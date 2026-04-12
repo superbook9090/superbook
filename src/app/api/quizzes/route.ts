@@ -20,7 +20,8 @@ export async function GET(request: NextRequest) {
     const course = searchParams.get('course');
     const instructor = searchParams.get('instructor');
 
-    const query: any = {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const query: Record<string, any> = {};
     if (course) query.course = course;
     if (instructor) query.instructor = instructor;
 
@@ -30,10 +31,11 @@ export async function GET(request: NextRequest) {
       .sort({ createdAt: -1 });
 
     return NextResponse.json({ quizzes }, { status: 200 });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching quizzes:', error);
+    const message = error instanceof Error ? error.message : 'Error fetching quizzes';
     return NextResponse.json(
-      { message: error.message || 'Error fetching quizzes' },
+      { message },
       { status: 500 }
     );
   }
@@ -115,10 +117,11 @@ export async function POST(request: NextRequest) {
       { message: 'Quiz created successfully', quiz },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error creating quiz:', error);
+    const message = error instanceof Error ? error.message : 'Error creating quiz';
     return NextResponse.json(
-      { message: error.message || 'Error creating quiz' },
+      { message },
       { status: 500 }
     );
   }

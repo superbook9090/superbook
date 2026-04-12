@@ -20,7 +20,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const course = searchParams.get('course');
 
-    const query: any = { student: session.user.id };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const query: Record<string, any> = { student: session.user.id };
     if (course) query.course = course;
 
     const enrollments = await Enrollment.find(query)
@@ -29,10 +30,11 @@ export async function GET(request: NextRequest) {
       .sort({ enrolledAt: -1 });
 
     return NextResponse.json({ enrollments }, { status: 200 });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching enrollments:', error);
+    const message = error instanceof Error ? error.message : 'Error fetching enrollments';
     return NextResponse.json(
-      { message: error.message || 'Error fetching enrollments' },
+      { message },
       { status: 500 }
     );
   }
@@ -107,16 +109,17 @@ export async function POST(request: NextRequest) {
       { message: 'Enrolled successfully', enrollment },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error creating enrollment:', error);
-    if (error.code === 11000) {
+    if ((error as { code?: number }).code === 11000) {
       return NextResponse.json(
         { message: 'You are already enrolled in this course' },
         { status: 400 }
       );
     }
+    const message = error instanceof Error ? error.message : 'Error creating enrollment';
     return NextResponse.json(
-      { message: error.message || 'Error creating enrollment' },
+      { message },
       { status: 500 }
     );
   }

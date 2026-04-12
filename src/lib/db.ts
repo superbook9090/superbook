@@ -10,7 +10,7 @@ if (!MONGODB_URI) {
 declare global {
   var mongoose: {
     conn: typeof mongoose | null;
-    promise: Promise<typeof mongoose> | null;
+    promise: Promise<typeof import('mongoose')> | null;
   };
 }
 
@@ -44,8 +44,9 @@ async function dbConnect() {
         console.log(`Mongoose: ${collectionName}.${method}`, JSON.stringify(query), doc);
       });
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       cached.promise = mongoose.connect(MONGODB_URI, opts as any)
-        .then((mongoose) => {
+        .then(() => {
           console.log('Successfully connected to MongoDB');
           return mongoose;
         })
@@ -60,7 +61,8 @@ async function dbConnect() {
   }
 
   try {
-    cached.conn = await cached.promise;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    cached.conn = await cached.promise as any;
   } catch (e) {
     cached.promise = null;
     console.error('Failed to connect to MongoDB:', e);

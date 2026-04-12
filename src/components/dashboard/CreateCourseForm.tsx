@@ -47,8 +47,9 @@ export default function CreateCourseForm() {
 
       // Success - redirect to teacher courses page
       router.push('/dashboard/teacher/courses');
-    } catch (err: any) {
-      setError(err.message || 'An error occurred. Please try again.');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'An error occurred. Please try again.';
+      setError(message);
     } finally {
       setIsLoading(false);
     }

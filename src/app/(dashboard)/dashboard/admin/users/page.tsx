@@ -55,6 +55,7 @@ export default function AdminUsersPage() {
       }
     } catch (err) {
       setError('Error loading users');
+      console.error('Users error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -77,6 +78,7 @@ export default function AdminUsersPage() {
       }
     } catch (err) {
       alert('Error updating user');
+      console.error('Users error:', err);
     }
   };
 
@@ -99,6 +101,7 @@ export default function AdminUsersPage() {
       }
     } catch (err) {
       alert('Error deleting user');
+      console.error('Users error:', err);
     }
   };
 

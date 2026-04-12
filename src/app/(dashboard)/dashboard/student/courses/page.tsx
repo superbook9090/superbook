@@ -16,6 +16,7 @@ interface Enrollment {
     category?: string;
     price: number;
     instructor: { name: string; email: string };
+    isPublished: boolean;
   };
   progress: number;
   status: string;

@@ -75,6 +75,9 @@ src/
 │   │       ├── CreateQuizForm.tsx       # Quiz creation form
 │   │       ├── CourseCard.tsx           # Course card component
 │   │       ├── QuizCard.tsx             # Quiz card component
+│   │   └── ui/
+│   │       ├── Loader.tsx               # Loading indicators (3 variants)
+│   │       ├── Skeleton.tsx             # Skeleton loaders with shimmer
 │   │       └── SessionProvider.tsx      # NextAuth session provider
 │   ├── lib/
 │   │   ├── auth.ts                      # NextAuth configuration
@@ -316,6 +319,23 @@ NEXTAUTH_URL=                    # App base URL (optional in dev)
 | useCallback | Memoized event handlers | Prevent function recreation on every render |
 | Optimized Effects | Fixed dependency arrays | Avoid infinite re-fetch loops |
 | Immutable Updates | Updated state immutably | Better React performance |
+| **LOADER COMPONENTS** | **Modern animated loaders & skeletons** | **Professional loading UI** |
+| Loader Component | Created `src/components/ui/Loader.tsx` | Full-page, button, section variants |
+| LoadingButton | Added to Loader.tsx | Button with integrated spinner |
+| LoadingOverlay | Added to Loader.tsx | Overlay wrapper for sections |
+| Skeleton Component | Created `src/components/ui/Skeleton.tsx` | Shimmer animation skeletons |
+| Skeleton Variants | Card, StatsCard, ListItem, Dashboard, etc. | For different content types |
+| Tailwind Animations | Updated `globals.css` | Shimmer, fade-in, fade-out keyframes |
+| Usage Examples | Created `LoaderExamples.tsx` | 12 comprehensive examples |
+| **BUILD FIXES** | **TypeScript & ESLint error fixes** | **Production-ready build** |
+| Fixed useMemo hook order | `src/app/(dashboard)/dashboard/student/quizzes/page.tsx` | Moved useMemo before early return |
+| Removed unused imports | Multiple files | Cleaned up unused useMemo imports |
+| Fixed 'any' types | API routes & components | Proper error handling with `unknown` type |
+| Fixed unused variables | Multiple files | Prefixed unused vars with underscore |
+| Fixed prefer-const | `CreateQuizForm.tsx` | Changed let to const for correctAnswer |
+| Fixed hook dependencies | `CreateQuizForm.tsx` | Used functional update for setUploadError |
+| Added User interfaces | `MobileNav.tsx`, `Sidebars` | Replaced `any` with proper User type |
+| Fixed ObjectId type assertions | `analytics/route.ts` | Added type assertions for _id properties |
 
 ### Bug Fix Details (2026-04-12)
 
@@ -604,6 +624,128 @@ if (instructor === 'self') {
 - Faster touch response on mobile devices
 - Reduced memory footprint
 - Smoother scrolling and animations
+
+### Loader Components (2026-04-12)
+
+**Objective**: Create modern, smooth, and professional animated loader components
+
+**Files Created**:
+
+**1. Loader.tsx** (`src/components/ui/Loader.tsx`)
+
+Main loader component with 3 variants:
+
+**Props**:
+```typescript
+interface LoaderProps {
+  variant?: 'full-page' | 'button' | 'section';  // Default: 'section'
+  size?: 'sm' | 'md' | 'lg';                    // Default: 'md'
+  text?: string;                                // Optional loading message
+  className?: string;                          // Custom styling
+  overlay?: boolean;                           // For section loader
+}
+```
+
+**Variants**:
+
+**Full Page Loader** (`variant="full-page"`):
+- Fixed overlay covering entire viewport
+- Backdrop blur effect
+- Centered spinner with optional text
+- Use case: Initial page loads, route transitions
+
+**Button Loader** (`variant="button"`):
+- Small animated dots (3 bouncing dots)
+- Perfect for button loading states
+- Use case: Form submissions, async actions
+
+**Section Loader** (`variant="section"`):
+- Centered loader within a container
+- Optional backdrop overlay
+- Use case: Card loading, component loading
+
+**Additional Components**:
+
+**LoadingButton**:
+- Pre-built button with integrated spinner
+- Props: `isLoading`, `loadingText`, `variant`
+- Variants: primary, secondary, outline, danger
+
+**LoadingOverlay**:
+- Wrapper component for blocking interactions
+- Shows loader over child content
+- Props: `isLoading`, `text`, `children`
+
+**2. Skeleton.tsx** (`src/components/ui/Skeleton.tsx`)
+
+Skeleton loaders with shimmer animation:
+
+**Components**:
+- `Skeleton` - Base skeleton with shimmer
+- `CardSkeleton` - Course/quiz card placeholder
+- `StatsCardSkeleton` - Dashboard stat cards
+- `ListItemSkeleton` - List item with avatar
+- `TableRowSkeleton` - Table row placeholders
+- `DashboardSkeleton` - Full dashboard layout
+- `CourseGridSkeleton` - Grid of course cards
+- `QuizListSkeleton` - Quiz list with header
+- `FormSkeleton` - Form fields placeholder
+- `ProfileSkeleton` - User profile layout
+
+**Features**:
+- Shimmer animation via CSS gradient
+- Pulse animation for loading state
+- Responsive sizing
+- Consistent with app design system
+
+**3. Tailwind Animations** (`src/app/globals.css`)
+
+Custom keyframe animations added:
+
+```css
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-10px); }
+}
+```
+
+**Usage Examples** (12 examples in `LoaderExamples.tsx`):
+
+```tsx
+// Full page loading
+<Loader variant="full-page" size="lg" text="Loading courses..." />
+
+// Button loading
+<LoadingButton isLoading={isLoading} loadingText="Saving...">
+  Save Changes
+</LoadingButton>
+
+// Section loading
+<Loader variant="section" text="Loading..." overlay />
+
+// Skeleton cards
+<CourseGridSkeleton count={6} />
+
+// Skeleton dashboard
+<DashboardSkeleton />
+```
+
+**Design Principles**:
+- Clean, minimal SaaS-style design
+- Smooth transitions (not flashy)
+- Professional feel like Stripe/Vercel
+- Responsive on all screen sizes
+- Consistent with Tailwind design system
 
 ## Decisions
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import * as XLSX from 'xlsx';
 
@@ -209,7 +209,7 @@ export default function CreateQuizForm() {
         const optionB = row[colMap.optionB]?.toString().trim();
         const optionC = row[colMap.optionC]?.toString().trim();
         const optionD = row[colMap.optionD]?.toString().trim();
-        let correctAnswer = row[colMap.correctAnswer];
+        const correctAnswer = row[colMap.correctAnswer];
 
         if (!question) {
           errors.push(`Row ${i + 1}: Question is required`);
@@ -253,11 +253,11 @@ export default function CreateQuizForm() {
       }
 
       if (parsed.length === 0) {
-        setUploadError(uploadError || 'No valid questions found in the file');
+        setUploadError((prev) => prev || 'No valid questions found in the file');
       } else {
         setPreviewData(parsed);
       }
-    } catch (err) {
+    } catch (_err) {
       setUploadError('Error parsing file. Please ensure it is a valid Excel or CSV file.');
     } finally {
       setIsParsing(false);
@@ -330,8 +330,9 @@ export default function CreateQuizForm() {
 
       // Success - redirect to teacher quizzes page
       router.push('/dashboard/teacher/quizzes');
-    } catch (err: any) {
-      setError(err.message || 'An error occurred. Please try again.');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'An error occurred. Please try again.';
+      setError(message);
     } finally {
       setIsLoading(false);
     }

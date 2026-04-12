@@ -18,7 +18,14 @@ const adminNavigation = [
   { name: 'All Courses', href: '/dashboard/admin/courses', icon: '📚' },
 ];
 
-export default function TeacherSidebar({ user }: { user: any }) {
+interface User {
+  id?: string;
+  name?: string | null;
+  email?: string | null;
+  role?: string;
+}
+
+export default function TeacherSidebar({ user }: { user: User | null }) {
   const pathname = usePathname();
   const isAdmin = user?.role === 'admin';
 

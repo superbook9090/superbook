@@ -33,6 +33,7 @@ export default function LoginPage() {
       router.push('/dashboard');
     } catch (error) {
       setError('An error occurred. Please try again.');
+      console.error('Login error:', error);
     } finally {
       setIsLoading(false);
     }

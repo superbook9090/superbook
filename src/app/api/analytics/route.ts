@@ -41,10 +41,11 @@ export async function GET(request: NextRequest) {
     // Overview for current user
     const stats = await getUserOverview(session.user.id, session.user.role);
     return NextResponse.json({ stats }, { status: 200 });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching analytics:', error);
+    const message = error instanceof Error ? error.message : 'Error fetching analytics';
     return NextResponse.json(
-      { message: error.message || 'Error fetching analytics' },
+      { message },
       { status: 500 }
     );
   }
@@ -125,6 +126,7 @@ async function getAdminStats() {
       averageScore: scoreStats.length > 0 ? Math.round(scoreStats[0].avgScore) : 0,
       highestScore: scoreStats.length > 0 ? scoreStats[0].highestScore : 0,
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     recentActivity: recentEnrollments.map((e: any) => ({
       type: 'enrollment',
       user: e.student?.name,
@@ -137,7 +139,7 @@ async function getAdminStats() {
 async function getTeacherStats(teacherId: string) {
   // Teacher's courses
   const courses = await Course.find({ instructor: teacherId }).lean();
-  const courseIds = courses.map((c) => c._id.toString());
+  const courseIds = courses.map((c) => (c._id as { toString(): string }).toString());
 
   // Enrollments in teacher's courses
   const enrollments = await Enrollment.find({
@@ -146,7 +148,7 @@ async function getTeacherStats(teacherId: string) {
 
   // Quizzes in teacher's courses
   const quizzes = await Quiz.find({ course: { $in: courseIds } }).lean();
-  const quizIds = quizzes.map((q) => q._id.toString());
+  const quizIds = quizzes.map((q) => (q._id as { toString(): string }).toString());
 
   // Attempts on teacher's quizzes
   const attempts = await QuizAttempt.find({
@@ -157,14 +159,14 @@ async function getTeacherStats(teacherId: string) {
   // Calculate stats per course
   const courseStats = courses.map((course) => {
     const courseEnrollments = enrollments.filter(
-      (e) => e.course.toString() === course._id.toString()
+      (e) => (e.course as { toString(): string }).toString() === (course._id as { toString(): string }).toString()
     );
     const courseQuizzes = quizzes.filter(
-      (q) => q.course.toString() === course._id.toString()
+      (q) => (q.course as { toString(): string }).toString() === (course._id as { toString(): string }).toString()
     );
-    const courseQuizIds = courseQuizzes.map((q) => q._id.toString());
+    const courseQuizIds = courseQuizzes.map((q) => (q._id as { toString(): string }).toString());
     const courseAttempts = attempts.filter((a) =>
-      courseQuizIds.includes(a.quiz.toString())
+      courseQuizIds.includes((a.quiz as { toString(): string }).toString())
     );
 
     const avgScore =
@@ -205,18 +207,19 @@ async function getTeacherStats(teacherId: string) {
     .populate('student', 'name')
     .lean();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   attemptsWithStudents.forEach((attempt: any) => {
     const studentId = attempt.student?._id?.toString();
     if (!studentId) return;
 
     if (!studentScores[studentId]) {
       studentScores[studentId] = {
-        name: attempt.student.name,
+        name: attempt.student?.name || '',
         totalScore: 0,
         attempts: 0,
       };
     }
-    studentScores[studentId].totalScore += attempt.score;
+    studentScores[studentId].totalScore += attempt.score || 0;
     studentScores[studentId].attempts += 1;
   });
 

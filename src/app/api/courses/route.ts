@@ -21,7 +21,8 @@ export async function GET(request: NextRequest) {
     const isPublished = searchParams.get('isPublished');
     const available = searchParams.get('available'); // For students to browse
 
-    const query: any = {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const query: Record<string, any> = {};
 
     // If 'available' is set, return published courses student can enroll in
     if (available === 'true' && session.user?.role === 'student') {
@@ -48,10 +49,11 @@ export async function GET(request: NextRequest) {
       .sort({ createdAt: -1 });
 
     return NextResponse.json({ courses }, { status: 200 });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching courses:', error);
+    const message = error instanceof Error ? error.message : 'Error fetching courses';
     return NextResponse.json(
-      { message: error.message || 'Error fetching courses' },
+      { message },
       { status: 500 }
     );
   }
@@ -103,10 +105,11 @@ export async function POST(request: NextRequest) {
       { message: 'Course created successfully', course },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error creating course:', error);
+    const message = error instanceof Error ? error.message : 'Error creating course';
     return NextResponse.json(
-      { message: error.message || 'Error creating course' },
+      { message },
       { status: 500 }
     );
   }

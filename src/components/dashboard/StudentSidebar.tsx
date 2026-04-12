@@ -14,7 +14,14 @@ const studentNavigation = [
   { name: 'Profile', href: '/dashboard/student/profile', icon: '👤' },
 ];
 
-export default function StudentSidebar({ user }: { user: any }) {
+interface User {
+  id?: string;
+  name?: string | null;
+  email?: string | null;
+  role?: string;
+}
+
+export default function StudentSidebar({ user }: { user: User | null }) {
   const pathname = usePathname();
 
   return (

@@ -1,11 +1,15 @@
 // src/app/api/admin/users/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
-import dbConnect from '@/lib/db';
 import User from '@/models/User';
+import dbConnect from '@/lib/db';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+interface QueryFilter { [key: string]: any }
 
 // Helper to check admin access
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function checkAdmin(session: any) {
   if (!session || session.user?.role !== 'admin') {
     return false;
@@ -18,7 +22,7 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!(await checkAdmin(session))) {
-      return NextResponse.json({ message: 'Admin access required' }, { status: 403 });
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
     await dbConnect();
@@ -28,8 +32,10 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
+    const skip = (page - 1) * limit;
 
-    const query: any = {};
+    // Build query
+    const query: QueryFilter = {};
     if (role) query.role = role;
     if (search) {
       query.$or = [
@@ -37,8 +43,6 @@ export async function GET(request: NextRequest) {
         { email: { $regex: search, $options: 'i' } },
       ];
     }
-
-    const skip = (page - 1) * limit;
 
     const users = await User.find(query)
       .select('-password')
@@ -61,10 +65,11 @@ export async function GET(request: NextRequest) {
       },
       { status: 200 }
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching users:', error);
+    const message = error instanceof Error ? error.message : 'Error fetching users';
     return NextResponse.json(
-      { message: error.message || 'Error fetching users' },
+      { message },
       { status: 500 }
     );
   }
@@ -108,10 +113,11 @@ export async function PATCH(request: NextRequest) {
     }
 
     return NextResponse.json({ message: 'User updated', user }, { status: 200 });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error updating user:', error);
+    const message = error instanceof Error ? error.message : 'Error updating user';
     return NextResponse.json(
-      { message: error.message || 'Error updating user' },
+      { message },
       { status: 500 }
     );
   }
@@ -149,10 +155,11 @@ export async function DELETE(request: NextRequest) {
     }
 
     return NextResponse.json({ message: 'User deleted' }, { status: 200 });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error deleting user:', error);
+    const message = error instanceof Error ? error.message : 'Error deleting user';
     return NextResponse.json(
-      { message: error.message || 'Error deleting user' },
+      { message },
       { status: 500 }
     );
   }

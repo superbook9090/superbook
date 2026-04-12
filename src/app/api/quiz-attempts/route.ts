@@ -21,7 +21,8 @@ export async function GET(request: NextRequest) {
     const quiz = searchParams.get('quiz');
     const course = searchParams.get('course');
 
-    const query: any = { student: session.user.id };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const query: Record<string, any> = { student: session.user.id };
     if (quiz) query.quiz = quiz;
     if (course) query.course = course;
 
@@ -31,10 +32,11 @@ export async function GET(request: NextRequest) {
       .sort({ startedAt: -1 });
 
     return NextResponse.json({ attempts }, { status: 200 });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching quiz attempts:', error);
+    const message = error instanceof Error ? error.message : 'Error fetching quiz attempts';
     return NextResponse.json(
-      { message: error.message || 'Error fetching quiz attempts' },
+      { message },
       { status: 500 }
     );
   }
@@ -205,10 +207,11 @@ export async function POST(request: NextRequest) {
       { message: 'Invalid action', attempt },
       { status: 400 }
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error handling quiz attempt:', error);
+    const message = error instanceof Error ? error.message : 'Error handling quiz attempt';
     return NextResponse.json(
-      { message: error.message || 'Error handling quiz attempt' },
+      { message },
       { status: 500 }
     );
   }

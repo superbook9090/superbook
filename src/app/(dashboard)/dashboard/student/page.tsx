@@ -20,7 +20,21 @@ interface Attempt {
   status: string;
   submittedAt?: string;
   startedAt: string;
+  type?: 'quiz';
 }
+
+// Extended enrollment with type for activity union
+interface EnrollmentActivity extends Enrollment {
+  type: 'enrollment';
+}
+
+// Extended attempt with type for activity union
+interface AttemptActivity extends Attempt {
+  type: 'quiz';
+}
+
+// Union type for recent activity
+type ActivityItem = EnrollmentActivity | AttemptActivity;
 
 interface Stats {
   enrolledCount: number;
@@ -32,7 +46,7 @@ export default function StudentDashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [stats, setStats] = useState<Stats>({ enrolledCount: 0, completedQuizzes: 0, averageScore: 0 });
-  const [recentActivity, setRecentActivity] = useState<(Enrollment | Attempt)[]>([]);
+  const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -76,18 +90,26 @@ export default function StudentDashboardPage() {
         });
 
         // Combine and sort recent activity
-        const activity = [
+        const activity: ActivityItem[] = [
           ...enrollments.map((e) => ({ ...e, type: 'enrollment' as const })),
           ...attempts
             .filter((a) => a.status === 'completed')
             .map((a) => ({ ...a, type: 'quiz' as const })),
-        ].sort((a, b) => {
-          const dateA = new Date((a as any).submittedAt || (a as any).enrolledAt || (a as any).startedAt);
-          const dateB = new Date((b as any).submittedAt || (b as any).enrolledAt || (b as any).startedAt);
-          return dateB.getTime() - dateA.getTime();
-        }).slice(0, 5);
+        ];
 
-        setRecentActivity(activity);
+        // Helper to get date from activity item
+        const getActivityDate = (item: ActivityItem): number => {
+          if (item.type === 'quiz') {
+            return new Date(item.submittedAt || item.startedAt).getTime();
+          }
+          return new Date(item.enrolledAt).getTime();
+        };
+
+        const sortedActivity = activity
+          .sort((a, b) => getActivityDate(b) - getActivityDate(a))
+          .slice(0, 5);
+
+        setRecentActivity(sortedActivity);
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -196,30 +218,32 @@ export default function StudentDashboardPage() {
                     {/* Icon */}
                     <div className="flex-shrink-0">
                       <div className={`h-8 w-8 sm:h-10 sm:w-10 rounded-full flex items-center justify-center ${
-                        (item as any).type === 'enrollment' ? 'bg-indigo-100' : 'bg-green-100'
+                        item.type === 'enrollment' ? 'bg-indigo-100' : 'bg-green-100'
                       }`}>
-                        <span className={(item as any).type === 'enrollment' ? 'text-indigo-600 text-sm sm:text-base' : 'text-green-600 text-sm sm:text-base'}>
-                          {(item as any).type === 'enrollment' ? '📚' : '✓'}
+                        <span className={item.type === 'enrollment' ? 'text-indigo-600 text-sm sm:text-base' : 'text-green-600 text-sm sm:text-base'}>
+                          {item.type === 'enrollment' ? '📚' : '✓'}
                         </span>
                       </div>
                     </div>
                     {/* Content */}
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-indigo-600 truncate">
-                        {(item as any).type === 'enrollment'
-                          ? `Enrolled in ${(item as Enrollment).course?.title || 'a course'}`
-                          : `Completed quiz: ${(item as Attempt).quiz?.title || 'Quiz'}`}
+                        {item.type === 'enrollment'
+                          ? `Enrolled in ${item.course?.title || 'a course'}`
+                          : `Completed quiz: ${item.quiz?.title || 'Quiz'}`}
                       </p>
                       <p className="mt-0.5 text-xs sm:text-sm text-gray-500">
-                        {(item as any).type === 'enrollment'
-                          ? `Progress: ${(item as Enrollment).progress}%`
-                          : `Score: ${(item as Attempt).score}%`}
+                        {item.type === 'enrollment'
+                          ? `Progress: ${item.progress}%`
+                          : `Score: ${item.score}%`}
                       </p>
                     </div>
                     {/* Date - Hidden on very small screens, shown on sm+ */}
                     <div className="hidden sm:block flex-shrink-0">
                       <p className="text-xs sm:text-sm text-gray-500">
-                        {new Date((item as any).submittedAt || (item as any).enrolledAt || (item as any).startedAt).toLocaleDateString()}
+                        {item.type === 'enrollment'
+                          ? new Date(item.enrolledAt).toLocaleDateString()
+                          : new Date(item.submittedAt || item.startedAt).toLocaleDateString()}
                       </p>
                     </div>
                   </div>

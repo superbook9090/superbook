@@ -54,8 +54,9 @@ export default function RegisterPage() {
       }
 
       router.push('/login');
-    } catch (err: any) {
-      setError(err.message || 'Registration failed. Please try again.');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Registration failed. Please try again.';
+      setError(message);
     } finally {
       setIsLoading(false);
     }

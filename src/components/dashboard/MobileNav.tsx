@@ -11,8 +11,15 @@ interface NavItem {
   icon: string;
 }
 
+interface User {
+  id?: string;
+  name?: string | null;
+  email?: string | null;
+  role?: string;
+}
+
 interface MobileNavProps {
-  user: any;
+  user: User | null;
   navigation: NavItem[];
   adminNavigation?: NavItem[];
   colorScheme: 'indigo' | 'green';

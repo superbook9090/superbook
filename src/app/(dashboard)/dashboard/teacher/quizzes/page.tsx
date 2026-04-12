@@ -1,7 +1,7 @@
 // src/app/(dashboard)/dashboard/teacher/quizzes/page.tsx
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
@@ -93,7 +93,7 @@ export default function TeacherQuizzesPage() {
       } else {
         setError(quizzesData.message || 'Failed to load quizzes');
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Error loading quizzes');
     } finally {
       setIsLoading(false);

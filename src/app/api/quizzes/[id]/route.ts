@@ -7,8 +7,9 @@ import Quiz from '@/models/Quiz';
 import Course from '@/models/Course';
 
 // PATCH /api/quizzes/[id] - Update a quiz
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
@@ -24,7 +25,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     const { title, description, questions, timeLimit, isPublished } = await request.json();
 
     // Find quiz and verify ownership
-    const quiz = await Quiz.findById(params.id);
+    const quiz = await Quiz.findById(id);
     if (!quiz) {
       return NextResponse.json({ message: 'Quiz not found' }, { status: 404 });
     }
@@ -49,15 +50,17 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     await quiz.save();
 
     return NextResponse.json({ message: 'Quiz updated successfully', quiz }, { status: 200 });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error updating quiz:', error);
-    return NextResponse.json({ message: error.message || 'Error updating quiz' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Error updating quiz';
+    return NextResponse.json({ message }, { status: 500 });
   }
 }
 
 // DELETE /api/quizzes/[id] - Delete a quiz
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
@@ -71,7 +74,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     await dbConnect();
 
     // Find quiz and verify ownership
-    const quiz = await Quiz.findById(params.id);
+    const quiz = await Quiz.findById(id);
     if (!quiz) {
       return NextResponse.json({ message: 'Quiz not found' }, { status: 404 });
     }
@@ -86,11 +89,12 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       return NextResponse.json({ message: 'Not authorized to delete this quiz' }, { status: 403 });
     }
 
-    await Quiz.findByIdAndDelete(params.id);
+    await Quiz.findByIdAndDelete(id);
 
     return NextResponse.json({ message: 'Quiz deleted successfully' }, { status: 200 });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error deleting quiz:', error);
-    return NextResponse.json({ message: error.message || 'Error deleting quiz' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Error deleting quiz';
+    return NextResponse.json({ message }, { status: 500 });
   }
 }

@@ -9,9 +9,10 @@ import Course from '@/models/Course';
 // PATCH /api/enrollments/[id] - Update enrollment progress
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
@@ -22,7 +23,7 @@ export async function PATCH(
     const { progress, status, completedLessons } = await request.json();
 
     const enrollment = await Enrollment.findOne({
-      _id: params.id,
+      _id: id,
       student: session.user.id,
     });
 
@@ -50,10 +51,11 @@ export async function PATCH(
       { message: 'Enrollment updated', enrollment },
       { status: 200 }
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error updating enrollment:', error);
+    const message = error instanceof Error ? error.message : 'Error updating enrollment';
     return NextResponse.json(
-      { message: error.message || 'Error updating enrollment' },
+      { message },
       { status: 500 }
     );
   }
@@ -62,9 +64,10 @@ export async function PATCH(
 // DELETE /api/enrollments/[id] - Drop a course
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
@@ -73,7 +76,7 @@ export async function DELETE(
     await dbConnect();
 
     const enrollment = await Enrollment.findOne({
-      _id: params.id,
+      _id: id,
       student: session.user.id,
     });
 
@@ -90,16 +93,17 @@ export async function DELETE(
     });
 
     // Delete enrollment
-    await Enrollment.findByIdAndDelete(params.id);
+    await Enrollment.findByIdAndDelete(id);
 
     return NextResponse.json(
       { message: 'Enrollment cancelled successfully' },
       { status: 200 }
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error deleting enrollment:', error);
+    const message = error instanceof Error ? error.message : 'Error cancelling enrollment';
     return NextResponse.json(
-      { message: error.message || 'Error cancelling enrollment' },
+      { message },
       { status: 500 }
     );
   }

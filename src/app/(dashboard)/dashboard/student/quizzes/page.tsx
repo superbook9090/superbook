@@ -146,19 +146,19 @@ export default function StudentQuizzesPage() {
       } else {
         alert(data.message || 'Failed to start quiz');
       }
-    } catch (err) {
+    } catch (_err) {
       alert('Error starting quiz');
     }
   }, [router]);
-
-  if (status === 'loading' || isLoading) {
-    return <div className="text-center py-8">Loading...</div>;
-  }
 
   const completedAttempts = useMemo(() =>
     attempts.filter((a) => a.status === 'completed'),
     [attempts]
   );
+
+  if (status === 'loading' || isLoading) {
+    return <div className="text-center py-8">Loading...</div>;
+  }
 
   return (
     <div>

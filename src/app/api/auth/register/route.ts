@@ -32,10 +32,11 @@ export async function POST(request: Request) {
       { message: 'User created successfully' },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error('Registration error:', error);
+    const message = error instanceof Error ? error.message : 'Error creating user';
     return NextResponse.json(
-      { message: error.message || 'Error creating user' },
+      { message },
       { status: 500 }
     );
   }

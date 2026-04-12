@@ -66,6 +66,7 @@ export default function AdminAnalyticsPage() {
       }
     } catch (err) {
       setError('Error loading analytics');
+      console.error('Analytics error:', err);
     } finally {
       setIsLoading(false);
     }
