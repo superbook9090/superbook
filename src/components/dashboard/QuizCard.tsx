@@ -2,6 +2,20 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+import {
+  HelpCircle,
+  Clock,
+  BookOpen,
+  ArrowRight,
+  Play,
+  RotateCcw,
+  Loader2,
+  CheckCircle,
+  AlertCircle,
+  XCircle
+} from 'lucide-react';
+import { Badge } from '@/components/ui/Badge';
 
 interface Quiz {
   _id: string;
@@ -69,74 +83,126 @@ export default function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const getScoreVariant = (score: number) => {
+    if (score >= 70) return 'success';
+    if (score >= 50) return 'warning';
+    return 'error';
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-      <div className="p-6">
-        <div className="flex items-center justify-between mb-2">
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+    <motion.div
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.3 }}
+      className="group relative bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden"
+    >
+      {/* Header Gradient */}
+      <div className="relative h-32 bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500">
+        <div className="absolute inset-0 bg-black/10" />
+        <div className="absolute bottom-4 left-6 right-6">
+          <Badge variant="success" size="sm" icon={<BookOpen className="w-3 h-3" />}>
             {quiz.course?.title || 'Course'}
-          </span>
-          <span className="text-sm text-gray-500">
+          </Badge>
+        </div>
+        <div className="absolute top-4 right-4">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full text-sm font-medium text-gray-700">
+            <HelpCircle className="w-4 h-4" />
             {quiz.questions?.length || 0} questions
-          </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="p-6">
+        <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors">
+          {quiz.title}
+        </h3>
+        <p className="text-sm text-gray-500 mb-4 line-clamp-2">
+          {quiz.description || 'No description available'}
+        </p>
+
+        {/* Time Limit */}
+        <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
+          <Clock className="w-4 h-4" />
+          <span>Time Limit: <span className="font-medium text-gray-700">{quiz.timeLimit} min</span></span>
         </div>
 
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">{quiz.title}</h3>
-        <p className="text-sm text-gray-600 mb-4 line-clamp-2">{quiz.description || 'No description available'}</p>
-
-        <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-          <span>Time Limit: {quiz.timeLimit} min</span>
-          {attempt && (
-            <span className={`font-medium ${attempt.score >= 70 ? 'text-green-600' : attempt.score >= 50 ? 'text-yellow-600' : 'text-red-600'}`}>
-              Score: {attempt.score}%
-            </span>
-          )}
-        </div>
-
+        {/* Attempt Results */}
         {attempt && (
-          <div className="bg-gray-50 rounded-md p-3 mb-4">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600">
-                Correct: {attempt.correctCount}/{attempt.totalQuestions}
-              </span>
-              <span className="text-gray-600">
-                Time: {formatTime(attempt.timeTaken)}
-              </span>
+          <div className="mb-4 p-4 bg-gray-50 rounded-xl">
+            <div className="flex items-center justify-between mb-3">
+              <Badge variant={getScoreVariant(attempt.score)} size="sm">
+                {attempt.score}% Score
+              </Badge>
+              <span className="text-xs text-gray-400">Attempt #{attempt.attemptNumber}</span>
             </div>
-            <p className="text-xs text-gray-500 mt-1">
-              Attempt #{attempt.attemptNumber} • {attempt.submittedAt ? new Date(attempt.submittedAt).toLocaleDateString() : 'In Progress'}
-            </p>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-emerald-500" />
+                <span className="text-gray-600">{attempt.correctCount}/{attempt.totalQuestions} correct</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-blue-500" />
+                <span className="text-gray-600">{formatTime(attempt.timeTaken)}</span>
+              </div>
+            </div>
+            {attempt.submittedAt && (
+              <p className="text-xs text-gray-400 mt-2">
+                Completed {new Date(attempt.submittedAt).toLocaleDateString()}
+              </p>
+            )}
           </div>
         )}
 
+        {/* Actions */}
         <div className="flex gap-2">
           {type === 'available' ? (
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={handleStart}
               disabled={isLoading}
-              className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-emerald-700 hover:to-teal-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Starting...' : 'Start Quiz'}
-            </button>
+              {isLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <>
+                  <Play className="w-4 h-4" />
+                  Start Quiz
+                </>
+              )}
+            </motion.button>
           ) : (
             <>
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={handleReview}
-                className="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors"
+                className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all"
               >
+                <CheckCircle className="w-4 h-4" />
                 Review
-              </button>
-              <button
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={handleRetake}
                 disabled={isLoading}
-                className="px-4 py-2 border border-green-600 text-green-600 rounded-md hover:bg-green-50 transition-colors disabled:opacity-50"
+                className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-emerald-100 text-emerald-600 rounded-xl font-semibold hover:bg-emerald-50 hover:border-emerald-200 transition-all disabled:opacity-50"
               >
-                Retake
-              </button>
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>
+                    <RotateCcw className="w-4 h-4" />
+                    Retake
+                  </>
+                )}
+              </motion.button>
             </>
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -4,6 +4,14 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+import {
+  BookOpen,
+  CheckCircle,
+  TrendingUp,
+  Activity,
+  Clock
+} from 'lucide-react';
 
 interface Enrollment {
   _id: string;
@@ -119,140 +127,172 @@ export default function StudentDashboardPage() {
   };
 
   if (status === 'loading' || isLoading) {
-    return <div className="text-center py-8">Loading dashboard...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-500">Loading dashboard...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Welcome Header - Mobile optimized */}
-      <div className="space-y-2">
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
-          Welcome back, <span className="break-words">{session?.user?.name}</span>!
-        </h1>
-        <p className="text-sm sm:text-base text-gray-600">
-          Continue your learning journey. You have access to courses and quizzes.
-        </p>
-      </div>
-
-      {/* Stats Cards - Responsive grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-        {/* Enrolled Courses */}
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-4 sm:p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0 bg-indigo-500 rounded-md p-2.5 sm:p-3">
-                <svg className="h-5 w-5 sm:h-6 sm:w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-              </div>
-              <div className="ml-4 sm:ml-5 flex-1 min-w-0">
-                <dl>
-                  <dt className="text-xs sm:text-sm font-medium text-gray-500 truncate">Enrolled Courses</dt>
-                  <dd className="mt-1">
-                    <div className="text-xl sm:text-2xl font-semibold text-gray-900">{stats.enrolledCount}</div>
-                  </dd>
-                </dl>
-              </div>
-            </div>
-          </div>
+    <div className="space-y-6 lg:space-y-8">
+      {/* Welcome Header */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-700 p-8 text-white shadow-xl"
+      >
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="relative z-10">
+          <h1 className="text-3xl font-bold mb-2">
+            Welcome back, {session?.user?.name}!
+          </h1>
+          <p className="text-indigo-100 text-lg">
+            Continue your learning journey. You have {stats.enrolledCount} courses in progress.
+          </p>
         </div>
+      </motion.div>
+
+      {/* Stats Cards - Modern Design */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+        {/* Enrolled Courses */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+          <div className="relative">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 rounded-xl bg-indigo-100 text-indigo-600">
+                <BookOpen className="w-6 h-6" />
+              </div>
+              <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Courses</span>
+            </div>
+            <div className="text-3xl font-bold text-gray-900 mb-1">{stats.enrolledCount}</div>
+            <div className="text-sm text-gray-500">Enrolled courses</div>
+          </div>
+        </motion.div>
 
         {/* Completed Quizzes */}
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-4 sm:p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0 bg-green-500 rounded-md p-2.5 sm:p-3">
-                <svg className="h-5 w-5 sm:h-6 sm:w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+          <div className="relative">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 rounded-xl bg-emerald-100 text-emerald-600">
+                <CheckCircle className="w-6 h-6" />
               </div>
-              <div className="ml-4 sm:ml-5 flex-1 min-w-0">
-                <dl>
-                  <dt className="text-xs sm:text-sm font-medium text-gray-500 truncate">Completed Quizzes</dt>
-                  <dd className="mt-1">
-                    <div className="text-xl sm:text-2xl font-semibold text-gray-900">{stats.completedQuizzes}</div>
-                  </dd>
-                </dl>
-              </div>
+              <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Quizzes</span>
             </div>
+            <div className="text-3xl font-bold text-gray-900 mb-1">{stats.completedQuizzes}</div>
+            <div className="text-sm text-gray-500">Completed quizzes</div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Average Score */}
-        <div className="bg-white overflow-hidden shadow rounded-lg sm:col-span-2 lg:col-span-1">
-          <div className="p-4 sm:p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0 bg-yellow-500 rounded-md p-2.5 sm:p-3">
-                <svg className="h-5 w-5 sm:h-6 sm:w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-50 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+          <div className="relative">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 rounded-xl bg-amber-100 text-amber-600">
+                <TrendingUp className="w-6 h-6" />
               </div>
-              <div className="ml-4 sm:ml-5 flex-1 min-w-0">
-                <dl>
-                  <dt className="text-xs sm:text-sm font-medium text-gray-500 truncate">Average Score</dt>
-                  <dd className="mt-1">
-                    <div className="text-xl sm:text-2xl font-semibold text-gray-900">{stats.averageScore}%</div>
-                  </dd>
-                </dl>
-              </div>
+              <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Performance</span>
+            </div>
+            <div className="text-3xl font-bold text-gray-900 mb-1">{stats.averageScore}%</div>
+            <div className="text-sm text-gray-500">Average score</div>
+            <div className="mt-3 h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full transition-all duration-500"
+                style={{ width: `${stats.averageScore}%` }}
+              />
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
 
-      {/* Recent Activity - Mobile optimized */}
-      <div className="bg-white shadow overflow-hidden rounded-lg">
-        <div className="px-4 py-4 sm:px-6 border-b border-gray-200">
-          <h3 className="text-base sm:text-lg font-medium text-gray-900">Recent Activity</h3>
+      {/* Recent Activity - Modern Design */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="rounded-2xl bg-white shadow-md overflow-hidden"
+      >
+        <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
+            <p className="text-sm text-gray-500 mt-1">Your latest learning activities</p>
+          </div>
+          <Activity className="w-5 h-5 text-gray-400" />
         </div>
-        <div className="bg-white overflow-hidden">
-          <ul className="divide-y divide-gray-200">
-            {recentActivity.length === 0 ? (
-              <li className="px-4 sm:px-6 py-6 sm:py-8 text-center text-gray-500">
-                <p className="text-sm sm:text-base">No recent activity. Start by enrolling in a course!</p>
-              </li>
-            ) : (
-              recentActivity.map((item, index) => (
-                <li key={index} className="px-4 sm:px-6 py-3 sm:py-4">
-                  <div className="flex items-start sm:items-center space-x-3 sm:space-x-4">
-                    {/* Icon */}
-                    <div className="flex-shrink-0">
-                      <div className={`h-8 w-8 sm:h-10 sm:w-10 rounded-full flex items-center justify-center ${
-                        item.type === 'enrollment' ? 'bg-indigo-100' : 'bg-green-100'
-                      }`}>
-                        <span className={item.type === 'enrollment' ? 'text-indigo-600 text-sm sm:text-base' : 'text-green-600 text-sm sm:text-base'}>
-                          {item.type === 'enrollment' ? '📚' : '✓'}
-                        </span>
-                      </div>
-                    </div>
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-indigo-600 truncate">
-                        {item.type === 'enrollment'
-                          ? `Enrolled in ${item.course?.title || 'a course'}`
-                          : `Completed quiz: ${item.quiz?.title || 'Quiz'}`}
-                      </p>
-                      <p className="mt-0.5 text-xs sm:text-sm text-gray-500">
-                        {item.type === 'enrollment'
-                          ? `Progress: ${item.progress}%`
-                          : `Score: ${item.score}%`}
-                      </p>
-                    </div>
-                    {/* Date - Hidden on very small screens, shown on sm+ */}
-                    <div className="hidden sm:block flex-shrink-0">
-                      <p className="text-xs sm:text-sm text-gray-500">
-                        {item.type === 'enrollment'
-                          ? new Date(item.enrolledAt).toLocaleDateString()
-                          : new Date(item.submittedAt || item.startedAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                </li>
-              ))
-            )}
-          </ul>
+        <div className="divide-y divide-gray-100">
+          {recentActivity.length === 0 ? (
+            <div className="px-6 py-12 text-center">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+                <Clock className="w-8 h-8 text-gray-400" />
+              </div>
+              <h4 className="text-gray-900 font-medium mb-1">No recent activity</h4>
+              <p className="text-sm text-gray-500">Start by enrolling in a course to see your progress here.</p>
+            </div>
+          ) : (
+            recentActivity.map((item, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.5 + index * 0.05 }}
+                className="px-6 py-4 flex items-center space-x-4 hover:bg-gray-50/50 transition-colors"
+              >
+                {/* Icon */}
+                <div className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center ${
+                  item.type === 'enrollment' 
+                    ? 'bg-indigo-50 text-indigo-600' 
+                    : 'bg-emerald-50 text-emerald-600'
+                }`}>
+                  {item.type === 'enrollment' ? (
+                    <BookOpen className="w-5 h-5" />
+                  ) : (
+                    <CheckCircle className="w-5 h-5" />
+                  )}
+                </div>
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-900">
+                    {item.type === 'enrollment'
+                      ? `Enrolled in ${item.course?.title || 'a course'}`
+                      : `Completed: ${item.quiz?.title || 'Quiz'}`}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-0.5">
+                    {item.type === 'enrollment'
+                      ? `Progress: ${item.progress}%`
+                      : `Score: ${item.score}%`}
+                  </p>
+                </div>
+                {/* Date */}
+                <div className="flex-shrink-0 text-sm text-gray-400">
+                  {item.type === 'enrollment'
+                    ? new Date(item.enrolledAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+                    : new Date(item.submittedAt || item.startedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                </div>
+              </motion.div>
+            ))
+          )}
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

@@ -4,10 +4,11 @@ import bcrypt from 'bcryptjs';
 export interface IUser extends Document {
   name: string;
   email: string;
-  password: string;
+  password?: string;
   role: 'student' | 'teacher' | 'admin';
   avatar?: string;
   isVerified: boolean;
+  provider?: 'credentials' | 'google';
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -15,23 +16,25 @@ const userSchema = new Schema<IUser>(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: { type: String, required: false },
     role: { type: String, enum: ['student', 'teacher', 'admin'], default: 'student' },
     avatar: String,
     isVerified: { type: Boolean, default: false },
+    provider: { type: String, enum: ['credentials', 'google'], default: 'credentials' },
   },
   { timestamps: true }
 );
 
-// Hash password before saving
+// Hash password before saving (only for credentials users)
 userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
+  if (!this.isModified('password') || !this.password) return next();
   this.password = await bcrypt.hash(this.password, 12);
   next();
 });
 
-// Compare password method
+// Compare password method (only for credentials users)
 userSchema.methods.comparePassword = async function (candidatePassword: string) {
+  if (!this.password) return false;
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
