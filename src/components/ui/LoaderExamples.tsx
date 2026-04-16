@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Loader, { LoadingButton, LoadingOverlay } from './Loader';
-import Skeleton, {
+import {
   CardSkeleton,
   StatsCardSkeleton,
   ListItemSkeleton,

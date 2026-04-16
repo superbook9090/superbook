@@ -67,32 +67,38 @@ export const authOptions: AuthOptions = {
     async signIn({ user, account, profile }) {
       // Handle Google OAuth sign in
       if (account?.provider === 'google') {
-        await dbConnect();
+        try {
+          await dbConnect();
 
-        const existingUser = await User.findOne({ email: user.email });
+          const existingUser = await User.findOne({ email: user.email });
 
-        if (!existingUser) {
-          // Create new user from Google OAuth
-          await User.create({
-            name: user.name || profile?.name || 'Google User',
-            email: user.email,
-            role: 'student', // Default role for Google users
-            avatar: user.image,
-            isVerified: true, // Google emails are verified
-            provider: 'google',
-          });
-        } else if (existingUser.provider !== 'google') {
-          // Link existing account to Google
-          existingUser.provider = 'google';
-          existingUser.avatar = user.image || existingUser.avatar;
-          await existingUser.save();
-        }
+          if (!existingUser) {
+            // Create new user from Google OAuth
+            await User.create({
+              name: user.name || profile?.name || 'Google User',
+              email: user.email,
+              role: 'student', // Default role for Google users
+              avatar: user.image,
+              isVerified: true, // Google emails are verified
+              provider: 'google',
+            });
+          } else if (existingUser.provider !== 'google') {
+            // Link existing account to Google
+            existingUser.provider = 'google';
+            existingUser.avatar = user.image || existingUser.avatar;
+            await existingUser.save();
+          }
 
-        // Get user role for the token
-        const dbUser = await User.findOne({ email: user.email });
-        if (dbUser) {
-          user.role = dbUser.role;
-          user.id = dbUser._id.toString();
+          // Get user role for the token
+          const dbUser = await User.findOne({ email: user.email });
+          if (dbUser) {
+            user.role = dbUser.role;
+            user.id = dbUser._id.toString();
+          }
+          return true;
+        } catch (error) {
+          console.error('Google signIn callback error:', error);
+          return false;
         }
       }
       return true;

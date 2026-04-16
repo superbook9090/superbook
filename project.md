@@ -275,6 +275,157 @@ Complete redesign of Login and Register pages to match premium SaaS dashboard UI
 
 ---
 
+## � BLOG SYSTEM (April 16, 2026)
+
+### Overview
+Added a complete content/blog system for knowledge sharing between teachers and students.
+
+### Features
+
+**1. Blog Model**
+- `title` - Blog post title (max 200 chars)
+- `content` - Rich text content
+- `topic` - Category (Math, Science, etc.)
+- `author` - Reference to teacher user
+- `isPublished` - Draft/Published status
+- `createdAt` / `updatedAt` - Timestamps
+
+**2. Favorite System**
+- Students can favorite blogs
+- Unique constraint (user + blog)
+- Quick access via "My Favorites" page
+
+**3. Teacher Features**
+- Create blog posts with topic categorization
+- Edit/Delete own blogs
+- Draft/Publish workflow
+- Blog management dashboard
+
+**4. Student Features**
+- Browse all published blogs
+- Filter by topic
+- Search functionality
+- Toggle favorites (heart icon)
+- Read full blog content
+
+**5. APIs Created**
+- `GET/POST /api/blogs` - List/Create blogs
+- `GET/PATCH/DELETE /api/blogs/[id]` - Blog operations
+- `GET/POST /api/favorites` - Favorites management
+- `DELETE /api/favorites/[id]` - Remove favorite
+
+**6. Pages Created**
+
+Teacher:
+- `/dashboard/teacher/blogs` - Blog management
+- `/dashboard/teacher/blogs/create` - Create blog
+- `/dashboard/teacher/blogs/edit/[id]` - Edit blog
+
+Student:
+- `/dashboard/student/blogs` - Browse blogs
+- `/dashboard/student/blogs/[id]` - Blog detail
+- `/dashboard/student/favorites` - Saved blogs
+
+**7. UI Components**
+- Blog cards with topic badges
+- Favorite toggle with animation
+- Search and filter UI
+- Empty states
+- Loading skeletons
+
+**8. Security**
+- Only teachers can create/edit blogs
+- Students can only read + favorite
+- Ownership validation before edit/delete
+
+### Files Modified/Created
+
+**Models:**
+- `src/models/Blog.ts`
+- `src/models/Favorite.ts`
+
+**APIs:**
+- `src/app/api/blogs/route.ts`
+- `src/app/api/blogs/[id]/route.ts`
+- `src/app/api/favorites/route.ts`
+- `src/app/api/favorites/[id]/route.ts`
+
+**Pages:**
+- `src/app/(dashboard)/dashboard/teacher/blogs/page.tsx`
+- `src/app/(dashboard)/dashboard/teacher/blogs/create/page.tsx`
+- `src/app/(dashboard)/dashboard/teacher/blogs/edit/[id]/page.tsx`
+- `src/app/(dashboard)/dashboard/student/blogs/page.tsx`
+- `src/app/(dashboard)/dashboard/student/blogs/[id]/page.tsx`
+- `src/app/(dashboard)/dashboard/student/favorites/page.tsx`
+
+**Components:**
+- `src/components/dashboard/TeacherSidebar.tsx` (added Blogs nav)
+- `src/components/dashboard/StudentSidebar.tsx` (added Blogs & Favorites nav)
+
+---
+
+## 📝 RICH TEXT EDITOR (April 16, 2026)
+
+### Overview
+Added TipTap rich text editor for enhanced blog content creation with formatting capabilities.
+
+### Dependencies
+```bash
+npm install @tiptap/react @tiptap/starter-kit @tiptap/extension-link @tiptap/extension-placeholder isomorphic-dompurify
+```
+
+### Features
+
+**1. Editor Capabilities**
+- ✅ Bold & Italic formatting
+- ✅ Headings (H1, H2, H3)
+- ✅ Bullet lists
+- ✅ Numbered lists
+- ✅ Blockquotes
+- ✅ Links (with URL validation)
+- ✅ Placeholder text
+- ✅ Undo/Redo
+
+**2. UI/UX**
+- Clean minimal toolbar (top-mounted)
+- Theme support (indigo/emerald)
+- Responsive design
+- Character count display
+- Active state indicators
+- Hover effects
+
+**3. Security**
+- HTML sanitization using DOMPurify
+- Content stored as sanitized HTML
+- No image upload (text-only as requested)
+- No media embedding
+
+**4. Validation**
+- Empty content detection (strips HTML tags)
+- Prevents submission of empty `<p></p>` tags
+- Helper function: `isContentEmpty(html)`
+
+**5. Updated Pages**
+- `/dashboard/teacher/blogs/create` - Create blog with RTE
+- `/dashboard/teacher/blogs/edit/[id]` - Edit blog with RTE
+- `/dashboard/student/blogs/[id]` - Render HTML content (sanitized)
+- `/dashboard/student/blogs` - Strip HTML for excerpts
+- `/dashboard/student/favorites` - Strip HTML for excerpts
+
+### Files Created/Modified
+
+**New Component:**
+- `src/components/ui/RichTextEditor.tsx`
+
+**Modified:**
+- `src/app/(dashboard)/dashboard/teacher/blogs/create/page.tsx`
+- `src/app/(dashboard)/dashboard/teacher/blogs/edit/[id]/page.tsx`
+- `src/app/(dashboard)/dashboard/student/blogs/[id]/page.tsx`
+- `src/app/(dashboard)/dashboard/student/blogs/page.tsx`
+- `src/app/(dashboard)/dashboard/student/favorites/page.tsx`
+
+---
+
 ## 🚧 Future Scope
 - Avatar upload
 - Email verification

@@ -74,7 +74,7 @@ export default function CreateCourseForm() {
           required
           value={formData.title}
           onChange={handleChange}
-          className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base sm:text-sm text-gray-900 touch-manipulation"
+          className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base sm:text-sm text-gray-900 placeholder-gray-400 touch-manipulation"
           placeholder="Enter course title"
         />
       </div>
@@ -89,7 +89,7 @@ export default function CreateCourseForm() {
           rows={4}
           value={formData.description}
           onChange={handleChange}
-          className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base sm:text-sm text-gray-900 resize-y"
+          className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base sm:text-sm text-gray-900 placeholder-gray-400 resize-y"
           placeholder="Enter course description"
         />
       </div>
@@ -107,7 +107,7 @@ export default function CreateCourseForm() {
             step="0.01"
             value={formData.price}
             onChange={handleChange}
-            className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base sm:text-sm text-gray-900"
+            className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base sm:text-sm text-gray-900 placeholder-gray-400"
             placeholder="0"
           />
         </div>
@@ -122,7 +122,7 @@ export default function CreateCourseForm() {
             id="category"
             value={formData.category}
             onChange={handleChange}
-            className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base sm:text-sm text-gray-900"
+            className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base sm:text-sm text-gray-900 placeholder-gray-400"
             placeholder="e.g., Programming, Design"
           />
         </div>
@@ -138,7 +138,7 @@ export default function CreateCourseForm() {
           id="thumbnail"
           value={formData.thumbnail}
           onChange={handleChange}
-          className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base sm:text-sm text-gray-900"
+          className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base sm:text-sm text-gray-900 placeholder-gray-400"
           placeholder="https://example.com/image.jpg"
         />
       </div>

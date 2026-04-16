@@ -7,13 +7,10 @@ import {
   HelpCircle,
   Clock,
   BookOpen,
-  ArrowRight,
   Play,
   RotateCcw,
   Loader2,
   CheckCircle,
-  AlertCircle,
-  XCircle
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 

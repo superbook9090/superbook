@@ -14,13 +14,15 @@ import {
   LogOut,
   GraduationCap,
   Users,
-  Library
+  Library,
+  Newspaper
 } from 'lucide-react';
 
 const teacherNavigation = [
   { name: 'Dashboard', href: '/dashboard/teacher', icon: LayoutDashboard },
   { name: 'My Courses', href: '/dashboard/teacher/courses', icon: BookOpen },
   { name: 'Quizzes', href: '/dashboard/teacher/quizzes', icon: HelpCircle },
+  { name: 'Blogs', href: '/dashboard/teacher/blogs', icon: Newspaper },
   { name: 'Analytics', href: '/dashboard/teacher/analytics', icon: BarChart3 },
   { name: 'Profile', href: '/dashboard/teacher/profile', icon: User },
 ];

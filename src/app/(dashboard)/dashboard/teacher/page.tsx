@@ -12,7 +12,6 @@ import {
   CheckCircle,
   Plus,
   ArrowRight,
-  TrendingUp,
   GraduationCap,
   BarChart3
 } from 'lucide-react';

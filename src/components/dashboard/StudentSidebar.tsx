@@ -13,13 +13,17 @@ import {
   TrendingUp,
   User,
   LogOut,
-  GraduationCap
+  GraduationCap,
+  Newspaper,
+  Heart
 } from 'lucide-react';
 
 const studentNavigation = [
   { name: 'Dashboard', href: '/dashboard/student', icon: LayoutDashboard },
   { name: 'My Courses', href: '/dashboard/student/courses', icon: BookOpen },
   { name: 'Browse', href: '/dashboard/student/browse', icon: Search },
+  { name: 'Blogs', href: '/dashboard/student/blogs', icon: Newspaper },
+  { name: 'Favorites', href: '/dashboard/student/favorites', icon: Heart },
   { name: 'Quizzes', href: '/dashboard/student/quizzes', icon: HelpCircle },
   { name: 'Progress', href: '/dashboard/student/progress', icon: TrendingUp },
   { name: 'Profile', href: '/dashboard/student/profile', icon: User },
