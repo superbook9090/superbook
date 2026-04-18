@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { motion } from 'framer-motion';
+import { useTranslation } from '@/hooks/useTranslation';
 import {
   LayoutDashboard,
   BookOpen,
@@ -17,16 +18,17 @@ import {
   Newspaper,
   Heart
 } from 'lucide-react';
+import { useFeature } from '@/contexts/AppSettingsContext';
 
 const studentNavigation = [
-  { name: 'Dashboard', href: '/dashboard/student', icon: LayoutDashboard },
-  { name: 'My Courses', href: '/dashboard/student/courses', icon: BookOpen },
-  { name: 'Browse', href: '/dashboard/student/browse', icon: Search },
-  { name: 'Blogs', href: '/dashboard/student/blogs', icon: Newspaper },
-  { name: 'Favorites', href: '/dashboard/student/favorites', icon: Heart },
-  { name: 'Quizzes', href: '/dashboard/student/quizzes', icon: HelpCircle },
-  { name: 'Progress', href: '/dashboard/student/progress', icon: TrendingUp },
-  { name: 'Profile', href: '/dashboard/student/profile', icon: User },
+  { name: 'common.dashboard', href: '/dashboard/student', icon: LayoutDashboard },
+  { name: 'common.myCourses', href: '/dashboard/student/courses', icon: BookOpen },
+  { name: 'common.browse', href: '/dashboard/student/browse', icon: Search },
+  { name: 'common.blogs', href: '/dashboard/student/blogs', icon: Newspaper, feature: 'enableBlogs' },
+  { name: 'common.favorites', href: '/dashboard/student/favorites', icon: Heart, feature: 'enableBlogs' },
+  { name: 'common.quizzes', href: '/dashboard/student/quizzes', icon: HelpCircle },
+  { name: 'common.progress', href: '/dashboard/student/progress', icon: TrendingUp },
+  { name: 'common.profile', href: '/dashboard/student/profile', icon: User },
 ];
 
 interface User {
@@ -38,6 +40,24 @@ interface User {
 
 export default function StudentSidebar({ user }: { user: User | null }) {
   const pathname = usePathname();
+  const { t } = useTranslation();
+
+  const enableBlogs = useFeature('enableBlogs');
+  const enableQuizzes = useFeature('enableQuizzes');
+  const enableCourses = useFeature('enableCourses');
+
+  const filteredNavigation = studentNavigation.filter(item => {
+    if (item.feature === 'enableBlogs') {
+      return enableBlogs;
+    }
+    if (item.feature === 'enableQuizzes') {
+      return enableQuizzes;
+    }
+    if (item.feature === 'enableCourses') {
+      return enableCourses;
+    }
+    return true;
+  });
 
   return (
     <div className="flex flex-col w-72 h-screen bg-gradient-to-b from-[#4f46e5] to-[#3730a3] relative overflow-hidden">
@@ -48,27 +68,31 @@ export default function StudentSidebar({ user }: { user: User | null }) {
       {/* Scrollable Content Area */}
       <div className="flex-1 flex flex-col min-h-0 overflow-y-auto pt-6 pb-4 relative z-10 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
         {/* Logo */}
-        <div className="flex items-center flex-shrink-0 px-6">
-          <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center mr-3">
-            <GraduationCap className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-white text-xl font-bold tracking-tight">SuperBook</h1>
-            <p className="text-indigo-200 text-xs">Learning Platform</p>
-          </div>
+        <div className="flex items-center flex-shrink-0 px-5 py-4">
+          <Link href="/dashboard/student" className="flex items-center gap-3 group">
+            <img
+              src="/logo.svg"
+              alt="Super Book Logo"
+              className="h-9 w-auto bg-transparent object-contain transition-transform duration-300 group-hover:scale-105 group-hover:drop-shadow-[0_0_8px_rgba(99,102,241,0.4)]"
+            />
+            <div className="flex flex-col items-start">
+              <h1 className="text-white text-xl font-bold leading-tight">SUPER BOOK</h1>
+              <p className="text-indigo-200 text-xs leading-none mt-0.5">{t('common.learningPlatform')}</p>
+            </div>
+          </Link>
         </div>
 
         {/* Role Badge */}
         <div className="mt-6 px-6">
           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-white/20 text-white backdrop-blur-sm border border-white/10">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-2 animate-pulse" />
-            Student
+            {t('common.student')}
           </span>
         </div>
 
         {/* Navigation - Scrollable */}
         <nav className="mt-8 flex-1 px-4 space-y-1 min-h-0 overflow-y-auto">
-          {studentNavigation.map((item, index) => {
+          {filteredNavigation.map((item, index) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
 
@@ -92,7 +116,7 @@ export default function StudentSidebar({ user }: { user: User | null }) {
                   }`}>
                     <Icon className="w-5 h-5" />
                   </div>
-                  <span className="truncate">{item.name}</span>
+                  <span className="truncate">{t(item.name)}</span>
                   {isActive && (
                     <motion.div
                       layoutId="activeIndicator"
@@ -122,7 +146,7 @@ export default function StudentSidebar({ user }: { user: User | null }) {
             <button
               onClick={() => signOut({ callbackUrl: '/login' })}
               className="ml-2 p-2 rounded-xl text-indigo-200 hover:text-white hover:bg-white/10 transition-all"
-              aria-label="Sign out"
+              aria-label={t('common.signOut')}
             >
               <LogOut className="w-4 h-4" />
             </button>

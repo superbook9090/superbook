@@ -5,6 +5,7 @@ import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import Quiz from '@/models/Quiz';
 import Course from '@/models/Course';
+import { requireFeature, checkTeacherLimit } from '@/lib/settingsHelpers';
 
 // GET /api/quizzes - Get all quizzes (with optional filtering)
 export async function GET(request: NextRequest) {
@@ -13,6 +14,10 @@ export async function GET(request: NextRequest) {
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
+
+    // Check if quizzes feature is enabled
+    const featureCheck = await requireFeature('enableQuizzes');
+    if (featureCheck) return featureCheck;
 
     await dbConnect();
 
@@ -45,10 +50,14 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
+
+    // Check if quizzes feature is enabled
+    const featureCheck = await requireFeature('enableQuizzes');
+    if (featureCheck) return featureCheck;
 
     // Only teachers and admins can create quizzes
     if (session.user?.role !== 'teacher' && session.user?.role !== 'admin') {
@@ -68,6 +77,16 @@ export async function POST(request: NextRequest) {
         { message: 'Title and course are required' },
         { status: 400 }
       );
+    }
+
+    // Check teacher limits (skip for admins)
+    if (session.user?.role === 'teacher') {
+      const quizCount = await Quiz.countDocuments({
+        instructor: session.user.id,
+      });
+
+      const limitCheck = await checkTeacherLimit('quizzes', quizCount);
+      if (limitCheck) return limitCheck;
     }
 
     // Verify course exists and belongs to this instructor

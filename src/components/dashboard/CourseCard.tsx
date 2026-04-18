@@ -3,10 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { 
-  BookOpen, 
-  Clock, 
-  User, 
+import { useTranslation } from '@/hooks/useTranslation';
+import {
+  BookOpen,
+  Clock,
+  User,
   Tag,
   ArrowRight,
   Loader2,
@@ -45,6 +46,7 @@ interface CourseCardProps {
 
 export default function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
 
   // Handle both course and enrollment objects
@@ -117,7 +119,7 @@ export default function CourseCard({ course, type, onEnroll, onDrop }: CourseCar
         {/* Price Badge */}
         <div className="absolute top-4 right-4">
           <span className="px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full text-sm font-bold text-gray-900">
-            {courseData.price === 0 ? 'Free' : `$${courseData.price}`}
+            {courseData.price === 0 ? t('courses.free') : `$${courseData.price}`}
           </span>
         </div>
       </div>
@@ -129,7 +131,7 @@ export default function CourseCard({ course, type, onEnroll, onDrop }: CourseCar
           {courseData.title}
         </h3>
         <p className="text-sm text-gray-500 mb-4 line-clamp-2">
-          {courseData.description || 'No description available'}
+          {courseData.description || t('courses.noDescription')}
         </p>
 
         {/* Instructor */}
@@ -137,14 +139,14 @@ export default function CourseCard({ course, type, onEnroll, onDrop }: CourseCar
           <div className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-400 to-purple-400 flex items-center justify-center">
             <User className="w-3 h-3 text-white" />
           </div>
-          <span>{courseData.instructor?.name || 'Unknown'}</span>
+          <span>{courseData.instructor?.name || t('courses.unknown')}</span>
         </div>
 
         {/* Progress (for enrolled courses) */}
         {type === 'enrolled' && enrollment && (
           <div className="mb-4 p-4 bg-gray-50 rounded-xl">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-600">Progress</span>
+              <span className="text-sm font-medium text-gray-600">{t('courses.progress')}</span>
               <span className="text-sm font-bold text-indigo-600">{enrollment.progress}%</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
@@ -173,7 +175,7 @@ export default function CourseCard({ course, type, onEnroll, onDrop }: CourseCar
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <>
-                  Enroll Now
+                  {t('courses.enrollNow')}
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -187,11 +189,11 @@ export default function CourseCard({ course, type, onEnroll, onDrop }: CourseCar
                 className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all"
               >
                 {enrollment?.progress === 0 ? (
-                  <><Play className="w-4 h-4" /> Start</>
+                  <><Play className="w-4 h-4" /> {t('courses.start')}</>
                 ) : enrollment?.progress === 100 ? (
-                  <><RotateCcw className="w-4 h-4" /> Review</>
+                  <><RotateCcw className="w-4 h-4" /> {t('courses.review')}</>
                 ) : (
-                  <><ArrowRight className="w-4 h-4" /> Continue</>
+                  <><ArrowRight className="w-4 h-4" /> {t('courses.continue')}</>
                 )}
               </motion.button>
               <motion.button

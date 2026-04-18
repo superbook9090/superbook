@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { memo, useMemo } from 'react';
+import { useMemo } from 'react';
+import { useTranslation } from '@/hooks/useTranslation';
 import {
   LayoutDashboard,
   BookOpen,
@@ -38,6 +39,7 @@ interface MobileBottomNavProps {
 
 function MobileBottomNav({ navigation, colorScheme }: MobileBottomNavProps) {
   const pathname = usePathname();
+  const { t } = useTranslation();
 
   // Memoize theme classes
   const themeClasses = useMemo(() => {
@@ -74,7 +76,7 @@ function MobileBottomNav({ navigation, colorScheme }: MobileBottomNavProps) {
               }`}
             >
               {renderIcon(item.icon, isActive)}
-              <span className="text-[10px] mt-0.5 truncate max-w-[4rem] leading-tight">{item.name}</span>
+              <span className="text-[10px] mt-0.5 truncate max-w-[4rem] leading-tight">{t(item.name)}</span>
             </Link>
           );
         })}
@@ -83,4 +85,4 @@ function MobileBottomNav({ navigation, colorScheme }: MobileBottomNavProps) {
   );
 }
 
-export default memo(MobileBottomNav);
+export default MobileBottomNav;

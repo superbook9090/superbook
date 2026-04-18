@@ -5,6 +5,7 @@ import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import '@/models/Lesson'; // Import to register Lesson model
 import Course from '@/models/Course';
+import { requireFeature, checkTeacherLimit } from '@/lib/settingsHelpers';
 
 // GET /api/courses - Get all courses (with optional filtering)
 export async function GET(request: NextRequest) {
@@ -13,6 +14,10 @@ export async function GET(request: NextRequest) {
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
+
+    // Check if courses feature is enabled
+    const featureCheck = await requireFeature('enableCourses');
+    if (featureCheck) return featureCheck;
 
     await dbConnect();
 
@@ -63,10 +68,14 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
+
+    // Check if courses feature is enabled
+    const featureCheck = await requireFeature('enableCourses');
+    if (featureCheck) return featureCheck;
 
     // Only teachers and admins can create courses
     if (session.user?.role !== 'teacher' && session.user?.role !== 'admin') {
@@ -78,7 +87,7 @@ export async function POST(request: NextRequest) {
 
     await dbConnect();
 
-    const { title, description, price, category, thumbnail, isPublished } = await request.json();
+    const { title, description, price, category, thumbnail, isPublished, language } = await request.json();
 
     // Validation
     if (!title) {
@@ -86,6 +95,16 @@ export async function POST(request: NextRequest) {
         { message: 'Title is required' },
         { status: 400 }
       );
+    }
+
+    // Check teacher limits (skip for admins)
+    if (session.user?.role === 'teacher') {
+      const courseCount = await Course.countDocuments({
+        instructor: session.user.id,
+      });
+
+      const limitCheck = await checkTeacherLimit('courses', courseCount);
+      if (limitCheck) return limitCheck;
     }
 
     // Create course
@@ -96,6 +115,7 @@ export async function POST(request: NextRequest) {
       price: price || 0,
       category,
       thumbnail,
+      language: language || 'en',
       isPublished: isPublished || false,
     });
 

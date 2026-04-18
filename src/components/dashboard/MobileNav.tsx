@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useMemo, useCallback, memo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
+import { useTranslation } from '@/hooks/useTranslation';
 import {
   LayoutDashboard,
   BookOpen,
@@ -58,6 +59,7 @@ function MobileNav({ user, navigation, adminNavigation = [], colorScheme }: Mobi
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const isAdmin = user?.role === 'admin';
+  const { t, lang, setLang } = useTranslation();
 
   // Memoize theme classes to avoid recalculation on every render
   const themeClasses = useMemo(() => {
@@ -96,18 +98,35 @@ function MobileNav({ user, navigation, adminNavigation = [], colorScheme }: Mobi
       {/* Mobile Header */}
       <div className={`${themeClasses.bg} md:hidden fixed top-0 left-0 right-0 z-50`}>
         <div className="flex items-center justify-between px-4 py-3">
-          <h1 className="text-white text-xl font-bold">SuperBook</h1>
-          <button
-            onClick={toggleMenu}
-            className="text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 active:scale-95 transition-transform"
-            aria-label="Toggle menu"
-          >
-            {isOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
-          </button>
+          <Link href={isAdmin ? '/dashboard/teacher' : '/dashboard/student'} className="flex items-center gap-3 group">
+            <img
+              src="/logo.svg"
+              alt="Super Book Logo"
+              className="h-11 w-auto bg-transparent object-contain transition-transform duration-300 group-hover:scale-105 group-hover:drop-shadow-[0_0_8px_rgba(99,102,241,0.4)]"
+            />
+            <span className="text-base font-semibold text-white leading-none tracking-tight">SUPER BOOK</span>
+          </Link>
+          <div className="flex items-center gap-2">
+            <select
+              value={lang}
+              onChange={(e) => setLang(e.target.value as 'en' | 'hi')}
+              className="px-2 py-1 bg-white/20 border border-white/30 rounded text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/50"
+            >
+              <option value="en" className="text-gray-900">EN</option>
+              <option value="hi" className="text-gray-900">HI</option>
+            </select>
+            <button
+              onClick={toggleMenu}
+              className="text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 active:scale-95 transition-transform"
+              aria-label="Toggle menu"
+            >
+              {isOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Menu */}
@@ -120,18 +139,22 @@ function MobileNav({ user, navigation, adminNavigation = [], colorScheme }: Mobi
                     key={item.name}
                     href={item.href}
                     onClick={closeMenu}
-                    className={`${
+                    className={`flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
                       pathname === item.href
-                        ? `${themeClasses.active} text-white`
-                        : `text-white/90 ${themeClasses.hover}`
-                    } group flex items-center px-3 py-3 text-base font-medium rounded-lg transition-colors`}
+                        ? `${themeClasses.active} text-white shadow-lg backdrop-blur-sm`
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
                   >
-                    {renderIcon(item.icon)}
-                    <span className="truncate">{item.name}</span>
+                    <div className={`mr-3 p-1.5 rounded-lg transition-colors ${
+                      pathname === item.href ? 'bg-white/20' : 'bg-transparent group-hover:bg-white/10'
+                    }`}>
+                      {renderIcon(item.icon)}
+                    </div>
+                    {t(item.name)}
                   </Link>
                 ) : (
                   <div key={item.name} className="px-3 py-2 text-xs font-semibold text-white/60 uppercase tracking-wider">
-                    {item.name}
+                    {t(item.name)}
                   </div>
                 )
               ))}
@@ -146,7 +169,7 @@ function MobileNav({ user, navigation, adminNavigation = [], colorScheme }: Mobi
                 className="mt-3 w-full bg-white/20 text-white px-4 py-2.5 rounded-lg text-base font-medium hover:bg-white/30 active:bg-white/40 focus:outline-none focus:ring-2 focus:ring-white/50 transition-colors flex items-center justify-center"
               >
                 <LogOut className="w-5 h-5 mr-2" />
-                Sign out
+                {t('common.signOut')}
               </button>
             </div>
           </div>
@@ -159,4 +182,4 @@ function MobileNav({ user, navigation, adminNavigation = [], colorScheme }: Mobi
   );
 }
 
-export default memo(MobileNav);
+export default MobileNav;

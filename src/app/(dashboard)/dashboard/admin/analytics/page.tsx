@@ -4,6 +4,19 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+import { useTranslation } from '@/hooks/useTranslation';
+import {
+  BarChart3,
+  Users,
+  BookOpen,
+  Loader2,
+  RefreshCw,
+  Award,
+  Activity,
+  GraduationCap,
+} from 'lucide-react';
+import Alert from '@/components/ui/Alert';
 
 interface AdminStats {
   users: {
@@ -12,6 +25,7 @@ interface AdminStats {
     teachers: number;
     admins: number;
     newThisMonth: number;
+    suspended: number;
   };
   courses: {
     total: number;
@@ -29,6 +43,10 @@ interface AdminStats {
     averageScore: number;
     highestScore: number;
   };
+  blogs: {
+    total: number;
+    published: number;
+  };
   recentActivity: {
     type: string;
     user: string;
@@ -40,9 +58,10 @@ interface AdminStats {
 export default function AdminAnalyticsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { t } = useTranslation();
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -62,10 +81,10 @@ export default function AdminAnalyticsPage() {
       if (response.ok) {
         setStats(data.stats || null);
       } else {
-        setError(data.message || 'Failed to load analytics');
+        setMessage({ type: 'error', text: data.message || 'Failed to load analytics' });
       }
     } catch (err) {
-      setError('Error loading analytics');
+      setMessage({ type: 'error', text: 'Error loading analytics' });
       console.error('Analytics error:', err);
     } finally {
       setIsLoading(false);
@@ -73,155 +92,249 @@ export default function AdminAnalyticsPage() {
   };
 
   if (status === 'loading' || isLoading) {
-    return <div className="text-center py-8">Loading analytics...</div>;
-  }
-
-  if (!stats) {
     return (
-      <div className="text-center py-8">
-        {error && <p className="text-red-600 mb-4">{error}</p>}
-        <button
-          onClick={fetchStats}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-md"
-        >
-          Retry
-        </button>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
       </div>
     );
   }
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-gray-900">System Analytics</h1>
-      <p className="mt-2 text-gray-600">
-        Overview of platform usage and performance metrics.
-      </p>
-
-      {/* User Stats */}
-      <div className="mt-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Users</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          <div className="bg-white rounded-lg shadow p-4 text-center">
-            <p className="text-3xl font-bold text-indigo-600">{stats.users.total}</p>
-            <p className="text-sm text-gray-600">Total Users</p>
+    <div className="space-y-6">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center justify-between"
+      >
+        <div className="flex items-center gap-3">
+          <div className="p-3 bg-indigo-100 rounded-xl">
+            <BarChart3 className="w-6 h-6 text-indigo-600" />
           </div>
-          <div className="bg-white rounded-lg shadow p-4 text-center">
-            <p className="text-3xl font-bold text-blue-600">{stats.users.students}</p>
-            <p className="text-sm text-gray-600">Students</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4 text-center">
-            <p className="text-3xl font-bold text-green-600">{stats.users.teachers}</p>
-            <p className="text-sm text-gray-600">Teachers</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4 text-center">
-            <p className="text-3xl font-bold text-purple-600">{stats.users.admins}</p>
-            <p className="text-sm text-gray-600">Admins</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4 text-center">
-            <p className="text-3xl font-bold text-orange-600">{stats.users.newThisMonth}</p>
-            <p className="text-sm text-gray-600">New This Month</p>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">System Analytics</h1>
+            <p className="text-gray-500 mt-1">Overview of platform usage and performance metrics</p>
           </div>
         </div>
-      </div>
+        <button
+          onClick={fetchStats}
+          className="inline-flex items-center px-4 py-2 bg-white text-gray-700 rounded-xl shadow-sm hover:shadow-md transition-all"
+        >
+          <RefreshCw className="w-4 h-4 mr-2" />
+          Refresh
+        </button>
+      </motion.div>
 
-      {/* Content Stats */}
-      <div className="mt-8">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Content & Engagement</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          <div className="bg-white rounded-lg shadow p-4 text-center">
-            <p className="text-3xl font-bold text-indigo-600">{stats.courses.total}</p>
-            <p className="text-sm text-gray-600">Total Courses</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4 text-center">
-            <p className="text-3xl font-bold text-green-600">{stats.courses.published}</p>
-            <p className="text-sm text-gray-600">Published</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4 text-center">
-            <p className="text-3xl font-bold text-blue-600">{stats.enrollments.total}</p>
-            <p className="text-sm text-gray-600">Enrollments</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4 text-center">
-            <p className="text-3xl font-bold text-yellow-600">{stats.enrollments.active}</p>
-            <p className="text-sm text-gray-600">Active</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4 text-center">
-            <p className="text-3xl font-bold text-purple-600">{stats.quizzes.total}</p>
-            <p className="text-sm text-gray-600">Quizzes</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4 text-center">
-            <p className="text-3xl font-bold text-pink-600">{stats.quizzes.totalAttempts}</p>
-            <p className="text-sm text-gray-600">Quiz Attempts</p>
-          </div>
+      {/* Alert */}
+      {message && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <Alert
+            type={message.type}
+            message={message.text}
+            onClose={() => setMessage(null)}
+          />
+        </motion.div>
+      )}
+
+      {!stats ? (
+        <div className="text-center py-16 bg-white rounded-2xl shadow-sm">
+          <BarChart3 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">No analytics data available</h3>
+          <p className="text-gray-500 mb-4">Try refreshing the page</p>
         </div>
-      </div>
+      ) : (
+        <>
+          {/* User Stats */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <Users className="w-5 h-5" />
+              Users
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              <div className="bg-white rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
+                <p className="text-3xl font-bold text-indigo-600">{stats.users.total}</p>
+                <p className="text-sm text-gray-600 mt-1">Total Users</p>
+              </div>
+              <div className="bg-white rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
+                <p className="text-3xl font-bold text-blue-600">{stats.users.students}</p>
+                <p className="text-sm text-gray-600 mt-1">Students</p>
+              </div>
+              <div className="bg-white rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
+                <p className="text-3xl font-bold text-emerald-600">{stats.users.teachers}</p>
+                <p className="text-sm text-gray-600 mt-1">Teachers</p>
+              </div>
+              <div className="bg-white rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
+                <p className="text-3xl font-bold text-purple-600">{stats.users.admins}</p>
+                <p className="text-sm text-gray-600 mt-1">Admins</p>
+              </div>
+              <div className="bg-white rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
+                <p className="text-3xl font-bold text-orange-600">{stats.users.newThisMonth}</p>
+                <p className="text-sm text-gray-600 mt-1">New This Month</p>
+              </div>
+            </div>
+          </motion.div>
 
-      {/* Quiz Performance */}
-      <div className="mt-8">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Quiz Performance</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white rounded-lg shadow p-6">
-            <p className="text-sm text-gray-600 mb-2">Average Score</p>
-            <div className="flex items-end">
-              <p className="text-4xl font-bold text-indigo-600">{stats.quizzes.averageScore}%</p>
+          {/* Content Stats */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <BookOpen className="w-5 h-5" />
+              Content & Engagement
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              <div className="bg-white rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
+                <p className="text-3xl font-bold text-indigo-600">{stats.courses.total}</p>
+                <p className="text-sm text-gray-600 mt-1">Total Courses</p>
+              </div>
+              <div className="bg-white rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
+                <p className="text-3xl font-bold text-emerald-600">{stats.courses.published}</p>
+                <p className="text-sm text-gray-600 mt-1">Published</p>
+              </div>
+              <div className="bg-white rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
+                <p className="text-3xl font-bold text-blue-600">{stats.enrollments.total}</p>
+                <p className="text-sm text-gray-600 mt-1">Enrollments</p>
+              </div>
+              <div className="bg-white rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
+                <p className="text-3xl font-bold text-amber-600">{stats.enrollments.active}</p>
+                <p className="text-sm text-gray-600 mt-1">Active</p>
+              </div>
+              <div className="bg-white rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
+                <p className="text-3xl font-bold text-violet-600">{stats.quizzes.total}</p>
+                <p className="text-sm text-gray-600 mt-1">Quizzes</p>
+              </div>
+              <div className="bg-white rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
+                <p className="text-3xl font-bold text-rose-600">{stats.quizzes.totalAttempts}</p>
+                <p className="text-sm text-gray-600 mt-1">Quiz Attempts</p>
+              </div>
             </div>
-            <div className="mt-4 w-full bg-gray-200 rounded-full h-2">
-              <div
-                className="bg-indigo-600 h-2 rounded-full"
-                style={{ width: `${stats.quizzes.averageScore}%` }}
-              />
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <p className="text-sm text-gray-600 mb-2">Highest Score</p>
-            <p className="text-4xl font-bold text-green-600">{stats.quizzes.highestScore}%</p>
-            <div className="mt-4 w-full bg-gray-200 rounded-full h-2">
-              <div
-                className="bg-green-600 h-2 rounded-full"
-                style={{ width: `${stats.quizzes.highestScore}%` }}
-              />
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <p className="text-sm text-gray-600 mb-2">Completion Rate</p>
-            <p className="text-4xl font-bold text-blue-600">
-              {stats.enrollments.total > 0
-                ? Math.round((stats.enrollments.completed / stats.enrollments.total) * 100)
-                : 0}%
-            </p>
-            <p className="text-sm text-gray-500 mt-2">
-              {stats.enrollments.completed} of {stats.enrollments.total} enrollments
-            </p>
-          </div>
-        </div>
-      </div>
+          </motion.div>
 
-      {/* Recent Activity */}
-      <div className="mt-8">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h2>
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          {stats.recentActivity.length === 0 ? (
-            <p className="p-6 text-gray-500 text-center">No recent activity</p>
-          ) : (
-            <div className="divide-y divide-gray-200">
-              {stats.recentActivity.map((activity, index) => (
-                <div key={index} className="p-4 flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      {activity.user} enrolled in {activity.course}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {new Date(activity.date).toLocaleString()}
-                    </p>
-                  </div>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    Enrollment
-                  </span>
+          {/* Blog Stats */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+          >
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <BookOpen className="w-5 h-5" />
+              Blogs
+            </h2>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
+                <p className="text-3xl font-bold text-indigo-600">{stats.blogs?.total || 0}</p>
+                <p className="text-sm text-gray-600 mt-1">Total Blogs</p>
+              </div>
+              <div className="bg-white rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
+                <p className="text-3xl font-bold text-emerald-600">{stats.blogs?.published || 0}</p>
+                <p className="text-sm text-gray-600 mt-1">Published</p>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Quiz Performance */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <Award className="w-5 h-5" />
+              Quiz Performance
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow">
+                <p className="text-sm text-gray-600 mb-2">Average Score</p>
+                <div className="flex items-end">
+                  <p className="text-4xl font-bold text-indigo-600">{stats.quizzes.averageScore}%</p>
                 </div>
-              ))}
+                <div className="mt-4 w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="bg-indigo-600 h-2 rounded-full transition-all"
+                    style={{ width: `${stats.quizzes.averageScore}%` }}
+                  />
+                </div>
+              </div>
+              <div className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow">
+                <p className="text-sm text-gray-600 mb-2">Highest Score</p>
+                <p className="text-4xl font-bold text-emerald-600">{stats.quizzes.highestScore}%</p>
+                <div className="mt-4 w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="bg-emerald-600 h-2 rounded-full transition-all"
+                    style={{ width: `${stats.quizzes.highestScore}%` }}
+                  />
+                </div>
+              </div>
+              <div className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow">
+                <p className="text-sm text-gray-600 mb-2">Completion Rate</p>
+                <p className="text-4xl font-bold text-blue-600">
+                  {stats.enrollments.total > 0
+                    ? Math.round((stats.enrollments.completed / stats.enrollments.total) * 100)
+                    : 0}%
+                </p>
+                <p className="text-sm text-gray-500 mt-2">
+                  {stats.enrollments.completed} of {stats.enrollments.total} enrollments
+                </p>
+              </div>
             </div>
-          )}
-        </div>
-      </div>
+          </motion.div>
+
+          {/* Recent Activity */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <Activity className="w-5 h-5" />
+              Recent Activity
+            </h2>
+            <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+              {stats.recentActivity.length === 0 ? (
+                <p className="p-6 text-gray-500 text-center">No recent activity</p>
+              ) : (
+                <div className="divide-y divide-gray-200">
+                  {stats.recentActivity.map((activity, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.5 + index * 0.05 }}
+                      className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-full bg-blue-100 text-blue-600">
+                          <GraduationCap className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">
+                            {activity.user} enrolled in {activity.course}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {new Date(activity.date).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        Enrollment
+                      </span>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </>
+      )}
     </div>
   );
 }

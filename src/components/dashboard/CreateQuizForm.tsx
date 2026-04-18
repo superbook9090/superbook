@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import * as XLSX from 'xlsx';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface Course {
   _id: string;
@@ -25,6 +26,7 @@ interface ExcelRow {
 }
 
 export default function CreateQuizForm() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
@@ -145,7 +147,7 @@ export default function CreateQuizForm() {
       'text/csv',
     ];
     if (!validTypes.includes(file.type) && !file.name.endsWith('.xlsx') && !file.name.endsWith('.csv') && !file.name.endsWith('.xls')) {
-      setUploadError('Please upload a valid Excel (.xlsx, .xls) or CSV (.csv) file');
+      setUploadError(t('createQuizForm.validFileRequired'));
       return;
     }
 
@@ -160,7 +162,7 @@ export default function CreateQuizForm() {
       const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 }) as string[][];
 
       if (jsonData.length < 2) {
-        setUploadError('File is empty or has no data rows');
+        setUploadError(t('createQuizForm.fileEmpty'));
         setIsParsing(false);
         return;
       }
@@ -173,7 +175,7 @@ export default function CreateQuizForm() {
       );
 
       if (!hasAllColumns) {
-        setUploadError(`Invalid format. Required columns: question, optionA, optionB, optionC, optionD, correctAnswer. Found: ${headers.join(', ')}`);
+        setUploadError(t('createQuizForm.invalidFormat').replace('{columns}', headers.join(', ')));
         setIsParsing(false);
         return;
       }
@@ -212,15 +214,15 @@ export default function CreateQuizForm() {
         const correctAnswer = row[colMap.correctAnswer];
 
         if (!question) {
-          errors.push(`Row ${i + 1}: Question is required`);
+          errors.push(t('createQuizForm.questionRequired').replace('{number}', (i + 1).toString()));
           continue;
         }
         if (!optionA || !optionB || !optionC || !optionD) {
-          errors.push(`Row ${i + 1}: All options (A, B, C, D) are required`);
+          errors.push(t('createQuizForm.optionsRequired').replace('{number}', (i + 1).toString()));
           continue;
         }
         if (correctAnswer === undefined || correctAnswer === null || correctAnswer === '') {
-          errors.push(`Row ${i + 1}: Correct answer is required`);
+          errors.push(t('createQuizForm.correctAnswerRequired'));
           continue;
         }
 
@@ -234,7 +236,7 @@ export default function CreateQuizForm() {
         }
 
         if (isNaN(correctIndex) || correctIndex < 0 || correctIndex > 3) {
-          errors.push(`Row ${i + 1}: Correct answer must be A, B, C, D or 1, 2, 3, 4`);
+          errors.push(t('createQuizForm.correctAnswerInvalid'));
           continue;
         }
 
@@ -249,16 +251,16 @@ export default function CreateQuizForm() {
       }
 
       if (errors.length > 0) {
-        setUploadError(`Validation errors:\n${errors.slice(0, 5).join('\n')}${errors.length > 5 ? `\n... and ${errors.length - 5} more errors` : ''}`);
+        setUploadError(`${t('createQuizForm.validationErrors')}\n${errors.slice(0, 5).join('\n')}${errors.length > 5 ? `\n${t('createQuizForm.andMoreErrors').replace('{count}', (errors.length - 5).toString())}` : ''}`);
       }
 
       if (parsed.length === 0) {
-        setUploadError((prev) => prev || 'No valid questions found in the file');
+        setUploadError((prev) => prev || t('createQuizForm.noValidQuestions'));
       } else {
         setPreviewData(parsed);
       }
     } catch (_err) {
-      setUploadError('Error parsing file. Please ensure it is a valid Excel or CSV file.');
+      setUploadError(t('createQuizForm.parsingError'));
     } finally {
       setIsParsing(false);
     }
@@ -300,12 +302,12 @@ export default function CreateQuizForm() {
     for (let i = 0; i < questions.length; i++) {
       const q = questions[i];
       if (!q.question.trim()) {
-        setError(`Question ${i + 1} is required`);
+        setError(t('createQuizForm.questionRequiredNumber').replace('{number}', (i + 1).toString()));
         setIsLoading(false);
         return;
       }
       if (q.options.some(opt => !opt.trim())) {
-        setError(`All options in Question ${i + 1} must be filled`);
+        setError(t('createQuizForm.optionsRequiredNumber').replace('{number}', (i + 1).toString()));
         setIsLoading(false);
         return;
       }
@@ -325,13 +327,13 @@ export default function CreateQuizForm() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to create quiz');
+        throw new Error(data.message || t('createQuizForm.failedCreateQuiz'));
       }
 
       // Success - redirect to teacher quizzes page
       router.push('/dashboard/teacher/quizzes');
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'An error occurred. Please try again.';
+      const message = err instanceof Error ? err.message : t('createQuizForm.errorOccurred');
       setError(message);
     } finally {
       setIsLoading(false);
@@ -339,7 +341,7 @@ export default function CreateQuizForm() {
   };
 
   if (isFetching) {
-    return <div className="text-center py-8 text-gray-500">Loading courses...</div>;
+    return <div className="text-center py-8 text-gray-500">{t('createQuizForm.loadingCourses')}</div>;
   }
 
   return (
@@ -352,7 +354,7 @@ export default function CreateQuizForm() {
 
       <div>
         <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-          Quiz Title *
+          {t('createQuizForm.quizTitle')} *
         </label>
         <input
           type="text"
@@ -362,13 +364,13 @@ export default function CreateQuizForm() {
           value={formData.title}
           onChange={handleChange}
           className="mt-1 px-3 py-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-900 placeholder-gray-400"
-          placeholder="Enter quiz title"
+          placeholder={t('createQuizForm.enterQuizTitle')}
         />
       </div>
 
       <div>
         <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-          Description
+          {t('createQuizForm.description')}
         </label>
         <textarea
           name="description"
@@ -377,13 +379,13 @@ export default function CreateQuizForm() {
           value={formData.description}
           onChange={handleChange}
           className="mt-1 px-3 py-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-900 placeholder-gray-400"
-          placeholder="Enter quiz description"
+          placeholder={t('createQuizForm.enterQuizDescription')}
         />
       </div>
 
       <div>
         <label htmlFor="course" className="block text-sm font-medium text-gray-700">
-          Course *
+          {t('createQuizForm.course')} *
         </label>
         <select
           name="course"
@@ -393,7 +395,7 @@ export default function CreateQuizForm() {
           onChange={handleChange}
           className="mt-1 px-3 py-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-900"
         >
-          <option value="">Select a course</option>
+          <option value="">{t('createQuizForm.selectCourse')}</option>
           {courses.map(course => (
             <option key={course._id} value={course._id}>
               {course.title}
@@ -402,14 +404,14 @@ export default function CreateQuizForm() {
         </select>
         {courses.length === 0 && (
           <p className="mt-2 text-sm text-amber-600">
-            You need to create a course first before creating a quiz.
+            {t('createQuizForm.needCourseFirst')}
           </p>
         )}
       </div>
 
       <div>
         <label htmlFor="timeLimit" className="block text-sm font-medium text-gray-700">
-          Time Limit (minutes)
+          {t('createQuizForm.timeLimit')}
         </label>
         <input
           type="number"
@@ -426,13 +428,13 @@ export default function CreateQuizForm() {
       {/* Excel Upload Section */}
       <div className="border-t border-gray-200 pt-6">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-medium text-gray-900">Questions</h3>
+          <h3 className="text-lg font-medium text-gray-900">{t('createQuizForm.questions')}</h3>
           <button
             type="button"
             onClick={() => setShowUpload(!showUpload)}
             className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
           >
-            {showUpload ? 'Hide Import' : '📁 Import from Excel'}
+            {showUpload ? t('createQuizForm.hideImport') : t('createQuizForm.importFromExcel')}
           </button>
         </div>
 
@@ -440,9 +442,9 @@ export default function CreateQuizForm() {
           <div className="bg-indigo-50 rounded-lg p-4 mb-6">
             <div className="flex justify-between items-start mb-3">
               <div>
-                <h4 className="font-medium text-indigo-900">Import Questions from Excel</h4>
+                <h4 className="font-medium text-indigo-900">{t('createQuizForm.importQuestionsFromExcel')}</h4>
                 <p className="text-sm text-indigo-700 mt-1">
-                  Upload an Excel file with columns: question, optionA, optionB, optionC, optionD, correctAnswer
+                  {t('createQuizForm.importInstructions')}
                 </p>
               </div>
               <button
@@ -450,7 +452,7 @@ export default function CreateQuizForm() {
                 onClick={downloadTemplate}
                 className="text-sm text-indigo-600 hover:text-indigo-800 underline"
               >
-                Download Template
+                {t('createQuizForm.downloadTemplate')}
               </button>
             </div>
 
@@ -465,7 +467,7 @@ export default function CreateQuizForm() {
             </div>
 
             {isParsing && (
-              <p className="mt-2 text-sm text-indigo-600">Parsing file...</p>
+              <p className="mt-2 text-sm text-indigo-600">{t('createQuizForm.parsingFile')}</p>
             )}
 
             {uploadError && (
@@ -479,7 +481,7 @@ export default function CreateQuizForm() {
                 <div className="px-4 py-3 bg-indigo-100 border-b border-indigo-200">
                   <div className="flex justify-between items-center">
                     <h5 className="font-medium text-indigo-900">
-                      Preview: {previewData.length} question(s) found
+                      {t('createQuizForm.preview')}: {previewData.length} {t('createQuizForm.questionsFound')}
                     </h5>
                     <div className="space-x-2">
                       <button
@@ -490,14 +492,14 @@ export default function CreateQuizForm() {
                         }}
                         className="text-sm text-gray-600 hover:text-gray-800 px-3 py-1 rounded border border-gray-300 hover:bg-gray-50"
                       >
-                        Cancel
+                        {t('createQuizForm.cancel')}
                       </button>
                       <button
                         type="button"
                         onClick={handleConfirmImport}
                         className="text-sm text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded"
                       >
-                        Confirm Import
+                        {t('createQuizForm.confirmImport')}
                       </button>
                     </div>
                   </div>
@@ -507,9 +509,9 @@ export default function CreateQuizForm() {
                     <thead className="bg-gray-50 sticky top-0">
                       <tr>
                         <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">#</th>
-                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Question</th>
-                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Options</th>
-                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Answer</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">{t('createQuizForm.question')}</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">{t('createQuizForm.options')}</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">{t('createQuizForm.answer')}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
@@ -526,7 +528,7 @@ export default function CreateQuizForm() {
                       {previewData.length > 5 && (
                         <tr>
                           <td colSpan={4} className="px-3 py-2 text-sm text-gray-500 text-center italic">
-                            ... and {previewData.length - 5} more questions
+                            ... {t('createQuizForm.moreQuestions').replace('{count}', (previewData.length - 5).toString())}
                           </td>
                         </tr>
                       )}
@@ -541,19 +543,19 @@ export default function CreateQuizForm() {
 
       {/* Questions Section */}
       <div className="border-t border-gray-200 pt-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Questions</h3>
+        <h3 className="text-lg font-medium text-gray-900 mb-4">{t('createQuizForm.questions')}</h3>
 
         {questions.map((question, qIndex) => (
           <div key={qIndex} className="bg-gray-50 rounded-lg p-4 mb-4">
             <div className="flex justify-between items-center mb-3">
-              <h4 className="font-medium text-gray-700">Question {qIndex + 1}</h4>
+              <h4 className="font-medium text-gray-700">{t('createQuizForm.question')} {qIndex + 1}</h4>
               {questions.length > 1 && (
                 <button
                   type="button"
                   onClick={() => removeQuestion(qIndex)}
                   className="text-red-600 hover:text-red-800 text-sm"
                 >
-                  Remove
+                  {t('createQuizForm.remove')}
                 </button>
               )}
             </div>
@@ -564,7 +566,7 @@ export default function CreateQuizForm() {
                 value={question.question}
                 onChange={(e) => handleQuestionChange(qIndex, 'question', e.target.value)}
                 className="px-3 py-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-900"
-                placeholder="Enter question"
+                placeholder={t('createQuizForm.enterQuestion')}
                 required
               />
             </div>
@@ -584,7 +586,7 @@ export default function CreateQuizForm() {
                     value={option}
                     onChange={(e) => handleQuestionChange(qIndex, `option${oIndex}`, e.target.value)}
                     className="flex-1 px-3 py-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-900"
-                    placeholder={`Option ${oIndex + 1}`}
+                    placeholder={`${t('createQuizForm.option')} ${oIndex + 1}`}
                     required
                   />
                   {question.options.length > 2 && (
@@ -605,7 +607,7 @@ export default function CreateQuizForm() {
               onClick={() => addOption(qIndex)}
               className="mt-3 text-sm text-indigo-600 hover:text-indigo-800"
             >
-              + Add Option
+              {t('createQuizForm.addOption')}
             </button>
           </div>
         ))}
@@ -615,7 +617,7 @@ export default function CreateQuizForm() {
           onClick={addQuestion}
           className="w-full py-2 border-2 border-dashed border-gray-300 rounded-md text-gray-600 hover:border-indigo-500 hover:text-indigo-600 transition-colors"
         >
-          + Add Question
+          {t('createQuizForm.addQuestion')}
         </button>
       </div>
 
@@ -629,7 +631,7 @@ export default function CreateQuizForm() {
           className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
         />
         <label htmlFor="isPublished" className="ml-2 block text-sm text-gray-900">
-          Publish immediately
+          {t('createQuizForm.publishImmediately')}
         </label>
       </div>
 
@@ -639,14 +641,14 @@ export default function CreateQuizForm() {
           onClick={() => router.push('/dashboard/teacher/quizzes')}
           className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
-          Cancel
+          {t('createQuizForm.cancel')}
         </button>
         <button
           type="submit"
           disabled={isLoading || courses.length === 0}
           className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isLoading ? 'Creating...' : 'Create Quiz'}
+          {isLoading ? t('createQuizForm.creating') : t('createQuizForm.createQuiz')}
         </button>
       </div>
     </form>

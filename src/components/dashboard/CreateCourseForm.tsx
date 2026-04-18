@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function CreateCourseForm() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -12,6 +14,7 @@ export default function CreateCourseForm() {
     description: '',
     price: '',
     category: '',
+    language: 'en',
     thumbnail: '',
     isPublished: false,
   });
@@ -42,13 +45,13 @@ export default function CreateCourseForm() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to create course');
+        throw new Error(data.message || t('createCourseForm.failedCreateCourse'));
       }
 
       // Success - redirect to teacher courses page
       router.push('/dashboard/teacher/courses');
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'An error occurred. Please try again.';
+      const message = err instanceof Error ? err.message : t('createCourseForm.errorOccurred');
       setError(message);
     } finally {
       setIsLoading(false);
@@ -65,7 +68,7 @@ export default function CreateCourseForm() {
 
       <div>
         <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1.5">
-          Course Title *
+          {t('createCourseForm.courseTitle')} *
         </label>
         <input
           type="text"
@@ -75,13 +78,13 @@ export default function CreateCourseForm() {
           value={formData.title}
           onChange={handleChange}
           className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base sm:text-sm text-gray-900 placeholder-gray-400 touch-manipulation"
-          placeholder="Enter course title"
+          placeholder={t('createCourseForm.enterCourseTitle')}
         />
       </div>
 
       <div>
         <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1.5">
-          Description
+          {t('createCourseForm.description')}
         </label>
         <textarea
           name="description"
@@ -90,14 +93,14 @@ export default function CreateCourseForm() {
           value={formData.description}
           onChange={handleChange}
           className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base sm:text-sm text-gray-900 placeholder-gray-400 resize-y"
-          placeholder="Enter course description"
+          placeholder={t('createCourseForm.enterCourseDescription')}
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
         <div>
           <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1.5">
-            Price ($)
+            {t('createCourseForm.price')}
           </label>
           <input
             type="number"
@@ -108,13 +111,13 @@ export default function CreateCourseForm() {
             value={formData.price}
             onChange={handleChange}
             className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base sm:text-sm text-gray-900 placeholder-gray-400"
-            placeholder="0"
+            placeholder={t('createCourseForm.pricePlaceholder')}
           />
         </div>
 
         <div>
           <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1.5">
-            Category
+            {t('createCourseForm.category')}
           </label>
           <input
             type="text"
@@ -123,14 +126,30 @@ export default function CreateCourseForm() {
             value={formData.category}
             onChange={handleChange}
             className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base sm:text-sm text-gray-900 placeholder-gray-400"
-            placeholder="e.g., Programming, Design"
+            placeholder={t('createCourseForm.categoryPlaceholder')}
           />
+        </div>
+
+        <div>
+          <label htmlFor="language" className="block text-sm font-medium text-gray-700 mb-1.5">
+            {t('createCourseForm.language')}
+          </label>
+          <select
+            name="language"
+            id="language"
+            value={formData.language}
+            onChange={handleChange}
+            className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base sm:text-sm text-gray-900"
+          >
+            <option value="en">English</option>
+            <option value="hi">हिंदी</option>
+          </select>
         </div>
       </div>
 
       <div>
         <label htmlFor="thumbnail" className="block text-sm font-medium text-gray-700 mb-1.5">
-          Thumbnail URL
+          {t('createCourseForm.thumbnailUrl')}
         </label>
         <input
           type="url"
@@ -139,7 +158,7 @@ export default function CreateCourseForm() {
           value={formData.thumbnail}
           onChange={handleChange}
           className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base sm:text-sm text-gray-900 placeholder-gray-400"
-          placeholder="https://example.com/image.jpg"
+          placeholder={t('createCourseForm.thumbnailPlaceholder')}
         />
       </div>
 
@@ -153,7 +172,7 @@ export default function CreateCourseForm() {
           className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer"
         />
         <label htmlFor="isPublished" className="ml-3 block text-base sm:text-sm text-gray-900 cursor-pointer">
-          Publish immediately
+          {t('createCourseForm.publishImmediately')}
         </label>
       </div>
 
@@ -163,14 +182,14 @@ export default function CreateCourseForm() {
           onClick={() => router.push('/dashboard/teacher/courses')}
           className="px-4 py-3 sm:py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 touch-manipulation"
         >
-          Cancel
+          {t('createCourseForm.cancel')}
         </button>
         <button
           type="submit"
           disabled={isLoading}
           className="px-4 py-3 sm:py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
         >
-          {isLoading ? 'Creating...' : 'Create Course'}
+          {isLoading ? t('createCourseForm.creating') : t('createCourseForm.createCourse')}
         </button>
       </div>
     </form>

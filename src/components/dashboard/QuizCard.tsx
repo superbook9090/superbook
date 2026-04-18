@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { useTranslation } from '@/hooks/useTranslation';
 import {
   HelpCircle,
   Clock,
@@ -46,6 +47,7 @@ interface QuizCardProps {
 
 export default function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleStart = async () => {
@@ -97,13 +99,13 @@ export default function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps
         <div className="absolute inset-0 bg-black/10" />
         <div className="absolute bottom-4 left-6 right-6">
           <Badge variant="success" size="sm" icon={<BookOpen className="w-3 h-3" />}>
-            {quiz.course?.title || 'Course'}
+            {quiz.course?.title || t('quiz.course')}
           </Badge>
         </div>
         <div className="absolute top-4 right-4">
           <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full text-sm font-medium text-gray-700">
             <HelpCircle className="w-4 h-4" />
-            {quiz.questions?.length || 0} questions
+            {quiz.questions?.length || 0} {t('quiz.questions')}
           </div>
         </div>
       </div>
@@ -114,13 +116,13 @@ export default function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps
           {quiz.title}
         </h3>
         <p className="text-sm text-gray-500 mb-4 line-clamp-2">
-          {quiz.description || 'No description available'}
+          {quiz.description || t('quiz.noDescription')}
         </p>
 
         {/* Time Limit */}
         <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
           <Clock className="w-4 h-4" />
-          <span>Time Limit: <span className="font-medium text-gray-700">{quiz.timeLimit} min</span></span>
+          <span>{t('quiz.timeLimit')}: <span className="font-medium text-gray-700">{quiz.timeLimit} {t('quiz.min')}</span></span>
         </div>
 
         {/* Attempt Results */}
@@ -128,14 +130,14 @@ export default function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps
           <div className="mb-4 p-4 bg-gray-50 rounded-xl">
             <div className="flex items-center justify-between mb-3">
               <Badge variant={getScoreVariant(attempt.score)} size="sm">
-                {attempt.score}% Score
+                {attempt.score}% {t('quiz.quizScore')}
               </Badge>
-              <span className="text-xs text-gray-400">Attempt #{attempt.attemptNumber}</span>
+              <span className="text-xs text-gray-400">{t('quiz.attempt')}{attempt.attemptNumber}</span>
             </div>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4 text-emerald-500" />
-                <span className="text-gray-600">{attempt.correctCount}/{attempt.totalQuestions} correct</span>
+                <span className="text-gray-600">{attempt.correctCount}/{attempt.totalQuestions} {t('quiz.correct')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-blue-500" />
@@ -144,7 +146,7 @@ export default function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps
             </div>
             {attempt.submittedAt && (
               <p className="text-xs text-gray-400 mt-2">
-                Completed {new Date(attempt.submittedAt).toLocaleDateString()}
+                {t('quiz.completed')} {new Date(attempt.submittedAt).toLocaleDateString()}
               </p>
             )}
           </div>
@@ -165,7 +167,7 @@ export default function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps
               ) : (
                 <>
                   <Play className="w-4 h-4" />
-                  Start Quiz
+                  {t('quiz.startQuiz')}
                 </>
               )}
             </motion.button>
@@ -178,7 +180,7 @@ export default function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps
                 className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all"
               >
                 <CheckCircle className="w-4 h-4" />
-                Review
+                {t('quiz.review')}
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -192,7 +194,7 @@ export default function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps
                 ) : (
                   <>
                     <RotateCcw className="w-4 h-4" />
-                    Retake
+                    {t('quiz.retake')}
                   </>
                 )}
               </motion.button>

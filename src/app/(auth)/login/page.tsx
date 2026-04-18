@@ -91,12 +91,19 @@ export default function LoginPage() {
             transition={{ duration: 0.8, delay: 0.2 }}
           >
             {/* Logo */}
-            <div className="flex items-center mb-8">
-              <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mr-4">
-                <GraduationCap className="w-8 h-8 text-white" />
-              </div>
-              <h1 className="text-4xl font-bold text-white tracking-tight">SuperBook</h1>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="flex items-center justify-center gap-3 mb-6"
+            >
+              <img
+                src="/logo.svg"
+                alt="Super Book Logo"
+                className="h-16 w-auto bg-transparent object-contain transition-transform duration-300 hover:scale-105 hover:drop-shadow-[0_0_8px_rgba(99,102,241,0.4)]"
+              />
+              <h1 className="text-white text-2xl font-bold leading-none tracking-tight">SUPER BOOK</h1>
+            </motion.div>
 
             <h2 className="text-5xl xl:text-6xl font-bold text-white leading-tight mb-6">
               Learn Smarter,
@@ -139,12 +146,18 @@ export default function LoginPage() {
           className="w-full max-w-md relative z-10"
         >
           {/* Mobile Logo */}
-          <div className="lg:hidden flex items-center justify-center mb-8">
-            <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center mr-3">
-              <GraduationCap className="w-7 h-7 text-white" />
-            </div>
-            <h1 className="text-2xl font-bold text-white">SuperBook</h1>
-          </div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6 }}
+            className="lg:hidden flex items-center justify-center mb-6"
+          >
+            <img
+              src="/logo.svg"
+              alt="Super Book Logo"
+              className="h-16 w-auto bg-transparent object-contain transition-transform duration-300 hover:scale-105 hover:drop-shadow-[0_0_8px_rgba(99,102,241,0.4)]"
+            />
+          </motion.div>
 
           {/* Form Card */}
           <motion.div

@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface Course {
   _id: string;
@@ -23,6 +24,7 @@ interface Quiz {
 
 export default function TeacherQuizzesPage() {
   const { data: session, status } = useSession();
+  const { t } = useTranslation();
   const router = useRouter();
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
@@ -34,8 +36,8 @@ export default function TeacherQuizzesPage() {
     if (typeof course === 'object' && course !== null && 'title' in course) {
       return (course as Course).title;
     }
-    return 'Unknown Course';
-  }, []);
+    return t('teacherQuizzes.unknownCourse');
+  }, [t]);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -113,15 +115,15 @@ export default function TeacherQuizzesPage() {
           q._id === quizId ? { ...q, isPublished: !currentStatus } : q
         ));
       } else {
-        alert('Failed to update quiz');
+        alert(t('teacherQuizzes.failedUpdateQuiz'));
       }
     } catch {
-      alert('Error updating quiz');
+      alert(t('teacherQuizzes.errorUpdateQuiz'));
     }
   }, []);
 
   const handleDelete = useCallback(async (quizId: string) => {
-    if (!confirm('Are you sure you want to delete this quiz?')) return;
+    if (!confirm(t('teacherQuizzes.confirmDeleteQuiz'))) return;
 
     try {
       const response = await fetch(`/api/quizzes/${quizId}`, {
@@ -131,15 +133,15 @@ export default function TeacherQuizzesPage() {
       if (response.ok) {
         setQuizzes(prev => prev.filter((q) => q._id !== quizId));
       } else {
-        alert('Failed to delete quiz');
+        alert(t('teacherQuizzes.failedDeleteQuiz'));
       }
     } catch {
-      alert('Error deleting quiz');
+      alert(t('teacherQuizzes.errorDeleteQuiz'));
     }
   }, []);
 
   if (status === 'loading' || isLoading) {
-    return <div className="text-center py-8">Loading quizzes...</div>;
+    return <div className="text-center py-8">{t('teacherQuizzes.loadingQuizzes')}</div>;
   }
 
   return (
@@ -147,14 +149,14 @@ export default function TeacherQuizzesPage() {
       {/* Header - Mobile optimized */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Quiz Management</h1>
-          <p className="mt-1 text-sm text-gray-600">Create and manage quizzes for your courses.</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{t('teacherQuizzes.quizManagement')}</h1>
+          <p className="mt-1 text-sm text-gray-600">{t('teacherQuizzes.quizManagementDesc')}</p>
         </div>
         <a
           href="/dashboard/teacher/quizzes/create"
           className="inline-flex items-center justify-center px-4 py-2.5 sm:py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 touch-manipulation"
         >
-          + Create Quiz
+          {t('teacherQuizzes.createQuiz')}
         </a>
       </div>
 
@@ -168,24 +170,24 @@ export default function TeacherQuizzesPage() {
         {courses.length === 0 ? (
           <div className="bg-white overflow-hidden shadow rounded-lg">
             <div className="px-4 py-8 sm:p-6 text-center">
-              <p className="text-gray-500 mb-4">Create a course first to add quizzes.</p>
+              <p className="text-gray-500 mb-4">{t('teacherQuizzes.createCourseFirst')}</p>
               <a
                 href="/dashboard/teacher/courses/create"
                 className="inline-flex items-center justify-center px-4 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 touch-manipulation"
               >
-                Create Course
+                {t('teacherQuizzes.createCourse')}
               </a>
             </div>
           </div>
         ) : quizzes.length === 0 ? (
           <div className="bg-white overflow-hidden shadow rounded-lg">
             <div className="px-4 py-8 sm:p-6 text-center">
-              <p className="text-gray-500 mb-4">You haven&apos;t created any quizzes yet.</p>
+              <p className="text-gray-500 mb-4">{t('teacherQuizzes.noQuizzesYet')}</p>
               <a
                 href="/dashboard/teacher/quizzes/create"
                 className="inline-flex items-center justify-center px-4 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 touch-manipulation"
               >
-                Create Your First Quiz
+                {t('teacherQuizzes.createFirstQuiz')}
               </a>
             </div>
           </div>
@@ -207,7 +209,7 @@ export default function TeacherQuizzesPage() {
                           : 'bg-gray-100 text-gray-800'
                       }`}
                     >
-                      {quiz.isPublished ? 'Published' : 'Draft'}
+                      {quiz.isPublished ? t('teacherQuizzes.published') : t('teacherQuizzes.draft')}
                     </span>
                   </div>
 
@@ -216,8 +218,8 @@ export default function TeacherQuizzesPage() {
                   )}
 
                   <div className="flex items-center gap-4 text-sm text-gray-500">
-                    <span>{quiz.questions?.length || 0} questions</span>
-                    <span>{quiz.timeLimit} min</span>
+                    <span>{quiz.questions?.length || 0} {t('teacherQuizzes.questions')}</span>
+                    <span>{quiz.timeLimit} {t('teacherQuizzes.min')}</span>
                   </div>
 
                   <div className="flex gap-2 pt-2 border-t border-gray-100">
@@ -225,13 +227,13 @@ export default function TeacherQuizzesPage() {
                       onClick={() => handleTogglePublish(quiz._id, quiz.isPublished)}
                       className="flex-1 px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 touch-manipulation"
                     >
-                      {quiz.isPublished ? 'Unpublish' : 'Publish'}
+                      {quiz.isPublished ? t('teacherQuizzes.unpublish') : t('teacherQuizzes.publish')}
                     </button>
                     <button
                       onClick={() => handleDelete(quiz._id)}
                       className="px-3 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 touch-manipulation"
                     >
-                      Delete
+                      {t('teacherQuizzes.delete')}
                     </button>
                   </div>
                 </div>
@@ -243,12 +245,12 @@ export default function TeacherQuizzesPage() {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quiz</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Questions</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('teacherQuizzes.tableQuiz')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('teacherQuizzes.tableCourse')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('teacherQuizzes.tableQuestions')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('teacherQuizzes.tableTime')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('teacherQuizzes.tableStatus')}</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t('teacherQuizzes.tableActions')}</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -267,7 +269,7 @@ export default function TeacherQuizzesPage() {
                         {quiz.questions?.length || 0}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {quiz.timeLimit} min
+                        {quiz.timeLimit} {t('teacherQuizzes.min')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
@@ -277,7 +279,7 @@ export default function TeacherQuizzesPage() {
                               : 'bg-gray-100 text-gray-800'
                           }`}
                         >
-                          {quiz.isPublished ? 'Published' : 'Draft'}
+                          {quiz.isPublished ? t('teacherQuizzes.published') : t('teacherQuizzes.draft')}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -285,13 +287,13 @@ export default function TeacherQuizzesPage() {
                           onClick={() => handleTogglePublish(quiz._id, quiz.isPublished)}
                           className="text-indigo-600 hover:text-indigo-900 mr-4"
                         >
-                          {quiz.isPublished ? 'Unpublish' : 'Publish'}
+                          {quiz.isPublished ? t('teacherQuizzes.unpublish') : t('teacherQuizzes.publish')}
                         </button>
                         <button
                           onClick={() => handleDelete(quiz._id)}
                           className="text-red-600 hover:text-red-900"
                         >
-                          Delete
+                          {t('teacherQuizzes.delete')}
                         </button>
                       </td>
                     </tr>

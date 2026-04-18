@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/hooks/useTranslation';
 import CourseCard from '@/components/dashboard/CourseCard';
 
 interface Enrollment {
@@ -26,6 +27,7 @@ interface Enrollment {
 export default function StudentCoursesPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { t } = useTranslation();
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -61,7 +63,7 @@ export default function StudentCoursesPage() {
   };
 
   const handleDrop = async (enrollmentId: string) => {
-    if (!confirm('Are you sure you want to drop this course?')) return;
+    if (!confirm(t('courses.dropCourse'))) return;
 
     try {
       const response = await fetch(`/api/enrollments/${enrollmentId}`, {
@@ -71,31 +73,31 @@ export default function StudentCoursesPage() {
         setEnrollments(enrollments.filter(e => e._id !== enrollmentId));
       } else {
         const data = await response.json();
-        alert(data.message || 'Failed to drop course');
+        alert(data.message || t('courses.dropFailed'));
       }
     } catch (err) {
-      alert('Error dropping course');
+      alert(t('courses.dropFailed'));
     }
   };
 
   if (status === 'loading' || isLoading) {
-    return <div className="text-center py-8">Loading...</div>;
+    return <div className="text-center py-8">{t('common.loading')}</div>;
   }
 
   return (
     <div>
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">My Courses</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('courses.myCourses')}</h1>
           <p className="mt-2 text-gray-600">
-            Continue your learning journey.
+            {t('courses.continueLearning')}
           </p>
         </div>
         <a
           href="/dashboard/student/browse"
           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
         >
-          Browse More Courses
+          {t('courses.browseMore')}
         </a>
       </div>
 
@@ -107,16 +109,17 @@ export default function StudentCoursesPage() {
 
       <div className="mt-8">
         {enrollments.length === 0 ? (
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="px-4 py-8 sm:p-6 text-center">
-              <p className="text-gray-500 mb-4">You haven&apos;t enrolled in any courses yet.</p>
-              <a
-                href="/dashboard/student/browse"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
-              >
-                Browse Available Courses
-              </a>
-            </div>
+          <div className="text-center py-12">
+            <p className="text-gray-500 mb-4">{t('courses.noCourses')}</p>
+            <p className="text-sm text-gray-400 mb-4">
+              {t('courses.startLearning')}
+            </p>
+            <a
+              href="/dashboard/student/browse"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+            >
+              {t('courses.browseMore')}
+            </a>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

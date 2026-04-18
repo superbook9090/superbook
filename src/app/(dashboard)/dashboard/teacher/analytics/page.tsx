@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface CourseStat {
   _id: string;
@@ -36,6 +37,7 @@ interface TeacherStats {
 
 export default function TeacherAnalyticsPage() {
   const { data: session, status } = useSession();
+  const { t } = useTranslation();
   const router = useRouter();
   const [stats, setStats] = useState<TeacherStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -73,7 +75,7 @@ export default function TeacherAnalyticsPage() {
   };
 
   if (status === 'loading' || isLoading) {
-    return <div className="text-center py-8">Loading analytics...</div>;
+    return <div className="text-center py-8">{t('analytics.loadingAnalytics')}</div>;
   }
 
   if (!stats) {
@@ -84,7 +86,7 @@ export default function TeacherAnalyticsPage() {
           onClick={fetchStats}
           className="px-4 py-2 bg-green-600 text-white rounded-md"
         >
-          Retry
+          {t('analytics.retry')}
         </button>
       </div>
     );
@@ -92,50 +94,50 @@ export default function TeacherAnalyticsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900">My Analytics</h1>
+      <h1 className="text-2xl font-bold text-gray-900">{t('analytics.myAnalytics')}</h1>
       <p className="mt-2 text-gray-600">
-        Track your courses, students, and quiz performance.
+        {t('analytics.analyticsDesc')}
       </p>
 
       {/* Overview Stats */}
       <div className="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <div className="bg-white rounded-lg shadow p-4 text-center">
           <p className="text-3xl font-bold text-green-600">{stats.overview.totalCourses}</p>
-          <p className="text-sm text-gray-600">Total Courses</p>
+          <p className="text-sm text-gray-600">{t('analytics.totalCourses')}</p>
         </div>
         <div className="bg-white rounded-lg shadow p-4 text-center">
           <p className="text-3xl font-bold text-blue-600">{stats.overview.publishedCourses}</p>
-          <p className="text-sm text-gray-600">Published</p>
+          <p className="text-sm text-gray-600">{t('analytics.published')}</p>
         </div>
         <div className="bg-white rounded-lg shadow p-4 text-center">
           <p className="text-3xl font-bold text-indigo-600">{stats.overview.totalStudents}</p>
-          <p className="text-sm text-gray-600">Total Students</p>
+          <p className="text-sm text-gray-600">{t('analytics.totalStudents')}</p>
         </div>
         <div className="bg-white rounded-lg shadow p-4 text-center">
           <p className="text-3xl font-bold text-purple-600">{stats.overview.totalQuizzes}</p>
-          <p className="text-sm text-gray-600">Quizzes</p>
+          <p className="text-sm text-gray-600">{t('analytics.quizzes')}</p>
         </div>
         <div className="bg-white rounded-lg shadow p-4 text-center">
           <p className="text-3xl font-bold text-pink-600">{stats.overview.totalAttempts}</p>
-          <p className="text-sm text-gray-600">Quiz Attempts</p>
+          <p className="text-sm text-gray-600">{t('analytics.quizAttempts')}</p>
         </div>
         <div className="bg-white rounded-lg shadow p-4 text-center">
           <p className="text-3xl font-bold text-orange-600">{stats.overview.averageScore}%</p>
-          <p className="text-sm text-gray-600">Avg Score</p>
+          <p className="text-sm text-gray-600">{t('analytics.avgScore')}</p>
         </div>
       </div>
 
       {/* Course Breakdown */}
       <div className="mt-8">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Course Performance</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('analytics.coursePerformance')}</h2>
         {stats.courses.length === 0 ? (
           <div className="bg-white rounded-lg shadow p-8 text-center">
-            <p className="text-gray-500 mb-4">No courses yet. Create your first course!</p>
+            <p className="text-gray-500 mb-4">{t('analytics.noCoursesYet')}</p>
             <a
               href="/dashboard/teacher/courses/create"
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
             >
-              Create Course
+              {t('analytics.createCourse')}
             </a>
           </div>
         ) : (
@@ -144,22 +146,22 @@ export default function TeacherAnalyticsPage() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Course
+                    {t('analytics.course')}
                   </th>
                   <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Students
+                    {t('analytics.students')}
                   </th>
                   <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Quizzes
+                    {t('analytics.quizzes')}
                   </th>
                   <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Attempts
+                    {t('analytics.attempts')}
                   </th>
                   <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Avg Score
+                    {t('analytics.avgScore')}
                   </th>
                   <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                    {t('analytics.status')}
                   </th>
                 </tr>
               </thead>
@@ -195,7 +197,7 @@ export default function TeacherAnalyticsPage() {
                           ? 'bg-green-100 text-green-800'
                           : 'bg-gray-100 text-gray-800'
                       }`}>
-                        {course.isPublished ? 'Published' : 'Draft'}
+                        {course.isPublished ? t('analytics.published') : t('analytics.draft')}
                       </span>
                     </td>
                   </tr>
@@ -208,24 +210,24 @@ export default function TeacherAnalyticsPage() {
 
       {/* Top Students */}
       <div className="mt-8">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Top Performing Students</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('analytics.topPerformingStudents')}</h2>
         {stats.topStudents.length === 0 ? (
           <div className="bg-white rounded-lg shadow p-6 text-center">
-            <p className="text-gray-500">No quiz attempts yet.</p>
+            <p className="text-gray-500">{t('analytics.noQuizAttempts')}</p>
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow overflow-hidden">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Student
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {t('analytics.student')}
                   </th>
                   <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Attempts
+                    {t('analytics.attempts')}
                   </th>
                   <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Average Score
+                    {t('analytics.averageScore')}
                   </th>
                 </tr>
               </thead>

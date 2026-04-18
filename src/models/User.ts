@@ -8,6 +8,8 @@ export interface IUser extends Document {
   role: 'student' | 'teacher' | 'admin';
   avatar?: string;
   isVerified: boolean;
+  isSuspended: boolean;
+  suspendedReason?: string;
   provider?: 'credentials' | 'google';
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
@@ -20,6 +22,8 @@ const userSchema = new Schema<IUser>(
     role: { type: String, enum: ['student', 'teacher', 'admin'], default: 'student' },
     avatar: String,
     isVerified: { type: Boolean, default: false },
+    isSuspended: { type: Boolean, default: false },
+    suspendedReason: String,
     provider: { type: String, enum: ['credentials', 'google'], default: 'credentials' },
   },
   { timestamps: true }

@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface Question {
   question: string;
@@ -28,6 +29,7 @@ export default function TakeQuizPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const attemptId = searchParams.get('attemptId');
+  const { t } = useTranslation();
 
   const [attempt, setAttempt] = useState<Attempt | null>(null);
   const [answers, setAnswers] = useState<{ [key: number]: number }>({});
@@ -105,7 +107,7 @@ export default function TakeQuizPage() {
   const handleSubmit = useCallback(async (autoSubmit = false) => {
     if (!attempt) return;
 
-    if (!autoSubmit && !confirm('Are you sure you want to submit? You cannot change your answers after submission.')) {
+    if (!autoSubmit && !confirm(t('quiz.confirmSubmit'))) {
       return;
     }
 
@@ -191,11 +193,11 @@ export default function TakeQuizPage() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{attempt.quiz.title}</h1>
             <p className="text-gray-600 mt-1">
-              Question {currentQuestion + 1} of {questions.length}
+              {t('quiz.question')} {currentQuestion + 1} {t('quiz.of')} {questions.length}
             </p>
           </div>
           <div className={`text-right ${timeRemaining < 60 ? 'text-red-600' : 'text-gray-900'}`}>
-            <p className="text-sm text-gray-600">Time Remaining</p>
+            <p className="text-sm text-gray-600">{t('quiz.timeRemaining')}</p>
             <p className="text-2xl font-bold font-mono">{formatTime(timeRemaining)}</p>
           </div>
         </div>
@@ -209,8 +211,8 @@ export default function TakeQuizPage() {
             />
           </div>
           <div className="flex justify-between text-sm text-gray-600 mt-1">
-            <span>{answeredCount} answered</span>
-            <span>{questions.length - answeredCount} remaining</span>
+            <span>{answeredCount} {t('quiz.answered')}</span>
+            <span>{questions.length - answeredCount} {t('quiz.remaining')}</span>
           </div>
         </div>
       </div>
@@ -256,7 +258,7 @@ export default function TakeQuizPage() {
           disabled={currentQuestion === 0}
           className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Previous
+          {t('common.previous')}
         </button>
 
         {/* Question dots */}
@@ -281,7 +283,7 @@ export default function TakeQuizPage() {
             onClick={() => setCurrentQuestion((prev) => Math.min(questions.length - 1, prev + 1))}
             className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
           >
-            Next
+            {t('common.next')}
           </button>
         ) : (
           <button
@@ -289,7 +291,7 @@ export default function TakeQuizPage() {
             disabled={isSubmitting}
             className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
           >
-            {isSubmitting ? 'Submitting...' : 'Submit Quiz'}
+            {isSubmitting ? t('quiz.submitting') : t('quiz.submit')}
           </button>
         )}
       </div>
@@ -298,7 +300,7 @@ export default function TakeQuizPage() {
       {timeRemaining < 300 && (
         <div className="mt-4 bg-red-50 border-l-4 border-red-400 p-4">
           <p className="text-sm text-red-700">
-            Less than 5 minutes remaining! Please submit your answers soon.
+            {t('quiz.autoSubmitWarning')}
           </p>
         </div>
       )}

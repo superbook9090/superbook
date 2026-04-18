@@ -7,6 +7,7 @@ import TeacherSidebar from '@/components/dashboard/TeacherSidebar';
 import MobileNav from '@/components/dashboard/MobileNav';
 import MobileBottomNav from '@/components/dashboard/MobileBottomNav';
 import SessionProvider from '@/components/dashboard/SessionProvider';
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
 
 const studentNavigation = [
   { name: 'Dashboard', href: '/dashboard/student', icon: 'LayoutDashboard' },
@@ -27,6 +28,11 @@ const teacherNavigation = [
 
 const adminNavigation = [
   { name: 'Users', href: '/dashboard/admin/users', icon: 'Users' },
+  { name: 'Courses', href: '/dashboard/admin/courses', icon: 'BookOpen' },
+  { name: 'Quizzes', href: '/dashboard/admin/quizzes', icon: 'HelpCircle' },
+  { name: 'Blogs', href: '/dashboard/admin/blogs', icon: 'Library' },
+  { name: 'Analytics', href: '/dashboard/admin/analytics', icon: 'BarChart3' },
+  { name: 'Settings', href: '/dashboard/admin/settings', icon: 'User' },
 ];
 
 export default async function DashboardLayout({
@@ -65,13 +71,7 @@ export default async function DashboardLayout({
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-h-screen md:min-h-0 md:h-screen overflow-hidden">
         {/* Desktop Header - Sticky */}
-        <header className="hidden md:block flex-shrink-0 bg-white shadow-sm border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <h1 className="text-xl lg:text-2xl font-semibold text-gray-900">
-              {isTeacherOrAdmin ? 'Teacher Dashboard' : 'Student Dashboard'}
-            </h1>
-          </div>
-        </header>
+        <DashboardHeader isTeacherOrAdmin={isTeacherOrAdmin} />
 
         {/* Main Content - Scrollable */}
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-4 sm:p-6 lg:p-8 pb-24 md:pb-8">

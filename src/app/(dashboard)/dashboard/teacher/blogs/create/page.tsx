@@ -40,6 +40,7 @@ export default function CreateBlogPage() {
     title: '',
     topic: '',
     content: '',
+    language: 'en',
   });
   const [error, setError] = useState('');
 
@@ -156,6 +157,22 @@ export default function CreateBlogPage() {
                   {topic}
                 </option>
               ))}
+            </select>
+          </div>
+
+          {/* Language */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <BookOpen className="w-4 h-4 inline mr-2" />
+              Language
+            </label>
+            <select
+              value={formData.language}
+              onChange={(e) => setFormData({ ...formData, language: e.target.value })}
+              className="w-full px-4 py-3 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+            >
+              <option value="en">English</option>
+              <option value="hi">हिंदी</option>
             </select>
           </div>
 

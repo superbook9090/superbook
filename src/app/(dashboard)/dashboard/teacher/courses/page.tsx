@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface Course {
   _id: string;
@@ -19,6 +20,7 @@ interface Course {
 
 export default function TeacherCoursesPage() {
   const { data: session, status } = useSession();
+  const { t } = useTranslation();
   const router = useRouter();
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -46,32 +48,32 @@ export default function TeacherCoursesPage() {
       if (response.ok) {
         setCourses(data.courses || []);
       } else {
-        setError(data.message || 'Failed to load courses');
+        setError(data.message || t('teacherCourses.failedLoadCourses'));
       }
     } catch (err) {
-      setError('Error loading courses');
+      setError(t('teacherCourses.errorLoadingCourses'));
     } finally {
       setIsLoading(false);
     }
   };
 
   if (status === 'loading' || isLoading) {
-    return <div className="text-center py-8">Loading courses...</div>;
+    return <div className="text-center py-8">{t('teacherCourses.loadingCourses')}</div>
   }
 
   return (
     <div>
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">My Courses</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('teacherCourses.myCourses')}</h1>
         <a
           href="/dashboard/teacher/courses/create"
           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
         >
-          Create New Course
+          {t('teacherCourses.createNewCourse')}
         </a>
       </div>
       <p className="mt-2 text-gray-600">
-        Manage your courses, lessons, and enrolled students.
+        {t('teacherCourses.coursesDesc')}
       </p>
 
       {error && (
@@ -84,12 +86,12 @@ export default function TeacherCoursesPage() {
         {courses.length === 0 ? (
           <div className="bg-white overflow-hidden shadow rounded-lg">
             <div className="px-4 py-8 sm:p-6 text-center">
-              <p className="text-gray-500 mb-4">You haven&apos;t created any courses yet.</p>
+              <p className="text-gray-500 mb-4">{t('teacherCourses.noCoursesYet')}</p>
               <a
                 href="/dashboard/teacher/courses/create"
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
               >
-                Create Your First Course
+                {t('teacherCourses.createFirstCourse')}
               </a>
             </div>
           </div>
@@ -118,17 +120,17 @@ export default function TeacherCoursesPage() {
                         ? 'bg-green-100 text-green-800'
                         : 'bg-gray-100 text-gray-800'
                     }`}>
-                      {course.isPublished ? 'Published' : 'Draft'}
+                      {course.isPublished ? t('teacherCourses.published') : t('teacherCourses.draft')}
                     </span>
                     {course.category && (
                       <span className="text-xs text-gray-500">{course.category}</span>
                     )}
                   </div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">{course.title}</h3>
-                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">{course.description || 'No description'}</p>
+                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">{course.description || t('teacherCourses.noDescription')}</p>
                   <div className="flex items-center justify-between text-sm text-gray-500">
-                    <span>{course.enrolledStudents?.length || 0} students enrolled</span>
-                    <span>{course.price > 0 ? `₹${course.price}` : 'Free'}</span>
+                    <span>{course.enrolledStudents?.length || 0} {t('teacherCourses.studentsEnrolled')}</span>
+                    <span>{course.price > 0 ? `₹${course.price}` : t('teacherCourses.free')}</span>
                   </div>
                 </div>
               </div>

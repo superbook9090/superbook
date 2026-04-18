@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { useTranslation } from '@/hooks/useTranslation';
 import {
   Heart,
   ArrowLeft,
@@ -31,22 +32,21 @@ interface Favorite {
   blog: Blog;
 }
 
+interface FeatureToggles {
+  enableBlogs: boolean;
+  enableQuizzes: boolean;
+  enableCourses: boolean;
+  enableAnalytics: boolean;
+}
+
 export default function FavoritesPage() {
   const { data: session, status } = useSession();
+  const { t } = useTranslation();
   const router = useRouter();
   const [favorites, setFavorites] = useState<Favorite[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login');
-      return;
-    }
-
-    if (status === 'authenticated') {
-      fetchFavorites();
-    }
-  }, [status, router]);
+  const [featureEnabled, setFeatureEnabled] = useState(true);
+  const [checkingFeature, setCheckingFeature] = useState(true);
 
   const fetchFavorites = async () => {
     try {
@@ -75,6 +75,43 @@ export default function FavoritesPage() {
     }
   };
 
+  useEffect(() => {
+    // Check if blogs feature is enabled
+    fetch('/api/settings')
+      .then(res => res.json())
+      .then(data => {
+        if (!data.featureToggles?.enableBlogs) {
+          setFeatureEnabled(false);
+          router.push('/dashboard/student');
+        }
+      })
+      .catch(err => console.error('Error fetching settings:', err))
+      .finally(() => setCheckingFeature(false));
+  }, [router]);
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login');
+      return;
+    }
+
+    if (status === 'authenticated' && featureEnabled) {
+      fetchFavorites();
+    }
+  }, [status, router, featureEnabled]);
+
+  if (checkingFeature) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="w-12 h-12 border-4 border-rose-200 border-t-rose-500 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!featureEnabled) {
+    return null; // Will redirect
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -97,14 +134,14 @@ export default function FavoritesPage() {
             className="inline-flex items-center text-gray-500 hover:text-indigo-600 mb-2"
           >
             <ArrowLeft className="w-4 h-4 mr-1" />
-            Back to Blogs
+            {t('favorites.backToBlogs')}
           </Link>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-2">
             <Bookmark className="w-7 h-7 text-rose-500" />
-            My Favorites
+            {t('favorites.myFavorites')}
           </h1>
           <p className="text-gray-500 mt-1">
-            Your saved blog posts for quick access
+            {t('favorites.favoritesDesc')}
           </p>
         </div>
       </motion.div>
@@ -122,7 +159,7 @@ export default function FavoritesPage() {
           </div>
           <div>
             <p className="text-3xl font-bold">{favorites.length}</p>
-            <p className="text-rose-100">Saved Articles</p>
+            <p className="text-rose-100">{t('favorites.savedArticles')}</p>
           </div>
         </div>
       </motion.div>
@@ -138,17 +175,17 @@ export default function FavoritesPage() {
           <div className="col-span-full text-center py-16 bg-white rounded-2xl shadow-sm">
             <Bookmark className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              No favorites yet
+              {t('favorites.noFavoritesYet')}
             </h3>
             <p className="text-gray-500 mb-6">
-              Start exploring blogs and save your favorites!
+              {t('favorites.startExploring')}
             </p>
             <Link
               href="/dashboard/student/blogs"
               className="inline-flex items-center px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-medium rounded-xl shadow-md hover:shadow-lg transition-all"
             >
               <BookOpen className="w-5 h-5 mr-2" />
-              Explore Blogs
+              {t('favorites.exploreBlogs')}
             </Link>
           </div>
         ) : (
@@ -177,7 +214,7 @@ export default function FavoritesPage() {
                     <button
                       onClick={() => removeFavorite(favorite._id, blog._id)}
                       className="p-2 rounded-full text-rose-500 hover:bg-rose-50 transition-colors"
-                      title="Remove from favorites"
+                      title={t('favorites.removeFromFavorites')}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -197,7 +234,7 @@ export default function FavoritesPage() {
                   <div className="flex items-center justify-between text-sm text-gray-500">
                     <span className="flex items-center">
                       <User className="w-4 h-4 mr-1" />
-                      {blog.author?.name || 'Teacher'}
+                      {blog.author?.name || t('blog.teacher')}
                     </span>
                     <span className="flex items-center">
                       <Calendar className="w-4 h-4 mr-1" />
@@ -210,7 +247,7 @@ export default function FavoritesPage() {
                     href={`/dashboard/student/blogs/${blog._id}`}
                     className="mt-4 inline-flex items-center text-indigo-600 font-medium hover:text-indigo-700 transition-colors"
                   >
-                    Read Article
+                    {t('favorites.readArticle')}
                     <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
                   </Link>
                 </div>

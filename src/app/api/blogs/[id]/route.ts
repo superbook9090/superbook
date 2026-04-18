@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import Blog from '@/models/Blog';
+import { requireFeature } from '@/lib/settingsHelpers';
 import mongoose from 'mongoose';
 
 // GET /api/blogs/[id] - Get a single blog
@@ -12,6 +13,11 @@ export async function GET(
 ) {
   try {
     await dbConnect();
+
+    // Check if blogs feature is enabled
+    const featureCheck = await requireFeature('enableBlogs');
+    if (featureCheck) return featureCheck;
+
     const { id } = await params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -51,22 +57,18 @@ export async function GET(
   }
 }
 
-// PATCH /api/blogs/[id] - Update a blog (author only)
+// PATCH /api/blogs/[id] - Update a blog
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { message: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
     await dbConnect();
+
+    // Check if blogs feature is enabled
+    const featureCheck = await requireFeature('enableBlogs');
+    if (featureCheck) return featureCheck;
+
     const { id } = await params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -82,6 +84,15 @@ export async function PATCH(
       return NextResponse.json(
         { message: 'Blog not found' },
         { status: 404 }
+      );
+    }
+
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user) {
+      return NextResponse.json(
+        { message: 'Unauthorized' },
+        { status: 401 }
       );
     }
 
@@ -113,22 +124,18 @@ export async function PATCH(
   }
 }
 
-// DELETE /api/blogs/[id] - Delete a blog (author only)
+// DELETE /api/blogs/[id] - Delete a blog
 export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { message: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
     await dbConnect();
+
+    // Check if blogs feature is enabled
+    const featureCheck = await requireFeature('enableBlogs');
+    if (featureCheck) return featureCheck;
+
     const { id } = await params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -144,6 +151,15 @@ export async function DELETE(
       return NextResponse.json(
         { message: 'Blog not found' },
         { status: 404 }
+      );
+    }
+
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user) {
+      return NextResponse.json(
+        { message: 'Unauthorized' },
+        { status: 401 }
       );
     }
 

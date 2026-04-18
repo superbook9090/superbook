@@ -2,10 +2,20 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import User from '@/models/User';
+import { isRegistrationAllowed } from '@/lib/settingsHelpers';
 
 export async function POST(request: Request) {
   try {
     await dbConnect();
+
+    // Check if registration is allowed
+    const registrationAllowed = await isRegistrationAllowed();
+    if (!registrationAllowed) {
+      return NextResponse.json(
+        { message: 'Registration is currently disabled by admin' },
+        { status: 403 }
+      );
+    }
 
     const { name, email, password, role = 'student' } = await request.json();
 

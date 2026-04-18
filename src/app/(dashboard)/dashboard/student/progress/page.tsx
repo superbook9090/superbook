@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface CourseProgress {
   enrollment: {
@@ -49,6 +50,7 @@ interface OverallStats {
 
 export default function StudentProgressPage() {
   const { data: session, status } = useSession();
+  const { t } = useTranslation();
   const router = useRouter();
   const [progressData, setProgressData] = useState<CourseProgress[]>([]);
   const [overallStats, setOverallStats] = useState<OverallStats | null>(null);
@@ -75,10 +77,10 @@ export default function StudentProgressPage() {
         setProgressData(data.progress || []);
         setOverallStats(data.overallStats || null);
       } else {
-        setError(data.message || 'Failed to load progress');
+        setError(data.message || t('progress.failedLoadProgress'));
       }
     } catch (err) {
-      setError('Error loading progress');
+      setError(t('progress.errorLoadingProgress'));
     } finally {
       setIsLoading(false);
     }
@@ -91,14 +93,14 @@ export default function StudentProgressPage() {
   };
 
   if (status === 'loading' || isLoading) {
-    return <div className="text-center py-8">Loading progress...</div>;
+    return <div className="text-center py-8">{t('progress.loadingProgress')}</div>
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900">My Progress</h1>
+      <h1 className="text-2xl font-bold text-gray-900">{t('progress.myProgress')}</h1>
       <p className="mt-2 text-gray-600">
-        Track your learning journey and quiz performance.
+        {t('progress.progressDesc')}
       </p>
 
       {error && (
@@ -112,43 +114,43 @@ export default function StudentProgressPage() {
         <div className="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           <div className="bg-white rounded-lg shadow p-4 text-center">
             <p className="text-2xl font-bold text-indigo-600">{overallStats.totalCourses}</p>
-            <p className="text-sm text-gray-600">Courses Enrolled</p>
+            <p className="text-sm text-gray-600">{t('progress.coursesEnrolled')}</p>
           </div>
           <div className="bg-white rounded-lg shadow p-4 text-center">
             <p className="text-2xl font-bold text-green-600">{overallStats.completedCourses}</p>
-            <p className="text-sm text-gray-600">Completed</p>
+            <p className="text-sm text-gray-600">{t('progress.completed')}</p>
           </div>
           <div className="bg-white rounded-lg shadow p-4 text-center">
             <p className="text-2xl font-bold text-yellow-600">{overallStats.inProgressCourses}</p>
-            <p className="text-sm text-gray-600">In Progress</p>
+            <p className="text-sm text-gray-600">{t('progress.inProgress')}</p>
           </div>
           <div className="bg-white rounded-lg shadow p-4 text-center">
             <p className="text-2xl font-bold text-indigo-600">{overallStats.averageProgress}%</p>
-            <p className="text-sm text-gray-600">Avg Progress</p>
+            <p className="text-sm text-gray-600">{t('progress.avgProgress')}</p>
           </div>
           <div className="bg-white rounded-lg shadow p-4 text-center">
             <p className="text-2xl font-bold text-blue-600">{overallStats.totalQuizzesTaken}</p>
-            <p className="text-sm text-gray-600">Quizzes Taken</p>
+            <p className="text-sm text-gray-600">{t('progress.quizzesTaken')}</p>
           </div>
           <div className="bg-white rounded-lg shadow p-4 text-center">
             <p className="text-2xl font-bold text-purple-600">{overallStats.overallAverageScore}%</p>
-            <p className="text-sm text-gray-600">Avg Quiz Score</p>
+            <p className="text-sm text-gray-600">{t('progress.avgQuizScore')}</p>
           </div>
         </div>
       )}
 
       {/* Course Progress */}
       <div className="mt-8">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Course Progress</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('progress.courseProgress')}</h2>
 
         {progressData.length === 0 ? (
           <div className="bg-white rounded-lg shadow p-8 text-center">
-            <p className="text-gray-500 mb-4">No progress data yet. Start by enrolling in a course!</p>
+            <p className="text-gray-500 mb-4">{t('progress.noProgressData')}</p>
             <a
               href="/dashboard/student/browse"
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
             >
-              Browse Courses
+              {t('progress.browseCourses')}
             </a>
           </div>
         ) : (
@@ -187,14 +189,14 @@ export default function StudentProgressPage() {
                             {item.enrollment.status.charAt(0).toUpperCase() + item.enrollment.status.slice(1)}
                           </span>
                           <span className="text-gray-500">
-                            Enrolled: {new Date(item.enrollment.enrolledAt).toLocaleDateString()}
+                            {t('progress.enrolled')}: {new Date(item.enrollment.enrolledAt).toLocaleDateString()}
                           </span>
                         </div>
                       </div>
                     </div>
                     <div className="text-right">
                       <p className="text-3xl font-bold text-indigo-600">{item.enrollment.progress}%</p>
-                      <p className="text-sm text-gray-500">Complete</p>
+                      <p className="text-sm text-gray-500">{t('progress.complete')}</p>
                     </div>
                   </div>
 
@@ -218,19 +220,19 @@ export default function StudentProgressPage() {
                   <div className="mt-4 grid grid-cols-4 gap-4 bg-gray-50 rounded-lg p-4">
                     <div className="text-center">
                       <p className="text-lg font-semibold text-gray-900">{item.quizStats.total}</p>
-                      <p className="text-xs text-gray-600">Total Quizzes</p>
+                      <p className="text-xs text-gray-600">{t('progress.totalQuizzes')}</p>
                     </div>
                     <div className="text-center">
                       <p className="text-lg font-semibold text-gray-900">{item.quizStats.completed}</p>
-                      <p className="text-xs text-gray-600">Completed</p>
+                      <p className="text-xs text-gray-600">{t('progress.completed')}</p>
                     </div>
                     <div className="text-center">
                       <p className="text-lg font-semibold text-gray-900">{item.quizStats.averageScore}%</p>
-                      <p className="text-xs text-gray-600">Avg Score</p>
+                      <p className="text-xs text-gray-600">{t('progress.avgScore')}</p>
                     </div>
                     <div className="text-center">
                       <p className="text-lg font-semibold text-gray-900">{item.quizStats.highestScore}%</p>
-                      <p className="text-xs text-gray-600">Best Score</p>
+                      <p className="text-xs text-gray-600">{t('progress.bestScore')}</p>
                     </div>
                   </div>
 
@@ -241,14 +243,14 @@ export default function StudentProgressPage() {
                     )}
                     className="mt-4 text-indigo-600 hover:text-indigo-800 text-sm font-medium"
                   >
-                    {selectedCourse === item.enrollment._id ? 'Hide Details' : 'View Quiz History'}
+                    {selectedCourse === item.enrollment._id ? t('progress.hideDetails') : t('progress.viewQuizHistory')}
                   </button>
                 </div>
 
                 {/* Quiz History */}
                 {selectedCourse === item.enrollment._id && item.attempts.length > 0 && (
                   <div className="border-t border-gray-200 bg-gray-50 px-6 py-4">
-                    <h4 className="text-sm font-semibold text-gray-900 mb-3">Quiz Attempts</h4>
+                    <h4 className="text-sm font-semibold text-gray-900 mb-3">{t('progress.quizAttempts')}</h4>
                     <div className="space-y-2">
                       {item.attempts.map((attempt) => (
                         <div
@@ -258,7 +260,7 @@ export default function StudentProgressPage() {
                           <div>
                             <p className="font-medium text-gray-900">{attempt.quizTitle}</p>
                             <p className="text-xs text-gray-500">
-                              Attempt #{attempt.attemptNumber} • {formatTime(attempt.timeTaken)}
+                              {t('progress.attempt')} #{attempt.attemptNumber} • {formatTime(attempt.timeTaken)}
                             </p>
                           </div>
                           <div className="text-right">
@@ -268,7 +270,7 @@ export default function StudentProgressPage() {
                               {attempt.score}%
                             </p>
                             <p className="text-xs text-gray-500">
-                              {attempt.correctCount}/{attempt.totalQuestions} correct
+                              {attempt.correctCount}/{attempt.totalQuestions} {t('progress.correct')}
                             </p>
                           </div>
                         </div>

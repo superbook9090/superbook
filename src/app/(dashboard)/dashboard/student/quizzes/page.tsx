@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/hooks/useTranslation';
 import QuizCard from '@/components/dashboard/QuizCard';
 
 interface Quiz {
@@ -32,6 +33,7 @@ interface Attempt {
 export default function StudentQuizzesPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { t } = useTranslation();
   const [availableQuizzes, setAvailableQuizzes] = useState<Quiz[]>([]);
   const [attempts, setAttempts] = useState<Attempt[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -61,7 +63,7 @@ export default function StudentQuizzesPage() {
 
       if (!attemptsRes.ok) {
         console.error('Quiz attempts error:', attemptsData);
-        setError(attemptsData.message || 'Failed to load quiz attempts');
+        setError(attemptsData.message || t('errors.failedLoadQuizAttempts'));
         setIsLoading(false);
         return;
       }
@@ -72,7 +74,7 @@ export default function StudentQuizzesPage() {
 
       if (!enrollmentsRes.ok) {
         console.error('Enrollments error:', enrollmentsData);
-        setError(enrollmentsData.message || 'Failed to load enrollments');
+        setError(enrollmentsData.message || t('errors.failedLoadEnrollments'));
         setIsLoading(false);
         return;
       }
@@ -101,7 +103,7 @@ export default function StudentQuizzesPage() {
 
       if (!quizzesRes.ok) {
         console.error('Quizzes error:', quizzesData);
-        setError(quizzesData.message || 'Failed to load quizzes');
+        setError(quizzesData.message || t('errors.failedLoadQuizzes'));
         setIsLoading(false);
         return;
       }
@@ -124,7 +126,7 @@ export default function StudentQuizzesPage() {
       setAvailableQuizzes(relevantQuizzes);
     } catch (err) {
       console.error('Error in fetchData:', err);
-      setError('Error loading quizzes: ' + (err instanceof Error ? err.message : 'Unknown error'));
+      setError(t('errors.errorLoadingQuizzes') + ': ' + (err instanceof Error ? err.message : t('errors.unknownError')));
     } finally {
       setIsLoading(false);
     }
@@ -144,10 +146,10 @@ export default function StudentQuizzesPage() {
         // Navigate to quiz taking page
         router.push(`/dashboard/student/quizzes/take?attemptId=${data.attempt._id}`);
       } else {
-        alert(data.message || 'Failed to start quiz');
+        alert(data.message || t('errors.failedStartQuiz'));
       }
     } catch (_err) {
-      alert('Error starting quiz');
+      alert(t('errors.errorStartingQuiz'));
     }
   }, [router]);
 
@@ -157,14 +159,14 @@ export default function StudentQuizzesPage() {
   );
 
   if (status === 'loading' || isLoading) {
-    return <div className="text-center py-8">Loading...</div>;
+    return <div className="text-center py-8">{t('common.loading')}</div>;
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900">My Quizzes</h1>
+      <h1 className="text-2xl font-bold text-gray-900">{t('quiz.myQuizzes')}</h1>
       <p className="mt-2 text-gray-600">
-        Take quizzes and track your progress.
+        {t('quiz.quizzesDesc')}
       </p>
 
       {error && (
@@ -184,7 +186,7 @@ export default function StudentQuizzesPage() {
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm`}
           >
-            Available ({availableQuizzes.length})
+            {t('quiz.available')} ({availableQuizzes.length})
           </button>
           <button
             onClick={() => setActiveTab('completed')}
@@ -194,7 +196,7 @@ export default function StudentQuizzesPage() {
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm`}
           >
-            Completed ({completedAttempts.length})
+            {t('quiz.completed')} ({completedAttempts.length})
           </button>
         </nav>
       </div>
@@ -205,13 +207,13 @@ export default function StudentQuizzesPage() {
             <div className="bg-white overflow-hidden shadow rounded-lg">
               <div className="px-4 py-8 sm:p-6 text-center">
                 <p className="text-gray-500 mb-4">
-                  No quizzes available. Enroll in a course to access quizzes.
+                  {t('quiz.enrollCourse')}
                 </p>
                 <a
                   href="/dashboard/student/browse"
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
                 >
-                  Browse Courses
+                  {t('courses.browseMore')}
                 </a>
               </div>
             </div>
@@ -230,7 +232,7 @@ export default function StudentQuizzesPage() {
         ) : completedAttempts.length === 0 ? (
           <div className="bg-white overflow-hidden shadow rounded-lg">
             <div className="px-4 py-8 sm:p-6 text-center">
-              <p className="text-gray-500">You haven&apos;t completed any quizzes yet.</p>
+              <p className="text-gray-500">{t('quiz.noCompleted')}</p>
             </div>
           </div>
         ) : (

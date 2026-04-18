@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { useTranslation } from '@/hooks/useTranslation';
 import {
   BookOpen,
   CheckCircle,
@@ -53,6 +54,7 @@ interface Stats {
 export default function StudentDashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { t } = useTranslation();
   const [stats, setStats] = useState<Stats>({ enrolledCount: 0, completedQuizzes: 0, averageScore: 0 });
   const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -131,7 +133,7 @@ export default function StudentDashboardPage() {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-500">Loading dashboard...</p>
+          <p className="text-gray-500">{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -148,10 +150,10 @@ export default function StudentDashboardPage() {
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
         <div className="relative z-10">
           <h1 className="text-3xl font-bold mb-2">
-            Welcome back, {session?.user?.name}!
+            {t('dashboard.welcomeBack')}, {session?.user?.name}!
           </h1>
           <p className="text-indigo-100 text-lg">
-            Continue your learning journey. You have {stats.enrolledCount} courses in progress.
+            {t('dashboard.continueLearning').replace('{count}', String(stats.enrolledCount))}
           </p>
         </div>
       </motion.div>
@@ -174,7 +176,7 @@ export default function StudentDashboardPage() {
               <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Courses</span>
             </div>
             <div className="text-3xl font-bold text-gray-900 mb-1">{stats.enrolledCount}</div>
-            <div className="text-sm text-gray-500">Enrolled courses</div>
+            <div className="text-sm text-gray-500">{t('dashboard.enrolledCourses')}</div>
           </div>
         </motion.div>
 
@@ -194,7 +196,7 @@ export default function StudentDashboardPage() {
               <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Quizzes</span>
             </div>
             <div className="text-3xl font-bold text-gray-900 mb-1">{stats.completedQuizzes}</div>
-            <div className="text-sm text-gray-500">Completed quizzes</div>
+            <div className="text-sm text-gray-500">{t('dashboard.completedQuizzes')}</div>
           </div>
         </motion.div>
 
@@ -214,7 +216,7 @@ export default function StudentDashboardPage() {
               <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Performance</span>
             </div>
             <div className="text-3xl font-bold text-gray-900 mb-1">{stats.averageScore}%</div>
-            <div className="text-sm text-gray-500">Average score</div>
+            <div className="text-sm text-gray-500">{t('dashboard.averageScore')}</div>
             <div className="mt-3 h-2 bg-gray-100 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full transition-all duration-500"
@@ -234,8 +236,8 @@ export default function StudentDashboardPage() {
       >
         <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
-            <p className="text-sm text-gray-500 mt-1">Your latest learning activities</p>
+            <h3 className="text-lg font-semibold text-gray-900">{t('dashboard.recentActivity')}</h3>
+            <p className="text-sm text-gray-500 mt-1">{t('dashboard.recentActivityDesc')}</p>
           </div>
           <Activity className="w-5 h-5 text-gray-400" />
         </div>
@@ -245,8 +247,8 @@ export default function StudentDashboardPage() {
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
                 <Clock className="w-8 h-8 text-gray-400" />
               </div>
-              <h4 className="text-gray-900 font-medium mb-1">No recent activity</h4>
-              <p className="text-sm text-gray-500">Start by enrolling in a course to see your progress here.</p>
+              <h4 className="text-gray-900 font-medium mb-1">{t('dashboard.noRecentActivity')}</h4>
+              <p className="text-sm text-gray-500">{t('dashboard.startEnrolling')}</p>
             </div>
           ) : (
             recentActivity.map((item, index) => (
@@ -273,13 +275,13 @@ export default function StudentDashboardPage() {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gray-900">
                     {item.type === 'enrollment'
-                      ? `Enrolled in ${item.course?.title || 'a course'}`
-                      : `Completed: ${item.quiz?.title || 'Quiz'}`}
+                      ? t('dashboard.enrolledIn').replace('{title}', item.course?.title || 'a course')
+                      : t('dashboard.completed').replace('{title}', item.quiz?.title || 'Quiz')}
                   </p>
                   <p className="text-sm text-gray-500 mt-0.5">
                     {item.type === 'enrollment'
-                      ? `Progress: ${item.progress}%`
-                      : `Score: ${item.score}%`}
+                      ? `${t('dashboard.progress')}: ${item.progress}%`
+                      : `${t('dashboard.score')}: ${item.score}%`}
                   </p>
                 </div>
                 {/* Date */}

@@ -102,6 +102,23 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
+    // Prevent suspending self
+    if (userId === session?.user?.id && updates.isSuspended) {
+      return NextResponse.json(
+        { message: 'Cannot suspend your own account' },
+        { status: 400 }
+      );
+    }
+
+    // Prevent suspending other admins
+    const targetUser = await User.findById(userId);
+    if (targetUser?.role === 'admin' && updates.isSuspended) {
+      return NextResponse.json(
+        { message: 'Cannot suspend admin accounts' },
+        { status: 400 }
+      );
+    }
+
     const user = await User.findByIdAndUpdate(
       userId,
       { $set: updates },

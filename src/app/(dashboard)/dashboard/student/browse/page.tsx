@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/hooks/useTranslation';
 import CourseCard from '@/components/dashboard/CourseCard';
 
 interface Course {
@@ -19,6 +20,7 @@ interface Course {
 
 export default function BrowseCoursesPage() {
   const { data: session, status } = useSession();
+  const { t } = useTranslation();
   const router = useRouter();
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -81,14 +83,14 @@ export default function BrowseCoursesPage() {
   };
 
   if (status === 'loading' || isLoading) {
-    return <div className="text-center py-8">Loading...</div>;
+    return <div className="text-center py-8">{t('common.loading')}</div>;
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900">Browse Courses</h1>
+      <h1 className="text-2xl font-bold text-gray-900">{t('courses.browseCourses')}</h1>
       <p className="mt-2 text-gray-600">
-        Discover new courses and start learning today.
+        {t('courses.browseDesc')}
       </p>
 
       {error && (
@@ -102,13 +104,13 @@ export default function BrowseCoursesPage() {
           <div className="bg-white overflow-hidden shadow rounded-lg">
             <div className="px-4 py-8 sm:p-6 text-center">
               <p className="text-gray-500 mb-4">
-                No available courses found. You may already be enrolled in all available courses, or there are no published courses at the moment.
+                {t('courses.noAvailableCourses')}
               </p>
               <a
                 href="/dashboard/student/courses"
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-600 bg-indigo-100 hover:bg-indigo-200"
               >
-                Go to My Courses
+                {t('courses.goToMyCourses')}
               </a>
             </div>
           </div>

@@ -4,6 +4,7 @@ export interface IBlog extends Document {
   title: string;
   content: string;
   topic: string;
+  language: string;
   author: mongoose.Types.ObjectId;
   isPublished: boolean;
   createdAt: Date;
@@ -28,6 +29,12 @@ const blogSchema = new Schema<IBlog>(
       trim: true,
       maxlength: 50,
     },
+    language: {
+      type: String,
+      required: true,
+      default: 'en',
+      enum: ['en', 'hi'],
+    },
     author: {
       type: Schema.Types.ObjectId,
       ref: 'User',
@@ -47,5 +54,6 @@ const blogSchema = new Schema<IBlog>(
 blogSchema.index({ topic: 1, isPublished: 1 });
 blogSchema.index({ author: 1 });
 blogSchema.index({ createdAt: -1 });
+blogSchema.index({ language: 1 });
 
 export default mongoose.models.Blog || mongoose.model<IBlog>('Blog', blogSchema);

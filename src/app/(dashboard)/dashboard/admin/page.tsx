@@ -1,96 +1,125 @@
 // src/app/(dashboard)/dashboard/admin/page.tsx
-import { getServerSession } from 'next-auth';
-import { redirect } from 'next/navigation';
-import { authOptions } from '@/lib/auth';
+'use client';
 
-export default async function AdminDashboardPage() {
-  const session = await getServerSession(authOptions);
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+import { useTranslation } from '@/hooks/useTranslation';
+import {
+  Users,
+  BookOpen,
+  BarChart3,
+  Edit3,
+  Settings as SettingsIcon,
+} from 'lucide-react';
+
+export default function AdminDashboardPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const { t } = useTranslation();
+
+  if (status === 'loading') {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   if (!session) {
-    redirect('/login');
+    router.push('/login');
+    return null;
   }
 
   if (session.user?.role !== 'admin') {
-    redirect('/dashboard/teacher');
+    router.push('/dashboard/teacher');
+    return null;
   }
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-      <p className="mt-2 text-gray-600">
-        Manage users, courses, and view system-wide analytics.
-      </p>
+    <div className="space-y-6">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center gap-3"
+      >
+        <div className="p-3 bg-indigo-100 rounded-xl">
+          <SettingsIcon className="w-6 h-6 text-indigo-600" />
+        </div>
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{t('admin.adminDashboard')}</h1>
+          <p className="text-gray-500 mt-1">{t('admin.adminDesc')}</p>
+        </div>
+      </motion.div>
 
-      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Quick Links */}
+      {/* Quick Links */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+      >
         <a
           href="/dashboard/admin/users"
-          className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow"
+          className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition-all group"
         >
           <div className="flex items-center">
-            <div className="p-3 rounded-full bg-blue-100 text-blue-600">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-              </svg>
+            <div className="p-3 rounded-full bg-blue-100 text-blue-600 group-hover:bg-blue-200 transition-colors">
+              <Users className="w-6 h-6" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">User Management</p>
-              <p className="text-lg font-semibold text-gray-900">Manage Users</p>
+              <p className="text-sm font-medium text-gray-600">{t('admin.userManagement')}</p>
+              <p className="text-lg font-semibold text-gray-900">{t('admin.manageUsers')}</p>
             </div>
           </div>
         </a>
 
         <a
           href="/dashboard/admin/courses"
-          className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow"
+          className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition-all group"
         >
           <div className="flex items-center">
-            <div className="p-3 rounded-full bg-green-100 text-green-600">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-              </svg>
+            <div className="p-3 rounded-full bg-green-100 text-green-600 group-hover:bg-green-200 transition-colors">
+              <BookOpen className="w-6 h-6" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">All Courses</p>
-              <p className="text-lg font-semibold text-gray-900">Manage Courses</p>
+              <p className="text-sm font-medium text-gray-600">{t('admin.allCourses')}</p>
+              <p className="text-lg font-semibold text-gray-900">{t('admin.manageCourses')}</p>
             </div>
           </div>
         </a>
 
         <a
           href="/dashboard/admin/analytics"
-          className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow"
+          className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition-all group"
         >
           <div className="flex items-center">
-            <div className="p-3 rounded-full bg-purple-100 text-purple-600">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z" />
-              </svg>
+            <div className="p-3 rounded-full bg-purple-100 text-purple-600 group-hover:bg-purple-200 transition-colors">
+              <BarChart3 className="w-6 h-6" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Analytics</p>
-              <p className="text-lg font-semibold text-gray-900">System Stats</p>
+              <p className="text-sm font-medium text-gray-600">{t('admin.analytics')}</p>
+              <p className="text-lg font-semibold text-gray-900">{t('admin.systemStats')}</p>
             </div>
           </div>
         </a>
 
         <a
-          href="/dashboard/teacher"
-          className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow"
+          href="/dashboard/admin/settings"
+          className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition-all group"
         >
           <div className="flex items-center">
-            <div className="p-3 rounded-full bg-orange-100 text-orange-600">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-              </svg>
+            <div className="p-3 rounded-full bg-orange-100 text-orange-600 group-hover:bg-orange-200 transition-colors">
+              <SettingsIcon className="w-6 h-6" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Teacher View</p>
-              <p className="text-lg font-semibold text-gray-900">My Courses</p>
+              <p className="text-sm font-medium text-gray-600">{t('admin.settings')}</p>
+              <p className="text-lg font-semibold text-gray-900">{t('admin.manageSettings')}</p>
             </div>
           </div>
         </a>
-      </div>
+      </motion.div>
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { useTranslation } from '@/hooks/useTranslation';
 import {
   Plus,
   Edit2,
@@ -17,41 +18,62 @@ import {
   Filter,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
+import Alert from '@/components/ui/Alert';
 
 interface Blog {
   _id: string;
   title: string;
   topic: string;
   content: string;
+  language: string;
   isPublished: boolean;
   createdAt: string;
   updatedAt: string;
   author?: { _id: string; name: string };
 }
 
+interface FeatureToggles {
+  enableBlogs: boolean;
+  enableQuizzes: boolean;
+  enableCourses: boolean;
+  enableAnalytics: boolean;
+}
+
 export default function TeacherBlogsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { t } = useTranslation();
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<'all' | 'published' | 'draft'>('all');
+  const [languageFilter, setLanguageFilter] = useState<'all' | 'en' | 'hi'>('all');
+  const [featureEnabled, setFeatureEnabled] = useState(true);
+  const [checkingFeature, setCheckingFeature] = useState(true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login');
-      return;
-    }
-
-    if (status === 'authenticated') {
-      fetchBlogs();
-    }
-  }, [status, router]);
+    // Check if blogs feature is enabled
+    fetch('/api/settings')
+      .then(res => res.json())
+      .then(data => {
+        if (!data.featureToggles?.enableBlogs) {
+          setFeatureEnabled(false);
+          router.push('/dashboard/teacher');
+        }
+      })
+      .catch(err => console.error('Error fetching settings:', err))
+      .finally(() => setCheckingFeature(false));
+  }, [router]);
 
   const fetchBlogs = async () => {
     try {
-      const response = await fetch('/api/blogs');
+      const params = new URLSearchParams();
+      if (languageFilter !== 'all') {
+        params.append('language', languageFilter);
+      }
+      const url = `/api/blogs${params.toString() ? `?${params.toString()}` : ''}`;
+      const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to fetch');
       const data = await response.json();
       // Filter blogs by current user
@@ -65,6 +87,29 @@ export default function TeacherBlogsPage() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login');
+      return;
+    }
+
+    if (status === 'authenticated' && featureEnabled) {
+      fetchBlogs();
+    }
+  }, [status, router, languageFilter, featureEnabled]);
+
+  if (checkingFeature) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="w-12 h-12 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!featureEnabled) {
+    return null; // Will redirect
+  }
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this blog?')) return;
@@ -111,7 +156,8 @@ export default function TeacherBlogsPage() {
     const matchesFilter = filter === 'all' ||
                          (filter === 'published' && blog.isPublished) ||
                          (filter === 'draft' && !blog.isPublished);
-    return matchesSearch && matchesFilter;
+    const matchesLanguage = languageFilter === 'all' || blog.language === languageFilter;
+    return matchesSearch && matchesFilter && matchesLanguage;
   });
 
   if (isLoading) {
@@ -174,6 +220,20 @@ export default function TeacherBlogsPage() {
               <option value="all">All Blogs</option>
               <option value="published">Published</option>
               <option value="draft">Drafts</option>
+            </select>
+          </div>
+
+          {/* Language Filter */}
+          <div className="flex items-center gap-2">
+            <BookOpen className="w-5 h-5 text-gray-400" />
+            <select
+              value={languageFilter}
+              onChange={(e) => setLanguageFilter(e.target.value as 'all' | 'en' | 'hi')}
+              className="px-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+            >
+              <option value="all">All Languages</option>
+              <option value="en">English</option>
+              <option value="hi">हिंदी</option>
             </select>
           </div>
         </div>

@@ -3,20 +3,29 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import Blog from '@/models/Blog';
+import { requireFeature, checkTeacherLimit } from '@/lib/settingsHelpers';
 
 // GET /api/blogs - Get all published blogs
 export async function GET(req: NextRequest) {
   try {
     await dbConnect();
 
+    // Check if blogs feature is enabled
+    const featureCheck = await requireFeature('enableBlogs');
+    if (featureCheck) return featureCheck;
+
     const { searchParams } = new URL(req.url);
     const topic = searchParams.get('topic');
+    const language = searchParams.get('language');
     const limit = parseInt(searchParams.get('limit') || '20');
     const page = parseInt(searchParams.get('page') || '1');
 
-    const query: { isPublished: boolean; topic?: string } = { isPublished: true };
+    const query: { isPublished: boolean; topic?: string; language?: string } = { isPublished: true };
     if (topic) {
       query.topic = topic;
+    }
+    if (language && (language === 'en' || language === 'hi')) {
+      query.language = language;
     }
 
     const blogs = await Blog.find(query)
@@ -47,6 +56,12 @@ export async function GET(req: NextRequest) {
 // POST /api/blogs - Create a new blog (teacher only)
 export async function POST(req: NextRequest) {
   try {
+    await dbConnect();
+
+    // Check if blogs feature is enabled
+    const featureCheck = await requireFeature('enableBlogs');
+    if (featureCheck) return featureCheck;
+
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
@@ -63,11 +78,28 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { title, content, topic, isPublished = true } = await req.json();
+    const { title, content, topic, language = 'en', isPublished = true } = await req.json();
 
     if (!title || !content || !topic) {
       return NextResponse.json(
         { message: 'Title, content, and topic are required' },
+        { status: 400 }
+      );
+    }
+
+    // Check teacher limits (skip for admins)
+    if (session.user.role === 'teacher') {
+      const blogCount = await Blog.countDocuments({
+        author: session.user.id,
+      });
+
+      const limitCheck = await checkTeacherLimit('blogs', blogCount);
+      if (limitCheck) return limitCheck;
+    }
+
+    if (!['en', 'hi'].includes(language)) {
+      return NextResponse.json(
+        { message: 'Language must be either en or hi' },
         { status: 400 }
       );
     }
@@ -78,6 +110,7 @@ export async function POST(req: NextRequest) {
       title,
       content,
       topic,
+      language,
       author: session.user.id,
       isPublished,
     });
