@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
 import QuizCard from '@/components/dashboard/QuizCard';
+import Alert from '@/components/ui/Alert';
 
 interface Quiz {
   _id: string;
@@ -39,6 +40,7 @@ export default function StudentQuizzesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<'available' | 'completed'>('available');
+  const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -146,12 +148,12 @@ export default function StudentQuizzesPage() {
         // Navigate to quiz taking page
         router.push(`/dashboard/student/quizzes/take?attemptId=${data.attempt._id}`);
       } else {
-        alert(data.message || t('errors.failedStartQuiz'));
+        setAlertState({ type: 'error', message: data.message || t('errors.failedStartQuiz') });
       }
     } catch (_err) {
-      alert(t('errors.errorStartingQuiz'));
+      setAlertState({ type: 'error', message: t('errors.errorStartingQuiz') });
     }
-  }, [router]);
+  }, [router, t]);
 
   const completedAttempts = useMemo(() =>
     attempts.filter((a) => a.status === 'completed'),
@@ -168,6 +170,14 @@ export default function StudentQuizzesPage() {
       <p className="mt-2 text-gray-600">
         {t('quiz.quizzesDesc')}
       </p>
+
+      {alertState && (
+        <Alert
+          type={alertState.type}
+          message={alertState.message}
+          onClose={() => setAlertState(null)}
+        />
+      )}
 
       {error && (
         <div className="mt-4 bg-red-50 border-l-4 border-red-400 p-4">

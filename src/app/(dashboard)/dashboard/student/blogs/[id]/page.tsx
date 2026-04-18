@@ -17,6 +17,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
+import Alert from '@/components/ui/Alert';
 
 interface Blog {
   _id: string;
@@ -36,6 +37,7 @@ export default function BlogDetailPage() {
   const [blog, setBlog] = useState<Blog | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isFavorited, setIsFavorited] = useState(false);
+  const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -108,7 +110,7 @@ export default function BlogDetailPage() {
     } else {
       // Fallback: copy to clipboard
       navigator.clipboard.writeText(window.location.href);
-      alert('Link copied to clipboard!');
+      setAlertState({ type: 'success', message: 'Link copied to clipboard!' });
     }
   };
 
@@ -157,6 +159,14 @@ export default function BlogDetailPage() {
           Back to Blogs
         </Link>
       </motion.div>
+
+      {alertState && (
+        <Alert
+          type={alertState.type}
+          message={alertState.message}
+          onClose={() => setAlertState(null)}
+        />
+      )}
 
       {/* Blog Content */}
       <motion.article

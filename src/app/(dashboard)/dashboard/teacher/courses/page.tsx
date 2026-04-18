@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
+import Alert from '@/components/ui/Alert';
 
 interface Course {
   _id: string;
@@ -25,6 +26,7 @@ export default function TeacherCoursesPage() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -48,10 +50,14 @@ export default function TeacherCoursesPage() {
       if (response.ok) {
         setCourses(data.courses || []);
       } else {
-        setError(data.message || t('teacherCourses.failedLoadCourses'));
+        const errorMsg = data.message || t('teacherCourses.failedLoadCourses');
+        setError(errorMsg);
+        setAlertState({ type: 'error', message: errorMsg });
       }
     } catch (err) {
-      setError(t('teacherCourses.errorLoadingCourses'));
+      const errorMsg = t('teacherCourses.errorLoadingCourses');
+      setError(errorMsg);
+      setAlertState({ type: 'error', message: errorMsg });
     } finally {
       setIsLoading(false);
     }
@@ -62,27 +68,36 @@ export default function TeacherCoursesPage() {
   }
 
   return (
-    <div>
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">{t('teacherCourses.myCourses')}</h1>
-        <a
-          href="/dashboard/teacher/courses/create"
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
-        >
-          {t('teacherCourses.createNewCourse')}
-        </a>
-      </div>
-      <p className="mt-2 text-gray-600">
-        {t('teacherCourses.coursesDesc')}
-      </p>
-
-      {error && (
-        <div className="mt-4 bg-red-50 border-l-4 border-red-400 p-4">
-          <p className="text-sm text-red-700">{error}</p>
-        </div>
+    <>
+      {alertState && (
+        <Alert
+          type={alertState.type}
+          message={alertState.message}
+          onClose={() => setAlertState(null)}
+        />
       )}
 
-      <div className="mt-8">
+      <div>
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-gray-900">{t('teacherCourses.myCourses')}</h1>
+          <a
+            href="/dashboard/teacher/courses/create"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+          >
+            {t('teacherCourses.createNewCourse')}
+          </a>
+        </div>
+        <p className="mt-2 text-gray-600">
+          {t('teacherCourses.coursesDesc')}
+        </p>
+
+        {error && (
+          <div className="mt-4 bg-red-50 border-l-4 border-red-400 p-4">
+            <p className="text-sm text-red-700">{error}</p>
+          </div>
+        )}
+
+        <div className="mt-8">
         {courses.length === 0 ? (
           <div className="bg-white overflow-hidden shadow rounded-lg">
             <div className="px-4 py-8 sm:p-6 text-center">
@@ -139,5 +154,6 @@ export default function TeacherCoursesPage() {
         )}
       </div>
     </div>
+    </>
   );
 }

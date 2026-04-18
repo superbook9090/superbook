@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
         author: session.user.id,
       });
 
-      const limitCheck = await checkTeacherLimit('blogs', blogCount);
+      const limitCheck = await checkTeacherLimit('blogs', blogCount, session.user.id);
       if (limitCheck) return limitCheck;
     }
 

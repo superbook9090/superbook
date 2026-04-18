@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
+import Alert from '@/components/ui/Alert';
 
 interface Course {
   _id: string;
@@ -30,6 +31,7 @@ export default function TeacherQuizzesPage() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
 
   // Memoized helper to safely get course title
   const getCourseTitle = useCallback((course: Quiz['course']): string => {
@@ -115,12 +117,12 @@ export default function TeacherQuizzesPage() {
           q._id === quizId ? { ...q, isPublished: !currentStatus } : q
         ));
       } else {
-        alert(t('teacherQuizzes.failedUpdateQuiz'));
+        setAlertState({ type: 'error', message: t('teacherQuizzes.failedUpdateQuiz') });
       }
     } catch {
-      alert(t('teacherQuizzes.errorUpdateQuiz'));
+      setAlertState({ type: 'error', message: t('teacherQuizzes.errorUpdateQuiz') });
     }
-  }, []);
+  }, [t]);
 
   const handleDelete = useCallback(async (quizId: string) => {
     if (!confirm(t('teacherQuizzes.confirmDeleteQuiz'))) return;
@@ -133,12 +135,12 @@ export default function TeacherQuizzesPage() {
       if (response.ok) {
         setQuizzes(prev => prev.filter((q) => q._id !== quizId));
       } else {
-        alert(t('teacherQuizzes.failedDeleteQuiz'));
+        setAlertState({ type: 'error', message: t('teacherQuizzes.failedDeleteQuiz') });
       }
     } catch {
-      alert(t('teacherQuizzes.errorDeleteQuiz'));
+      setAlertState({ type: 'error', message: t('teacherQuizzes.errorDeleteQuiz') });
     }
-  }, []);
+  }, [t]);
 
   if (status === 'loading' || isLoading) {
     return <div className="text-center py-8">{t('teacherQuizzes.loadingQuizzes')}</div>;
@@ -159,6 +161,14 @@ export default function TeacherQuizzesPage() {
           {t('teacherQuizzes.createQuiz')}
         </a>
       </div>
+
+      {alertState && (
+        <Alert
+          type={alertState.type}
+          message={alertState.message}
+          onClose={() => setAlertState(null)}
+        />
+      )}
 
       {error && (
         <div className="bg-red-50 border-l-4 border-red-400 p-3 sm:p-4 rounded-r-lg">

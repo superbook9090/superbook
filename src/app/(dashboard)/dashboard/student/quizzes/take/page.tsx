@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
+import Alert from '@/components/ui/Alert';
 
 interface Question {
   question: string;
@@ -37,6 +38,7 @@ export default function TakeQuizPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState(0);
 
   useEffect(() => {
@@ -148,11 +150,15 @@ export default function TakeQuizPage() {
       if (response.ok) {
         router.push(`/dashboard/student/quizzes/${data.attempt._id}/result`);
       } else {
-        setError(data.message || 'Failed to submit quiz');
+        const errorMsg = data.message || 'Failed to submit quiz';
+        setError(errorMsg);
+        setAlertState({ type: 'error', message: errorMsg });
         setIsSubmitting(false);
       }
     } catch (err) {
-      setError('Error submitting quiz');
+      const errorMsg = 'Error submitting quiz';
+      setError(errorMsg);
+      setAlertState({ type: 'error', message: errorMsg });
       setIsSubmitting(false);
     }
   }, [attempt, answers, timeRemaining, router]);
@@ -170,6 +176,13 @@ export default function TakeQuizPage() {
   if (error || !attempt) {
     return (
       <div className="text-center py-8">
+        {alertState && (
+          <Alert
+            type={alertState.type}
+            message={alertState.message}
+            onClose={() => setAlertState(null)}
+          />
+        )}
         <p className="text-red-600 mb-4">{error || 'Quiz not found'}</p>
         <button
           onClick={() => router.push('/dashboard/student/quizzes')}
@@ -295,6 +308,14 @@ export default function TakeQuizPage() {
           </button>
         )}
       </div>
+
+      {alertState && (
+        <Alert
+          type={alertState.type}
+          message={alertState.message}
+          onClose={() => setAlertState(null)}
+        />
+      )}
 
       {/* Warning if time is low */}
       {timeRemaining < 300 && (

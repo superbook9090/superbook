@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
         instructor: session.user.id,
       });
 
-      const limitCheck = await checkTeacherLimit('quizzes', quizCount);
+      const limitCheck = await checkTeacherLimit('quizzes', quizCount, session.user.id);
       if (limitCheck) return limitCheck;
     }
 

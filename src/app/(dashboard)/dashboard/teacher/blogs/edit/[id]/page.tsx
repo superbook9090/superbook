@@ -15,6 +15,7 @@ import {
   Type,
 } from 'lucide-react';
 import RichTextEditor from '@/components/ui/RichTextEditor';
+import Alert from '@/components/ui/Alert';
 
 const topics = [
   'Mathematics',
@@ -53,6 +54,7 @@ export default function EditBlogPage() {
     isPublished: true,
   });
   const [error, setError] = useState('');
+  const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -70,7 +72,7 @@ export default function EditBlogPage() {
       const response = await fetch(`/api/blogs/${blogId}`);
       if (!response.ok) throw new Error('Failed to fetch');
       const blog: Blog = await response.json();
-      
+
       setFormData({
         title: blog.title,
         topic: blog.topic,
@@ -78,7 +80,9 @@ export default function EditBlogPage() {
         isPublished: blog.isPublished,
       });
     } catch (error) {
-      setError('Failed to load blog');
+      const errorMsg = 'Failed to load blog';
+      setError(errorMsg);
+      setAlertState({ type: 'error', message: errorMsg });
     } finally {
       setIsLoading(false);
     }
@@ -96,7 +100,9 @@ export default function EditBlogPage() {
     setIsSaving(true);
 
     if (!formData.title.trim() || !formData.topic || isContentEmpty(formData.content)) {
-      setError('Please fill in all fields');
+      const errorMsg = 'Please fill in all fields';
+      setError(errorMsg);
+      setAlertState({ type: 'error', message: errorMsg });
       setIsSaving(false);
       return;
     }
@@ -115,10 +121,14 @@ export default function EditBlogPage() {
         router.push('/dashboard/teacher/blogs');
       } else {
         const data = await response.json();
-        setError(data.message || 'Failed to update blog');
+        const errorMsg = data.message || 'Failed to update blog';
+        setError(errorMsg);
+        setAlertState({ type: 'error', message: errorMsg });
       }
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      const errorMsg = 'An error occurred. Please try again.';
+      setError(errorMsg);
+      setAlertState({ type: 'error', message: errorMsg });
     } finally {
       setIsSaving(false);
     }
@@ -134,6 +144,14 @@ export default function EditBlogPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
+      {alertState && (
+        <Alert
+          type={alertState.type}
+          message={alertState.message}
+          onClose={() => setAlertState(null)}
+        />
+      )}
+
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}

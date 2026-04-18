@@ -1,4 +1,5 @@
 import AppSettings from '@/models/AppSettings';
+import User from '@/models/User';
 import { NextResponse } from 'next/server';
 
 interface FeatureToggles {
@@ -73,9 +74,18 @@ export async function isRegistrationAllowed(): Promise<boolean> {
 /**
  * Get teacher limit for a specific content type
  * @param type - The content type (courses, quizzes, blogs)
+ * @param userId - The user ID to check for custom limits (optional)
  * @returns The limit for the content type
  */
-export async function getTeacherLimit(type: keyof TeacherLimits): Promise<number> {
+export async function getTeacherLimit(type: keyof TeacherLimits, userId?: string): Promise<number> {
+  // If userId is provided, check for user-specific limits first
+  if (userId) {
+    const user = await User.findById(userId);
+    if (user?.limits?.[type]) {
+      return user.limits[type];
+    }
+  }
+  // Fallback to global limits
   const settings = await AppSettings.findOne();
   return settings?.teacherLimits?.[type] ?? 10;
 }
@@ -84,13 +94,15 @@ export async function getTeacherLimit(type: keyof TeacherLimits): Promise<number
  * Check if teacher has reached the limit for a content type
  * @param type - The content type (courses, quizzes, blogs)
  * @param currentCount - The current count of items
+ * @param userId - The user ID to check for custom limits (optional)
  * @returns NextResponse with 403 if limit reached, or null if under limit
  */
 export async function checkTeacherLimit(
   type: keyof TeacherLimits,
-  currentCount: number
+  currentCount: number,
+  userId?: string
 ): Promise<NextResponse | null> {
-  const limit = await getTeacherLimit(type);
+  const limit = await getTeacherLimit(type, userId);
   if (currentCount >= limit) {
     return NextResponse.json(
       { message: `You have reached your ${type} limit (${limit}). Please delete some ${type} or contact admin.` },

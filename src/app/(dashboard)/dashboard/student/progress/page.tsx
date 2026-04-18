@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
+import Alert from '@/components/ui/Alert';
 
 interface CourseProgress {
   enrollment: {
@@ -56,6 +57,7 @@ export default function StudentProgressPage() {
   const [overallStats, setOverallStats] = useState<OverallStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
 
   useEffect(() => {
@@ -77,10 +79,14 @@ export default function StudentProgressPage() {
         setProgressData(data.progress || []);
         setOverallStats(data.overallStats || null);
       } else {
-        setError(data.message || t('progress.failedLoadProgress'));
+        const errorMsg = data.message || t('progress.failedLoadProgress');
+        setError(errorMsg);
+        setAlertState({ type: 'error', message: errorMsg });
       }
     } catch (err) {
-      setError(t('progress.errorLoadingProgress'));
+      const errorMsg = t('progress.errorLoadingProgress');
+      setError(errorMsg);
+      setAlertState({ type: 'error', message: errorMsg });
     } finally {
       setIsLoading(false);
     }
@@ -102,6 +108,14 @@ export default function StudentProgressPage() {
       <p className="mt-2 text-gray-600">
         {t('progress.progressDesc')}
       </p>
+
+      {alertState && (
+        <Alert
+          type={alertState.type}
+          message={alertState.message}
+          onClose={() => setAlertState(null)}
+        />
+      )}
 
       {error && (
         <div className="mt-4 bg-red-50 border-l-4 border-red-400 p-4">

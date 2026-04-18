@@ -119,6 +119,28 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
+    // Validate limits if provided
+    if (updates.limits) {
+      if (updates.limits.courses !== undefined && (typeof updates.limits.courses !== 'number' || updates.limits.courses < 1)) {
+        return NextResponse.json(
+          { message: 'Courses limit must be a positive integer' },
+          { status: 400 }
+        );
+      }
+      if (updates.limits.quizzes !== undefined && (typeof updates.limits.quizzes !== 'number' || updates.limits.quizzes < 1)) {
+        return NextResponse.json(
+          { message: 'Quizzes limit must be a positive integer' },
+          { status: 400 }
+        );
+      }
+      if (updates.limits.blogs !== undefined && (typeof updates.limits.blogs !== 'number' || updates.limits.blogs < 1)) {
+        return NextResponse.json(
+          { message: 'Blogs limit must be a positive integer' },
+          { status: 400 }
+        );
+      }
+    }
+
     const user = await User.findByIdAndUpdate(
       userId,
       { $set: updates },

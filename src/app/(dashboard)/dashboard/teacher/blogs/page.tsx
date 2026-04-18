@@ -51,6 +51,7 @@ export default function TeacherBlogsPage() {
   const [featureEnabled, setFeatureEnabled] = useState(true);
   const [checkingFeature, setCheckingFeature] = useState(true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
 
   useEffect(() => {
     // Check if blogs feature is enabled
@@ -122,11 +123,11 @@ export default function TeacherBlogsPage() {
       if (response.ok) {
         setBlogs(blogs.filter(blog => blog._id !== id));
       } else {
-        alert('Failed to delete blog');
+        setAlertState({ type: 'error', message: 'Failed to delete blog' });
       }
     } catch (error) {
       console.error('Error deleting blog:', error);
-      alert('Failed to delete blog');
+      setAlertState({ type: 'error', message: 'Failed to delete blog' });
     }
   };
 
@@ -188,6 +189,14 @@ export default function TeacherBlogsPage() {
           Create Blog
         </Link>
       </motion.div>
+
+      {alertState && (
+        <Alert
+          type={alertState.type}
+          message={alertState.message}
+          onClose={() => setAlertState(null)}
+        />
+      )}
 
       {/* Filters */}
       <motion.div

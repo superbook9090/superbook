@@ -16,6 +16,7 @@ import {
   Type,
 } from 'lucide-react';
 import RichTextEditor from '@/components/ui/RichTextEditor';
+import Alert from '@/components/ui/Alert';
 
 const topics = [
   'Mathematics',
@@ -43,6 +44,7 @@ export default function CreateBlogPage() {
     language: 'en',
   });
   const [error, setError] = useState('');
+  const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
 
   if (status === 'unauthenticated') {
     router.push('/login');
@@ -61,7 +63,9 @@ export default function CreateBlogPage() {
     setIsLoading(true);
 
     if (!formData.title.trim() || !formData.topic || isContentEmpty(formData.content)) {
-      setError('Please fill in all fields');
+      const errorMsg = 'Please fill in all fields';
+      setError(errorMsg);
+      setAlertState({ type: 'error', message: errorMsg });
       setIsLoading(false);
       return;
     }
@@ -80,10 +84,14 @@ export default function CreateBlogPage() {
         router.push('/dashboard/teacher/blogs');
       } else {
         const data = await response.json();
-        setError(data.message || 'Failed to create blog');
+        const errorMsg = data.message || 'Failed to create blog';
+        setError(errorMsg);
+        setAlertState({ type: 'error', message: errorMsg });
       }
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      const errorMsg = 'An error occurred. Please try again.';
+      setError(errorMsg);
+      setAlertState({ type: 'error', message: errorMsg });
     } finally {
       setIsLoading(false);
     }
@@ -91,6 +99,14 @@ export default function CreateBlogPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
+      {alertState && (
+        <Alert
+          type={alertState.type}
+          message={alertState.message}
+          onClose={() => setAlertState(null)}
+        />
+      )}
+
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}

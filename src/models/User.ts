@@ -11,6 +11,11 @@ export interface IUser extends Document {
   isSuspended: boolean;
   suspendedReason?: string;
   provider?: 'credentials' | 'google';
+  limits?: {
+    courses: number;
+    quizzes: number;
+    blogs: number;
+  };
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -25,6 +30,11 @@ const userSchema = new Schema<IUser>(
     isSuspended: { type: Boolean, default: false },
     suspendedReason: String,
     provider: { type: String, enum: ['credentials', 'google'], default: 'credentials' },
+    limits: {
+      courses: { type: Number, default: undefined },
+      quizzes: { type: Number, default: undefined },
+      blogs: { type: Number, default: undefined },
+    },
   },
   { timestamps: true }
 );

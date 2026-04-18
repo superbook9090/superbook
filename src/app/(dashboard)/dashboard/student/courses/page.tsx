@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
 import CourseCard from '@/components/dashboard/CourseCard';
+import Alert from '@/components/ui/Alert';
 
 interface Enrollment {
   _id: string;
@@ -31,6 +32,7 @@ export default function StudentCoursesPage() {
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -73,10 +75,10 @@ export default function StudentCoursesPage() {
         setEnrollments(enrollments.filter(e => e._id !== enrollmentId));
       } else {
         const data = await response.json();
-        alert(data.message || t('courses.dropFailed'));
+        setAlertState({ type: 'error', message: data.message || t('courses.dropFailed') });
       }
     } catch (err) {
-      alert(t('courses.dropFailed'));
+      setAlertState({ type: 'error', message: t('courses.dropFailed') });
     }
   };
 
@@ -100,6 +102,14 @@ export default function StudentCoursesPage() {
           {t('courses.browseMore')}
         </a>
       </div>
+
+      {alertState && (
+        <Alert
+          type={alertState.type}
+          message={alertState.message}
+          onClose={() => setAlertState(null)}
+        />
+      )}
 
       {error && (
         <div className="mt-4 bg-red-50 border-l-4 border-red-400 p-4">

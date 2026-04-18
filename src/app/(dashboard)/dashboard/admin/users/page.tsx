@@ -26,6 +26,11 @@ interface User {
   email: string;
   role: string;
   createdAt: string;
+  limits?: {
+    courses: number;
+    quizzes: number;
+    blogs: number;
+  };
 }
 
 export default function AdminUsersPage() {
@@ -39,6 +44,8 @@ export default function AdminUsersPage() {
   const [roleFilter, setRoleFilter] = useState('');
   const [page, setPage] = useState(1);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [limitsUserId, setLimitsUserId] = useState<string | null>(null);
+  const [limitsForm, setLimitsForm] = useState({ courses: '', quizzes: '', blogs: '' });
   const [pagination, setPagination] = useState({
     total: 0,
     totalPages: 1,
@@ -118,6 +125,48 @@ export default function AdminUsersPage() {
     } catch (err) {
       setMessage({ type: 'error', text: 'Error deleting user' });
       console.error('Users error:', err);
+    }
+  };
+
+  const handleOpenLimits = (user: User) => {
+    setLimitsUserId(user._id);
+    setLimitsForm({
+      courses: user.limits?.courses?.toString() || '',
+      quizzes: user.limits?.quizzes?.toString() || '',
+      blogs: user.limits?.blogs?.toString() || '',
+    });
+  };
+
+  const handleCloseLimits = () => {
+    setLimitsUserId(null);
+    setLimitsForm({ courses: '', quizzes: '', blogs: '' });
+  };
+
+  const handleSaveLimits = async () => {
+    try {
+      const updates: any = {};
+      if (limitsForm.courses) updates.limits = { ...updates.limits, courses: parseInt(limitsForm.courses) };
+      if (limitsForm.quizzes) updates.limits = { ...updates.limits, quizzes: parseInt(limitsForm.quizzes) };
+      if (limitsForm.blogs) updates.limits = { ...updates.limits, blogs: parseInt(limitsForm.blogs) };
+
+      const response = await fetch('/api/admin/users', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: limitsUserId, updates }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setUsers(users.map(u => u._id === limitsUserId ? { ...u, limits: updates.limits } : u));
+        setMessage({ type: 'success', text: t('adminUsers.userLimitsUpdated') });
+        handleCloseLimits();
+      } else {
+        setMessage({ type: 'error', text: data.message || t('adminUsers.failedUpdateLimits') });
+      }
+    } catch (err) {
+      setMessage({ type: 'error', text: 'Error updating limits' });
+      console.error('Limits error:', err);
     }
   };
 
@@ -209,6 +258,9 @@ export default function AdminUsersPage() {
                 {t('admin.role')}
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                {t('adminUsers.limits')}
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 {t('admin.joined')}
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -250,6 +302,23 @@ export default function AdminUsersPage() {
                     <option value="teacher">{t('roles.teacher')}</option>
                     <option value="admin">{t('roles.admin')}</option>
                   </select>
+                </td>
+                <td className="px-6 py-4">
+                  {user.role === 'teacher' ? (
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-700">
+                        C: {user.limits?.courses || '-'} | Q: {user.limits?.quizzes || '-'} | B: {user.limits?.blogs || '-'}
+                      </span>
+                      <button
+                        onClick={() => handleOpenLimits(user)}
+                        className="text-xs px-2 py-1 bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 transition-colors"
+                      >
+                        {t('adminUsers.editLimits')}
+                      </button>
+                    </div>
+                  ) : (
+                    <span className="text-sm text-gray-400">-</span>
+                  )}
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-500 flex items-center">
                   <Calendar className="w-4 h-4 mr-2" />
@@ -293,6 +362,72 @@ export default function AdminUsersPage() {
           </div>
         )}
       </motion.div>
+
+      {/* Limits Modal */}
+      {limitsUserId && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+        >
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl"
+          >
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('adminUsers.editTeacherLimits')}</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('adminUsers.coursesLimit')}</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={limitsForm.courses}
+                  onChange={(e) => setLimitsForm({ ...limitsForm, courses: e.target.value })}
+                  placeholder={t('adminUsers.leaveEmptyForGlobal')}
+                  className="w-full px-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('adminUsers.quizzesLimit')}</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={limitsForm.quizzes}
+                  onChange={(e) => setLimitsForm({ ...limitsForm, quizzes: e.target.value })}
+                  placeholder={t('adminUsers.leaveEmptyForGlobal')}
+                  className="w-full px-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('adminUsers.blogsLimit')}</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={limitsForm.blogs}
+                  onChange={(e) => setLimitsForm({ ...limitsForm, blogs: e.target.value })}
+                  placeholder={t('adminUsers.leaveEmptyForGlobal')}
+                  className="w-full px-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={handleSaveLimits}
+                className="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors text-sm font-medium"
+              >
+                {t('adminUsers.saveLimits')}
+              </button>
+              <button
+                onClick={handleCloseLimits}
+                className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors text-sm font-medium"
+              >
+                {t('common.cancel')}
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
 
       {/* Pagination */}
       {pagination.totalPages > 1 && (

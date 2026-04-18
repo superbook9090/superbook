@@ -66,6 +66,8 @@ export const hi = {
     manageContent: 'अपनी सामग्री प्रबंधित करें।',
     createCourse: 'पाठ्यक्रम बनाएं',
     myCourses: 'मेरे पाठ्यक्रम',
+    myQuizzes: 'मेरे क्विज़',
+    myBlogs: 'मेरे ब्लॉग',
     students: 'छात्र',
     published: 'प्रकाशित',
     recentCourses: 'हाल के पाठ्यक्रम',
@@ -503,5 +505,19 @@ export const hi = {
     settingsSaved: 'सेटिंग्स सफलतापूर्वक सहेजी गईं',
     failedLoadSettings: 'सेटिंग्स लोड करने में विफल',
     failedSaveSettings: 'सेटिंग्स सहेजने में विफल',
+  },
+
+  // Admin Users
+  adminUsers: {
+    limits: 'सीमाएं',
+    editLimits: 'संपादित करें',
+    editTeacherLimits: 'शिक्षक सीमाएं संपादित करें',
+    coursesLimit: 'पाठ्यक्रम सीमा',
+    quizzesLimit: 'क्विज़ सीमा',
+    blogsLimit: 'ब्लॉग सीमा',
+    leaveEmptyForGlobal: 'वैश्विक सीमा के लिए खाली छोड़ें',
+    saveLimits: 'सीमाएं सहेजें',
+    userLimitsUpdated: 'उपयोगकर्ता सीमाएं सफलतापूर्वक अपडेट की गईं',
+    failedUpdateLimits: 'सीमाएं अपडेट करने में विफल',
   },
 };

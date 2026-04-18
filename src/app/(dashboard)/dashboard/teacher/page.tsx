@@ -56,6 +56,11 @@ interface TeacherLimits {
   courses: number;
   quizzes: number;
   blogs: number;
+  userLimits?: {
+    courses?: number;
+    quizzes?: number;
+    blogs?: number;
+  };
 }
 
 export default function TeacherDashboardPage() {
@@ -73,10 +78,36 @@ export default function TeacherDashboardPage() {
     courses: 5,
     quizzes: 10,
     blogs: 10,
+    userLimits: {
+      courses: undefined,
+      quizzes: undefined,
+      blogs: undefined,
+    },
   });
   const [recentCourses, setRecentCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [limitAlert, setLimitAlert] = useState<{ type: 'courses' | 'quizzes' | 'blogs' } | null>(null);
+
+  const getLimit = (type: 'courses' | 'quizzes' | 'blogs') => {
+    return limits.userLimits?.[type] || limits[type];
+  };
+
+  const getUsagePercentage = (type: 'courses' | 'quizzes' | 'blogs') => {
+    const limit = getLimit(type);
+    const current = stats[`total${type.charAt(0).toUpperCase() + type.slice(1)}` as keyof Stats] as number;
+    return (current / limit) * 100;
+  };
+
+  const isNearLimit = (type: 'courses' | 'quizzes' | 'blogs') => {
+    const percentage = getUsagePercentage(type);
+    return percentage >= 80;
+  };
+
+  const isAtLimit = (type: 'courses' | 'quizzes' | 'blogs') => {
+    const limit = getLimit(type);
+    const current = stats[`total${type.charAt(0).toUpperCase() + type.slice(1)}` as keyof Stats] as number;
+    return current >= limit;
+  };
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -139,13 +170,16 @@ export default function TeacherDashboardPage() {
           publishedCourses: publishedCount,
         });
 
-        // Get 3 most recent courses
+        // Use global limits for now (individual limits are fetched separately if needed)
+        setLimits({
+          ...settingsData.teacherLimits || { courses: 5, quizzes: 10, blogs: 10 },
+          userLimits: {
+            courses: undefined,
+            quizzes: undefined,
+            blogs: undefined,
+          },
+        });
         setRecentCourses(courses.slice(0, 3));
-
-        // Set limits if admin settings are available
-        if (settingsRes.ok && settingsData.teacherLimits) {
-          setLimits(settingsData.teacherLimits);
-        }
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -185,17 +219,17 @@ export default function TeacherDashboardPage() {
           </div>
           <div className="hidden sm:flex items-center space-x-3">
             <motion.a
-              whileHover={{ scale: stats.totalCourses < limits.courses ? 1.02 : 1 }}
-              whileTap={{ scale: stats.totalCourses < limits.courses ? 0.98 : 1 }}
-              href={stats.totalCourses < limits.courses ? '/dashboard/teacher/courses/create' : '#'}
+              whileHover={{ scale: !isAtLimit('courses') ? 1.02 : 1 }}
+              whileTap={{ scale: !isAtLimit('courses') ? 0.98 : 1 }}
+              href={!isAtLimit('courses') ? '/dashboard/teacher/courses/create' : '#'}
               onClick={(e) => {
-                if (stats.totalCourses >= limits.courses) {
+                if (isAtLimit('courses')) {
                   e.preventDefault();
                   setLimitAlert({ type: 'courses' });
                 }
               }}
               className={`inline-flex items-center px-4 py-2.5 text-emerald-700 rounded-xl font-semibold shadow-lg transition-all ${
-                stats.totalCourses >= limits.courses
+                isAtLimit('courses')
                   ? 'bg-gray-300 cursor-not-allowed'
                   : 'bg-white hover:shadow-xl'
               }`}
@@ -215,7 +249,7 @@ export default function TeacherDashboardPage() {
         >
           <Alert
             type="error"
-            message={`You have reached your ${limitAlert.type} limit (${limits[limitAlert.type]}). Please delete some ${limitAlert.type} or contact admin.`}
+            message={`You have reached your ${limitAlert.type} limit (${getLimit(limitAlert.type)}). Please delete some ${limitAlert.type} or contact admin.`}
             onClose={() => setLimitAlert(null)}
           />
         </motion.div>
@@ -236,17 +270,22 @@ export default function TeacherDashboardPage() {
               <BookOpen className="w-6 h-6" />
             </div>
             <div className="text-3xl font-bold text-gray-900 mb-1">
-              {stats.totalCourses} / {limits.courses}
+              {stats.totalCourses} / {getLimit('courses')}
             </div>
             <div className="text-sm text-gray-500 mb-2">{t('dashboard.myCourses')}</div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div
                 className={`h-2 rounded-full transition-all ${
-                  stats.totalCourses >= limits.courses ? 'bg-red-500' : 'bg-emerald-500'
+                  isAtLimit('courses') ? 'bg-red-500' : isNearLimit('courses') ? 'bg-amber-500' : 'bg-emerald-500'
                 }`}
-                style={{ width: `${Math.min((stats.totalCourses / limits.courses) * 100, 100)}%` }}
+                style={{ width: `${Math.min(getUsagePercentage('courses'), 100)}%` }}
               />
             </div>
+            {isNearLimit('courses') && !isAtLimit('courses') && (
+              <div className="mt-2 text-xs text-amber-600 font-medium">
+                ⚠️ {Math.round(getUsagePercentage('courses'))}% used
+              </div>
+            )}
           </div>
         </motion.div>
 
@@ -274,23 +313,28 @@ export default function TeacherDashboardPage() {
           transition={{ delay: 0.3 }}
           className="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
         >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-violet-50 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute top-0 right-0 w-32 h-32 bg-purple-50 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
           <div className="relative">
-            <div className="p-3 rounded-xl bg-violet-100 text-violet-600 w-fit mb-4">
+            <div className="p-3 rounded-xl bg-purple-100 text-purple-600 w-fit mb-4">
               <HelpCircle className="w-6 h-6" />
             </div>
             <div className="text-3xl font-bold text-gray-900 mb-1">
-              {stats.totalQuizzes} / {limits.quizzes}
+              {stats.totalQuizzes} / {getLimit('quizzes')}
             </div>
-            <div className="text-sm text-gray-500 mb-2">{t('nav.quizzes')}</div>
+            <div className="text-sm text-gray-500 mb-2">{t('dashboard.myQuizzes')}</div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div
                 className={`h-2 rounded-full transition-all ${
-                  stats.totalQuizzes >= limits.quizzes ? 'bg-red-500' : 'bg-violet-500'
+                  isAtLimit('quizzes') ? 'bg-red-500' : isNearLimit('quizzes') ? 'bg-amber-500' : 'bg-purple-500'
                 }`}
-                style={{ width: `${Math.min((stats.totalQuizzes / limits.quizzes) * 100, 100)}%` }}
+                style={{ width: `${Math.min(getUsagePercentage('quizzes'), 100)}%` }}
               />
             </div>
+            {isNearLimit('quizzes') && !isAtLimit('quizzes') && (
+              <div className="mt-2 text-xs text-amber-600 font-medium">
+                ⚠️ {Math.round(getUsagePercentage('quizzes'))}% used
+              </div>
+            )}
           </div>
         </motion.div>
 
@@ -307,17 +351,22 @@ export default function TeacherDashboardPage() {
               <BarChart3 className="w-6 h-6" />
             </div>
             <div className="text-3xl font-bold text-gray-900 mb-1">
-              {stats.totalBlogs} / {limits.blogs}
+              {stats.totalBlogs} / {getLimit('blogs')}
             </div>
-            <div className="text-sm text-gray-500 mb-2">Blogs</div>
+            <div className="text-sm text-gray-500 mb-2">{t('dashboard.myBlogs')}</div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div
                 className={`h-2 rounded-full transition-all ${
-                  stats.totalBlogs >= limits.blogs ? 'bg-red-500' : 'bg-rose-500'
+                  isAtLimit('blogs') ? 'bg-red-500' : isNearLimit('blogs') ? 'bg-amber-500' : 'bg-rose-500'
                 }`}
-                style={{ width: `${Math.min((stats.totalBlogs / limits.blogs) * 100, 100)}%` }}
+                style={{ width: `${Math.min(getUsagePercentage('blogs'), 100)}%` }}
               />
             </div>
+            {isNearLimit('blogs') && !isAtLimit('blogs') && (
+              <div className="mt-2 text-xs text-amber-600 font-medium">
+                ⚠️ {Math.round(getUsagePercentage('blogs'))}% used
+              </div>
+            )}
           </div>
         </motion.div>
       </div>
@@ -449,6 +498,37 @@ export default function TeacherDashboardPage() {
                 stats.totalCourses >= limits.courses ? 'text-gray-400' : 'text-gray-900'
               }`}>{t('dashboard.createCourse')}</div>
               <div className="text-sm text-gray-500">{t('dashboard.addNewContent')}</div>
+            </div>
+          </motion.a>
+
+          <motion.a
+            whileHover={{ scale: stats.totalBlogs < limits.blogs ? 1.02 : 1 }}
+            whileTap={{ scale: stats.totalBlogs < limits.blogs ? 0.98 : 1 }}
+            href={stats.totalBlogs < limits.blogs ? '/dashboard/teacher/blogs/create' : '#'}
+            onClick={(e) => {
+              if (stats.totalBlogs >= limits.blogs) {
+                e.preventDefault();
+                setLimitAlert({ type: 'blogs' });
+              }
+            }}
+            className={`flex items-center p-4 rounded-xl transition-colors group ${
+              stats.totalBlogs >= limits.blogs
+                ? 'bg-gray-100 cursor-not-allowed'
+                : 'bg-rose-50 hover:bg-rose-100'
+            }`}
+          >
+            <div className={`p-3 rounded-lg transition-colors ${
+              stats.totalBlogs >= limits.blogs
+                ? 'bg-gray-300 text-gray-500'
+                : 'bg-rose-200 text-rose-700 group-hover:bg-rose-300'
+            }`}>
+              <Plus className="w-5 h-5" />
+            </div>
+            <div className="ml-3">
+              <div className={`font-semibold ${
+                stats.totalBlogs >= limits.blogs ? 'text-gray-400' : 'text-gray-900'
+              }`}>Create Blog</div>
+              <div className="text-sm text-gray-500">Write new content</div>
             </div>
           </motion.a>
         </div>

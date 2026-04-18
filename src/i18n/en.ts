@@ -66,6 +66,8 @@ export const en = {
     manageContent: 'Manage your content.',
     createCourse: 'Create Course',
     myCourses: 'My Courses',
+    myQuizzes: 'My Quizzes',
+    myBlogs: 'My Blogs',
     students: 'Students',
     published: 'Published',
     recentCourses: 'Recent Courses',
@@ -503,5 +505,19 @@ export const en = {
     settingsSaved: 'Settings saved successfully',
     failedLoadSettings: 'Failed to load settings',
     failedSaveSettings: 'Failed to save settings',
+  },
+
+  // Admin Users
+  adminUsers: {
+    limits: 'Limits',
+    editLimits: 'Edit',
+    editTeacherLimits: 'Edit Teacher Limits',
+    coursesLimit: 'Courses Limit',
+    quizzesLimit: 'Quizzes Limit',
+    blogsLimit: 'Blogs Limit',
+    leaveEmptyForGlobal: 'Leave empty for global limit',
+    saveLimits: 'Save Limits',
+    userLimitsUpdated: 'User limits updated successfully',
+    failedUpdateLimits: 'Failed to update limits',
   },
 };
