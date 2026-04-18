@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Loader2, Settings as SettingsIcon, Save, BookOpen, FileText, GraduationCap, ToggleLeft, ToggleRight, Globe, Shield, Power, UserPlus } from 'lucide-react';
 import Alert from '@/components/ui/Alert';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface AppSettings {
   teacherLimits: {
@@ -29,6 +30,7 @@ interface AppSettings {
 export default function AdminSettingsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { t } = useTranslation();
   const [settings, setSettings] = useState<AppSettings>({
     teacherLimits: {
       courses: 5,
@@ -73,7 +75,7 @@ export default function AdminSettingsPage() {
       const data = await response.json();
       setSettings(data);
     } catch (error) {
-      setMessage({ type: 'error', text: 'Failed to load settings' });
+      setMessage({ type: 'error', text: t('adminSettings.failedLoadSettings') });
     } finally {
       setIsLoading(false);
     }
@@ -95,12 +97,12 @@ export default function AdminSettingsPage() {
         throw new Error(error.message || 'Failed to save settings');
       }
 
-      setMessage({ type: 'success', text: 'Settings saved successfully' });
+      setMessage({ type: 'success', text: t('adminSettings.settingsSaved') });
 
       // Force refresh of settings across the app by updating localStorage timestamp
       localStorage.setItem('settingsTimestamp', Date.now().toString());
     } catch (error) {
-      setMessage({ type: 'error', text: error instanceof Error ? error.message : 'Failed to save settings' });
+      setMessage({ type: 'error', text: error instanceof Error ? error.message : t('adminSettings.failedSaveSettings') });
     } finally {
       setIsSaving(false);
     }
@@ -126,8 +128,8 @@ export default function AdminSettingsPage() {
           <SettingsIcon className="w-6 h-6 text-indigo-600" />
         </div>
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Admin Settings</h1>
-          <p className="text-gray-500 mt-1">Manage platform configuration and teacher limits</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{t('adminSettings.title')}</h1>
+          <p className="text-gray-500 mt-1">{t('adminSettings.description')}</p>
         </div>
       </motion.div>
 
@@ -154,7 +156,7 @@ export default function AdminSettingsPage() {
       >
         <h2 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
           <GraduationCap className="w-5 h-5" />
-          Teacher Content Limits
+          {t('adminSettings.teacherLimits')}
         </h2>
 
         <div className="space-y-6">
@@ -165,7 +167,7 @@ export default function AdminSettingsPage() {
             </div>
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Courses Limit
+                {t('adminSettings.coursesLimit')}
               </label>
               <input
                 type="number"
@@ -183,7 +185,7 @@ export default function AdminSettingsPage() {
                 className="w-full px-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
               />
               <p className="text-xs text-gray-500 mt-1">
-                Maximum number of courses a teacher can create
+                {t('adminSettings.coursesLimitDesc')}
               </p>
             </div>
           </div>
@@ -195,7 +197,7 @@ export default function AdminSettingsPage() {
             </div>
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Quizzes Limit
+                {t('adminSettings.quizzesLimit')}
               </label>
               <input
                 type="number"
@@ -213,7 +215,7 @@ export default function AdminSettingsPage() {
                 className="w-full px-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
               />
               <p className="text-xs text-gray-500 mt-1">
-                Maximum number of quizzes a teacher can create
+                {t('adminSettings.quizzesLimitDesc')}
               </p>
             </div>
           </div>
@@ -225,7 +227,7 @@ export default function AdminSettingsPage() {
             </div>
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Blogs Limit
+                {t('adminSettings.blogsLimit')}
               </label>
               <input
                 type="number"
@@ -243,7 +245,7 @@ export default function AdminSettingsPage() {
                 className="w-full px-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
               />
               <p className="text-xs text-gray-500 mt-1">
-                Maximum number of blogs a teacher can create
+                {t('adminSettings.blogsLimitDesc')}
               </p>
             </div>
           </div>
@@ -259,7 +261,7 @@ export default function AdminSettingsPage() {
       >
         <h2 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
           <ToggleRight className="w-5 h-5" />
-          Feature Toggles
+          {t('adminSettings.featureToggles')}
         </h2>
 
         <div className="space-y-4">
@@ -268,8 +270,8 @@ export default function AdminSettingsPage() {
             <div className="flex items-center gap-3">
               <BookOpen className="w-5 h-5 text-rose-600" />
               <div>
-                <p className="font-medium text-gray-900">Enable Blogs</p>
-                <p className="text-sm text-gray-500">Allow users to create and view blog posts</p>
+                <p className="font-medium text-gray-900">{t('adminSettings.enableBlogs')}</p>
+                <p className="text-sm text-gray-500">{t('adminSettings.enableBlogsDesc')}</p>
               </div>
             </div>
             <button
@@ -299,8 +301,8 @@ export default function AdminSettingsPage() {
             <div className="flex items-center gap-3">
               <FileText className="w-5 h-5 text-purple-600" />
               <div>
-                <p className="font-medium text-gray-900">Enable Quizzes</p>
-                <p className="text-sm text-gray-500">Allow teachers to create quizzes</p>
+                <p className="font-medium text-gray-900">{t('adminSettings.enableQuizzes')}</p>
+                <p className="text-sm text-gray-500">{t('adminSettings.enableQuizzesDesc')}</p>
               </div>
             </div>
             <button
@@ -330,8 +332,8 @@ export default function AdminSettingsPage() {
             <div className="flex items-center gap-3">
               <GraduationCap className="w-5 h-5 text-emerald-600" />
               <div>
-                <p className="font-medium text-gray-900">Enable Courses</p>
-                <p className="text-sm text-gray-500">Allow teachers to create courses</p>
+                <p className="font-medium text-gray-900">{t('adminSettings.enableCourses')}</p>
+                <p className="text-sm text-gray-500">{t('adminSettings.enableCoursesDesc')}</p>
               </div>
             </div>
             <button
@@ -361,8 +363,8 @@ export default function AdminSettingsPage() {
             <div className="flex items-center gap-3">
               <SettingsIcon className="w-5 h-5 text-indigo-600" />
               <div>
-                <p className="font-medium text-gray-900">Enable Analytics</p>
-                <p className="text-sm text-gray-500">Enable analytics dashboard for teachers</p>
+                <p className="font-medium text-gray-900">{t('adminSettings.enableAnalytics')}</p>
+                <p className="text-sm text-gray-500">{t('adminSettings.enableAnalyticsDesc')}</p>
               </div>
             </div>
             <button
@@ -398,7 +400,7 @@ export default function AdminSettingsPage() {
       >
         <h2 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
           <Globe className="w-5 h-5" />
-          Platform Configuration
+          {t('adminSettings.platformConfig')}
         </h2>
 
         <div className="space-y-6">
@@ -407,8 +409,8 @@ export default function AdminSettingsPage() {
             <div className="flex items-center gap-3">
               <Power className="w-5 h-5 text-amber-600" />
               <div>
-                <p className="font-medium text-gray-900">Maintenance Mode</p>
-                <p className="text-sm text-gray-500">Disable site for maintenance</p>
+                <p className="font-medium text-gray-900">{t('adminSettings.maintenanceMode')}</p>
+                <p className="text-sm text-gray-500">{t('adminSettings.maintenanceModeDesc')}</p>
               </div>
             </div>
             <button
@@ -438,8 +440,8 @@ export default function AdminSettingsPage() {
             <div className="flex items-center gap-3">
               <UserPlus className="w-5 h-5 text-blue-600" />
               <div>
-                <p className="font-medium text-gray-900">Allow Registration</p>
-                <p className="text-sm text-gray-500">Allow new users to register</p>
+                <p className="font-medium text-gray-900">{t('adminSettings.allowRegistration')}</p>
+                <p className="text-sm text-gray-500">{t('adminSettings.allowRegistrationDesc')}</p>
               </div>
             </div>
             <button
@@ -481,12 +483,12 @@ export default function AdminSettingsPage() {
           {isSaving ? (
             <>
               <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-              Saving...
+              {t('adminSettings.saving')}
             </>
           ) : (
             <>
               <Save className="w-5 h-5 mr-2" />
-              Save Settings
+              {t('adminSettings.saveSettings')}
             </>
           )}
         </button>
