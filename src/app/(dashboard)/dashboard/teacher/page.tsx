@@ -32,6 +32,18 @@ interface Quiz {
   course: { _id: string } | string;
 }
 
+interface Blog {
+  _id: string;
+  title: string;
+  topic: string;
+  content: string;
+  language: string;
+  isPublished: boolean;
+  createdAt: string;
+  updatedAt: string;
+  author?: { _id: string; name: string };
+}
+
 interface Stats {
   totalCourses: number;
   totalStudents: number;
@@ -97,7 +109,7 @@ export default function TeacherDashboardPage() {
       if (coursesRes.ok && quizzesRes.ok && blogsRes.ok) {
         const courses: Course[] = coursesData.courses || [];
         const allQuizzes: Quiz[] = quizzesData.quizzes || [];
-        const allBlogs: any[] = blogsData.blogs || [];
+        const allBlogs: Blog[] = blogsData.blogs || [];
 
         // Filter quizzes for this teacher's courses
         const courseIds = new Set(courses.map((c) => c._id.toString()));

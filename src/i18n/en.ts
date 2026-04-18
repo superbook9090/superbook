@@ -465,4 +465,11 @@ export const en = {
     studentsEnrolled: 'students enrolled',
     free: 'Free',
   },
+
+  // Maintenance
+  maintenance: {
+    title: 'Under Maintenance',
+    message: 'We\'re currently performing scheduled maintenance to improve your experience. We\'ll be back shortly!',
+    contactAdmin: 'For urgent assistance, please contact your administrator.',
+  },
 };

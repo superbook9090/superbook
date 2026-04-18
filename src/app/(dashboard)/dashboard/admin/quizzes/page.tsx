@@ -27,10 +27,18 @@ interface Quiz {
   description: string;
   course: { _id: string; title: string };
   instructor: { _id: string; name: string };
-  questions: any[];
+  questions: Question[];
   timeLimit: number;
   isPublished: boolean;
   createdAt: string;
+}
+
+interface Question {
+  _id: string;
+  question: string;
+  options: string[];
+  correctAnswer: number;
+  explanation?: string;
 }
 
 export default function AdminQuizzesPage() {

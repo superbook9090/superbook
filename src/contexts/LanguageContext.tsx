@@ -29,15 +29,17 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   };
 
   // Translation function
-  const t = (key: string) => {
+  const t = (key: string): string => {
     const keys = key.split('.');
-    let value: any = translations[lang];
+    let value: unknown = translations[lang];
 
     for (const k of keys) {
-      value = value?.[k];
+      if (typeof value === 'object' && value !== null) {
+        value = (value as Record<string, unknown>)[k];
+      }
     }
 
-    return value || key;
+    return typeof value === 'string' ? value : key;
   };
 
   // Load language from localStorage on mount
