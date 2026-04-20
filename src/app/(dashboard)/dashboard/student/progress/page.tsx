@@ -4,16 +4,10 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { motion } from 'framer-motion';
-import {
-  BookOpen,
-  TrendingUp,
-  Clock,
-  Award,
-  Target,
-} from 'lucide-react';
 import Loader from '@/components/ui/Loader';
 import Alert from '@/components/ui/Alert';
 
@@ -79,6 +73,7 @@ export default function StudentProgressPage() {
     }
 
     fetchProgress();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, status]);
 
   const fetchProgress = async () => {
@@ -94,7 +89,7 @@ export default function StudentProgressPage() {
         setError(errorMsg);
         setAlertState({ type: 'error', message: errorMsg });
       }
-    } catch (err) {
+    } catch {
       const errorMsg = t('progress.errorLoadingProgress');
       setError(errorMsg);
       setAlertState({ type: 'error', message: errorMsg });
@@ -190,11 +185,14 @@ export default function StudentProgressPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex items-start space-x-4">
                       {item.course.thumbnail ? (
-                        <img
-                          src={item.course.thumbnail}
-                          alt={item.course.title}
-                          className="w-20 h-20 rounded-lg object-cover"
-                        />
+                        <div className="relative w-20 h-20 rounded-lg overflow-hidden">
+                          <Image
+                            src={item.course.thumbnail}
+                            alt={item.course.title}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
                       ) : (
                         <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center">
                           <span className="text-white text-2xl">📚</span>

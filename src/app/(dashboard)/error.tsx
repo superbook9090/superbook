@@ -1,18 +1,13 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
-import { AlertCircle, RefreshCw } from 'lucide-react';
 
 export default function Error({
-  error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  const { t } = useTranslation();
   const { theme } = useRoleTheme();
 
   return (

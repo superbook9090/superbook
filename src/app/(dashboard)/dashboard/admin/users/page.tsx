@@ -3,7 +3,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { debounce } from '@/lib/debounce';
@@ -21,6 +20,7 @@ import {
 } from 'lucide-react';
 import Loader from '@/components/ui/Loader';
 import Alert from '@/components/ui/Alert';
+import { useRouter } from 'next/router';
 
 interface User {
   _id: string;

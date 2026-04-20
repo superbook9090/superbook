@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { motion } from 'framer-motion';
 import {
@@ -53,12 +52,11 @@ export default function AdminQuizzesPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   // Debounced search handler
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const debouncedSearchHandler = useCallback(
-    ((value: string) => {
+    (value: string) => {
       const timer = setTimeout(() => setSearchTerm(value), 300);
       return () => clearTimeout(timer);
-    }) as any,
+    },
     []
   );
 
@@ -77,6 +75,7 @@ export default function AdminQuizzesPage() {
     if (status === 'authenticated') {
       fetchQuizzes();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, status]);
 
   const fetchQuizzes = async () => {
@@ -85,7 +84,7 @@ export default function AdminQuizzesPage() {
       if (!response.ok) throw new Error('Failed to fetch quizzes');
       const data = await response.json();
       setQuizzes(data.quizzes || []);
-    } catch (error) {
+    } catch {
       setMessage({ type: 'error', text: 'Failed to fetch quizzes' });
     } finally {
       setIsLoading(false);
@@ -103,7 +102,7 @@ export default function AdminQuizzesPage() {
       if (!response.ok) throw new Error('Failed to update quiz');
       setMessage({ type: 'success', text: 'Quiz updated successfully' });
       fetchQuizzes();
-    } catch (error) {
+    } catch {
       setMessage({ type: 'error', text: 'Failed to update quiz' });
     }
   };

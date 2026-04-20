@@ -5,9 +5,6 @@ import { useRouter } from 'next/navigation';
 import * as XLSX from 'xlsx';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
-import { motion } from 'framer-motion';
-import { X, Plus, Trash2, Upload } from 'lucide-react';
-import Loader from '@/components/ui/Loader';
 
 interface Course {
   _id: string;
@@ -264,12 +261,12 @@ export default function CreateQuizForm() {
       } else {
         setPreviewData(parsed);
       }
-    } catch (_err) {
+    } catch {
       setUploadError(t('createQuizForm.parsingError'));
     } finally {
       setIsParsing(false);
     }
-  }, []);
+  }, [t]);
 
   const handleConfirmImport = useCallback(() => {
     const importedQuestions: Question[] = previewData.map((row) => ({

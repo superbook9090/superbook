@@ -3,15 +3,14 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import {
   BookOpen,
-  Clock,
   User,
   Tag,
   ArrowRight,
-  CheckCircle,
   Play,
   RotateCcw,
   Trash2
@@ -97,9 +96,10 @@ export default function CourseCard({ course, type, onEnroll, onDrop }: CourseCar
       {/* Thumbnail */}
       <div className="relative h-48 overflow-hidden">
         {courseData.thumbnail ? (
-          <img
+          <Image
             src={courseData.thumbnail}
             alt={courseData.title}
+            fill
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (

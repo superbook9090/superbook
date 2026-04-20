@@ -3,7 +3,6 @@
 
 import { useState } from 'react';
 import { useSessionStore } from '@/store/useSessionStore';
-import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
 import useSWR from 'swr';
@@ -11,7 +10,6 @@ import {
   BookOpen,
   Users,
   HelpCircle,
-  CheckCircle,
   Plus,
   ArrowRight,
   GraduationCap,
@@ -69,7 +67,6 @@ interface TeacherLimits {
 export default function TeacherDashboardPage() {
   const session = useSessionStore((s) => s.session) as { user?: { id: string; role: string; name: string } };
   const status = useSessionStore((s) => s.status);
-  const router = useRouter();
   const { t } = useTranslation();
   const [limitAlert, setLimitAlert] = useState<{ type: 'courses' | 'quizzes' | 'blogs' } | null>(null);
 

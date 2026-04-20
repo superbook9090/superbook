@@ -55,6 +55,7 @@ export default function StudentQuizzesPage() {
     // Auth and role-based redirects handled by middleware and /dashboard/page.tsx
 
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, status]);
 
   const fetchData = async () => {
@@ -156,10 +157,10 @@ export default function StudentQuizzesPage() {
       } else {
         setAlertState({ type: 'error', message: data.message || t('errors.failedStartQuiz') });
       }
-    } catch (_err) {
+    } catch {
       setAlertState({ type: 'error', message: t('errors.errorStartingQuiz') });
     }
-  }, [t]);
+  }, [t, router]);
 
   const completedAttempts = useMemo(() =>
     attempts.filter((a) => a.status === 'completed'),

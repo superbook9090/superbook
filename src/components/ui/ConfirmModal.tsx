@@ -133,9 +133,10 @@ export default function ConfirmModal({
         }
       };
 
-      modalRef.current.addEventListener('keydown', handleTab);
+      const currentModal = modalRef.current;
+      currentModal?.addEventListener('keydown', handleTab);
       return () => {
-        modalRef.current?.removeEventListener('keydown', handleTab);
+        currentModal?.removeEventListener('keydown', handleTab);
       };
     }
   }, [isOpen]);

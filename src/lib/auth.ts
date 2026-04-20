@@ -74,7 +74,7 @@ export const authOptions: AuthOptions = {
     })
   ],
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       // Handle Google OAuth sign in
       if (account?.provider === 'google') {
         if (!user?.email) return false;

@@ -40,7 +40,7 @@ interface Blog {
 }
 
 export default function EditBlogPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const params = useParams();
   const blogId = params.id as string;
@@ -65,6 +65,7 @@ export default function EditBlogPage() {
     if (status === 'authenticated' && blogId) {
       fetchBlog();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, blogId]);
 
   const fetchBlog = async () => {
@@ -79,10 +80,9 @@ export default function EditBlogPage() {
         content: blog.content,
         isPublished: blog.isPublished,
       });
-    } catch (error) {
+    } catch {
       const errorMsg = 'Failed to load blog';
       setError(errorMsg);
-      setAlertState({ type: 'error', message: errorMsg });
     } finally {
       setIsLoading(false);
     }
@@ -125,7 +125,7 @@ export default function EditBlogPage() {
         setError(errorMsg);
         setAlertState({ type: 'error', message: errorMsg });
       }
-    } catch (err) {
+    } catch {
       const errorMsg = 'An error occurred. Please try again.';
       setError(errorMsg);
       setAlertState({ type: 'error', message: errorMsg });

@@ -16,7 +16,7 @@ export default function SessionSync() {
     if (status === 'authenticated') {
       setSession(session);
     }
-  }, [status, setSession, setStatus]);
+  }, [status, session, setSession, setStatus]);
 
   return null;
 }

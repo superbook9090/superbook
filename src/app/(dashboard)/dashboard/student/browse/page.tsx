@@ -39,6 +39,7 @@ export default function BrowseCoursesPage() {
     // Auth and role-based redirects handled by middleware and /dashboard/page.tsx
 
     fetchAvailableCourses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, status]);
 
   const fetchAvailableCourses = async () => {
@@ -50,7 +51,7 @@ export default function BrowseCoursesPage() {
       } else {
         setError(data.message || 'Failed to load courses');
       }
-    } catch (err) {
+    } catch {
       setError('Error loading courses');
     } finally {
       setIsLoading(false);
@@ -75,7 +76,7 @@ export default function BrowseCoursesPage() {
       } else {
         setAlertState({ type: 'error', message: data.message || 'Failed to enroll' });
       }
-    } catch (err) {
+    } catch {
       setAlertState({ type: 'error', message: 'Error enrolling in course' });
     } finally {
       setEnrollingId(null);

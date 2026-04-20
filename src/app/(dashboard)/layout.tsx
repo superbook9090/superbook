@@ -1,6 +1,5 @@
 // src/app/(dashboard)/layout.tsx
 import { getServerSession } from 'next-auth';
-import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
 import StudentSidebar from '@/components/dashboard/StudentSidebar';
 import TeacherSidebar from '@/components/dashboard/TeacherSidebar';
@@ -63,7 +62,6 @@ export default async function DashboardLayout({
         user={session.user}
         navigation={isTeacherOrAdmin ? teacherNavigation : studentNavigation}
         adminNavigation={isTeacherOrAdmin ? adminNavigation : []}
-        colorScheme={isTeacherOrAdmin ? 'emerald' : 'indigo'}
       />
 
       {/* Sidebar - Desktop Only */}

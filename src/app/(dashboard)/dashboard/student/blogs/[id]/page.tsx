@@ -6,7 +6,6 @@ import { useRouter, useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useTranslation } from '@/hooks/useTranslation';
-import { useApiRequest } from '@/hooks/useApiRequest';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import {
   ArrowLeft,
@@ -19,7 +18,6 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
-import Loader from '@/components/ui/Loader';
 import DOMPurify from 'isomorphic-dompurify';
 
 interface Blog {

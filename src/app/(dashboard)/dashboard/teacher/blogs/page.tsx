@@ -1,12 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { useTranslation } from '@/hooks/useTranslation';
-import { debounce } from '@/lib/debounce';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import {
   BookOpen,
@@ -39,18 +35,9 @@ interface Blog {
   author?: { _id: string; name: string };
 }
 
-interface FeatureToggles {
-  enableBlogs: boolean;
-  enableQuizzes: boolean;
-  enableCourses: boolean;
-  enableAnalytics: boolean;
-}
-
 export default function TeacherBlogsPage() {
   const session = useSessionStore((s) => s.session) as { user?: { id: string } };
   const status = useSessionStore((s) => s.status);
-  const router = useRouter();
-  const { t } = useTranslation();
   const { theme } = useRoleTheme();
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<'all' | 'published' | 'draft'>('all');
@@ -61,7 +48,10 @@ export default function TeacherBlogsPage() {
 
   // Debounced search handler
   const debouncedSearchHandler = useCallback(
-    debounce((...args: unknown[]) => setSearchTerm(args[0] as string), 300),
+    (value: string) => {
+      const timer = setTimeout(() => setSearchTerm(value), 300);
+      return () => clearTimeout(timer);
+    },
     []
   );
 

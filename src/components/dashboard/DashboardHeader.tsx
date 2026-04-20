@@ -2,6 +2,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useTranslation } from '@/hooks/useTranslation';
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher';
 
@@ -20,9 +21,11 @@ export default function DashboardHeader({ isTeacherOrAdmin }: DashboardHeaderPro
             href={isTeacherOrAdmin ? '/dashboard/teacher' : '/dashboard/student'}
             className="group"
           >
-            <img
+            <Image
               src="/logo.svg"
               alt="Super Book Logo"
+              width={32}
+              height={32}
               className="h-8 w-auto bg-transparent transition-transform duration-300 group-hover:scale-105 group-hover:drop-shadow-[0_0_10px_rgba(79,70,229,0.3)]"
             />
           </Link>

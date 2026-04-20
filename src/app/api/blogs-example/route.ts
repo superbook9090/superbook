@@ -1,6 +1,5 @@
 // Example API route demonstrating middleware system
 import { NextResponse } from 'next/server';
-import { NextRequest } from 'next/server';
 import dbConnect from '@/lib/db';
 import Blog from '@/models/Blog';
 import { requireFeature } from '@/lib/settingsHelpers';
@@ -78,7 +77,7 @@ export const GET = withMiddleware(
 
 // Example POST handler with authentication
 async function createBlogHandler(context: MiddlewareContext): Promise<NextResponse> {
-  const { request, userId, userRole } = context;
+  const { userId, userRole } = context;
   const logContext: LogContext = {
     method: 'POST',
     path: '/api/blogs-example',
@@ -86,8 +85,6 @@ async function createBlogHandler(context: MiddlewareContext): Promise<NextRespon
   };
 
   try {
-    const body = await request.json();
-
     // Only teachers and admins can create blogs
     if (userRole !== 'teacher' && userRole !== 'admin') {
       return NextResponse.json(

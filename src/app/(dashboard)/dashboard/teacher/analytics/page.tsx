@@ -6,17 +6,6 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
-import { motion } from 'framer-motion';
-import {
-  TrendingUp,
-  Users,
-  BookOpen,
-  Award,
-  Clock,
-  BarChart3,
-} from 'lucide-react';
-import Loader from '@/components/ui/Loader';
-import Alert from '@/components/ui/Alert';
 
 interface CourseStat {
   _id: string;
@@ -66,7 +55,7 @@ export default function TeacherAnalyticsPage() {
     // Role-based redirect handled in /dashboard/page.tsx - no redirect here
 
     fetchStats();
-  }, [session, status]);
+  }, [session, status, router]);
 
   const fetchStats = async () => {
     try {
@@ -78,7 +67,7 @@ export default function TeacherAnalyticsPage() {
       } else {
         setError(data.message || 'Failed to load analytics');
       }
-    } catch (err) {
+    } catch {
       setError('Error loading analytics');
     } finally {
       setIsLoading(false);

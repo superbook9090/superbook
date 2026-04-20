@@ -5,7 +5,6 @@ import dbConnect from '@/lib/db';
 import Blog from '@/models/Blog';
 import { createBlogSchema } from '@/lib/validation';
 import { logApiError, logFailedRequest, type LogContext } from '@/lib/logger';
-import { serialize } from '@/lib/serialize';
 import { requireFeature, checkTeacherLimit } from '@/lib/settingsHelpers';
 import { sanitizeHtml } from '@/lib/sanitize';
 

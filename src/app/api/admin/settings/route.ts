@@ -8,7 +8,7 @@ import { logApiError, type LogContext } from '@/lib/logger';
 import { revalidatePath } from 'next/cache';
 
 // GET /api/admin/settings - Get app settings (admin only)
-export async function GET(req: NextRequest) {
+export async function GET() {
   const logContext: LogContext = {
     method: 'GET',
     path: '/api/admin/settings',

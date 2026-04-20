@@ -4,21 +4,9 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
-import { motion } from 'framer-motion';
-import {
-  BookOpen,
-  Search,
-  Filter,
-  Eye,
-  EyeOff,
-  Calendar,
-  Plus,
-  Trash2,
-} from 'lucide-react';
-import Loader from '@/components/ui/Loader';
-import { Badge } from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
 
 interface Course {
@@ -53,6 +41,7 @@ export default function TeacherCoursesPage() {
     // Role-based redirect handled in /dashboard/page.tsx - no redirect here
 
     fetchCourses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, status]);
 
   const fetchCourses = async () => {
@@ -67,7 +56,7 @@ export default function TeacherCoursesPage() {
         setError(errorMsg);
         setAlertState({ type: 'error', message: errorMsg });
       }
-    } catch (err) {
+    } catch {
       const errorMsg = t('teacherCourses.errorLoadingCourses');
       setError(errorMsg);
       setAlertState({ type: 'error', message: errorMsg });
@@ -131,11 +120,14 @@ export default function TeacherCoursesPage() {
                 className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
               >
                 {course.thumbnail ? (
-                  <img
-                    src={course.thumbnail}
-                    alt={course.title}
-                    className="w-full h-40 object-cover"
-                  />
+                  <div className="relative h-40">
+                    <Image
+                      src={course.thumbnail}
+                      alt={course.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
                 ) : (
                   <div className="w-full h-40 bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center">
                     <span className="text-white text-4xl">📚</span>

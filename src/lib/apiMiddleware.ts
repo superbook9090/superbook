@@ -31,7 +31,7 @@ export function withRateLimit(limitType: RateLimitType = 'general') {
     context: MiddlewareContext,
     next: () => Promise<NextResponse>
   ): Promise<NextResponse | void> {
-    const { request, requestId, userId, ip } = context;
+    const { requestId, userId, ip } = context;
 
     const identifier = userId || ip || 'unknown';
     const limiter =
@@ -44,14 +44,6 @@ export function withRateLimit(limitType: RateLimitType = 'general') {
     const result = limiter.check(identifier);
 
     if (!result.allowed) {
-      const logContext: LogContext = {
-        requestId,
-        userId,
-        ip,
-        method: request.method,
-        path: request.nextUrl.pathname,
-      };
-
       return NextResponse.json(
         { message: 'Too many requests. Please try again later.' },
         {

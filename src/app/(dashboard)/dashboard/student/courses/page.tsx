@@ -7,13 +7,6 @@ import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { motion } from 'framer-motion';
-import {
-  BookOpen,
-  Search,
-  Filter,
-  Clock,
-  User,
-} from 'lucide-react';
 import Loader from '@/components/ui/Loader';
 import CourseCard from '@/components/dashboard/CourseCard';
 import Alert from '@/components/ui/Alert';
@@ -55,6 +48,7 @@ export default function StudentCoursesPage() {
     // Auth and role-based redirects handled by middleware and /dashboard/page.tsx
 
     fetchEnrollments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, status]);
 
   const fetchEnrollments = async () => {
@@ -66,7 +60,7 @@ export default function StudentCoursesPage() {
       } else {
         setError(data.message || 'Failed to load courses');
       }
-    } catch (err) {
+    } catch {
       setError('Error loading courses');
     } finally {
       setIsLoading(false);
@@ -86,7 +80,7 @@ export default function StudentCoursesPage() {
         const data = await response.json();
         setAlertState({ type: 'error', message: data.message || t('courses.dropFailed') });
       }
-    } catch (err) {
+    } catch {
       setAlertState({ type: 'error', message: t('courses.dropFailed') });
     }
   };

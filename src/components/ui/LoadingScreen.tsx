@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 interface LoadingScreenProps {
   fullScreen?: boolean;
@@ -47,9 +48,11 @@ export default function LoadingScreen({ fullScreen = true, message }: LoadingScr
             }}
             className="rounded-2xl"
           >
-            <img
+            <Image
               src="/logo.svg"
               alt="Super Book Logo"
+              width={96}
+              height={96}
               className="h-24 w-24 bg-transparent"
             />
           </motion.div>

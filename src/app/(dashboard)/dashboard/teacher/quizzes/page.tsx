@@ -51,7 +51,7 @@ export default function TeacherQuizzesPage() {
     }
 
     fetchData();
-  }, [session, status]);
+  }, [session, status, router]);
 
   const fetchData = async () => {
     try {
@@ -94,7 +94,7 @@ export default function TeacherQuizzesPage() {
       } else {
         setError(quizzesData.message || 'Failed to load quizzes');
       }
-    } catch (_err) {
+    } catch {
       setError('Error loading quizzes');
     } finally {
       setIsLoading(false);

@@ -7,15 +7,6 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
 import { motion } from 'framer-motion';
-import {
-  CheckCircle,
-  XCircle,
-  Clock,
-  BookOpen,
-  ChevronLeft,
-  ChevronRight,
-  RotateCcw,
-} from 'lucide-react';
 import Loader from '@/components/ui/Loader';
 
 interface Question {
@@ -71,6 +62,7 @@ export default function QuizResultPage() {
     }
 
     fetchAttempt();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, status, attemptId]);
 
   const fetchAttempt = async () => {
@@ -81,8 +73,8 @@ export default function QuizResultPage() {
       if (response.ok) {
         setAttempt(data);
       }
-    } catch (err) {
-      console.error('Error fetching attempt:', err);
+    } catch {
+      console.error('Error fetching attempt');
     } finally {
       setIsLoading(false);
     }

@@ -1,8 +1,6 @@
 // src/app/(dashboard)/dashboard/student/page.tsx
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
 import useSWR from 'swr';
@@ -57,7 +55,6 @@ interface Stats {
 export default function StudentDashboardPage() {
   const session = useSessionStore((s) => s.session) as { user?: { name: string } };
   const status = useSessionStore((s) => s.status);
-  const router = useRouter();
   const { t } = useTranslation();
 
   // SWR hooks for data fetching with automatic caching and deduplication

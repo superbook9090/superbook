@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import { useTranslation } from '@/hooks/useTranslation';
 import {
   LayoutDashboard,
@@ -14,7 +15,6 @@ import {
   TrendingUp,
   User,
   LogOut,
-  GraduationCap,
   Newspaper,
   Heart
 } from 'lucide-react';
@@ -70,9 +70,11 @@ export default function StudentSidebar({ user }: { user: User | null }) {
         {/* Logo */}
         <div className="flex items-center flex-shrink-0 px-5 py-4">
           <Link href="/dashboard/student" className="flex items-center gap-3 group">
-            <img
+            <Image
               src="/logo.svg"
               alt="Super Book Logo"
+              width={36}
+              height={36}
               className="h-9 w-auto bg-transparent object-contain transition-transform duration-300 group-hover:scale-105 group-hover:drop-shadow-[0_0_8px_rgba(99,102,241,0.4)]"
             />
             <div className="flex flex-col items-start">

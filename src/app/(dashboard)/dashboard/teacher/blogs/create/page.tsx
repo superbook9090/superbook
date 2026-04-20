@@ -1,14 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useTranslation } from '@/hooks/useTranslation';
-import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { motion } from 'framer-motion';
-import { useApiRequest } from '@/hooks/useApiRequest';
-import { ArrowLeft, Save, Eye, EyeOff, BookOpen, Hash, FileText, Type } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, BookOpen, Hash, FileText, Type } from 'lucide-react';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import Alert from '@/components/ui/Alert';
 import Loader from '@/components/ui/Loader';
@@ -28,10 +25,8 @@ const topics = [
 ];
 
 export default function CreateBlogPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
-  const { t } = useTranslation();
-  const { theme } = useRoleTheme();
   const [isLoading, setIsLoading] = useState(false);
   const [isDraft, setIsDraft] = useState(false);
   const [formData, setFormData] = useState({
@@ -85,7 +80,7 @@ export default function CreateBlogPage() {
         setError(errorMsg);
         setAlertState({ type: 'error', message: errorMsg });
       }
-    } catch (err) {
+    } catch {
       const errorMsg = 'An error occurred. Please try again.';
       setError(errorMsg);
       setAlertState({ type: 'error', message: errorMsg });
