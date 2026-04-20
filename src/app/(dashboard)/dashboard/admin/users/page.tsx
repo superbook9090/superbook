@@ -48,7 +48,7 @@ export default function AdminUsersPage() {
 
   // Debounced search handler
   const debouncedSearchHandler = useCallback(
-    debounce((value: string) => setSearch(value), 300),
+    debounce((...args: unknown[]) => setSearch(args[0] as string), 300),
     []
   );
   const [page, setPage] = useState(1);
@@ -155,6 +155,7 @@ export default function AdminUsersPage() {
 
   const handleSaveLimits = async () => {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const updates: any = {};
       if (limitsForm.courses) updates.limits = { ...updates.limits, courses: parseInt(limitsForm.courses) };
       if (limitsForm.quizzes) updates.limits = { ...updates.limits, quizzes: parseInt(limitsForm.quizzes) };

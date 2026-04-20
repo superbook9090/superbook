@@ -219,11 +219,16 @@ async function getTeacherStats(teacherId: string) {
 
   // Calculate overview stats from aggregated data
   const totalCourses = courseStats.length;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const publishedCourses = courseStats.filter((c: any) => c.isPublished).length;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const totalStudents = courseStats.reduce((sum: number, c: any) => sum + c.students, 0);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const totalQuizzes = courseStats.reduce((sum: number, c: any) => sum + c.quizzes, 0);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const totalAttempts = courseStats.reduce((sum: number, c: any) => sum + c.attempts, 0);
   const averageScore = totalAttempts > 0
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ? Math.round(courseStats.reduce((sum: number, c: any) => sum + c.averageScore * c.attempts, 0) / totalAttempts)
     : 0;
 
@@ -231,6 +236,7 @@ async function getTeacherStats(teacherId: string) {
   const topStudents = await QuizAttempt.aggregate([
     {
       $match: {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         quiz: { $in: courseStats.flatMap((c: any) => c.quizzes) },
         status: 'completed'
       }

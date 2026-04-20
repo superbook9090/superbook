@@ -24,6 +24,7 @@ export async function GET(
 
     const course = await Course.findById(id)
       .populate('instructor', 'name email')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .lean() as any;
 
     if (!course) {

@@ -53,7 +53,9 @@ export default async function FavoritesPage() {
 
     // Filter out favorites where blog is null (unpublished) and serialize
     favorites = favoritesData
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .filter((fav: any) => fav.blog !== null)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .map((fav: any) => ({
         _id: fav._id.toString(),
         blog: {

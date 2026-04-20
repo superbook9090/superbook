@@ -90,7 +90,7 @@ export default function StudentBlogsPage() {
 
   // Debounced search handler
   const debouncedSearchHandler = useCallback(
-    debounce((value: string) => setSearchTerm(value), 300),
+    debounce((...args: unknown[]) => setSearchTerm(args[0] as string), 300),
     []
   );
 

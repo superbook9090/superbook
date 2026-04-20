@@ -13,9 +13,9 @@ export function serialize(data: unknown): unknown {
   // Handle ObjectId (has buffer property and toHexString method)
   if (typeof data === 'object' && data !== null) {
     // Check if it's an actual ObjectId instance (has buffer and toHexString method)
-    if ('buffer' in data && 'toHexString' in data && typeof (data as any).toHexString === 'function') {
+    if ('buffer' in data && 'toHexString' in data && typeof (data as { toHexString: () => string }).toHexString === 'function') {
       // It's an ObjectId, convert to string
-      return (data as any).toString();
+      return (data as { toString: () => string }).toString();
     }
 
     // Handle arrays

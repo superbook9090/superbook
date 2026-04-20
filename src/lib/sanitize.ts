@@ -1,7 +1,7 @@
 import DOMPurify from 'isomorphic-dompurify';
 
 // Sanitize HTML content to prevent XSS attacks
-export function sanitizeHtml(html: string, options?: any): string {
+export function sanitizeHtml(html: string, options?: Record<string, unknown>): string {
   const sanitized = DOMPurify.sanitize(html, {
     ALLOWED_TAGS: [
       'p', 'br', 'strong', 'em', 'u', 'i', 'b', 'a', 'ul', 'ol', 'li',
@@ -11,7 +11,6 @@ export function sanitizeHtml(html: string, options?: any): string {
     ALLOWED_ATTR: [
       'href', 'target', 'rel', 'src', 'alt', 'class', 'id', 'style'
     ],
-    FORCE_SELF_CLOSING_TAGS: ['img', 'br'],
     KEEP_CONTENT: true,
     ...options,
   });
@@ -31,18 +30,18 @@ export function validateObjectId(id: string): boolean {
 }
 
 // Sanitize user input for queries to prevent NoSQL injection
-export function sanitizeQueryValue(value: any): any {
+export function sanitizeQueryValue(value: unknown): unknown {
   if (typeof value === 'string') {
     // Remove potential NoSQL injection operators
     return value.replace(/^\$/, '');
   }
   if (typeof value === 'object' && value !== null) {
     // Recursively sanitize nested objects
-    const sanitized: any = {};
+    const sanitized: Record<string, unknown> = {};
     for (const key in value) {
       // Skip keys that look like MongoDB operators
       if (!key.startsWith('$')) {
-        sanitized[key] = sanitizeQueryValue(value[key]);
+        sanitized[key] = sanitizeQueryValue((value as Record<string, unknown>)[key]);
       }
     }
     return sanitized;

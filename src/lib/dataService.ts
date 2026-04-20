@@ -27,7 +27,7 @@ export const getSettingsWithDefaults = cache(async (): Promise<IAppSettings> => 
   const settings = await AppSettings.findOne().lean() as IAppSettings | null;
   
   if (settings) return settings;
-  
+
   // Return default settings if none exist
   return {
     teacherLimits: {
@@ -43,12 +43,12 @@ export const getSettingsWithDefaults = cache(async (): Promise<IAppSettings> => 
     },
     platformConfig: {
       siteName: 'Super Book',
-      siteDescription: 'Learning Management System',
+      siteDescription: 'A comprehensive learning platform',
       maintenanceMode: false,
       allowRegistration: true,
       defaultLanguage: 'en',
     },
-  } as IAppSettings;
+  } as unknown as IAppSettings;
 });
 
 // ============================================
@@ -57,21 +57,20 @@ export const getSettingsWithDefaults = cache(async (): Promise<IAppSettings> => 
 
 export const getCourses = cache(async (options?: {
   instructor?: string;
-  isPublished?: boolean;
-  available?: boolean;
+  isPublished?: unknown;
+  available?: boolean | string;
   studentId?: string;
   limit?: number;
   skip?: number;
 }) => {
   await dbConnect();
   
-  const { instructor, isPublished, available, studentId, limit = 20, skip = 0 } = options || {};
-  
+  const { instructor, available, studentId, limit = 20, skip = 0 } = options || {};
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const query: Record<string, any> = {};
-  
+
   if (instructor) query.instructor = instructor;
-  if (isPublished !== undefined) query.isPublished = isPublished;
   if (available === 'true' && studentId) {
     query.isPublished = true;
     // Exclude courses student is already enrolled in
@@ -350,19 +349,20 @@ export const getTeacherStats = cache(async (teacherId: string) => {
   const quizzes = await Quiz.find({ instructor: teacherId }).lean();
   const blogs = await Blog.find({ author: teacherId }).lean();
   
-  const courseIds = courses.map(c => c._id.toString());
+  const courseIds = courses.map((c: unknown) => (c as { _id: { toString: () => string } })._id.toString());
   const enrollments = await Enrollment.find({ course: { $in: courseIds } }).lean();
-  
+
   const allStudentIds = new Set<string>();
-  enrollments.forEach((e: any) => {
-    e.enrolledStudents?.forEach((studentId: string) => allStudentIds.add(studentId));
+  enrollments.forEach((e: unknown) => {
+    const enrollment = e as { enrolledStudents?: string[] };
+    enrollment.enrolledStudents?.forEach((studentId: string) => allStudentIds.add(studentId));
   });
-  
+
   return {
     totalCourses: courses.length,
     totalQuizzes: quizzes.length,
     totalBlogs: blogs.length,
     totalStudents: allStudentIds.size,
-    publishedCourses: courses.filter((c: any) => c.isPublished).length,
+    publishedCourses: courses.filter((c: unknown) => (c as { isPublished?: boolean }).isPublished).length,
   };
 });

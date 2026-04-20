@@ -14,7 +14,6 @@ import {
   Eye,
   EyeOff,
   Calendar,
-  User,
   BookOpen,
 } from 'lucide-react';
 import Loader from '@/components/ui/Loader';
@@ -44,7 +43,6 @@ interface Question {
 export default function AdminQuizzesPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const { t } = useTranslation();
   const { theme } = useRoleTheme();
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -55,6 +53,7 @@ export default function AdminQuizzesPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   // Debounced search handler
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const debouncedSearchHandler = useCallback(
     ((value: string) => {
       const timer = setTimeout(() => setSearchTerm(value), 300);

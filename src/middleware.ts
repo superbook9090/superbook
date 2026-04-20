@@ -27,17 +27,13 @@ export async function middleware(request: NextRequest) {
     const identifier = token?.id || ip;
 
     let limiter;
-    let limitType;
 
     if (pathname.startsWith('/api/auth/')) {
       limiter = authRateLimiter;
-      limitType = 'auth';
     } else if (pathname.startsWith('/api/admin/')) {
       limiter = adminRateLimiter;
-      limitType = 'admin';
     } else {
       limiter = generalRateLimiter;
-      limitType = 'general';
     }
 
     const result = limiter.check(identifier);

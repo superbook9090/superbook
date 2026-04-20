@@ -67,7 +67,7 @@ interface TeacherLimits {
 }
 
 export default function TeacherDashboardPage() {
-  const session = useSessionStore((s) => s.session);
+  const session = useSessionStore((s) => s.session) as { user?: { id: string; role: string; name: string } };
   const status = useSessionStore((s) => s.status);
   const router = useRouter();
   const { t } = useTranslation();

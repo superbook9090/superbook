@@ -25,7 +25,7 @@ enum LogLevel {
 }
 
 // Format log message
-function formatLog(level: LogLevel, message: string, context?: LogContext, data?: any): string {
+function formatLog(level: LogLevel, message: string, context?: LogContext, data?: unknown): string {
   const timestamp = new Date().toISOString();
   const contextStr = context ? ` [${JSON.stringify(context)}]` : '';
   const dataStr = data ? ` ${JSON.stringify(data)}` : '';
@@ -33,15 +33,15 @@ function formatLog(level: LogLevel, message: string, context?: LogContext, data?
 }
 
 // Log functions
-export function logInfo(message: string, context?: LogContext, data?: any) {
+export function logInfo(message: string, context?: LogContext, data?: unknown) {
   console.log(formatLog(LogLevel.INFO, message, context, data));
 }
 
-export function logWarn(message: string, context?: LogContext, data?: any) {
+export function logWarn(message: string, context?: LogContext, data?: unknown) {
   console.warn(formatLog(LogLevel.WARN, message, context, data));
 }
 
-export function logError(message: string, context?: LogContext, data?: any) {
+export function logError(message: string, context?: LogContext, data?: unknown) {
   console.error(formatLog(LogLevel.ERROR, message, context, data));
 }
 
@@ -51,7 +51,7 @@ export function logFailedRequest(
   method: string,
   path: string,
   context?: LogContext,
-  error?: any
+  error?: Error
 ) {
   logError(
     `Failed request: ${method} ${path} - ${statusCode}`,

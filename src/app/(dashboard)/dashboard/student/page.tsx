@@ -55,7 +55,7 @@ interface Stats {
 }
 
 export default function StudentDashboardPage() {
-  const session = useSessionStore((s) => s.session);
+  const session = useSessionStore((s) => s.session) as { user?: { name: string } };
   const status = useSessionStore((s) => s.status);
   const router = useRouter();
   const { t } = useTranslation();

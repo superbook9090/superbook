@@ -67,7 +67,7 @@ interface Quiz {
   instructor: { _id: string; name: string; email: string };
   isPublished: boolean;
   timeLimit: number;
-  questions: any[];
+  questions: unknown[];
   createdAt: string;
 }
 

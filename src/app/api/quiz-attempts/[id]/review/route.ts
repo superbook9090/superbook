@@ -11,11 +11,12 @@ import { serialize } from '@/lib/serialize';
 // GET /api/quiz-attempts/[id]/review - Get quiz review data (only for completed attempts)
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const logContext: LogContext = {
     method: 'GET',
-    path: `/api/quiz-attempts/${params.id}/review`,
+    path: `/api/quiz-attempts/${id}/review`,
   };
 
   try {
@@ -31,13 +32,14 @@ export async function GET(
       logContext.userId = session.user.id;
     }
 
-    const attemptId = params.id;
+    const attemptId = id;
 
     // Fetch the attempt with full details
     const attempt = await QuizAttempt.findById(attemptId)
       .populate('quiz')
       .populate('course', 'title description')
       .populate('student', 'name email')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .lean() as any;
 
     if (!attempt) {
@@ -58,6 +60,7 @@ export async function GET(
     }
 
     // Fetch the full quiz with correct answers
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const quiz = await Quiz.findById(attempt.quiz._id).lean() as any;
 
     if (!quiz) {
@@ -80,6 +83,7 @@ export async function GET(
         title: quiz.title,
         description: quiz.description,
         timeLimit: quiz.timeLimit,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         questions: quiz.questions.map((q: any) => ({
           _id: q._id,
           question: q.question,
@@ -87,6 +91,7 @@ export async function GET(
           correctAnswer: q.correctAnswer,
         })),
       },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       answers: attempt.answers.map((a: any) => ({
         questionIndex: a.questionIndex,
         selectedOption: a.selectedOption,
@@ -99,7 +104,7 @@ export async function GET(
 
     return NextResponse.json(serializedReviewData, { status: 200 });
   } catch (error) {
-    logApiError(error as Error, 'GET', `/api/quiz-attempts/${params.id}/review`, logContext);
+    logApiError(error as Error, 'GET', `/api/quiz-attempts/${id}/review`, logContext);
     return NextResponse.json(
       { message: 'Something went wrong. Please try again later.' },
       { status: 500 }

@@ -4,9 +4,9 @@
 import { create } from 'zustand';
 
 interface SessionState {
-  session: any;
+  session: unknown;
   status: 'loading' | 'authenticated' | 'unauthenticated';
-  setSession: (session: any) => void;
+  setSession: (session: unknown) => void;
   setStatus: (status: 'loading' | 'authenticated' | 'unauthenticated') => void;
   clearSession: () => void;
 }

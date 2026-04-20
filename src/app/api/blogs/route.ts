@@ -51,6 +51,7 @@ export async function GET(req: NextRequest) {
       .lean();
 
     // Convert ObjectIds to strings for Next.js serialization
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const serializedBlogs = blogs.map((blog: any) => ({
       ...blog,
       _id: blog._id?.toString(),
@@ -145,7 +146,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!['en', 'hi'].includes(language)) {
-      logFailedRequest(400, 'POST', '/api/blogs', logContext, { reason: 'Invalid language' });
+      logFailedRequest(400, 'POST', '/api/blogs', logContext, new Error('Invalid language'));
       return NextResponse.json(
         { message: 'Language must be either en or hi' },
         { status: 400 }

@@ -10,7 +10,7 @@ export const fetcher = async (url: string) => {
   return res.json();
 };
 
-export const postFetcher = async (url: string, { arg }: { arg: any }) => {
+export const postFetcher = async (url: string, { arg }: { arg: unknown }) => {
   const res = await fetch(url, {
     method: 'POST',
     headers: {
@@ -25,7 +25,7 @@ export const postFetcher = async (url: string, { arg }: { arg: any }) => {
   return res.json();
 };
 
-export const putFetcher = async (url: string, { arg }: { arg: any }) => {
+export const putFetcher = async (url: string, { arg }: { arg: unknown }) => {
   const res = await fetch(url, {
     method: 'PUT',
     headers: {
@@ -40,7 +40,7 @@ export const putFetcher = async (url: string, { arg }: { arg: any }) => {
   return res.json();
 };
 
-export const patchFetcher = async (url: string, { arg }: { arg: any }) => {
+export const patchFetcher = async (url: string, { arg }: { arg: unknown }) => {
   const res = await fetch(url, {
     method: 'PATCH',
     headers: {

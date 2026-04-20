@@ -65,8 +65,10 @@ export async function GET(request: NextRequest) {
 
     // Sanitize quiz questions - remove correctAnswer before sending to frontend
     // Use separate review endpoint for completed attempts with correct answers
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sanitizedAttempts = attempts.map((attempt: any) => {
       if (attempt.quiz && attempt.quiz.questions) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         attempt.quiz.questions = attempt.quiz.questions.map((q: any) => ({
           _id: q._id?.toString(),
           question: q.question,
@@ -75,6 +77,7 @@ export async function GET(request: NextRequest) {
       }
       // For completed attempts, include isCorrect in answers
       if (attempt.status === 'completed' && attempt.answers) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         attempt.answers = attempt.answers.map((a: any) => ({
           questionIndex: a.questionIndex,
           selectedOption: a.selectedOption,
@@ -223,6 +226,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Sanitize questions - remove correctAnswer before sending to frontend
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const sanitizedQuestions = quiz.questions.map((q: any) => ({
         _id: q._id,
         question: q.question,
@@ -298,6 +302,7 @@ export async function POST(request: NextRequest) {
       }).lean();
 
       // Count unique quizzes completed (not total attempts)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const completedQuizzes = new Set(completedAttempts.map((a: any) => a.quiz.toString())).size;
 
       // Update course progress based on quiz completion (simplified)
@@ -314,6 +319,7 @@ export async function POST(request: NextRequest) {
           message: 'Quiz submitted successfully',
           attempt: {
             ...attempt.toObject(),
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             answers: gradedAnswers.map((a: any) => ({
               questionIndex: a.questionIndex,
               selectedOption: a.selectedOption,

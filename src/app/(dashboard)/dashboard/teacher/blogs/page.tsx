@@ -47,7 +47,7 @@ interface FeatureToggles {
 }
 
 export default function TeacherBlogsPage() {
-  const session = useSessionStore((s) => s.session);
+  const session = useSessionStore((s) => s.session) as { user?: { id: string } };
   const status = useSessionStore((s) => s.status);
   const router = useRouter();
   const { t } = useTranslation();
@@ -61,7 +61,7 @@ export default function TeacherBlogsPage() {
 
   // Debounced search handler
   const debouncedSearchHandler = useCallback(
-    debounce((value: string) => setSearchTerm(value), 300),
+    debounce((...args: unknown[]) => setSearchTerm(args[0] as string), 300),
     []
   );
 
