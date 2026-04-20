@@ -9,6 +9,7 @@ import MobileBottomNav from '@/components/dashboard/MobileBottomNav';
 import SessionProvider from '@/components/dashboard/SessionProvider';
 import SessionSync from '@/components/dashboard/SessionSync';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
+import { RoleThemeProvider } from '@/contexts/RoleThemeContext';
 
 // TODO: Add translation keys for navigation items
 // Currently using hardcoded strings - should use i18n system
@@ -16,6 +17,7 @@ const studentNavigation = [
   { name: 'Dashboard', href: '/dashboard/student', icon: 'LayoutDashboard' },
   { name: 'My Courses', href: '/dashboard/student/courses', icon: 'BookOpen' },
   { name: 'Browse', href: '/dashboard/student/browse', icon: 'Search' },
+  { name: 'Blogs', href: '/dashboard/student/blogs', icon: 'Library' },
   { name: 'Quizzes', href: '/dashboard/student/quizzes', icon: 'HelpCircle' },
   { name: 'Progress', href: '/dashboard/student/progress', icon: 'TrendingUp' },
   { name: 'Profile', href: '/dashboard/student/profile', icon: 'User' },
@@ -25,6 +27,7 @@ const teacherNavigation = [
   { name: 'Dashboard', href: '/dashboard/teacher', icon: 'LayoutDashboard' },
   { name: 'Courses', href: '/dashboard/teacher/courses', icon: 'BookOpen' },
   { name: 'Quizzes', href: '/dashboard/teacher/quizzes', icon: 'HelpCircle' },
+  { name: 'Blogs', href: '/dashboard/teacher/blogs', icon: 'Library' },
   { name: 'Analytics', href: '/dashboard/teacher/analytics', icon: 'BarChart3' },
   { name: 'Profile', href: '/dashboard/teacher/profile', icon: 'User' },
 ];
@@ -79,12 +82,14 @@ export default async function DashboardLayout({
 
         {/* Main Content - Scrollable */}
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-4 sm:p-6 lg:p-8 pb-24 md:pb-8">
-          <SessionProvider>
-            <SessionSync />
-            <div className="max-w-7xl mx-auto w-full">
-              {children}
-            </div>
-          </SessionProvider>
+          <RoleThemeProvider role={role || 'student'}>
+            <SessionProvider>
+              <SessionSync />
+              <div className="max-w-7xl mx-auto w-full">
+                {children}
+              </div>
+            </SessionProvider>
+          </RoleThemeProvider>
         </main>
 
         {/* Mobile Bottom Navigation */}

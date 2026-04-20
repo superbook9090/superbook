@@ -18,6 +18,7 @@ import {
   BarChart3
 } from 'lucide-react';
 import Alert from '@/components/ui/Alert';
+import Loader from '@/components/ui/Loader';
 import { fetcher } from '@/lib/swrFetcher';
 
 interface Course {
@@ -151,12 +152,7 @@ export default function TeacherDashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-500">{t('common.loading')}</p>
-        </div>
-      </div>
+      <Loader variant="inline" size="lg" text={t('common.loading')} />
     );
   }
 
@@ -349,7 +345,7 @@ export default function TeacherDashboardPage() {
             </a>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-            {recentCourses.map((course, index) => (
+            {recentCourses.map((course: Course, index: number) => (
               <motion.div
                 key={course._id}
                 initial={{ opacity: 0, y: 20 }}

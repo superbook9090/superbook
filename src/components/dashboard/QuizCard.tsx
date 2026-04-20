@@ -4,16 +4,17 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import {
   HelpCircle,
   Clock,
   BookOpen,
   Play,
   RotateCcw,
-  Loader2,
   CheckCircle,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
+import Loader from '@/components/ui/Loader';
 
 interface Quiz {
   _id: string;
@@ -48,6 +49,7 @@ interface QuizCardProps {
 export default function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps) {
   const router = useRouter();
   const { t } = useTranslation();
+  const { theme } = useRoleTheme();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleStart = async () => {
@@ -95,7 +97,7 @@ export default function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps
       className="group relative bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden"
     >
       {/* Header Gradient */}
-      <div className="relative h-32 bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500">
+      <div className={`relative h-32 bg-gradient-to-br ${theme.gradient}`}>
         <div className="absolute inset-0 bg-black/10" />
         <div className="absolute bottom-4 left-6 right-6">
           <Badge variant="success" size="sm" icon={<BookOpen className="w-3 h-3" />}>
@@ -112,7 +114,7 @@ export default function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps
 
       {/* Content */}
       <div className="p-6">
-        <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors">
+        <h3 className={`text-lg font-bold text-gray-900 mb-2 group-hover:${theme.text} transition-colors`}>
           {quiz.title}
         </h3>
         <p className="text-sm text-gray-500 mb-4 line-clamp-2">
@@ -166,10 +168,10 @@ export default function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps
               whileTap={{ scale: 0.98 }}
               onClick={handleStart}
               disabled={isLoading}
-              className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-emerald-700 hover:to-teal-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className={`flex-1 flex items-center justify-center gap-2 bg-gradient-to-r ${theme.gradient} text-white py-3 px-4 rounded-xl font-semibold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {isLoading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader variant="button" size="sm" />
               ) : (
                 <>
                   <Play className="w-4 h-4" />
@@ -183,7 +185,7 @@ export default function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleReview}
-                className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all"
+                className={`flex-1 flex items-center justify-center gap-2 bg-gradient-to-r ${theme.gradient} text-white py-3 px-4 rounded-xl font-semibold hover:opacity-90 transition-all`}
               >
                 <CheckCircle className="w-4 h-4" />
                 {t('quiz.review')}
@@ -193,10 +195,10 @@ export default function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps
                 whileTap={{ scale: 0.95 }}
                 onClick={handleRetake}
                 disabled={isLoading}
-                className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-emerald-100 text-emerald-600 rounded-xl font-semibold hover:bg-emerald-50 hover:border-emerald-200 transition-all disabled:opacity-50"
+                className={`flex items-center justify-center gap-2 px-4 py-3 border-2 ${theme.border} ${theme.text} rounded-xl font-semibold ${theme.activeBg} hover:opacity-80 transition-all disabled:opacity-50`}
               >
                 {isLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader variant="button" size="sm" />
                 ) : (
                   <>
                     <RotateCcw className="w-4 h-4" />

@@ -5,6 +5,16 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useRoleTheme } from '@/contexts/RoleThemeContext';
+import { motion } from 'framer-motion';
+import {
+  BookOpen,
+  Search,
+  Filter,
+  Clock,
+  User,
+} from 'lucide-react';
+import Loader from '@/components/ui/Loader';
 import CourseCard from '@/components/dashboard/CourseCard';
 import Alert from '@/components/ui/Alert';
 
@@ -29,6 +39,7 @@ export default function StudentCoursesPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const { t } = useTranslation();
+  const { theme } = useRoleTheme();
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -95,7 +106,7 @@ export default function StudentCoursesPage() {
         </div>
         <a
           href="/dashboard/student/browse"
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+          className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90`}
         >
           {t('courses.browseMore')}
         </a>
@@ -124,7 +135,7 @@ export default function StudentCoursesPage() {
             </p>
             <a
               href="/dashboard/student/browse"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+              className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90`}
             >
               {t('courses.browseMore')}
             </a>

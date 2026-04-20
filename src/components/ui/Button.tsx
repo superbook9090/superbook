@@ -2,15 +2,15 @@
 
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
-import { Loader2 } from 'lucide-react';
 import { ButtonHTMLAttributes, forwardRef } from 'react';
+import Loader from '@/components/ui/Loader';
+import { useRoleTheme } from '@/contexts/RoleThemeContext';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'success';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
   fullWidth?: boolean;
-  theme?: 'student' | 'teacher';
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -21,13 +21,14 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       size = 'md',
       isLoading = false,
       fullWidth = false,
-      theme = 'student',
       children,
       disabled,
       ...props
     },
     ref
   ) => {
+    const { theme } = useRoleTheme();
+
     const baseStyles = cn(
       'relative inline-flex items-center justify-center font-medium transition-all duration-200',
       'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
@@ -37,16 +38,10 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     );
 
     const variants = {
-      primary: theme === 'student'
-        ? 'bg-[var(--student-primary)] text-white hover:bg-[var(--student-primary-dark)] focus-visible:ring-[var(--student-primary)] shadow-md hover:shadow-lg'
-        : 'bg-[var(--teacher-primary)] text-white hover:bg-[var(--teacher-primary-dark)] focus-visible:ring-[var(--teacher-primary)] shadow-md hover:shadow-lg',
+      primary: `bg-gradient-to-r ${theme.gradient} text-white shadow-md hover:shadow-lg focus-visible:ring-offset-2 focus-visible:ring-2`,
       secondary: 'bg-slate-900 text-white hover:bg-slate-800 focus-visible:ring-slate-900 shadow-md hover:shadow-lg',
-      outline: theme === 'student'
-        ? 'border-2 border-[var(--student-primary)] text-[var(--student-primary)] hover:bg-[var(--student-primary-light)] focus-visible:ring-[var(--student-primary)]'
-        : 'border-2 border-[var(--teacher-primary)] text-[var(--teacher-primary)] hover:bg-[var(--teacher-primary-light)] focus-visible:ring-[var(--teacher-primary)]',
-      ghost: theme === 'student'
-        ? 'text-[var(--student-primary)] hover:bg-[var(--student-primary-light)] focus-visible:ring-[var(--student-primary)]'
-        : 'text-[var(--teacher-primary)] hover:bg-[var(--teacher-primary-light)] focus-visible:ring-[var(--teacher-primary)]',
+      outline: `border-2 ${theme.border} ${theme.text} ${theme.activeBg} hover:opacity-80 focus-visible:ring-offset-2 focus-visible:ring-2`,
+      ghost: `${theme.text} ${theme.activeBg} hover:opacity-80 focus-visible:ring-offset-2 focus-visible:ring-2`,
       danger: 'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-600 shadow-md hover:shadow-lg',
       success: 'bg-emerald-600 text-white hover:bg-emerald-700 focus-visible:ring-emerald-600 shadow-md hover:shadow-lg',
     };
@@ -68,7 +63,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {...props as any}
       >
         {isLoading && (
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          <Loader variant="button" size="sm" />
         )}
         {children}
       </motion.button>

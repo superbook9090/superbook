@@ -1,22 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
 import Link from 'next/link';
-import {
-  ArrowLeft,
-  Loader2,
-  Eye,
-  EyeOff,
-  BookOpen,
-  Hash,
-  FileText,
-  Type,
-} from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
+import { useRoleTheme } from '@/contexts/RoleThemeContext';
+import { motion } from 'framer-motion';
+import { useApiRequest } from '@/hooks/useApiRequest';
+import { ArrowLeft, Save, Eye, EyeOff, BookOpen, Hash, FileText, Type } from 'lucide-react';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import Alert from '@/components/ui/Alert';
+import Loader from '@/components/ui/Loader';
 
 const topics = [
   'Mathematics',
@@ -35,6 +30,8 @@ const topics = [
 export default function CreateBlogPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { t } = useTranslation();
+  const { theme } = useRoleTheme();
   const [isLoading, setIsLoading] = useState(false);
   const [isDraft, setIsDraft] = useState(false);
   const [formData, setFormData] = useState({
@@ -215,7 +212,7 @@ export default function CreateBlogPage() {
               className="flex-1 flex items-center justify-center px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl shadow-md hover:shadow-lg disabled:opacity-60 transition-all"
             >
               {isLoading && !isDraft ? (
-                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                <Loader variant="button" size="sm" />
               ) : (
                 <Eye className="w-5 h-5 mr-2" />
               )}
@@ -229,7 +226,7 @@ export default function CreateBlogPage() {
               className="flex-1 sm:flex-none flex items-center justify-center px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 disabled:opacity-60 transition-all"
             >
               {isLoading && isDraft ? (
-                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                <Loader variant="button" size="sm" />
               ) : (
                 <EyeOff className="w-5 h-5 mr-2" />
               )}

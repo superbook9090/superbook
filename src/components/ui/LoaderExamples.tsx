@@ -39,7 +39,7 @@ export function FullPageLoaderExample() {
       {/* Full page loader overlay */}
       {isLoading && (
         <Loader
-          variant="full-page"
+          variant="page"
           size="lg"
           text="Loading dashboard..."
         />
@@ -127,7 +127,7 @@ export function SectionLoaderExample() {
       <div className="bg-gray-50 rounded-lg p-6 min-h-[300px]">
         {isLoading ? (
           <Loader
-            variant="section"
+            variant="inline"
             size="md"
             text="Loading courses..."
           />

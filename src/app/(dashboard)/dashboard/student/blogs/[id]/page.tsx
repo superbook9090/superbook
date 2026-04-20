@@ -5,19 +5,22 @@ import { useSession } from 'next-auth/react';
 import { useRouter, useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import DOMPurify from 'isomorphic-dompurify';
+import { useTranslation } from '@/hooks/useTranslation';
+import { useApiRequest } from '@/hooks/useApiRequest';
+import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import {
   ArrowLeft,
   Heart,
+  Share2,
   Calendar,
   User,
-  Hash,
-  Share2,
   BookOpen,
-  Loader2,
+  Hash,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
+import Loader from '@/components/ui/Loader';
+import DOMPurify from 'isomorphic-dompurify';
 
 interface Blog {
   _id: string;
@@ -31,6 +34,8 @@ interface Blog {
 export default function BlogDetailPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { t } = useTranslation();
+  const { theme } = useRoleTheme();
   const params = useParams();
   const blogId = params.id as string;
 
@@ -69,7 +74,8 @@ export default function BlogDetailPage() {
       const response = await fetch('/api/favorites');
       if (!response.ok) throw new Error('Failed to fetch');
       const data = await response.json();
-      const isFav = data.some((fav: { blog: { _id: string } }) => fav.blog._id === blogId);
+      const favorites = data.favorites || [];
+      const isFav = Array.isArray(favorites) && favorites.some((fav: { blog: { _id: string } }) => fav.blog._id === blogId);
       setIsFavorited(isFav);
     } catch (error) {
       console.error('Error checking favorite:', error);
@@ -87,7 +93,7 @@ export default function BlogDetailPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ blogId }),
         });
-        if (response.ok) {
+        if (response.ok || response.status === 409) {
           setIsFavorited(true);
         }
       }
@@ -116,7 +122,7 @@ export default function BlogDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="flex items-center justify-center min-h-[60vh] px-4">
         <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
       </div>
     );
@@ -124,7 +130,7 @@ export default function BlogDetailPage() {
 
   if (!blog) {
     return (
-      <div className="text-center py-16">
+      <div className="text-center py-16 px-4">
         <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
         <h3 className="text-xl font-semibold text-gray-900 mb-2">
           Blog not found
@@ -134,7 +140,7 @@ export default function BlogDetailPage() {
         </p>
         <Link
           href="/dashboard/student/blogs"
-          className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors"
+          className={`inline-flex items-center justify-center px-4 py-2.5 bg-gradient-to-r ${theme.gradient} text-white rounded-xl hover:opacity-90 transition-colors touch-manipulation`}
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Blogs
@@ -144,7 +150,7 @@ export default function BlogDetailPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
       {/* Navigation */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -153,7 +159,7 @@ export default function BlogDetailPage() {
       >
         <Link
           href="/dashboard/student/blogs"
-          className="inline-flex items-center text-indigo-600 hover:text-indigo-700"
+          className="inline-flex items-center text-indigo-600 hover:text-indigo-700 touch-manipulation"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Blogs
@@ -176,7 +182,7 @@ export default function BlogDetailPage() {
         className="bg-white rounded-2xl shadow-sm overflow-hidden"
       >
         {/* Header */}
-        <div className="p-6 sm:p-8 border-b border-gray-100">
+        <div className="p-4 sm:p-6 lg:p-8 border-b border-gray-100">
           <div className="flex items-center gap-3 mb-4">
             <Badge variant="primary" size="md">
               <Hash className="w-3 h-3 mr-1" />
@@ -184,11 +190,11 @@ export default function BlogDetailPage() {
             </Badge>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-4 leading-tight">
             {blog.title}
           </h1>
 
-          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+          <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
             <span className="flex items-center">
               <User className="w-4 h-4 mr-1" />
               {blog.author?.name || 'Teacher'}
@@ -205,35 +211,33 @@ export default function BlogDetailPage() {
         </div>
 
         {/* Content */}
-        <div className="p-6 sm:p-8">
+        <div className="p-4 sm:p-6 lg:p-8">
           <div
-            className="prose prose-indigo max-w-none text-gray-900 prose-headings:font-semibold prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-indigo-600 prose-a:no-underline hover:prose-a:underline prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-gray-700 prose-ul:list-disc prose-ol:list-decimal prose-li:text-gray-700"
+            className="prose prose-sm sm:prose-base prose-indigo max-w-none text-gray-900 prose-headings:font-semibold prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-indigo-600 prose-a:no-underline hover:prose-a:underline prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-gray-700 prose-ul:list-disc prose-ol:list-decimal prose-li:text-gray-700 prose-img:rounded-lg prose-img:shadow-sm"
             dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(blog.content) }}
           />
         </div>
 
         {/* Actions */}
-        <div className="p-6 sm:p-8 bg-gray-50 border-t border-gray-100">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={toggleFavorite}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${
-                  isFavorited
-                    ? 'bg-rose-100 text-rose-600 hover:bg-rose-200'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-              >
-                <Heart
-                  className={`w-5 h-5 ${isFavorited ? 'fill-current' : ''}`}
-                />
-                {isFavorited ? 'Favorited' : 'Add to Favorites'}
-              </button>
-            </div>
+        <div className="p-4 sm:p-6 lg:p-8 bg-gray-50 border-t border-gray-100">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <button
+              onClick={toggleFavorite}
+              className={`flex items-center justify-center gap-2 px-4 py-3 sm:py-2.5 rounded-xl font-medium transition-all touch-manipulation ${
+                isFavorited
+                  ? `${theme.activeBg} ${theme.text} hover:opacity-80`
+                  : `${theme.activeBg} ${theme.text} hover:opacity-70`
+              }`}
+            >
+              <Heart
+                className={`w-5 h-5 ${isFavorited ? 'fill-current' : ''}`}
+              />
+              <span className="hidden sm:inline">{isFavorited ? 'Favorited' : 'Add to Favorites'}</span>
+              <span className="sm:hidden">{isFavorited ? 'Saved' : 'Save'}</span>
+            </button>
 
             <button
-              onClick={shareBlog}
-              className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-all"
+              className={`flex items-center justify-center gap-2 px-4 py-3 sm:py-2.5 bg-gradient-to-r ${theme.gradient} text-white rounded-xl hover:opacity-90 transition-all touch-manipulation`}
             >
               <Share2 className="w-4 h-4" />
               Share

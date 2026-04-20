@@ -5,6 +5,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import {
   LayoutDashboard,
   BookOpen,
@@ -60,16 +61,16 @@ function MobileNav({ user, navigation, adminNavigation = [], colorScheme }: Mobi
   const pathname = usePathname();
   const isAdmin = user?.role === 'admin';
   const { t, lang, setLang } = useTranslation();
+  const { theme } = useRoleTheme();
 
   // Memoize theme classes to avoid recalculation on every render
   const themeClasses = useMemo(() => {
-    const isGreen = colorScheme === 'green' || colorScheme === 'emerald';
     return {
-      bg: isGreen ? 'bg-emerald-700' : 'bg-indigo-700',
-      active: isGreen ? 'bg-emerald-800' : 'bg-indigo-800',
-      hover: isGreen ? 'hover:bg-emerald-600' : 'hover:bg-indigo-600',
+      bg: `bg-gradient-to-r ${theme.gradient}`,
+      active: `bg-gradient-to-r ${theme.gradient}`,
+      hover: 'hover:opacity-80',
     };
-  }, [colorScheme]);
+  }, [theme]);
 
   // Memoize navigation items to prevent unnecessary array creation
   const allNavItems = useMemo(() => {

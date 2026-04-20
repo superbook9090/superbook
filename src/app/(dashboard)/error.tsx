@@ -1,5 +1,10 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useTranslation } from '@/hooks/useTranslation';
+import { useRoleTheme } from '@/contexts/RoleThemeContext';
+import { AlertCircle, RefreshCw } from 'lucide-react';
+
 export default function Error({
   error,
   reset,
@@ -7,6 +12,9 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const { t } = useTranslation();
+  const { theme } = useRoleTheme();
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="max-w-md w-full mx-4 text-center">
@@ -34,7 +42,7 @@ export default function Error({
           </p>
           <button
             onClick={reset}
-            className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition-colors"
+            className={`inline-flex items-center px-6 py-3 bg-gradient-to-r ${theme.gradient} text-white font-medium rounded-xl hover:opacity-90 transition-colors`}
           >
             Try again
           </button>

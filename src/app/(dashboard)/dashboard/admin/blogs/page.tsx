@@ -5,20 +5,19 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { debounce } from '@/lib/debounce';
 import {
   BookOpen,
   Search,
   Filter,
-  Loader2,
   Trash2,
   Eye,
   EyeOff,
   Calendar,
   User,
-  ChevronLeft,
-  ChevronRight,
 } from 'lucide-react';
+import Loader from '@/components/ui/Loader';
 import { Badge } from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
 
@@ -37,6 +36,7 @@ export default function AdminBlogsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const { t } = useTranslation();
+  const { theme } = useRoleTheme();
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -118,15 +118,11 @@ export default function AdminBlogsPage() {
   });
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
-      </div>
-    );
+    return <Loader variant="inline" size="lg" />;
   }
 
   return (
-    <div className="space-y-6">
+    <div className="px-4 sm:px-6 lg:px-8 space-y-6">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -136,7 +132,7 @@ export default function AdminBlogsPage() {
         <div className="p-3 bg-indigo-100 rounded-xl">
           <BookOpen className="w-6 h-6 text-indigo-600" />
         </div>
-        <div>
+        <div className="flex-1">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">All Blogs</h1>
           <p className="text-gray-500 mt-1">Manage all blogs on the platform</p>
         </div>
@@ -174,11 +170,11 @@ export default function AdminBlogsPage() {
           />
         </div>
         <div className="flex items-center gap-2">
-          <Filter className="w-5 h-5 text-gray-400" />
+          <Filter className="w-5 h-5 text-gray-400 flex-shrink-0" />
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value as 'all' | 'published' | 'draft')}
-            className="px-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+            className="flex-1 sm:flex-none px-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
           >
             <option value="all">All Blogs</option>
             <option value="published">Published</option>
@@ -186,11 +182,11 @@ export default function AdminBlogsPage() {
           </select>
         </div>
         <div className="flex items-center gap-2">
-          <BookOpen className="w-5 h-5 text-gray-400" />
+          <BookOpen className="w-5 h-5 text-gray-400 flex-shrink-0" />
           <select
             value={languageFilter}
             onChange={(e) => setLanguageFilter(e.target.value as 'all' | 'en' | 'hi')}
-            className="px-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+            className="flex-1 sm:flex-none px-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
           >
             <option value="all">All Languages</option>
             <option value="en">English</option>
@@ -204,10 +200,10 @@ export default function AdminBlogsPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="grid grid-cols-3 gap-4"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
       >
         <div className="bg-white rounded-xl p-4 shadow-sm">
-          <p className="text-2xl font-bold text-indigo-600">{blogs.length}</p>
+          <p className={`text-2xl font-bold ${theme.text}`}>{blogs.length}</p>
           <p className="text-sm text-gray-500">Total Blogs</p>
         </div>
         <div className="bg-white rounded-xl p-4 shadow-sm">
@@ -215,7 +211,7 @@ export default function AdminBlogsPage() {
           <p className="text-sm text-gray-500">Published</p>
         </div>
         <div className="bg-white rounded-xl p-4 shadow-sm">
-          <p className="text-2xl font-bold text-amber-600">{blogs.filter(b => !b.isPublished).length}</p>
+          <p className="text-2xl font-bold text-gray-600">{blogs.filter(b => !b.isPublished).length}</p>
           <p className="text-sm text-gray-500">Drafts</p>
         </div>
       </motion.div>
@@ -228,7 +224,7 @@ export default function AdminBlogsPage() {
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
       >
         {filteredBlogs.length === 0 ? (
-          <div className="col-span-full text-center py-16 bg-white rounded-2xl shadow-sm">
+          <div className="col-span-full text-center py-16 px-4 bg-white rounded-2xl shadow-sm">
             <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 mb-2">No blogs found</h3>
             <p className="text-gray-500">Try adjusting your search or filters</p>
@@ -245,7 +241,7 @@ export default function AdminBlogsPage() {
               <div className="p-6">
                 {/* Header */}
                 <div className="flex items-start justify-between mb-4">
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 text-white">
+                  <div className={`p-3 rounded-xl bg-gradient-to-br ${theme.gradient} text-white`}>
                     <BookOpen className="w-5 h-5" />
                   </div>
                   <div className="flex items-center gap-2">
@@ -288,25 +284,31 @@ export default function AdminBlogsPage() {
                 <div className="flex gap-2 pt-4 border-t border-gray-100">
                   <button
                     onClick={() => handleTogglePublish(blog._id, blog.isPublished)}
-                    className="flex-1 flex items-center justify-center px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
+                    className="flex-1 flex items-center justify-center px-3 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm touch-manipulation"
                   >
                     {blog.isPublished ? (
                       <>
                         <EyeOff className="w-4 h-4 mr-1" />
-                        Unpublish
+                        <span className="hidden sm:inline">Unpublish</span>
+                        <span className="sm:hidden">Hide</span>
                       </>
                     ) : (
                       <>
                         <Eye className="w-4 h-4 mr-1" />
-                        Publish
+                        <span className="hidden sm:inline">Publish</span>
+                        <span className="sm:hidden">Show</span>
                       </>
                     )}
                   </button>
                   <button
-                    onClick={() => setDeleteId(blog._id)}
-                    className="px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
+                    onClick={() => {
+                      setDeleteId(blog._id);
+                      handleDelete(blog._id);
+                    }}
+                    className="flex-1 flex items-center justify-center px-3 py-2.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm touch-manipulation"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-4 h-4 mr-1" />
+                    Delete
                   </button>
                 </div>
               </div>
@@ -321,7 +323,7 @@ export default function AdminBlogsPage() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleDelete(blog._id)}
-                        className="flex-1 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+                        className={`flex-1 px-3 py-2 bg-gradient-to-r ${theme.gradient} text-white rounded-lg hover:opacity-90 transition-colors text-sm`}
                       >
                         Delete
                       </button>

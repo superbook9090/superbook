@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { useTranslation } from '@/hooks/useTranslation';
 import { debounce } from '@/lib/debounce';
 import { useApiRequest } from '@/hooks/useApiRequest';
+import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import {
   BookOpen,
   Heart,
@@ -72,10 +73,12 @@ export default function StudentBlogsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const { t } = useTranslation();
+  const { theme } = useRoleTheme();
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchInput, setSearchInput] = useState('');
   const [selectedTopic, setSelectedTopic] = useState('all');
   const [languageFilter, setLanguageFilter] = useState<'all' | 'en' | 'hi'>('all');
   const [featureEnabled, setFeatureEnabled] = useState(true);
@@ -90,6 +93,12 @@ export default function StudentBlogsPage() {
     debounce((value: string) => setSearchTerm(value), 300),
     []
   );
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchInput(value);
+    debouncedSearchHandler(value);
+  };
 
   const fetchBlogs = useCallback(async () => {
     const params = new URLSearchParams();
@@ -198,7 +207,7 @@ export default function StudentBlogsPage() {
     const matchesSearch =
       blog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       blog.topic.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTopic = selectedTopic === 'all' || blog.topic === selectedTopic;
+    const matchesTopic = selectedTopic === 'all' || blog.topic.toLowerCase() === selectedTopic.toLowerCase();
     const matchesLanguage = languageFilter === 'all' || blog.language === languageFilter;
     return matchesSearch && matchesTopic && matchesLanguage;
   });
@@ -212,14 +221,14 @@ export default function StudentBlogsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="px-4 sm:px-6 lg:px-8 space-y-6">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
       >
-        <div>
+        <div className="flex-1">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{t('blog.learningBlog')}</h1>
           <p className="text-gray-500 mt-1">
             {t('blog.blogDesc')}
@@ -227,7 +236,7 @@ export default function StudentBlogsPage() {
         </div>
         <Link
           href="/dashboard/student/favorites"
-          className="inline-flex items-center px-4 py-2.5 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-medium rounded-xl shadow-md hover:shadow-lg transition-all"
+          className={`inline-flex items-center justify-center px-4 py-2.5 sm:w-auto w-full bg-gradient-to-r ${theme.gradient} text-white font-medium rounded-xl shadow-md hover:shadow-lg transition-all`}
         >
           <Bookmark className="w-5 h-5 mr-2" />
           {t('blog.myFavorites')}
@@ -247,22 +256,22 @@ export default function StudentBlogsPage() {
           <input
             type="text"
             placeholder={t('blog.searchBlogs')}
-            defaultValue={searchTerm}
-            onChange={(e) => debouncedSearchHandler(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+            value={searchInput}
+            onChange={handleSearchChange}
+            className="w-full pl-10 pr-4 py-3 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400"
           />
         </div>
 
         {/* Topic Filter */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2">
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-2 px-2">
           <Filter className="w-5 h-5 text-gray-400 flex-shrink-0" />
           {topics.map((topic) => (
             <button
               key={topic}
               onClick={() => setSelectedTopic(topic)}
-              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+              className={`px-4 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all touch-manipulation ${
                 selectedTopic === topic
-                  ? 'bg-indigo-600 text-white'
+                  ? `${theme.primary} text-white`
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
@@ -277,7 +286,7 @@ export default function StudentBlogsPage() {
           <select
             value={languageFilter}
             onChange={(e) => setLanguageFilter(e.target.value as 'all' | 'en' | 'hi')}
-            className="px-4 py-2 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+            className="flex-1 sm:flex-none px-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400"
           >
             <option value="all">{t('blog.allLanguages')}</option>
             <option value="en">English</option>
@@ -291,14 +300,14 @@ export default function StudentBlogsPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="flex gap-4"
+        className="grid grid-cols-2 gap-4"
       >
-        <div className="bg-white rounded-xl p-4 shadow-sm flex-1">
-          <p className="text-2xl font-bold text-indigo-600">{blogs.length}</p>
+        <div className="bg-white rounded-xl p-4 shadow-sm">
+          <p className={`text-2xl font-bold ${theme.text}`}>{blogs.length}</p>
           <p className="text-sm text-gray-500">{t('blog.totalArticles')}</p>
         </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm flex-1">
-          <p className="text-2xl font-bold text-rose-500">{favorites.size}</p>
+        <div className="bg-white rounded-xl p-4 shadow-sm">
+          <p className={`text-2xl font-bold ${theme.text}`}>{favorites.size}</p>
           <p className="text-sm text-gray-500">{t('nav.favorites')}</p>
         </div>
       </motion.div>
@@ -354,8 +363,8 @@ export default function StudentBlogsPage() {
                       <Heart
                         className={`w-5 h-5 transition-colors ${
                           isFavorited
-                            ? 'fill-rose-500 text-rose-500'
-                            : 'text-gray-400 hover:text-rose-500'
+                            ? `fill-current ${theme.text}`
+                            : `text-gray-400 hover:${theme.text}`
                         }`}
                       />
                     </button>
@@ -372,7 +381,7 @@ export default function StudentBlogsPage() {
                   </p>
 
                   {/* Meta */}
-                  <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                  <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 mb-4">
                     <span className="flex items-center">
                       <User className="w-4 h-4 mr-1" />
                       {blog.author?.name || t('blog.teacher')}
@@ -386,7 +395,7 @@ export default function StudentBlogsPage() {
                   {/* Read More */}
                   <Link
                     href={`/dashboard/student/blogs/${blog._id}`}
-                    className="inline-flex items-center text-indigo-600 font-medium hover:text-indigo-700 transition-colors"
+                    className={`inline-flex items-center ${theme.text} font-medium hover:opacity-80 transition-colors touch-manipulation`}
                   >
                     {t('blog.readMore')}
                     <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />

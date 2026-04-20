@@ -4,6 +4,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import * as XLSX from 'xlsx';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useRoleTheme } from '@/contexts/RoleThemeContext';
+import { motion } from 'framer-motion';
+import { X, Plus, Trash2, Upload } from 'lucide-react';
+import Loader from '@/components/ui/Loader';
 
 interface Course {
   _id: string;
@@ -28,6 +32,7 @@ interface ExcelRow {
 export default function CreateQuizForm() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { theme } = useRoleTheme();
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [error, setError] = useState('');
@@ -439,7 +444,7 @@ export default function CreateQuizForm() {
         </div>
 
         {showUpload && (
-          <div className="bg-indigo-50 rounded-lg p-4 mb-6">
+          <div className={`${theme.activeBg} rounded-lg p-4 mb-6`}>
             <div className="flex justify-between items-start mb-3">
               <div>
                 <h4 className="font-medium text-indigo-900">{t('createQuizForm.importQuestionsFromExcel')}</h4>
@@ -462,7 +467,7 @@ export default function CreateQuizForm() {
                 accept=".xlsx,.xls,.csv"
                 onChange={handleFileUpload}
                 disabled={isParsing}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-indigo-100 file:text-indigo-700 hover:file:bg-indigo-200 disabled:opacity-50"
+                className={`block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium ${theme.activeBg} ${theme.text} hover:opacity-80 disabled:opacity-50`}
               />
             </div>
 
@@ -477,10 +482,10 @@ export default function CreateQuizForm() {
             )}
 
             {previewData.length > 0 && (
-              <div className="mt-4 bg-white rounded-md border border-indigo-200 overflow-hidden">
-                <div className="px-4 py-3 bg-indigo-100 border-b border-indigo-200">
+              <div className="mt-4 bg-white rounded-md border border-gray-200 overflow-hidden">
+                <div className={`px-4 py-3 ${theme.activeBg} border-b border-gray-200`}>
                   <div className="flex justify-between items-center">
-                    <h5 className="font-medium text-indigo-900">
+                    <h5 className={`font-medium ${theme.activeText}`}>
                       {t('createQuizForm.preview')}: {previewData.length} {t('createQuizForm.questionsFound')}
                     </h5>
                     <div className="space-x-2">
@@ -497,7 +502,7 @@ export default function CreateQuizForm() {
                       <button
                         type="button"
                         onClick={handleConfirmImport}
-                        className="text-sm text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded"
+                        className={`text-sm text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 px-3 py-1 rounded`}
                       >
                         {t('createQuizForm.confirmImport')}
                       </button>
@@ -646,7 +651,7 @@ export default function CreateQuizForm() {
         <button
           type="submit"
           disabled={isLoading || courses.length === 0}
-          className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           {isLoading ? t('createQuizForm.creating') : t('createQuizForm.createQuiz')}
         </button>

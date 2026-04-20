@@ -1,129 +1,65 @@
 'use client';
 
 import React from 'react';
+import { useRoleTheme } from '@/contexts/RoleThemeContext';
 
 export interface LoaderProps {
-  /** Loader variant type */
-  variant?: 'full-page' | 'button' | 'section';
-  /** Size of the loader */
+  variant?: 'page' | 'inline' | 'button';
   size?: 'sm' | 'md' | 'lg';
-  /** Optional loading text */
   text?: string;
-  /** Optional className for custom styling */
   className?: string;
-  /** Optional background overlay for section loader */
-  overlay?: boolean;
 }
 
-/**
- * Modern, smooth Loader component with multiple variants
- * 
- * @example
- * // Full page loader
- * <Loader variant="full-page" size="lg" text="Loading courses..." />
- * 
- * @example
- * // Button loader
- * <Loader variant="button" size="sm" />
- * 
- * @example
- * // Section loader with overlay
- * <Loader variant="section" size="md" text="Loading..." overlay />
- */
+const sizes = {
+  sm: 'w-4 h-4',
+  md: 'w-6 h-6',
+  lg: 'w-8 h-8',
+};
+
+const textSizes = {
+  sm: 'text-xs',
+  md: 'text-sm',
+  lg: 'text-sm',
+};
+
+function Spinner({ size }: { size: keyof typeof sizes }) {
+  return (
+    <div
+      className={`
+        ${sizes[size]}
+        rounded-full
+        border-2
+        border-gray-200
+        border-t-indigo-600
+        border-r-purple-600
+        animate-spin
+        shadow-sm
+        shadow-indigo-500/20
+      `}
+      style={{ animationDuration: '1s' }}
+    />
+  );
+}
+
 export default function Loader({
-  variant = 'section',
+  variant = 'inline',
   size = 'md',
   text,
   className = '',
-  overlay = false,
 }: LoaderProps) {
-  // Size configurations
-  const sizeClasses = {
-    sm: 'w-4 h-4 border-2',
-    md: 'w-8 h-8 border-2',
-    lg: 'w-12 h-12 border-3',
-  };
-
-  // Spinner component with gradient animation
-  const Spinner = ({ className: extraClass = '' }: { className?: string }) => (
-    <div
-      className={`
-        ${sizeClasses[size]}
-        border-gray-200
-        border-t-indigo-600
-        border-r-indigo-600
-        rounded-full
-        animate-spin
-        ${extraClass}
-      `}
-      style={{
-        borderTopWidth: variant === 'button' ? '2px' : undefined,
-        borderRightWidth: variant === 'button' ? '2px' : undefined,
-      }}
-    />
-  );
-
-  // Dots loader for button variant (alternative)
-  const DotsLoader = () => (
-    <div className="flex items-center gap-1">
-      {[0, 1, 2].map((i) => (
-        <div
-          key={i}
-          className={`
-            rounded-full
-            bg-current
-            animate-bounce
-            ${size === 'sm' ? 'w-1 h-1' : size === 'md' ? 'w-1.5 h-1.5' : 'w-2 h-2'}
-          `}
-          style={{
-            animationDelay: `${i * 150}ms`,
-            animationDuration: '600ms',
-          }}
-        />
-      ))}
-    </div>
-  );
-
-  // Full page loader
-  if (variant === 'full-page') {
+  // Page loader - full screen with blur
+  if (variant === 'page') {
     return (
       <div
-        className={`
-          fixed
-          inset-0
-          z-50
-          flex
-          flex-col
-          items-center
-          justify-center
-          bg-white/80
-          backdrop-blur-sm
-          transition-all
-          duration-300
-          ${className}
-        `}
+        className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm animate-in fade-in duration-300"
+        role="status"
+        aria-busy="true"
       >
-        <div className="relative">
-          {/* Outer ring with pulse */}
-          <div className="absolute inset-0 rounded-full bg-indigo-100 animate-ping opacity-20" />
-          
-          {/* Main spinner */}
-          <div
-            className={`
-              ${sizeClasses[size]}
-              border-gray-200
-              border-t-indigo-600
-              border-r-indigo-600
-              rounded-full
-              animate-spin
-              relative
-            `}
-            style={{ borderWidth: '3px' }}
-          />
+        <div className="animate-in zoom-in duration-300">
+          <Spinner size={size} />
         </div>
-        
         {text && (
-          <p className="mt-4 text-sm text-gray-500 font-medium animate-pulse">
+          <p className={`mt-4 ${textSizes[size]} text-gray-600 font-medium animate-in slide-in-from-bottom-4 duration-300`}>
             {text}
           </p>
         )}
@@ -131,33 +67,21 @@ export default function Loader({
     );
   }
 
-  // Button loader
+  // Button loader - inline, no text
   if (variant === 'button') {
     return (
-      <div className={`inline-flex items-center justify-center ${className}`}>
-        <DotsLoader />
-      </div>
+      <span className={`inline-flex items-center ${className} animate-in fade-in duration-200`} role="status" aria-busy="true">
+        <Spinner size="sm" />
+      </span>
     );
   }
 
-  // Section loader (default)
+  // Inline loader - section with optional text
   return (
-    <div
-      className={`
-        relative
-        flex
-        flex-col
-        items-center
-        justify-center
-        py-12
-        ${overlay ? 'bg-white/60 backdrop-blur-sm rounded-lg' : ''}
-        ${className}
-      `}
-    >
-      <Spinner />
-      
+    <div className={`flex flex-col items-center justify-center py-8 ${className} animate-in fade-in duration-200`} role="status" aria-busy="true">
+      <Spinner size={size} />
       {text && (
-        <p className="mt-3 text-sm text-gray-500 font-medium">
+        <p className={`mt-3 ${textSizes[size]} text-gray-600 font-medium animate-in slide-in-from-bottom-2 duration-300`}>
           {text}
         </p>
       )}
@@ -165,14 +89,11 @@ export default function Loader({
   );
 }
 
-/**
- * LoadingButton component - Button with integrated loader
- */
-export interface LoadingButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+// LoadingButton - Button with integrated loader
+export interface LoadingButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   isLoading?: boolean;
   loadingText?: string;
-  variant?: 'primary' | 'secondary' | 'outline' | 'danger';
+  variant?: 'primary' | 'secondary' | 'outline';
 }
 
 export function LoadingButton({
@@ -184,49 +105,25 @@ export function LoadingButton({
   className = '',
   ...props
 }: LoadingButtonProps) {
-  const baseClasses =
-    'inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2';
+  const { theme } = useRoleTheme();
+  const baseStyles = 'inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2';
 
-  const variantClasses = {
-    primary:
-      'bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500 disabled:bg-indigo-400',
-    secondary:
-      'bg-gray-100 text-gray-700 hover:bg-gray-200 focus:ring-gray-500 disabled:bg-gray-50 disabled:text-gray-400',
-    outline:
-      'border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-indigo-500 disabled:text-gray-400',
-    danger:
-      'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 disabled:bg-red-400',
+  const variantStyles = {
+    primary: `bg-gradient-to-r ${theme.gradient} text-white hover:opacity-90 disabled:opacity-50`,
+    secondary: 'bg-gray-100 text-gray-700 hover:bg-gray-200 focus:ring-gray-500 disabled:bg-gray-50 disabled:text-gray-400',
+    outline: 'border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-indigo-500 disabled:text-gray-400',
   };
 
   return (
     <button
-      className={`${baseClasses} ${variantClasses[variant]} ${className}`}
+      className={`${baseStyles} ${variantStyles[variant]} ${className}`}
       disabled={disabled || isLoading}
       {...props}
     >
       {isLoading ? (
         <>
-          <svg
-            className="animate-spin -ml-1 mr-2 h-4 w-4"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            />
-          </svg>
-          {loadingText}
+          <Loader variant="button" />
+          <span className="ml-2">{loadingText}</span>
         </>
       ) : (
         children
@@ -235,9 +132,7 @@ export function LoadingButton({
   );
 }
 
-/**
- * LoadingOverlay component - Overlay with loader for blocking interactions
- */
+// LoadingOverlay - Simple overlay with loader
 export interface LoadingOverlayProps {
   isLoading: boolean;
   text?: string;
@@ -254,29 +149,10 @@ export function LoadingOverlay({
   return (
     <div className={`relative ${className}`}>
       {children}
-      
       {isLoading && (
-        <div
-          className="
-            absolute
-            inset-0
-            z-40
-            flex
-            flex-col
-            items-center
-            justify-center
-            bg-white/70
-            backdrop-blur-sm
-            rounded-lg
-            transition-all
-            duration-200
-          "
-        >
-          <div className="w-8 h-8 border-2 border-gray-200 border-t-indigo-600 rounded-full animate-spin" />
-          
-          {text && (
-            <p className="mt-2 text-sm text-gray-600 font-medium">{text}</p>
-          )}
+        <div className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm rounded-lg">
+          <Spinner size="md" />
+          {text && <p className="mt-2 text-sm text-gray-600 font-medium">{text}</p>}
         </div>
       )}
     </div>

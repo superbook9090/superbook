@@ -5,6 +5,18 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useRoleTheme } from '@/contexts/RoleThemeContext';
+import { motion } from 'framer-motion';
+import {
+  TrendingUp,
+  Users,
+  BookOpen,
+  Award,
+  Clock,
+  BarChart3,
+} from 'lucide-react';
+import Loader from '@/components/ui/Loader';
+import Alert from '@/components/ui/Alert';
 
 interface CourseStat {
   _id: string;
@@ -37,8 +49,9 @@ interface TeacherStats {
 
 export default function TeacherAnalyticsPage() {
   const { data: session, status } = useSession();
-  const { t } = useTranslation();
   const router = useRouter();
+  const { t } = useTranslation();
+  const { theme } = useRoleTheme();
   const [stats, setStats] = useState<TeacherStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -82,7 +95,7 @@ export default function TeacherAnalyticsPage() {
         {error && <p className="text-red-600 mb-4">{error}</p>}
         <button
           onClick={fetchStats}
-          className="px-4 py-2 bg-green-600 text-white rounded-md"
+          className={`px-4 py-2 bg-gradient-to-r ${theme.gradient} text-white rounded-md hover:opacity-90`}
         >
           {t('analytics.retry')}
         </button>
@@ -133,7 +146,7 @@ export default function TeacherAnalyticsPage() {
             <p className="text-gray-500 mb-4">{t('analytics.noCoursesYet')}</p>
             <a
               href="/dashboard/teacher/courses/create"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
+              className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90`}
             >
               {t('analytics.createCourse')}
             </a>

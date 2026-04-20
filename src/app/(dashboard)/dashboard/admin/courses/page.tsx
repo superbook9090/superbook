@@ -3,21 +3,22 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
-import { debounce } from '@/lib/debounce';
+import { useRoleTheme } from '@/contexts/RoleThemeContext';
+import { motion } from 'framer-motion';
 import {
   BookOpen,
-  Users,
   Search,
   Filter,
-  Loader2,
   Trash2,
   Eye,
   EyeOff,
-  GraduationCap,
   Calendar,
+  User,
+  Users,
+  GraduationCap,
 } from 'lucide-react';
+import Loader from '@/components/ui/Loader';
 import { Badge } from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
 
@@ -39,6 +40,7 @@ export default function AdminCoursesPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const { t } = useTranslation();
+  const { theme } = useRoleTheme();
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -48,7 +50,10 @@ export default function AdminCoursesPage() {
 
   // Debounced search handler
   const debouncedSearchHandler = useCallback(
-    debounce((value: string) => setSearchTerm(value), 300),
+    ((value: string) => {
+      const timer = setTimeout(() => setSearchTerm(value), 300);
+      return () => clearTimeout(timer);
+    }),
     []
   );
 
@@ -121,11 +126,7 @@ export default function AdminCoursesPage() {
   });
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
-      </div>
-    );
+    return <Loader variant="inline" size="lg" />;
   }
 
   return (
@@ -316,7 +317,7 @@ export default function AdminCoursesPage() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleDelete(course._id)}
-                        className="flex-1 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+                        className={`flex-1 px-3 py-2 bg-gradient-to-r ${theme.gradient} text-white rounded-lg hover:opacity-90 transition-colors text-sm`}
                       >
                         Delete
                       </button>

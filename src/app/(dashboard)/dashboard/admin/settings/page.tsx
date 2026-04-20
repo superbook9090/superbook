@@ -3,10 +3,26 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { Loader2, Settings as SettingsIcon, Save, BookOpen, FileText, GraduationCap, ToggleLeft, ToggleRight, Globe, Shield, Power, UserPlus } from 'lucide-react';
-import Alert from '@/components/ui/Alert';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useRoleTheme } from '@/contexts/RoleThemeContext';
+import { motion } from 'framer-motion';
+import {
+  Settings,
+  Save,
+  RefreshCw,
+  Shield,
+  Globe,
+  Users,
+  BarChart3,
+  GraduationCap,
+  FileText,
+  BookOpen,
+  Power,
+  UserPlus,
+  ToggleLeft,
+} from 'lucide-react';
+import Loader from '@/components/ui/Loader';
+import Alert from '@/components/ui/Alert';
 
 interface AppSettings {
   teacherLimits: {
@@ -31,6 +47,7 @@ export default function AdminSettingsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const { t } = useTranslation();
+  const { theme } = useRoleTheme();
   const [settings, setSettings] = useState<AppSettings>({
     teacherLimits: {
       courses: 5,
@@ -107,11 +124,7 @@ export default function AdminSettingsPage() {
   };
 
   if (status === 'loading' || isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
-      </div>
-    );
+    return <Loader variant="inline" size="lg" />;
   }
 
   return (
@@ -122,8 +135,8 @@ export default function AdminSettingsPage() {
         animate={{ opacity: 1, y: 0 }}
         className="flex items-center gap-3"
       >
-        <div className="p-3 bg-indigo-100 rounded-xl">
-          <SettingsIcon className="w-6 h-6 text-indigo-600" />
+        <div className={`p-3 ${theme.activeBg} rounded-xl`}>
+          <Settings className={`w-6 h-6 ${theme.text}`} />
         </div>
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{t('adminSettings.title')}</h1>
@@ -160,8 +173,8 @@ export default function AdminSettingsPage() {
         <div className="space-y-6">
           {/* Courses Limit */}
           <div className="flex items-start gap-4">
-            <div className="p-3 bg-emerald-100 rounded-xl flex-shrink-0">
-              <GraduationCap className="w-5 h-5 text-emerald-600" />
+            <div className={`p-3 ${theme.activeBg} rounded-xl flex-shrink-0`}>
+              <GraduationCap className={`w-5 h-5 ${theme.text}`} />
             </div>
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -190,8 +203,8 @@ export default function AdminSettingsPage() {
 
           {/* Quizzes Limit */}
           <div className="flex items-start gap-4">
-            <div className="p-3 bg-purple-100 rounded-xl flex-shrink-0">
-              <FileText className="w-5 h-5 text-purple-600" />
+            <div className={`p-3 ${theme.activeBg} rounded-xl flex-shrink-0`}>
+              <FileText className={`w-5 h-5 ${theme.text}`} />
             </div>
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -220,8 +233,8 @@ export default function AdminSettingsPage() {
 
           {/* Blogs Limit */}
           <div className="flex items-start gap-4">
-            <div className="p-3 bg-rose-100 rounded-xl flex-shrink-0">
-              <BookOpen className="w-5 h-5 text-rose-600" />
+            <div className={`p-3 ${theme.activeBg} rounded-xl flex-shrink-0`}>
+              <BookOpen className={`w-5 h-5 ${theme.text}`} />
             </div>
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -258,7 +271,7 @@ export default function AdminSettingsPage() {
         className="bg-white rounded-2xl shadow-sm p-6 sm:p-8"
       >
         <h2 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
-          <ToggleRight className="w-5 h-5" />
+          <ToggleLeft className="w-5 h-5" />
           {t('adminSettings.featureToggles')}
         </h2>
 
@@ -266,7 +279,7 @@ export default function AdminSettingsPage() {
           {/* Enable Blogs */}
           <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
             <div className="flex items-center gap-3">
-              <BookOpen className="w-5 h-5 text-rose-600" />
+              <BookOpen className={`w-5 h-5 ${theme.text}`} />
               <div>
                 <p className="font-medium text-gray-900">{t('adminSettings.enableBlogs')}</p>
                 <p className="text-sm text-gray-500">{t('adminSettings.enableBlogsDesc')}</p>
@@ -283,7 +296,7 @@ export default function AdminSettingsPage() {
                 })
               }
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                settings.featureToggles.enableBlogs ? 'bg-indigo-600' : 'bg-gray-300'
+                settings.featureToggles.enableBlogs ? `bg-gradient-to-r ${theme.gradient}` : 'bg-gray-300'
               }`}
             >
               <span
@@ -297,7 +310,7 @@ export default function AdminSettingsPage() {
           {/* Enable Quizzes */}
           <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
             <div className="flex items-center gap-3">
-              <FileText className="w-5 h-5 text-purple-600" />
+              <FileText className={`w-5 h-5 ${theme.text}`} />
               <div>
                 <p className="font-medium text-gray-900">{t('adminSettings.enableQuizzes')}</p>
                 <p className="text-sm text-gray-500">{t('adminSettings.enableQuizzesDesc')}</p>
@@ -314,7 +327,7 @@ export default function AdminSettingsPage() {
                 })
               }
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                settings.featureToggles.enableQuizzes ? 'bg-indigo-600' : 'bg-gray-300'
+                settings.featureToggles.enableQuizzes ? `bg-gradient-to-r ${theme.gradient}` : 'bg-gray-300'
               }`}
             >
               <span
@@ -328,7 +341,7 @@ export default function AdminSettingsPage() {
           {/* Enable Courses */}
           <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
             <div className="flex items-center gap-3">
-              <GraduationCap className="w-5 h-5 text-emerald-600" />
+              <GraduationCap className={`w-5 h-5 ${theme.text}`} />
               <div>
                 <p className="font-medium text-gray-900">{t('adminSettings.enableCourses')}</p>
                 <p className="text-sm text-gray-500">{t('adminSettings.enableCoursesDesc')}</p>
@@ -345,7 +358,7 @@ export default function AdminSettingsPage() {
                 })
               }
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                settings.featureToggles.enableCourses ? 'bg-indigo-600' : 'bg-gray-300'
+                settings.featureToggles.enableCourses ? `bg-gradient-to-r ${theme.gradient}` : 'bg-gray-300'
               }`}
             >
               <span
@@ -359,7 +372,7 @@ export default function AdminSettingsPage() {
           {/* Enable Analytics */}
           <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
             <div className="flex items-center gap-3">
-              <SettingsIcon className="w-5 h-5 text-indigo-600" />
+              <Settings className={`w-5 h-5 ${theme.text}`} />
               <div>
                 <p className="font-medium text-gray-900">{t('adminSettings.enableAnalytics')}</p>
                 <p className="text-sm text-gray-500">{t('adminSettings.enableAnalyticsDesc')}</p>
@@ -376,7 +389,7 @@ export default function AdminSettingsPage() {
                 })
               }
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                settings.featureToggles.enableAnalytics ? 'bg-indigo-600' : 'bg-gray-300'
+                settings.featureToggles.enableAnalytics ? `bg-gradient-to-r ${theme.gradient}` : 'bg-gray-300'
               }`}
             >
               <span
@@ -405,7 +418,7 @@ export default function AdminSettingsPage() {
           {/* Maintenance Mode */}
           <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
             <div className="flex items-center gap-3">
-              <Power className="w-5 h-5 text-amber-600" />
+              <Power className={`w-5 h-5 ${theme.text}`} />
               <div>
                 <p className="font-medium text-gray-900">{t('adminSettings.maintenanceMode')}</p>
                 <p className="text-sm text-gray-500">{t('adminSettings.maintenanceModeDesc')}</p>
@@ -422,7 +435,7 @@ export default function AdminSettingsPage() {
                 })
               }
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                settings.platformConfig.maintenanceMode ? 'bg-amber-600' : 'bg-gray-300'
+                settings.platformConfig.maintenanceMode ? `bg-gradient-to-r ${theme.gradient}` : 'bg-gray-300'
               }`}
             >
               <span
@@ -436,7 +449,7 @@ export default function AdminSettingsPage() {
           {/* Allow Registration */}
           <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
             <div className="flex items-center gap-3">
-              <UserPlus className="w-5 h-5 text-blue-600" />
+              <UserPlus className={`w-5 h-5 ${theme.text}`} />
               <div>
                 <p className="font-medium text-gray-900">{t('adminSettings.allowRegistration')}</p>
                 <p className="text-sm text-gray-500">{t('adminSettings.allowRegistrationDesc')}</p>
@@ -453,7 +466,7 @@ export default function AdminSettingsPage() {
                 })
               }
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                settings.platformConfig.allowRegistration ? 'bg-indigo-600' : 'bg-gray-300'
+                settings.platformConfig.allowRegistration ? `bg-gradient-to-r ${theme.gradient}` : 'bg-gray-300'
               }`}
             >
               <span
@@ -480,7 +493,7 @@ export default function AdminSettingsPage() {
         >
           {isSaving ? (
             <>
-              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+              <Loader variant="button" size="sm" />
               {t('adminSettings.saving')}
             </>
           ) : (

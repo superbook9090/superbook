@@ -12,11 +12,11 @@ import {
   Eye,
   EyeOff,
   ArrowRight,
-  Loader2,
   Sparkles,
   BookOpen,
   Users
 } from 'lucide-react';
+import Loader from '@/components/ui/Loader';
 
 export default function RegisterForm() {
   const { status } = useSession();
@@ -397,7 +397,7 @@ export default function RegisterForm() {
                   className="w-full flex items-center justify-center py-3.5 px-6 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-semibold rounded-xl shadow-lg shadow-violet-500/25 hover:shadow-xl hover:shadow-violet-500/30 focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:opacity-60 disabled:cursor-not-allowed transition-all"
                 >
                   {isLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <Loader variant="button" size="sm" />
                   ) : (
                     <>
                       Create Account

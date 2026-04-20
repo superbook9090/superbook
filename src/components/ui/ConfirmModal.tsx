@@ -5,7 +5,8 @@
 
 import { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertCircle, AlertTriangle, Info, CheckCircle, Loader2 } from 'lucide-react';
+import { AlertCircle, AlertTriangle, Info, CheckCircle } from 'lucide-react';
+import Loader from '@/components/ui/Loader';
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -220,7 +221,7 @@ export default function ConfirmModal({
                   >
                     {isLoading ? (
                       <>
-                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <Loader variant="button" size="sm" />
                         Processing...
                       </>
                     ) : (

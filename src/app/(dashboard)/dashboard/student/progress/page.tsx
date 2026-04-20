@@ -5,6 +5,16 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useRoleTheme } from '@/contexts/RoleThemeContext';
+import { motion } from 'framer-motion';
+import {
+  BookOpen,
+  TrendingUp,
+  Clock,
+  Award,
+  Target,
+} from 'lucide-react';
+import Loader from '@/components/ui/Loader';
 import Alert from '@/components/ui/Alert';
 
 interface CourseProgress {
@@ -51,8 +61,9 @@ interface OverallStats {
 
 export default function StudentProgressPage() {
   const { data: session, status } = useSession();
-  const { t } = useTranslation();
   const router = useRouter();
+  const { t } = useTranslation();
+  const { theme } = useRoleTheme();
   const [progressData, setProgressData] = useState<CourseProgress[]>([]);
   const [overallStats, setOverallStats] = useState<OverallStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -162,7 +173,7 @@ export default function StudentProgressPage() {
             <p className="text-gray-500 mb-4">{t('progress.noProgressData')}</p>
             <a
               href="/dashboard/student/browse"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+              className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90`}
             >
               {t('progress.browseCourses')}
             </a>
@@ -222,7 +233,7 @@ export default function StudentProgressPage() {
                           item.enrollment.progress >= 100
                             ? 'bg-green-500'
                             : item.enrollment.progress >= 50
-                            ? 'bg-indigo-600'
+                            ? `bg-gradient-to-r ${theme.gradient}`
                             : 'bg-yellow-500'
                         }`}
                         style={{ width: `${item.enrollment.progress}%` }}

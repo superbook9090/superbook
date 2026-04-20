@@ -4,19 +4,20 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import {
   BookOpen,
   Clock,
   User,
   Tag,
   ArrowRight,
-  Loader2,
   CheckCircle,
   Play,
   RotateCcw,
   Trash2
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
+import Loader from '@/components/ui/Loader';
 
 interface Course {
   _id: string;
@@ -47,6 +48,7 @@ interface CourseCardProps {
 export default function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
   const router = useRouter();
   const { t } = useTranslation();
+  const { theme } = useRoleTheme();
   const [isLoading, setIsLoading] = useState(false);
 
   // Handle both course and enrollment objects
@@ -101,7 +103,7 @@ export default function CourseCard({ course, type, onEnroll, onDrop }: CourseCar
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center">
+          <div className={`w-full h-full bg-gradient-to-br ${theme.gradient} flex items-center justify-center`}>
             <BookOpen className="w-16 h-16 text-white/80" />
           </div>
         )}
@@ -127,7 +129,7 @@ export default function CourseCard({ course, type, onEnroll, onDrop }: CourseCar
       {/* Content */}
       <div className="p-6">
         {/* Title & Description */}
-        <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-1 group-hover:text-indigo-600 transition-colors">
+        <h3 className={`text-lg font-bold text-gray-900 mb-2 line-clamp-1 group-hover:${theme.text} transition-colors`}>
           {courseData.title}
         </h3>
         <p className="text-sm text-gray-500 mb-4 line-clamp-2">
@@ -136,7 +138,7 @@ export default function CourseCard({ course, type, onEnroll, onDrop }: CourseCar
 
         {/* Instructor */}
         <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
-          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-400 to-purple-400 flex items-center justify-center">
+          <div className={`w-6 h-6 rounded-full bg-gradient-to-br ${theme.gradient} flex items-center justify-center`}>
             <User className="w-3 h-3 text-white" />
           </div>
           <span>{courseData.instructor?.name || t('courses.unknown')}</span>
@@ -147,11 +149,11 @@ export default function CourseCard({ course, type, onEnroll, onDrop }: CourseCar
           <div className="mb-4 p-4 bg-gray-50 rounded-xl">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-600">{t('courses.progress')}</span>
-              <span className="text-sm font-bold text-indigo-600">{enrollment.progress}%</span>
+              <span className={`text-sm font-bold ${theme.text}`}>{enrollment.progress}%</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500"
+                className={`h-full rounded-full bg-gradient-to-r ${theme.gradient} transition-all duration-500`}
                 style={{ width: `${enrollment.progress}%` }}
               />
             </div>
@@ -169,10 +171,10 @@ export default function CourseCard({ course, type, onEnroll, onDrop }: CourseCar
               whileTap={{ scale: 0.98 }}
               onClick={handleEnroll}
               disabled={isLoading}
-              className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className={`flex-1 flex items-center justify-center gap-2 bg-gradient-to-r ${theme.gradient} text-white py-3 px-4 rounded-xl font-semibold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {isLoading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader variant="button" size="sm" />
               ) : (
                 <>
                   {t('courses.enrollNow')}
@@ -186,7 +188,7 @@ export default function CourseCard({ course, type, onEnroll, onDrop }: CourseCar
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleContinue}
-                className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all"
+                className={`flex-1 flex items-center justify-center gap-2 bg-gradient-to-r ${theme.gradient} text-white py-3 px-4 rounded-xl font-semibold hover:opacity-90 transition-all`}
               >
                 {enrollment?.progress === 0 ? (
                   <><Play className="w-4 h-4" /> {t('courses.start')}</>
@@ -203,7 +205,7 @@ export default function CourseCard({ course, type, onEnroll, onDrop }: CourseCar
                 disabled={isLoading}
                 className="p-3 border-2 border-red-100 text-red-500 rounded-xl hover:bg-red-50 hover:border-red-200 transition-all disabled:opacity-50"
               >
-                {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Trash2 className="w-5 h-5" />}
+                {isLoading ? <Loader variant="button" size="sm" /> : <Trash2 className="w-5 h-5" />}
               </motion.button>
             </>
           )}

@@ -11,9 +11,9 @@ import {
   Eye,
   EyeOff,
   ArrowRight,
-  Loader2,
   Sparkles
 } from 'lucide-react';
+import Loader from '@/components/ui/Loader';
 
 export default function LoginForm() {
   const { status } = useSession();
@@ -291,7 +291,7 @@ export default function LoginForm() {
                   className="w-full flex items-center justify-center py-4 px-6 bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-60 disabled:cursor-not-allowed transition-all"
                 >
                   {isLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <Loader variant="button" size="sm" />
                   ) : (
                     <>
                       Sign in

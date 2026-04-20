@@ -522,4 +522,14 @@ export const en = {
     userLimitsUpdated: 'User limits updated successfully',
     failedUpdateLimits: 'Failed to update limits',
   },
+
+  // Not Found
+  notFound: {
+    pageNotFound: 'Page Not Found',
+    description: 'Sorry, we couldn\'t find the page you\'re looking for. It might have been moved, deleted, or never existed.',
+    goHome: 'Go Home',
+    goToDashboard: 'Go to Dashboard',
+    signIn: 'Sign In',
+    helpText: 'If you believe this is an error, please contact support.',
+  },
 };

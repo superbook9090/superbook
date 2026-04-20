@@ -51,8 +51,23 @@ export default async function FavoritesPage() {
       .sort({ createdAt: -1 })
       .lean();
 
-    // Filter out favorites where blog is null (unpublished)
-    favorites = favoritesData.filter((fav: any) => fav.blog !== null) as Favorite[];
+    // Filter out favorites where blog is null (unpublished) and serialize
+    favorites = favoritesData
+      .filter((fav: any) => fav.blog !== null)
+      .map((fav: any) => ({
+        _id: fav._id.toString(),
+        blog: {
+          _id: fav.blog._id.toString(),
+          title: fav.blog.title,
+          topic: fav.blog.topic,
+          content: fav.blog.content,
+          createdAt: fav.blog.createdAt?.toString() || '',
+          author: fav.blog.author ? {
+            _id: fav.blog.author._id?.toString() || '',
+            name: fav.blog.author.name
+          } : { _id: '', name: '' },
+        },
+      })) as Favorite[];
   } catch (error) {
     console.error('Error fetching favorites:', error);
     favorites = [];

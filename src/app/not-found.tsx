@@ -1,20 +1,25 @@
-import Link from 'next/link';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+'use client';
 
-export default async function NotFound() {
-  const session = await getServerSession(authOptions);
+import Link from 'next/link';
+import { useSession } from 'next-auth/react';
+import { useTranslation } from '@/hooks/useTranslation';
+import { useRoleTheme } from '@/contexts/RoleThemeContext';
+
+export default function NotFound() {
+  const session = useSession();
+  const { t } = useTranslation();
+  const { theme } = useRoleTheme();
 
   // Determine dashboard link based on role
   let dashboardLink = '/';
-  let dashboardText = 'Go Home';
+  let dashboardText = t('notFound.goHome');
 
-  if (session?.user?.role === 'student') {
+  if (session.data?.user?.role === 'student') {
     dashboardLink = '/dashboard/student';
-    dashboardText = 'Go to Dashboard';
-  } else if (session?.user?.role === 'teacher' || session?.user?.role === 'admin') {
+    dashboardText = t('notFound.goToDashboard');
+  } else if (session.data?.user?.role === 'teacher' || session.data?.user?.role === 'admin') {
     dashboardLink = '/dashboard/teacher';
-    dashboardText = 'Go to Dashboard';
+    dashboardText = t('notFound.goToDashboard');
   }
 
   return (
@@ -22,9 +27,9 @@ export default async function NotFound() {
       <div className="max-w-md w-full text-center">
         {/* 404 Illustration */}
         <div className="mb-8">
-          <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-indigo-100">
+          <div className={`inline-flex items-center justify-center w-24 h-24 rounded-full ${theme.activeBg}`}>
             <svg
-              className="w-12 h-12 text-indigo-600"
+              className={`w-12 h-12 ${theme.text}`}
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
@@ -42,18 +47,18 @@ export default async function NotFound() {
 
         {/* Heading */}
         <h1 className="text-6xl font-extrabold text-gray-900 mb-4">404</h1>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Page Not Found</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('notFound.pageNotFound')}</h2>
 
         {/* Description */}
         <p className="text-gray-500 mb-8">
-          Sorry, we couldn&apos;t find the page you&apos;re looking for. It might have been moved, deleted, or never existed.
+          {t('notFound.description')}
         </p>
 
         {/* Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
             href={dashboardLink}
-            className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+            className={`inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors`}
           >
             <svg
               className="w-5 h-5 mr-2"
@@ -72,7 +77,7 @@ export default async function NotFound() {
             {dashboardText}
           </Link>
 
-          {!session && (
+          {!session.data && (
             <Link
               href="/login"
               className="inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
@@ -91,14 +96,14 @@ export default async function NotFound() {
                   d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
                 />
               </svg>
-              Sign In
+              {t('notFound.signIn')}
             </Link>
           )}
         </div>
 
         {/* Help Text */}
         <p className="mt-8 text-sm text-gray-400">
-          If you believe this is an error, please contact support.
+          {t('notFound.helpText')}
         </p>
       </div>
     </div>

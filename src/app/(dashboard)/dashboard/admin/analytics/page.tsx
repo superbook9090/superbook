@@ -4,18 +4,21 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useRoleTheme } from '@/contexts/RoleThemeContext';
+import { motion } from 'framer-motion';
 import {
-  BarChart3,
   Users,
   BookOpen,
-  Loader2,
-  RefreshCw,
+  TrendingUp,
   Award,
+  Clock,
+  BarChart3,
+  RefreshCw,
   Activity,
   GraduationCap,
 } from 'lucide-react';
+import Loader from '@/components/ui/Loader';
 import Alert from '@/components/ui/Alert';
 
 interface AdminStats {
@@ -59,6 +62,7 @@ export default function AdminAnalyticsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const { t } = useTranslation();
+  const { theme } = useRoleTheme();
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -94,11 +98,7 @@ export default function AdminAnalyticsPage() {
   };
 
   if (status === 'loading' || isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
-      </div>
-    );
+    return <Loader variant="inline" size="lg" />;
   }
 
   return (
@@ -261,7 +261,7 @@ export default function AdminAnalyticsPage() {
                 </div>
                 <div className="mt-4 w-full bg-gray-200 rounded-full h-2">
                   <div
-                    className="bg-indigo-600 h-2 rounded-full transition-all"
+                    className={`bg-gradient-to-r ${theme.gradient} h-2 rounded-full transition-all`}
                     style={{ width: `${stats.quizzes.averageScore}%` }}
                   />
                 </div>
@@ -271,7 +271,7 @@ export default function AdminAnalyticsPage() {
                 <p className="text-4xl font-bold text-emerald-600">{stats.quizzes.highestScore}%</p>
                 <div className="mt-4 w-full bg-gray-200 rounded-full h-2">
                   <div
-                    className="bg-emerald-600 h-2 rounded-full transition-all"
+                    className={`bg-gradient-to-r ${theme.gradient} h-2 rounded-full transition-all`}
                     style={{ width: `${stats.quizzes.highestScore}%` }}
                   />
                 </div>

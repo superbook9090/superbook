@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { fetcher } from '@/lib/swrFetcher';
 import { useSessionStore } from '@/store/useSessionStore';
+import Loader from '@/components/ui/Loader';
 
 interface Enrollment {
   _id: string;
@@ -102,14 +103,7 @@ export default function StudentDashboardPage() {
   const isLoading = status === 'loading' || !enrollmentsData || !attemptsData;
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-500">{t('common.loading')}</p>
-        </div>
-      </div>
-    );
+    return <Loader variant="inline" size="lg" text={t('common.loading')} />;
   }
 
   return (

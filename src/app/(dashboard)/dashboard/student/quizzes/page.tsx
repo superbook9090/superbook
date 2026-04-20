@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import QuizCard from '@/components/dashboard/QuizCard';
 import Alert from '@/components/ui/Alert';
 import { useSessionStore } from '@/store/useSessionStore';
@@ -36,6 +37,7 @@ export default function StudentQuizzesPage() {
   const status = useSessionStore((s) => s.status);
   const router = useRouter();
   const { t } = useTranslation();
+  const { theme } = useRoleTheme();
   const [availableQuizzes, setAvailableQuizzes] = useState<Quiz[]>([]);
   const [attempts, setAttempts] = useState<Attempt[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -225,7 +227,7 @@ export default function StudentQuizzesPage() {
                 </p>
                 <a
                   href="/dashboard/student/browse"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
+                  className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90`}
                 >
                   {t('courses.browseMore')}
                 </a>

@@ -12,6 +12,7 @@ import {
   TrendingUp,
   User,
   BarChart3,
+  Library,
   LucideIcon
 } from 'lucide-react';
 
@@ -24,6 +25,7 @@ const iconMap: Record<string, LucideIcon> = {
   TrendingUp,
   User,
   BarChart3,
+  Library,
 };
 
 interface NavItem {

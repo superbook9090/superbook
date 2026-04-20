@@ -4,7 +4,19 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
+import { motion } from 'framer-motion';
+import {
+  CheckCircle,
+  XCircle,
+  Clock,
+  BookOpen,
+  ChevronLeft,
+  ChevronRight,
+  RotateCcw,
+} from 'lucide-react';
+import Loader from '@/components/ui/Loader';
 
 interface Question {
   question: string;
@@ -45,6 +57,7 @@ export default function QuizResultPage() {
   const router = useRouter();
   const params = useParams();
   const attemptId = params.id as string;
+  const { theme } = useRoleTheme();
 
   const [attempt, setAttempt] = useState<Attempt | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -104,7 +117,7 @@ export default function QuizResultPage() {
         <p className="text-red-600 mb-4">{t('quizResult.resultNotFound')}</p>
         <button
           onClick={() => router.push('/dashboard/student/quizzes')}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-md"
+          className={`px-4 py-2 bg-gradient-to-r ${theme.gradient} text-white rounded-md`}
         >
           {t('quizResult.backToQuizzes')}
         </button>
@@ -192,7 +205,7 @@ export default function QuizResultPage() {
         <div className="flex justify-center space-x-4">
           <button
             onClick={() => setShowAnswers(!showAnswers)}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+            className={`px-4 py-2 bg-gradient-to-r ${theme.gradient} text-white rounded-md hover:opacity-90`}
           >
             {showAnswers ? t('quizResult.hideAnswers') : t('quizResult.showAnswers')}
           </button>

@@ -5,6 +5,20 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useRoleTheme } from '@/contexts/RoleThemeContext';
+import { motion } from 'framer-motion';
+import {
+  BookOpen,
+  Search,
+  Filter,
+  Eye,
+  EyeOff,
+  Calendar,
+  Plus,
+  Trash2,
+} from 'lucide-react';
+import Loader from '@/components/ui/Loader';
+import { Badge } from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
 
 interface Course {
@@ -21,8 +35,9 @@ interface Course {
 
 export default function TeacherCoursesPage() {
   const { data: session, status } = useSession();
-  const { t } = useTranslation();
   const router = useRouter();
+  const { t } = useTranslation();
+  const { theme } = useRoleTheme();
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -80,7 +95,7 @@ export default function TeacherCoursesPage() {
           <h1 className="text-2xl font-bold text-gray-900">{t('teacherCourses.myCourses')}</h1>
           <a
             href="/dashboard/teacher/courses/create"
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+            className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90`}
           >
             {t('teacherCourses.createNewCourse')}
           </a>
@@ -102,7 +117,7 @@ export default function TeacherCoursesPage() {
               <p className="text-gray-500 mb-4">{t('teacherCourses.noCoursesYet')}</p>
               <a
                 href="/dashboard/teacher/courses/create"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90`}
               >
                 {t('teacherCourses.createFirstCourse')}
               </a>

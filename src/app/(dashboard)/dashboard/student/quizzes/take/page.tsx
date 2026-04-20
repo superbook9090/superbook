@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import Alert from '@/components/ui/Alert';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import { useSessionStore } from '@/store/useSessionStore';
@@ -33,6 +34,7 @@ export default function TakeQuizPage() {
   const searchParams = useSearchParams();
   const attemptId = searchParams.get('attemptId');
   const { t } = useTranslation();
+  const { theme } = useRoleTheme();
 
   const [attempt, setAttempt] = useState<Attempt | null>(null);
   const [answers, setAnswers] = useState<{ [key: number]: number }>({});
@@ -190,7 +192,7 @@ export default function TakeQuizPage() {
         <p className="text-red-600 mb-4">{error || 'Quiz not found'}</p>
         <button
           onClick={() => router.push('/dashboard/student/quizzes')}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-md"
+          className={`px-4 py-2 bg-gradient-to-r ${theme.gradient} text-white rounded-md`}
         >
           Back to Quizzes
         </button>
@@ -223,7 +225,7 @@ export default function TakeQuizPage() {
         <div className="mt-4">
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div
-              className="bg-indigo-600 h-2 rounded-full transition-all"
+              className={`bg-gradient-to-r ${theme.gradient} h-2 rounded-full transition-all`}
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -255,7 +257,7 @@ export default function TakeQuizPage() {
                 <span
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium mr-3 ${
                     answers[currentQuestion] === index
-                      ? 'bg-indigo-600 text-white'
+                      ? `bg-gradient-to-r ${theme.gradient} text-white`
                       : 'bg-gray-200 text-gray-700'
                   }`}
                 >
@@ -286,7 +288,7 @@ export default function TakeQuizPage() {
               onClick={() => setCurrentQuestion(index)}
               className={`w-3 h-3 rounded-full ${
                 index === currentQuestion
-                  ? 'bg-indigo-600'
+                  ? `bg-gradient-to-r ${theme.gradient}`
                   : answers[index] !== undefined
                   ? 'bg-green-500'
                   : 'bg-gray-300'
@@ -298,7 +300,7 @@ export default function TakeQuizPage() {
         {currentQuestion < questions.length - 1 ? (
           <button
             onClick={() => setCurrentQuestion((prev) => Math.min(questions.length - 1, prev + 1))}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+            className={`px-4 py-2 bg-gradient-to-r ${theme.gradient} text-white rounded-md hover:opacity-90`}
           >
             {t('common.next')}
           </button>
@@ -306,7 +308,7 @@ export default function TakeQuizPage() {
           <button
             onClick={() => handleSubmit()}
             disabled={isSubmitting}
-            className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
+            className={`px-6 py-2 bg-gradient-to-r ${theme.gradient} text-white rounded-md hover:opacity-90 disabled:opacity-50`}
           >
             {isSubmitting ? t('quiz.submitting') : t('quiz.submit')}
           </button>

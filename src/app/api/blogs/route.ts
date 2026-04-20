@@ -51,16 +51,19 @@ export async function GET(req: NextRequest) {
       .lean();
 
     // Convert ObjectIds to strings for Next.js serialization
-    const sanitizedBlogs = blogs.map((blog: any) => ({
+    const serializedBlogs = blogs.map((blog: any) => ({
       ...blog,
       _id: blog._id?.toString(),
-      author: blog.author?._id?.toString() || blog.author,
+      author: blog.author ? {
+        ...blog.author,
+        _id: blog.author._id?.toString(),
+      } : blog.author,
     }));
 
     const total = await Blog.countDocuments(query);
 
     return NextResponse.json({
-      blogs: sanitizedBlogs,
+      blogs: serializedBlogs,
       pagination: {
         total,
         page,

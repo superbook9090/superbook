@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import Alert from '@/components/ui/Alert';
 
 interface Course {
@@ -27,6 +28,7 @@ export default function TeacherQuizzesPage() {
   const { data: session, status } = useSession();
   const { t } = useTranslation();
   const router = useRouter();
+  const { theme } = useRoleTheme();
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -151,7 +153,7 @@ export default function TeacherQuizzesPage() {
         </div>
         <a
           href="/dashboard/teacher/quizzes/create"
-          className="inline-flex items-center justify-center px-4 py-2.5 sm:py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 touch-manipulation"
+          className={`inline-flex items-center justify-center px-4 py-2.5 sm:py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 touch-manipulation`}
         >
           {t('teacherQuizzes.createQuiz')}
         </a>
@@ -178,7 +180,7 @@ export default function TeacherQuizzesPage() {
               <p className="text-gray-500 mb-4">{t('teacherQuizzes.createCourseFirst')}</p>
               <a
                 href="/dashboard/teacher/courses/create"
-                className="inline-flex items-center justify-center px-4 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 touch-manipulation"
+                className={`inline-flex items-center justify-center px-4 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 touch-manipulation`}
               >
                 {t('teacherQuizzes.createCourse')}
               </a>
@@ -190,7 +192,7 @@ export default function TeacherQuizzesPage() {
               <p className="text-gray-500 mb-4">{t('teacherQuizzes.noQuizzesYet')}</p>
               <a
                 href="/dashboard/teacher/quizzes/create"
-                className="inline-flex items-center justify-center px-4 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 touch-manipulation"
+                className={`inline-flex items-center justify-center px-4 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 touch-manipulation`}
               >
                 {t('teacherQuizzes.createFirstQuiz')}
               </a>
@@ -230,7 +232,7 @@ export default function TeacherQuizzesPage() {
                   <div className="flex gap-2 pt-2 border-t border-gray-100">
                     <button
                       onClick={() => handleTogglePublish(quiz._id, quiz.isPublished)}
-                      className="flex-1 px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 touch-manipulation"
+                      className={`flex-1 px-3 py-2 text-sm font-medium ${theme.text} ${theme.activeBg} rounded-lg hover:opacity-80 touch-manipulation`}
                     >
                       {quiz.isPublished ? t('teacherQuizzes.unpublish') : t('teacherQuizzes.publish')}
                     </button>

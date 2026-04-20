@@ -1,26 +1,29 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useTranslation } from '@/hooks/useTranslation';
-import useSWR from 'swr';
 import { debounce } from '@/lib/debounce';
+import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import {
-  Plus,
-  Edit2,
-  Trash2,
-  Calendar,
-  Eye,
-  EyeOff,
   BookOpen,
   Search,
   Filter,
+  Trash2,
+  Eye,
+  EyeOff,
+  Calendar,
+  Edit2,
+  Plus,
 } from 'lucide-react';
+import Loader from '@/components/ui/Loader';
 import { Badge } from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
 import ConfirmModal from '@/components/ui/ConfirmModal';
+import useSWR from 'swr';
 import { fetcher } from '@/lib/swrFetcher';
 import { useSessionStore } from '@/store/useSessionStore';
 
@@ -48,6 +51,7 @@ export default function TeacherBlogsPage() {
   const status = useSessionStore((s) => s.status);
   const router = useRouter();
   const { t } = useTranslation();
+  const { theme } = useRoleTheme();
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<'all' | 'published' | 'draft'>('all');
   const [languageFilter, setLanguageFilter] = useState<'all' | 'en' | 'hi'>('all');
@@ -125,28 +129,24 @@ export default function TeacherBlogsPage() {
   });
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-12 h-12 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin" />
-      </div>
-    );
+    return <Loader variant="inline" size="lg" />;
   }
 
   return (
-    <div className="space-y-6">
+    <div className="px-4 sm:px-6 lg:px-8 space-y-6">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
       >
-        <div>
+        <div className="flex-1">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">My Blogs</h1>
           <p className="text-gray-500 mt-1">Manage your blog posts and content</p>
         </div>
         <Link
           href="/dashboard/teacher/blogs/create"
-          className="inline-flex items-center justify-center px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-medium rounded-xl shadow-md hover:shadow-lg transition-all"
+          className={`inline-flex items-center justify-center px-4 py-2.5 sm:w-auto w-full bg-gradient-to-r ${theme.gradient} text-white font-medium rounded-xl shadow-md hover:shadow-lg transition-all`}
         >
           <Plus className="w-5 h-5 mr-2" />
           Create Blog
@@ -183,11 +183,11 @@ export default function TeacherBlogsPage() {
 
           {/* Filter */}
           <div className="flex items-center gap-2">
-            <Filter className="w-5 h-5 text-gray-400" />
+            <Filter className="w-5 h-5 text-gray-400 flex-shrink-0" />
             <select
               value={filter}
               onChange={(e) => setFilter(e.target.value as 'all' | 'published' | 'draft')}
-              className="px-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+              className="flex-1 sm:flex-none px-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
             >
               <option value="all">All Blogs</option>
               <option value="published">Published</option>
@@ -197,11 +197,11 @@ export default function TeacherBlogsPage() {
 
           {/* Language Filter */}
           <div className="flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-gray-400" />
+            <BookOpen className="w-5 h-5 text-gray-400 flex-shrink-0" />
             <select
               value={languageFilter}
               onChange={(e) => setLanguageFilter(e.target.value as 'all' | 'en' | 'hi')}
-              className="px-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+              className="flex-1 sm:flex-none px-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
             >
               <option value="all">All Languages</option>
               <option value="en">English</option>
@@ -216,14 +216,14 @@ export default function TeacherBlogsPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="grid grid-cols-3 gap-4"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
       >
         <div className="bg-white rounded-xl p-4 shadow-sm">
-          <p className="text-2xl font-bold text-emerald-600">{blogs.length}</p>
+          <p className={`text-2xl font-bold ${theme.text}`}>{blogs.length}</p>
           <p className="text-sm text-gray-500">Total Blogs</p>
         </div>
         <div className="bg-white rounded-xl p-4 shadow-sm">
-          <p className="text-2xl font-bold text-emerald-600">
+          <p className={`text-2xl font-bold ${theme.text}`}>
             {blogs.filter((b: Blog) => b.isPublished).length}
           </p>
           <p className="text-sm text-gray-500">Published</p>
@@ -244,7 +244,7 @@ export default function TeacherBlogsPage() {
         className="space-y-4"
       >
         {filteredBlogs.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-2xl shadow-sm">
+          <div className="text-center py-16 px-4 bg-white rounded-2xl shadow-sm">
             <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
               {searchTerm ? 'No blogs found' : 'No blogs yet'}
@@ -257,7 +257,7 @@ export default function TeacherBlogsPage() {
             {!searchTerm && (
               <Link
                 href="/dashboard/teacher/blogs/create"
-                className="inline-flex items-center px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-medium rounded-xl shadow-md hover:shadow-lg transition-all"
+                className={`inline-flex items-center justify-center px-4 py-2.5 sm:w-auto w-full bg-gradient-to-r ${theme.gradient} text-white font-medium rounded-xl shadow-md hover:shadow-lg transition-all touch-manipulation`}
               >
                 <Plus className="w-5 h-5 mr-2" />
                 Create Blog
@@ -273,10 +273,10 @@ export default function TeacherBlogsPage() {
               transition={{ delay: 0.1 * index }}
               className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow"
             >
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-lg font-semibold text-gray-900">{blog.title}</h3>
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-3 mb-2 flex-wrap">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 line-clamp-1">{blog.title}</h3>
                     <Badge
                       variant={blog.isPublished ? 'success' : 'default'}
                       size="sm"
@@ -284,7 +284,7 @@ export default function TeacherBlogsPage() {
                       {blog.isPublished ? 'Published' : 'Draft'}
                     </Badge>
                   </div>
-                  <div className="flex items-center gap-4 text-sm text-gray-500">
+                  <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
                     <Badge variant="primary" size="sm">{blog.topic}</Badge>
                     <span className="flex items-center">
                       <Calendar className="w-4 h-4 mr-1" />
@@ -293,12 +293,12 @@ export default function TeacherBlogsPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 sm:gap-1">
                   <button
                     onClick={() => togglePublish(blog._id, blog.isPublished)}
-                    className={`p-2 rounded-lg transition-colors ${
+                    className={`p-2.5 sm:p-2 rounded-lg transition-colors touch-manipulation ${
                       blog.isPublished
-                        ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
+                        ? `${theme.activeBg} ${theme.text} hover:opacity-80`
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                     title={blog.isPublished ? 'Unpublish' : 'Publish'}
@@ -307,14 +307,14 @@ export default function TeacherBlogsPage() {
                   </button>
                   <Link
                     href={`/dashboard/teacher/blogs/edit/${blog._id}`}
-                    className="p-2 bg-gray-50 text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
+                    className="p-2.5 sm:p-2 bg-gray-50 text-gray-600 rounded-lg hover:bg-gray-100 transition-colors touch-manipulation"
                     title="Edit"
                   >
                     <Edit2 className="w-5 h-5" />
                   </Link>
                   <button
                     onClick={() => handleDelete(blog._id)}
-                    className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
+                    className="p-2.5 sm:p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors touch-manipulation"
                     title="Delete"
                   >
                     <Trash2 className="w-5 h-5" />
