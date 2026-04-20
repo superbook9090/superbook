@@ -2,6 +2,7 @@
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
+import { headers } from 'next/headers';
 
 export default async function DashboardRedirectPage() {
   const session = await getServerSession(authOptions);
@@ -10,15 +11,22 @@ export default async function DashboardRedirectPage() {
     redirect('/login');
   }
 
-  // Redirect based on user role
   const role = session.user?.role;
 
-  if (role === 'teacher') {
-    redirect('/dashboard/teacher');
-  } else if (role === 'admin') {
-    redirect('/dashboard/admin');
-  } else {
-    // Default to student dashboard
-    redirect('/dashboard/student');
+  const targetPath =
+    role === 'teacher'
+      ? '/dashboard/teacher'
+      : role === 'admin'
+      ? '/dashboard/admin'
+      : '/dashboard/student';
+
+  // 🛑 SAFETY CHECK (prevents infinite loop)
+  const headersList = await headers();
+  const pathname = headersList.get('x-pathname') || '';
+
+  if (pathname === targetPath) {
+    return null;
   }
+
+  redirect(targetPath);
 }

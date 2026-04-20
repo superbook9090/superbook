@@ -1,6 +1,7 @@
-import AppSettings from '@/models/AppSettings';
 import User from '@/models/User';
 import { NextResponse } from 'next/server';
+import { getSettingsWithDefaults as getDataServiceSettings } from './dataService';
+import type { IAppSettings } from '@/models/AppSettings';
 
 interface FeatureToggles {
   enableBlogs: boolean;
@@ -24,13 +25,30 @@ interface PlatformConfig {
 }
 
 /**
+ * Get settings with defaults using centralized data service
+ * @returns AppSettings document with defaults
+ */
+async function getSettingsWithDefaults(): Promise<IAppSettings> {
+  return getDataServiceSettings();
+}
+
+/**
+ * Invalidate settings cache (call after updating settings)
+ * Note: This is a no-op now since we use React cache() in dataService
+ * Cache is automatically invalidated per request
+ */
+export function invalidateSettingsCache(): void {
+  // No-op - React cache() handles this automatically per request
+}
+
+/**
  * Check if a feature is enabled
  * @param feature - The feature to check
  * @returns true if enabled, false if disabled
  * @throws Error if feature is disabled (returns 403 response)
  */
 export async function checkFeature(feature: keyof FeatureToggles): Promise<boolean> {
-  const settings = await AppSettings.findOne();
+  const settings = await getSettingsWithDefaults();
   if (!settings?.featureToggles?.[feature]) {
     return false;
   }
@@ -43,7 +61,7 @@ export async function checkFeature(feature: keyof FeatureToggles): Promise<boole
  * @returns NextResponse with 403 if disabled, or null if enabled
  */
 export async function requireFeature(feature: keyof FeatureToggles): Promise<NextResponse | null> {
-  const settings = await AppSettings.findOne();
+  const settings = await getSettingsWithDefaults();
   if (!settings?.featureToggles?.[feature]) {
     return NextResponse.json(
       { message: `${feature} feature is disabled by admin` },
@@ -58,7 +76,7 @@ export async function requireFeature(feature: keyof FeatureToggles): Promise<Nex
  * @returns true if maintenance mode is enabled
  */
 export async function isMaintenanceMode(): Promise<boolean> {
-  const settings = await AppSettings.findOne();
+  const settings = await getSettingsWithDefaults();
   return settings?.platformConfig?.maintenanceMode ?? false;
 }
 
@@ -67,7 +85,7 @@ export async function isMaintenanceMode(): Promise<boolean> {
  * @returns true if registration is allowed
  */
 export async function isRegistrationAllowed(): Promise<boolean> {
-  const settings = await AppSettings.findOne();
+  const settings = await getSettingsWithDefaults();
   return settings?.platformConfig?.allowRegistration ?? true;
 }
 
@@ -86,7 +104,7 @@ export async function getTeacherLimit(type: keyof TeacherLimits, userId?: string
     }
   }
   // Fallback to global limits
-  const settings = await AppSettings.findOne();
+  const settings = await getSettingsWithDefaults();
   return settings?.teacherLimits?.[type] ?? 10;
 }
 
@@ -117,10 +135,6 @@ export async function checkTeacherLimit(
  * @returns The platform configuration
  */
 export async function getPlatformConfig(): Promise<PlatformConfig> {
-  const settings = await AppSettings.findOne();
-  return settings?.platformConfig ?? {
-    maintenanceMode: false,
-    allowRegistration: true,
-    defaultLanguage: 'en',
-  };
+  const settings = await getSettingsWithDefaults();
+  return settings?.platformConfig as PlatformConfig;
 }

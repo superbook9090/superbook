@@ -1,11 +1,12 @@
 // src/app/(dashboard)/dashboard/teacher/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useState } from 'react';
+import { useSessionStore } from '@/store/useSessionStore';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
+import useSWR from 'swr';
 import {
   BookOpen,
   Users,
@@ -17,6 +18,7 @@ import {
   BarChart3
 } from 'lucide-react';
 import Alert from '@/components/ui/Alert';
+import { fetcher } from '@/lib/swrFetcher';
 
 interface Course {
   _id: string;
@@ -64,29 +66,65 @@ interface TeacherLimits {
 }
 
 export default function TeacherDashboardPage() {
-  const { data: session, status } = useSession();
+  const session = useSessionStore((s) => s.session);
+  const status = useSessionStore((s) => s.status);
   const router = useRouter();
   const { t } = useTranslation();
-  const [stats, setStats] = useState<Stats>({
-    totalCourses: 0,
-    totalStudents: 0,
-    totalQuizzes: 0,
-    totalBlogs: 0,
-    publishedCourses: 0,
+  const [limitAlert, setLimitAlert] = useState<{ type: 'courses' | 'quizzes' | 'blogs' } | null>(null);
+
+  const isAdmin = session?.user?.role === 'admin';
+  const settingsEndpoint = isAdmin ? '/api/admin/settings' : '/api/settings';
+
+  // SWR hooks for data fetching with automatic caching and deduplication
+  const { data: coursesData } = useSWR(session ? '/api/courses?instructor=self' : null, fetcher);
+  const { data: quizzesData } = useSWR(session ? '/api/quizzes' : null, fetcher);
+  const { data: blogsData } = useSWR(session ? '/api/blogs' : null, fetcher);
+  const { data: settingsData } = useSWR(session ? settingsEndpoint : null, fetcher);
+
+  // Process data when available
+  const courses = coursesData?.courses || [];
+  const allQuizzes = quizzesData?.quizzes || [];
+  const allBlogs = blogsData?.blogs || [];
+  const teacherLimits = settingsData?.teacherLimits || { courses: 5, quizzes: 10, blogs: 10 };
+
+  // Filter quizzes for this teacher's courses
+  const courseIds = new Set(courses.map((c: Course) => c._id.toString()));
+  const teacherQuizzes = allQuizzes.filter((q: Quiz) => {
+    const quizCourseId = typeof q.course === 'object' && q.course !== null
+      ? q.course._id?.toString()
+      : q.course?.toString();
+    return quizCourseId && courseIds.has(quizCourseId);
   });
-  const [limits, setLimits] = useState<TeacherLimits>({
-    courses: 5,
-    quizzes: 10,
-    blogs: 10,
+
+  // Filter blogs for this teacher
+  const teacherBlogs = allBlogs.filter((b: Blog) => b.author?._id === session?.user?.id);
+
+  // Calculate total unique students across all courses
+  const allStudentIds = new Set<string>();
+  courses.forEach((course: Course) => {
+    course.enrolledStudents?.forEach((studentId: string) => allStudentIds.add(studentId));
+  });
+
+  const publishedCount = courses.filter((c: Course) => c.isPublished).length;
+
+  const stats: Stats = {
+    totalCourses: courses.length,
+    totalStudents: allStudentIds.size,
+    totalQuizzes: teacherQuizzes.length,
+    totalBlogs: teacherBlogs.length,
+    publishedCourses: publishedCount,
+  };
+
+  const limits: TeacherLimits = {
+    ...teacherLimits,
     userLimits: {
       courses: undefined,
       quizzes: undefined,
       blogs: undefined,
     },
-  });
-  const [recentCourses, setRecentCourses] = useState<Course[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [limitAlert, setLimitAlert] = useState<{ type: 'courses' | 'quizzes' | 'blogs' } | null>(null);
+  };
+
+  const recentCourses = courses.slice(0, 3);
 
   const getLimit = (type: 'courses' | 'quizzes' | 'blogs') => {
     return limits.userLimits?.[type] || limits[type];
@@ -109,86 +147,9 @@ export default function TeacherDashboardPage() {
     return current >= limit;
   };
 
-  useEffect(() => {
-    if (status === 'loading') return;
-    if (!session) {
-      router.push('/login');
-      return;
-    }
-    if (session.user?.role !== 'teacher' && session.user?.role !== 'admin') {
-      router.push('/dashboard/student');
-      return;
-    }
+  const isLoading = status === 'loading' || !coursesData || !quizzesData || !blogsData || !settingsData;
 
-    fetchDashboardData();
-  }, [session, status, router]);
-
-  const fetchDashboardData = async () => {
-    try {
-      const [coursesRes, quizzesRes, blogsRes, settingsRes] = await Promise.all([
-        fetch('/api/courses?instructor=self'),
-        fetch('/api/quizzes'),
-        fetch('/api/blogs'),
-        fetch('/api/admin/settings'),
-      ]);
-
-      const coursesData = await coursesRes.json();
-      const quizzesData = await quizzesRes.json();
-      const blogsData = await blogsRes.json();
-      const settingsData = await settingsRes.json();
-
-      if (coursesRes.ok && quizzesRes.ok && blogsRes.ok) {
-        const courses: Course[] = coursesData.courses || [];
-        const allQuizzes: Quiz[] = quizzesData.quizzes || [];
-        const allBlogs: Blog[] = blogsData.blogs || [];
-
-        // Filter quizzes for this teacher's courses
-        const courseIds = new Set(courses.map((c) => c._id.toString()));
-        const teacherQuizzes = allQuizzes.filter((q) => {
-          const quizCourseId = typeof q.course === 'object' && q.course !== null
-            ? q.course._id?.toString()
-            : q.course?.toString();
-          return quizCourseId && courseIds.has(quizCourseId);
-        });
-
-        // Filter blogs for this teacher
-        const teacherBlogs = allBlogs.filter((b) => b.author?._id === session?.user?.id);
-
-        // Calculate total unique students across all courses
-        const allStudentIds = new Set<string>();
-        courses.forEach((course) => {
-          course.enrolledStudents?.forEach((studentId) => allStudentIds.add(studentId));
-        });
-
-        const publishedCount = courses.filter((c) => c.isPublished).length;
-
-        setStats({
-          totalCourses: courses.length,
-          totalStudents: allStudentIds.size,
-          totalQuizzes: teacherQuizzes.length,
-          totalBlogs: teacherBlogs.length,
-          publishedCourses: publishedCount,
-        });
-
-        // Use global limits for now (individual limits are fetched separately if needed)
-        setLimits({
-          ...settingsData.teacherLimits || { courses: 5, quizzes: 10, blogs: 10 },
-          userLimits: {
-            courses: undefined,
-            quizzes: undefined,
-            blogs: undefined,
-          },
-        });
-        setRecentCourses(courses.slice(0, 3));
-      }
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  if (status === 'loading' || isLoading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">

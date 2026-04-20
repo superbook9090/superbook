@@ -1,13 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import AppSettings from '@/models/AppSettings';
+import { logApiError, type LogContext } from '@/lib/logger';
 
 // GET /api/settings - Get app settings
 export async function GET() {
+  const logContext: LogContext = {
+    method: 'GET',
+    path: '/api/settings',
+  };
+
   try {
     await dbConnect();
 
-    const settings = await AppSettings.findOne();
+    const settings = await AppSettings.findOne().lean();
 
     if (!settings) {
       // Return default settings if none exist
@@ -30,14 +36,22 @@ export async function GET() {
           allowRegistration: true,
           defaultLanguage: 'en',
         },
+      }, {
+        headers: {
+          'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+        },
       });
     }
 
-    return NextResponse.json(settings);
+    return NextResponse.json(settings, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+      },
+    });
   } catch (error) {
-    console.error('Error fetching settings:', error);
+    logApiError(error as Error, 'GET', '/api/settings', logContext);
     return NextResponse.json(
-      { message: 'Failed to fetch settings' },
+      { message: 'Something went wrong. Please try again later.' },
       { status: 500 }
     );
   }

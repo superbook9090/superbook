@@ -3,8 +3,14 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import User from '@/models/User';
 import { isRegistrationAllowed } from '@/lib/settingsHelpers';
+import { logApiError, type LogContext } from '@/lib/logger';
 
 export async function POST(request: Request) {
+  const logContext: LogContext = {
+    method: 'POST',
+    path: '/api/auth/register',
+  };
+
   try {
     await dbConnect();
 
@@ -43,10 +49,9 @@ export async function POST(request: Request) {
       { status: 201 }
     );
   } catch (error) {
-    console.error('Registration error:', error);
-    const message = error instanceof Error ? error.message : 'Error creating user';
+    logApiError(error as Error, 'POST', '/api/auth/register', logContext);
     return NextResponse.json(
-      { message },
+      { message: 'Something went wrong. Please try again later.' },
       { status: 500 }
     );
   }

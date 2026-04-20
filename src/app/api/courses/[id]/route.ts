@@ -3,20 +3,28 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
-import '@/models/Lesson';
 import Course from '@/models/Course';
+import { updateCourseSchema } from '@/lib/validation';
+import { logApiError, type LogContext } from '@/lib/logger';
+import { serialize } from '@/lib/serialize';
 
 // GET /api/courses/[id] - Get a single course
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const logContext: LogContext = {
+    method: 'GET',
+    path: '/api/courses/[id]',
+  };
+
   try {
     await dbConnect();
     const { id } = await params;
 
     const course = await Course.findById(id)
-      .populate('instructor', 'name email');
+      .populate('instructor', 'name email')
+      .lean() as any;
 
     if (!course) {
       return NextResponse.json(
@@ -37,11 +45,14 @@ export async function GET(
       }
     }
 
-    return NextResponse.json(course);
+    // Apply serialization to convert ObjectIds to strings
+    const serializedCourse = serialize(course);
+
+    return NextResponse.json(serializedCourse);
   } catch (error) {
-    console.error('Error fetching course:', error);
+    logApiError(error as Error, 'GET', '/api/courses/[id]', logContext);
     return NextResponse.json(
-      { message: 'Failed to fetch course' },
+      { message: 'Something went wrong. Please try again later.' },
       { status: 500 }
     );
   }
@@ -52,6 +63,11 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const logContext: LogContext = {
+    method: 'PATCH',
+    path: '/api/courses/[id]',
+  };
+
   try {
     const session = await getServerSession(authOptions);
 
@@ -61,6 +77,8 @@ export async function PATCH(
         { status: 401 }
       );
     }
+
+    logContext.userId = session.user.id;
 
     await dbConnect();
     const { id } = await params;
@@ -82,7 +100,18 @@ export async function PATCH(
       );
     }
 
-    const { title, description, price, category, thumbnail, isPublished, language } = await req.json();
+    const body = await req.json();
+
+    // Validate input using Zod schema
+    const validationResult = updateCourseSchema.safeParse(body);
+    if (!validationResult.success) {
+      return NextResponse.json(
+        { message: 'Invalid input', errors: validationResult.error.issues },
+        { status: 400 }
+      );
+    }
+
+    const { title, description, price, category, thumbnail, isPublished, language } = validationResult.data;
 
     if (title) course.title = title;
     if (description) course.description = description;
@@ -97,9 +126,9 @@ export async function PATCH(
 
     return NextResponse.json(course);
   } catch (error) {
-    console.error('Error updating course:', error);
+    logApiError(error as Error, 'PATCH', '/api/courses/[id]', logContext);
     return NextResponse.json(
-      { message: 'Failed to update course' },
+      { message: 'Something went wrong. Please try again later.' },
       { status: 500 }
     );
   }
@@ -110,6 +139,11 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const logContext: LogContext = {
+    method: 'DELETE',
+    path: '/api/courses/[id]',
+  };
+
   try {
     const session = await getServerSession(authOptions);
 
@@ -119,6 +153,8 @@ export async function DELETE(
         { status: 401 }
       );
     }
+
+    logContext.userId = session.user.id;
 
     await dbConnect();
     const { id } = await params;
@@ -144,9 +180,9 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Course deleted successfully' });
   } catch (error) {
-    console.error('Error deleting course:', error);
+    logApiError(error as Error, 'DELETE', '/api/courses/[id]', logContext);
     return NextResponse.json(
-      { message: 'Failed to delete course' },
+      { message: 'Something went wrong. Please try again later.' },
       { status: 500 }
     );
   }

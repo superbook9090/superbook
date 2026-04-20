@@ -37,4 +37,10 @@ const quizSchema = new Schema<IQuiz>(
   { timestamps: true }
 );
 
+// Add indexes for frequently queried fields
+quizSchema.index({ course: 1 });
+quizSchema.index({ instructor: 1 });
+quizSchema.index({ isPublished: 1 });
+quizSchema.index({ createdAt: -1 });
+
 export default mongoose.models.Quiz || mongoose.model<IQuiz>('Quiz', quizSchema);

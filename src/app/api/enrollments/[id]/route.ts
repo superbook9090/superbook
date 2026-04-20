@@ -5,17 +5,27 @@ import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import Enrollment from '@/models/Enrollment';
 import Course from '@/models/Course';
+import { logApiError, type LogContext } from '@/lib/logger';
 
 // PATCH /api/enrollments/[id] - Update enrollment progress
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const logContext: LogContext = {
+    method: 'PATCH',
+    path: '/api/enrollments/[id]',
+  };
+
   try {
     const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (session.user) {
+      logContext.userId = session.user.id;
     }
 
     await dbConnect();
@@ -52,10 +62,9 @@ export async function PATCH(
       { status: 200 }
     );
   } catch (error) {
-    console.error('Error updating enrollment:', error);
-    const message = error instanceof Error ? error.message : 'Error updating enrollment';
+    logApiError(error as Error, 'PATCH', '/api/enrollments/[id]', logContext);
     return NextResponse.json(
-      { message },
+      { message: 'Something went wrong. Please try again later.' },
       { status: 500 }
     );
   }
@@ -66,11 +75,20 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const logContext: LogContext = {
+    method: 'DELETE',
+    path: '/api/enrollments/[id]',
+  };
+
   try {
     const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (session.user) {
+      logContext.userId = session.user.id;
     }
 
     await dbConnect();
@@ -100,10 +118,9 @@ export async function DELETE(
       { status: 200 }
     );
   } catch (error) {
-    console.error('Error deleting enrollment:', error);
-    const message = error instanceof Error ? error.message : 'Error cancelling enrollment';
+    logApiError(error as Error, 'DELETE', '/api/enrollments/[id]', logContext);
     return NextResponse.json(
-      { message },
+      { message: 'Something went wrong. Please try again later.' },
       { status: 500 }
     );
   }

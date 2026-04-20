@@ -2,11 +2,11 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
 import QuizCard from '@/components/dashboard/QuizCard';
 import Alert from '@/components/ui/Alert';
+import { useSessionStore } from '@/store/useSessionStore';
 
 interface Quiz {
   _id: string;
@@ -32,7 +32,8 @@ interface Attempt {
 }
 
 export default function StudentQuizzesPage() {
-  const { data: session, status } = useSession();
+  const session = useSessionStore((s) => s.session);
+  const status = useSessionStore((s) => s.status);
   const router = useRouter();
   const { t } = useTranslation();
   const [availableQuizzes, setAvailableQuizzes] = useState<Quiz[]>([]);
@@ -48,14 +49,11 @@ export default function StudentQuizzesPage() {
       router.push('/login');
       return;
     }
-    if (session.user?.role === 'teacher' || session.user?.role === 'admin') {
-      router.push('/dashboard/teacher/quizzes');
-      return;
-    }
+
+    // Auth and role-based redirects handled by middleware and /dashboard/page.tsx
 
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.user?.id]); // Only re-fetch when user ID changes
+  }, [session, status]);
 
   const fetchData = async () => {
     try {
@@ -114,12 +112,18 @@ export default function StudentQuizzesPage() {
       console.log('All quizzes:', allQuizzes);
       console.log('All quizzes count:', allQuizzes.length);
 
-      // Filter for published quizzes from enrolled courses
+      // Filter for published quizzes from enrolled courses that haven't been completed
       const relevantQuizzes = allQuizzes.filter((q: Quiz) => {
         const quizCourseId = q.course?._id?.toString();
         const isEnrolled = quizCourseId && enrolledCourseIds.includes(quizCourseId);
-        console.log(`Quiz ${q.title}: isPublished=${q.isPublished}, courseId=${quizCourseId}, isEnrolled=${isEnrolled}`);
-        return q.isPublished && isEnrolled;
+        
+        // Check if quiz has been completed
+        const isCompleted = allAttempts.some(
+          (a: Attempt) => a.quiz?._id === q._id && a.status === 'completed'
+        );
+        
+        console.log(`Quiz ${q.title}: isPublished=${q.isPublished}, courseId=${quizCourseId}, isEnrolled=${isEnrolled}, isCompleted=${isCompleted}`);
+        return q.isPublished && isEnrolled && !isCompleted;
       });
 
       console.log('Filtered relevant quizzes:', relevantQuizzes);
@@ -153,7 +157,7 @@ export default function StudentQuizzesPage() {
     } catch (_err) {
       setAlertState({ type: 'error', message: t('errors.errorStartingQuiz') });
     }
-  }, [router, t]);
+  }, [t]);
 
   const completedAttempts = useMemo(() =>
     attempts.filter((a) => a.status === 'completed'),

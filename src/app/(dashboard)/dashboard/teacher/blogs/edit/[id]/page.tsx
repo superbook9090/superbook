@@ -65,7 +65,7 @@ export default function EditBlogPage() {
     if (status === 'authenticated' && blogId) {
       fetchBlog();
     }
-  }, [status, blogId, router]);
+  }, [status, blogId]);
 
   const fetchBlog = async () => {
     try {

@@ -52,4 +52,11 @@ userSchema.methods.comparePassword = async function (candidatePassword: string) 
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
+// Add indexes for frequently queried fields
+// Note: email already has unique: true in field definition, no duplicate index needed
+userSchema.index({ role: 1 });
+userSchema.index({ createdAt: -1 });
+userSchema.index({ isVerified: 1 });
+userSchema.index({ isSuspended: 1 });
+
 export default mongoose.models.User || mongoose.model<IUser>('User', userSchema);

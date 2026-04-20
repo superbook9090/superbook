@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useTranslation } from '@/hooks/useTranslation';
+import useSWR from 'swr';
+import { debounce } from '@/lib/debounce';
 import {
   Plus,
   Edit2,
@@ -19,6 +20,9 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
+import ConfirmModal from '@/components/ui/ConfirmModal';
+import { fetcher } from '@/lib/swrFetcher';
+import { useSessionStore } from '@/store/useSessionStore';
 
 interface Blog {
   _id: string;
@@ -40,88 +44,51 @@ interface FeatureToggles {
 }
 
 export default function TeacherBlogsPage() {
-  const { data: session, status } = useSession();
+  const session = useSessionStore((s) => s.session);
+  const status = useSessionStore((s) => s.status);
   const router = useRouter();
   const { t } = useTranslation();
-  const [blogs, setBlogs] = useState<Blog[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<'all' | 'published' | 'draft'>('all');
   const [languageFilter, setLanguageFilter] = useState<'all' | 'en' | 'hi'>('all');
-  const [featureEnabled, setFeatureEnabled] = useState(true);
-  const [checkingFeature, setCheckingFeature] = useState(true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
 
-  useEffect(() => {
-    // Check if blogs feature is enabled
-    fetch('/api/settings')
-      .then(res => res.json())
-      .then(data => {
-        if (!data.featureToggles?.enableBlogs) {
-          setFeatureEnabled(false);
-          router.push('/dashboard/teacher');
-        }
-      })
-      .catch(err => console.error('Error fetching settings:', err))
-      .finally(() => setCheckingFeature(false));
-  }, [router]);
+  // Debounced search handler
+  const debouncedSearchHandler = useCallback(
+    debounce((value: string) => setSearchTerm(value), 300),
+    []
+  );
 
-  const fetchBlogs = async () => {
-    try {
-      const params = new URLSearchParams();
-      if (languageFilter !== 'all') {
-        params.append('language', languageFilter);
-      }
-      const url = `/api/blogs${params.toString() ? `?${params.toString()}` : ''}`;
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('Failed to fetch');
-      const data = await response.json();
-      // Filter blogs by current user
-      const myBlogs = data.blogs.filter(
-        (blog: Blog) => blog.author?._id === session?.user?.id
-      );
-      setBlogs(myBlogs);
-    } catch (error) {
-      console.error('Error fetching blogs:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // SWR hook for data fetching with automatic caching and deduplication
+  const { data: blogsData, mutate } = useSWR(session ? '/api/blogs?includeDrafts=true' : null, fetcher);
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login');
-      return;
-    }
+  // Filter blogs by current user
+  const allBlogs = blogsData?.blogs || [];
+  const blogs = allBlogs.filter(
+    (blog: Blog) => blog.author?._id === session?.user?.id
+  );
 
-    if (status === 'authenticated' && featureEnabled) {
-      fetchBlogs();
-    }
-  }, [status, router, languageFilter, featureEnabled]);
-
-  if (checkingFeature) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-12 h-12 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  if (!featureEnabled) {
-    return null; // Will redirect
-  }
+  const isLoading = status === 'loading' || !blogsData;
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this blog?')) return;
+    setDeleteId(id);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteId) return;
 
     try {
-      const response = await fetch(`/api/blogs/${id}`, {
+      const response = await fetch(`/api/blogs/${deleteId}`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
-        setBlogs(blogs.filter(blog => blog._id !== id));
+        mutate(); // Revalidate SWR cache
+        setShowDeleteModal(false);
+        setDeleteId(null);
       } else {
         setAlertState({ type: 'error', message: 'Failed to delete blog' });
       }
@@ -140,18 +107,14 @@ export default function TeacherBlogsPage() {
       });
 
       if (response.ok) {
-        setBlogs(
-          blogs.map(blog =>
-            blog._id === id ? { ...blog, isPublished: !currentStatus } : blog
-          )
-        );
+        mutate(); // Revalidate SWR cache
       }
     } catch (error) {
       console.error('Error updating blog:', error);
     }
   };
 
-  const filteredBlogs = blogs.filter(blog => {
+  const filteredBlogs = blogs.filter((blog: Blog) => {
     const matchesSearch = blog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          blog.topic.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filter === 'all' ||
@@ -212,8 +175,8 @@ export default function TeacherBlogsPage() {
             <input
               type="text"
               placeholder="Search blogs..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              defaultValue={searchTerm}
+              onChange={(e) => debouncedSearchHandler(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
             />
           </div>
@@ -261,13 +224,13 @@ export default function TeacherBlogsPage() {
         </div>
         <div className="bg-white rounded-xl p-4 shadow-sm">
           <p className="text-2xl font-bold text-emerald-600">
-            {blogs.filter(b => b.isPublished).length}
+            {blogs.filter((b: Blog) => b.isPublished).length}
           </p>
           <p className="text-sm text-gray-500">Published</p>
         </div>
         <div className="bg-white rounded-xl p-4 shadow-sm">
           <p className="text-2xl font-bold text-gray-600">
-            {blogs.filter(b => !b.isPublished).length}
+            {blogs.filter((b: Blog) => !b.isPublished).length}
           </p>
           <p className="text-sm text-gray-500">Drafts</p>
         </div>
@@ -302,7 +265,7 @@ export default function TeacherBlogsPage() {
             )}
           </div>
         ) : (
-          filteredBlogs.map((blog, index) => (
+          filteredBlogs.map((blog: Blog, index: number) => (
             <motion.div
               key={blog._id}
               initial={{ opacity: 0, y: 20 }}
@@ -362,6 +325,21 @@ export default function TeacherBlogsPage() {
           ))
         )}
       </motion.div>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        title="Confirm Deletion"
+        message="Are you sure you want to delete this blog? This action cannot be undone."
+        onConfirm={confirmDelete}
+        onCancel={() => {
+          setShowDeleteModal(false);
+          setDeleteId(null);
+        }}
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+      />
     </div>
   );
 }

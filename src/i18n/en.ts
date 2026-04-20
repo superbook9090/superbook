@@ -330,7 +330,7 @@ export const en = {
     keepPracticing: 'Keep practicing!',
     canDoBetter: 'You can do better!',
     correctMark: '✓ Correct',
-    yourAnswer: '✗ Your answer',
+    incorrectMark: '✗ Incorrect',
   },
 
   // Quizzes (general page)
@@ -362,6 +362,8 @@ export const en = {
     exploreBlogs: 'Explore Blogs',
     removeFromFavorites: 'Remove from favorites',
     readArticle: 'Read Article',
+    errorLoading: 'Error Loading Favorites',
+    retry: 'Retry',
   },
 
   // Topics

@@ -29,4 +29,10 @@ const courseSchema = new Schema<ICourse>(
   { timestamps: true }
 );
 
+// Add indexes for frequently queried fields
+courseSchema.index({ instructor: 1 });
+courseSchema.index({ isPublished: 1 });
+courseSchema.index({ createdAt: -1 });
+courseSchema.index({ category: 1 });
+
 export default mongoose.models.Course || mongoose.model<ICourse>('Course', courseSchema);

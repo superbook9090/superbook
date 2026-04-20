@@ -54,19 +54,17 @@ export default function AdminSettingsPage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
+    if (status === 'loading') return;
+    if (!session) {
       router.push('/login');
       return;
     }
 
     if (status === 'authenticated') {
-      if (session?.user?.role !== 'admin') {
-        router.push('/dashboard');
-        return;
-      }
+      // Role-based redirect handled in /dashboard/page.tsx
       fetchSettings();
     }
-  }, [status, session, router]);
+  }, [status, session]);
 
   const fetchSettings = async () => {
     try {
@@ -102,7 +100,7 @@ export default function AdminSettingsPage() {
       // Force refresh of settings across the app by updating localStorage timestamp
       localStorage.setItem('settingsTimestamp', Date.now().toString());
     } catch (error) {
-      setMessage({ type: 'error', text: error instanceof Error ? error.message : t('adminSettings.failedSaveSettings') });
+      setMessage({ type: 'error', text: t('adminSettings.failedSaveSettings') });
     } finally {
       setIsSaving(false);
     }

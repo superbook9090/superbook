@@ -3,9 +3,17 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import AppSettings from '@/models/AppSettings';
+import { updateSettingsSchema } from '@/lib/validation';
+import { logApiError, type LogContext } from '@/lib/logger';
+import { revalidatePath } from 'next/cache';
 
 // GET /api/admin/settings - Get app settings (admin only)
 export async function GET(req: NextRequest) {
+  const logContext: LogContext = {
+    method: 'GET',
+    path: '/api/admin/settings',
+  };
+
   try {
     const session = await getServerSession(authOptions);
 
@@ -15,6 +23,8 @@ export async function GET(req: NextRequest) {
         { status: 401 }
       );
     }
+
+    logContext.userId = session.user.id;
 
     if (session.user.role !== 'admin') {
       return NextResponse.json(
@@ -25,18 +35,18 @@ export async function GET(req: NextRequest) {
 
     await dbConnect();
 
-    let settings = await AppSettings.findOne();
+    let settings = await AppSettings.findOne().lean();
 
     // Create default settings if none exist
     if (!settings) {
-      settings = await AppSettings.create({});
+      settings = await AppSettings.create({}).then(s => s.toObject());
     }
 
     return NextResponse.json(settings);
   } catch (error) {
-    console.error('Error fetching settings:', error);
+    logApiError(error as Error, 'GET', '/api/admin/settings', logContext);
     return NextResponse.json(
-      { message: 'Failed to fetch settings' },
+      { message: 'Something went wrong. Please try again later.' },
       { status: 500 }
     );
   }
@@ -44,6 +54,11 @@ export async function GET(req: NextRequest) {
 
 // PATCH /api/admin/settings - Update app settings (admin only)
 export async function PATCH(req: NextRequest) {
+  const logContext: LogContext = {
+    method: 'PATCH',
+    path: '/api/admin/settings',
+  };
+
   try {
     const session = await getServerSession(authOptions);
 
@@ -54,6 +69,8 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
+    logContext.userId = session.user.id;
+
     if (session.user.role !== 'admin') {
       return NextResponse.json(
         { message: 'Only admins can update settings' },
@@ -61,7 +78,18 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    const { teacherLimits, featureToggles, platformConfig } = await req.json();
+    const body = await req.json();
+
+    // Validate input using Zod schema
+    const validationResult = updateSettingsSchema.safeParse(body);
+    if (!validationResult.success) {
+      return NextResponse.json(
+        { message: 'Invalid input', errors: validationResult.error.issues },
+        { status: 400 }
+      );
+    }
+
+    const { teacherLimits, featureToggles, platformConfig } = validationResult.data;
 
     await dbConnect();
 
@@ -160,11 +188,15 @@ export async function PATCH(req: NextRequest) {
 
     await settings.save();
 
+    // Revalidate cache after updating settings
+    revalidatePath('/api/settings');
+    revalidatePath('/api/admin/settings');
+
     return NextResponse.json(settings);
   } catch (error) {
-    console.error('Error updating settings:', error);
+    logApiError(error as Error, 'PATCH', '/api/admin/settings', logContext);
     return NextResponse.json(
-      { message: 'Failed to update settings' },
+      { message: 'Something went wrong. Please try again later.' },
       { status: 500 }
     );
   }

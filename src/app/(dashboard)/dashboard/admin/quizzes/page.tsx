@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
+import { debounce } from '@/lib/debounce';
 import {
   HelpCircle,
   Search,
@@ -52,6 +53,12 @@ export default function AdminQuizzesPage() {
   const [filter, setFilter] = useState<'all' | 'published' | 'draft'>('all');
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
+  // Debounced search handler
+  const debouncedSearchHandler = useCallback(
+    debounce((value: string) => setSearchTerm(value), 300),
+    []
+  );
+
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login');
@@ -59,13 +66,9 @@ export default function AdminQuizzesPage() {
     }
 
     if (status === 'authenticated') {
-      if (session?.user?.role !== 'admin') {
-        router.push('/dashboard');
-        return;
-      }
       fetchQuizzes();
     }
-  }, [status, session, router]);
+  }, [session, status]);
 
   const fetchQuizzes = async () => {
     try {
@@ -171,8 +174,8 @@ export default function AdminQuizzesPage() {
           <input
             type="text"
             placeholder="Search quizzes..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            defaultValue={searchTerm}
+            onChange={(e) => debouncedSearchHandler(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
           />
         </div>

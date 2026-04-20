@@ -330,7 +330,7 @@ export const hi = {
     keepPracticing: 'अभ्यास जारी रखें!',
     canDoBetter: 'आप बेहतर कर सकते हैं!',
     correctMark: '✓ सही',
-    yourAnswer: '✗ आपका उत्तर',
+    incorrectMark: '✗ गलत',
   },
 
   // Quizzes (general page)
@@ -362,6 +362,8 @@ export const hi = {
     exploreBlogs: 'ब्लॉग एक्सप्लोर करें',
     removeFromFavorites: 'पसंदीदा से हटाएं',
     readArticle: 'लेख पढ़ें',
+    errorLoading: 'पसंदीदा लोड करने में त्रुटि',
+    retry: 'पुनः प्रयास करें',
   },
 
   // Topics

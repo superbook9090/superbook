@@ -62,7 +62,7 @@ export default function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps
 
   const handleReview = () => {
     if (attempt) {
-      router.push(`/dashboard/student/quizzes/${attempt._id}/review`);
+      router.push(`/dashboard/student/quizzes/${attempt._id}/result`);
     }
   };
 
@@ -146,7 +146,13 @@ export default function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps
             </div>
             {attempt.submittedAt && (
               <p className="text-xs text-gray-400 mt-2">
-                {t('quiz.completed')} {new Date(attempt.submittedAt).toLocaleDateString()}
+                {t('quiz.completed')} {new Date(attempt.submittedAt).toLocaleString(undefined, {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
               </p>
             )}
           </div>

@@ -5,12 +5,20 @@ import dbConnect from '@/lib/db';
 import Blog from '@/models/Blog';
 import { requireFeature } from '@/lib/settingsHelpers';
 import mongoose from 'mongoose';
+import { sanitizeHtml } from '@/lib/sanitize';
+import { updateBlogSchema } from '@/lib/validation';
+import { logApiError, type LogContext } from '@/lib/logger';
 
 // GET /api/blogs/[id] - Get a single blog
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const logContext: LogContext = {
+    method: 'GET',
+    path: '/api/blogs/[id]',
+  };
+
   try {
     await dbConnect();
 
@@ -49,9 +57,9 @@ export async function GET(
 
     return NextResponse.json(blog);
   } catch (error) {
-    console.error('Error fetching blog:', error);
+    logApiError(error as Error, 'GET', '/api/blogs/[id]', logContext);
     return NextResponse.json(
-      { message: 'Failed to fetch blog' },
+      { message: 'Something went wrong. Please try again later.' },
       { status: 500 }
     );
   }
@@ -62,6 +70,11 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const logContext: LogContext = {
+    method: 'PATCH',
+    path: '/api/blogs/[id]',
+  };
+
   try {
     await dbConnect();
 
@@ -96,6 +109,8 @@ export async function PATCH(
       );
     }
 
+    logContext.userId = session.user.id;
+
     // Check ownership
     if (blog.author.toString() !== session.user.id && session.user.role !== 'admin') {
       return NextResponse.json(
@@ -104,10 +119,21 @@ export async function PATCH(
       );
     }
 
-    const { title, content, topic, isPublished } = await req.json();
+    const body = await req.json();
+
+    // Validate input using Zod schema
+    const validationResult = updateBlogSchema.safeParse(body);
+    if (!validationResult.success) {
+      return NextResponse.json(
+        { message: 'Invalid input', errors: validationResult.error.issues },
+        { status: 400 }
+      );
+    }
+
+    const { title, content, topic, isPublished } = validationResult.data;
 
     if (title) blog.title = title;
-    if (content) blog.content = content;
+    if (content) blog.content = sanitizeHtml(content);
     if (topic) blog.topic = topic;
     if (typeof isPublished === 'boolean') blog.isPublished = isPublished;
 
@@ -116,9 +142,9 @@ export async function PATCH(
 
     return NextResponse.json(blog);
   } catch (error) {
-    console.error('Error updating blog:', error);
+    logApiError(error as Error, 'PATCH', '/api/blogs/[id]', logContext);
     return NextResponse.json(
-      { message: 'Failed to update blog' },
+      { message: 'Something went wrong. Please try again later.' },
       { status: 500 }
     );
   }
@@ -129,6 +155,11 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const logContext: LogContext = {
+    method: 'DELETE',
+    path: '/api/blogs/[id]',
+  };
+
   try {
     await dbConnect();
 
@@ -162,6 +193,8 @@ export async function DELETE(
         { status: 401 }
       );
     }
+
+    logContext.userId = session.user.id;
 
     // Check ownership
     if (blog.author.toString() !== session.user.id && session.user.role !== 'admin') {
@@ -175,9 +208,9 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Blog deleted successfully' });
   } catch (error) {
-    console.error('Error deleting blog:', error);
+    logApiError(error as Error, 'DELETE', '/api/blogs/[id]', logContext);
     return NextResponse.json(
-      { message: 'Failed to delete blog' },
+      { message: 'Something went wrong. Please try again later.' },
       { status: 500 }
     );
   }

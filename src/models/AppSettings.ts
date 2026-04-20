@@ -94,4 +94,7 @@ appSettingsSchema.pre('save', async function (next) {
   next();
 });
 
+// Add index for updatedAt to track settings changes
+appSettingsSchema.index({ updatedAt: -1 });
+
 export default mongoose.models.AppSettings || mongoose.model<IAppSettings>('AppSettings', appSettingsSchema);

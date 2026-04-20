@@ -6,13 +6,25 @@ import dbConnect from '@/lib/db';
 import '@/models/Lesson'; // Import to register Lesson model
 import Course from '@/models/Course';
 import { requireFeature, checkTeacherLimit } from '@/lib/settingsHelpers';
+import { createCourseSchema } from '@/lib/validation';
+import { logApiError, type LogContext } from '@/lib/logger';
+import { serialize } from '@/lib/serialize';
 
 // GET /api/courses - Get all courses (with optional filtering)
 export async function GET(request: NextRequest) {
+  const logContext: LogContext = {
+    method: 'GET',
+    path: '/api/courses',
+  };
+
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (session.user) {
+      logContext.userId = session.user.id;
     }
 
     // Check if courses feature is enabled
@@ -25,6 +37,10 @@ export async function GET(request: NextRequest) {
     const instructor = searchParams.get('instructor');
     const isPublished = searchParams.get('isPublished');
     const available = searchParams.get('available'); // For students to browse
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '20');
+    const skip = (page - 1) * limit;
+    const fields = searchParams.get('fields'); // Comma-separated fields to select
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const query: Record<string, any> = {};
@@ -34,7 +50,7 @@ export async function GET(request: NextRequest) {
       query.isPublished = true;
       // Exclude courses student is already enrolled in
       const Enrollment = (await import('@/models/Enrollment')).default;
-      const enrollments = await Enrollment.find({ student: session.user.id }).select('course');
+      const enrollments = await Enrollment.find({ student: session.user.id }).select('course').lean();
       const enrolledCourseIds = enrollments.map(e => e.course.toString());
       if (enrolledCourseIds.length > 0) {
         query._id = { $nin: enrolledCourseIds };
@@ -49,16 +65,50 @@ export async function GET(request: NextRequest) {
       if (isPublished !== null) query.isPublished = isPublished === 'true';
     }
 
-    const courses = await Course.find(query)
-      .populate('instructor', 'name email')
-      .sort({ createdAt: -1 });
+    // Build select object for field selection
+    let selectFields: Record<string, number> = {};
+    if (fields) {
+      const fieldList = fields.split(',');
+      fieldList.forEach(f => selectFields[f] = 1);
+    } else {
+      // Default fields to avoid over-fetching
+      selectFields = { title: 1, description: 1, price: 1, category: 1, thumbnail: 1, isPublished: 1, language: 1, createdAt: 1 };
+    }
 
-    return NextResponse.json({ courses }, { status: 200 });
-  } catch (error) {
-    console.error('Error fetching courses:', error);
-    const message = error instanceof Error ? error.message : 'Error fetching courses';
+    const courses = await Course.find(query, selectFields)
+      .populate('instructor', 'name email')
+      .populate('enrolledStudents', 'name email')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    // Apply serialization to convert ObjectIds to strings
+    const serializedCourses = serialize(courses);
+
+    const total = await Course.countDocuments(query);
+
     return NextResponse.json(
-      { message },
+      {
+        courses: serializedCourses,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
+      },
+      {
+        status: 200,
+        headers: {
+          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+        },
+      }
+    );
+  } catch (error) {
+    logApiError(error as Error, 'GET', '/api/courses', logContext);
+    return NextResponse.json(
+      { message: 'Something went wrong. Please try again later.' },
       { status: 500 }
     );
   }
@@ -66,11 +116,20 @@ export async function GET(request: NextRequest) {
 
 // POST /api/courses - Create new course (Teacher only)
 export async function POST(request: NextRequest) {
+  const logContext: LogContext = {
+    method: 'POST',
+    path: '/api/courses',
+  };
+
   try {
     const session = await getServerSession(authOptions);
 
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (session.user) {
+      logContext.userId = session.user.id;
     }
 
     // Check if courses feature is enabled
@@ -87,15 +146,18 @@ export async function POST(request: NextRequest) {
 
     await dbConnect();
 
-    const { title, description, price, category, thumbnail, isPublished, language } = await request.json();
+    const body = await request.json();
 
-    // Validation
-    if (!title) {
+    // Validate input using Zod schema
+    const validationResult = createCourseSchema.safeParse(body);
+    if (!validationResult.success) {
       return NextResponse.json(
-        { message: 'Title is required' },
+        { message: 'Invalid input', errors: validationResult.error.issues },
         { status: 400 }
       );
     }
+
+    const { title, description, price, category, thumbnail, isPublished, language } = validationResult.data;
 
     // Check teacher limits (skip for admins)
     if (session.user?.role === 'teacher') {
@@ -126,10 +188,9 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error('Error creating course:', error);
-    const message = error instanceof Error ? error.message : 'Error creating course';
+    logApiError(error as Error, 'POST', '/api/courses', logContext);
     return NextResponse.json(
-      { message },
+      { message: 'Something went wrong. Please try again later.' },
       { status: 500 }
     );
   }

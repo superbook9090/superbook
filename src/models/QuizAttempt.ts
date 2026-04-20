@@ -49,6 +49,10 @@ const quizAttemptSchema = new Schema<IQuizAttempt>(
 quizAttemptSchema.index({ student: 1, quiz: 1 });
 quizAttemptSchema.index({ student: 1, course: 1 });
 quizAttemptSchema.index({ student: 1, status: 1 });
+quizAttemptSchema.index({ quiz: 1, status: 1 });
+quizAttemptSchema.index({ course: 1, status: 1 });
 quizAttemptSchema.index({ quiz: 1, score: 1 }); // for analytics
+quizAttemptSchema.index({ startedAt: -1 });
+quizAttemptSchema.index({ submittedAt: -1 });
 
 export default mongoose.models.QuizAttempt || mongoose.model<IQuizAttempt>('QuizAttempt', quizAttemptSchema);

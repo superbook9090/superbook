@@ -5,9 +5,16 @@ import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import Quiz from '@/models/Quiz';
 import Course from '@/models/Course';
+import { updateQuizSchema } from '@/lib/validation';
+import { logApiError, type LogContext } from '@/lib/logger';
 
 // PATCH /api/quizzes/[id] - Update a quiz
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const logContext: LogContext = {
+    method: 'PATCH',
+    path: '/api/quizzes/[id]',
+  };
+
   try {
     const { id } = await params;
     const session = await getServerSession(authOptions);
@@ -20,9 +27,24 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       return NextResponse.json({ message: 'Only teachers can update quizzes' }, { status: 403 });
     }
 
+    if (session.user) {
+      logContext.userId = session.user.id;
+    }
+
     await dbConnect();
 
-    const { title, description, questions, timeLimit, isPublished } = await request.json();
+    const body = await request.json();
+
+    // Validate input using Zod schema
+    const validationResult = updateQuizSchema.safeParse(body);
+    if (!validationResult.success) {
+      return NextResponse.json(
+        { message: 'Invalid input', errors: validationResult.error.issues },
+        { status: 400 }
+      );
+    }
+
+    const { title, description, questions, timeLimit, isPublished } = validationResult.data;
 
     // Find quiz and verify ownership
     const quiz = await Quiz.findById(id);
@@ -51,14 +73,21 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     return NextResponse.json({ message: 'Quiz updated successfully', quiz }, { status: 200 });
   } catch (error) {
-    console.error('Error updating quiz:', error);
-    const message = error instanceof Error ? error.message : 'Error updating quiz';
-    return NextResponse.json({ message }, { status: 500 });
+    logApiError(error as Error, 'PATCH', '/api/quizzes/[id]', logContext);
+    return NextResponse.json(
+      { message: 'Something went wrong. Please try again later.' },
+      { status: 500 }
+    );
   }
 }
 
 // DELETE /api/quizzes/[id] - Delete a quiz
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const logContext: LogContext = {
+    method: 'DELETE',
+    path: '/api/quizzes/[id]',
+  };
+
   try {
     const { id } = await params;
     const session = await getServerSession(authOptions);
@@ -69,6 +98,10 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     // Only teachers and admins can delete quizzes
     if (session.user?.role !== 'teacher' && session.user?.role !== 'admin') {
       return NextResponse.json({ message: 'Only teachers can delete quizzes' }, { status: 403 });
+    }
+
+    if (session.user) {
+      logContext.userId = session.user.id;
     }
 
     await dbConnect();
@@ -93,8 +126,10 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
 
     return NextResponse.json({ message: 'Quiz deleted successfully' }, { status: 200 });
   } catch (error) {
-    console.error('Error deleting quiz:', error);
-    const message = error instanceof Error ? error.message : 'Error deleting quiz';
-    return NextResponse.json({ message }, { status: 500 });
+    logApiError(error as Error, 'DELETE', '/api/quizzes/[id]', logContext);
+    return NextResponse.json(
+      { message: 'Something went wrong. Please try again later.' },
+      { status: 500 }
+    );
   }
 }

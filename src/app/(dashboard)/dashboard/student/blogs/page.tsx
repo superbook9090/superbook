@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useTranslation } from '@/hooks/useTranslation';
+import { debounce } from '@/lib/debounce';
+import { useApiRequest } from '@/hooks/useApiRequest';
 import {
   BookOpen,
   Heart,
@@ -32,6 +34,16 @@ interface Blog {
 interface Favorite {
   _id: string;
   blog: Blog;
+}
+
+interface FavoritesResponse {
+  favorites: Favorite[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 interface FeatureToggles {
@@ -68,53 +80,84 @@ export default function StudentBlogsPage() {
   const [languageFilter, setLanguageFilter] = useState<'all' | 'en' | 'hi'>('all');
   const [featureEnabled, setFeatureEnabled] = useState(true);
   const [checkingFeature, setCheckingFeature] = useState(true);
+  const [hasRedirected, setHasRedirected] = useState(false);
 
-  const fetchBlogs = async () => {
-    try {
-      const params = new URLSearchParams();
-      if (languageFilter !== 'all') {
-        params.append('language', languageFilter);
-      }
-      const url = `/api/blogs${params.toString() ? `?${params.toString()}` : ''}`;
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('Failed to fetch');
-      const data = await response.json();
-      setBlogs(data.blogs);
-    } catch (error) {
-      console.error('Error fetching blogs:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const blogsRequest = useApiRequest<Blog[]>();
+  const favoritesRequest = useApiRequest<FavoritesResponse>();
 
-  const fetchFavorites = async () => {
-    try {
-      const response = await fetch('/api/favorites');
-      if (!response.ok) throw new Error('Failed to fetch');
-      const data: Favorite[] = await response.json();
-      const favoriteIds = new Set(data.map((fav) => fav.blog._id));
-      setFavorites(favoriteIds);
-    } catch (error) {
-      console.error('Error fetching favorites:', error);
+  // Debounced search handler
+  const debouncedSearchHandler = useCallback(
+    debounce((value: string) => setSearchTerm(value), 300),
+    []
+  );
+
+  const fetchBlogs = useCallback(async () => {
+    const params = new URLSearchParams();
+    if (languageFilter !== 'all') {
+      params.append('language', languageFilter);
     }
-  };
+    const url = `/api/blogs${params.toString() ? `?${params.toString()}` : ''}`;
+
+    blogsRequest.execute({
+      fn: async () => {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Failed to fetch');
+        const data = await response.json();
+        return data.blogs;
+      },
+      onSuccess: (data) => {
+        setBlogs(data);
+        setIsLoading(false);
+      },
+      onError: (error) => {
+        console.error('Error fetching blogs:', error);
+        setIsLoading(false);
+      },
+    });
+  }, [languageFilter, blogsRequest]);
+
+  const fetchFavorites = useCallback(async () => {
+    favoritesRequest.execute({
+      fn: async () => {
+        const response = await fetch('/api/favorites');
+        if (!response.ok) throw new Error('Failed to fetch');
+        return await response.json();
+      },
+      onSuccess: (data) => {
+        const favoriteIds = new Set(data.favorites.map((fav) => fav.blog._id));
+        setFavorites(favoriteIds);
+      },
+      onError: (error) => {
+        console.error('Error fetching favorites:', error);
+      },
+    });
+  }, [favoritesRequest]);
 
   useEffect(() => {
-    // Check if blogs feature is enabled
+    if (checkingFeature) return; // Prevent multiple calls
+    
     fetch('/api/settings')
       .then(res => res.json())
       .then(data => {
         if (!data.featureToggles?.enableBlogs) {
           setFeatureEnabled(false);
-          router.push('/dashboard/student');
         }
       })
       .catch(err => console.error('Error fetching settings:', err))
       .finally(() => setCheckingFeature(false));
-  }, [router]);
+  }, [checkingFeature]);
 
   useEffect(() => {
+    if (hasRedirected) return; // Prevent repeated redirects
+
+    if (!featureEnabled) {
+      setHasRedirected(true);
+      router.push('/dashboard/student');
+      return;
+    }
+
     if (status === 'unauthenticated') {
+      setHasRedirected(true);
       router.push('/login');
       return;
     }
@@ -123,19 +166,7 @@ export default function StudentBlogsPage() {
       fetchBlogs();
       fetchFavorites();
     }
-  }, [status, router, languageFilter, featureEnabled]);
-
-  if (checkingFeature) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  if (!featureEnabled) {
-    return null; // Will redirect
-  }
+  }, [status, featureEnabled, hasRedirected]);
 
   const toggleFavorite = async (blogId: string) => {
     const isFavorited = favorites.has(blogId);
@@ -216,8 +247,8 @@ export default function StudentBlogsPage() {
           <input
             type="text"
             placeholder={t('blog.searchBlogs')}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            defaultValue={searchTerm}
+            onChange={(e) => debouncedSearchHandler(e.target.value)}
             className="w-full pl-10 pr-4 py-3 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
           />
         </div>

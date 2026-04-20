@@ -29,5 +29,8 @@ const lessonSchema = new Schema<ILesson>(
 
 // Index for ordering lessons within a course
 lessonSchema.index({ course: 1, order: 1 });
+lessonSchema.index({ course: 1 });
+lessonSchema.index({ isPublished: 1 });
+lessonSchema.index({ createdAt: -1 });
 
 export default mongoose.models.Lesson || mongoose.model<ILesson>('Lesson', lessonSchema);

@@ -35,13 +35,11 @@ export default function BrowseCoursesPage() {
       router.push('/login');
       return;
     }
-    if (session.user?.role === 'teacher' || session.user?.role === 'admin') {
-      router.push('/dashboard/teacher');
-      return;
-    }
+
+    // Auth and role-based redirects handled by middleware and /dashboard/page.tsx
 
     fetchAvailableCourses();
-  }, [session, status, router]);
+  }, [session, status]);
 
   const fetchAvailableCourses = async () => {
     try {

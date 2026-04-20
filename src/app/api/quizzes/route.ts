@@ -6,13 +6,25 @@ import dbConnect from '@/lib/db';
 import Quiz from '@/models/Quiz';
 import Course from '@/models/Course';
 import { requireFeature, checkTeacherLimit } from '@/lib/settingsHelpers';
+import { createQuizSchema } from '@/lib/validation';
+import { logApiError, type LogContext } from '@/lib/logger';
+import { serialize } from '@/lib/serialize';
 
 // GET /api/quizzes - Get all quizzes (with optional filtering)
 export async function GET(request: NextRequest) {
+  const logContext: LogContext = {
+    method: 'GET',
+    path: '/api/quizzes',
+  };
+
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (session.user) {
+      logContext.userId = session.user.id;
     }
 
     // Check if quizzes feature is enabled
@@ -24,23 +36,57 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const course = searchParams.get('course');
     const instructor = searchParams.get('instructor');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '20');
+    const skip = (page - 1) * limit;
+    const fields = searchParams.get('fields'); // Comma-separated fields to select
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const query: Record<string, any> = {};
     if (course) query.course = course;
     if (instructor) query.instructor = instructor;
 
-    const quizzes = await Quiz.find(query)
-      .populate('course', 'title')
-      .populate('instructor', 'name email')
-      .sort({ createdAt: -1 });
+    // Build select object for field selection
+    let selectFields: Record<string, number> = {};
+    if (fields) {
+      const fieldList = fields.split(',');
+      fieldList.forEach(f => selectFields[f] = 1);
+    } else {
+      // Default fields to avoid over-fetching
+      selectFields = { title: 1, description: 1, timeLimit: 1, isPublished: 1, createdAt: 1 };
+    }
 
-    return NextResponse.json({ quizzes }, { status: 200 });
+    const quizzes = await Quiz.find(query, selectFields)
+      .populate('course', 'title description')
+      .populate('instructor', 'name email')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    // Apply serialization to convert ObjectIds to strings
+    const serializedQuizzes = serialize(quizzes);
+
+    const total = await Quiz.countDocuments(query);
+
+    return NextResponse.json({
+      quizzes: serializedQuizzes,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      }
+    }, {
+      status: 200,
+      headers: {
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+      },
+    });
   } catch (error) {
-    console.error('Error fetching quizzes:', error);
-    const message = error instanceof Error ? error.message : 'Error fetching quizzes';
+    logApiError(error as Error, 'GET', '/api/quizzes', logContext);
     return NextResponse.json(
-      { message },
+      { message: 'Something went wrong. Please try again later.' },
       { status: 500 }
     );
   }
@@ -48,11 +94,20 @@ export async function GET(request: NextRequest) {
 
 // POST /api/quizzes - Create new quiz (Teacher only)
 export async function POST(request: NextRequest) {
+  const logContext: LogContext = {
+    method: 'POST',
+    path: '/api/quizzes',
+  };
+
   try {
     const session = await getServerSession(authOptions);
 
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (session.user) {
+      logContext.userId = session.user.id;
     }
 
     // Check if quizzes feature is enabled
@@ -69,15 +124,18 @@ export async function POST(request: NextRequest) {
 
     await dbConnect();
 
-    const { title, description, course, questions, timeLimit, isPublished } = await request.json();
+    const body = await request.json();
 
-    // Validation
-    if (!title || !course) {
+    // Validate input using Zod schema
+    const validationResult = createQuizSchema.safeParse(body);
+    if (!validationResult.success) {
       return NextResponse.json(
-        { message: 'Title and course are required' },
+        { message: 'Invalid input', errors: validationResult.error.issues },
         { status: 400 }
       );
     }
+
+    const { title, description, course, questions, timeLimit, isPublished } = validationResult.data;
 
     // Check teacher limits (skip for admins)
     if (session.user?.role === 'teacher') {
@@ -93,7 +151,7 @@ export async function POST(request: NextRequest) {
     const courseDoc = await Course.findOne({
       _id: course,
       instructor: session.user.id,
-    });
+    }).lean();
 
     if (!courseDoc) {
       return NextResponse.json(
@@ -137,10 +195,9 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error('Error creating quiz:', error);
-    const message = error instanceof Error ? error.message : 'Error creating quiz';
+    logApiError(error as Error, 'POST', '/api/quizzes', logContext);
     return NextResponse.json(
-      { message },
+      { message: 'Something went wrong. Please try again later.' },
       { status: 500 }
     );
   }

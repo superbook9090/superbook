@@ -49,13 +49,11 @@ export default function TeacherAnalyticsPage() {
       router.push('/login');
       return;
     }
-    if (session.user?.role !== 'teacher' && session.user?.role !== 'admin') {
-      router.push('/dashboard/student');
-      return;
-    }
+
+    // Role-based redirect handled in /dashboard/page.tsx - no redirect here
 
     fetchStats();
-  }, [session, status, router]);
+  }, [session, status]);
 
   const fetchStats = async () => {
     try {

@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
+import { debounce } from '@/lib/debounce';
 import {
   BookOpen,
   Search,
@@ -44,6 +45,12 @@ export default function AdminBlogsPage() {
   const [languageFilter, setLanguageFilter] = useState<'all' | 'en' | 'hi'>('all');
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
+  // Debounced search handler
+  const debouncedSearchHandler = useCallback(
+    debounce((value: string) => setSearchTerm(value), 300),
+    []
+  );
+
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login');
@@ -51,13 +58,10 @@ export default function AdminBlogsPage() {
     }
 
     if (status === 'authenticated') {
-      if (session?.user?.role !== 'admin') {
-        router.push('/dashboard');
-        return;
-      }
+      // Auth and role-based redirects handled by middleware and /dashboard/page.tsx
       fetchBlogs();
     }
-  }, [status, session, router]);
+  }, [session, status]);
 
   const fetchBlogs = async () => {
     try {
@@ -164,8 +168,8 @@ export default function AdminBlogsPage() {
           <input
             type="text"
             placeholder="Search blogs..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            defaultValue={searchTerm}
+            onChange={(e) => debouncedSearchHandler(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
           />
         </div>

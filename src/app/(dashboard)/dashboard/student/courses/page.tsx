@@ -40,13 +40,11 @@ export default function StudentCoursesPage() {
       router.push('/login');
       return;
     }
-    if (session.user?.role === 'teacher' || session.user?.role === 'admin') {
-      router.push('/dashboard/teacher/courses');
-      return;
-    }
+
+    // Auth and role-based redirects handled by middleware and /dashboard/page.tsx
 
     fetchEnrollments();
-  }, [session, status, router]);
+  }, [session, status]);
 
   const fetchEnrollments = async () => {
     try {

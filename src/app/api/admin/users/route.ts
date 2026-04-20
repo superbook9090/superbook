@@ -4,6 +4,8 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import User from '@/models/User';
 import dbConnect from '@/lib/db';
+import { sanitizeSearchQuery, validateObjectId } from '@/lib/sanitize';
+import { logApiError, type LogContext } from '@/lib/logger';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface QueryFilter { [key: string]: any }
@@ -19,10 +21,19 @@ async function checkAdmin(session: any) {
 
 // GET /api/admin/users - Get all users (Admin only)
 export async function GET(request: NextRequest) {
+  const logContext: LogContext = {
+    method: 'GET',
+    path: '/api/admin/users',
+  };
+
   try {
     const session = await getServerSession(authOptions);
     if (!(await checkAdmin(session))) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (session?.user) {
+      logContext.userId = session.user.id;
     }
 
     await dbConnect();
@@ -34,13 +45,14 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20');
     const skip = (page - 1) * limit;
 
-    // Build query
+    // Build query with sanitized inputs
     const query: QueryFilter = {};
     if (role) query.role = role;
     if (search) {
+      const sanitizedSearch = sanitizeSearchQuery(search);
       query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } },
+        { name: { $regex: sanitizedSearch, $options: 'i' } },
+        { email: { $regex: sanitizedSearch, $options: 'i' } },
       ];
     }
 
@@ -66,10 +78,9 @@ export async function GET(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error('Error fetching users:', error);
-    const message = error instanceof Error ? error.message : 'Error fetching users';
+    logApiError(error as Error, 'GET', '/api/admin/users', logContext);
     return NextResponse.json(
-      { message },
+      { message: 'Something went wrong. Please try again later.' },
       { status: 500 }
     );
   }
@@ -77,10 +88,19 @@ export async function GET(request: NextRequest) {
 
 // PATCH /api/admin/users - Update user (Admin only)
 export async function PATCH(request: NextRequest) {
+  const logContext: LogContext = {
+    method: 'PATCH',
+    path: '/api/admin/users',
+  };
+
   try {
     const session = await getServerSession(authOptions);
     if (!(await checkAdmin(session))) {
       return NextResponse.json({ message: 'Admin access required' }, { status: 403 });
+    }
+
+    if (session?.user) {
+      logContext.userId = session.user.id;
     }
 
     await dbConnect();
@@ -153,10 +173,9 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({ message: 'User updated', user }, { status: 200 });
   } catch (error) {
-    console.error('Error updating user:', error);
-    const message = error instanceof Error ? error.message : 'Error updating user';
+    logApiError(error as Error, 'PATCH', '/api/admin/users', logContext);
     return NextResponse.json(
-      { message },
+      { message: 'Something went wrong. Please try again later.' },
       { status: 500 }
     );
   }
@@ -164,10 +183,19 @@ export async function PATCH(request: NextRequest) {
 
 // DELETE /api/admin/users - Delete user (Admin only)
 export async function DELETE(request: NextRequest) {
+  const logContext: LogContext = {
+    method: 'DELETE',
+    path: '/api/admin/users',
+  };
+
   try {
     const session = await getServerSession(authOptions);
     if (!(await checkAdmin(session))) {
       return NextResponse.json({ message: 'Admin access required' }, { status: 403 });
+    }
+
+    if (session?.user) {
+      logContext.userId = session.user.id;
     }
 
     await dbConnect();
@@ -177,6 +205,11 @@ export async function DELETE(request: NextRequest) {
 
     if (!userId) {
       return NextResponse.json({ message: 'User ID is required' }, { status: 400 });
+    }
+
+    // Validate ObjectId to prevent injection
+    if (!validateObjectId(userId)) {
+      return NextResponse.json({ message: 'Invalid User ID' }, { status: 400 });
     }
 
     // Prevent deleting self
@@ -195,10 +228,9 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ message: 'User deleted' }, { status: 200 });
   } catch (error) {
-    console.error('Error deleting user:', error);
-    const message = error instanceof Error ? error.message : 'Error deleting user';
+    logApiError(error as Error, 'DELETE', '/api/admin/users', logContext);
     return NextResponse.json(
-      { message },
+      { message: 'Something went wrong. Please try again later.' },
       { status: 500 }
     );
   }

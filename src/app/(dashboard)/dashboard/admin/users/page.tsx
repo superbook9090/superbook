@@ -1,11 +1,12 @@
 // src/app/(dashboard)/dashboard/admin/users/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
+import { debounce } from '@/lib/debounce';
 import {
   Users,
   Search,
@@ -42,6 +43,12 @@ export default function AdminUsersPage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
+
+  // Debounced search handler
+  const debouncedSearchHandler = useCallback(
+    debounce((value: string) => setSearch(value), 300),
+    []
+  );
   const [page, setPage] = useState(1);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [limitsUserId, setLimitsUserId] = useState<string | null>(null);
@@ -53,13 +60,15 @@ export default function AdminUsersPage() {
 
   useEffect(() => {
     if (status === 'loading') return;
-    if (!session || session.user?.role !== 'admin') {
-      router.push('/dashboard');
+    if (!session) {
+      router.push('/login');
       return;
     }
 
+    // Auth and role-based redirects handled by middleware and /dashboard/page.tsx
+
     fetchUsers();
-  }, [session, status, router, search, roleFilter, page]);
+  }, [session, status, search, roleFilter, page]);
 
   const fetchUsers = async () => {
     try {
@@ -221,8 +230,8 @@ export default function AdminUsersPage() {
           <input
             type="text"
             placeholder={t('admin.searchUsers')}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            defaultValue={search}
+            onChange={(e) => debouncedSearchHandler(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
           />
         </div>

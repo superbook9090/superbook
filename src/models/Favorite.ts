@@ -27,5 +27,6 @@ const favoriteSchema = new Schema<IFavorite>(
 // Compound index to prevent duplicate favorites
 favoriteSchema.index({ user: 1, blog: 1 }, { unique: true });
 favoriteSchema.index({ user: 1 });
+favoriteSchema.index({ createdAt: -1 });
 
 export default mongoose.models.Favorite || mongoose.model<IFavorite>('Favorite', favoriteSchema);

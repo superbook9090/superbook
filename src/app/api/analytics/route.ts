@@ -3,19 +3,30 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
+import mongoose from 'mongoose';
 import '@/models/Lesson'; // Import to register Lesson model
 import User from '@/models/User';
 import Course from '@/models/Course';
 import Quiz from '@/models/Quiz';
 import Enrollment from '@/models/Enrollment';
 import QuizAttempt from '@/models/QuizAttempt';
+import { logApiError, type LogContext } from '@/lib/logger';
 
 // GET /api/analytics - Get analytics data
 export async function GET(request: NextRequest) {
+  const logContext: LogContext = {
+    method: 'GET',
+    path: '/api/analytics',
+  };
+
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (session.user) {
+      logContext.userId = session.user.id;
     }
 
     await dbConnect();
@@ -40,12 +51,16 @@ export async function GET(request: NextRequest) {
 
     // Overview for current user
     const stats = await getUserOverview(session.user.id, session.user.role);
-    return NextResponse.json({ stats }, { status: 200 });
+    return NextResponse.json({ stats }, {
+      status: 200,
+      headers: {
+        'Cache-Control': 'private, s-maxage=60, stale-while-revalidate=120',
+      },
+    });
   } catch (error) {
-    console.error('Error fetching analytics:', error);
-    const message = error instanceof Error ? error.message : 'Error fetching analytics';
+    logApiError(error as Error, 'GET', '/api/analytics', logContext);
     return NextResponse.json(
-      { message },
+      { message: 'Something went wrong. Please try again later.' },
       { status: 500 }
     );
   }
@@ -137,109 +152,135 @@ async function getAdminStats() {
 }
 
 async function getTeacherStats(teacherId: string) {
-  // Teacher's courses
-  const courses = await Course.find({ instructor: teacherId }).lean();
-  const courseIds = courses.map((c) => (c._id as { toString(): string }).toString());
-
-  // Enrollments in teacher's courses
-  const enrollments = await Enrollment.find({
-    course: { $in: courseIds },
-  }).lean();
-
-  // Quizzes in teacher's courses
-  const quizzes = await Quiz.find({ course: { $in: courseIds } }).lean();
-  const quizIds = quizzes.map((q) => (q._id as { toString(): string }).toString());
-
-  // Attempts on teacher's quizzes
-  const attempts = await QuizAttempt.find({
-    quiz: { $in: quizIds },
-    status: 'completed',
-  }).lean();
-
-  // Calculate stats per course
-  const courseStats = courses.map((course) => {
-    const courseEnrollments = enrollments.filter(
-      (e) => (e.course as { toString(): string }).toString() === (course._id as { toString(): string }).toString()
-    );
-    const courseQuizzes = quizzes.filter(
-      (q) => (q.course as { toString(): string }).toString() === (course._id as { toString(): string }).toString()
-    );
-    const courseQuizIds = courseQuizzes.map((q) => (q._id as { toString(): string }).toString());
-    const courseAttempts = attempts.filter((a) =>
-      courseQuizIds.includes((a.quiz as { toString(): string }).toString())
-    );
-
-    const avgScore =
-      courseAttempts.length > 0
-        ? Math.round(
-            courseAttempts.reduce((sum, a) => sum + a.score, 0) /
-              courseAttempts.length
-          )
-        : 0;
-
-    return {
-      _id: course._id,
-      title: course.title,
-      students: courseEnrollments.length,
-      quizzes: courseQuizzes.length,
-      attempts: courseAttempts.length,
-      averageScore: avgScore,
-      isPublished: course.isPublished,
-    };
-  });
-
-  // Overall teacher stats
-  const totalStudents = new Set(enrollments.map((e) => e.student.toString())).size;
-  const totalAttempts = attempts.length;
-  const averageScore =
-    totalAttempts > 0
-      ? Math.round(attempts.reduce((sum, a) => sum + a.score, 0) / totalAttempts)
-      : 0;
-
-  // Top performing students
-  const studentScores: { [key: string]: { name: string; totalScore: number; attempts: number } } = {};
-
-  // Need to populate student data
-  const attemptsWithStudents = await QuizAttempt.find({
-    quiz: { $in: quizIds },
-    status: 'completed',
-  })
-    .populate('student', 'name')
-    .lean();
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  attemptsWithStudents.forEach((attempt: any) => {
-    const studentId = attempt.student?._id?.toString();
-    if (!studentId) return;
-
-    if (!studentScores[studentId]) {
-      studentScores[studentId] = {
-        name: attempt.student?.name || '',
-        totalScore: 0,
-        attempts: 0,
-      };
+  // Use aggregation to get all data in a single query pipeline
+  const courseStats = await Course.aggregate([
+    { $match: { instructor: new mongoose.Types.ObjectId(teacherId) } },
+    {
+      $lookup: {
+        from: 'enrollments',
+        localField: '_id',
+        foreignField: 'course',
+        as: 'enrollments'
+      }
+    },
+    {
+      $lookup: {
+        from: 'quizzes',
+        localField: '_id',
+        foreignField: 'course',
+        as: 'quizzes'
+      }
+    },
+    {
+      $lookup: {
+        from: 'quizattempts',
+        localField: 'quizzes._id',
+        foreignField: 'quiz',
+        as: 'attempts'
+      }
+    },
+    {
+      $addFields: {
+        enrollmentCount: { $size: '$enrollments' },
+        quizCount: { $size: '$quizzes' },
+        completedAttempts: {
+          $filter: {
+            input: '$attempts',
+            as: 'attempt',
+            cond: { $eq: ['$$attempt.status', 'completed'] }
+          }
+        }
+      }
+    },
+    {
+      $addFields: {
+        attemptCount: { $size: '$completedAttempts' },
+        avgScore: {
+          $cond: {
+            if: { $gt: ['$attemptCount', 0] },
+            then: { $avg: '$completedAttempts.score' },
+            else: 0
+          }
+        }
+      }
+    },
+    {
+      $project: {
+        _id: 1,
+        title: 1,
+        isPublished: 1,
+        students: '$enrollmentCount',
+        quizzes: '$quizCount',
+        attempts: '$attemptCount',
+        averageScore: { $round: ['$avgScore', 0] }
+      }
     }
-    studentScores[studentId].totalScore += attempt.score || 0;
-    studentScores[studentId].attempts += 1;
-  });
+  ]);
 
-  const topStudents = Object.values(studentScores)
-    .map((s) => ({
-      ...s,
-      averageScore: Math.round(s.totalScore / s.attempts),
-    }))
-    .sort((a, b) => b.averageScore - a.averageScore)
-    .slice(0, 5);
+  // Calculate overview stats from aggregated data
+  const totalCourses = courseStats.length;
+  const publishedCourses = courseStats.filter((c: any) => c.isPublished).length;
+  const totalStudents = courseStats.reduce((sum: number, c: any) => sum + c.students, 0);
+  const totalQuizzes = courseStats.reduce((sum: number, c: any) => sum + c.quizzes, 0);
+  const totalAttempts = courseStats.reduce((sum: number, c: any) => sum + c.attempts, 0);
+  const averageScore = totalAttempts > 0
+    ? Math.round(courseStats.reduce((sum: number, c: any) => sum + c.averageScore * c.attempts, 0) / totalAttempts)
+    : 0;
+
+  // Get top performing students using aggregation
+  const topStudents = await QuizAttempt.aggregate([
+    {
+      $match: {
+        quiz: { $in: courseStats.flatMap((c: any) => c.quizzes) },
+        status: 'completed'
+      }
+    },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'student',
+        foreignField: '_id',
+        as: 'studentData'
+      }
+    },
+    {
+      $unwind: '$studentData'
+    },
+    {
+      $group: {
+        _id: '$student',
+        name: { $first: '$studentData.name' },
+        totalScore: { $sum: '$score' },
+        attempts: { $sum: 1 }
+      }
+    },
+    {
+      $addFields: {
+        averageScore: { $round: [{ $divide: ['$totalScore', '$attempts'] }, 0] }
+      }
+    },
+    { $sort: { averageScore: -1 } },
+    { $limit: 5 },
+    {
+      $project: {
+        _id: 0,
+        name: 1,
+        totalScore: 1,
+        attempts: 1,
+        averageScore: 1
+      }
+    }
+  ]);
 
   return {
     courses: courseStats,
     overview: {
-      totalCourses: courses.length,
+      totalCourses,
       totalStudents,
-      totalQuizzes: quizzes.length,
+      totalQuizzes,
       totalAttempts,
       averageScore,
-      publishedCourses: courses.filter((c) => c.isPublished).length,
+      publishedCourses,
     },
     topStudents,
   };

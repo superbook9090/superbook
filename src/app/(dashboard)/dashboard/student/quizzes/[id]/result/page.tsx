@@ -2,9 +2,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
 import { useRouter, useParams } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useSessionStore } from '@/store/useSessionStore';
 
 interface Question {
   question: string;
@@ -19,24 +19,28 @@ interface Answer {
 }
 
 interface Attempt {
-  _id: string;
+  attempt: {
+    _id: string;
+    score: number;
+    correctCount: number;
+    totalQuestions: number;
+    timeTaken: number;
+    attemptNumber: number;
+    submittedAt: string;
+  };
   quiz: {
     _id: string;
     title: string;
     description: string;
+    timeLimit: number;
     questions: Question[];
   };
   answers: Answer[];
-  score: number;
-  correctCount: number;
-  totalQuestions: number;
-  timeTaken: number;
-  attemptNumber: number;
-  submittedAt: string;
 }
 
 export default function QuizResultPage() {
-  const { data: session, status } = useSession();
+  const session = useSessionStore((s) => s.session);
+  const status = useSessionStore((s) => s.status);
   const { t } = useTranslation();
   const router = useRouter();
   const params = useParams();
@@ -54,18 +58,15 @@ export default function QuizResultPage() {
     }
 
     fetchAttempt();
-  }, [session, status, attemptId, router]);
+  }, [session, status, attemptId]);
 
   const fetchAttempt = async () => {
     try {
-      const response = await fetch('/api/quiz-attempts');
+      const response = await fetch(`/api/quiz-attempts/${attemptId}/review`);
       const data = await response.json();
 
       if (response.ok) {
-        const foundAttempt = data.attempts.find((a: Attempt) => a._id === attemptId);
-        if (foundAttempt) {
-          setAttempt(foundAttempt);
-        }
+        setAttempt(data);
       }
     } catch (err) {
       console.error('Error fetching attempt:', err);
@@ -136,49 +137,55 @@ export default function QuizResultPage() {
                 cx="80"
                 cy="80"
                 r="70"
-                stroke={attempt.score >= 60 ? '#10b981' : attempt.score >= 40 ? '#f59e0b' : '#ef4444'}
+                stroke={attempt.attempt.score >= 60 ? '#10b981' : attempt.attempt.score >= 40 ? '#f59e0b' : '#ef4444'}
                 strokeWidth="12"
                 fill="none"
-                strokeDasharray={`${attempt.score * 4.4} 440`}
+                strokeDasharray={`${attempt.attempt.score * 4.4} 440`}
                 strokeLinecap="round"
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className={`text-4xl font-bold ${getScoreColor(attempt.score)}`}>
-                {attempt.score}%
+              <span className={`text-4xl font-bold ${getScoreColor(attempt.attempt.score)}`}>
+                {attempt.attempt.score}%
               </span>
               <span className="text-sm text-gray-500 mt-1">
-                {attempt.correctCount}/{attempt.totalQuestions}
+                {attempt.attempt.correctCount}/{attempt.attempt.totalQuestions}
               </span>
             </div>
           </div>
         </div>
 
-        <p className={`text-center text-lg font-medium mb-6 ${getScoreColor(attempt.score)}`}>
-          {getScoreMessage(attempt.score)}
+        <p className={`text-center text-lg font-medium mb-6 ${getScoreColor(attempt.attempt.score)}`}>
+          {getScoreMessage(attempt.attempt.score)}
         </p>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="bg-gray-50 rounded-lg p-4 text-center">
-            <p className="text-2xl font-bold text-gray-900">{attempt.correctCount}</p>
+            <p className="text-2xl font-bold text-gray-900">{attempt.attempt.correctCount}</p>
             <p className="text-sm text-gray-600">{t('quizResult.correct')}</p>
           </div>
           <div className="bg-gray-50 rounded-lg p-4 text-center">
             <p className="text-2xl font-bold text-gray-900">
-              {attempt.totalQuestions - attempt.correctCount}
+              {attempt.attempt.totalQuestions - attempt.attempt.correctCount}
             </p>
             <p className="text-sm text-gray-600">{t('quizResult.incorrect')}</p>
           </div>
           <div className="bg-gray-50 rounded-lg p-4 text-center">
-            <p className="text-2xl font-bold text-gray-900">{formatTime(attempt.timeTaken)}</p>
+            <p className="text-2xl font-bold text-gray-900">{formatTime(attempt.attempt.timeTaken)}</p>
             <p className="text-sm text-gray-600">{t('quizResult.timeTaken')}</p>
           </div>
         </div>
 
         <div className="text-center text-sm text-gray-500 mb-6">
-          {t('quizResult.attempt')} #{attempt.attemptNumber} • {t('quizResult.submittedOn')}{' '}
-          {new Date(attempt.submittedAt).toLocaleString()}
+          {t('quizResult.attempt')} #{attempt.attempt.attemptNumber} • {t('quizResult.submittedOn')}{' '}
+          {new Date(attempt.attempt.submittedAt).toLocaleString(undefined, {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+          })}
         </div>
 
         {/* Actions */}
@@ -239,8 +246,8 @@ export default function QuizResultPage() {
                           {isCorrectOption && (
                             <span className="ml-2 text-green-700 font-medium">{t('quizResult.correctMark')}</span>
                           )}
-                          {isSelected && !isCorrectOption && (
-                            <span className="ml-2 text-red-700 font-medium">{t('quizResult.yourAnswer')}</span>
+                          {isSelected && !isCorrect && (
+                            <span className="ml-2 text-red-700 font-medium">{t('quizResult.incorrectMark')}</span>
                           )}
                         </div>
                       );

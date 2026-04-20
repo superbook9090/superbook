@@ -4,12 +4,18 @@ import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import Favorite from '@/models/Favorite';
 import mongoose from 'mongoose';
+import { logApiError, type LogContext } from '@/lib/logger';
 
 // DELETE /api/favorites/[id] - Remove blog from favorites
 export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const logContext: LogContext = {
+    method: 'DELETE',
+    path: '/api/favorites/[id]',
+  };
+
   try {
     const session = await getServerSession(authOptions);
 
@@ -19,6 +25,8 @@ export async function DELETE(
         { status: 401 }
       );
     }
+
+    logContext.userId = session.user.id;
 
     await dbConnect();
     const { id } = await params;
@@ -54,9 +62,9 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Removed from favorites' });
   } catch (error) {
-    console.error('Error removing favorite:', error);
+    logApiError(error as Error, 'DELETE', '/api/favorites/[id]', logContext);
     return NextResponse.json(
-      { message: 'Failed to remove favorite' },
+      { message: 'Something went wrong. Please try again later.' },
       { status: 500 }
     );
   }

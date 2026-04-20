@@ -1,11 +1,11 @@
 // src/app/(dashboard)/dashboard/student/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
+import useSWR from 'swr';
 import {
   BookOpen,
   CheckCircle,
@@ -13,6 +13,8 @@ import {
   Activity,
   Clock
 } from 'lucide-react';
+import { fetcher } from '@/lib/swrFetcher';
+import { useSessionStore } from '@/store/useSessionStore';
 
 interface Enrollment {
   _id: string;
@@ -52,83 +54,54 @@ interface Stats {
 }
 
 export default function StudentDashboardPage() {
-  const { data: session, status } = useSession();
+  const session = useSessionStore((s) => s.session);
+  const status = useSessionStore((s) => s.status);
   const router = useRouter();
   const { t } = useTranslation();
-  const [stats, setStats] = useState<Stats>({ enrolledCount: 0, completedQuizzes: 0, averageScore: 0 });
-  const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    if (status === 'loading') return;
-    if (!session) {
-      router.push('/login');
-      return;
-    }
-    if (session.user?.role === 'teacher' || session.user?.role === 'admin') {
-      router.push('/dashboard/teacher');
-      return;
-    }
+  // SWR hooks for data fetching with automatic caching and deduplication
+  const { data: enrollmentsData } = useSWR(session ? '/api/enrollments' : null, fetcher);
+  const { data: attemptsData } = useSWR(session ? '/api/quiz-attempts' : null, fetcher);
 
-    fetchDashboardData();
-  }, [session, status, router]);
+  // Process data when available
+  const enrollments: Enrollment[] = enrollmentsData?.enrollments || [];
+  const attempts: Attempt[] = attemptsData?.attempts || [];
 
-  const fetchDashboardData = async () => {
-    try {
-      const [enrollmentsRes, attemptsRes] = await Promise.all([
-        fetch('/api/enrollments'),
-        fetch('/api/quiz-attempts'),
-      ]);
+  // Calculate stats
+  const completedAttempts = attempts.filter((a) => a.status === 'completed');
+  const avgScore = completedAttempts.length > 0
+    ? Math.round(completedAttempts.reduce((sum, a) => sum + (a.score || 0), 0) / completedAttempts.length)
+    : 0;
 
-      const enrollmentsData = await enrollmentsRes.json();
-      const attemptsData = await attemptsRes.json();
-
-      if (enrollmentsRes.ok && attemptsRes.ok) {
-        const enrollments: Enrollment[] = enrollmentsData.enrollments || [];
-        const attempts: Attempt[] = attemptsData.attempts || [];
-
-        // Calculate stats
-        const completedAttempts = attempts.filter((a) => a.status === 'completed');
-        const avgScore = completedAttempts.length > 0
-          ? Math.round(completedAttempts.reduce((sum, a) => sum + (a.score || 0), 0) / completedAttempts.length)
-          : 0;
-
-        setStats({
-          enrolledCount: enrollments.length,
-          completedQuizzes: completedAttempts.length,
-          averageScore: avgScore,
-        });
-
-        // Combine and sort recent activity
-        const activity: ActivityItem[] = [
-          ...enrollments.map((e) => ({ ...e, type: 'enrollment' as const })),
-          ...attempts
-            .filter((a) => a.status === 'completed')
-            .map((a) => ({ ...a, type: 'quiz' as const })),
-        ];
-
-        // Helper to get date from activity item
-        const getActivityDate = (item: ActivityItem): number => {
-          if (item.type === 'quiz') {
-            return new Date(item.submittedAt || item.startedAt).getTime();
-          }
-          return new Date(item.enrolledAt).getTime();
-        };
-
-        const sortedActivity = activity
-          .sort((a, b) => getActivityDate(b) - getActivityDate(a))
-          .slice(0, 5);
-
-        setRecentActivity(sortedActivity);
-      }
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-    } finally {
-      setIsLoading(false);
-    }
+  const stats: Stats = {
+    enrolledCount: enrollments.length,
+    completedQuizzes: completedAttempts.length,
+    averageScore: avgScore,
   };
 
-  if (status === 'loading' || isLoading) {
+  // Combine and sort recent activity
+  const activity: ActivityItem[] = [
+    ...enrollments.map((e) => ({ ...e, type: 'enrollment' as const })),
+    ...attempts
+      .filter((a) => a.status === 'completed')
+      .map((a) => ({ ...a, type: 'quiz' as const })),
+  ];
+
+  // Helper to get date from activity item
+  const getActivityDate = (item: ActivityItem): number => {
+    if (item.type === 'quiz') {
+      return new Date(item.submittedAt || item.startedAt).getTime();
+    }
+    return new Date(item.enrolledAt).getTime();
+  };
+
+  const recentActivity = activity
+    .sort((a, b) => getActivityDate(b) - getActivityDate(a))
+    .slice(0, 5);
+
+  const isLoading = status === 'loading' || !enrollmentsData || !attemptsData;
+
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">

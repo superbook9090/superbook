@@ -68,7 +68,7 @@ export default function StudentProgressPage() {
     }
 
     fetchProgress();
-  }, [session, status, router]);
+  }, [session, status]);
 
   const fetchProgress = async () => {
     try {

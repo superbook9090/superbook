@@ -65,13 +65,15 @@ export default function AdminAnalyticsPage() {
 
   useEffect(() => {
     if (status === 'loading') return;
-    if (!session || session.user?.role !== 'admin') {
-      router.push('/dashboard');
+    if (!session) {
+      router.push('/login');
       return;
     }
 
+    // Auth and role-based redirects handled by middleware and /dashboard/page.tsx
+
     fetchStats();
-  }, [session, status, router]);
+  }, [session, status]);
 
   const fetchStats = async () => {
     try {

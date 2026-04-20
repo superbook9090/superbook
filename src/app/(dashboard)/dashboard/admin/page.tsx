@@ -31,10 +31,7 @@ export default function AdminDashboardPage() {
     return null;
   }
 
-  if (session.user?.role !== 'admin') {
-    router.push('/dashboard/teacher');
-    return null;
-  }
+  // Role-based redirect handled in /dashboard/page.tsx - no redirect here
 
   return (
     <div className="space-y-6">

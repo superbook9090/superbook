@@ -47,14 +47,9 @@ export default function TeacherQuizzesPage() {
       router.push('/login');
       return;
     }
-    if (session.user?.role !== 'teacher' && session.user?.role !== 'admin') {
-      router.push('/dashboard/student');
-      return;
-    }
 
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.user?.id]); // Only re-fetch when user ID changes
+  }, [session, status]);
 
   const fetchData = async () => {
     try {

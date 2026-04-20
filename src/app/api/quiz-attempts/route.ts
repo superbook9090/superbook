@@ -6,13 +6,25 @@ import dbConnect from '@/lib/db';
 import QuizAttempt from '@/models/QuizAttempt';
 import Quiz from '@/models/Quiz';
 import Enrollment from '@/models/Enrollment';
+import { createQuizAttemptSchema } from '@/lib/validation';
+import { logApiError, type LogContext } from '@/lib/logger';
+import { serialize } from '@/lib/serialize';
 
 // GET /api/quiz-attempts - Get student's quiz attempts
 export async function GET(request: NextRequest) {
+  const logContext: LogContext = {
+    method: 'GET',
+    path: '/api/quiz-attempts',
+  };
+
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (session.user) {
+      logContext.userId = session.user.id;
     }
 
     await dbConnect();
@@ -20,23 +32,81 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const quiz = searchParams.get('quiz');
     const course = searchParams.get('course');
+    const attemptId = searchParams.get('attemptId');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '20');
+    const skip = (page - 1) * limit;
+    const fields = searchParams.get('fields'); // Comma-separated fields to select
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const query: Record<string, any> = { student: session.user.id };
     if (quiz) query.quiz = quiz;
     if (course) query.course = course;
+    if (attemptId) query._id = attemptId;
 
-    const attempts = await QuizAttempt.find(query)
+    // Build select object for field selection
+    let selectFields: Record<string, number> = {};
+    if (fields) {
+      const fieldList = fields.split(',');
+      fieldList.forEach(f => selectFields[f] = 1);
+    } else {
+      // Default fields to avoid over-fetching
+      selectFields = { score: 1, status: 1, startedAt: 1, submittedAt: 1, timeTaken: 1, attemptNumber: 1, correctCount: 1, answers: 1, totalQuestions: 1 };
+    }
+
+    const attempts = await QuizAttempt.find(query, selectFields)
       .populate('quiz', 'title description timeLimit questions')
-      .populate('course', 'title')
-      .sort({ startedAt: -1 });
+      .populate('course', 'title description')
+      .populate('student', 'name email')
+      .sort({ startedAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
 
-    return NextResponse.json({ attempts }, { status: 200 });
+    // Sanitize quiz questions - remove correctAnswer before sending to frontend
+    // Use separate review endpoint for completed attempts with correct answers
+    const sanitizedAttempts = attempts.map((attempt: any) => {
+      if (attempt.quiz && attempt.quiz.questions) {
+        attempt.quiz.questions = attempt.quiz.questions.map((q: any) => ({
+          _id: q._id?.toString(),
+          question: q.question,
+          options: q.options,
+        }));
+      }
+      // For completed attempts, include isCorrect in answers
+      if (attempt.status === 'completed' && attempt.answers) {
+        attempt.answers = attempt.answers.map((a: any) => ({
+          questionIndex: a.questionIndex,
+          selectedOption: a.selectedOption,
+          isCorrect: a.isCorrect,
+        }));
+      }
+      return attempt;
+    });
+
+    // Apply serialization to convert ObjectIds to strings
+    const serializedAttempts = serialize(sanitizedAttempts);
+
+    const total = await QuizAttempt.countDocuments(query);
+
+    return NextResponse.json({
+      attempts: serializedAttempts,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      }
+    }, {
+      status: 200,
+      headers: {
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+      },
+    });
   } catch (error) {
-    console.error('Error fetching quiz attempts:', error);
-    const message = error instanceof Error ? error.message : 'Error fetching quiz attempts';
+    logApiError(error as Error, 'GET', '/api/quiz-attempts', logContext);
     return NextResponse.json(
-      { message },
+      { message: 'Something went wrong. Please try again later.' },
       { status: 500 }
     );
   }
@@ -44,11 +114,20 @@ export async function GET(request: NextRequest) {
 
 // POST /api/quiz-attempts - Start or submit a quiz attempt
 export async function POST(request: NextRequest) {
+  const logContext: LogContext = {
+    method: 'POST',
+    path: '/api/quiz-attempts',
+  };
+
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (session.user) {
+      logContext.userId = session.user.id;
     }
 
     // Only students can attempt quizzes
@@ -61,14 +140,18 @@ export async function POST(request: NextRequest) {
 
     await dbConnect();
 
-    const { quizId, action, answers, timeTaken } = await request.json();
+    const body = await request.json();
 
-    if (!quizId) {
+    // Validate input using Zod schema
+    const validationResult = createQuizAttemptSchema.safeParse(body);
+    if (!validationResult.success) {
       return NextResponse.json(
-        { message: 'Quiz ID is required' },
+        { message: 'Invalid input', errors: validationResult.error.issues },
         { status: 400 }
       );
     }
+
+    const { quizId, action, answers, timeTaken } = validationResult.data;
 
     // Get quiz details
     const quiz = await Quiz.findById(quizId).populate('course', '_id');
@@ -90,7 +173,6 @@ export async function POST(request: NextRequest) {
     const enrollment = await Enrollment.findOne({
       student: session.user.id,
       course: quiz.course._id,
-      status: 'active',
     });
 
     if (!enrollment) {
@@ -140,18 +222,52 @@ export async function POST(request: NextRequest) {
         await attempt.save();
       }
 
+      // Sanitize questions - remove correctAnswer before sending to frontend
+      const sanitizedQuestions = quiz.questions.map((q: any) => ({
+        _id: q._id,
+        question: q.question,
+        options: q.options,
+      }));
+
       return NextResponse.json(
-        { message: 'Quiz started', attempt, questions: quiz.questions },
+        { message: 'Quiz started', attempt, questions: sanitizedQuestions },
         { status: 201 }
       );
     }
 
     // Submitting the quiz
     if (action === 'submit' && answers) {
+      // Validate: check if attempt is in progress
+      if (attempt.status !== 'in_progress') {
+        return NextResponse.json(
+          { message: 'Quiz has already been submitted' },
+          { status: 400 }
+        );
+      }
+
+      // Validate: check if answers length matches questions length
+      if (answers.length !== quiz.questions.length) {
+        return NextResponse.json(
+          { message: 'Invalid number of answers' },
+          { status: 400 }
+        );
+      }
+
+      // Validate: check if all question indices are valid
+      const validIndices = answers.every((a: { questionIndex: number }) =>
+        a.questionIndex >= 0 && a.questionIndex < quiz.questions.length
+      );
+      if (!validIndices) {
+        return NextResponse.json(
+          { message: 'Invalid question index in answers' },
+          { status: 400 }
+        );
+      }
+
       // Auto-grade the answers
       const gradedAnswers = answers.map((answer: { questionIndex: number; selectedOption: number }) => {
         const question = quiz.questions[answer.questionIndex];
-        const isCorrect = question && answer.selectedOption === question.correctAnswer;
+        const isCorrect = question && answer.selectedOption !== -1 && answer.selectedOption === question.correctAnswer;
         return {
           questionIndex: answer.questionIndex,
           selectedOption: answer.selectedOption,
@@ -174,16 +290,19 @@ export async function POST(request: NextRequest) {
 
       // Update enrollment progress based on quiz completion
       // Find all completed quizzes for this course
-      const courseQuizzes = await Quiz.find({ course: quiz.course._id, isPublished: true });
-      const completedQuizzes = await QuizAttempt.countDocuments({
+      const courseQuizzes = await Quiz.find({ course: quiz.course._id, isPublished: true }).lean();
+      const completedAttempts = await QuizAttempt.find({
         student: session.user.id,
         course: quiz.course._id,
         status: 'completed',
-      });
+      }).lean();
+
+      // Count unique quizzes completed (not total attempts)
+      const completedQuizzes = new Set(completedAttempts.map((a: any) => a.quiz.toString())).size;
 
       // Update course progress based on quiz completion (simplified)
       const quizProgress = courseQuizzes.length > 0 ? (completedQuizzes / courseQuizzes.length) * 100 : 0;
-      enrollment.progress = Math.round(quizProgress);
+      enrollment.progress = Math.min(100, Math.round(quizProgress)); // Cap at 100
       if (enrollment.progress >= 100) {
         enrollment.status = 'completed';
         enrollment.completedAt = new Date();
@@ -195,9 +314,11 @@ export async function POST(request: NextRequest) {
           message: 'Quiz submitted successfully',
           attempt: {
             ...attempt.toObject(),
-            answers: gradedAnswers, // Include correct answers for review
+            answers: gradedAnswers.map((a: any) => ({
+              questionIndex: a.questionIndex,
+              selectedOption: a.selectedOption,
+            })),
           },
-          correctAnswers: quiz.questions.map((q: { correctAnswer: number }) => q.correctAnswer),
         },
         { status: 200 }
       );
@@ -208,10 +329,9 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   } catch (error) {
-    console.error('Error handling quiz attempt:', error);
-    const message = error instanceof Error ? error.message : 'Error handling quiz attempt';
+    logApiError(error as Error, 'POST', '/api/quiz-attempts', logContext);
     return NextResponse.json(
-      { message },
+      { message: 'Something went wrong. Please try again later.' },
       { status: 500 }
     );
   }

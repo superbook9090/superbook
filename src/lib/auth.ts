@@ -10,10 +10,12 @@ declare module 'next-auth' {
     user: {
       id: string;
       role: string;
+      email: string;
     } & DefaultSession['user'];
   }
 
   interface User {
+    id: string;
     role: string;
   }
 }
@@ -22,6 +24,7 @@ declare module 'next-auth/jwt' {
   interface JWT {
     id: string;
     role: string;
+    email: string;
   }
 }
 
@@ -44,14 +47,21 @@ export const authOptions: AuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          throw new Error('Please enter email and password');
+          throw new Error('Missing email or password');
         }
 
         await dbConnect();
+
         const user = await User.findOne({ email: credentials.email }).select('+password');
 
-        if (!user || !(await user.comparePassword(credentials.password))) {
-          throw new Error('Invalid email or password');
+        if (!user) {
+          throw new Error('User not found');
+        }
+
+        const isValid = await user.comparePassword(credentials.password);
+
+        if (!isValid) {
+          throw new Error('Invalid password');
         }
 
         return {
@@ -67,62 +77,44 @@ export const authOptions: AuthOptions = {
     async signIn({ user, account, profile }) {
       // Handle Google OAuth sign in
       if (account?.provider === 'google') {
-        try {
-          await dbConnect();
+        if (!user?.email) return false;
 
-          const existingUser = await User.findOne({ email: user.email });
+        await dbConnect();
 
-          if (!existingUser) {
-            // Create new user from Google OAuth
-            await User.create({
-              name: user.name || profile?.name || 'Google User',
-              email: user.email,
-              role: 'student', // Default role for Google users
-              avatar: user.image,
-              isVerified: true, // Google emails are verified
-              provider: 'google',
-            });
-          } else if (existingUser.provider !== 'google') {
-            // Link existing account to Google
-            existingUser.provider = 'google';
-            existingUser.avatar = user.image || existingUser.avatar;
-            await existingUser.save();
-          }
+        let dbUser = await User.findOne({ email: user.email });
 
-          // Get user role for the token
-          const dbUser = await User.findOne({ email: user.email });
-          if (dbUser) {
-            user.role = dbUser.role;
-            user.id = dbUser._id.toString();
-          }
-          return true;
-        } catch (error) {
-          console.error('Google signIn callback error:', error);
-          return false;
+        if (!dbUser) {
+          dbUser = await User.create({
+            name: user.name || 'Google User',
+            email: user.email,
+            role: 'student',
+            avatar: user.image,
+            isVerified: true,
+            provider: 'google',
+          });
         }
+
+        user.id = dbUser._id.toString();
+        user.role = dbUser.role;
+
+        return true;
       }
+
       return true;
     },
-    async jwt({ token, user, account }) {
+    async jwt({ token, user }) {
       if (user) {
-        token.role = user.role;
         token.id = user.id;
-      }
-      // Handle Google OAuth JWT
-      if (account?.provider === 'google' && token.email) {
-        await dbConnect();
-        const dbUser = await User.findOne({ email: token.email });
-        if (dbUser) {
-          token.role = dbUser.role;
-          token.id = dbUser._id.toString();
-        }
+        token.role = user.role;
+        token.email = user.email || '';
       }
       return token;
     },
     async session({ session, token }) {
-      if (session?.user) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as string;
+      if (session.user && token) {
+        session.user.id = token.id;
+        session.user.role = token.role;
+        session.user.email = token.email;
       }
       return session;
     }

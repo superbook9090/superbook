@@ -7,13 +7,23 @@ import '@/models/Lesson'; // Import to register Lesson model
 import Enrollment from '@/models/Enrollment';
 import QuizAttempt from '@/models/QuizAttempt';
 import Quiz from '@/models/Quiz';
+import { logApiError, type LogContext } from '@/lib/logger';
 
 // GET /api/progress - Get progress data
 export async function GET(request: NextRequest) {
+  const logContext: LogContext = {
+    method: 'GET',
+    path: '/api/progress',
+  };
+
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (session.user) {
+      logContext.userId = session.user.id;
     }
 
     await dbConnect();
@@ -21,6 +31,10 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const studentId = searchParams.get('student');
     const courseId = searchParams.get('course');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '20');
+    const skip = (page - 1) * limit;
+    const fields = searchParams.get('fields'); // Comma-separated fields to select
 
     // Students can only view their own progress
     // Teachers can view progress of students in their courses
@@ -36,10 +50,25 @@ export async function GET(request: NextRequest) {
     const query: Record<string, any> = { student: targetStudentId };
     if (courseId) query.course = courseId;
 
+    // Build select object for field selection
+    let selectFields: Record<string, number> = {};
+    if (fields) {
+      const fieldList = fields.split(',');
+      fieldList.forEach(f => selectFields[f] = 1);
+    } else {
+      // Default fields to avoid over-fetching
+      selectFields = { progress: 1, status: 1, enrolledAt: 1, completedAt: 1 };
+    }
+
     // Get enrollments with course details
-    const enrollments = await Enrollment.find(query)
+    const enrollments = await Enrollment.find(query, selectFields)
       .populate('course', 'title description thumbnail instructor')
+      .sort({ enrolledAt: -1 })
+      .skip(skip)
+      .limit(limit)
       .lean();
+
+    const total = await Enrollment.countDocuments(query);
 
     // Get quiz attempts for each enrollment
     const progressData = await Promise.all(
@@ -125,14 +154,27 @@ export async function GET(request: NextRequest) {
     };
 
     return NextResponse.json(
-      { progress: progressData, overallStats },
-      { status: 200 }
+      {
+        progress: progressData,
+        overallStats,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        }
+      },
+      {
+        status: 200,
+        headers: {
+          'Cache-Control': 'private, s-maxage=60, stale-while-revalidate=120',
+        },
+      }
     );
   } catch (error) {
-    console.error('Error fetching progress:', error);
-    const message = error instanceof Error ? error.message : 'Error fetching progress';
+    logApiError(error as Error, 'GET', '/api/progress', logContext);
     return NextResponse.json(
-      { message },
+      { message: 'Something went wrong. Please try again later.' },
       { status: 500 }
     );
   }

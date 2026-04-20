@@ -49,7 +49,7 @@ export default function BlogDetailPage() {
       fetchBlog();
       checkFavorite();
     }
-  }, [status, blogId, router]);
+  }, [status, blogId]);
 
   const fetchBlog = async () => {
     try {

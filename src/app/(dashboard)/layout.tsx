@@ -7,8 +7,11 @@ import TeacherSidebar from '@/components/dashboard/TeacherSidebar';
 import MobileNav from '@/components/dashboard/MobileNav';
 import MobileBottomNav from '@/components/dashboard/MobileBottomNav';
 import SessionProvider from '@/components/dashboard/SessionProvider';
+import SessionSync from '@/components/dashboard/SessionSync';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 
+// TODO: Add translation keys for navigation items
+// Currently using hardcoded strings - should use i18n system
 const studentNavigation = [
   { name: 'Dashboard', href: '/dashboard/student', icon: 'LayoutDashboard' },
   { name: 'My Courses', href: '/dashboard/student/courses', icon: 'BookOpen' },
@@ -42,8 +45,9 @@ export default async function DashboardLayout({
 }) {
   const session = await getServerSession(authOptions);
 
+  // Middleware handles authentication - no redirect here
   if (!session) {
-    redirect('/login');
+    return null;
   }
 
   const role = session.user?.role;
@@ -76,6 +80,7 @@ export default async function DashboardLayout({
         {/* Main Content - Scrollable */}
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-4 sm:p-6 lg:p-8 pb-24 md:pb-8">
           <SessionProvider>
+            <SessionSync />
             <div className="max-w-7xl mx-auto w-full">
               {children}
             </div>

@@ -2,10 +2,11 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
 import Alert from '@/components/ui/Alert';
+import ConfirmModal from '@/components/ui/ConfirmModal';
+import { useSessionStore } from '@/store/useSessionStore';
 
 interface Question {
   question: string;
@@ -26,7 +27,8 @@ interface Attempt {
 }
 
 export default function TakeQuizPage() {
-  const { data: session, status } = useSession();
+  const session = useSessionStore((s) => s.session);
+  const status = useSessionStore((s) => s.status);
   const router = useRouter();
   const searchParams = useSearchParams();
   const attemptId = searchParams.get('attemptId');
@@ -40,6 +42,7 @@ export default function TakeQuizPage() {
   const [error, setError] = useState('');
   const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -53,7 +56,7 @@ export default function TakeQuizPage() {
     }
 
     fetchAttempt();
-  }, [session, status, attemptId, router]);
+  }, [session, status, attemptId]);
 
   // Timer
   useEffect(() => {
@@ -75,11 +78,11 @@ export default function TakeQuizPage() {
 
   const fetchAttempt = async () => {
     try {
-      const response = await fetch('/api/quiz-attempts');
+      const response = await fetch(`/api/quiz-attempts?attemptId=${attemptId}`);
       const data = await response.json();
 
       if (response.ok) {
-        const foundAttempt = data.attempts.find((a: Attempt) => a._id === attemptId);
+        const foundAttempt = data.attempts?.[0];
         if (foundAttempt && foundAttempt.status === 'in_progress') {
           setAttempt(foundAttempt);
           // Calculate remaining time
@@ -109,7 +112,8 @@ export default function TakeQuizPage() {
   const handleSubmit = useCallback(async (autoSubmit = false) => {
     if (!attempt) return;
 
-    if (!autoSubmit && !confirm(t('quiz.confirmSubmit'))) {
+    if (!autoSubmit) {
+      setShowSubmitModal(true);
       return;
     }
 
@@ -194,8 +198,8 @@ export default function TakeQuizPage() {
     );
   }
 
-  const questions = attempt.quiz.questions;
-  const progress = ((currentQuestion + 1) / questions.length) * 100;
+  const questions = attempt.quiz.questions || [];
+  const progress = questions.length > 0 ? ((currentQuestion + 1) / questions.length) * 100 : 0;
   const answeredCount = Object.keys(answers).length;
 
   return (
@@ -325,6 +329,22 @@ export default function TakeQuizPage() {
           </p>
         </div>
       )}
+
+      {/* Submit Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showSubmitModal}
+        title="Confirm Submission"
+        message="Are you sure you want to submit? You cannot change your answers after submission."
+        onConfirm={() => {
+          setShowSubmitModal(false);
+          handleSubmit(true);
+        }}
+        onCancel={() => setShowSubmitModal(false)}
+        confirmText="Submit"
+        cancelText="Cancel"
+        type="warning"
+        isLoading={isSubmitting}
+      />
     </div>
   );
 }

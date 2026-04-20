@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
+import { debounce } from '@/lib/debounce';
 import {
   BookOpen,
   Users,
@@ -45,20 +46,24 @@ export default function AdminCoursesPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  // Debounced search handler
+  const debouncedSearchHandler = useCallback(
+    debounce((value: string) => setSearchTerm(value), 300),
+    []
+  );
+
   useEffect(() => {
-    if (status === 'unauthenticated') {
+    if (status === 'loading') return;
+    if (!session) {
       router.push('/login');
       return;
     }
 
     if (status === 'authenticated') {
-      if (session?.user?.role !== 'admin') {
-        router.push('/dashboard');
-        return;
-      }
+      // Role-based redirect handled in /dashboard/page.tsx
       fetchCourses();
     }
-  }, [status, session, router]);
+  }, [status, session]);
 
   const fetchCourses = async () => {
     try {
@@ -167,8 +172,8 @@ export default function AdminCoursesPage() {
           <input
             type="text"
             placeholder="Search courses or instructors..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            defaultValue={searchTerm}
+            onChange={(e) => debouncedSearchHandler(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
           />
         </div>
