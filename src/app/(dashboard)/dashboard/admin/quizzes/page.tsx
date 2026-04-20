@@ -50,6 +50,7 @@ export default function AdminQuizzesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchInput, setSearchInput] = useState('');
   const [filter, setFilter] = useState<'all' | 'published' | 'draft'>('all');
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
@@ -58,9 +59,15 @@ export default function AdminQuizzesPage() {
     ((value: string) => {
       const timer = setTimeout(() => setSearchTerm(value), 300);
       return () => clearTimeout(timer);
-    }),
+    }) as any,
     []
   );
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchInput(value);
+    debouncedSearchHandler(value);
+  };
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -138,8 +145,8 @@ export default function AdminQuizzesPage() {
         animate={{ opacity: 1, y: 0 }}
         className="flex items-center gap-3"
       >
-        <div className="p-3 bg-indigo-100 rounded-xl">
-          <HelpCircle className="w-6 h-6 text-indigo-600" />
+        <div className={`p-3 ${theme.activeBg} rounded-xl`}>
+          <HelpCircle className={`w-6 h-6 ${theme.text}`} />
         </div>
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">All Quizzes</h1>
@@ -173,8 +180,8 @@ export default function AdminQuizzesPage() {
           <input
             type="text"
             placeholder="Search quizzes..."
-            defaultValue={searchTerm}
-            onChange={(e) => debouncedSearchHandler(e.target.value)}
+            value={searchInput}
+            onChange={handleSearchChange}
             className="w-full pl-10 pr-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
           />
         </div>
@@ -200,15 +207,15 @@ export default function AdminQuizzesPage() {
         className="grid grid-cols-3 gap-4"
       >
         <div className="bg-white rounded-xl p-4 shadow-sm">
-          <p className="text-2xl font-bold text-indigo-600">{quizzes.length}</p>
+          <p className={`text-2xl font-bold ${theme.text}`}>{quizzes.length}</p>
           <p className="text-sm text-gray-500">Total Quizzes</p>
         </div>
         <div className="bg-white rounded-xl p-4 shadow-sm">
-          <p className="text-2xl font-bold text-emerald-600">{quizzes.filter(q => q.isPublished).length}</p>
+          <p className={`text-2xl font-bold ${theme.text}`}>{quizzes.filter(q => q.isPublished).length}</p>
           <p className="text-sm text-gray-500">Published</p>
         </div>
         <div className="bg-white rounded-xl p-4 shadow-sm">
-          <p className="text-2xl font-bold text-amber-600">{quizzes.filter(q => !q.isPublished).length}</p>
+          <p className={`text-2xl font-bold ${theme.text}`}>{quizzes.filter(q => !q.isPublished).length}</p>
           <p className="text-sm text-gray-500">Drafts</p>
         </div>
       </motion.div>
@@ -264,7 +271,7 @@ export default function AdminQuizzesPage() {
                   </div>
                   <div className="flex items-center text-sm text-gray-500">
                     <HelpCircle className="w-4 h-4 mr-2" />
-                    {quiz.questions.length} questions
+                    {quiz.questions?.length || 0} questions
                   </div>
                   <div className="flex items-center text-sm text-gray-500">
                     <Calendar className="w-4 h-4 mr-2" />

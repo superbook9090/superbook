@@ -9,13 +9,18 @@
   --student-primary: #4f46e5;
   --student-primary-light: #e0e7ff;
   --student-primary-dark: #3730a3;
-  --student-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  /* --student-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); */
   
+  --student-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+--teacher-gradient: linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%);
+--admin-gradient: linear-gradient(135deg, #f43f5e 0%, #ec4899 50%, #d946ef 100%);
+--superadmin-gradient: linear-gradient(135deg, #1e293b 0%, #111827 50%, #000000 100%);
+
   /* Teacher Theme - Emerald */
   --teacher-primary: #059669;
   --teacher-primary-light: #d1fae5;
   --teacher-primary-dark: #047857;
-  --teacher-gradient: linear-gradient(135deg, #059669 0%, #0891b2 100%);
+  /* --teacher-gradient: linear-gradient(135deg, #059669 0%, #0891b2 100%); */
   
   /* Neutral Colors */
   --card: #ffffff;
