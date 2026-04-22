@@ -4,6 +4,7 @@ export interface ICourse extends Document {
   title: string;
   description: string;
   instructor: mongoose.Types.ObjectId;
+  organizationId?: mongoose.Types.ObjectId | null;
   price: number;
   thumbnail: string;
   category: string;
@@ -19,6 +20,7 @@ const courseSchema = new Schema<ICourse>(
     title: { type: String, required: true },
     description: String,
     instructor: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    organizationId: { type: Schema.Types.ObjectId, ref: 'Organization', default: null },
     price: { type: Number, default: 0 },
     thumbnail: String,
     category: String,

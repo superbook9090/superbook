@@ -1,12 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useSession } from 'next-auth/react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
+import { useSessionStore } from '@/store/useSessionStore';
 
 export default function NotFound() {
-  const session = useSession();
+  const { session } = useSessionStore();
   const { t } = useTranslation();
   const { theme } = useRoleTheme();
 
@@ -14,16 +14,16 @@ export default function NotFound() {
   let dashboardLink = '/';
   let dashboardText = t('notFound.goHome');
 
-  if (session.data?.user?.role === 'student') {
+  if (session?.user?.role === 'student') {
     dashboardLink = '/dashboard/student';
     dashboardText = t('notFound.goToDashboard');
-  } else if (session.data?.user?.role === 'teacher' || session.data?.user?.role === 'admin') {
+  } else if (session?.user?.role === 'teacher' || session?.user?.role === 'admin') {
     dashboardLink = '/dashboard/teacher';
     dashboardText = t('notFound.goToDashboard');
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[var(--color-background)] flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full text-center">
         {/* 404 Illustration */}
         <div className="mb-8">
@@ -46,11 +46,11 @@ export default function NotFound() {
         </div>
 
         {/* Heading */}
-        <h1 className="text-6xl font-extrabold text-gray-900 mb-4">404</h1>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('notFound.pageNotFound')}</h2>
+        <h1 className="text-6xl font-extrabold text-[var(--color-foreground)] mb-4">404</h1>
+        <h2 className="text-2xl font-bold text-[var(--color-foreground)] mb-2">{t('notFound.pageNotFound')}</h2>
 
         {/* Description */}
-        <p className="text-gray-500 mb-8">
+        <p className="text-[var(--color-muted-foreground)] mb-8">
           {t('notFound.description')}
         </p>
 
@@ -77,10 +77,10 @@ export default function NotFound() {
             {dashboardText}
           </Link>
 
-          {!session.data && (
+          {!session && (
             <Link
               href="/login"
-              className="inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+              className="inline-flex items-center justify-center px-6 py-3 border border-[var(--color-border)] text-base font-medium rounded-md text-[var(--color-foreground)] bg-[var(--color-card)] hover:bg-[var(--color-accent)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
             >
               <svg
                 className="w-5 h-5 mr-2"
@@ -102,7 +102,7 @@ export default function NotFound() {
         </div>
 
         {/* Help Text */}
-        <p className="mt-8 text-sm text-gray-400">
+        <p className="mt-8 text-sm text-[var(--color-muted)]">
           {t('notFound.helpText')}
         </p>
       </div>

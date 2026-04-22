@@ -35,11 +35,12 @@ export async function GET(request: NextRequest) {
     const type = searchParams.get('type') || 'overview'; // overview, teacher, admin
 
     const isAdmin = session.user?.role === 'admin';
+    const isSuperAdmin = session.user?.role === 'superadmin';
     const isTeacher = session.user?.role === 'teacher';
 
-    // Admin gets system-wide analytics
-    if (type === 'admin' && isAdmin) {
-      const stats = await getAdminStats();
+    // Admin gets organization-specific analytics, superadmin gets system-wide
+    if (type === 'admin' && (isAdmin || isSuperAdmin)) {
+      const stats = await getAdminStats(session.user.organizationId, isSuperAdmin);
       return NextResponse.json({ stats }, { status: 200 });
     }
 
@@ -66,40 +67,50 @@ export async function GET(request: NextRequest) {
   }
 }
 
-async function getAdminStats() {
+async function getAdminStats(organizationId?: string | null, isSuperAdmin: boolean = false) {
+  // Build organization filter
+  const orgFilter = isSuperAdmin ? {} : (organizationId ? { organizationId } : { organizationId: null });
+
   // User stats
-  const totalUsers = await User.countDocuments();
-  const students = await User.countDocuments({ role: 'student' });
-  const teachers = await User.countDocuments({ role: 'teacher' });
-  const admins = await User.countDocuments({ role: 'admin' });
+  const totalUsers = await User.countDocuments(orgFilter);
+  const students = await User.countDocuments({ ...orgFilter, role: 'student' });
+  const teachers = await User.countDocuments({ ...orgFilter, role: 'teacher' });
+  const admins = await User.countDocuments({ ...orgFilter, role: 'admin' });
 
   // New users this month
   const startOfMonth = new Date();
   startOfMonth.setDate(1);
   startOfMonth.setHours(0, 0, 0, 0);
   const newUsersThisMonth = await User.countDocuments({
+    ...orgFilter,
     createdAt: { $gte: startOfMonth },
   });
 
   // Course stats
-  const totalCourses = await Course.countDocuments();
-  const publishedCourses = await Course.countDocuments({ isPublished: true });
+  const totalCourses = await Course.countDocuments(orgFilter);
+  const publishedCourses = await Course.countDocuments({ ...orgFilter, isPublished: true });
 
-  // Enrollment stats
-  const totalEnrollments = await Enrollment.countDocuments();
-  const activeEnrollments = await Enrollment.countDocuments({ status: 'active' });
-  const completedEnrollments = await Enrollment.countDocuments({ status: 'completed' });
+  // Enrollment stats - filter by users in the organization
+  const orgUserIds = await User.find(orgFilter).select('_id').lean();
+  const userIds = orgUserIds.map(u => u._id);
+
+  const totalEnrollments = await Enrollment.countDocuments({ student: { $in: userIds } });
+  const activeEnrollments = await Enrollment.countDocuments({ student: { $in: userIds }, status: 'active' });
+  const completedEnrollments = await Enrollment.countDocuments({ student: { $in: userIds }, status: 'completed' });
 
   // Quiz stats
-  const totalQuizzes = await Quiz.countDocuments();
-  const publishedQuizzes = await Quiz.countDocuments({ isPublished: true });
+  const totalQuizzes = await Quiz.countDocuments(orgFilter);
+  const publishedQuizzes = await Quiz.countDocuments({ ...orgFilter, isPublished: true });
 
-  // Quiz attempt stats
-  const totalAttempts = await QuizAttempt.countDocuments({ status: 'completed' });
+  // Quiz attempt stats - filter by quizzes in the organization
+  const orgQuizIds = await Quiz.find(orgFilter).select('_id').lean();
+  const quizIds = orgQuizIds.map(q => q._id);
+
+  const totalAttempts = await QuizAttempt.countDocuments({ quiz: { $in: quizIds }, status: 'completed' });
 
   // Average scores
   const scoreStats = await QuizAttempt.aggregate([
-    { $match: { status: 'completed' } },
+    { $match: { quiz: { $in: quizIds }, status: 'completed' } },
     {
       $group: {
         _id: null,
@@ -110,7 +121,7 @@ async function getAdminStats() {
   ]);
 
   // Recent activity
-  const recentEnrollments = await Enrollment.find()
+  const recentEnrollments = await Enrollment.find({ student: { $in: userIds } })
     .sort({ createdAt: -1 })
     .limit(5)
     .populate('student', 'name')

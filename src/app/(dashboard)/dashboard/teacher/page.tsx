@@ -16,7 +16,7 @@ import {
   BarChart3
 } from 'lucide-react';
 import Alert from '@/components/ui/Alert';
-import Loader from '@/components/ui/Loader';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { fetcher } from '@/lib/swrFetcher';
 
 interface Course {
@@ -149,7 +149,44 @@ export default function TeacherDashboardPage() {
 
   if (isLoading) {
     return (
-      <Loader variant="inline" size="lg" text={t('common.loading')} />
+      <div className="px-4 sm:px-6 lg:px-8 space-y-6">
+        {/* Header skeleton */}
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+
+        {/* Stats grid skeleton */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-white rounded-xl p-6 shadow-sm">
+              <Skeleton className="h-12 w-12 mb-4" />
+              <Skeleton className="h-4 w-24 mb-2" />
+              <Skeleton className="h-8 w-16" />
+            </div>
+          ))}
+        </div>
+
+        {/* Recent activity skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white rounded-xl p-6 shadow-sm">
+            <Skeleton className="h-6 w-32 mb-4" />
+            <div className="space-y-3">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-5/6" />
+              <Skeleton className="h-4 w-4/5" />
+            </div>
+          </div>
+          <div className="bg-white rounded-xl p-6 shadow-sm">
+            <Skeleton className="h-6 w-32 mb-4" />
+            <div className="space-y-3">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-5/6" />
+              <Skeleton className="h-4 w-4/5" />
+            </div>
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -159,7 +196,7 @@ export default function TeacherDashboardPage() {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 p-8 text-white shadow-xl"
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[var(--teacher-primary)] to-[var(--teacher-accent)] p-8 text-white shadow-xl"
       >
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
         <div className="relative z-10 flex items-center justify-between">
@@ -167,7 +204,7 @@ export default function TeacherDashboardPage() {
             <h1 className="text-3xl font-bold mb-2">
               {t('dashboard.teacherDashboard')}
             </h1>
-            <p className="text-emerald-100 text-lg">
+            <p className="text-white/80 text-lg">
               {t('dashboard.welcomeBack')}, {session?.user?.name}! {t('dashboard.manageContent')}
             </p>
           </div>
@@ -182,7 +219,7 @@ export default function TeacherDashboardPage() {
                   setLimitAlert({ type: 'courses' });
                 }
               }}
-              className={`inline-flex items-center px-4 py-2.5 text-emerald-700 rounded-xl font-semibold shadow-lg transition-all ${
+              className={`inline-flex items-center px-4 py-2.5 text-[var(--teacher-primary)] rounded-xl font-semibold shadow-lg transition-all ${
                 isAtLimit('courses')
                   ? 'bg-gray-300 cursor-not-allowed'
                   : 'bg-white hover:shadow-xl'
@@ -218,25 +255,25 @@ export default function TeacherDashboardPage() {
           transition={{ delay: 0.1 }}
           className="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
         >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--teacher-soft)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
           <div className="relative">
-            <div className="p-3 rounded-xl bg-emerald-100 text-emerald-600 w-fit mb-4">
+            <div className="p-3 rounded-xl bg-[var(--teacher-soft)] text-[var(--teacher-primary)] w-fit mb-4">
               <BookOpen className="w-6 h-6" />
             </div>
             <div className="text-3xl font-bold text-gray-900 mb-1">
               {stats.totalCourses} / {getLimit('courses')}
             </div>
             <div className="text-sm text-gray-500 mb-2">{t('dashboard.myCourses')}</div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-[var(--border)] rounded-full h-2">
               <div
                 className={`h-2 rounded-full transition-all ${
-                  isAtLimit('courses') ? 'bg-red-500' : isNearLimit('courses') ? 'bg-amber-500' : 'bg-emerald-500'
+                  isAtLimit('courses') ? 'bg-[var(--error)]' : isNearLimit('courses') ? 'bg-[var(--warning)]' : 'bg-[var(--success)]'
                 }`}
                 style={{ width: `${Math.min(getUsagePercentage('courses'), 100)}%` }}
               />
             </div>
             {isNearLimit('courses') && !isAtLimit('courses') && (
-              <div className="mt-2 text-xs text-amber-600 font-medium">
+              <div className="mt-2 text-xs text-[var(--warning)] font-medium">
                 ⚠️ {Math.round(getUsagePercentage('courses'))}% used
               </div>
             )}
@@ -250,9 +287,9 @@ export default function TeacherDashboardPage() {
           transition={{ delay: 0.2 }}
           className="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
         >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--info-light)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
           <div className="relative">
-            <div className="p-3 rounded-xl bg-blue-100 text-blue-600 w-fit mb-4">
+            <div className="p-3 rounded-xl bg-[var(--info-light)] text-[var(--info)] w-fit mb-4">
               <Users className="w-6 h-6" />
             </div>
             <div className="text-3xl font-bold text-gray-900 mb-1">{stats.totalStudents}</div>
@@ -267,25 +304,25 @@ export default function TeacherDashboardPage() {
           transition={{ delay: 0.3 }}
           className="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
         >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-purple-50 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--student-soft)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
           <div className="relative">
-            <div className="p-3 rounded-xl bg-purple-100 text-purple-600 w-fit mb-4">
+            <div className="p-3 rounded-xl bg-[var(--student-soft)] text-[var(--student-primary)] w-fit mb-4">
               <HelpCircle className="w-6 h-6" />
             </div>
             <div className="text-3xl font-bold text-gray-900 mb-1">
               {stats.totalQuizzes} / {getLimit('quizzes')}
             </div>
             <div className="text-sm text-gray-500 mb-2">{t('dashboard.myQuizzes')}</div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-[var(--border)] rounded-full h-2">
               <div
                 className={`h-2 rounded-full transition-all ${
-                  isAtLimit('quizzes') ? 'bg-red-500' : isNearLimit('quizzes') ? 'bg-amber-500' : 'bg-purple-500'
+                  isAtLimit('quizzes') ? 'bg-[var(--error)]' : isNearLimit('quizzes') ? 'bg-[var(--warning)]' : 'bg-[var(--student-primary)]'
                 }`}
                 style={{ width: `${Math.min(getUsagePercentage('quizzes'), 100)}%` }}
               />
             </div>
             {isNearLimit('quizzes') && !isAtLimit('quizzes') && (
-              <div className="mt-2 text-xs text-amber-600 font-medium">
+              <div className="mt-2 text-xs text-[var(--warning)] font-medium">
                 ⚠️ {Math.round(getUsagePercentage('quizzes'))}% used
               </div>
             )}
@@ -299,25 +336,25 @@ export default function TeacherDashboardPage() {
           transition={{ delay: 0.4 }}
           className="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
         >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-rose-50 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--admin-soft)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
           <div className="relative">
-            <div className="p-3 rounded-xl bg-rose-100 text-rose-600 w-fit mb-4">
+            <div className="p-3 rounded-xl bg-[var(--admin-soft)] text-[var(--admin-primary)] w-fit mb-4">
               <BarChart3 className="w-6 h-6" />
             </div>
             <div className="text-3xl font-bold text-gray-900 mb-1">
               {stats.totalBlogs} / {getLimit('blogs')}
             </div>
             <div className="text-sm text-gray-500 mb-2">{t('dashboard.myBlogs')}</div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-[var(--border)] rounded-full h-2">
               <div
                 className={`h-2 rounded-full transition-all ${
-                  isAtLimit('blogs') ? 'bg-red-500' : isNearLimit('blogs') ? 'bg-amber-500' : 'bg-rose-500'
+                  isAtLimit('blogs') ? 'bg-[var(--error)]' : isNearLimit('blogs') ? 'bg-[var(--warning)]' : 'bg-[var(--admin-primary)]'
                 }`}
                 style={{ width: `${Math.min(getUsagePercentage('blogs'), 100)}%` }}
               />
             </div>
             {isNearLimit('blogs') && !isAtLimit('blogs') && (
-              <div className="mt-2 text-xs text-amber-600 font-medium">
+              <div className="mt-2 text-xs text-[var(--warning)] font-medium">
                 ⚠️ {Math.round(getUsagePercentage('blogs'))}% used
               </div>
             )}
@@ -336,7 +373,7 @@ export default function TeacherDashboardPage() {
             <h2 className="text-xl font-semibold text-gray-900">{t('dashboard.recentCourses')}</h2>
             <a 
               href="/dashboard/teacher/courses" 
-              className="text-sm font-medium text-emerald-600 hover:text-emerald-700 flex items-center"
+              className="text-sm font-medium text-[var(--teacher-primary)] hover:text-[var(--teacher-hover)] flex items-center"
             >
               {t('dashboard.viewAll')} <ArrowRight className="w-4 h-4 ml-1" />
             </a>
@@ -351,11 +388,11 @@ export default function TeacherDashboardPage() {
                 className="group bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
               >
                 <div className="flex items-start justify-between mb-4">
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
+                  <div className="p-3 rounded-xl bg-gradient-to-r from-[var(--teacher-primary)] to-[var(--teacher-accent)] text-white">
                     <GraduationCap className="w-5 h-5" />
                   </div>
                   {course.isPublished && (
-                    <span className="px-2 py-1 text-xs font-medium bg-emerald-100 text-emerald-700 rounded-full">
+                    <span className="px-2 py-1 text-xs font-medium bg-[var(--teacher-soft)] text-[var(--teacher-primary)] rounded-full">
                       {t('dashboard.published')}
                     </span>
                   )}
@@ -383,9 +420,9 @@ export default function TeacherDashboardPage() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             href="/dashboard/teacher/courses"
-            className="flex items-center p-4 rounded-xl bg-emerald-50 hover:bg-emerald-100 transition-colors group"
+            className="flex items-center p-4 rounded-xl bg-[var(--teacher-soft)] hover:bg-[var(--teacher-border)] transition-colors group"
           >
-            <div className="p-3 rounded-lg bg-emerald-200 text-emerald-700 group-hover:bg-emerald-300 transition-colors">
+            <div className="p-3 rounded-lg bg-[var(--teacher-primary)]/20 text-[var(--teacher-primary)] group-hover:bg-[var(--teacher-primary)]/30 transition-colors">
               <BookOpen className="w-5 h-5" />
             </div>
             <div className="ml-3">
@@ -398,9 +435,9 @@ export default function TeacherDashboardPage() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             href="/dashboard/teacher/quizzes"
-            className="flex items-center p-4 rounded-xl bg-violet-50 hover:bg-violet-100 transition-colors group"
+            className="flex items-center p-4 rounded-xl bg-[var(--student-soft)] hover:bg-[var(--student-border)] transition-colors group"
           >
-            <div className="p-3 rounded-lg bg-violet-200 text-violet-700 group-hover:bg-violet-300 transition-colors">
+            <div className="p-3 rounded-lg bg-[var(--student-primary)]/20 text-[var(--student-primary)] group-hover:bg-[var(--student-primary)]/30 transition-colors">
               <HelpCircle className="w-5 h-5" />
             </div>
             <div className="ml-3">
@@ -413,9 +450,9 @@ export default function TeacherDashboardPage() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             href="/dashboard/teacher/analytics"
-            className="flex items-center p-4 rounded-xl bg-blue-50 hover:bg-blue-100 transition-colors group"
+            className="flex items-center p-4 rounded-xl bg-[var(--info-light)] hover:bg-[var(--info-light)]/80 transition-colors group"
           >
-            <div className="p-3 rounded-lg bg-blue-200 text-blue-700 group-hover:bg-blue-300 transition-colors">
+            <div className="p-3 rounded-lg bg-[var(--info)]/20 text-[var(--info)] group-hover:bg-[var(--info)]/30 transition-colors">
               <BarChart3 className="w-5 h-5" />
             </div>
             <div className="ml-3">
@@ -437,13 +474,13 @@ export default function TeacherDashboardPage() {
             className={`flex items-center p-4 rounded-xl transition-colors group ${
               stats.totalCourses >= limits.courses
                 ? 'bg-gray-100 cursor-not-allowed'
-                : 'bg-amber-50 hover:bg-amber-100'
+                : 'bg-[var(--warning-light)] hover:bg-[var(--warning-light)]/80'
             }`}
           >
             <div className={`p-3 rounded-lg transition-colors ${
               stats.totalCourses >= limits.courses
                 ? 'bg-gray-300 text-gray-500'
-                : 'bg-amber-200 text-amber-700 group-hover:bg-amber-300'
+                : 'bg-[var(--warning)]/20 text-[var(--warning)] group-hover:bg-[var(--warning)]/30'
             }`}>
               <Plus className="w-5 h-5" />
             </div>
@@ -468,13 +505,13 @@ export default function TeacherDashboardPage() {
             className={`flex items-center p-4 rounded-xl transition-colors group ${
               stats.totalBlogs >= limits.blogs
                 ? 'bg-gray-100 cursor-not-allowed'
-                : 'bg-rose-50 hover:bg-rose-100'
+                : 'bg-[var(--admin-soft)] hover:bg-[var(--admin-border)]'
             }`}
           >
             <div className={`p-3 rounded-lg transition-colors ${
               stats.totalBlogs >= limits.blogs
                 ? 'bg-gray-300 text-gray-500'
-                : 'bg-rose-200 text-rose-700 group-hover:bg-rose-300'
+                : 'bg-[var(--admin-primary)]/20 text-[var(--admin-primary)] group-hover:bg-[var(--admin-primary)]/30'
             }`}>
               <Plus className="w-5 h-5" />
             </div>

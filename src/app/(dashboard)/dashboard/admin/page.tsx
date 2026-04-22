@@ -1,7 +1,6 @@
 // src/app/(dashboard)/dashboard/admin/page.tsx
 'use client';
 
-import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -9,19 +8,19 @@ import {
   Users,
   BookOpen,
   BarChart3,
-  Edit3,
   Settings as SettingsIcon,
 } from 'lucide-react';
+import { useSessionStore } from '@/store/useSessionStore';
 
 export default function AdminDashboardPage() {
-  const { data: session, status } = useSession();
+  const { session, status } = useSessionStore();
   const router = useRouter();
   const { t } = useTranslation();
 
   if (status === 'loading') {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+        <div className="w-12 h-12 border-4 border-[var(--student-border)] border-t-[var(--student-primary)] rounded-full animate-spin" />
       </div>
     );
   }
@@ -41,8 +40,8 @@ export default function AdminDashboardPage() {
         animate={{ opacity: 1, y: 0 }}
         className="flex items-center gap-3"
       >
-        <div className="p-3 bg-indigo-100 rounded-xl">
-          <SettingsIcon className="w-6 h-6 text-indigo-600" />
+        <div className="p-3 bg-[var(--admin-soft)] rounded-xl">
+          <SettingsIcon className="w-6 h-6 text-[var(--admin-primary)]" />
         </div>
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{t('admin.adminDashboard')}</h1>
@@ -62,7 +61,7 @@ export default function AdminDashboardPage() {
           className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition-all group"
         >
           <div className="flex items-center">
-            <div className="p-3 rounded-full bg-blue-100 text-blue-600 group-hover:bg-blue-200 transition-colors">
+            <div className="p-3 rounded-full bg-[var(--info-light)] text-[var(--info)] group-hover:bg-[var(--info-light)]/80 transition-colors">
               <Users className="w-6 h-6" />
             </div>
             <div className="ml-4">
@@ -77,7 +76,7 @@ export default function AdminDashboardPage() {
           className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition-all group"
         >
           <div className="flex items-center">
-            <div className="p-3 rounded-full bg-green-100 text-green-600 group-hover:bg-green-200 transition-colors">
+            <div className="p-3 rounded-full bg-[var(--success-light)] text-[var(--success)] group-hover:bg-[var(--success-light)]/80 transition-colors">
               <BookOpen className="w-6 h-6" />
             </div>
             <div className="ml-4">
@@ -92,7 +91,7 @@ export default function AdminDashboardPage() {
           className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition-all group"
         >
           <div className="flex items-center">
-            <div className="p-3 rounded-full bg-purple-100 text-purple-600 group-hover:bg-purple-200 transition-colors">
+            <div className="p-3 rounded-full bg-[var(--student-soft)] text-[var(--student-primary)] group-hover:bg-[var(--student-border)] transition-colors">
               <BarChart3 className="w-6 h-6" />
             </div>
             <div className="ml-4">
@@ -107,7 +106,7 @@ export default function AdminDashboardPage() {
           className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition-all group"
         >
           <div className="flex items-center">
-            <div className="p-3 rounded-full bg-orange-100 text-orange-600 group-hover:bg-orange-200 transition-colors">
+            <div className="p-3 rounded-full bg-[var(--warning-light)] text-[var(--warning)] group-hover:bg-[var(--warning-light)]/80 transition-colors">
               <SettingsIcon className="w-6 h-6" />
             </div>
             <div className="ml-4">

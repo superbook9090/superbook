@@ -64,7 +64,23 @@ export async function middleware(request: NextRequest) {
   }
 
   // =========================
-  // ✅ 3. PROTECT DASHBOARD
+  // ✅ 3. PROTECT ADMIN ROUTES
+  // =========================
+  if (pathname.startsWith('/dashboard/admin')) {
+    if (!token) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+
+    // Only admin and superadmin can access admin routes
+    if (token.role !== 'admin' && token.role !== 'superadmin') {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
+
+    return NextResponse.next();
+  }
+
+  // =========================
+  // ✅ 4. PROTECT DASHBOARD
   // =========================
   if (pathname.startsWith('/dashboard')) {
     if (!token) {

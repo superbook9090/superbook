@@ -106,7 +106,7 @@ export async function POST(req: NextRequest) {
     await dbConnect();
 
     // Check if blog exists and is published
-    const blog = await Blog.findOne({ _id: blogId, isPublished: true });
+    const blog = await Blog.findOne({ _id: blogId, isPublished: true }).lean();
     if (!blog) {
       return NextResponse.json(
         { message: 'Blog not found' },
@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
     const existingFavorite = await Favorite.findOne({
       user: session.user.id,
       blog: blogId,
-    });
+    }).lean();
 
     if (existingFavorite) {
       return NextResponse.json(

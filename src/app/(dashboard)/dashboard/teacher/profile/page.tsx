@@ -2,7 +2,7 @@
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
-import Profile from '@/components/dashboard/Profile';
+import Profile from '@/features/dashboard/components/Profile';
 
 export default async function TeacherProfilePage() {
   const session = await getServerSession(authOptions);

@@ -1,376 +1,203 @@
 @import "tailwindcss";
 
-:root {
-  /* Primary Colors */
-  --background: #fafafa;
-  --foreground: #0f172a;
-  
-  /* Student Theme - Indigo */
-  --student-primary: #4f46e5;
-  --student-primary-light: #e0e7ff;
-  --student-primary-dark: #3730a3;
-  /* --student-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); */
-  
-  --student-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
---teacher-gradient: linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%);
---admin-gradient: linear-gradient(135deg, #f43f5e 0%, #ec4899 50%, #d946ef 100%);
---superadmin-gradient: linear-gradient(135deg, #1e293b 0%, #111827 50%, #000000 100%);
+/* =========================
+   ROOT DESIGN SYSTEM
+========================= */
 
-  /* Teacher Theme - Emerald */
-  --teacher-primary: #059669;
-  --teacher-primary-light: #d1fae5;
-  --teacher-primary-dark: #047857;
-  /* --teacher-gradient: linear-gradient(135deg, #059669 0%, #0891b2 100%); */
-  
-  /* Neutral Colors */
-  --card: #ffffff;
-  --card-foreground: #0f172a;
-  --border: #e2e8f0;
-  --border-subtle: #f1f5f9;
-  --muted: #64748b;
-  --muted-foreground: #94a3b8;
-  --accent: #f8fafc;
-  
-  /* Status Colors */
-  --success: #10b981;
-  --success-light: #d1fae5;
+:root {
+  --background: #f6f8fb;
+  --foreground: #0b1220;
+
+  /* =========================
+     ROLE COLORS (PREMIUM)
+  ========================= */
+
+  /* Student (Indigo → Violet Glow) */
+  --student-primary: #6366f1;
+  --student-hover: #4f46e5;
+  --student-soft: #eef2ff;
+  --student-border: #e0e7ff;
+  --student-accent: #a78bfa;
+  --student-gradient: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7);
+  --student-shadow: 0 10px 40px rgba(99, 102, 241, 0.25);
+
+  /* Teacher (Emerald → Cyan Glow) */
+  --teacher-primary: #10b981;
+  --teacher-hover: #059669;
+  --teacher-soft: #ecfdf5;
+  --teacher-border: #d1fae5;
+  --teacher-accent: #22d3ee;
+  --teacher-gradient: linear-gradient(135deg, #10b981, #14b8a6, #06b6d4);
+  --teacher-shadow: 0 10px 40px rgba(16, 185, 129, 0.25);
+
+  /* Admin (Rose → Pink Glow) */
+  --admin-primary: #f43f5e;
+  --admin-hover: #e11d48;
+  --admin-soft: #fff1f2;
+  --admin-border: #ffe4e6;
+  --admin-accent: #f472b6;
+  --admin-gradient: linear-gradient(135deg, #f43f5e, #ec4899, #d946ef);
+  --admin-shadow: 0 10px 40px rgba(244, 63, 94, 0.25);
+
+  /* Super Admin (Dark Premium) */
+  --superadmin-primary: #111827;
+  --superadmin-hover: #020617;
+  --superadmin-soft: #f8fafc;
+  --superadmin-border: #e2e8f0;
+  --superadmin-accent: #64748b;
+  --superadmin-gradient: linear-gradient(135deg, #1e293b, #111827, #020617);
+  --superadmin-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+
+  /* ACTIVE ROLE DEFAULT */
+  --primary: var(--student-primary);
+  --primary-hover: var(--student-hover);
+  --primary-soft: var(--student-soft);
+  --primary-border: var(--student-border);
+  --primary-accent: var(--student-accent);
+  --primary-gradient: var(--student-gradient);
+  --primary-shadow: var(--student-shadow);
+
+  /* =========================
+     UI COLORS
+  ========================= */
+
+  --card: rgba(255, 255, 255, 0.7);
+  --card-solid: #ffffff;
+  --border: #e6eaf0;
+  --muted: #6b7280;
+  --muted-light: #9ca3af;
+
+  /* Status */
+  --success: #22c55e;
+  --success-light: #dcfce7;
   --warning: #f59e0b;
   --warning-light: #fef3c7;
   --error: #ef4444;
   --error-light: #fee2e2;
   --info: #3b82f6;
   --info-light: #dbeafe;
-  
+
   /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-  --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  --shadow-sm: 0 2px 6px rgba(0,0,0,0.04);
+  --shadow-md: 0 6px 20px rgba(0,0,0,0.08);
+  --shadow-lg: 0 10px 40px rgba(0,0,0,0.12);
+
+  /* Blur */
+  --blur-glass: blur(12px);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  
-  /* Theme colors */
-  --color-student-primary: var(--student-primary);
-  --color-student-primary-light: var(--student-primary-light);
-  --color-student-primary-dark: var(--student-primary-dark);
-  --color-teacher-primary: var(--teacher-primary);
-  --color-teacher-primary-light: var(--teacher-primary-light);
-  --color-teacher-primary-dark: var(--teacher-primary-dark);
-  
-  /* UI colors */
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-border: var(--border);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  
-  /* Status colors */
-  --color-success: var(--success);
-  --color-warning: var(--warning);
-  --color-error: var(--error);
-  --color-info: var(--info);
+/* =========================
+   ROLE SWITCHING
+========================= */
 
-  /* Custom animations */
-  --animate-shimmer: shimmer 2s infinite;
-  --animate-fade-in: fadeIn 0.3s ease-out;
-  --animate-fade-out: fadeOut 0.3s ease-out;
-  --animate-slide-up: slideUp 0.4s ease-out;
-  --animate-slide-in-right: slideInRight 0.4s ease-out;
-  --animate-scale: scale 0.2s ease-out;
-  --animate-pulse-soft: pulseSoft 2s ease-in-out infinite;
-  --animate-float: float 3s ease-in-out infinite;
-  --animate-shine: shine 8s linear infinite;
-
-  @keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes fadeOut {
-    from { opacity: 1; transform: translateY(0); }
-    to { opacity: 0; transform: translateY(-10px); }
-  }
-  
-  @keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  
-  @keyframes slideInRight {
-    from { opacity: 0; transform: translateX(20px); }
-    to { opacity: 1; transform: translateX(0); }
-  }
-  
-  @keyframes scale {
-    from { transform: scale(0.95); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-  }
-  
-  @keyframes pulseSoft {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
-  }
-  
-  @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
-  }
-  
-  @keyframes shine {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
-  }
+[data-role="teacher"] {
+  --primary: var(--teacher-primary);
+  --primary-hover: var(--teacher-hover);
+  --primary-soft: var(--teacher-soft);
+  --primary-border: var(--teacher-border);
+  --primary-accent: var(--teacher-accent);
+  --primary-gradient: var(--teacher-gradient);
+  --primary-shadow: var(--teacher-shadow);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0f172a;
-    --foreground: #f8fafc;
-    --card: #1e293b;
-    --card-foreground: #f8fafc;
-    --border: #334155;
-    --border-subtle: #1e293b;
-    --muted: #94a3b8;
-    --muted-foreground: #64748b;
-    --accent: #1e293b;
-  }
+[data-role="admin"] {
+  --primary: var(--admin-primary);
+  --primary-hover: var(--admin-hover);
+  --primary-soft: var(--admin-soft);
+  --primary-border: var(--admin-border);
+  --primary-accent: var(--admin-accent);
+  --primary-gradient: var(--admin-gradient);
+  --primary-shadow: var(--admin-shadow);
 }
 
-/* Base styles */
-* {
-  border-color: var(--border);
+[data-role="superadmin"] {
+  --primary: var(--superadmin-primary);
+  --primary-hover: var(--superadmin-hover);
+  --primary-soft: var(--superadmin-soft);
+  --primary-border: var(--superadmin-border);
+  --primary-accent: var(--superadmin-accent);
+  --primary-gradient: var(--superadmin-gradient);
+  --primary-shadow: var(--superadmin-shadow);
 }
+
+/* =========================
+   BASE
+========================= */
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-feature-settings: "rlig" 1, "calt" 1;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  font-smoothing: antialiased;
 }
 
-/* Glassmorphism utility */
+/* =========================
+   PREMIUM UI UTILITIES
+========================= */
+
+/* Glass Card */
 .glass {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: var(--card);
+  backdrop-filter: var(--blur-glass);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  border-radius: 16px;
 }
 
-.glass-dark {
-  background: rgba(15, 23, 42, 0.7);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+/* Gradient Background */
+.gradient-bg {
+  background: var(--primary-gradient);
 }
 
-/* Gradient text */
+/* Gradient Text */
 .gradient-text {
-  background: var(--student-gradient);
+  background: var(--primary-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
-.gradient-text-teacher {
-  background: var(--teacher-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+/* Glow Shadow */
+.shadow-glow {
+  box-shadow: var(--primary-shadow);
 }
 
-/* Gradient backgrounds */
-.gradient-bg-student {
-  background: var(--student-gradient);
+/* Premium Button */
+.btn-primary {
+  background: var(--primary-gradient);
+  color: white;
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-weight: 500;
+  box-shadow: var(--primary-shadow);
+  transition: all 0.3s ease;
 }
 
-.gradient-bg-teacher {
-  background: var(--teacher-gradient);
+.btn-primary:hover {
+  transform: translateY(-2px);
+  opacity: 0.95;
 }
 
-/* Shine effect for premium feel */
-.shine {
-  position: relative;
-  overflow: hidden;
+/* Card Hover */
+.hover-lift {
+  transition: all 0.3s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
 }
 
-.shine::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
+/* Shimmer Loader */
+.shimmer {
   background: linear-gradient(
     90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
+    #f1f5f9 25%,
+    #e2e8f0 50%,
+    #f1f5f9 75%
   );
-  animation: shine 8s linear infinite;
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
 }
 
-/* Custom animations for loaders */
 @keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-@keyframes pulse-ring {
-  0% {
-    transform: scale(0.8);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(2);
-    opacity: 0;
-  }
-}
-
-@keyframes wave {
-  0%, 100% {
-    transform: scaleY(0.5);
-  }
-  50% {
-    transform: scaleY(1);
-  }
-}
-
-.animate-shimmer {
-  animation: shimmer 2s infinite linear;
-}
-
-.animate-pulse-ring {
-  animation: pulse-ring 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-.animate-wave {
-  animation: wave 1.2s ease-in-out infinite;
-}
-
-/* Smooth transitions */
-.transition-smooth {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Focus styles */
-.focus-ring {
-  outline: none;
-  ring: 2px;
-  ring-offset: 2px;
-  ring-color: var(--student-primary);
-}
-
-/* Card hover lift effect */
-.hover-lift {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.hover-lift:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-xl);
-}
-
-/* Button press effect */
-.press-effect {
-  transition: transform 0.1s ease;
-}
-
-.press-effect:active {
-  transform: scale(0.98);
-}
-
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--border-subtle);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--muted);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--muted-foreground);
-}
-
-/* Selection styling */
-::selection {
-  background: var(--student-primary-light);
-  color: var(--student-primary-dark);
-}
-
-/* Safe Area Utilities for Mobile */
-.safe-area-pt {
-  padding-top: env(safe-area-inset-top);
-}
-
-.safe-area-pb {
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-.safe-area-pl {
-  padding-left: env(safe-area-inset-left);
-}
-
-.safe-area-pr {
-  padding-right: env(safe-area-inset-right);
-}
-
-/* Custom Scrollbar for Webkit */
-.scrollbar-thin {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
-}
-
-.scrollbar-thin::-webkit-scrollbar {
-  width: 6px;
-}
-
-.scrollbar-thin::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.scrollbar-thin::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 3px;
-}
-
-.scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255, 255, 255, 0.3);
-}
-
-/* Prevent horizontal overflow */
-.overflow-fix {
-  overflow-x: hidden;
-  max-width: 100vw;
-}
-
-/* Touch-friendly tap targets */
-.touch-target {
-  min-height: 44px;
-  min-width: 44px;
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }

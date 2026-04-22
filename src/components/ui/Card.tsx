@@ -18,7 +18,7 @@ export function Card({ children, className, hover = true, glass = false, onClick
       whileHover={hover ? { y: -4, transition: { duration: 0.2 } } : undefined}
       className={cn(
         'rounded-2xl overflow-hidden transition-all duration-300',
-        glass ? 'glass' : 'bg-white',
+        glass ? 'glass' : 'bg-[var(--color-card)]',
         hover && 'shadow-md hover:shadow-xl',
         onClick && 'cursor-pointer',
         className
@@ -37,7 +37,7 @@ interface CardHeaderProps {
 
 export function CardHeader({ children, className }: CardHeaderProps) {
   return (
-    <div className={cn('px-6 py-4 border-b border-slate-100', className)}>
+    <div className={cn('px-6 py-4 border-b border-[var(--color-border)]', className)}>
       {children}
     </div>
   );
@@ -52,8 +52,8 @@ interface CardTitleProps {
 export function CardTitle({ children, className, icon }: CardTitleProps) {
   return (
     <div className={cn('flex items-center gap-3', className)}>
-      {icon && <span className="text-slate-400">{icon}</span>}
-      <h3 className="text-lg font-semibold text-slate-900">{children}</h3>
+      {icon && <span className="text-[var(--color-muted-foreground)]">{icon}</span>}
+      <h3 className="text-lg font-semibold text-[var(--color-card-foreground)]">{children}</h3>
     </div>
   );
 }
@@ -65,7 +65,7 @@ interface CardDescriptionProps {
 
 export function CardDescription({ children, className }: CardDescriptionProps) {
   return (
-    <p className={cn('mt-1 text-sm text-slate-500', className)}>
+    <p className={cn('mt-1 text-sm text-[var(--color-muted)]', className)}>
       {children}
     </p>
   );
@@ -91,7 +91,7 @@ interface CardFooterProps {
 
 export function CardFooter({ children, className }: CardFooterProps) {
   return (
-    <div className={cn('px-6 py-4 border-t border-slate-100 bg-slate-50/50', className)}>
+    <div className={cn('px-6 py-4 border-t border-[var(--color-border)] bg-[var(--color-accent)]', className)}>
       {children}
     </div>
   );

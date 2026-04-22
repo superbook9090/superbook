@@ -11,12 +11,12 @@ export default function Error({
   const { theme } = useRoleTheme();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--color-background)]">
       <div className="max-w-md w-full mx-4 text-center">
-        <div className="bg-white rounded-2xl shadow-lg p-8">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="bg-[var(--color-card)] rounded-2xl shadow-lg p-8">
+          <div className="w-16 h-16 bg-[var(--color-error-light)] rounded-full flex items-center justify-center mx-auto mb-4">
             <svg
-              className="w-8 h-8 text-red-600"
+              className="w-8 h-8 text-[var(--color-error)]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -29,10 +29,10 @@ export default function Error({
               />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          <h2 className="text-2xl font-bold text-[var(--color-foreground)] mb-2">
             Something went wrong
           </h2>
-          <p className="text-gray-600 mb-6">
+          <p className="text-[var(--color-muted)] mb-6">
             An unexpected error occurred. Please try again later.
           </p>
           <button

@@ -3,10 +3,10 @@
 import Link from 'next/link';
 import { useState, useMemo, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
-import { signOut } from 'next-auth/react';
 import Image from 'next/image';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
+import { useSessionStore } from '@/store/useSessionStore';
 import {
   LayoutDashboard,
   BookOpen,
@@ -83,7 +83,7 @@ function MobileNav({ user, navigation, adminNavigation = [] }: MobileNavProps) {
   // Memoize toggle handler
   const toggleMenu = useCallback(() => setIsOpen(prev => !prev), []);
   const closeMenu = useCallback(() => setIsOpen(false), []);
-  const handleSignOut = useCallback(() => signOut({ callbackUrl: '/login' }), []);
+  const handleSignOut = useCallback(() => useSessionStore.getState().logout(), []);
 
   // Helper to render icon
   const renderIcon = (iconName: string, className?: string) => {
@@ -144,7 +144,7 @@ function MobileNav({ user, navigation, adminNavigation = [] }: MobileNavProps) {
                     onClick={closeMenu}
                     className={`flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
                       pathname === item.href
-                        ? `${themeClasses.active} text-white shadow-lg backdrop-blur-sm`
+                        ? `${themeClasses.active} text-white shadow-lg`
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}
                   >

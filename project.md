@@ -70,6 +70,9 @@ src/
 - Configure teacher content limits
 - Feature toggles (enable/disable platform features)
 - Platform configuration (maintenance mode, registration, etc.)
+- Organization management (create, edit, delete organizations)
+- User organization assignment (assign/remove users from organizations)
+- Invite code system for organization joining
 
 ### Course System
 - Course enrollment with duplicate prevention
@@ -93,6 +96,16 @@ src/
 - Student favorite system
 - Search and filter capabilities
 - Teacher ownership validation
+
+### Organization-Based Access Control
+- Hybrid access system (public + organization-restricted content)
+- Organizations with unique invite codes for user joining
+- Admin-controlled organization management (CRUD)
+- User organization assignment by admins
+- Content automatically inherits teacher's organization
+- Students see: public content + their organization's content
+- Admins have full access override to all content
+- Safe deletion (prevents deleting organizations with users/content)
 
 ### Analytics
 - Teacher: Course performance, student stats, quiz attempts
@@ -125,12 +138,13 @@ NEXTAUTH_URL=http://localhost:3000
 ```
 
 ### Database Models
-- **User**: Authentication, role, suspension status
-- **Course**: Course content, enrollment tracking
-- **Quiz**: Questions, options, time limits
+- **User**: Authentication, role, suspension status, organization assignment
+- **Organization**: Organization management with invite codes
+- **Course**: Course content, enrollment tracking, organization association
+- **Quiz**: Questions, options, time limits, organization association
 - **QuizAttempt**: Student quiz results
 - **Enrollment**: Student-course relationships
-- **Blog**: Blog posts with rich text
+- **Blog**: Blog posts with rich text, organization association
 - **Favorite**: Student blog favorites
 - **AppSettings**: Platform configuration
 
@@ -189,6 +203,9 @@ NEXTAUTH_URL=http://localhost:3000
 - `/api/favorites/*` - Blog favorites
 - `/api/admin/settings` - Platform configuration
 - `/api/admin/users` - User management
+- `/api/admin/users/[userId]/organization` - User organization assignment
+- `/api/organizations` - Organization management (CRUD)
+- `/api/organizations/[id]` - Organization details
 - `/api/analytics/*` - Analytics data
 
 ## 🎯 Recent Major Updates

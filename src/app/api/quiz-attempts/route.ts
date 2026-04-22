@@ -145,9 +145,12 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
+    console.log('Quiz attempt request body:', body);
+
     // Validate input using Zod schema
     const validationResult = createQuizAttemptSchema.safeParse(body);
     if (!validationResult.success) {
+      console.error('Validation error:', validationResult.error.issues);
       return NextResponse.json(
         { message: 'Invalid input', errors: validationResult.error.issues },
         { status: 400 }

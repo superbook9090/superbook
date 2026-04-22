@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { fetcher } from '@/lib/swrFetcher';
 import { useSessionStore } from '@/store/useSessionStore';
-import Loader from '@/components/ui/Loader';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 interface Enrollment {
   _id: string;
@@ -100,7 +100,46 @@ export default function StudentDashboardPage() {
   const isLoading = status === 'loading' || !enrollmentsData || !attemptsData;
 
   if (isLoading) {
-    return <Loader variant="inline" size="lg" text={t('common.loading')} />;
+    return (
+      <div className="px-4 sm:px-6 lg:px-8 space-y-6">
+        {/* Header skeleton */}
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+
+        {/* Stats grid skeleton */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="bg-white rounded-xl p-6 shadow-sm">
+              <Skeleton className="h-12 w-12 mb-4" />
+              <Skeleton className="h-4 w-24 mb-2" />
+              <Skeleton className="h-8 w-16" />
+            </div>
+          ))}
+        </div>
+
+        {/* Recent activity skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white rounded-xl p-6 shadow-sm">
+            <Skeleton className="h-6 w-32 mb-4" />
+            <div className="space-y-3">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-5/6" />
+              <Skeleton className="h-4 w-4/5" />
+            </div>
+          </div>
+          <div className="bg-white rounded-xl p-6 shadow-sm">
+            <Skeleton className="h-6 w-32 mb-4" />
+            <div className="space-y-3">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-5/6" />
+              <Skeleton className="h-4 w-4/5" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -109,14 +148,14 @@ export default function StudentDashboardPage() {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-700 p-8 text-white shadow-xl"
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)] p-8 text-white shadow-xl"
       >
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
         <div className="relative z-10">
           <h1 className="text-3xl font-bold mb-2">
             {t('dashboard.welcomeBack')}, {session?.user?.name}!
           </h1>
-          <p className="text-indigo-100 text-lg">
+          <p className="text-white/80 text-lg">
             {t('dashboard.continueLearning').replace('{count}', String(stats.enrolledCount))}
           </p>
         </div>
@@ -131,10 +170,10 @@ export default function StudentDashboardPage() {
           transition={{ delay: 0.1 }}
           className="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
         >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--student-soft)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
           <div className="relative">
             <div className="flex items-center justify-between mb-4">
-              <div className="p-3 rounded-xl bg-indigo-100 text-indigo-600">
+              <div className="p-3 rounded-xl bg-[var(--student-soft)] text-[var(--student-primary)]">
                 <BookOpen className="w-6 h-6" />
               </div>
               <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Courses</span>
@@ -151,10 +190,10 @@ export default function StudentDashboardPage() {
           transition={{ delay: 0.2 }}
           className="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
         >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--success-light)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
           <div className="relative">
             <div className="flex items-center justify-between mb-4">
-              <div className="p-3 rounded-xl bg-emerald-100 text-emerald-600">
+              <div className="p-3 rounded-xl bg-[var(--success-light)] text-[var(--success)]">
                 <CheckCircle className="w-6 h-6" />
               </div>
               <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Quizzes</span>
@@ -171,19 +210,19 @@ export default function StudentDashboardPage() {
           transition={{ delay: 0.3 }}
           className="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
         >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-50 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--warning-light)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
           <div className="relative">
             <div className="flex items-center justify-between mb-4">
-              <div className="p-3 rounded-xl bg-amber-100 text-amber-600">
+              <div className="p-3 rounded-xl bg-[var(--warning-light)] text-[var(--warning)]">
                 <TrendingUp className="w-6 h-6" />
               </div>
               <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Performance</span>
             </div>
             <div className="text-3xl font-bold text-gray-900 mb-1">{stats.averageScore}%</div>
             <div className="text-sm text-gray-500">{t('dashboard.averageScore')}</div>
-            <div className="mt-3 h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div className="mt-3 h-2 bg-[var(--border)] rounded-full overflow-hidden">
               <div 
-                className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full transition-all duration-500"
+                className="h-full bg-gradient-to-r from-[var(--warning)] to-[var(--warning)] rounded-full transition-all duration-500"
                 style={{ width: `${stats.averageScore}%` }}
               />
             </div>
@@ -198,18 +237,18 @@ export default function StudentDashboardPage() {
         transition={{ delay: 0.4 }}
         className="rounded-2xl bg-white shadow-md overflow-hidden"
       >
-        <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+        <div className="px-6 py-5 border-b border-[var(--border)] flex items-center justify-between">
           <div>
             <h3 className="text-lg font-semibold text-gray-900">{t('dashboard.recentActivity')}</h3>
             <p className="text-sm text-gray-500 mt-1">{t('dashboard.recentActivityDesc')}</p>
           </div>
           <Activity className="w-5 h-5 text-gray-400" />
         </div>
-        <div className="divide-y divide-gray-100">
+        <div className="divide-y divide-[var(--border)]">
           {recentActivity.length === 0 ? (
             <div className="px-6 py-12 text-center">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-                <Clock className="w-8 h-8 text-gray-400" />
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--border)] flex items-center justify-center">
+                <Clock className="w-8 h-8 text-[var(--muted)]" />
               </div>
               <h4 className="text-gray-900 font-medium mb-1">{t('dashboard.noRecentActivity')}</h4>
               <p className="text-sm text-gray-500">{t('dashboard.startEnrolling')}</p>
@@ -221,13 +260,13 @@ export default function StudentDashboardPage() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.5 + index * 0.05 }}
-                className="px-6 py-4 flex items-center space-x-4 hover:bg-gray-50/50 transition-colors"
+                className="px-6 py-4 flex items-center space-x-4 hover:bg-[var(--background)]/50 transition-colors"
               >
                 {/* Icon */}
                 <div className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center ${
                   item.type === 'enrollment' 
-                    ? 'bg-indigo-50 text-indigo-600' 
-                    : 'bg-emerald-50 text-emerald-600'
+                    ? 'bg-[var(--student-soft)] text-[var(--student-primary)]' 
+                    : 'bg-[var(--success-light)] text-[var(--success)]'
                 }`}>
                   {item.type === 'enrollment' ? (
                     <BookOpen className="w-5 h-5" />

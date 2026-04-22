@@ -11,6 +11,7 @@ export interface IQuiz extends Document {
   description: string;
   course: mongoose.Types.ObjectId;
   instructor: mongoose.Types.ObjectId;
+  organizationId?: mongoose.Types.ObjectId | null;
   questions: IQuestion[];
   timeLimit: number; // in minutes
   isPublished: boolean;
@@ -30,6 +31,7 @@ const quizSchema = new Schema<IQuiz>(
     description: String,
     course: { type: Schema.Types.ObjectId, ref: 'Course', required: true },
     instructor: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    organizationId: { type: Schema.Types.ObjectId, ref: 'Organization', default: null },
     questions: [questionSchema],
     timeLimit: { type: Number, default: 30 },
     isPublished: { type: Boolean, default: false },

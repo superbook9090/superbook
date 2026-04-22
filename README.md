@@ -1,5 +1,31 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Environment Variables
+
+### Redis Configuration (Optional)
+
+The application uses Redis for caching to improve performance. Redis is optional - the app will work perfectly without it.
+
+**For Local Development:**
+```bash
+REDIS_URL=redis://127.0.0.1:6379
+```
+
+**For Cloud Redis (Upstash, Railway, Render, etc.):**
+```bash
+REDIS_URL=rediss://default:password@host:port
+```
+
+**To Disable Redis:**
+Simply don't set the `REDIS_URL` environment variable. The app will skip Redis and use the database directly.
+
+### Other Required Environment Variables
+
+Make sure to configure:
+- `MONGODB_URI` - MongoDB connection string
+- `NEXTAUTH_SECRET` - Secret for NextAuth.js
+- `NEXTAUTH_URL` - Your application URL
+
 ## Getting Started
 
 First, run the development server:

@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
@@ -13,9 +12,12 @@ import {
   FileText,
   Type,
 } from 'lucide-react';
-import RichTextEditor from '@/components/ui/RichTextEditor';
 import Alert from '@/components/ui/Alert';
-import Loader from '@/components/ui/Loader';
+import Button from '@/components/ui/Button';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { useSessionStore } from '@/store/useSessionStore';
+
+const RichTextEditor = lazy(() => import('@/components/ui/RichTextEditor'));
 
 const topics = [
   'Mathematics',
@@ -40,7 +42,7 @@ interface Blog {
 }
 
 export default function EditBlogPage() {
-  const { status } = useSession();
+  const { status } = useSessionStore();
   const router = useRouter();
   const params = useParams();
   const blogId = params.id as string;
@@ -226,43 +228,40 @@ export default function EditBlogPage() {
               <FileText className="w-4 h-4 inline mr-2" />
               Content
             </label>
-            <RichTextEditor
-              content={formData.content}
-              onChange={(content) => setFormData({ ...formData, content })}
-              placeholder="Write your blog content here... Use the toolbar to format your text."
-              theme="emerald"
-            />
+            <Suspense fallback={<Skeleton className="h-64 w-full" />}>
+              <RichTextEditor
+                content={formData.content}
+                onChange={(content) => setFormData({ ...formData, content })}
+                placeholder="Write your blog content here... Use the toolbar to format your text."
+                theme="emerald"
+              />
+            </Suspense>
           </div>
 
           {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
-            <button
+            <Button
               type="button"
               disabled={isSaving}
               onClick={(e) => handleSubmit(e, false)}
-              className="flex-1 flex items-center justify-center px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl shadow-md hover:shadow-lg disabled:opacity-60 transition-all"
+              isLoading={isSaving && formData.isPublished}
+              className="flex-1"
             >
-              {isSaving && formData.isPublished ? (
-                <Loader variant="button" size="sm" />
-              ) : (
-                <Eye className="w-5 h-5 mr-2" />
-              )}
+              <Eye className="w-5 h-5 mr-2" />
               {formData.isPublished ? 'Update & Publish' : 'Publish'}
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="button"
               disabled={isSaving}
               onClick={(e) => handleSubmit(e, true)}
-              className="flex-1 sm:flex-none flex items-center justify-center px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 disabled:opacity-60 transition-all"
+              isLoading={isSaving && !formData.isPublished}
+              variant="secondary"
+              className="flex-1 sm:flex-none"
             >
-              {isSaving && !formData.isPublished ? (
-                <Loader variant="button" size="sm" />
-              ) : (
-                <EyeOff className="w-5 h-5 mr-2" />
-              )}
+              <EyeOff className="w-5 h-5 mr-2" />
               Save as Draft
-            </button>
+            </Button>
           </div>
         </div>
       </motion.form>

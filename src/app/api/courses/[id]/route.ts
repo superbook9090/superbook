@@ -7,6 +7,8 @@ import Course from '@/models/Course';
 import { updateCourseSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
+import mongoose from 'mongoose';
+import { validateContentAccess } from '@/lib/accessControl';
 
 // GET /api/courses/[id] - Get a single course
 export async function GET(
@@ -35,6 +37,21 @@ export async function GET(
     }
 
     const session = await getServerSession(authOptions);
+
+    // Apply organization-based access control
+    if (session?.user) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const user = session.user as any;
+      validateContentAccess(
+        course.organizationId,
+        {
+          _id: new mongoose.Types.ObjectId(user.id),
+          organizationId: user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null,
+          role: user.role as 'student' | 'teacher' | 'admin',
+        },
+        'course'
+      );
+    }
 
     // Only allow viewing unpublished courses for owner or admin
     if (!course.isPublished) {

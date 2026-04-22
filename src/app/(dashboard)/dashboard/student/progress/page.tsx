@@ -2,13 +2,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
-import { motion } from 'framer-motion';
-import Loader from '@/components/ui/Loader';
+import { useSessionStore } from '@/store/useSessionStore';
+import { Skeleton } from '@/components/ui/Skeleton';
 import Alert from '@/components/ui/Alert';
 
 interface CourseProgress {
@@ -54,7 +53,7 @@ interface OverallStats {
 }
 
 export default function StudentProgressPage() {
-  const { data: session, status } = useSession();
+  const { session, status } = useSessionStore();
   const router = useRouter();
   const { t } = useTranslation();
   const { theme } = useRoleTheme();
@@ -105,11 +104,40 @@ export default function StudentProgressPage() {
   };
 
   if (status === 'loading' || isLoading) {
-    return <div className="text-center py-8">{t('progress.loadingProgress')}</div>
+    return (
+      <div className="px-4 sm:px-6 lg:px-8 space-y-6">
+        {/* Header skeleton */}
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+
+        {/* Stats grid skeleton */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="bg-white rounded-xl p-6 shadow-sm">
+              <Skeleton className="h-12 w-12 mb-4" />
+              <Skeleton className="h-4 w-24 mb-2" />
+              <Skeleton className="h-8 w-16" />
+            </div>
+          ))}
+        </div>
+
+        {/* Progress sections skeleton */}
+        <div className="bg-white rounded-xl p-6 shadow-sm">
+          <Skeleton className="h-6 w-32 mb-4" />
+          <div className="space-y-3">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-5/6" />
+            <Skeleton className="h-4 w-4/5" />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div>
+    <div className="px-4 sm:px-6 lg:px-8">
       <h1 className="text-2xl font-bold text-gray-900">{t('progress.myProgress')}</h1>
       <p className="mt-2 text-gray-600">
         {t('progress.progressDesc')}

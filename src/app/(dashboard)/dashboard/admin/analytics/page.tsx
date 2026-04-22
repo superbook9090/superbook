@@ -1,25 +1,22 @@
 // src/app/(dashboard)/dashboard/admin/analytics/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { motion } from 'framer-motion';
 import {
   Users,
   BookOpen,
-  TrendingUp,
   Award,
-  Clock,
   BarChart3,
   RefreshCw,
   Activity,
   GraduationCap,
 } from 'lucide-react';
-import Loader from '@/components/ui/Loader';
+import { Skeleton } from '@/components/ui/Skeleton';
 import Alert from '@/components/ui/Alert';
+import { useSessionStore } from '@/store/useSessionStore';
 
 interface AdminStats {
   users: {
@@ -59,27 +56,14 @@ interface AdminStats {
 }
 
 export default function AdminAnalyticsPage() {
-  const { data: session, status } = useSession();
+  const { session, status } = useSessionStore();
   const router = useRouter();
-  const { t } = useTranslation();
   const { theme } = useRoleTheme();
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  useEffect(() => {
-    if (status === 'loading') return;
-    if (!session) {
-      router.push('/login');
-      return;
-    }
-
-    // Auth and role-based redirects handled by middleware and /dashboard/page.tsx
-
-    fetchStats();
-  }, [session, status]);
-
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       const response = await fetch('/api/analytics?type=admin');
       const data = await response.json();
@@ -95,10 +79,57 @@ export default function AdminAnalyticsPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (status === 'loading') return;
+    if (!session) {
+      router.push('/login');
+      return;
+    }
+
+    // Auth and role-based redirects handled by middleware and /dashboard/page.tsx
+
+    fetchStats();
+  }, [session, status, fetchStats, router]);
 
   if (status === 'loading' || isLoading) {
-    return <Loader variant="inline" size="lg" />;
+    return (
+      <div className="space-y-6 px-4 sm:px-6 lg:px-8">
+        {/* Header skeleton */}
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+
+        {/* Stats grid skeleton */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="bg-white rounded-xl p-6 shadow-sm">
+              <Skeleton className="h-12 w-12 mb-4" />
+              <Skeleton className="h-4 w-24 mb-2" />
+              <Skeleton className="h-8 w-16" />
+            </div>
+          ))}
+        </div>
+
+        {/* Content sections skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-xl p-6 shadow-sm">
+              <Skeleton className="h-6 w-32 mb-4" />
+              <Skeleton className="h-64 w-full" />
+            </div>
+          </div>
+          <div className="space-y-4">
+            <div className="bg-white rounded-xl p-6 shadow-sm">
+              <Skeleton className="h-6 w-32 mb-4" />
+              <Skeleton className="h-48 w-full" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (

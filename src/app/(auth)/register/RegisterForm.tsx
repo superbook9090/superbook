@@ -3,8 +3,11 @@
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { signIn, useSession } from 'next-auth/react';
+import { signIn } from 'next-auth/react';
+import { useTranslation } from '@/hooks/useTranslation';
+import { useSessionStore } from '@/store/useSessionStore';
 import {
   User,
   Mail,
@@ -12,15 +15,15 @@ import {
   Eye,
   EyeOff,
   ArrowRight,
-  Sparkles,
   BookOpen,
   Users
 } from 'lucide-react';
 import Loader from '@/components/ui/Loader';
 
 export default function RegisterForm() {
-  const { status } = useSession();
+  const { status } = useSessionStore();
   const router = useRouter();
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -137,22 +140,24 @@ export default function RegisterForm() {
               transition={{ duration: 0.8, delay: 0.2 }}
               className="flex items-center justify-center gap-3 mb-6"
             >
-              <img
+              <Image
                 src="/logo.svg"
                 alt="Super Book Logo"
+                width={64}
+                height={64}
                 className="h-16 w-auto bg-transparent object-contain transition-transform duration-300 hover:scale-105 hover:drop-shadow-[0_0_8px_rgba(99,102,241,0.4)]"
               />
               <h1 className="text-white text-2xl font-bold leading-none tracking-tight">SUPER BOOK</h1>
             </motion.div>
 
             <h2 className="text-5xl xl:text-6xl font-bold text-white leading-tight mb-6">
-              Start Your
+              {t('register.startYour')}
               <br />
-              <span className="text-purple-200">Journey Today</span>
+              <span className="text-purple-200">{t('register.journeyToday')}</span>
             </h2>
 
             <p className="text-xl text-purple-100 max-w-md mb-12">
-              Create your account and join our community of learners and educators.
+              {t('register.joinCommunity')}
             </p>
 
             {/* Stats */}
@@ -195,9 +200,11 @@ export default function RegisterForm() {
             transition={{ duration: 0.6 }}
             className="lg:hidden flex items-center justify-center mb-6"
           >
-            <img
+            <Image
               src="/logo.svg"
               alt="Super Book Logo"
+              width={64}
+              height={64}
               className="h-16 w-auto bg-transparent object-contain transition-transform duration-300 hover:scale-105 hover:drop-shadow-[0_0_8px_rgba(99,102,241,0.4)]"
             />
           </motion.div>
@@ -283,7 +290,7 @@ export default function RegisterForm() {
                 transition={{ delay: 0.2 }}
               >
                 <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                  Full Name
+                  {t('register.fullName')}
                 </label>
                 <div className="relative">
                   <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -306,7 +313,7 @@ export default function RegisterForm() {
                 transition={{ delay: 0.3 }}
               >
                 <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                  Email Address
+                  {t('register.emailAddress')}
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -329,7 +336,7 @@ export default function RegisterForm() {
                 transition={{ delay: 0.4 }}
               >
                 <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                  Password
+                  {t('register.password')}
                 </label>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -359,7 +366,7 @@ export default function RegisterForm() {
                 transition={{ delay: 0.5 }}
               >
                 <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                  Confirm Password
+                  {t('register.confirmPassword')}
                 </label>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -397,7 +404,7 @@ export default function RegisterForm() {
                   className="w-full flex items-center justify-center py-3.5 px-6 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-semibold rounded-xl shadow-lg shadow-violet-500/25 hover:shadow-xl hover:shadow-violet-500/30 focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:opacity-60 disabled:cursor-not-allowed transition-all"
                 >
                   {isLoading ? (
-                    <Loader variant="button" size="sm" />
+                    <Loader size="sm" />
                   ) : (
                     <>
                       Create Account
@@ -437,12 +444,12 @@ export default function RegisterForm() {
 
             {/* Login Link */}
             <p className="mt-6 text-center text-sm text-gray-500">
-              Already have an account?{' '}
+              {t('register.alreadyHaveAccount')}{' '}
               <Link
                 href="/login"
                 className="font-semibold text-violet-600 hover:text-violet-700 transition-colors"
               >
-                Sign in
+                {t('register.signIn')}
               </Link>
             </p>
           </motion.div>

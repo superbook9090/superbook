@@ -9,7 +9,7 @@ export const createCourseSchema = z.object({
   description: z.string().max(5000, 'Description must be less than 5000 characters').optional(),
   price: z.number().min(0, 'Price must be non-negative').optional(),
   category: z.string().optional(),
-  thumbnail: z.string().url('Invalid thumbnail URL').optional(),
+  thumbnail: z.preprocess((val) => val === '' ? undefined : val, z.string().url('Invalid thumbnail URL').optional()),
   isPublished: z.boolean().optional(),
   language: z.enum(['en', 'hi']).optional(),
 });
@@ -69,7 +69,7 @@ export const createQuizAttemptSchema = z.object({
     questionIndex: z.number().int().min(0),
     selectedOption: z.number().int().min(-1), // -1 for unanswered
   })).optional(),
-  timeTaken: z.number().int().min(0).optional(),
+  timeTaken: z.number().int().min(0).nullable().optional(),
 });
 
 // Favorite validation schemas

@@ -7,7 +7,7 @@ import Loader from '@/components/ui/Loader';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'success';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
   fullWidth?: boolean;
@@ -30,42 +30,67 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const { theme } = useRoleTheme();
 
     const baseStyles = cn(
-      'relative inline-flex items-center justify-center font-medium transition-all duration-200',
+      'relative inline-flex items-center justify-center font-semibold transition-all duration-200',
       'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
-      'disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none',
-      'press-effect',
+      'disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none',
       fullWidth && 'w-full'
     );
 
     const variants = {
-      primary: `bg-gradient-to-r ${theme.gradient} text-white shadow-md hover:shadow-lg focus-visible:ring-offset-2 focus-visible:ring-2`,
-      secondary: 'bg-slate-900 text-white hover:bg-slate-800 focus-visible:ring-slate-900 shadow-md hover:shadow-lg',
-      outline: `border-2 ${theme.border} ${theme.text} ${theme.activeBg} hover:opacity-80 focus-visible:ring-offset-2 focus-visible:ring-2`,
-      ghost: `${theme.text} ${theme.activeBg} hover:opacity-80 focus-visible:ring-offset-2 focus-visible:ring-2`,
-      danger: 'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-600 shadow-md hover:shadow-lg',
-      success: 'bg-emerald-600 text-white hover:bg-emerald-700 focus-visible:ring-emerald-600 shadow-md hover:shadow-lg',
+      primary: cn(
+        `bg-gradient-to-r ${theme.gradient} text-white`,
+        'shadow-lg hover:shadow-xl',
+        'hover:brightness-110 active:brightness-95',
+        'focus-visible:ring-offset-2 focus-visible:ring-2'
+      ),
+      secondary: cn(
+        'bg-gray-100 text-gray-900',
+        'hover:bg-gray-200',
+        'active:bg-gray-300',
+        'focus-visible:ring-gray-500'
+      ),
+      outline: cn(
+        `border-2 ${theme.border} ${theme.text}`,
+        'hover:bg-gray-50',
+        'active:bg-gray-100',
+        'focus-visible:ring-offset-2 focus-visible:ring-2'
+      ),
+      ghost: cn(
+        `${theme.text} ${theme.activeBg}`,
+        'hover:opacity-80',
+        'active:opacity-60',
+        'focus-visible:ring-offset-2 focus-visible:ring-2'
+      ),
+      danger: cn(
+        'bg-[var(--color-error)] text-white',
+        'hover:opacity-90',
+        'active:opacity-80',
+        'shadow-md hover:shadow-lg',
+        'focus-visible:ring-[var(--color-error)]'
+      ),
     };
 
     const sizes = {
-      sm: 'px-3 py-1.5 text-sm rounded-lg',
-      md: 'px-4 py-2.5 text-sm rounded-xl',
+      sm: 'px-4 py-2 text-xs rounded-lg',
+      md: 'px-5 py-2.5 text-sm rounded-xl',
       lg: 'px-6 py-3 text-base rounded-xl',
     };
 
     return (
       <motion.button
         ref={ref}
-        whileHover={{ scale: disabled || isLoading ? 1 : 1.02 }}
-        whileTap={{ scale: disabled || isLoading ? 1 : 0.98 }}
+        whileHover={{ scale: disabled || isLoading ? 1 : 1.01, y: disabled || isLoading ? 0 : -1 }}
+        whileTap={{ scale: disabled || isLoading ? 1 : 0.99 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 17 }}
         className={cn(baseStyles, variants[variant], sizes[size], className)}
         disabled={disabled || isLoading}
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         {...props as any}
       >
         {isLoading && (
-          <Loader variant="button" size="sm" />
+          <Loader size="sm" />
         )}
-        {children}
+        {!isLoading && children}
       </motion.button>
     );
   }

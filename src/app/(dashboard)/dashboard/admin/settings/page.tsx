@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
@@ -9,11 +8,7 @@ import { motion } from 'framer-motion';
 import {
   Settings,
   Save,
-  RefreshCw,
-  Shield,
   Globe,
-  Users,
-  BarChart3,
   GraduationCap,
   FileText,
   BookOpen,
@@ -21,8 +16,10 @@ import {
   UserPlus,
   ToggleLeft,
 } from 'lucide-react';
-import Loader from '@/components/ui/Loader';
+import Button from '@/components/ui/Button';
+import { Skeleton } from '@/components/ui/Skeleton';
 import Alert from '@/components/ui/Alert';
+import { useSessionStore } from '@/store/useSessionStore';
 
 interface AppSettings {
   teacherLimits: {
@@ -44,7 +41,7 @@ interface AppSettings {
 }
 
 export default function AdminSettingsPage() {
-  const { data: session, status } = useSession();
+  const { session, status } = useSessionStore();
   const router = useRouter();
   const { t } = useTranslation();
   const { theme } = useRoleTheme();
@@ -70,6 +67,19 @@ export default function AdminSettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  const fetchSettings = useCallback(async () => {
+    try {
+      const response = await fetch('/api/admin/settings');
+      if (!response.ok) throw new Error('Failed to fetch settings');
+      const data = await response.json();
+      setSettings(data);
+    } catch {
+      setMessage({ type: 'error', text: t('adminSettings.failedLoadSettings') });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [t]);
+
   useEffect(() => {
     if (status === 'loading') return;
     if (!session) {
@@ -81,20 +91,7 @@ export default function AdminSettingsPage() {
       // Role-based redirect handled in /dashboard/page.tsx
       fetchSettings();
     }
-  }, [status, session]);
-
-  const fetchSettings = async () => {
-    try {
-      const response = await fetch('/api/admin/settings');
-      if (!response.ok) throw new Error('Failed to fetch settings');
-      const data = await response.json();
-      setSettings(data);
-    } catch (error) {
-      setMessage({ type: 'error', text: t('adminSettings.failedLoadSettings') });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [status, session, fetchSettings, router]);
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -108,15 +105,15 @@ export default function AdminSettingsPage() {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to save settings');
+        const err = await response.json();
+        throw new Error(err.message || 'Failed to save settings');
       }
 
       setMessage({ type: 'success', text: t('adminSettings.settingsSaved') });
 
       // Force refresh of settings across the app by updating localStorage timestamp
       localStorage.setItem('settingsTimestamp', Date.now().toString());
-    } catch (error) {
+    } catch {
       setMessage({ type: 'error', text: t('adminSettings.failedSaveSettings') });
     } finally {
       setIsSaving(false);
@@ -124,7 +121,14 @@ export default function AdminSettingsPage() {
   };
 
   if (status === 'loading' || isLoading) {
-    return <Loader variant="inline" size="lg" />;
+    return (
+      <div className="px-4 sm:px-6 lg:px-8 space-y-6">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -486,23 +490,15 @@ export default function AdminSettingsPage() {
         transition={{ delay: 0.4 }}
         className="flex justify-end"
       >
-        <button
+        <Button
           onClick={handleSave}
           disabled={isSaving}
-          className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          isLoading={isSaving}
+          size="lg"
         >
-          {isSaving ? (
-            <>
-              <Loader variant="button" size="sm" />
-              {t('adminSettings.saving')}
-            </>
-          ) : (
-            <>
-              <Save className="w-5 h-5 mr-2" />
-              {t('adminSettings.saveSettings')}
-            </>
-          )}
-        </button>
+          {!isSaving && <Save className="w-5 h-5 mr-2" />}
+          {isSaving ? t('adminSettings.saving') : t('adminSettings.saveSettings')}
+        </Button>
       </motion.div>
     </div>
   );

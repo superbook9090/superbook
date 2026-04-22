@@ -2,7 +2,7 @@
 export type UserRole = 'student' | 'teacher' | 'admin' | 'superadmin';
 
 export interface RoleTheme {
-  // Gradient classes for primary buttons
+  // Gradient classes for primary buttons (subtle, premium)
   gradient: string;
   // Solid color for backgrounds
   primary: string;
@@ -18,6 +18,8 @@ export interface RoleTheme {
   activeBg: string;
   // Text color for active states
   activeText: string;
+  // Shadow color for glowing effects
+  shadow: string;
   // Actual color values for inline styles
   colors: {
     primary: string;
@@ -25,79 +27,88 @@ export interface RoleTheme {
     text: string;
     border: string;
     activeBg: string;
+    shadow: string;
   };
 }
 
 export const roleThemes: Record<UserRole, RoleTheme> = {
   student: {
-    gradient: 'from-indigo-500 via-violet-500 to-purple-500',
-    primary: 'bg-indigo-500',
-    hover: 'hover:bg-indigo-600',
-    text: 'text-indigo-500',
-    border: 'border-indigo-400',
+    gradient: 'from-indigo-600 to-violet-600',
+    primary: 'bg-indigo-600',
+    hover: 'hover:bg-indigo-700',
+    text: 'text-indigo-600',
+    border: 'border-indigo-200',
     accent: 'text-violet-500',
     activeBg: 'bg-indigo-50',
-    activeText: 'text-indigo-600',
+    activeText: 'text-indigo-700',
+    shadow: 'shadow-indigo-500/25',
     colors: {
-      primary: '#6366f1',
-      primaryHover: '#4f46e5',
-      text: '#6366f1',
-      border: '#818cf8',
+      primary: '#4f46e5',
+      primaryHover: '#4338ca',
+      text: '#4f46e5',
+      border: '#c7d2fe',
       activeBg: '#eef2ff',
+      shadow: 'rgba(79, 70, 229, 0.25)',
     },
   },
 
   teacher: {
-    gradient: 'from-emerald-500 via-teal-500 to-cyan-500',
-    primary: 'bg-emerald-500',
-    hover: 'hover:bg-emerald-600',
-    text: 'text-emerald-500',
-    border: 'border-emerald-400',
+    gradient: 'from-emerald-600 to-teal-600',
+    primary: 'bg-emerald-600',
+    hover: 'hover:bg-emerald-700',
+    text: 'text-emerald-600',
+    border: 'border-emerald-200',
     accent: 'text-teal-500',
     activeBg: 'bg-emerald-50',
-    activeText: 'text-emerald-600',
+    activeText: 'text-emerald-700',
+    shadow: 'shadow-emerald-500/25',
     colors: {
-      primary: '#10b981',
-      primaryHover: '#059669',
-      text: '#10b981',
-      border: '#34d399',
+      primary: '#059669',
+      primaryHover: '#047857',
+      text: '#059669',
+      border: '#a7f3d0',
       activeBg: '#ecfdf5',
+      shadow: 'rgba(5, 150, 105, 0.25)',
     },
   },
 
   admin: {
-    gradient: 'from-rose-500 via-pink-500 to-fuchsia-500',
-    primary: 'bg-rose-500',
-    hover: 'hover:bg-rose-600',
-    text: 'text-rose-500',
-    border: 'border-rose-400',
+    gradient: 'from-rose-600 to-pink-600',
+    primary: 'bg-rose-600',
+    hover: 'hover:bg-rose-700',
+    text: 'text-rose-600',
+    border: 'border-rose-200',
     accent: 'text-pink-500',
     activeBg: 'bg-rose-50',
-    activeText: 'text-rose-600',
+    activeText: 'text-rose-700',
+    shadow: 'shadow-rose-500/25',
     colors: {
-      primary: '#f43f5e',
-      primaryHover: '#e11d48',
-      text: '#f43f5e',
-      border: '#fb7185',
+      primary: '#e11d48',
+      primaryHover: '#be123c',
+      text: '#e11d48',
+      border: '#fecdd3',
       activeBg: '#fff1f2',
+      shadow: 'rgba(225, 29, 72, 0.25)',
     },
   },
 
   superadmin: {
-    gradient: 'from-slate-800 via-gray-900 to-black',
-    primary: 'bg-slate-800',
-    hover: 'hover:bg-slate-900',
-    text: 'text-slate-800',
-    border: 'border-slate-600',
-    accent: 'text-gray-700',
-    activeBg: 'bg-slate-100',
-    activeText: 'text-slate-900',
+    gradient: 'from-slate-700 to-slate-900',
+    primary: 'bg-slate-700',
+    hover: 'hover:bg-slate-800',
+    text: 'text-slate-700',
+    border: 'border-slate-300',
+    accent: 'text-slate-500',
+    activeBg: 'bg-slate-50',
+    activeText: 'text-slate-800',
+    shadow: 'shadow-slate-500/25',
     colors: {
-      primary: '#1e293b',
-      primaryHover: '#0f172a',
-      text: '#1e293b',
-      border: '#475569',
-      activeBg: '#f1f5f9',
+      primary: '#334155',
+      primaryHover: '#1e293b',
+      text: '#334155',
+      border: '#cbd5e1',
+      activeBg: '#f8fafc',
+      shadow: 'rgba(51, 65, 85, 0.25)',
     },
   },
 };

@@ -5,32 +5,12 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
-import QuizCard from '@/components/dashboard/QuizCard';
+import QuizCard from '@/features/quizzes/components/QuizCard';
 import Alert from '@/components/ui/Alert';
 import { useSessionStore } from '@/store/useSessionStore';
-
-interface Quiz {
-  _id: string;
-  title: string;
-  description: string;
-  timeLimit: number;
-  questions: { question: string; options: string[]; correctAnswer: number }[];
-  course: { _id: string; title: string };
-  isPublished: boolean;
-}
-
-interface Attempt {
-  _id: string;
-  quiz: Quiz;
-  score: number;
-  correctCount: number;
-  totalQuestions: number;
-  timeTaken: number;
-  status: string;
-  attemptNumber: number;
-  submittedAt?: string;
-  startedAt: string;
-}
+import { useCachedStore } from '@/store/useCachedStore';
+import { Skeleton, CardSkeleton } from '@/components/ui/Skeleton';
+import type { QuizAttempt, Quiz } from '@/store/useCachedStore';
 
 export default function StudentQuizzesPage() {
   const session = useSessionStore((s) => s.session);
@@ -38,12 +18,18 @@ export default function StudentQuizzesPage() {
   const router = useRouter();
   const { t } = useTranslation();
   const { theme } = useRoleTheme();
+  const { enrollments: enrollmentsCache, quizAttempts: quizAttemptsCache, fetchEnrollments, fetchQuizAttempts } = useCachedStore();
   const [availableQuizzes, setAvailableQuizzes] = useState<Quiz[]>([]);
-  const [attempts, setAttempts] = useState<Attempt[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<'available' | 'completed'>('available');
   const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+
+  const userId = session?.user?.id;
+  const enrollmentState = userId ? enrollmentsCache[userId] : null;
+  const attemptsState = userId ? quizAttemptsCache[userId] : null;
+  const enrollments = useMemo(() => enrollmentState?.data || [], [enrollmentState?.data]);
+  const attempts = useMemo(() => attemptsState?.data || [], [attemptsState?.data]);
+  const isLoading = (enrollmentState?.loading ?? true) || (attemptsState?.loading ?? true);
+  const error = enrollmentState?.error || attemptsState?.error || '';
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -52,96 +38,65 @@ export default function StudentQuizzesPage() {
       return;
     }
 
-    // Auth and role-based redirects handled by middleware and /dashboard/page.tsx
+    if (userId) {
+      fetchEnrollments(userId);
+      fetchQuizAttempts(userId);
+    }
+  }, [session, status, userId, fetchEnrollments, fetchQuizAttempts, router]);
 
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, status]);
-
-  const fetchData = async () => {
-    try {
-      // Fetch attempts
-      const attemptsRes = await fetch('/api/quiz-attempts');
-      const attemptsData = await attemptsRes.json();
-
-      if (!attemptsRes.ok) {
-        console.error('Quiz attempts error:', attemptsData);
-        setError(attemptsData.message || t('errors.failedLoadQuizAttempts'));
-        setIsLoading(false);
+  // Derive available quizzes from enrollments
+  useEffect(() => {
+    const fetchAvailableQuizzes = async () => {
+      if (enrollments.length === 0) {
+        setAvailableQuizzes([]);
         return;
       }
 
-      // Fetch enrollments to get available quizzes
-      const enrollmentsRes = await fetch('/api/enrollments');
-      const enrollmentsData = await enrollmentsRes.json();
-
-      if (!enrollmentsRes.ok) {
-        console.error('Enrollments error:', enrollmentsData);
-        setError(enrollmentsData.message || t('errors.failedLoadEnrollments'));
-        setIsLoading(false);
-        return;
-      }
-
-      const allAttempts = (attemptsData.attempts || []).filter(
-        (a: Attempt) => a.quiz && a.quiz._id // Filter out attempts with missing quiz data
-      );
-      setAttempts(allAttempts);
-
-      // Get quizzes from enrolled courses
-      const enrolledCourseIds = (enrollmentsData.enrollments || []).map(
+      const enrolledCourseIds = enrollments.map(
         (e: { course: { _id: string } | string }) => {
-          // Handle both populated course object and course ID string
           if (typeof e.course === 'object' && e.course !== null) {
             return e.course._id?.toString();
           }
           return e.course?.toString();
         }
-      ).filter(Boolean); // Remove any undefined/null
+      ).filter(Boolean);
 
-      console.log('Enrolled course IDs:', enrolledCourseIds);
+      try {
+        // Fetch all available quizzes
+        const quizzesRes = await fetch('/api/quizzes');
+        const quizzesData = await quizzesRes.json();
 
-      // Fetch all available quizzes
-      const quizzesRes = await fetch('/api/quizzes');
-      const quizzesData = await quizzesRes.json();
+        if (!quizzesRes.ok) {
+          console.error('Quizzes error:', quizzesData);
+          return;
+        }
 
-      if (!quizzesRes.ok) {
-        console.error('Quizzes error:', quizzesData);
-        setError(quizzesData.message || t('errors.failedLoadQuizzes'));
-        setIsLoading(false);
-        return;
+        const allQuizzes = quizzesData.quizzes || [];
+
+        // Filter for published quizzes from enrolled courses that haven't been completed
+        const relevantQuizzes = allQuizzes.filter((q: Quiz) => {
+          const quizCourseId = q.course?._id?.toString();
+          const isEnrolled = quizCourseId && enrolledCourseIds.includes(quizCourseId);
+          
+          // Check if quiz has been completed
+          const isCompleted = attempts.some(
+            (a: QuizAttempt) => a.quiz?._id === q._id && a.status === 'completed'
+          );
+          
+          return q.isPublished && isEnrolled && !isCompleted;
+        });
+
+        setAvailableQuizzes(relevantQuizzes);
+      } catch (err) {
+        console.error('Error fetching quizzes:', err);
       }
+    };
 
-      const allQuizzes = quizzesData.quizzes || [];
-      console.log('All quizzes:', allQuizzes);
-      console.log('All quizzes count:', allQuizzes.length);
-
-      // Filter for published quizzes from enrolled courses that haven't been completed
-      const relevantQuizzes = allQuizzes.filter((q: Quiz) => {
-        const quizCourseId = q.course?._id?.toString();
-        const isEnrolled = quizCourseId && enrolledCourseIds.includes(quizCourseId);
-        
-        // Check if quiz has been completed
-        const isCompleted = allAttempts.some(
-          (a: Attempt) => a.quiz?._id === q._id && a.status === 'completed'
-        );
-        
-        console.log(`Quiz ${q.title}: isPublished=${q.isPublished}, courseId=${quizCourseId}, isEnrolled=${isEnrolled}, isCompleted=${isCompleted}`);
-        return q.isPublished && isEnrolled && !isCompleted;
-      });
-
-      console.log('Filtered relevant quizzes:', relevantQuizzes);
-      console.log('Filtered quizzes count:', relevantQuizzes.length);
-
-      setAvailableQuizzes(relevantQuizzes);
-    } catch (err) {
-      console.error('Error in fetchData:', err);
-      setError(t('errors.errorLoadingQuizzes') + ': ' + (err instanceof Error ? err.message : t('errors.unknownError')));
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    fetchAvailableQuizzes();
+  }, [enrollments, attempts]);
 
   const handleStartQuiz = useCallback(async (quizId: string) => {
+    console.log('Starting quiz with ID:', quizId);
     try {
       const response = await fetch('/api/quiz-attempts', {
         method: 'POST',
@@ -155,6 +110,7 @@ export default function StudentQuizzesPage() {
         // Navigate to quiz taking page
         router.push(`/dashboard/student/quizzes/take?attemptId=${data.attempt._id}`);
       } else {
+        console.error('Failed to start quiz:', data);
         setAlertState({ type: 'error', message: data.message || t('errors.failedStartQuiz') });
       }
     } catch {
@@ -168,7 +124,22 @@ export default function StudentQuizzesPage() {
   );
 
   if (status === 'loading' || isLoading) {
-    return <div className="text-center py-8">{t('common.loading')}</div>;
+    return (
+      <div className="px-4 sm:px-6 lg:px-8 space-y-6">
+        {/* Header skeleton */}
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+
+        {/* Quiz cards skeleton */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <CardSkeleton key={i} />
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (

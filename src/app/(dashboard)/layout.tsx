@@ -1,13 +1,11 @@
 // src/app/(dashboard)/layout.tsx
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import StudentSidebar from '@/components/dashboard/StudentSidebar';
-import TeacherSidebar from '@/components/dashboard/TeacherSidebar';
-import MobileNav from '@/components/dashboard/MobileNav';
-import MobileBottomNav from '@/components/dashboard/MobileBottomNav';
-import SessionProvider from '@/components/dashboard/SessionProvider';
-import SessionSync from '@/components/dashboard/SessionSync';
-import DashboardHeader from '@/components/dashboard/DashboardHeader';
+import StudentSidebar from '@/features/dashboard/components/StudentSidebar';
+import TeacherSidebar from '@/features/dashboard/components/TeacherSidebar';
+import MobileNav from '@/features/dashboard/components/MobileNav';
+import MobileBottomNav from '@/features/dashboard/components/MobileBottomNav';
+import DashboardHeader from '@/features/dashboard/components/DashboardHeader';
 import { RoleThemeProvider } from '@/contexts/RoleThemeContext';
 
 // TODO: Add translation keys for navigation items
@@ -33,6 +31,7 @@ const teacherNavigation = [
 
 const adminNavigation = [
   { name: 'Users', href: '/dashboard/admin/users', icon: 'Users' },
+  { name: 'Organizations', href: '/dashboard/admin/organizations', icon: 'Building2', superadminOnly: true },
   { name: 'Courses', href: '/dashboard/admin/courses', icon: 'BookOpen' },
   { name: 'Quizzes', href: '/dashboard/admin/quizzes', icon: 'HelpCircle' },
   { name: 'Blogs', href: '/dashboard/admin/blogs', icon: 'Library' },
@@ -55,13 +54,18 @@ export default async function DashboardLayout({
   const role = session.user?.role;
   const isTeacherOrAdmin = role === 'teacher' || role === 'admin';
 
+  // Filter admin navigation based on role
+  const filteredAdminNavigation = role === 'superadmin'
+    ? adminNavigation
+    : adminNavigation.filter((item) => !item.superadminOnly);
+
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-[var(--color-foreground)] flex flex-col md:flex-row">
       {/* Mobile Navigation Header - Fixed */}
       <MobileNav
         user={session.user}
         navigation={isTeacherOrAdmin ? teacherNavigation : studentNavigation}
-        adminNavigation={isTeacherOrAdmin ? adminNavigation : []}
+        adminNavigation={isTeacherOrAdmin ? filteredAdminNavigation : []}
       />
 
       {/* Sidebar - Desktop Only */}
@@ -79,14 +83,11 @@ export default async function DashboardLayout({
         <DashboardHeader isTeacherOrAdmin={isTeacherOrAdmin} />
 
         {/* Main Content - Scrollable */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-4 sm:p-6 lg:p-8 pb-24 md:pb-8">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-[var(--color-foreground)] p-4 sm:p-6 lg:p-8 pb-24 md:pb-8">
           <RoleThemeProvider role={role || 'student'}>
-            <SessionProvider>
-              <SessionSync />
-              <div className="max-w-7xl mx-auto w-full">
-                {children}
-              </div>
-            </SessionProvider>
+            <div className="max-w-7xl mx-auto w-full">
+              {children}
+            </div>
           </RoleThemeProvider>
         </main>
 

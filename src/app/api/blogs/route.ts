@@ -7,6 +7,9 @@ import { createBlogSchema } from '@/lib/validation';
 import { logApiError, logFailedRequest, type LogContext } from '@/lib/logger';
 import { requireFeature, checkTeacherLimit } from '@/lib/settingsHelpers';
 import { sanitizeHtml } from '@/lib/sanitize';
+import mongoose from 'mongoose';
+import { getAccessFilter } from '@/lib/accessControl';
+import { getCachedData, setCachedData, invalidatePattern } from '@/lib/redis';
 
 // GET /api/blogs - Get all published blogs
 export async function GET(req: NextRequest) {
@@ -18,11 +21,7 @@ export async function GET(req: NextRequest) {
   };
 
   try {
-    await dbConnect();
-
-    // Check if blogs feature is enabled
-    const featureCheck = await requireFeature('enableBlogs');
-    if (featureCheck) return featureCheck;
+    const session = await getServerSession(authOptions);
 
     const { searchParams } = new URL(req.url);
     const topic = searchParams.get('topic');
@@ -30,6 +29,24 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20');
     const page = parseInt(searchParams.get('page') || '1');
     const includeDrafts = searchParams.get('includeDrafts') === 'true';
+    const orgId = searchParams.get('orgId') || 'public';
+
+    // Build cache key
+    const cacheKey = `blogs:${orgId}:${topic || 'all'}:${language || 'all'}:${page}:${limit}:${includeDrafts}`;
+
+    // Try to get from cache first (only for published blogs without drafts)
+    if (!includeDrafts) {
+      const cached = await getCachedData(cacheKey);
+      if (cached) {
+        return NextResponse.json(cached);
+      }
+    }
+
+    await dbConnect();
+
+    // Check if blogs feature is enabled
+    const featureCheck = await requireFeature('enableBlogs');
+    if (featureCheck) return featureCheck;
 
     const query: { isPublished?: boolean; topic?: string; language?: string } = {};
     if (!includeDrafts) {
@@ -40,6 +57,18 @@ export async function GET(req: NextRequest) {
     }
     if (language && (language === 'en' || language === 'hi')) {
       query.language = language;
+    }
+
+    // Apply organization-based access control
+    if (session?.user) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const user = session.user as any;
+      const accessFilter = getAccessFilter({
+        _id: new mongoose.Types.ObjectId(user.id),
+        organizationId: user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null,
+        role: user.role as 'student' | 'teacher' | 'admin',
+      });
+      Object.assign(query, accessFilter);
     }
 
     const blogs = await Blog.find(query)
@@ -62,14 +91,21 @@ export async function GET(req: NextRequest) {
 
     const total = await Blog.countDocuments(query);
 
-    return NextResponse.json({
+    const responseData = {
       blogs: serializedBlogs,
       pagination: {
         total,
         page,
         pages: Math.ceil(total / limit),
       },
-    }, {
+    };
+
+    // Cache the response (only for published blogs)
+    if (!includeDrafts) {
+      await setCachedData(cacheKey, responseData, 300); // 5 minutes
+    }
+
+    return NextResponse.json(responseData, {
       headers: {
         'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
       },
@@ -154,16 +190,26 @@ export async function POST(req: NextRequest) {
 
     await dbConnect();
 
+    // Get organizationId from session
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const user = session.user as any;
+    const organizationId = user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null;
+
     const blog = await Blog.create({
       title,
       content: sanitizedContent,
       topic,
       language,
       author: session.user.id,
+      organizationId,
       isPublished,
     });
 
     await blog.populate('author', 'name');
+
+    // Invalidate cache for this organization
+    const orgId = organizationId?.toString() || 'public';
+    await invalidatePattern(`blogs:${orgId}:*`);
 
     return NextResponse.json(blog, { status: 201 });
   } catch (error) {

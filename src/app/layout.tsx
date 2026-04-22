@@ -4,7 +4,7 @@ import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AppSettingsProvider } from "@/contexts/AppSettingsContext";
 import MaintenanceCheck from '@/components/MaintenanceCheck';
-import SessionProvider from '@/components/dashboard/SessionProvider';
+import { SessionProvider } from '@/components/providers/SessionProvider';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

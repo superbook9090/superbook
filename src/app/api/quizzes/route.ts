@@ -9,6 +9,9 @@ import { requireFeature, checkTeacherLimit } from '@/lib/settingsHelpers';
 import { createQuizSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
+import mongoose from 'mongoose';
+import { getAccessFilter } from '@/lib/accessControl';
+import { getCachedData, setCachedData, invalidatePattern } from '@/lib/redis';
 
 // GET /api/quizzes - Get all quizzes (with optional filtering)
 export async function GET(request: NextRequest) {
@@ -31,8 +34,6 @@ export async function GET(request: NextRequest) {
     const featureCheck = await requireFeature('enableQuizzes');
     if (featureCheck) return featureCheck;
 
-    await dbConnect();
-
     const { searchParams } = new URL(request.url);
     const course = searchParams.get('course');
     const instructor = searchParams.get('instructor');
@@ -41,8 +42,36 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
     const fields = searchParams.get('fields'); // Comma-separated fields to select
 
+    // Build cache key (only for published quizzes)
+    const orgId = session.user?.organizationId || 'public';
+    const cacheKey = `quizzes:${orgId}:${course || 'all'}:${instructor || 'all'}:${page}:${limit}`;
+
+    // Try cache for published quizzes
+    const isPublished = searchParams.get('isPublished') === 'true';
+    if (isPublished) {
+      const cached = await getCachedData(cacheKey);
+      if (cached) {
+        return NextResponse.json(cached);
+      }
+    }
+
+    await dbConnect();
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const query: Record<string, any> = {};
+
+    // Apply organization-based access control
+    if (session.user) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const user = session.user as any;
+      const accessFilter = getAccessFilter({
+        _id: new mongoose.Types.ObjectId(user.id),
+        organizationId: user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null,
+        role: user.role as 'student' | 'teacher' | 'admin',
+      });
+      Object.assign(query, accessFilter);
+    }
+
     if (course) query.course = course;
     if (instructor) query.instructor = instructor;
 
@@ -69,7 +98,7 @@ export async function GET(request: NextRequest) {
 
     const total = await Quiz.countDocuments(query);
 
-    return NextResponse.json({
+    const responseData = {
       quizzes: serializedQuizzes,
       pagination: {
         page,
@@ -77,7 +106,14 @@ export async function GET(request: NextRequest) {
         total,
         totalPages: Math.ceil(total / limit),
       }
-    }, {
+    };
+
+    // Cache the response for published quizzes
+    if (isPublished) {
+      await setCachedData(cacheKey, responseData, 300); // 5 minutes
+    }
+
+    return NextResponse.json(responseData, {
       status: 200,
       headers: {
         'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
@@ -177,18 +213,28 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Get organizationId from session
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const user = session.user as any;
+    const organizationId = user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null;
+    const orgId = organizationId?.toString() || 'public';
+
     // Create quiz
     const quiz = new Quiz({
       title,
       description,
       course,
       instructor: session.user.id,
+      organizationId,
       questions,
       timeLimit: timeLimit || 30,
       isPublished: isPublished || false,
     });
 
     await quiz.save();
+
+    // Invalidate cache for this organization
+    await invalidatePattern(`quizzes:${orgId}:*`);
 
     return NextResponse.json(
       { message: 'Quiz created successfully', quiz },

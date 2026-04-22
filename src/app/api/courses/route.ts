@@ -3,12 +3,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
+import mongoose from 'mongoose';
 import '@/models/Lesson'; // Import to register Lesson model
 import Course from '@/models/Course';
 import { requireFeature, checkTeacherLimit } from '@/lib/settingsHelpers';
 import { createCourseSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
+import { getAccessFilter } from '@/lib/accessControl';
+import { getCachedData, setCachedData, invalidatePattern } from '@/lib/redis';
 
 // GET /api/courses - Get all courses (with optional filtering)
 export async function GET(request: NextRequest) {
@@ -31,8 +34,6 @@ export async function GET(request: NextRequest) {
     const featureCheck = await requireFeature('enableCourses');
     if (featureCheck) return featureCheck;
 
-    await dbConnect();
-
     const { searchParams } = new URL(request.url);
     const instructor = searchParams.get('instructor');
     const isPublished = searchParams.get('isPublished');
@@ -42,8 +43,34 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
     const fields = searchParams.get('fields'); // Comma-separated fields to select
 
+    // Build cache key (only for public/available courses)
+    const orgId = session.user?.organizationId || 'public';
+    const cacheKey = `courses:${orgId}:${instructor || 'all'}:${isPublished || 'all'}:${available || 'false'}:${page}:${limit}`;
+
+    // Try cache for available/public courses
+    if (available === 'true' || isPublished === 'true') {
+      const cached = await getCachedData(cacheKey);
+      if (cached) {
+        return NextResponse.json(cached);
+      }
+    }
+
+    await dbConnect();
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const query: Record<string, any> = {};
+
+    // Apply organization-based access control
+    if (session.user) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const user = session.user as any;
+      const accessFilter = getAccessFilter({
+        _id: new mongoose.Types.ObjectId(user.id),
+        organizationId: user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null,
+        role: user.role as 'student' | 'teacher' | 'admin',
+      });
+      Object.assign(query, accessFilter);
+    }
 
     // If 'available' is set, return published courses student can enroll in
     if (available === 'true' && session.user?.role === 'student') {
@@ -88,16 +115,23 @@ export async function GET(request: NextRequest) {
 
     const total = await Course.countDocuments(query);
 
-    return NextResponse.json(
-      {
-        courses: serializedCourses,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages: Math.ceil(total / limit),
-        },
+    const responseData = {
+      courses: serializedCourses,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
       },
+    };
+
+    // Cache the response for available/public courses
+    if (available === 'true' || isPublished === 'true') {
+      await setCachedData(cacheKey, responseData, 300); // 5 minutes
+    }
+
+    return NextResponse.json(
+      responseData,
       {
         status: 200,
         headers: {
@@ -169,11 +203,18 @@ export async function POST(request: NextRequest) {
       if (limitCheck) return limitCheck;
     }
 
+    // Get organizationId from session
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const user = session.user as any;
+    const organizationId = user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null;
+    const orgId = organizationId?.toString() || 'public';
+
     // Create course
     const course = new Course({
       title,
       description,
       instructor: session.user.id,
+      organizationId,
       price: price || 0,
       category,
       thumbnail,
@@ -182,6 +223,9 @@ export async function POST(request: NextRequest) {
     });
 
     await course.save();
+
+    // Invalidate cache for this organization
+    await invalidatePattern(`courses:${orgId}:*`);
 
     return NextResponse.json(
       { message: 'Course created successfully', course },

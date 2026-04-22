@@ -1,79 +1,34 @@
-import { getServerSession } from 'next-auth';
-import { redirect } from 'next/navigation';
-import { authOptions } from '@/lib/auth';
-import dbConnect from '@/lib/db';
-import Favorite from '@/models/Favorite';
-import AppSettings from '@/models/AppSettings';
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useSessionStore } from '@/store/useSessionStore';
 import FavoritesList from './FavoritesList';
-import type { IAppSettings } from '@/models/AppSettings';
+import { useFeature } from '@/contexts/AppSettingsContext';
 
-interface Blog {
-  _id: string;
-  title: string;
-  topic: string;
-  content: string;
-  createdAt: string;
-  author: { name: string };
-}
+export default function FavoritesPage() {
+  const { status, favoritesLoading, favoritesData } = useSessionStore();
+  const router = useRouter();
+  const featureEnabled = useFeature('enableBlogs');
 
-interface Favorite {
-  _id: string;
-  blog: Blog;
-}
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login');
+      return;
+    }
 
-export default async function FavoritesPage() {
-  const session = await getServerSession(authOptions);
+    if (status === 'authenticated' && !featureEnabled) {
+      router.push('/dashboard/student');
+    }
+  }, [status, router, featureEnabled]);
 
-  // Auth check
-  if (!session?.user) {
-    redirect('/login');
+  if (status === 'loading' || favoritesLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
   }
 
-  await dbConnect();
-
-  // Check if blogs feature is enabled
-  const appSettings = await AppSettings.findOne({}).lean() as IAppSettings | null;
-  const enableBlogs = appSettings?.featureToggles?.enableBlogs ?? true;
-
-  if (!enableBlogs) {
-    redirect('/dashboard/student');
-  }
-
-  // Fetch favorites
-  let favorites: Favorite[] = [];
-  try {
-    const favoritesData = await Favorite.find({ user: session.user.id })
-      .populate({
-        path: 'blog',
-        match: { isPublished: true },
-        populate: { path: 'author', select: 'name' },
-      })
-      .sort({ createdAt: -1 })
-      .lean();
-
-    // Filter out favorites where blog is null (unpublished) and serialize
-    favorites = favoritesData
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .filter((fav: any) => fav.blog !== null)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .map((fav: any) => ({
-        _id: fav._id.toString(),
-        blog: {
-          _id: fav.blog._id.toString(),
-          title: fav.blog.title,
-          topic: fav.blog.topic,
-          content: fav.blog.content,
-          createdAt: fav.blog.createdAt?.toString() || '',
-          author: fav.blog.author ? {
-            _id: fav.blog.author._id?.toString() || '',
-            name: fav.blog.author.name
-          } : { _id: '', name: '' },
-        },
-      })) as Favorite[];
-  } catch (error) {
-    console.error('Error fetching favorites:', error);
-    favorites = [];
-  }
-
-  return <FavoritesList initialFavorites={favorites} />;
+  return <FavoritesList initialFavorites={favoritesData} />;
 }

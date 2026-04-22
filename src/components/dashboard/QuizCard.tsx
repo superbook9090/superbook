@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -46,7 +46,7 @@ interface QuizCardProps {
   onStart?: (quizId: string) => Promise<void>;
 }
 
-export default function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps) {
+function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps) {
   const router = useRouter();
   const { t } = useTranslation();
   const { theme } = useRoleTheme();
@@ -105,7 +105,7 @@ export default function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps
           </Badge>
         </div>
         <div className="absolute top-4 right-4">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full text-sm font-medium text-gray-700">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-full text-sm font-medium text-gray-700 shadow-sm">
             <HelpCircle className="w-4 h-4" />
             {quiz.questions?.length || 0} {t('quiz.questions')}
           </div>
@@ -171,7 +171,7 @@ export default function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps
               className={`flex-1 flex items-center justify-center gap-2 bg-gradient-to-r ${theme.gradient} text-white py-3 px-4 rounded-xl font-semibold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {isLoading ? (
-                <Loader variant="button" size="sm" />
+                <Loader size="sm" />
               ) : (
                 <>
                   <Play className="w-4 h-4" />
@@ -198,7 +198,7 @@ export default function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps
                 className={`flex items-center justify-center gap-2 px-4 py-3 border-2 ${theme.border} ${theme.text} rounded-xl font-semibold ${theme.activeBg} hover:opacity-80 transition-all disabled:opacity-50`}
               >
                 {isLoading ? (
-                  <Loader variant="button" size="sm" />
+                  <Loader size="sm" />
                 ) : (
                   <>
                     <RotateCcw className="w-4 h-4" />
@@ -213,3 +213,6 @@ export default function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps
     </motion.div>
   );
 }
+
+const QuizCardMemo = memo(QuizCard);
+export default QuizCardMemo;

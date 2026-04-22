@@ -1,14 +1,15 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useSession } from 'next-auth/react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useTranslation } from '@/hooks/useTranslation';
 import { debounce } from '@/lib/debounce';
-import { useApiRequest } from '@/hooks/useApiRequest';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
+import { useCachedStore } from '@/store/useCachedStore';
+import { useSessionStore } from '@/store/useSessionStore';
+import { useFeature } from '@/contexts/AppSettingsContext';
 import {
   BookOpen,
   Heart,
@@ -18,8 +19,8 @@ import {
   User,
   ArrowRight,
   Bookmark,
-  AlertCircle,
 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
 
 interface Blog {
@@ -30,28 +31,6 @@ interface Blog {
   language: string;
   createdAt: string;
   author: { name: string };
-}
-
-interface Favorite {
-  _id: string;
-  blog: Blog;
-}
-
-interface FavoritesResponse {
-  favorites: Favorite[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-}
-
-interface FeatureToggles {
-  enableBlogs: boolean;
-  enableQuizzes: boolean;
-  enableCourses: boolean;
-  enableAnalytics: boolean;
 }
 
 const topics = [
@@ -70,100 +49,44 @@ const topics = [
 ];
 
 export default function StudentBlogsPage() {
-  const { data: session, status } = useSession();
+  const { session, status, favorites, addFavorite, removeFavorite } = useSessionStore();
   const router = useRouter();
   const { t } = useTranslation();
   const { theme } = useRoleTheme();
-  const [blogs, setBlogs] = useState<Blog[]>([]);
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
-  const [isLoading, setIsLoading] = useState(true);
+  const featureEnabled = useFeature('enableBlogs');
+
+  // Use cached store for blogs
+  const orgId = session?.user?.organizationId || 'public';
+  const { blogs, fetchBlogs } = useCachedStore();
+  const blogState = blogs[orgId];
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [selectedTopic, setSelectedTopic] = useState('all');
   const [languageFilter, setLanguageFilter] = useState<'all' | 'en' | 'hi'>('all');
-  const [featureEnabled, setFeatureEnabled] = useState(true);
-  const [checkingFeature, setCheckingFeature] = useState(true);
   const [hasRedirected, setHasRedirected] = useState(false);
-
-  const blogsRequest = useApiRequest<Blog[]>();
-  const favoritesRequest = useApiRequest<FavoritesResponse>();
-
-  // Debounced search handler
-  const debouncedSearchHandler = useCallback(
-    debounce((...args: unknown[]) => setSearchTerm(args[0] as string), 300),
-    []
-  );
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchInput(value);
-    debouncedSearchHandler(value);
+    debounce((...args: unknown[]) => setSearchTerm(args[0] as string), 300)(value);
   };
 
-  const fetchBlogs = useCallback(async () => {
-    const params = new URLSearchParams();
-    if (languageFilter !== 'all') {
-      params.append('language', languageFilter);
-    }
-    const url = `/api/blogs${params.toString() ? `?${params.toString()}` : ''}`;
-
-    blogsRequest.execute({
-      fn: async () => {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('Failed to fetch');
-        const data = await response.json();
-        return data.blogs;
-      },
-      onSuccess: (data) => {
-        setBlogs(data);
-        setIsLoading(false);
-      },
-      onError: (error) => {
-        console.error('Error fetching blogs:', error);
-        setIsLoading(false);
-      },
-    });
-  }, [languageFilter, blogsRequest]);
-
-  const fetchFavorites = useCallback(async () => {
-    favoritesRequest.execute({
-      fn: async () => {
-        const response = await fetch('/api/favorites');
-        if (!response.ok) throw new Error('Failed to fetch');
-        return await response.json();
-      },
-      onSuccess: (data) => {
-        const favoriteIds = new Set(data.favorites.map((fav) => fav.blog._id));
-        setFavorites(favoriteIds);
-      },
-      onError: (error) => {
-        console.error('Error fetching favorites:', error);
-      },
-    });
-  }, [favoritesRequest]);
-
+  // Fetch blogs using cached store
   useEffect(() => {
-    if (checkingFeature) return; // Prevent multiple calls
-    
-    fetch('/api/settings')
-      .then(res => res.json())
-      .then(data => {
-        if (!data.featureToggles?.enableBlogs) {
-          setFeatureEnabled(false);
-        }
-      })
-      .catch(err => console.error('Error fetching settings:', err))
-      .finally(() => setCheckingFeature(false));
-  }, [checkingFeature]);
-
-  useEffect(() => {
-    if (hasRedirected) return; // Prevent repeated redirects
-
-    if (!featureEnabled) {
-      setHasRedirected(true);
-      router.push('/dashboard/student');
+    if (status === 'loading') return;
+    if (!session) {
+      router.push('/login');
       return;
     }
+    
+    // Fetch blogs from cached store
+    fetchBlogs(orgId);
+  }, [session, status, orgId, languageFilter, fetchBlogs, router]);
+
+  useEffect(() => {
+    if (status === 'loading') return;
+    if (hasRedirected) return;
 
     if (status === 'unauthenticated') {
       setHasRedirected(true);
@@ -173,9 +96,8 @@ export default function StudentBlogsPage() {
 
     if (status === 'authenticated' && featureEnabled) {
       fetchBlogs();
-      fetchFavorites();
     }
-  }, [status, featureEnabled, hasRedirected]);
+  }, [status, featureEnabled, hasRedirected, fetchBlogs, router]);
 
   const toggleFavorite = async (blogId: string) => {
     const isFavorited = favorites.has(blogId);
@@ -183,27 +105,21 @@ export default function StudentBlogsPage() {
     try {
       if (isFavorited) {
         await fetch(`/api/favorites/${blogId}`, { method: 'DELETE' });
-        setFavorites((prev) => {
-          const next = new Set(prev);
-          next.delete(blogId);
-          return next;
-        });
+        removeFavorite(blogId);
       } else {
-        const response = await fetch('/api/favorites', {
+        await fetch('/api/favorites', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ blogId }),
         });
-        if (response.ok) {
-          setFavorites((prev) => new Set(prev).add(blogId));
-        }
+        addFavorite(blogId);
       }
     } catch (error) {
       console.error('Error toggling favorite:', error);
     }
   };
 
-  const filteredBlogs = blogs.filter((blog) => {
+  const filteredBlogs = (blogState?.data || []).filter((blog) => {
     const matchesSearch =
       blog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       blog.topic.toLowerCase().includes(searchTerm.toLowerCase());
@@ -212,10 +128,39 @@ export default function StudentBlogsPage() {
     return matchesSearch && matchesTopic && matchesLanguage;
   });
 
-  if (isLoading) {
+  if (blogState?.loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+      <div className="px-4 sm:px-6 lg:px-8 space-y-6">
+        {/* Header skeleton */}
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+
+        {/* Blog cards skeleton */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="bg-white rounded-2xl p-6 shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                <div className="flex-1 min-w-0 space-y-3">
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <Skeleton className="h-5 w-48" />
+                    <Skeleton className="h-5 w-16" />
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-10 w-10" />
+                  <Skeleton className="h-10 w-10" />
+                  <Skeleton className="h-10 w-10" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -303,7 +248,7 @@ export default function StudentBlogsPage() {
         className="grid grid-cols-2 gap-4"
       >
         <div className="bg-white rounded-xl p-4 shadow-sm">
-          <p className={`text-2xl font-bold ${theme.text}`}>{blogs.length}</p>
+          <p className={`text-2xl font-bold ${theme.text}`}>{(blogState?.data || []).length}</p>
           <p className="text-sm text-gray-500">{t('blog.totalArticles')}</p>
         </div>
         <div className="bg-white rounded-xl p-4 shadow-sm">
@@ -334,7 +279,7 @@ export default function StudentBlogsPage() {
             </p>
           </div>
         ) : (
-          filteredBlogs.map((blog, index) => {
+          filteredBlogs.map((blog: Blog, index: number) => {
             const isFavorited = favorites.has(blog._id);
             // Strip HTML tags for excerpt
             const plainText = blog.content.replace(/<[^>]*>/g, '');

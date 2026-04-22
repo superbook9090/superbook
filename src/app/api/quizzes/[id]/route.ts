@@ -7,6 +7,8 @@ import Quiz from '@/models/Quiz';
 import Course from '@/models/Course';
 import { updateQuizSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
+import mongoose from 'mongoose';
+import { validateContentAccess } from '@/lib/accessControl';
 
 // PATCH /api/quizzes/[id] - Update a quiz
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -51,6 +53,19 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (!quiz) {
       return NextResponse.json({ message: 'Quiz not found' }, { status: 404 });
     }
+
+    // Apply organization-based access control
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const user = session.user as any;
+    validateContentAccess(
+      quiz.organizationId,
+      {
+        _id: new mongoose.Types.ObjectId(user.id),
+        organizationId: user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null,
+        role: user.role as 'student' | 'teacher' | 'admin',
+      },
+      'quiz'
+    );
 
     // Verify the course belongs to this instructor
     const course = await Course.findOne({
@@ -111,6 +126,19 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     if (!quiz) {
       return NextResponse.json({ message: 'Quiz not found' }, { status: 404 });
     }
+
+    // Apply organization-based access control
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const user = session.user as any;
+    validateContentAccess(
+      quiz.organizationId,
+      {
+        _id: new mongoose.Types.ObjectId(user.id),
+        organizationId: user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null,
+        role: user.role as 'student' | 'teacher' | 'admin',
+      },
+      'quiz'
+    );
 
     // Verify the course belongs to this instructor
     const course = await Course.findOne({

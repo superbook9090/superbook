@@ -3,10 +3,10 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { signOut } from 'next-auth/react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useSessionStore } from '@/store/useSessionStore';
 import {
   LayoutDashboard,
   BookOpen,
@@ -86,7 +86,7 @@ export default function StudentSidebar({ user }: { user: User | null }) {
 
         {/* Role Badge */}
         <div className="mt-6 px-6">
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-white/20 text-white backdrop-blur-sm border border-white/10">
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-white/20 text-white border border-white/10">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-2 animate-pulse" />
             {t('common.student')}
           </span>
@@ -109,7 +109,7 @@ export default function StudentSidebar({ user }: { user: User | null }) {
                   href={item.href}
                   className={`group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
                     isActive
-                      ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm'
+                      ? 'bg-white/20 text-white shadow-lg'
                       : 'text-indigo-100 hover:bg-white/10 hover:text-white'
                   }`}
                 >
@@ -146,7 +146,7 @@ export default function StudentSidebar({ user }: { user: User | null }) {
               </div>
             </div>
             <button
-              onClick={() => signOut({ callbackUrl: '/login' })}
+              onClick={() => useSessionStore.getState().logout()}
               className="ml-2 p-2 rounded-xl text-indigo-200 hover:text-white hover:bg-white/10 transition-all"
               aria-label={t('common.signOut')}
             >

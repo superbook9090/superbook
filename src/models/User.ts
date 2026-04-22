@@ -5,12 +5,13 @@ export interface IUser extends Document {
   name: string;
   email: string;
   password?: string;
-  role: 'student' | 'teacher' | 'admin';
+  role: 'student' | 'teacher' | 'admin' | 'superadmin';
   avatar?: string;
   isVerified: boolean;
   isSuspended: boolean;
   suspendedReason?: string;
   provider?: 'credentials' | 'google';
+  organizationId?: mongoose.Types.ObjectId | null;
   limits?: {
     courses: number;
     quizzes: number;
@@ -24,12 +25,13 @@ const userSchema = new Schema<IUser>(
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: false },
-    role: { type: String, enum: ['student', 'teacher', 'admin'], default: 'student' },
+    role: { type: String, enum: ['student', 'teacher', 'admin', 'superadmin'], default: 'student' },
     avatar: String,
     isVerified: { type: Boolean, default: false },
     isSuspended: { type: Boolean, default: false },
     suspendedReason: String,
     provider: { type: String, enum: ['credentials', 'google'], default: 'credentials' },
+    organizationId: { type: Schema.Types.ObjectId, ref: 'Organization', default: null },
     limits: {
       courses: { type: Number, default: undefined },
       quizzes: { type: Number, default: undefined },
@@ -43,6 +45,14 @@ const userSchema = new Schema<IUser>(
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password') || !this.password) return next();
   this.password = await bcrypt.hash(this.password, 12);
+  next();
+});
+
+// Validate: Admin must have organizationId
+userSchema.pre('save', function (next) {
+  if (this.role === 'admin' && !this.organizationId) {
+    next(new Error('Admin must belong to an organization'));
+  }
   next();
 });
 

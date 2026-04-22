@@ -8,6 +8,8 @@ import mongoose from 'mongoose';
 import { sanitizeHtml } from '@/lib/sanitize';
 import { updateBlogSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
+import { validateContentAccess } from '@/lib/accessControl';
+import { invalidatePattern } from '@/lib/redis';
 
 // GET /api/blogs/[id] - Get a single blog
 export async function GET(
@@ -45,8 +47,24 @@ export async function GET(
       );
     }
 
+    const session = await getServerSession(authOptions);
+
+    // Apply organization-based access control
+    if (session?.user) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const user = session.user as any;
+      validateContentAccess(
+        blog.organizationId,
+        {
+          _id: new mongoose.Types.ObjectId(user.id),
+          organizationId: user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null,
+          role: user.role as 'student' | 'teacher' | 'admin',
+        },
+        'blog'
+      );
+    }
+
     if (!blog.isPublished) {
-      const session = await getServerSession(authOptions);
       if (!session || (session.user.id !== blog.author._id.toString() && session.user.role !== 'admin')) {
         return NextResponse.json(
           { message: 'Blog not found' },
@@ -140,6 +158,10 @@ export async function PATCH(
     await blog.save();
     await blog.populate('author', 'name');
 
+    // Invalidate cache for this organization
+    const orgId = blog.organizationId?.toString() || 'public';
+    await invalidatePattern(`blogs:${orgId}:*`);
+
     return NextResponse.json(blog);
   } catch (error) {
     logApiError(error as Error, 'PATCH', '/api/blogs/[id]', logContext);
@@ -205,6 +227,10 @@ export async function DELETE(
     }
 
     await Blog.findByIdAndDelete(id);
+
+    // Invalidate cache for this organization
+    const orgId = blog.organizationId?.toString() || 'public';
+    await invalidatePattern(`blogs:${orgId}:*`);
 
     return NextResponse.json({ message: 'Blog deleted successfully' });
   } catch (error) {

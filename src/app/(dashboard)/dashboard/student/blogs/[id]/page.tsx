@@ -1,12 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
+import { useSessionStore } from '@/store/useSessionStore';
 import {
   ArrowLeft,
   Heart,
@@ -30,31 +29,17 @@ interface Blog {
 }
 
 export default function BlogDetailPage() {
-  const { data: session, status } = useSession();
+  const { status, favorites, addFavorite, removeFavorite } = useSessionStore();
   const router = useRouter();
-  const { t } = useTranslation();
   const { theme } = useRoleTheme();
   const params = useParams();
   const blogId = params.id as string;
 
   const [blog, setBlog] = useState<Blog | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isFavorited, setIsFavorited] = useState(false);
   const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login');
-      return;
-    }
-
-    if (status === 'authenticated' && blogId) {
-      fetchBlog();
-      checkFavorite();
-    }
-  }, [status, blogId]);
-
-  const fetchBlog = async () => {
+  const fetchBlog = useCallback(async () => {
     try {
       const response = await fetch(`/api/blogs/${blogId}`);
       if (!response.ok) throw new Error('Failed to fetch');
@@ -65,26 +50,25 @@ export default function BlogDetailPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [blogId]);
 
-  const checkFavorite = async () => {
-    try {
-      const response = await fetch('/api/favorites');
-      if (!response.ok) throw new Error('Failed to fetch');
-      const data = await response.json();
-      const favorites = data.favorites || [];
-      const isFav = Array.isArray(favorites) && favorites.some((fav: { blog: { _id: string } }) => fav.blog._id === blogId);
-      setIsFavorited(isFav);
-    } catch (error) {
-      console.error('Error checking favorite:', error);
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login');
+      return;
     }
-  };
+
+    if (status === 'authenticated' && blogId) {
+      fetchBlog();
+    }
+  }, [status, blogId, fetchBlog, router]);
 
   const toggleFavorite = async () => {
+    const isFavorited = favorites.has(blogId);
     try {
       if (isFavorited) {
         await fetch(`/api/favorites/${blogId}`, { method: 'DELETE' });
-        setIsFavorited(false);
+        removeFavorite(blogId);
       } else {
         const response = await fetch('/api/favorites', {
           method: 'POST',
@@ -92,29 +76,11 @@ export default function BlogDetailPage() {
           body: JSON.stringify({ blogId }),
         });
         if (response.ok || response.status === 409) {
-          setIsFavorited(true);
+          addFavorite(blogId);
         }
       }
     } catch (error) {
       console.error('Error toggling favorite:', error);
-    }
-  };
-
-  const shareBlog = async () => {
-    if (navigator.share && blog) {
-      try {
-        await navigator.share({
-          title: blog.title,
-          text: `Check out this blog: ${blog.title}`,
-          url: window.location.href,
-        });
-      } catch (error) {
-        console.error('Error sharing:', error);
-      }
-    } else {
-      // Fallback: copy to clipboard
-      navigator.clipboard.writeText(window.location.href);
-      setAlertState({ type: 'success', message: 'Link copied to clipboard!' });
     }
   };
 
@@ -222,16 +188,16 @@ export default function BlogDetailPage() {
             <button
               onClick={toggleFavorite}
               className={`flex items-center justify-center gap-2 px-4 py-3 sm:py-2.5 rounded-xl font-medium transition-all touch-manipulation ${
-                isFavorited
+                favorites.has(blogId)
                   ? `${theme.activeBg} ${theme.text} hover:opacity-80`
                   : `${theme.activeBg} ${theme.text} hover:opacity-70`
               }`}
             >
               <Heart
-                className={`w-5 h-5 ${isFavorited ? 'fill-current' : ''}`}
+                className={`w-5 h-5 ${favorites.has(blogId) ? 'fill-current' : ''}`}
               />
-              <span className="hidden sm:inline">{isFavorited ? 'Favorited' : 'Add to Favorites'}</span>
-              <span className="sm:hidden">{isFavorited ? 'Saved' : 'Save'}</span>
+              <span className="hidden sm:inline">{favorites.has(blogId) ? 'Favorited' : 'Add to Favorites'}</span>
+              <span className="sm:hidden">{favorites.has(blogId) ? 'Saved' : 'Save'}</span>
             </button>
 
             <button

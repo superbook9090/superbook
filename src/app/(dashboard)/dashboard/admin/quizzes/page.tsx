@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { motion } from 'framer-motion';
@@ -15,9 +14,10 @@ import {
   Calendar,
   BookOpen,
 } from 'lucide-react';
-import Loader from '@/components/ui/Loader';
+import { Skeleton, CardSkeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
+import { useSessionStore } from '@/store/useSessionStore';
 
 interface Quiz {
   _id: string;
@@ -40,7 +40,7 @@ interface Question {
 }
 
 export default function AdminQuizzesPage() {
-  const { data: session, status } = useSession();
+  const { session, status } = useSessionStore();
   const router = useRouter();
   const { theme } = useRoleTheme();
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
@@ -117,7 +117,7 @@ export default function AdminQuizzesPage() {
       setMessage({ type: 'success', text: 'Quiz deleted successfully' });
       setDeleteId(null);
       fetchQuizzes();
-    } catch (error) {
+    } catch {
       setMessage({ type: 'error', text: 'Failed to delete quiz' });
     }
   };
@@ -132,11 +132,34 @@ export default function AdminQuizzesPage() {
   });
 
   if (isLoading) {
-    return <Loader variant="inline" size="lg" />;
+    return (
+      <div className="px-4 sm:px-6 lg:px-8 space-y-6">
+        {/* Header skeleton */}
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+
+        {/* Filters skeleton */}
+        <div className="bg-white rounded-xl p-4 shadow-sm">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-32" />
+          </div>
+        </div>
+
+        {/* Quiz cards skeleton */}
+        <div className="space-y-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <CardSkeleton key={i} />
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="px-4 sm:px-6 lg:px-8 space-y-6">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}

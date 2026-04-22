@@ -6,6 +6,7 @@ export interface IBlog extends Document {
   topic: string;
   language: string;
   author: mongoose.Types.ObjectId;
+  organizationId?: mongoose.Types.ObjectId | null;
   isPublished: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -39,6 +40,11 @@ const blogSchema = new Schema<IBlog>(
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
+    },
+    organizationId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Organization',
+      default: null,
     },
     isPublished: {
       type: Boolean,

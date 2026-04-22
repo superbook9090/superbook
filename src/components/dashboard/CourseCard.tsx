@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
@@ -44,7 +44,7 @@ interface CourseCardProps {
   onDrop?: (enrollmentId: string) => Promise<void>;
 }
 
-export default function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
+function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
   const router = useRouter();
   const { t } = useTranslation();
   const { theme } = useRoleTheme();
@@ -120,7 +120,7 @@ export default function CourseCard({ course, type, onEnroll, onDrop }: CourseCar
 
         {/* Price Badge */}
         <div className="absolute top-4 right-4">
-          <span className="px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full text-sm font-bold text-gray-900">
+          <span className="px-3 py-1.5 bg-white rounded-full text-sm font-bold text-gray-900 shadow-sm">
             {courseData.price === 0 ? t('courses.free') : `$${courseData.price}`}
           </span>
         </div>
@@ -174,7 +174,7 @@ export default function CourseCard({ course, type, onEnroll, onDrop }: CourseCar
               className={`flex-1 flex items-center justify-center gap-2 bg-gradient-to-r ${theme.gradient} text-white py-3 px-4 rounded-xl font-semibold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {isLoading ? (
-                <Loader variant="button" size="sm" />
+                <Loader size="sm" />
               ) : (
                 <>
                   {t('courses.enrollNow')}
@@ -205,7 +205,7 @@ export default function CourseCard({ course, type, onEnroll, onDrop }: CourseCar
                 disabled={isLoading}
                 className="p-3 border-2 border-red-100 text-red-500 rounded-xl hover:bg-red-50 hover:border-red-200 transition-all disabled:opacity-50"
               >
-                {isLoading ? <Loader variant="button" size="sm" /> : <Trash2 className="w-5 h-5" />}
+                {isLoading ? <Loader size="sm" /> : <Trash2 className="w-5 h-5" />}
               </motion.button>
             </>
           )}
@@ -214,3 +214,6 @@ export default function CourseCard({ course, type, onEnroll, onDrop }: CourseCar
     </motion.div>
   );
 }
+
+const CourseCardMemo = memo(CourseCard);
+export default CourseCardMemo;

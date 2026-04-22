@@ -2,7 +2,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useSession } from 'next-auth/react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { debounce } from '@/lib/debounce';
@@ -17,10 +16,13 @@ import {
   Calendar,
   ChevronLeft,
   ChevronRight,
+  Building2,
+  X,
 } from 'lucide-react';
-import Loader from '@/components/ui/Loader';
+import { Skeleton } from '@/components/ui/Skeleton';
 import Alert from '@/components/ui/Alert';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
+import { useSessionStore } from '@/store/useSessionStore';
 
 interface User {
   _id: string;
@@ -28,6 +30,11 @@ interface User {
   email: string;
   role: string;
   createdAt: string;
+  organizationId?: string | null;
+  organization?: {
+    _id: string;
+    name: string;
+  } | null;
   limits?: {
     courses: number;
     quizzes: number;
@@ -36,43 +43,49 @@ interface User {
 }
 
 export default function AdminUsersPage() {
-  const { data: session, status } = useSession();
+  const { session, status } = useSessionStore();
   const router = useRouter();
   const { t } = useTranslation();
   const { theme } = useRoleTheme();
   const [users, setUsers] = useState<User[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [search, setSearch] = useState('');
-  const [roleFilter, setRoleFilter] = useState('');
 
-  // Debounced search handler
-  const debouncedSearchHandler = useCallback(
-    debounce((...args: unknown[]) => setSearch(args[0] as string), 300),
-    []
-  );
-  const [page, setPage] = useState(1);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [limitsUserId, setLimitsUserId] = useState<string | null>(null);
-  const [limitsForm, setLimitsForm] = useState({ courses: '', quizzes: '', blogs: '' });
-  const [pagination, setPagination] = useState({
-    total: 0,
-    totalPages: 1,
-  });
-
+  // Frontend role guard (secondary security layer)
   useEffect(() => {
     if (status === 'loading') return;
+
     if (!session) {
       router.push('/login');
       return;
     }
 
-    // Auth and role-based redirects handled by middleware and /dashboard/page.tsx
+    if (session.user?.role !== 'admin' && session.user?.role !== 'superadmin') {
+      router.push('/dashboard');
+      return;
+    }
+  }, [session, status, router]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [search, setSearch] = useState('');
+  const [roleFilter, setRoleFilter] = useState('');
 
-    fetchUsers();
-  }, [session, status, search, roleFilter, page]);
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    debounce((...args: unknown[]) => setSearch(args[0] as string), 300)(value);
+  };
 
-  const fetchUsers = async () => {
+  const [page, setPage] = useState(1);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [limitsUserId, setLimitsUserId] = useState<string | null>(null);
+  const [limitsForm, setLimitsForm] = useState({ courses: '', quizzes: '', blogs: '' });
+  const [organizations, setOrganizations] = useState<Array<{ _id: string; name: string }>>([]);
+  const [orgAssignUserId, setOrgAssignUserId] = useState<string | null>(null);
+  const [selectedOrganizationId, setSelectedOrganizationId] = useState<string | null>(null);
+  const [pagination, setPagination] = useState({
+    total: 0,
+    totalPages: 1,
+  });
+
+  const fetchUsers = useCallback(async () => {
     try {
       const params = new URLSearchParams();
       if (search) params.append('search', search);
@@ -94,7 +107,33 @@ export default function AdminUsersPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [search, roleFilter, page]);
+
+  const fetchOrganizations = useCallback(async () => {
+    try {
+      const response = await fetch('/api/organizations');
+      const data = await response.json();
+
+      if (response.ok) {
+        setOrganizations(data.organizations || []);
+      }
+    } catch (err) {
+      console.error('Error fetching organizations:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (status === 'loading') return;
+    if (!session) {
+      router.push('/login');
+      return;
+    }
+
+    // Auth and role-based redirects handled by middleware and /dashboard/page.tsx
+
+    fetchUsers();
+    fetchOrganizations();
+  }, [session, status, fetchUsers, fetchOrganizations, router]);
 
   const handleRoleChange = async (userId: string, newRole: string) => {
     try {
@@ -182,8 +221,60 @@ export default function AdminUsersPage() {
     }
   };
 
+  const handleOpenOrgAssign = (user: User) => {
+    setOrgAssignUserId(user._id);
+    setSelectedOrganizationId(user.organizationId || null);
+  };
+
+  const handleCloseOrgAssign = () => {
+    setOrgAssignUserId(null);
+    setSelectedOrganizationId(null);
+  };
+
+  const handleSaveOrgAssign = async () => {
+    try {
+      const response = await fetch(`/api/admin/users/${orgAssignUserId}/organization`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ organizationId: selectedOrganizationId }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setUsers(users.map(u => u._id === orgAssignUserId ? { ...u, ...data } : u));
+        setMessage({ type: 'success', text: 'User organization updated successfully' });
+        handleCloseOrgAssign();
+      } else {
+        setMessage({ type: 'error', text: data.message || 'Failed to update user organization' });
+      }
+    } catch (err) {
+      setMessage({ type: 'error', text: 'Error updating user organization' });
+      console.error('Organization assignment error:', err);
+    }
+  };
+
   if (status === 'loading' || isLoading) {
-    return <Loader variant="inline" size="lg" />;
+    return (
+      <div className="px-4 sm:px-6 lg:px-8 space-y-6">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div className="p-4 space-y-3">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-4">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="h-5 w-40" />
+                <Skeleton className="h-5 w-24 ml-auto" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -230,7 +321,7 @@ export default function AdminUsersPage() {
             type="text"
             placeholder={t('admin.searchUsers')}
             defaultValue={search}
-            onChange={(e) => debouncedSearchHandler(e.target.value)}
+            onChange={handleSearchChange}
             className="w-full pl-10 pr-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
           />
         </div>
@@ -264,6 +355,9 @@ export default function AdminUsersPage() {
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 {t('admin.role')}
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Organization
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 {t('adminUsers.limits')}
@@ -310,6 +404,24 @@ export default function AdminUsersPage() {
                     <option value="teacher">{t('roles.teacher')}</option>
                     <option value="admin">{t('roles.admin')}</option>
                   </select>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-2">
+                    {user.organization ? (
+                      <div className="flex items-center gap-2">
+                        <Building2 className="w-4 h-4 text-indigo-500" />
+                        <span className="text-sm text-gray-700">{user.organization.name}</span>
+                      </div>
+                    ) : (
+                      <span className="text-sm text-gray-400">None</span>
+                    )}
+                    <button
+                      onClick={() => handleOpenOrgAssign(user)}
+                      className="text-xs px-2 py-1 bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 transition-colors"
+                    >
+                      Assign
+                    </button>
+                  </div>
                 </td>
                 <td className="px-6 py-4">
                   {user.role === 'teacher' ? (
@@ -431,6 +543,62 @@ export default function AdminUsersPage() {
                 className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors text-sm font-medium"
               >
                 {t('common.cancel')}
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+
+      {/* Organization Assignment Modal */}
+      {orgAssignUserId && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+        >
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">{t('adminUsers.assignOrganization')}</h3>
+              <button
+                onClick={handleCloseOrgAssign}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('adminUsers.selectOrganization')}</label>
+                <select
+                  value={selectedOrganizationId || ''}
+                  onChange={(e) => setSelectedOrganizationId(e.target.value || null)}
+                  className="w-full px-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                >
+                  <option value="">{t('adminUsers.noOrganization')}</option>
+                  {organizations.map((org) => (
+                    <option key={org._id} value={org._id}>
+                      {org.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={handleSaveOrgAssign}
+                className={`flex-1 px-4 py-2.5 bg-gradient-to-r ${theme.gradient} text-white rounded-xl hover:opacity-90 transition-colors text-sm font-medium`}
+              >
+                Save
+              </button>
+              <button
+                onClick={handleCloseOrgAssign}
+                className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors text-sm font-medium"
+              >
+                Cancel
               </button>
             </div>
           </motion.div>

@@ -1,9 +1,9 @@
 'use client';
 
 import { useAppSettings } from '@/contexts/AppSettingsContext';
-import { useSession } from 'next-auth/react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
+import { useSessionStore } from '@/store/useSessionStore';
 
 interface MaintenanceCheckProps {
   children: React.ReactNode;
@@ -11,7 +11,7 @@ interface MaintenanceCheckProps {
 
 export default function MaintenanceCheck({ children }: MaintenanceCheckProps) {
   const { settings, isLoading } = useAppSettings();
-  const { data: session, status } = useSession();
+  const { session, status } = useSessionStore();
   const router = useRouter();
   const pathname = usePathname();
 

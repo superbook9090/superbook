@@ -2,7 +2,7 @@
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
-import CreateQuizForm from '@/components/dashboard/CreateQuizForm';
+import CreateQuizForm from '@/features/quizzes/components/CreateQuizForm';
 
 export default async function CreateQuizPage() {
   const session = await getServerSession(authOptions);

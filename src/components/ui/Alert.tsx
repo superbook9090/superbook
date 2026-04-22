@@ -62,9 +62,9 @@ export default function Alert({ type = 'info', message, onClose, duration = 4000
   };
 
   const styles = {
-    error: 'bg-red-100 text-red-600 border-red-200',
-    success: 'bg-green-100 text-green-600 border-green-200',
-    info: 'bg-blue-100 text-blue-600 border-blue-200',
+    error: 'bg-[var(--error-light)] text-[var(--error)] border-[var(--error)]/20',
+    success: 'bg-[var(--success-light)] text-[var(--success)] border-[var(--success)]/20',
+    info: 'bg-[var(--info-light)] text-[var(--info)] border-[var(--info)]/20',
   };
 
   const Icon = icons[type];
@@ -95,7 +95,7 @@ export default function Alert({ type = 'info', message, onClose, duration = 4000
           {onClose && (
             <button
               onClick={onClose}
-              className="flex-shrink-0 p-1 hover:bg-black/5 rounded transition-colors"
+              className="flex-shrink-0 p-1 hover:bg-[var(--color-foreground)]/5 rounded transition-colors"
               aria-label="Close alert"
             >
               <X className="w-4 h-4" />
@@ -103,7 +103,7 @@ export default function Alert({ type = 'info', message, onClose, duration = 4000
           )}
         </div>
         {showProgressBar && duration && (
-          <div className="w-full h-1 bg-black/10 rounded-full overflow-hidden">
+          <div className="w-full h-1 bg-[var(--color-foreground)]/10 rounded-full overflow-hidden">
             <motion.div
               initial={{ width: '100%' }}
               animate={{ width: `${progress}%` }}

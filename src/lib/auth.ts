@@ -11,12 +11,14 @@ declare module 'next-auth' {
       id: string;
       role: string;
       email: string;
+      organizationId?: string | null;
     } & DefaultSession['user'];
   }
 
   interface User {
     id: string;
     role: string;
+    organizationId?: string | null;
   }
 }
 
@@ -25,6 +27,7 @@ declare module 'next-auth/jwt' {
     id: string;
     role: string;
     email: string;
+    organizationId?: string | null;
   }
 }
 
@@ -69,6 +72,7 @@ export const authOptions: AuthOptions = {
           email: user.email,
           name: user.name,
           role: user.role,
+          organizationId: user.organizationId?.toString() || null,
         };
       }
     })
@@ -96,6 +100,7 @@ export const authOptions: AuthOptions = {
 
         user.id = dbUser._id.toString();
         user.role = dbUser.role;
+        user.organizationId = dbUser.organizationId?.toString() || null;
 
         return true;
       }
@@ -107,6 +112,7 @@ export const authOptions: AuthOptions = {
         token.id = user.id;
         token.role = user.role;
         token.email = user.email || '';
+        token.organizationId = user.organizationId || null;
       }
       return token;
     },
@@ -115,6 +121,7 @@ export const authOptions: AuthOptions = {
         session.user.id = token.id;
         session.user.role = token.role;
         session.user.email = token.email;
+        session.user.organizationId = token.organizationId || null;
       }
       return session;
     }

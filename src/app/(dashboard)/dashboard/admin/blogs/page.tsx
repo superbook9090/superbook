@@ -1,12 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
-import { debounce } from '@/lib/debounce';
 import {
   BookOpen,
   Search,
@@ -17,9 +14,11 @@ import {
   Calendar,
   User,
 } from 'lucide-react';
-import Loader from '@/components/ui/Loader';
+
+import { Skeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
+import { useSessionStore } from '@/store/useSessionStore';
 
 interface Blog {
   _id: string;
@@ -33,9 +32,8 @@ interface Blog {
 }
 
 export default function AdminBlogsPage() {
-  const { data: session, status } = useSession();
+  const { session, status } = useSessionStore();
   const router = useRouter();
-  const { t } = useTranslation();
   const { theme } = useRoleTheme();
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -47,7 +45,10 @@ export default function AdminBlogsPage() {
 
   // Debounced search handler
   const debouncedSearchHandler = useCallback(
-    debounce((...args: unknown[]) => setSearchTerm(args[0] as string), 300),
+    (value: string) => {
+      const timer = setTimeout(() => setSearchTerm(value), 300);
+      return () => clearTimeout(timer);
+    },
     []
   );
 
@@ -61,6 +62,7 @@ export default function AdminBlogsPage() {
       // Auth and role-based redirects handled by middleware and /dashboard/page.tsx
       fetchBlogs();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, status]);
 
   const fetchBlogs = async () => {
@@ -69,7 +71,7 @@ export default function AdminBlogsPage() {
       if (!response.ok) throw new Error('Failed to fetch blogs');
       const data = await response.json();
       setBlogs(data.blogs || []);
-    } catch (error) {
+    } catch {
       setMessage({ type: 'error', text: 'Failed to fetch blogs' });
     } finally {
       setIsLoading(false);
@@ -87,7 +89,7 @@ export default function AdminBlogsPage() {
       if (!response.ok) throw new Error('Failed to update blog');
       setMessage({ type: 'success', text: 'Blog updated successfully' });
       fetchBlogs();
-    } catch (error) {
+    } catch {
       setMessage({ type: 'error', text: 'Failed to update blog' });
     }
   };
@@ -102,7 +104,7 @@ export default function AdminBlogsPage() {
       setMessage({ type: 'success', text: 'Blog deleted successfully' });
       setDeleteId(null);
       fetchBlogs();
-    } catch (error) {
+    } catch {
       setMessage({ type: 'error', text: 'Failed to delete blog' });
     }
   };
@@ -118,7 +120,59 @@ export default function AdminBlogsPage() {
   });
 
   if (isLoading) {
-    return <Loader variant="inline" size="lg" />;
+    return (
+      <div className="px-4 sm:px-6 lg:px-8 space-y-6">
+        {/* Header skeleton */}
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+
+        {/* Filters skeleton */}
+        <div className="bg-white rounded-xl p-4 shadow-sm">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-32" />
+          </div>
+        </div>
+
+        {/* Stats grid skeleton */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-white rounded-xl p-6 shadow-sm">
+              <Skeleton className="h-12 w-12 mb-4" />
+              <Skeleton className="h-4 w-24 mb-2" />
+              <Skeleton className="h-8 w-16" />
+            </div>
+          ))}
+        </div>
+
+        {/* Blog cards skeleton */}
+        <div className="space-y-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="bg-white rounded-2xl p-6 shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                <div className="flex-1 min-w-0 space-y-3">
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <Skeleton className="h-5 w-48" />
+                    <Skeleton className="h-5 w-16" />
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-10 w-10" />
+                  <Skeleton className="h-10 w-10" />
+                  <Skeleton className="h-10 w-10" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (

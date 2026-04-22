@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useMemo } from 'react';
 
 interface ApiRequestOptions<T> {
   fn: () => Promise<T>;
@@ -44,12 +44,14 @@ export function useApiRequest<T>() {
     requestLockRef.current = false;
   }, []);
 
-  return {
+  const result = useMemo(() => ({
     execute,
     isLoading,
     error,
     data,
     reset,
-    isLocked: requestLockRef.current,
-  };
+    get isLocked() { return requestLockRef.current; },
+  }), [execute, isLoading, error, data, reset]);
+
+  return result;
 }

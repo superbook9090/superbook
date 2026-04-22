@@ -2,10 +2,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
+import { useSessionStore } from '@/store/useSessionStore';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 interface CourseStat {
   _id: string;
@@ -37,7 +38,7 @@ interface TeacherStats {
 }
 
 export default function TeacherAnalyticsPage() {
-  const { data: session, status } = useSession();
+  const { session, status } = useSessionStore();
   const router = useRouter();
   const { t } = useTranslation();
   const { theme } = useRoleTheme();
@@ -75,7 +76,46 @@ export default function TeacherAnalyticsPage() {
   };
 
   if (status === 'loading' || isLoading) {
-    return <div className="text-center py-8">{t('analytics.loadingAnalytics')}</div>;
+    return (
+      <div className="px-4 sm:px-6 lg:px-8 space-y-6">
+        {/* Header skeleton */}
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+
+        {/* Stats grid skeleton */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="bg-white rounded-xl p-6 shadow-sm">
+              <Skeleton className="h-12 w-12 mb-4" />
+              <Skeleton className="h-4 w-24 mb-2" />
+              <Skeleton className="h-8 w-16" />
+            </div>
+          ))}
+        </div>
+
+        {/* Content sections skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white rounded-xl p-6 shadow-sm">
+            <Skeleton className="h-6 w-32 mb-4" />
+            <div className="space-y-3">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-5/6" />
+              <Skeleton className="h-4 w-4/5" />
+            </div>
+          </div>
+          <div className="bg-white rounded-xl p-6 shadow-sm">
+            <Skeleton className="h-6 w-32 mb-4" />
+            <div className="space-y-3">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-5/6" />
+              <Skeleton className="h-4 w-4/5" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (!stats) {
@@ -142,68 +182,70 @@ export default function TeacherAnalyticsPage() {
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('analytics.course')}
-                  </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('analytics.students')}
-                  </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('analytics.quizzes')}
-                  </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('analytics.attempts')}
-                  </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('analytics.avgScore')}
-                  </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('analytics.status')}
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {stats.courses.map((course) => (
-                  <tr key={course._id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <p className="text-sm font-medium text-gray-900">{course.title}</p>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <p className="text-sm text-gray-900">{course.students}</p>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <p className="text-sm text-gray-900">{course.quizzes}</p>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <p className="text-sm text-gray-900">{course.attempts}</p>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        course.averageScore >= 70
-                          ? 'bg-green-100 text-green-800'
-                          : course.averageScore >= 50
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {course.averageScore}%
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        course.isPublished
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {course.isPublished ? t('analytics.published') : t('analytics.draft')}
-                      </span>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('analytics.course')}
+                    </th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('analytics.students')}
+                    </th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('analytics.quizzes')}
+                    </th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('analytics.attempts')}
+                    </th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('analytics.avgScore')}
+                    </th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('analytics.status')}
+                    </th>
                   </tr>
-                ))}
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {stats.courses.map((course) => (
+                    <tr key={course._id}>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <p className="text-sm font-medium text-gray-900">{course.title}</p>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <p className="text-sm text-gray-900">{course.students}</p>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <p className="text-sm text-gray-900">{course.quizzes}</p>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <p className="text-sm text-gray-900">{course.attempts}</p>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          course.averageScore >= 70
+                            ? 'bg-green-100 text-green-800'
+                            : course.averageScore >= 50
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {course.averageScore}%
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          course.isPublished
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {course.isPublished ? t('analytics.published') : t('analytics.draft')}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
+            </div>
           </div>
         )}
       </div>

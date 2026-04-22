@@ -2,32 +2,26 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
-import CourseCard from '@/components/dashboard/CourseCard';
+import { useSessionStore } from '@/store/useSessionStore';
+import { useCachedStore } from '@/store/useCachedStore';
+import CourseCard from '@/features/courses/components/CourseCard';
 import Alert from '@/components/ui/Alert';
-
-interface Course {
-  _id: string;
-  title: string;
-  description: string;
-  thumbnail?: string;
-  category?: string;
-  price: number;
-  instructor: { name: string; email: string };
-  isPublished: boolean;
-}
+import { Skeleton, CardSkeleton } from '@/components/ui/Skeleton';
 
 export default function BrowseCoursesPage() {
-  const { data: session, status } = useSession();
+  const { session, status } = useSessionStore();
   const { t } = useTranslation();
   const router = useRouter();
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [enrollingId, setEnrollingId] = useState<string | null>(null);
+  const { courses: coursesCache, fetchCourses, invalidateCourses } = useCachedStore();
   const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+
+  const orgId = session?.user?.organizationId || 'public';
+  const courseState = coursesCache[orgId];
+  const courses = courseState?.data || [];
+  const isLoading = courseState?.loading ?? true;
+  const error = courseState?.error || '';
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -36,30 +30,10 @@ export default function BrowseCoursesPage() {
       return;
     }
 
-    // Auth and role-based redirects handled by middleware and /dashboard/page.tsx
-
-    fetchAvailableCourses();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, status]);
-
-  const fetchAvailableCourses = async () => {
-    try {
-      const response = await fetch('/api/courses?available=true');
-      const data = await response.json();
-      if (response.ok) {
-        setCourses(data.courses || []);
-      } else {
-        setError(data.message || 'Failed to load courses');
-      }
-    } catch {
-      setError('Error loading courses');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    fetchCourses(orgId);
+  }, [session, status, orgId, fetchCourses, router]);
 
   const handleEnroll = async (courseId: string) => {
-    setEnrollingId(courseId);
     try {
       const response = await fetch('/api/enrollments', {
         method: 'POST',
@@ -70,21 +44,35 @@ export default function BrowseCoursesPage() {
       const data = await response.json();
 
       if (response.ok) {
-        // Remove enrolled course from list and redirect to my courses
-        setCourses(courses.filter(c => c._id !== courseId));
+        // Invalidate courses cache and enrollments cache
+        invalidateCourses(orgId);
+        // Redirect to my courses
         router.push('/dashboard/student/courses');
       } else {
         setAlertState({ type: 'error', message: data.message || 'Failed to enroll' });
       }
     } catch {
       setAlertState({ type: 'error', message: 'Error enrolling in course' });
-    } finally {
-      setEnrollingId(null);
     }
   };
 
   if (status === 'loading' || isLoading) {
-    return <div className="text-center py-8">{t('common.loading')}</div>;
+    return (
+      <div className="px-4 sm:px-6 lg:px-8 space-y-6">
+        {/* Header skeleton */}
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+
+        {/* Course cards skeleton */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <CardSkeleton key={i} />
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (

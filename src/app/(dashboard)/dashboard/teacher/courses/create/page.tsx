@@ -2,7 +2,7 @@
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
-import CreateCourseForm from '@/components/dashboard/CreateCourseForm';
+import CreateCourseForm from '@/features/courses/components/CreateCourseForm';
 
 export default async function CreateCoursePage() {
   const session = await getServerSession(authOptions);

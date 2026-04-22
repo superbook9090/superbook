@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useSessionStore } from '@/store/useSessionStore';
 import {
   Bookmark,
   Calendar,
@@ -14,20 +15,7 @@ import {
   BookOpen,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
-
-interface Blog {
-  _id: string;
-  title: string;
-  topic: string;
-  content: string;
-  createdAt: string;
-  author: { name: string };
-}
-
-interface Favorite {
-  _id: string;
-  blog: Blog;
-}
+import type { Favorite } from '@/store/useSessionStore';
 
 interface FavoritesListProps {
   initialFavorites: Favorite[];
@@ -35,6 +23,7 @@ interface FavoritesListProps {
 
 export default function FavoritesList({ initialFavorites }: FavoritesListProps) {
   const { t } = useTranslation();
+  const { removeFavorite: removeFavoriteFromStore } = useSessionStore();
   const [favorites, setFavorites] = useState<Favorite[]>(initialFavorites);
 
   const removeFavorite = async (favoriteId: string, blogId: string) => {
@@ -45,6 +34,7 @@ export default function FavoritesList({ initialFavorites }: FavoritesListProps) 
 
       if (response.ok) {
         setFavorites(favorites.filter((fav) => fav._id !== favoriteId));
+        removeFavoriteFromStore(blogId);
       }
     } catch (error) {
       console.error('Error removing favorite:', error);
@@ -113,7 +103,7 @@ export default function FavoritesList({ initialFavorites }: FavoritesListProps) 
             </p>
             <Link
               href="/dashboard/student/blogs"
-              className="inline-flex items-center px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-medium rounded-xl shadow-md hover:shadow-lg transition-all"
+              className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-medium rounded-xl shadow-lg hover:shadow-xl hover:brightness-110 transition-all"
             >
               <BookOpen className="w-5 h-5 mr-2" />
               {t('favorites.exploreBlogs')}

@@ -2,11 +2,12 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
+import { useSessionStore } from '@/store/useSessionStore';
 import Alert from '@/components/ui/Alert';
+import { Skeleton, CardSkeleton } from '@/components/ui/Skeleton';
 
 interface Course {
   _id: string;
@@ -25,7 +26,7 @@ interface Quiz {
 }
 
 export default function TeacherQuizzesPage() {
-  const { data: session, status } = useSession();
+  const { session, status } = useSessionStore();
   const { t } = useTranslation();
   const router = useRouter();
   const { theme } = useRoleTheme();
@@ -140,7 +141,22 @@ export default function TeacherQuizzesPage() {
   }, [t]);
 
   if (status === 'loading' || isLoading) {
-    return <div className="text-center py-8">{t('teacherQuizzes.loadingQuizzes')}</div>;
+    return (
+      <div className="px-4 sm:px-6 lg:px-8 space-y-6">
+        {/* Header skeleton */}
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+
+        {/* Quiz cards skeleton */}
+        <div className="space-y-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <CardSkeleton key={i} />
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (

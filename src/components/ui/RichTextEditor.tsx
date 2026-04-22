@@ -66,19 +66,19 @@ export default function RichTextEditor({
 
   if (!editor) {
     return (
-      <div className="w-full h-64 bg-gray-50 border border-gray-200 rounded-xl animate-pulse" />
+      <div className="w-full h-64 bg-[var(--color-accent)] border border-[var(--color-border)] rounded-xl animate-pulse" />
     );
   }
 
   const themeColors = {
     indigo: {
       active: 'bg-indigo-100 text-indigo-700',
-      hover: 'hover:bg-gray-100',
+      hover: 'hover:bg-[var(--color-accent)]',
       ring: 'focus-visible:ring-indigo-500',
     },
     emerald: {
       active: 'bg-emerald-100 text-emerald-700',
-      hover: 'hover:bg-gray-100',
+      hover: 'hover:bg-[var(--color-accent)]',
       ring: 'focus-visible:ring-emerald-500',
     },
   };
@@ -133,12 +133,12 @@ export default function RichTextEditor({
   return (
     <div
       className={cn(
-        'w-full bg-gray-50 text-gray-900 border border-gray-200 rounded-xl overflow-hidden',
+        'w-full bg-[var(--color-accent)] text-[var(--color-foreground)] border border-[var(--color-border)] rounded-xl overflow-hidden',
         className
       )}
     >
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-1 p-3 border-b border-gray-100 bg-gray-50/50">
+      <div className="flex flex-wrap items-center gap-1 p-3 border-b border-[var(--color-border)] bg-[var(--color-accent)]/50">
         {/* Text Style */}
         <div className="flex items-center gap-1">
           <ToolbarButton
@@ -157,7 +157,7 @@ export default function RichTextEditor({
           </ToolbarButton>
         </div>
 
-        <div className="w-px h-6 bg-gray-200 mx-1" />
+        <div className="w-px h-6 bg-[var(--color-border)] mx-1" />
 
         {/* Headings */}
         <div className="flex items-center gap-1">
@@ -184,7 +184,7 @@ export default function RichTextEditor({
           </ToolbarButton>
         </div>
 
-        <div className="w-px h-6 bg-gray-200 mx-1" />
+        <div className="w-px h-6 bg-[var(--color-border)] mx-1" />
 
         {/* Lists */}
         <div className="flex items-center gap-1">
@@ -204,7 +204,7 @@ export default function RichTextEditor({
           </ToolbarButton>
         </div>
 
-        <div className="w-px h-6 bg-gray-200 mx-1" />
+        <div className="w-px h-6 bg-[var(--color-border)] mx-1" />
 
         {/* Link & Quote */}
         <div className="flex items-center gap-1">
@@ -253,24 +253,24 @@ export default function RichTextEditor({
             'prose prose-sm sm:prose-base max-w-none',
             'min-h-[300px] max-h-[500px] overflow-y-auto',
             'p-4 focus:outline-none',
-            'prose-headings:font-semibold prose-headings:text-gray-900',
-            'prose-p:text-gray-700 prose-p:leading-relaxed',
+            'prose-headings:font-semibold prose-headings:text-[var(--color-foreground)]',
+            'prose-p:text-[var(--color-card-foreground)] prose-p:leading-relaxed',
             'prose-a:text-indigo-600 prose-a:no-underline hover:prose-a:underline',
-            'prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:italic',
+            'prose-blockquote:border-l-4 prose-blockquote:border-[var(--color-border)] prose-blockquote:pl-4 prose-blockquote:italic',
             'prose-ul:list-disc prose-ol:list-decimal',
             '[&_.ProseMirror]:outline-none [&_.ProseMirror]:min-h-[300px]',
-            '[&_.ProseMirror_p.is-empty]:before:content-[attr(data-placeholder)] [&_.ProseMirror_p.is-empty]:before:text-gray-400 [&_.ProseMirror_p.is-empty]:before:float-left [&_.ProseMirror_p.is-empty]:before:pointer-events-none',
+            '[&_.ProseMirror_p.is-empty]:before:content-[attr(data-placeholder)] [&_.ProseMirror_p.is-empty]:before:text-[var(--color-muted-foreground)] [&_.ProseMirror_p.is-empty]:before:float-left [&_.ProseMirror_p.is-empty]:before:pointer-events-none',
             theme === 'emerald' && 'prose-a:text-emerald-600'
           )}
         />
       </div>
 
       {/* Character Count */}
-      <div className="px-4 py-2 border-t border-gray-100 bg-gray-50/50 text-xs text-gray-500 flex justify-between">
+      <div className="px-4 py-2 border-t border-[var(--color-border)] bg-[var(--color-accent)]/50 text-xs text-[var(--color-muted)] flex justify-between">
         <span>
           {editor.storage.characterCount?.characters?.() || editor.getText().length} characters
         </span>
-        <span className="text-gray-400">
+        <span className="text-[var(--color-muted-foreground)]">
           Use toolbar to format text
         </span>
       </div>

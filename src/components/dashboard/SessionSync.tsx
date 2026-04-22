@@ -14,7 +14,8 @@ export default function SessionSync() {
   useEffect(() => {
     setStatus(status);
     if (status === 'authenticated') {
-      setSession(session);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setSession(session as any);
     }
   }, [status, session, setSession, setStatus]);
 

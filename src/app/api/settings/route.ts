@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import AppSettings from '@/models/AppSettings';
 import { logApiError, type LogContext } from '@/lib/logger';
+import { getCachedData, setCachedData } from '@/lib/redis';
 
 // GET /api/settings - Get app settings
 export async function GET() {
@@ -11,13 +12,25 @@ export async function GET() {
   };
 
   try {
+    const cacheKey = 'app:settings';
+
+    // Try cache first
+    const cached = await getCachedData(cacheKey);
+    if (cached) {
+      return NextResponse.json(cached, {
+        headers: {
+          'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+        },
+      });
+    }
+
     await dbConnect();
 
     const settings = await AppSettings.findOne().lean();
 
     if (!settings) {
       // Return default settings if none exist
-      return NextResponse.json({
+      const defaultSettings = {
         teacherLimits: {
           courses: 5,
           quizzes: 10,
@@ -36,12 +49,20 @@ export async function GET() {
           allowRegistration: true,
           defaultLanguage: 'en',
         },
-      }, {
+      };
+
+      // Cache default settings
+      await setCachedData(cacheKey, defaultSettings, 300); // 5 minutes
+
+      return NextResponse.json(defaultSettings, {
         headers: {
           'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
         },
       });
     }
+
+    // Cache the settings
+    await setCachedData(cacheKey, settings, 300); // 5 minutes
 
     return NextResponse.json(settings, {
       headers: {
