@@ -1,232 +1,322 @@
 # Super Book - Learning Management System
 
-## 🚀 Overview
+## 1. Project Overview
+
 Super Book is a modern Learning Management System (LMS) built with Next.js 15, featuring role-based access control, course management, quizzes, blogs, analytics, and comprehensive admin controls. The platform supports both English and Hindi languages with instant switching capabilities.
 
-## 🛠 Tech Stack
-- **Framework**: Next.js 15 (App Router + Turbopack)
+**Roles:**
+- **Student**: Browse courses, enroll, take quizzes, track progress, read blogs
+- **Teacher**: Create courses, quizzes, and blogs; view student analytics
+- **Admin**: Manage users, configure platform, view platform-wide analytics
+- **Super Admin**: Full platform control including organization management
+
+## 2. Tech Stack
+
+- **Framework**: Next.js 15 (App Router, Server Components, API Routes, Turbopack)
 - **Language**: TypeScript
 - **Database**: MongoDB + Mongoose
-- **Authentication**: NextAuth (JWT)
+- **Authentication**: NextAuth (JWT-based session handling)
+- **State Management**: Zustand (client-side caching)
+- **Caching**: Redis (server-side, optional/fallback-safe)
 - **Styling**: Tailwind CSS
 - **Animations**: Framer Motion
 - **Rich Text**: TipTap editor
 - **File Processing**: xlsx (Excel parsing)
 
-## 🏗 Architecture
+## 3. Authentication & Authorization
 
-### Directory Structure
+### Roles
+
+- **superadmin**: Full platform access, organization management
+- **admin**: User management within their organization, platform configuration
+- **teacher**: Content creation (courses, quizzes, blogs), student analytics
+- **student**: Course enrollment, quiz taking, progress tracking
+
+### Admin Access Logic (IMPORTANT)
+
+All authorization checks are enforced at the **API level** (backend), not frontend.
+
+#### User Management API (`/api/admin/users`)
+
+**Super Admin:**
+- Can access ALL users (no organization filter)
+
+**Admin (with organizationId):**
+- Can access:
+  - Users in their organization
+  - Users with `organizationId = null` (public users)
+- Cannot access users from other organizations
+
+**Admin (without organizationId):**
+- Can access ONLY users with `organizationId = null` (public users)
+
+**MongoDB Query Example:**
+```javascript
+{
+  $or: [
+    { organizationId: user.organizationId },
+    { organizationId: null },
+    { organizationId: { $exists: false } }
+  ]
+}
+```
+
+### Content Access Control (`getAccessFilter`)
+
+**Super Admin:**
+- Full access to all content (no filter)
+
+**Admin:**
+- Can ONLY see content from their organization (not public content)
+- Cannot see content from other organizations
+
+**Student/Teacher with organization:**
+- Can see public content + content from their organization
+
+**Student/Teacher without organization:**
+- Can only see public content
+
+### Route Protection
+
+- Middleware protects `/dashboard/admin/*` routes (admin and superadmin only)
+- Frontend role guards as secondary security layer
+- API-level authorization checks for all endpoints
+
+## 4. State Management (Zustand)
+
+Global stores used to cache frequently accessed data and prevent redundant API calls:
+
+### Stores
+
+**useSessionStore:**
+- Caches user session data
+- Prevents repeated `/api/auth/session` calls
+- Persists session state across components
+
+**useCachedStore:**
+- Caches enrollments by userId
+- Courses by organizationId
+- Quiz attempts by userId
+- Prevents duplicate API calls to `/api/enrollments`, `/api/quiz-attempts`, `/api/courses`
+
+**Usage Pattern:**
+```javascript
+const { enrollments: enrollmentsCache, fetchEnrollments } = useCachedStore();
+const userId = session?.user?.id;
+const enrollmentState = userId ? enrollmentsCache[userId] : null;
+
+// Only fetch if not cached
+if (!enrollmentState) {
+  fetchEnrollments(userId);
+}
+```
+
+## 5. API Optimization Strategy
+
+### Prevent Duplicate API Calls
+
+- Use `useEffect` guards to check if data is already cached
+- Store checks before making API requests
+- Cache data in Zustand stores with proper invalidation
+
+### MongoDB Query Optimization
+
+**Use `.lean()` for performance:**
+```javascript
+User.find(query).select('-password').lean()
+```
+
+**Field Projection (select only required fields):**
+```javascript
+User.find(query).select('name email role organizationId').lean()
+```
+
+**Indexes:**
+- `organizationId` on User, Course, Quiz, Blog models
+- `userId` on Enrollment, QuizAttempt, Favorite models
+- `courseId` on Enrollment model
+
+### Example Optimized Query
+```javascript
+const users = await User.find(query)
+  .select('name email role organizationId')
+  .skip(skip)
+  .limit(limit)
+  .lean();
+```
+
+## 6. Redis Caching
+
+Redis is **OPTIONAL** and fault-tolerant. If Redis is unavailable, the system continues to work by falling back to the database.
+
+### Usage
+
+Cache heavy GET APIs:
+- `/api/courses` (published courses)
+- `/api/blogs` (published blogs)
+- `/api/analytics` (aggregated data)
+
+### TTL Configuration
+- Courses: 300 seconds (5 minutes)
+- Blogs: 300 seconds (5 minutes)
+- Analytics: 60 seconds (1 minute)
+
+### Implementation Pattern
+```javascript
+import { getCachedData, setCachedData, invalidatePattern } from '@/lib/redis';
+
+// GET - Try cache first
+const cacheKey = `courses:${orgId}:${page}:${limit}`;
+const cached = await getCachedData(cacheKey);
+if (cached) return NextResponse.json(cached);
+
+// Fetch from DB
+const data = await Course.find(query).lean();
+
+// Set cache
+await setCachedData(cacheKey, data, 300);
+
+// POST/PUT/DELETE - Invalidate cache
+await invalidatePattern(`courses:${orgId}:*`);
+```
+
+### Safety Mechanisms
+
+All Redis operations are wrapped in try/catch:
+```javascript
+try {
+  const cached = await getCachedData(cacheKey);
+  if (cached) return JSON.parse(cached);
+} catch (error) {
+  console.warn('[Redis] Cache unavailable, falling back to DB');
+  // Continue to DB fetch
+}
+```
+
+## 7. Performance Fixes Implemented
+
+### Reduced Excessive API Calls
+- Fixed repeated `/api/auth/session` calls using Zustand session store
+- Capped enrollment and quiz-attempt API calls to once per session
+- Added cache checks before API requests
+
+### Database Query Optimization
+- Added `.lean()` to all Mongoose queries for better performance
+- Implemented field projection to reduce data transfer
+- Added proper indexes on frequently queried fields
+
+### Caching Strategy
+- Implemented Redis caching for heavy read operations
+- Added Zustand stores for client-side data caching
+- Implemented cache invalidation on data mutations
+
+### Improved Dashboard Load Times
+- Reduced initial API calls from 15+ to 3-5 per page load
+- Added skeleton loaders for better perceived performance
+- Implemented parallel data fetching where possible
+
+## 8. Known Issues & Safeguards
+
+### Redis Connection Failures
+- **Safeguard**: All Redis calls wrapped in try/catch
+- **Fallback**: System continues to work using database only
+- **Logging**: Warnings logged when Redis is unavailable
+
+### Cache Staleness
+- **Safeguard**: TTL-based expiration (60-300 seconds)
+- **Invalidation**: Cache invalidated on POST/PUT/DELETE operations
+- **Fallback**: Data always available from database
+
+### Data Leakage Prevention
+- **Safeguard**: Strict backend filtering by organizationId
+- **Safeguard**: Role-based access control at API level
+- **Safeguard**: Frontend role guards as secondary layer
+
+### Session Sync
+- **Issue**: Type mismatch between NextAuth Session and Zustand Session
+- **Fix**: Type casting in SessionSync component
+- **Status**: Functional, pending proper type definition update
+
+## 9. Folder Structure (High Level)
+
 ```
 src/
 ├── app/
 │   ├── (auth)/              # Authentication pages
-│   │   ├── login/           # Login page with glassmorphism UI
-│   │   └── register/        # Registration with role selection
+│   │   ├── login/
+│   │   └── register/
 │   ├── (dashboard)/
 │   │   ├── dashboard/
-│   │   │   ├── student/     # Student dashboard & features
-│   │   │   ├── teacher/     # Teacher dashboard & content management
-│   │   │   └── admin/       # Admin panel & system controls
+│   │   │   ├── student/     # Student dashboard
+│   │   │   ├── teacher/     # Teacher dashboard
+│   │   │   └── admin/       # Admin panel
 │   └── api/                 # API routes
+│       ├── admin/           # Admin-only endpoints
+│       ├── auth/            # NextAuth configuration
+│       ├── courses/         # Course management
+│       ├── quizzes/         # Quiz management
+│       ├── blogs/           # Blog management
+│       ├── enrollments/     # Enrollment tracking
+│       ├── quiz-attempts/   # Quiz results
+│       ├── favorites/       # Blog favorites
+│       ├── organizations/   # Organization management
+│       └── analytics/       # Analytics data
 ├── components/
 │   ├── dashboard/           # Dashboard-specific components
 │   └── ui/                  # Reusable UI components
-├── contexts/               # React contexts
-├── hooks/                  # Custom React hooks
-├── i18n/                   # Internationalization files
-├── lib/                    # Utility functions
-└── models/                 # Mongoose schemas
+├── contexts/                # React contexts (AppSettings, RoleTheme)
+├── features/                # Feature-specific components
+│   ├── courses/
+│   ├── quizzes/
+│   └── blogs/
+├── hooks/                   # Custom React hooks
+├── i18n/                    # Translation files (en, hi)
+├── lib/                     # Utility functions
+│   ├── db.ts                # Database connection
+│   ├── redis.ts             # Redis client
+│   ├── auth.ts              # NextAuth configuration
+│   ├── logger.ts            # Logging utilities
+│   ├── accessControl.ts     # Authorization helpers
+│   └── serialize.ts         # MongoDB serialization
+├── models/                  # Mongoose schemas
+│   ├── User.ts
+│   ├── Organization.ts
+│   ├── Course.ts
+│   ├── Quiz.ts
+│   ├── QuizAttempt.ts
+│   ├── Enrollment.ts
+│   ├── Blog.ts
+│   ├── Favorite.ts
+│   └── AppSettings.ts
+└── store/                   # Zustand stores
+    ├── useSessionStore.ts
+    └── useCachedStore.ts
 ```
 
-## 🔑 Core Features
+## 10. Future Improvements
 
-### Authentication & Authorization
-- JWT-based authentication via NextAuth
-- Role-based access control (student, teacher, admin)
-- User suspension capabilities
-- Protected routes with server-side validation
+### Performance
+- Add request deduplication (React Query or SWR)
+- Implement Next.js server-side caching
+- Add background jobs for analytics aggregation
+- Optimize bundle size with code splitting
 
-### Student Features
-- Browse and enroll in courses
-- Take timed quizzes with auto-grading
-- View quiz results and detailed feedback
-- Track learning progress across courses
-- Read and favorite blog posts
-- Personalized dashboard with statistics
-
-### Teacher Features
-- Create and manage courses (draft/publish)
-- Create quizzes with manual entry or Excel upload
-- Write and manage blog posts with rich text editor
-- View analytics on student performance
-- Content creation limits (configurable by admin)
-- Publish/unpublish content
-
-### Admin Features
-- Full user management (CRUD operations)
-- Role assignment and user suspension
-- Platform-wide analytics dashboard
-- Content management (view, publish, delete all content)
-- Configure teacher content limits
-- Feature toggles (enable/disable platform features)
-- Platform configuration (maintenance mode, registration, etc.)
-- Organization management (create, edit, delete organizations)
-- User organization assignment (assign/remove users from organizations)
-- Invite code system for organization joining
-
-### Course System
-- Course enrollment with duplicate prevention
-- Progress tracking per course
-- Price support (free/paid)
-- Draft and published states
-- Instructor information
-
-### Quiz System
-- Multiple choice questions
-- Timer functionality
-- Auto-grading with instant feedback
-- Multiple attempts tracking
-- Result review with correct answers
-- Excel import for bulk question creation
-
-### Blog System
-- Rich text editor (TipTap)
-- Topic categorization
-- Draft/publish workflow
-- Student favorite system
-- Search and filter capabilities
-- Teacher ownership validation
-
-### Organization-Based Access Control
-- Hybrid access system (public + organization-restricted content)
-- Organizations with unique invite codes for user joining
-- Admin-controlled organization management (CRUD)
-- User organization assignment by admins
-- Content automatically inherits teacher's organization
-- Students see: public content + their organization's content
-- Admins have full access override to all content
-- Safe deletion (prevents deleting organizations with users/content)
-
-### Analytics
-- Teacher: Course performance, student stats, quiz attempts
-- Admin: Platform-wide metrics, user growth, content statistics
-- Visual dashboards with modern UI
-
-## 🎨 UI/UX Design
-- **Design Philosophy**: Premium SaaS-inspired UI (Stripe/Vercel aesthetic)
-- **Visual Style**: Glassmorphism, gradients, rounded corners, subtle shadows
-- **Animations**: Framer Motion for smooth transitions
-- **Responsiveness**: Mobile-first design with bottom navigation
-- **Loading States**: Skeleton loaders and spinners
-- **Accessibility**: Semantic HTML, aria-labels, keyboard navigation
-
-## 🌐 Internationalization
-- **Languages**: English (default), Hindi
-- **Architecture**: File-based translation system (no API dependencies)
-- **Switching**: Instant language switching without page reload
-- **Storage**: localStorage for language preference
-- **Coverage**: All major UI components translated
-- **Future**: Support for additional Indian languages (Telugu, Tamil, Bengali, Marathi)
-
-## ⚙️ Configuration
-
-### Environment Variables
-```env
-MONGODB_URI=mongodb://localhost:27017/super-book
-NEXTAUTH_SECRET=your-secret-key
-NEXTAUTH_URL=http://localhost:3000
-```
-
-### Database Models
-- **User**: Authentication, role, suspension status, organization assignment
-- **Organization**: Organization management with invite codes
-- **Course**: Course content, enrollment tracking, organization association
-- **Quiz**: Questions, options, time limits, organization association
-- **QuizAttempt**: Student quiz results
-- **Enrollment**: Student-course relationships
-- **Blog**: Blog posts with rich text, organization association
-- **Favorite**: Student blog favorites
-- **AppSettings**: Platform configuration
-
-## 🔐 Security
-- Server-side session validation
-- Role-based API access control
-- Ownership validation for content modifications
-- HTML sanitization (DOMPurify)
-- Password hashing
-- Admin self-protection (cannot suspend self)
-- Protected routes with middleware
-
-## 📱 Mobile Experience
-- Bottom navigation for students
-- Hamburger menu for desktop
-- Touch-friendly UI (44px minimum touch targets)
-- Responsive card layouts
-- Mobile-optimized forms
-
-## 🚀 Development Guidelines
-
-### API Development
-- Always validate sessions with `getServerSession(authOptions)`
-- Check user roles before allowing access
-- Return proper HTTP status codes (401, 403, 404, 500)
-- Use NextResponse for responses
-- Include error messages in response body
-
-### Component Development
-- Use TypeScript interfaces for props
-- Use 'use client' directive for client components
-- Keep components focused and reusable
-- Use Framer Motion for animations
-- Use Lucide React for icons
-
-### State Management
-- useState for local component state
-- useEffect for side effects and data fetching
-- useSession for authentication state
-- Global context for app-wide state (language)
-
-### Styling
-- Tailwind CSS for all styling
-- Mobile-first responsive design
-- Consistent spacing and border radius
-- Consistent color scheme (indigo/emerald)
-- Glassmorphism effects
-
-## 📊 Key APIs
-- `/api/auth/*` - Authentication endpoints
-- `/api/courses/*` - Course management
-- `/api/quizzes/*` - Quiz management
-- `/api/blogs/*` - Blog management
-- `/api/enrollments/*` - Enrollment tracking
-- `/api/quiz-attempts/*` - Quiz results
-- `/api/favorites/*` - Blog favorites
-- `/api/admin/settings` - Platform configuration
-- `/api/admin/users` - User management
-- `/api/admin/users/[userId]/organization` - User organization assignment
-- `/api/organizations` - Organization management (CRUD)
-- `/api/organizations/[id]` - Organization details
-- `/api/analytics/*` - Analytics data
-
-## 🎯 Recent Major Updates
-
-### April 2026
-- **Auth UI Redesign**: Premium glassmorphism login/register pages
-- **Blog System**: Complete content management with rich text editor
-- **I18n System**: File-based translations with instant switching
-- **Super Admin**: Full platform control with settings and limits
-- **Alert Component**: Modern toast notifications with auto-dismiss
-- **Blog Integration**: Alert component added to all blog pages
-
-## 🔮 Future Enhancements
+### Features
 - Avatar upload functionality
 - Email verification system
 - Video lessons support
 - Course completion certificates
-- Real-time notifications
+- Real-time notifications (WebSocket)
 - Payment gateway integration
 - Advanced analytics with charts
-- Bulk user import
+- Bulk user import (Excel)
 - Audit logs for admin actions
 - Content moderation system
 - Quiz multilingual data support
+
+### Architecture
+- Proper type definitions for SessionSync
+- Remove redundant SessionSync component (Zustand handles session)
+- Add API response caching headers
+- Implement rate limiting
+- Add request logging middleware
