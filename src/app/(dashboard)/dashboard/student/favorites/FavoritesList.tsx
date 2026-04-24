@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import useSWR, { mutate } from 'swr';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -35,9 +36,11 @@ export default function FavoritesList({ initialFavorites }: FavoritesListProps) 
       if (response.ok) {
         setFavorites(favorites.filter((fav) => fav._id !== favoriteId));
         removeFavoriteFromStore(blogId);
+        // Refetch favorites from API to ensure sync
+        mutate('/api/favorites');
       }
-    } catch (error) {
-      console.error('Error removing favorite:', error);
+    } catch {
+      // Error handled silently - favorite remains in UI
     }
   };
 

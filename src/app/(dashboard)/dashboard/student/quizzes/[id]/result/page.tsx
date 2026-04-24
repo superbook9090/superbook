@@ -73,7 +73,7 @@ export default function QuizResultPage() {
         setAttempt(data);
       }
     } catch {
-      console.error('Error fetching attempt');
+      // Error handled silently - UI shows loading state
     } finally {
       setIsLoading(false);
     }

@@ -509,6 +509,11 @@ export const hi = {
     settingsSaved: 'सेटिंग्स सफलतापूर्वक सहेजी गईं',
     failedLoadSettings: 'सेटिंग्स लोड करने में विफल',
     failedSaveSettings: 'सेटिंग्स सहेजने में विफल',
+    errorLoadingUsers: 'उपयोगकर्ताओं को लोड करने में त्रुटि',
+    errorUpdatingUser: 'उपयोगकर्ता अपडेट करने में त्रुटि',
+    errorDeletingUser: 'उपयोगकर्ता हटाने में त्रुटि',
+    errorUpdatingLimits: 'सीमाएं अपडेट करने में त्रुटि',
+    errorUpdatingOrganization: 'उपयोगकर्ता संगठन अपडेट करने में त्रुटि',
   },
 
   // Admin Users

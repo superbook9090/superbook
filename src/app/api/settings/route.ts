@@ -17,12 +17,15 @@ export async function GET() {
     // Try cache first
     const cached = await getCachedData(cacheKey);
     if (cached) {
+      console.log(`✅ Redis Cache HIT: ${cacheKey}`);
       return NextResponse.json(cached, {
         headers: {
           'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
         },
       });
     }
+
+    console.log(`❌ Redis Cache MISS: ${cacheKey}`);
 
     await dbConnect();
 
@@ -53,6 +56,7 @@ export async function GET() {
 
       // Cache default settings
       await setCachedData(cacheKey, defaultSettings, 300); // 5 minutes
+      console.log(`✅ Redis Cache SET: ${cacheKey}`);
 
       return NextResponse.json(defaultSettings, {
         headers: {
@@ -63,6 +67,7 @@ export async function GET() {
 
     // Cache the settings
     await setCachedData(cacheKey, settings, 300); // 5 minutes
+    console.log(`✅ Redis Cache SET: ${cacheKey}`);
 
     return NextResponse.json(settings, {
       headers: {

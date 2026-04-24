@@ -67,7 +67,7 @@ export default function StudentQuizzesPage() {
         const quizzesData = await quizzesRes.json();
 
         if (!quizzesRes.ok) {
-          console.error('Quizzes error:', quizzesData);
+          setAlertState({ type: 'error', message: t('errors.failedLoadQuizzes') || 'Failed to load quizzes' });
           return;
         }
 

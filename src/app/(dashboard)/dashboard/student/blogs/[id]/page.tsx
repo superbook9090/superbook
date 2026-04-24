@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { mutate } from 'swr';
 import { useRouter, useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
@@ -69,6 +70,8 @@ export default function BlogDetailPage() {
       if (isFavorited) {
         await fetch(`/api/favorites/${blogId}`, { method: 'DELETE' });
         removeFavorite(blogId);
+        // Refetch favorites to sync across pages
+        mutate('/api/favorites');
       } else {
         const response = await fetch('/api/favorites', {
           method: 'POST',
@@ -77,10 +80,12 @@ export default function BlogDetailPage() {
         });
         if (response.ok || response.status === 409) {
           addFavorite(blogId);
+          // Refetch favorites to sync across pages
+          mutate('/api/favorites');
         }
       }
-    } catch (error) {
-      console.error('Error toggling favorite:', error);
+    } catch {
+      setAlertState({ type: 'error', message: 'Failed to update favorite' });
     }
   };
 

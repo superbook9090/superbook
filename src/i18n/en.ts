@@ -509,6 +509,11 @@ export const en = {
     settingsSaved: 'Settings saved successfully',
     failedLoadSettings: 'Failed to load settings',
     failedSaveSettings: 'Failed to save settings',
+    errorLoadingUsers: 'Error loading users',
+    errorUpdatingUser: 'Error updating user',
+    errorDeletingUser: 'Error deleting user',
+    errorUpdatingLimits: 'Error updating limits',
+    errorUpdatingOrganization: 'Error updating user organization',
   },
 
   // Admin Users

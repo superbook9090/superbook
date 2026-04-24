@@ -102,8 +102,7 @@ export default function AdminUsersPage() {
         setMessage({ type: 'error', text: data.message || 'Failed to load users' });
       }
     } catch (err) {
-      setMessage({ type: 'error', text: 'Error loading users' });
-      console.error('Users error:', err);
+      setMessage({ type: 'error', text: t('admin.errorLoadingUsers') || 'Error loading users' });
     } finally {
       setIsLoading(false);
     }
@@ -117,8 +116,8 @@ export default function AdminUsersPage() {
       if (response.ok) {
         setOrganizations(data.organizations || []);
       }
-    } catch (err) {
-      console.error('Error fetching organizations:', err);
+    } catch {
+      // Organizations fetch failed, handled silently
     }
   }, []);
 
@@ -151,9 +150,8 @@ export default function AdminUsersPage() {
       } else {
         setMessage({ type: 'error', text: data.message || 'Failed to update user' });
       }
-    } catch (err) {
-      setMessage({ type: 'error', text: 'Error updating user' });
-      console.error('Users error:', err);
+    } catch {
+      setMessage({ type: 'error', text: t('admin.errorUpdatingUser') || 'Error updating user' });
     }
   };
 
@@ -172,9 +170,8 @@ export default function AdminUsersPage() {
       } else {
         setMessage({ type: 'error', text: data.message || 'Failed to delete user' });
       }
-    } catch (err) {
-      setMessage({ type: 'error', text: 'Error deleting user' });
-      console.error('Users error:', err);
+    } catch {
+      setMessage({ type: 'error', text: t('admin.errorDeletingUser') || 'Error deleting user' });
     }
   };
 
@@ -215,9 +212,8 @@ export default function AdminUsersPage() {
       } else {
         setMessage({ type: 'error', text: data.message || t('adminUsers.failedUpdateLimits') });
       }
-    } catch (err) {
-      setMessage({ type: 'error', text: 'Error updating limits' });
-      console.error('Limits error:', err);
+    } catch {
+      setMessage({ type: 'error', text: t('admin.errorUpdatingLimits') || 'Error updating limits' });
     }
   };
 
@@ -248,9 +244,8 @@ export default function AdminUsersPage() {
       } else {
         setMessage({ type: 'error', text: data.message || 'Failed to update user organization' });
       }
-    } catch (err) {
-      setMessage({ type: 'error', text: 'Error updating user organization' });
-      console.error('Organization assignment error:', err);
+    } catch {
+      setMessage({ type: 'error', text: t('admin.errorUpdatingOrganization') || 'Error updating user organization' });
     }
   };
 
