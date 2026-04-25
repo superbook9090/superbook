@@ -8,6 +8,7 @@ import MobileBottomNav from '@/features/dashboard/components/MobileBottomNav';
 import DashboardHeader from '@/features/dashboard/components/DashboardHeader';
 import { RoleThemeProvider } from '@/contexts/RoleThemeContext';
 import { QuizProvider } from '@/contexts/QuizContext';
+import { isAdmin, isSuperAdmin } from '@/lib/roles';
 
 // TODO: Add translation keys for navigation items
 // Currently using hardcoded strings - should use i18n system
@@ -53,26 +54,35 @@ export default async function DashboardLayout({
   }
 
   const role = session.user?.role;
-  const isTeacherOrAdmin = role === 'teacher' || role === 'admin';
+  const isStaff = ['teacher', 'admin', 'superadmin'].includes(role || '');
+  const isAdminUser = isAdmin(role);
+  const isSuperAdminUser = isSuperAdmin(role);
+  const isStudent = role === 'student';
 
   // Filter admin navigation based on role
-  const filteredAdminNavigation = role === 'superadmin'
+  const filteredAdminNavigation = isSuperAdminUser
     ? adminNavigation
     : adminNavigation.filter((item) => !item.superadminOnly);
 
+  // Determine navigation based on role
+  let mainNavigation = studentNavigation;
+  if (isStaff) {
+    mainNavigation = teacherNavigation;
+  }
+
   return (
     <QuizProvider>
-      <div className="min-h-screen bg-[var(--color-foreground)] flex flex-col md:flex-row">
+      <div className="min-h-screen bg-[var(--color-foreground)] flex flex-col md:flex-row overflow-x-hidden">
         {/* Mobile Navigation Header - Fixed */}
         <MobileNav
           user={session.user}
-          navigation={isTeacherOrAdmin ? teacherNavigation : studentNavigation}
-          adminNavigation={isTeacherOrAdmin ? filteredAdminNavigation : []}
+          navigation={mainNavigation}
+          adminNavigation={isAdminUser ? filteredAdminNavigation : []}
         />
 
         {/* Sidebar - Desktop Only */}
         <aside className="hidden md:block flex-shrink-0">
-          {isTeacherOrAdmin ? (
+          {isStaff ? (
             <TeacherSidebar user={session.user} />
           ) : (
             <StudentSidebar user={session.user} />
@@ -82,7 +92,7 @@ export default async function DashboardLayout({
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-h-screen md:min-h-0 md:h-screen overflow-hidden">
           {/* Desktop Header - Sticky */}
-          <DashboardHeader isTeacherOrAdmin={isTeacherOrAdmin} />
+          <DashboardHeader isTeacherOrAdmin={isStaff} />
 
           {/* Main Content - Scrollable */}
           <main className="flex-1 overflow-x-hidden overflow-y-auto bg-[var(--color-foreground)] p-4 sm:p-6 lg:p-8 pb-24 md:pb-8">
@@ -95,8 +105,8 @@ export default async function DashboardLayout({
 
           {/* Mobile Bottom Navigation */}
           <MobileBottomNav
-            navigation={isTeacherOrAdmin ? teacherNavigation : studentNavigation}
-            colorScheme={isTeacherOrAdmin ? 'emerald' : 'indigo'}
+            navigation={mainNavigation}
+            colorScheme={isStaff ? 'emerald' : 'indigo'}
           />
         </div>
       </div>

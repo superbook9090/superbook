@@ -33,15 +33,15 @@ export default function AdminDashboardPage() {
   // Role-based redirect handled in /dashboard/page.tsx - no redirect here
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-x-hidden">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="flex items-center gap-3"
       >
-        <div className="p-3 bg-[var(--admin-soft)] rounded-xl">
-          <SettingsIcon className="w-6 h-6 text-[var(--admin-primary)]" />
+        <div className="p-3 bg-[var(--primary-soft)] rounded-xl">
+          <SettingsIcon className="w-6 h-6 text-[var(--primary)]" />
         </div>
         <div>
           <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">{t('admin.adminDashboard')}</h1>
@@ -54,11 +54,11 @@ export default function AdminDashboardPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
       >
         <a
           href="/dashboard/admin/users"
-          className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 hover:shadow-lg transition-all group"
+          className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-4 sm:p-6 hover:shadow-lg transition-all group w-full"
         >
           <div className="flex items-center">
             <div className="p-3 rounded-full bg-[var(--info-light)] text-[var(--info)] group-hover:bg-[var(--info-light)]/80 transition-colors">
@@ -73,7 +73,7 @@ export default function AdminDashboardPage() {
 
         <a
           href="/dashboard/admin/courses"
-          className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 hover:shadow-lg transition-all group"
+          className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-4 sm:p-6 hover:shadow-lg transition-all group w-full"
         >
           <div className="flex items-center">
             <div className="p-3 rounded-full bg-[var(--success-light)] text-[var(--success)] group-hover:bg-[var(--success-light)]/80 transition-colors">
@@ -88,7 +88,7 @@ export default function AdminDashboardPage() {
 
         <a
           href="/dashboard/admin/analytics"
-          className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 hover:shadow-lg transition-all group"
+          className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-4 sm:p-6 hover:shadow-lg transition-all group w-full"
         >
           <div className="flex items-center">
             <div className="p-3 rounded-full bg-[var(--student-soft)] text-[var(--student-primary)] group-hover:bg-[var(--student-border)] transition-colors">
@@ -103,7 +103,7 @@ export default function AdminDashboardPage() {
 
         <a
           href="/dashboard/admin/settings"
-          className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 hover:shadow-lg transition-all group"
+          className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-4 sm:p-6 hover:shadow-lg transition-all group w-full"
         >
           <div className="flex items-center">
             <div className="p-3 rounded-full bg-[var(--warning-light)] text-[var(--warning)] group-hover:bg-[var(--warning-light)]/80 transition-colors">

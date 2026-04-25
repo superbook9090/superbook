@@ -133,7 +133,7 @@ export default function AdminAnalyticsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-x-hidden">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -190,7 +190,7 @@ export default function AdminAnalyticsPage() {
               <Users className="w-5 h-5" />
               Users
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
               <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
                 <p className="text-3xl font-bold text-[var(--info)]">{stats.users.total}</p>
                 <p className="text-sm text-[var(--color-muted-foreground)] mt-1">Total Users</p>
@@ -204,7 +204,7 @@ export default function AdminAnalyticsPage() {
                 <p className="text-sm text-[var(--color-muted-foreground)] mt-1">Teachers</p>
               </div>
               <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
-                <p className="text-3xl font-bold text-[var(--admin-primary)]">{stats.users.admins}</p>
+                <p className="text-3xl font-bold text-[var(--primary)]">{stats.users.admins}</p>
                 <p className="text-sm text-[var(--color-muted-foreground)] mt-1">Admins</p>
               </div>
               <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
@@ -224,7 +224,7 @@ export default function AdminAnalyticsPage() {
               <BookOpen className="w-5 h-5" />
               Content & Engagement
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
               <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
                 <p className="text-3xl font-bold text-[var(--info)]">{stats.courses.total}</p>
                 <p className="text-sm text-[var(--color-muted-foreground)] mt-1">Total Courses</p>
@@ -246,7 +246,7 @@ export default function AdminAnalyticsPage() {
                 <p className="text-sm text-[var(--color-muted-foreground)] mt-1">Quizzes</p>
               </div>
               <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
-                <p className="text-3xl font-bold text-[var(--admin-primary)]">{stats.quizzes.totalAttempts}</p>
+                <p className="text-3xl font-bold text-[var(--primary)]">{stats.quizzes.totalAttempts}</p>
                 <p className="text-sm text-[var(--color-muted-foreground)] mt-1">Quiz Attempts</p>
               </div>
             </div>

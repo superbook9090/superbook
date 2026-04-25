@@ -150,7 +150,7 @@ export default function AdminCoursesPage() {
   }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 space-y-6">
+    <div className="px-4 sm:px-6 lg:px-8 space-y-6 overflow-x-hidden">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -195,7 +195,7 @@ export default function AdminCoursesPage() {
             placeholder="Search courses or instructors..."
             defaultValue={searchTerm}
             onChange={(e) => debouncedSearchHandler(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)]/20 focus:border-[var(--admin-primary)]"
+            className="w-full pl-10 pr-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
           />
         </div>
 
@@ -205,7 +205,7 @@ export default function AdminCoursesPage() {
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value as 'all' | 'published' | 'draft')}
-            className="px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)]/20 focus:border-[var(--admin-primary)]"
+            className="px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
           >
             <option value="all">All Courses</option>
             <option value="published">Published</option>
@@ -219,7 +219,7 @@ export default function AdminCoursesPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="grid grid-cols-3 gap-4"
+        className="grid grid-cols-1 sm:grid-cols-3 gap-4"
       >
         <div className="bg-[var(--card-solid)] rounded-xl p-4 shadow-sm">
           <p className="text-2xl font-bold text-[var(--info)]">{courses.length}</p>
@@ -260,7 +260,7 @@ export default function AdminCoursesPage() {
               <div className="p-6">
                 {/* Header */}
                 <div className="flex items-start justify-between mb-4">
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-[var(--admin-primary)] to-[var(--admin-accent)] text-white">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-[var(--primary)] to-[var(--primary-accent)] text-white">
                     <GraduationCap className="w-5 h-5" />
                   </div>
                   <div className="flex items-center gap-2">

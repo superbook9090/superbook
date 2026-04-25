@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useFeature } from '@/contexts/AppSettingsContext';
 import { useQuiz } from '@/contexts/QuizContext';
+import { isAdmin, isSuperAdmin } from '@/lib/roles';
 
 const teacherNavigation = [
   { name: 'common.dashboard', href: '/dashboard/teacher', icon: LayoutDashboard },
@@ -52,8 +53,9 @@ export default function TeacherSidebar({ user }: { user: User | null }) {
   const pathname = usePathname();
   const { t } = useTranslation();
   const { isQuizActive } = useQuiz();
-  const isAdmin = user?.role === 'admin';
-  const isSuperAdmin = user?.role === 'superadmin';
+  const isStaff = ['teacher', 'admin', 'superadmin'].includes(user?.role || '');
+  const isAdminUser = isAdmin(user?.role);
+  const isSuperAdminUser = isSuperAdmin(user?.role);
 
   const enableBlogs = useFeature('enableBlogs');
   const enableQuizzes = useFeature('enableQuizzes');
@@ -77,7 +79,7 @@ export default function TeacherSidebar({ user }: { user: User | null }) {
 
   const filteredAdminNavigation = adminNavigation.filter(item => {
     // Filter out superadminOnly items for non-superadmin users
-    if (item.superadminOnly && !isSuperAdmin) {
+    if (item.superadminOnly && !isSuperAdminUser) {
       return false;
     }
     if (item.feature === 'enableBlogs') {
@@ -93,10 +95,13 @@ export default function TeacherSidebar({ user }: { user: User | null }) {
   });
 
   return (
-    <div className="hidden lg:flex flex-col w-72 h-screen bg-gradient-to-b from-[var(--teacher-primary)] to-[var(--teacher-primary-dark)] relative overflow-hidden">
+    <div className="hidden lg:flex flex-col w-72 h-screen bg-gradient-to-br from-[var(--teacher-primary)] via-[var(--teacher-primary)] to-[var(--teacher-primary-dark)] relative overflow-hidden">
       {/* Decorative background elements */}
       <div className="absolute top-0 right-0 w-48 h-48 lg:w-64 lg:h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-32 h-32 lg:w-48 lg:h-48 bg-[var(--teacher-primary-light)]/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
+      <div className="absolute top-1/3 left-0 w-24 h-24 bg-[var(--teacher-accent)]/10 rounded-full blur-2xl -translate-x-1/2 pointer-events-none" />
+      <div className="absolute bottom-1/4 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl translate-x-1/2 pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 w-40 h-40 bg-gradient-to-br from-[var(--teacher-accent)]/5 to-transparent rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
 
       {/* Scrollable Content Area */}
       <div className="flex-1 flex flex-col min-h-0 overflow-y-auto pt-4 sm:pt-6 pb-4 relative z-10 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
@@ -120,12 +125,12 @@ export default function TeacherSidebar({ user }: { user: User | null }) {
         {/* Role Badge */}
         <div className="mt-4 sm:mt-6 px-4 sm:px-6">
           <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-sm border ${
-            isAdmin
+            isAdminUser
               ? 'bg-[var(--color-error)]/30 text-white border-[var(--color-error)]/30'
               : 'bg-white/20 text-white border-white/10'
           }`}>
-            <span className={`w-1.5 h-1.5 rounded-full mr-2 animate-pulse ${isAdmin ? 'bg-[var(--color-error)]' : 'bg-[var(--teacher-primary-light)]'}`} />
-            {isAdmin ? t('common.administrator') : t('common.teacher')}
+            <span className={`w-1.5 h-1.5 rounded-full mr-2 animate-pulse ${isAdminUser ? 'bg-[var(--color-error)]' : 'bg-[var(--teacher-primary-light)]'}`} />
+            {isAdminUser ? t('common.administrator') : t('common.teacher')}
           </span>
         </div>
 
@@ -167,7 +172,7 @@ export default function TeacherSidebar({ user }: { user: User | null }) {
             );
           })}
 
-          {isAdmin && (
+          {isAdminUser && (
             <div className="pt-3 sm:pt-4 mt-3 sm:mt-4 border-t border-white/10">
               <p className="px-3 sm:px-4 text-xs font-semibold text-[var(--teacher-primary-light)]/70 uppercase tracking-wider mb-2">
                 {t('common.administration')}
@@ -188,7 +193,7 @@ export default function TeacherSidebar({ user }: { user: User | null }) {
                         href={item.href}
                         className={`group flex items-center px-3 sm:px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
                           isActive
-                            ? 'bg-[var(--color-error)]/30 text-white shadow-lg backdrop-blur-sm'
+                            ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm'
                             : 'text-[var(--teacher-primary-light)] hover:bg-white/10 hover:text-white'
                         }`}
                       >

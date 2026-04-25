@@ -6,6 +6,7 @@ import User from '@/models/User';
 import dbConnect from '@/lib/db';
 import { sanitizeSearchQuery, validateObjectId } from '@/lib/sanitize';
 import { logApiError, type LogContext } from '@/lib/logger';
+import { hasAccess, isAdmin, isSuperAdmin } from '@/lib/roles';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface QueryFilter { [key: string]: any }
@@ -21,19 +22,17 @@ async function checkAdmin(session: any) {
   const userId = session.user?.id;
   const organizationId = session.user?.organizationId;
 
-  // Only admin and superadmin roles can access this endpoint
-  if (userRole !== 'admin' && userRole !== 'superadmin') {
+  // Use role hierarchy - admin or higher can access
+  if (!isAdmin(userRole)) {
     return { authorized: false, reason: 'Insufficient role', userId };
   }
-
-  // Admins without organizationId are allowed to access the endpoint
-  // They will only see users with no organization (handled by query filtering)
 
   return {
     authorized: true,
     role: userRole,
     userId,
     organizationId,
+    isSuperAdmin: isSuperAdmin(userRole),
   };
 }
 
@@ -74,15 +73,16 @@ export async function GET(request: NextRequest) {
 
     // STRICT ORGANIZATION FILTERING:
     // - Super admins can see ALL users (no filter)
-    // - Regular admins can ONLY see users from their organization
+    // - Public admins (without organizationId) can see ONLY public users (users without organizationId)
+    // - Organizational admins (with organizationId) can see ONLY users from their organization
     let orgFilter: QueryFilter = {};
-    if (authResult.role === 'admin') {
-      // Admin must have an organizationId to see users
+    if (!authResult.isSuperAdmin) {
+      // Regular admin (not superadmin)
       if (!authResult.organizationId) {
-        // Admin without organization sees no users
-        orgFilter = { _id: null }; // This returns no results
+        // Public admin sees only public users (users without organization)
+        orgFilter = { organizationId: null };
       } else {
-        // Admin can ONLY see users from their organization
+        // Organizational admin sees only users from their organization
         orgFilter = { organizationId: authResult.organizationId };
       }
     }
@@ -190,7 +190,7 @@ export async function PATCH(request: NextRequest) {
 
     // ORGANIZATION-LEVEL AUTHORIZATION:
     // Regular admins can only update users from their own organization
-    if (authResult.role === 'admin') {
+    if (!authResult.isSuperAdmin) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const targetOrgId = (targetUser as any).organizationId?.toString();
       if (targetOrgId !== authResult.organizationId?.toString()) {
@@ -330,7 +330,7 @@ export async function DELETE(request: NextRequest) {
 
     // ORGANIZATION-LEVEL AUTHORIZATION:
     // Regular admins can only delete users from their own organization
-    if (authResult.role === 'admin') {
+    if (!authResult.isSuperAdmin) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const targetOrgId = (targetUser as any).organizationId?.toString();
       if (targetOrgId !== authResult.organizationId?.toString()) {
@@ -349,9 +349,18 @@ export async function DELETE(request: NextRequest) {
     }
     // Super admin: no organization restriction
 
+    // Prevent deleting superadmin accounts - no one can delete superadmins
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((targetUser as any).role === 'superadmin') {
+      return NextResponse.json(
+        { message: 'Super admin accounts cannot be deleted' },
+        { status: 403 }
+      );
+    }
+
     // Prevent deleting other admins (only superadmin can do this)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((targetUser as any).role === 'admin' && authResult.role !== 'superadmin') {
+    if ((targetUser as any).role === 'admin' && !authResult.isSuperAdmin) {
       return NextResponse.json(
         { message: 'Only super admins can delete admin accounts' },
         { status: 403 }

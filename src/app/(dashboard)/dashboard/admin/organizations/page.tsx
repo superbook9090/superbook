@@ -1,24 +1,29 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/hooks/useTranslation';
+import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { motion } from 'framer-motion';
 import {
   Building2,
   Plus,
+  Search,
   Edit,
   Trash2,
+  Copy,
+  X,
+  Check,
+  AlertCircle,
   Users,
   BookOpen,
   FileText,
   ClipboardList,
-  Copy,
-  Check,
-  X
 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/Skeleton';
 import Alert from '@/components/ui/Alert';
-import { useTranslation } from '@/hooks/useTranslation';
+import { useRouter } from 'next/navigation';
 import { useSessionStore } from '@/store/useSessionStore';
+import { isSuperAdmin } from '@/lib/roles';
 
 interface Organization {
   _id: string;
@@ -60,7 +65,7 @@ export default function OrganizationsPage() {
       return;
     }
 
-    if (session.user?.role !== 'superadmin') {
+    if (!isSuperAdmin(session.user?.role)) {
       router.push('/dashboard');
       return;
     }
@@ -194,16 +199,16 @@ export default function OrganizationsPage() {
   }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 space-y-6">
+    <div className="px-4 sm:px-6 lg:px-8 space-y-6 overflow-x-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">{t('organizations.title')}</h1>
           <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">{t('organizations.description')}</p>
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 min-h-[44px] px-4 py-3 sm:px-4 sm:py-2 bg-[var(--admin-primary)] text-white rounded-lg hover:bg-[var(--admin-primary)]/90 transition-colors"
+          className="w-full sm:w-auto flex items-center justify-center gap-2 min-h-[44px] px-4 py-3 sm:px-4 sm:py-2 bg-[var(--primary)] text-white rounded-lg hover:bg-[var(--primary)]/90 transition-colors"
         >
           <Plus className="w-5 h-5" />
           {t('organizations.createOrganization')}
@@ -228,7 +233,7 @@ export default function OrganizationsPage() {
             <p className="text-[var(--color-muted-foreground)] mb-4">{t('organizations.noOrganizationsDesc')}</p>
             <button
               onClick={() => setShowCreateModal(true)}
-              className="inline-flex items-center gap-2 min-h-[44px] px-4 py-3 sm:px-4 sm:py-2 bg-[var(--admin-primary)] text-white rounded-lg hover:bg-[var(--admin-primary)]/90 transition-colors"
+              className="inline-flex items-center gap-2 min-h-[44px] px-4 py-3 sm:px-4 sm:py-2 bg-[var(--primary)] text-white rounded-lg hover:bg-[var(--primary)]/90 transition-colors"
             >
               <Plus className="w-5 h-5" />
               {t('organizations.createOrganization')}
@@ -311,10 +316,10 @@ export default function OrganizationsPage() {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-2 ml-4">
+                  <div className="flex items-center gap-2 sm:ml-4 mt-4 sm:mt-0">
                     <button
                       onClick={() => openEditModal(org)}
-                      className="p-2 min-h-[44px] sm:min-h-0 text-[var(--color-muted-foreground)] hover:text-[var(--admin-primary)] hover:bg-[var(--info-light)] rounded-lg transition-colors"
+                      className="p-2 min-h-[44px] sm:min-h-0 text-[var(--color-muted-foreground)] hover:text-[var(--primary)] hover:bg-[var(--info-light)] rounded-lg transition-colors"
                     >
                       <Edit className="w-5 h-5" />
                     </button>
@@ -360,7 +365,7 @@ export default function OrganizationsPage() {
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-2 min-h-[44px] border border-[var(--border)] text-[var(--color-foreground)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)]"
+                  className="w-full px-4 py-2 min-h-[44px] border border-[var(--border)] text-[var(--color-foreground)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
                   placeholder={t('organizations.namePlaceholder')}
                 />
               </div>
@@ -372,7 +377,7 @@ export default function OrganizationsPage() {
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-4 py-2 border border-[var(--border)] text-[var(--color-foreground)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)]"
+                  className="w-full px-4 py-2 border border-[var(--border)] text-[var(--color-foreground)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
                   placeholder={t('organizations.briefDescription')}
                   rows={3}
                 />
@@ -384,7 +389,7 @@ export default function OrganizationsPage() {
                   id="isActive"
                   checked={formData.isActive}
                   onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                  className="w-4 h-4 text-[var(--admin-primary)] border-[var(--border)] rounded focus:ring-[var(--admin-primary)]"
+                  className="w-4 h-4 text-[var(--primary)] border-[var(--border)] rounded focus:ring-[var(--primary)]"
                 />
                 <label htmlFor="isActive" className="text-sm text-[var(--color-foreground)]">
                   {t('organizations.active')}
@@ -401,7 +406,7 @@ export default function OrganizationsPage() {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 min-h-[44px] sm:min-h-0 px-4 py-2 bg-[var(--admin-primary)] text-white rounded-lg hover:bg-[var(--admin-primary)]/90 transition-colors"
+                  className="flex-1 min-h-[44px] sm:min-h-0 px-4 py-2 bg-[var(--primary)] text-white rounded-lg hover:bg-[var(--primary)]/90 transition-colors"
                 >
                   {t('organizations.create')}
                 </button>
@@ -439,7 +444,7 @@ export default function OrganizationsPage() {
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-2 min-h-[44px] border border-[var(--border)] text-[var(--color-foreground)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)]"
+                  className="w-full px-4 py-2 min-h-[44px] border border-[var(--border)] text-[var(--color-foreground)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
                   placeholder={t('organizations.namePlaceholder')}
                 />
               </div>
@@ -451,7 +456,7 @@ export default function OrganizationsPage() {
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-4 py-2 border border-[var(--border)] text-[var(--color-foreground)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)]"
+                  className="w-full px-4 py-2 border border-[var(--border)] text-[var(--color-foreground)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
                   rows={3}
                 />
               </div>
@@ -462,7 +467,7 @@ export default function OrganizationsPage() {
                   id="isActive"
                   checked={formData.isActive}
                   onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                  className="w-4 h-4 text-[var(--admin-primary)] border-[var(--border)] rounded focus:ring-[var(--admin-primary)]"
+                  className="w-4 h-4 text-[var(--primary)] border-[var(--border)] rounded focus:ring-[var(--primary)]"
                 />
                 <label htmlFor="isActive" className="text-sm text-[var(--color-foreground)]">
                   {t('organizations.active')}
@@ -479,7 +484,7 @@ export default function OrganizationsPage() {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 min-h-[44px] sm:min-h-0 px-4 py-2 bg-[var(--admin-primary)] text-white rounded-lg hover:bg-[var(--admin-primary)]/90 transition-colors"
+                  className="flex-1 min-h-[44px] sm:min-h-0 px-4 py-2 bg-[var(--primary)] text-white rounded-lg hover:bg-[var(--primary)]/90 transition-colors"
                 >
                   {t('organizations.update')}
                 </button>

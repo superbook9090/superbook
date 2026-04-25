@@ -55,16 +55,6 @@ export default function LoginForm() {
 
       console.log('Fetching session after login...');
 
-      // Directly fetch session to ensure it's visible in network tab
-      const sessionRes = await fetch(`/api/auth/session?_t=${Date.now()}`, {
-        cache: 'no-store',
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-        },
-      });
-
-      console.log('Session fetch completed:', sessionRes.status);
-
       // Also update Zustand store
       await fetchSession(true);
 

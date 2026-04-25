@@ -60,7 +60,16 @@ export async function POST(request: Request) {
     await user.save();
 
     return NextResponse.json(
-      { message: 'User created successfully' },
+      { 
+        message: 'User created successfully',
+        user: {
+          id: user._id.toString(),
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          organizationId: user.organizationId?.toString() || null,
+        }
+      },
       { status: 201 }
     );
   } catch (error) {

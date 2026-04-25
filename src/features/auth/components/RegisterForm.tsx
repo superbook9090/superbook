@@ -22,7 +22,7 @@ import {
 import Loader from '@/components/ui/Loader';
 
 export default function RegisterForm() {
-  const { status } = useSessionStore();
+  const { status, fetchSession } = useSessionStore();
   const router = useRouter();
   const { t } = useTranslation();
   const [formData, setFormData] = useState({
@@ -82,7 +82,26 @@ export default function RegisterForm() {
         throw new Error(data.message || 'Registration failed');
       }
 
-      router.push('/login');
+      // Automatically sign in after successful registration
+      const signInResult = await signIn('credentials', {
+        email: formData.email,
+        password: formData.password,
+        redirect: false,
+      });
+
+      if (signInResult?.error) {
+        throw new Error('Registration successful but auto-login failed. Please login manually.');
+      }
+
+      // Update Zustand store session
+      await fetchSession(true);
+
+      // Delay to ensure session is fully loaded
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Redirect to dashboard based on role
+      const dashboardPath = formData.role === 'teacher' ? '/dashboard/teacher' : '/dashboard/student';
+      router.push(dashboardPath);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Registration failed. Please try again.';
       setError(message);

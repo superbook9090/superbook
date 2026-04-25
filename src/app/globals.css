@@ -22,7 +22,7 @@
   --student-gradient: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7);
   --student-shadow: 0 10px 40px rgba(99, 102, 241, 0.25);
 
-  /* Teacher (Emerald → Cyan Glow) */
+  /* Teacher/Staff (Emerald → Cyan Glow) - Unified theme for instructor, admin, superadmin */
   --teacher-primary: #10b981;
   --teacher-hover: #059669;
   --teacher-soft: #ecfdf5;
@@ -32,25 +32,6 @@
   --teacher-gradient: linear-gradient(135deg, #10b981, #14b8a6, #06b6d4);
   --teacher-shadow: 0 10px 40px rgba(16, 185, 129, 0.25);
 
-  /* Admin (Rose → Pink Glow) */
-  --admin-primary: #f43f5e;
-  --admin-hover: #e11d48;
-  --admin-soft: #fff1f2;
-  --admin-border: #ffe4e6;
-  --admin-accent: #f472b6;
-  --admin-primary-dark: #be123c;
-  --admin-gradient: linear-gradient(135deg, #f43f5e, #ec4899, #d946ef);
-  --admin-shadow: 0 10px 40px rgba(244, 63, 94, 0.25);
-
-  /* Super Admin (Dark Premium) */
-  --superadmin-primary: #111827;
-  --superadmin-hover: #020617;
-  --superadmin-soft: #f8fafc;
-  --superadmin-border: #e2e8f0;
-  --superadmin-accent: #64748b;
-  --superadmin-primary-dark: #020617;
-  --superadmin-gradient: linear-gradient(135deg, #1e293b, #111827, #020617);
-  --superadmin-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
 
   /* ACTIVE ROLE DEFAULT */
   --primary: var(--student-primary);
@@ -94,7 +75,9 @@
    ROLE SWITCHING
 ========================= */
 
-[data-role="teacher"] {
+[data-role="teacher"],
+[data-role="admin"],
+[data-role="superadmin"] {
   --primary: var(--teacher-primary);
   --primary-hover: var(--teacher-hover);
   --primary-soft: var(--teacher-soft);
@@ -102,26 +85,6 @@
   --primary-accent: var(--teacher-accent);
   --primary-gradient: var(--teacher-gradient);
   --primary-shadow: var(--teacher-shadow);
-}
-
-[data-role="admin"] {
-  --primary: var(--admin-primary);
-  --primary-hover: var(--admin-hover);
-  --primary-soft: var(--admin-soft);
-  --primary-border: var(--admin-border);
-  --primary-accent: var(--admin-accent);
-  --primary-gradient: var(--admin-gradient);
-  --primary-shadow: var(--admin-shadow);
-}
-
-[data-role="superadmin"] {
-  --primary: var(--superadmin-primary);
-  --primary-hover: var(--superadmin-hover);
-  --primary-soft: var(--superadmin-soft);
-  --primary-border: var(--superadmin-border);
-  --primary-accent: var(--superadmin-accent);
-  --primary-gradient: var(--superadmin-gradient);
-  --primary-shadow: var(--superadmin-shadow);
 }
 
 /* =========================

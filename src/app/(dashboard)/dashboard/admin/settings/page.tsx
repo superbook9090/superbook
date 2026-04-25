@@ -132,7 +132,7 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6 overflow-x-hidden">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -197,7 +197,7 @@ export default function AdminSettingsPage() {
                     },
                   })
                 }
-                className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)]/20 focus:border-[var(--admin-primary)]"
+                className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
               />
               <p className="text-xs text-[var(--color-muted-foreground)] mt-1">
                 {t('adminSettings.coursesLimitDesc')}
@@ -227,7 +227,7 @@ export default function AdminSettingsPage() {
                     },
                   })
                 }
-                className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)]/20 focus:border-[var(--admin-primary)]"
+                className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
               />
               <p className="text-xs text-[var(--color-muted-foreground)] mt-1">
                 {t('adminSettings.quizzesLimitDesc')}
@@ -257,7 +257,7 @@ export default function AdminSettingsPage() {
                     },
                   })
                 }
-                className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)]/20 focus:border-[var(--admin-primary)]"
+                className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
               />
               <p className="text-xs text-[var(--color-muted-foreground)] mt-1">
                 {t('adminSettings.blogsLimitDesc')}
@@ -495,6 +495,7 @@ export default function AdminSettingsPage() {
           disabled={isSaving}
           isLoading={isSaving}
           size="lg"
+          className="w-full sm:w-auto min-h-[44px]"
         >
           {!isSaving && <Save className="w-5 h-5 mr-2" />}
           {isSaving ? t('adminSettings.saving') : t('adminSettings.saveSettings')}

@@ -60,26 +60,28 @@ interface MobileNavProps {
 function MobileNav({ user, navigation, adminNavigation = [] }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
-  const isAdmin = user?.role === 'admin';
+  const isStaff = ['teacher', 'admin', 'superadmin'].includes(user?.role || '');
   const { t, lang, setLang } = useTranslation();
 
   // Memoize theme classes to avoid recalculation on every render
   const themeClasses = useMemo(() => {
     const role = user?.role || 'student';
+    // All staff roles (teacher, admin, superadmin) use the same theme
+    const themeRole = isStaff ? 'teacher' : role;
     return {
-      bg: `bg-gradient-to-b from-[var(--${role}-primary)] to-[var(--${role}-primary-dark)]`,
-      active: `bg-gradient-to-b from-[var(--${role}-primary)] to-[var(--${role}-primary-dark)]`,
+      bg: `bg-gradient-to-b from-[var(--${themeRole}-primary)] to-[var(--${themeRole}-primary-dark)]`,
+      active: `bg-gradient-to-b from-[var(--${themeRole}-primary)] to-[var(--${themeRole}-primary-dark)]`,
       hover: 'hover:opacity-80',
     };
-  }, [user?.role]);
+  }, [user?.role, isStaff]);
 
   // Memoize navigation items to prevent unnecessary array creation
   const allNavItems = useMemo(() => {
-    if (isAdmin && adminNavigation.length > 0) {
+    if (isStaff && adminNavigation.length > 0) {
       return [...navigation, { name: 'common.administration', href: '', icon: '' }, ...adminNavigation];
     }
     return navigation;
-  }, [isAdmin, navigation, adminNavigation]);
+  }, [isStaff, navigation, adminNavigation]);
 
   // Memoize toggle handler
   const toggleMenu = useCallback(() => setIsOpen(prev => !prev), []);
@@ -100,7 +102,7 @@ function MobileNav({ user, navigation, adminNavigation = [] }: MobileNavProps) {
       {/* Mobile Header */}
       <div className={`${themeClasses.bg} md:hidden fixed top-0 left-0 right-0 z-50`}>
         <div className="flex items-center justify-between px-4 py-3">
-          <Link href={isAdmin ? '/dashboard/teacher' : '/dashboard/student'} className="flex items-center gap-3 group">
+          <Link href={isStaff ? '/dashboard/teacher' : '/dashboard/student'} className="flex items-center gap-3 group">
             <Image
               src="/logo.svg"
               alt="Super Book Logo"
@@ -132,11 +134,13 @@ function MobileNav({ user, navigation, adminNavigation = [] }: MobileNavProps) {
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Mobile Menu */}
-        {isOpen && (
-          <div className={`${themeClasses.bg} border-t border-white/20 pb-4 max-h-[calc(100vh-64px)] overflow-y-auto`}>
-            <nav className="px-2 space-y-1">
+      {/* Mobile Menu - Separate fixed element */}
+      {isOpen && (
+        <div className={`${themeClasses.bg} border-t border-white/20 fixed top-14 left-0 right-0 bottom-0 z-40`}>
+          <div className="h-full overflow-y-auto px-2 py-4 pb-24">
+            <nav className="space-y-1">
               {allNavItems.map((item) => (
                 item.href ? (
                   <Link
@@ -163,22 +167,22 @@ function MobileNav({ user, navigation, adminNavigation = [] }: MobileNavProps) {
                 )
               ))}
             </nav>
-            <div className="mt-4 pt-4 border-t border-white/20 px-4">
-              <div className="text-white">
+            <div className="mt-6 pt-4 border-t border-white/20">
+              <div className="text-white mb-3">
                 <div className="text-base font-medium truncate">{user?.name ? user.name.charAt(0).toUpperCase() + user.name.slice(1) : user?.name}</div>
-                <div className="text-sm text-white/70 truncate">{user?.email?.toUpperCase()}</div>
+                <div className="text-sm text-white/70 truncate">{user?.email}</div>
               </div>
               <button
                 onClick={handleSignOut}
-                className="mt-3 w-full bg-white/20 text-white px-4 py-2.5 rounded-lg text-base font-medium hover:bg-white/30 active:bg-white/40 focus:outline-none focus:ring-2 focus:ring-white/50 transition-colors flex items-center justify-center"
+                className="w-full bg-white/20 text-white px-4 py-2.5 rounded-lg text-base font-medium hover:bg-white/30 active:bg-white/40 focus:outline-none focus:ring-2 focus:ring-white/50 transition-colors flex items-center justify-center"
               >
                 <LogOut className="w-5 h-5 mr-2" />
                 {t('common.signOut')}
               </button>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Spacer for fixed header */}
       <div className="h-14 md:hidden" />
