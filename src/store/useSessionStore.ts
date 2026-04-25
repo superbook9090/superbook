@@ -42,7 +42,7 @@ interface SessionState {
   favoritesData: Favorite[];
   favoritesLoading: boolean;
   favoritesLastFetched: number | null;
-  fetchSession: () => Promise<void>;
+  fetchSession: (force?: boolean) => Promise<void>;
   fetchFavorites: () => Promise<void>;
   setSession: (session: Session | null) => void;
   setStatus: (status: 'loading' | 'authenticated' | 'unauthenticated') => void;
@@ -66,22 +66,28 @@ export const useSessionStore = create<SessionState>((set, get) => ({
   favoritesLoading: false,
   favoritesLastFetched: null,
 
-  fetchSession: async () => {
+  fetchSession: async (force = false) => {
     const state = get();
     const now = Date.now();
 
     // Prevent duplicate calls
     if (state.loading) return;
 
-    // Use cache if fresh
-    if (state.session && state.lastFetched && now - state.lastFetched < CACHE_TIME) {
+    // Use cache if fresh (unless forced)
+    if (!force && state.session && state.lastFetched && now - state.lastFetched < CACHE_TIME) {
+      set({ status: 'authenticated' });
       return;
     }
 
     set({ loading: true, error: null });
 
     try {
-      const res = await fetch('/api/auth/session');
+      const res = await fetch('/api/auth/session', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
+      });
       const data = await res.json();
 
       if (data.user) {

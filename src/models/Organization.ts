@@ -22,8 +22,6 @@ const organizationSchema = new Schema<IOrganization>(
 );
 
 // Index for frequently queried fields
-organizationSchema.index({ code: 1 });
-organizationSchema.index({ inviteCode: 1 });
 organizationSchema.index({ isActive: 1 });
 
 export default mongoose.models.Organization || mongoose.model<IOrganization>('Organization', organizationSchema);

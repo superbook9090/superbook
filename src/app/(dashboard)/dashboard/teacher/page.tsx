@@ -196,19 +196,19 @@ export default function TeacherDashboardPage() {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[var(--teacher-primary)] to-[var(--teacher-accent)] p-8 text-white shadow-xl"
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[var(--teacher-primary)] to-[var(--teacher-accent)] p-4 sm:p-6 lg:p-8 text-white shadow-xl"
       >
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-        <div className="relative z-10 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">
+        <div className="absolute top-0 right-0 w-32 h-32 sm:w-48 sm:h-48 lg:w-64 lg:h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="w-full sm:w-auto">
+            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold mb-2 truncate">
               {t('dashboard.teacherDashboard')}
             </h1>
-            <p className="text-white/80 text-lg">
-              {t('dashboard.welcomeBack')}, {session?.user?.name}! {t('dashboard.manageContent')}
+            <p className="text-white/80 text-sm sm:text-base truncate">
+              {t('dashboard.welcomeBack')}, {session?.user?.name ? session.user.name.charAt(0).toUpperCase() + session.user.name.slice(1) : session?.user?.name}! {t('dashboard.manageContent')}
             </p>
           </div>
-          <div className="hidden sm:flex items-center space-x-3">
+          <div className="w-full sm:w-auto">
             <motion.a
               whileHover={{ scale: !isAtLimit('courses') ? 1.02 : 1 }}
               whileTap={{ scale: !isAtLimit('courses') ? 0.98 : 1 }}
@@ -219,9 +219,9 @@ export default function TeacherDashboardPage() {
                   setLimitAlert({ type: 'courses' });
                 }
               }}
-              className={`inline-flex items-center px-4 py-2.5 text-[var(--teacher-primary)] rounded-xl font-semibold shadow-lg transition-all ${
+              className={`inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base text-[var(--teacher-primary)] rounded-xl font-semibold shadow-lg transition-all ${
                 isAtLimit('courses')
-                  ? 'bg-gray-300 cursor-not-allowed'
+                  ? 'bg-[var(--color-muted)] cursor-not-allowed'
                   : 'bg-white hover:shadow-xl'
               }`}
             >
@@ -240,7 +240,7 @@ export default function TeacherDashboardPage() {
         >
           <Alert
             type="error"
-            message={`You have reached your ${limitAlert.type} limit (${getLimit(limitAlert.type)}). Please delete some ${limitAlert.type} or contact admin.`}
+            message={t('dashboard.limitReached').replace('{type}', limitAlert.type).replace('{limit}', String(getLimit(limitAlert.type)))}
             onClose={() => setLimitAlert(null)}
           />
         </motion.div>
@@ -253,17 +253,17 @@ export default function TeacherDashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+          className="group relative overflow-hidden rounded-2xl bg-white p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
         >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--teacher-soft)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-[var(--teacher-soft)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
           <div className="relative">
-            <div className="p-3 rounded-xl bg-[var(--teacher-soft)] text-[var(--teacher-primary)] w-fit mb-4">
-              <BookOpen className="w-6 h-6" />
+            <div className="p-2 sm:p-3 rounded-xl bg-[var(--teacher-soft)] text-[var(--teacher-primary)] w-fit mb-4">
+              <BookOpen className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <div className="text-3xl font-bold text-gray-900 mb-1">
+            <div className="text-2xl sm:text-3xl font-bold text-[var(--color-foreground)] mb-1">
               {stats.totalCourses} / {getLimit('courses')}
             </div>
-            <div className="text-sm text-gray-500 mb-2">{t('dashboard.myCourses')}</div>
+            <div className="text-sm text-[var(--color-muted-foreground)] mb-2">{t('dashboard.myCourses')}</div>
             <div className="w-full bg-[var(--border)] rounded-full h-2">
               <div
                 className={`h-2 rounded-full transition-all ${
@@ -285,15 +285,15 @@ export default function TeacherDashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+          className="group relative overflow-hidden rounded-2xl bg-white p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
         >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--info-light)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-[var(--info-light)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
           <div className="relative">
-            <div className="p-3 rounded-xl bg-[var(--info-light)] text-[var(--info)] w-fit mb-4">
-              <Users className="w-6 h-6" />
+            <div className="p-2 sm:p-3 rounded-xl bg-[var(--info-light)] text-[var(--info)] w-fit mb-4">
+              <Users className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <div className="text-3xl font-bold text-gray-900 mb-1">{stats.totalStudents}</div>
-            <div className="text-sm text-gray-500">{t('dashboard.students')}</div>
+            <div className="text-2xl sm:text-3xl font-bold text-[var(--color-foreground)] mb-1">{stats.totalStudents}</div>
+            <div className="text-sm text-[var(--color-muted-foreground)]">{t('dashboard.students')}</div>
           </div>
         </motion.div>
 
@@ -302,17 +302,17 @@ export default function TeacherDashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+          className="group relative overflow-hidden rounded-2xl bg-white p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
         >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--student-soft)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-[var(--student-soft)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
           <div className="relative">
-            <div className="p-3 rounded-xl bg-[var(--student-soft)] text-[var(--student-primary)] w-fit mb-4">
-              <HelpCircle className="w-6 h-6" />
+            <div className="p-2 sm:p-3 rounded-xl bg-[var(--student-soft)] text-[var(--student-primary)] w-fit mb-4">
+              <HelpCircle className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <div className="text-3xl font-bold text-gray-900 mb-1">
+            <div className="text-2xl sm:text-3xl font-bold text-[var(--color-foreground)] mb-1">
               {stats.totalQuizzes} / {getLimit('quizzes')}
             </div>
-            <div className="text-sm text-gray-500 mb-2">{t('dashboard.myQuizzes')}</div>
+            <div className="text-sm text-[var(--color-muted-foreground)] mb-2">{t('dashboard.myQuizzes')}</div>
             <div className="w-full bg-[var(--border)] rounded-full h-2">
               <div
                 className={`h-2 rounded-full transition-all ${
@@ -334,17 +334,17 @@ export default function TeacherDashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+          className="group relative overflow-hidden rounded-2xl bg-white p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
         >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--admin-soft)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-[var(--admin-soft)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
           <div className="relative">
-            <div className="p-3 rounded-xl bg-[var(--admin-soft)] text-[var(--admin-primary)] w-fit mb-4">
-              <BarChart3 className="w-6 h-6" />
+            <div className="p-2 sm:p-3 rounded-xl bg-[var(--admin-soft)] text-[var(--admin-primary)] w-fit mb-4">
+              <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <div className="text-3xl font-bold text-gray-900 mb-1">
+            <div className="text-2xl sm:text-3xl font-bold text-[var(--color-foreground)] mb-1">
               {stats.totalBlogs} / {getLimit('blogs')}
             </div>
-            <div className="text-sm text-gray-500 mb-2">{t('dashboard.myBlogs')}</div>
+            <div className="text-sm text-[var(--color-muted-foreground)] mb-2">{t('dashboard.myBlogs')}</div>
             <div className="w-full bg-[var(--border)] rounded-full h-2">
               <div
                 className={`h-2 rounded-full transition-all ${
@@ -370,7 +370,7 @@ export default function TeacherDashboardPage() {
           transition={{ delay: 0.5 }}
         >
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">{t('dashboard.recentCourses')}</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-[var(--color-foreground)]">{t('dashboard.recentCourses')}</h2>
             <a 
               href="/dashboard/teacher/courses" 
               className="text-sm font-medium text-[var(--teacher-primary)] hover:text-[var(--teacher-hover)] flex items-center"
@@ -385,11 +385,11 @@ export default function TeacherDashboardPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 + index * 0.1 }}
-                className="group bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                className="group bg-white rounded-2xl p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
               >
                 <div className="flex items-start justify-between mb-4">
-                  <div className="p-3 rounded-xl bg-gradient-to-r from-[var(--teacher-primary)] to-[var(--teacher-accent)] text-white">
-                    <GraduationCap className="w-5 h-5" />
+                  <div className="p-2 sm:p-3 rounded-xl bg-gradient-to-r from-[var(--teacher-primary)] to-[var(--teacher-accent)] text-white">
+                    <GraduationCap className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
                   {course.isPublished && (
                     <span className="px-2 py-1 text-xs font-medium bg-[var(--teacher-soft)] text-[var(--teacher-primary)] rounded-full">
@@ -397,8 +397,8 @@ export default function TeacherDashboardPage() {
                     </span>
                   )}
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-1 truncate">{course.title}</h3>
-                <p className="text-sm text-gray-500">
+                <h3 className="font-semibold text-[var(--color-foreground)] mb-1 truncate">{course.title}</h3>
+                <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)]">
                   {t('dashboard.studentsEnrolled').replace('{count}', String(course.enrolledStudents?.length || 0))}
                 </p>
               </motion.div>
@@ -412,22 +412,22 @@ export default function TeacherDashboardPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.7 }}
-        className="rounded-2xl bg-white p-6 shadow-md"
+        className="rounded-2xl bg-white p-4 sm:p-6 shadow-md"
       >
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('dashboard.quickActions')}</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <h2 className="text-lg sm:text-xl font-semibold text-[var(--color-foreground)] mb-4">{t('dashboard.quickActions')}</h2>
+        <div className="flex flex-col sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <motion.a
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             href="/dashboard/teacher/courses"
-            className="flex items-center p-4 rounded-xl bg-[var(--teacher-soft)] hover:bg-[var(--teacher-border)] transition-colors group"
+            className="flex items-center justify-center sm:justify-start w-full min-h-[44px] p-3 sm:p-4 rounded-xl bg-[var(--teacher-soft)] hover:bg-[var(--teacher-border)] transition-colors group"
           >
-            <div className="p-3 rounded-lg bg-[var(--teacher-primary)]/20 text-[var(--teacher-primary)] group-hover:bg-[var(--teacher-primary)]/30 transition-colors">
+            <div className="p-2 sm:p-3 rounded-lg bg-[var(--teacher-primary)]/20 text-[var(--teacher-primary)] group-hover:bg-[var(--teacher-primary)]/30 transition-colors">
               <BookOpen className="w-5 h-5" />
             </div>
-            <div className="ml-3">
-              <div className="font-semibold text-gray-900">{t('dashboard.manageCourses')}</div>
-              <div className="text-sm text-gray-500">{t('dashboard.viewAndEdit')}</div>
+            <div className="ml-3 text-left">
+              <div className="font-semibold text-sm sm:text-base text-[var(--color-foreground)]">{t('dashboard.manageCourses')}</div>
+              <div className="text-xs text-[var(--color-muted-foreground)]">{t('dashboard.viewAndEdit')}</div>
             </div>
           </motion.a>
 
@@ -435,14 +435,14 @@ export default function TeacherDashboardPage() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             href="/dashboard/teacher/quizzes"
-            className="flex items-center p-4 rounded-xl bg-[var(--student-soft)] hover:bg-[var(--student-border)] transition-colors group"
+            className="flex items-center justify-center sm:justify-start w-full min-h-[44px] p-3 sm:p-4 rounded-xl bg-[var(--student-soft)] hover:bg-[var(--student-border)] transition-colors group"
           >
-            <div className="p-3 rounded-lg bg-[var(--student-primary)]/20 text-[var(--student-primary)] group-hover:bg-[var(--student-primary)]/30 transition-colors">
+            <div className="p-2 sm:p-3 rounded-lg bg-[var(--student-primary)]/20 text-[var(--student-primary)] group-hover:bg-[var(--student-primary)]/30 transition-colors">
               <HelpCircle className="w-5 h-5" />
             </div>
-            <div className="ml-3">
-              <div className="font-semibold text-gray-900">{t('dashboard.manageQuizzes')}</div>
-              <div className="text-sm text-gray-500">{t('dashboard.createAndReview')}</div>
+            <div className="ml-3 text-left">
+              <div className="font-semibold text-sm sm:text-base text-[var(--color-foreground)]">{t('dashboard.manageQuizzes')}</div>
+              <div className="text-xs text-[var(--color-muted-foreground)]">{t('dashboard.createAndReview')}</div>
             </div>
           </motion.a>
 
@@ -450,14 +450,14 @@ export default function TeacherDashboardPage() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             href="/dashboard/teacher/analytics"
-            className="flex items-center p-4 rounded-xl bg-[var(--info-light)] hover:bg-[var(--info-light)]/80 transition-colors group"
+            className="flex items-center justify-center sm:justify-start w-full min-h-[44px] p-3 sm:p-4 rounded-xl bg-[var(--info-light)] hover:bg-[var(--info-light)]/80 transition-colors group"
           >
-            <div className="p-3 rounded-lg bg-[var(--info)]/20 text-[var(--info)] group-hover:bg-[var(--info)]/30 transition-colors">
+            <div className="p-2 sm:p-3 rounded-lg bg-[var(--info)]/20 text-[var(--info)] group-hover:bg-[var(--info)]/30 transition-colors">
               <BarChart3 className="w-5 h-5" />
             </div>
-            <div className="ml-3">
-              <div className="font-semibold text-gray-900">{t('dashboard.analytics')}</div>
-              <div className="text-sm text-gray-500">{t('dashboard.viewInsights')}</div>
+            <div className="ml-3 text-left">
+              <div className="font-semibold text-sm sm:text-base text-[var(--color-foreground)]">{t('dashboard.analytics')}</div>
+              <div className="text-xs text-[var(--color-muted-foreground)]">{t('dashboard.viewInsights')}</div>
             </div>
           </motion.a>
 
@@ -471,24 +471,24 @@ export default function TeacherDashboardPage() {
                 setLimitAlert({ type: 'courses' });
               }
             }}
-            className={`flex items-center p-4 rounded-xl transition-colors group ${
+            className={`flex items-center justify-center sm:justify-start w-full min-h-[44px] p-3 sm:p-4 rounded-xl transition-colors group ${
               stats.totalCourses >= limits.courses
-                ? 'bg-gray-100 cursor-not-allowed'
+                ? 'bg-[var(--color-muted)] cursor-not-allowed'
                 : 'bg-[var(--warning-light)] hover:bg-[var(--warning-light)]/80'
             }`}
           >
-            <div className={`p-3 rounded-lg transition-colors ${
+            <div className={`p-2 sm:p-3 rounded-lg transition-colors ${
               stats.totalCourses >= limits.courses
-                ? 'bg-gray-300 text-gray-500'
+                ? 'bg-[var(--color-muted-foreground)] text-[var(--color-muted-foreground)]'
                 : 'bg-[var(--warning)]/20 text-[var(--warning)] group-hover:bg-[var(--warning)]/30'
             }`}>
               <Plus className="w-5 h-5" />
             </div>
-            <div className="ml-3">
-              <div className={`font-semibold ${
-                stats.totalCourses >= limits.courses ? 'text-gray-400' : 'text-gray-900'
+            <div className="ml-3 text-left">
+              <div className={`font-semibold text-sm sm:text-base ${
+                stats.totalCourses >= limits.courses ? 'text-[var(--color-muted-foreground)]' : 'text-[var(--color-foreground)]'
               }`}>{t('dashboard.createCourse')}</div>
-              <div className="text-sm text-gray-500">{t('dashboard.addNewContent')}</div>
+              <div className="text-xs text-[var(--color-muted-foreground)]">{t('dashboard.addNewContent')}</div>
             </div>
           </motion.a>
 
@@ -502,24 +502,24 @@ export default function TeacherDashboardPage() {
                 setLimitAlert({ type: 'blogs' });
               }
             }}
-            className={`flex items-center p-4 rounded-xl transition-colors group ${
+            className={`flex items-center justify-center sm:justify-start w-full min-h-[44px] p-3 sm:p-4 rounded-xl transition-colors group ${
               stats.totalBlogs >= limits.blogs
-                ? 'bg-gray-100 cursor-not-allowed'
+                ? 'bg-[var(--color-muted)] cursor-not-allowed'
                 : 'bg-[var(--admin-soft)] hover:bg-[var(--admin-border)]'
             }`}
           >
-            <div className={`p-3 rounded-lg transition-colors ${
+            <div className={`p-2 sm:p-3 rounded-lg transition-colors ${
               stats.totalBlogs >= limits.blogs
-                ? 'bg-gray-300 text-gray-500'
+                ? 'bg-[var(--color-muted-foreground)] text-[var(--color-muted-foreground)]'
                 : 'bg-[var(--admin-primary)]/20 text-[var(--admin-primary)] group-hover:bg-[var(--admin-primary)]/30'
             }`}>
               <Plus className="w-5 h-5" />
             </div>
-            <div className="ml-3">
-              <div className={`font-semibold ${
-                stats.totalBlogs >= limits.blogs ? 'text-gray-400' : 'text-gray-900'
-              }`}>Create Blog</div>
-              <div className="text-sm text-gray-500">Write new content</div>
+            <div className="ml-3 text-left">
+              <div className={`font-semibold text-sm sm:text-base ${
+                stats.totalBlogs >= limits.blogs ? 'text-[var(--color-muted-foreground)]' : 'text-[var(--color-foreground)]'
+              }`}>{t('dashboard.createBlog')}</div>
+              <div className="text-xs text-[var(--color-muted-foreground)]">{t('dashboard.writeNewContent')}</div>
             </div>
           </motion.a>
         </div>

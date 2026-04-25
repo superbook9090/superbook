@@ -3,12 +3,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
-import '@/models/Lesson'; // Import to register Lesson model
-import Enrollment from '@/models/Enrollment';
-import Course from '@/models/Course';
+import { Enrollment, Course } from '@/models';
 import { createEnrollmentSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
+import { invalidatePattern } from '@/lib/redis';
+import { revalidateTag } from 'next/cache';
+import mongoose from 'mongoose';
+
+// Configure Next.js caching for this route
+export const dynamic = 'force-dynamic';
 
 // GET /api/enrollments - Get user's enrollments
 export async function GET(request: NextRequest) {
@@ -59,8 +63,23 @@ export async function GET(request: NextRequest) {
       .limit(limit)
       .lean();
 
+    // Ensure enrolledAt is properly serialized as ISO string
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sanitizedEnrollments = enrollments.map((enrollment: any) => {
+      if (enrollment.enrolledAt) {
+        enrollment.enrolledAt = new Date(enrollment.enrolledAt).toISOString();
+      } else {
+        // If enrolledAt is missing, set it to current time as fallback
+        enrollment.enrolledAt = new Date().toISOString();
+      }
+      if (enrollment.completedAt) {
+        enrollment.completedAt = new Date(enrollment.completedAt).toISOString();
+      }
+      return enrollment;
+    });
+
     // Apply serialization to convert ObjectIds to strings
-    const serializedEnrollments = serialize(enrollments);
+    const serializedEnrollments = serialize(sanitizedEnrollments);
 
     const total = await Enrollment.countDocuments(query);
 
@@ -75,7 +94,7 @@ export async function GET(request: NextRequest) {
     }, {
       status: 200,
       headers: {
-        'Cache-Control': 'private, s-maxage=60, stale-while-revalidate=120',
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
       },
     });
   } catch (error) {
@@ -164,6 +183,20 @@ export async function POST(request: NextRequest) {
     await Course.findByIdAndUpdate(courseId, {
       $addToSet: { enrolledStudents: session.user.id },
     });
+
+    // Get organizationId for cache invalidation
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const user = session.user as any;
+    const orgId = user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null;
+    const orgIdStr = orgId?.toString() || 'public';
+
+    // Invalidate Redis cache for courses and enrollments
+    await invalidatePattern(`courses:${orgIdStr}:*`);
+    await invalidatePattern(`enrollments:*`);
+
+    // Revalidate Next.js cache tags
+    revalidateTag(`courses:${orgIdStr}`);
+    revalidateTag('enrollments');
 
     return NextResponse.json(
       { message: 'Enrolled successfully', enrollment },

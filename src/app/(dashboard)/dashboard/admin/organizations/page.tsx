@@ -183,10 +183,10 @@ export default function OrganizationsPage() {
   if (isLoading) {
     return (
       <div className="px-4 sm:px-6 lg:px-8 space-y-6">
-        <div className="w-32 h-8 bg-gray-200 rounded-lg animate-pulse mb-4" />
+        <div className="w-32 h-8 bg-[var(--color-muted)] rounded-lg animate-pulse mb-4" />
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-20 bg-gray-200 rounded-lg animate-pulse" />
+            <div key={i} className="h-20 bg-[var(--color-muted)] rounded-lg animate-pulse" />
           ))}
         </div>
       </div>
@@ -198,12 +198,12 @@ export default function OrganizationsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t('organizations.title')}</h1>
-          <p className="text-gray-500 mt-1">{t('organizations.description')}</p>
+          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">{t('organizations.title')}</h1>
+          <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">{t('organizations.description')}</p>
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+          className="flex items-center gap-2 min-h-[44px] px-4 py-3 sm:px-4 sm:py-2 bg-[var(--admin-primary)] text-white rounded-lg hover:bg-[var(--admin-primary)]/90 transition-colors"
         >
           <Plus className="w-5 h-5" />
           {t('organizations.createOrganization')}
@@ -220,68 +220,68 @@ export default function OrganizationsPage() {
       )}
 
       {/* Organizations List */}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+      <div className="bg-[var(--card-solid)] rounded-xl shadow-sm overflow-hidden">
         {organizations.length === 0 ? (
           <div className="p-12 text-center">
-            <Building2 className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('organizations.noOrganizations')}</h3>
-            <p className="text-gray-500 mb-4">{t('organizations.noOrganizationsDesc')}</p>
+            <Building2 className="w-16 h-16 mx-auto text-[var(--color-muted-foreground)] mb-4" />
+            <h3 className="text-lg font-semibold text-[var(--color-foreground)] mb-2">{t('organizations.noOrganizations')}</h3>
+            <p className="text-[var(--color-muted-foreground)] mb-4">{t('organizations.noOrganizationsDesc')}</p>
             <button
               onClick={() => setShowCreateModal(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+              className="inline-flex items-center gap-2 min-h-[44px] px-4 py-3 sm:px-4 sm:py-2 bg-[var(--admin-primary)] text-white rounded-lg hover:bg-[var(--admin-primary)]/90 transition-colors"
             >
               <Plus className="w-5 h-5" />
               {t('organizations.createOrganization')}
             </button>
           </div>
         ) : (
-          <div className="divide-y divide-gray-200">
+          <div className="divide-y divide-[var(--border)]">
             {organizations.map((org) => (
               <motion.div
                 key={org._id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-6 hover:bg-gray-50 transition-colors"
+                className="p-6 hover:bg-[var(--color-muted)] transition-colors"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900">{org.name}</h3>
+                      <h3 className="text-lg font-semibold text-[var(--color-foreground)]">{org.name}</h3>
                       {!org.isActive && (
-                        <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">
+                        <span className="px-2 py-1 text-xs font-medium bg-[var(--color-muted)] text-[var(--color-muted-foreground)] rounded-full">
                           {t('organizations.inactive')}
                         </span>
                       )}
                     </div>
                     {org.description && (
-                      <p className="text-gray-500 text-sm mb-3">{org.description}</p>
+                      <p className="text-[var(--color-muted-foreground)] text-sm mb-3">{org.description}</p>
                     )}
 
                     {/* Codes */}
                     <div className="flex flex-wrap gap-4 mb-4">
-                      <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-lg">
-                        <span className="text-xs text-gray-500">{t('organizations.code')}:</span>
-                        <code className="text-sm font-mono text-gray-900">{org.code}</code>
+                      <div className="flex items-center gap-2 bg-[var(--color-muted)] px-3 py-1.5 rounded-lg">
+                        <span className="text-xs text-[var(--color-muted-foreground)]">{t('organizations.code')}:</span>
+                        <code className="text-sm font-mono text-[var(--color-foreground)]">{org.code}</code>
                         <button
                           onClick={() => copyToClipboard(org.code, 'code')}
-                          className="text-gray-400 hover:text-gray-600 transition-colors"
+                          className="text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors"
                         >
                           {copiedCode === `code-${org.code}` ? (
-                            <Check className="w-4 h-4 text-green-500" />
+                            <Check className="w-4 h-4 text-[var(--success)]" />
                           ) : (
                             <Copy className="w-4 h-4" />
                           )}
                         </button>
                       </div>
-                      <div className="flex items-center gap-2 bg-indigo-50 px-3 py-1.5 rounded-lg">
-                        <span className="text-xs text-indigo-600">{t('organizations.inviteCode')}:</span>
-                        <code className="text-sm font-mono text-indigo-900">{org.inviteCode}</code>
+                      <div className="flex items-center gap-2 bg-[var(--info-light)] px-3 py-1.5 rounded-lg">
+                        <span className="text-xs text-[var(--info)]">{t('organizations.inviteCode')}:</span>
+                        <code className="text-sm font-mono text-[var(--info)]">{org.inviteCode}</code>
                         <button
                           onClick={() => copyToClipboard(org.inviteCode, 'inviteCode')}
-                          className="text-indigo-400 hover:text-indigo-600 transition-colors"
+                          className="text-[var(--info)] hover:text-[var(--info)]/80 transition-colors"
                         >
                           {copiedCode === `inviteCode-${org.inviteCode}` ? (
-                            <Check className="w-4 h-4 text-green-500" />
+                            <Check className="w-4 h-4 text-[var(--success)]" />
                           ) : (
                             <Copy className="w-4 h-4" />
                           )}
@@ -291,19 +291,19 @@ export default function OrganizationsPage() {
 
                     {/* Stats */}
                     <div className="flex flex-wrap gap-6">
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <div className="flex items-center gap-2 text-sm text-[var(--color-muted-foreground)]">
                         <Users className="w-4 h-4" />
                         <span>{org.userCount} {t('organizations.users')}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <div className="flex items-center gap-2 text-sm text-[var(--color-muted-foreground)]">
                         <BookOpen className="w-4 h-4" />
                         <span>{org.courseCount} {t('organizations.courses')}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <div className="flex items-center gap-2 text-sm text-[var(--color-muted-foreground)]">
                         <FileText className="w-4 h-4" />
                         <span>{org.blogCount} {t('organizations.blogs')}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <div className="flex items-center gap-2 text-sm text-[var(--color-muted-foreground)]">
                         <ClipboardList className="w-4 h-4" />
                         <span>{org.quizCount} {t('organizations.quizzes')}</span>
                       </div>
@@ -314,13 +314,13 @@ export default function OrganizationsPage() {
                   <div className="flex items-center gap-2 ml-4">
                     <button
                       onClick={() => openEditModal(org)}
-                      className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                      className="p-2 min-h-[44px] sm:min-h-0 text-[var(--color-muted-foreground)] hover:text-[var(--admin-primary)] hover:bg-[var(--info-light)] rounded-lg transition-colors"
                     >
                       <Edit className="w-5 h-5" />
                     </button>
                     <button
                       onClick={() => handleDelete(org._id)}
-                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      className="p-2 min-h-[44px] sm:min-h-0 text-[var(--color-muted-foreground)] hover:text-[var(--error)] hover:bg-[var(--error-light)] rounded-lg transition-colors"
                     >
                       <Trash2 className="w-5 h-5" />
                     </button>
@@ -338,13 +338,13 @@ export default function OrganizationsPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-xl shadow-xl max-w-md w-full p-6"
+            className="bg-[var(--card-solid)] rounded-xl shadow-xl max-w-md w-full p-6"
           >
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900">{t('organizations.createOrganization')}</h2>
+              <h2 className="text-xl font-bold text-[var(--color-foreground)]">{t('organizations.createOrganization')}</h2>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -352,7 +352,7 @@ export default function OrganizationsPage() {
 
             <form onSubmit={handleCreate} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-[var(--color-foreground)] mb-1">
                   {t('organizations.organizationName')}
                 </label>
                 <input
@@ -360,19 +360,19 @@ export default function OrganizationsPage() {
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 min-h-[44px] border border-[var(--border)] text-[var(--color-foreground)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)]"
                   placeholder={t('organizations.namePlaceholder')}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-[var(--color-foreground)] mb-1">
                   {t('organizations.descriptionOptional')}
                 </label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-[var(--border)] text-[var(--color-foreground)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)]"
                   placeholder={t('organizations.briefDescription')}
                   rows={3}
                 />
@@ -384,9 +384,9 @@ export default function OrganizationsPage() {
                   id="isActive"
                   checked={formData.isActive}
                   onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                  className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                  className="w-4 h-4 text-[var(--admin-primary)] border-[var(--border)] rounded focus:ring-[var(--admin-primary)]"
                 />
-                <label htmlFor="isActive" className="text-sm text-gray-700">
+                <label htmlFor="isActive" className="text-sm text-[var(--color-foreground)]">
                   {t('organizations.active')}
                 </label>
               </div>
@@ -395,13 +395,13 @@ export default function OrganizationsPage() {
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex-1 min-h-[44px] sm:min-h-0 px-4 py-2 border border-[var(--border)] text-[var(--color-foreground)] rounded-lg hover:bg-[var(--color-muted)] transition-colors"
                 >
                   {t('organizations.cancel')}
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                  className="flex-1 min-h-[44px] sm:min-h-0 px-4 py-2 bg-[var(--admin-primary)] text-white rounded-lg hover:bg-[var(--admin-primary)]/90 transition-colors"
                 >
                   {t('organizations.create')}
                 </button>
@@ -417,13 +417,13 @@ export default function OrganizationsPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-xl shadow-xl max-w-md w-full p-6"
+            className="bg-[var(--card-solid)] rounded-xl shadow-xl max-w-md w-full p-6"
           >
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900">{t('organizations.editOrganization')}</h2>
+              <h2 className="text-xl font-bold text-[var(--color-foreground)]">{t('organizations.editOrganization')}</h2>
               <button
                 onClick={() => setShowEditModal(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -431,7 +431,7 @@ export default function OrganizationsPage() {
 
             <form onSubmit={handleUpdate} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-[var(--color-foreground)] mb-1">
                   {t('organizations.organizationName')}
                 </label>
                 <input
@@ -439,19 +439,19 @@ export default function OrganizationsPage() {
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 min-h-[44px] border border-[var(--border)] text-[var(--color-foreground)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)]"
                   placeholder={t('organizations.namePlaceholder')}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-[var(--color-foreground)] mb-1">
                   {t('organizations.descriptionOptional')}
                 </label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border border-[var(--border)] text-[var(--color-foreground)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)]"
                   rows={3}
                 />
               </div>
@@ -462,9 +462,9 @@ export default function OrganizationsPage() {
                   id="isActive"
                   checked={formData.isActive}
                   onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                  className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                  className="w-4 h-4 text-[var(--admin-primary)] border-[var(--border)] rounded focus:ring-[var(--admin-primary)]"
                 />
-                <label htmlFor="isActive" className="text-sm text-gray-700">
+                <label htmlFor="isActive" className="text-sm text-[var(--color-foreground)]">
                   {t('organizations.active')}
                 </label>
               </div>
@@ -473,13 +473,13 @@ export default function OrganizationsPage() {
                 <button
                   type="button"
                   onClick={() => setShowEditModal(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex-1 min-h-[44px] sm:min-h-0 px-4 py-2 border border-[var(--border)] text-[var(--color-foreground)] rounded-lg hover:bg-[var(--color-muted)] transition-colors"
                 >
                   {t('organizations.cancel')}
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                  className="flex-1 min-h-[44px] sm:min-h-0 px-4 py-2 bg-[var(--admin-primary)] text-white rounded-lg hover:bg-[var(--admin-primary)]/90 transition-colors"
                 >
                   {t('organizations.update')}
                 </button>

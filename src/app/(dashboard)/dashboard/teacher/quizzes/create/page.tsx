@@ -18,13 +18,13 @@ export default async function CreateQuizPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Create New Quiz</h1>
-        <p className="mt-2 text-gray-600">
+        <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">Create New Quiz</h1>
+        <p className="mt-2 text-sm sm:text-base text-[var(--color-muted-foreground)]">
           Create a quiz for one of your courses.
         </p>
       </div>
 
-      <div className="bg-white shadow rounded-lg">
+      <div className="bg-[var(--card-solid)] shadow rounded-lg">
         <div className="px-4 py-5 sm:p-6">
           <CreateQuizForm />
         </div>

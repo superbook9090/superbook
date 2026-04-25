@@ -143,8 +143,8 @@ export default function AdminSettingsPage() {
           <Settings className={`w-6 h-6 ${theme.text}`} />
         </div>
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{t('adminSettings.title')}</h1>
-          <p className="text-gray-500 mt-1">{t('adminSettings.description')}</p>
+          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">{t('adminSettings.title')}</h1>
+          <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">{t('adminSettings.description')}</p>
         </div>
       </motion.div>
 
@@ -167,9 +167,9 @@ export default function AdminSettingsPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="bg-white rounded-2xl shadow-sm p-6 sm:p-8"
+        className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 sm:p-8"
       >
-        <h2 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-[var(--color-foreground)] mb-6 flex items-center gap-2">
           <GraduationCap className="w-5 h-5" />
           {t('adminSettings.teacherLimits')}
         </h2>
@@ -181,7 +181,7 @@ export default function AdminSettingsPage() {
               <GraduationCap className={`w-5 h-5 ${theme.text}`} />
             </div>
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-[var(--color-foreground)] mb-2">
                 {t('adminSettings.coursesLimit')}
               </label>
               <input
@@ -197,9 +197,9 @@ export default function AdminSettingsPage() {
                     },
                   })
                 }
-                className="w-full px-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)]/20 focus:border-[var(--admin-primary)]"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-[var(--color-muted-foreground)] mt-1">
                 {t('adminSettings.coursesLimitDesc')}
               </p>
             </div>
@@ -211,7 +211,7 @@ export default function AdminSettingsPage() {
               <FileText className={`w-5 h-5 ${theme.text}`} />
             </div>
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-[var(--color-foreground)] mb-2">
                 {t('adminSettings.quizzesLimit')}
               </label>
               <input
@@ -227,9 +227,9 @@ export default function AdminSettingsPage() {
                     },
                   })
                 }
-                className="w-full px-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)]/20 focus:border-[var(--admin-primary)]"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-[var(--color-muted-foreground)] mt-1">
                 {t('adminSettings.quizzesLimitDesc')}
               </p>
             </div>
@@ -241,7 +241,7 @@ export default function AdminSettingsPage() {
               <BookOpen className={`w-5 h-5 ${theme.text}`} />
             </div>
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-[var(--color-foreground)] mb-2">
                 {t('adminSettings.blogsLimit')}
               </label>
               <input
@@ -257,9 +257,9 @@ export default function AdminSettingsPage() {
                     },
                   })
                 }
-                className="w-full px-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)]/20 focus:border-[var(--admin-primary)]"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-[var(--color-muted-foreground)] mt-1">
                 {t('adminSettings.blogsLimitDesc')}
               </p>
             </div>
@@ -272,21 +272,21 @@ export default function AdminSettingsPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="bg-white rounded-2xl shadow-sm p-6 sm:p-8"
+        className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 sm:p-8"
       >
-        <h2 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-[var(--color-foreground)] mb-6 flex items-center gap-2">
           <ToggleLeft className="w-5 h-5" />
           {t('adminSettings.featureToggles')}
         </h2>
 
         <div className="space-y-4">
           {/* Enable Blogs */}
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+          <div className="flex items-center justify-between p-4 bg-[var(--color-muted)] rounded-xl">
             <div className="flex items-center gap-3">
               <BookOpen className={`w-5 h-5 ${theme.text}`} />
               <div>
-                <p className="font-medium text-gray-900">{t('adminSettings.enableBlogs')}</p>
-                <p className="text-sm text-gray-500">{t('adminSettings.enableBlogsDesc')}</p>
+                <p className="font-medium text-[var(--color-foreground)]">{t('adminSettings.enableBlogs')}</p>
+                <p className="text-sm text-[var(--color-muted-foreground)]">{t('adminSettings.enableBlogsDesc')}</p>
               </div>
             </div>
             <button
@@ -299,8 +299,8 @@ export default function AdminSettingsPage() {
                   },
                 })
               }
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                settings.featureToggles.enableBlogs ? `bg-gradient-to-r ${theme.gradient}` : 'bg-gray-300'
+              className={`relative inline-flex h-6 w-11 min-h-[44px] sm:min-h-0 items-center rounded-full transition-colors ${
+                settings.featureToggles.enableBlogs ? `bg-gradient-to-r ${theme.gradient}` : 'bg-[var(--color-muted)]'
               }`}
             >
               <span
@@ -312,12 +312,12 @@ export default function AdminSettingsPage() {
           </div>
 
           {/* Enable Quizzes */}
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+          <div className="flex items-center justify-between p-4 bg-[var(--color-muted)] rounded-xl">
             <div className="flex items-center gap-3">
               <FileText className={`w-5 h-5 ${theme.text}`} />
               <div>
-                <p className="font-medium text-gray-900">{t('adminSettings.enableQuizzes')}</p>
-                <p className="text-sm text-gray-500">{t('adminSettings.enableQuizzesDesc')}</p>
+                <p className="font-medium text-[var(--color-foreground)]">{t('adminSettings.enableQuizzes')}</p>
+                <p className="text-sm text-[var(--color-muted-foreground)]">{t('adminSettings.enableQuizzesDesc')}</p>
               </div>
             </div>
             <button
@@ -330,8 +330,8 @@ export default function AdminSettingsPage() {
                   },
                 })
               }
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                settings.featureToggles.enableQuizzes ? `bg-gradient-to-r ${theme.gradient}` : 'bg-gray-300'
+              className={`relative inline-flex h-6 w-11 min-h-[44px] sm:min-h-0 items-center rounded-full transition-colors ${
+                settings.featureToggles.enableQuizzes ? `bg-gradient-to-r ${theme.gradient}` : 'bg-[var(--color-muted)]'
               }`}
             >
               <span
@@ -343,12 +343,12 @@ export default function AdminSettingsPage() {
           </div>
 
           {/* Enable Courses */}
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+          <div className="flex items-center justify-between p-4 bg-[var(--color-muted)] rounded-xl">
             <div className="flex items-center gap-3">
               <GraduationCap className={`w-5 h-5 ${theme.text}`} />
               <div>
-                <p className="font-medium text-gray-900">{t('adminSettings.enableCourses')}</p>
-                <p className="text-sm text-gray-500">{t('adminSettings.enableCoursesDesc')}</p>
+                <p className="font-medium text-[var(--color-foreground)]">{t('adminSettings.enableCourses')}</p>
+                <p className="text-sm text-[var(--color-muted-foreground)]">{t('adminSettings.enableCoursesDesc')}</p>
               </div>
             </div>
             <button
@@ -361,8 +361,8 @@ export default function AdminSettingsPage() {
                   },
                 })
               }
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                settings.featureToggles.enableCourses ? `bg-gradient-to-r ${theme.gradient}` : 'bg-gray-300'
+              className={`relative inline-flex h-6 w-11 min-h-[44px] sm:min-h-0 items-center rounded-full transition-colors ${
+                settings.featureToggles.enableCourses ? `bg-gradient-to-r ${theme.gradient}` : 'bg-[var(--color-muted)]'
               }`}
             >
               <span
@@ -374,12 +374,12 @@ export default function AdminSettingsPage() {
           </div>
 
           {/* Enable Analytics */}
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+          <div className="flex items-center justify-between p-4 bg-[var(--color-muted)] rounded-xl">
             <div className="flex items-center gap-3">
               <Settings className={`w-5 h-5 ${theme.text}`} />
               <div>
-                <p className="font-medium text-gray-900">{t('adminSettings.enableAnalytics')}</p>
-                <p className="text-sm text-gray-500">{t('adminSettings.enableAnalyticsDesc')}</p>
+                <p className="font-medium text-[var(--color-foreground)]">{t('adminSettings.enableAnalytics')}</p>
+                <p className="text-sm text-[var(--color-muted-foreground)]">{t('adminSettings.enableAnalyticsDesc')}</p>
               </div>
             </div>
             <button
@@ -392,8 +392,8 @@ export default function AdminSettingsPage() {
                   },
                 })
               }
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                settings.featureToggles.enableAnalytics ? `bg-gradient-to-r ${theme.gradient}` : 'bg-gray-300'
+              className={`relative inline-flex h-6 w-11 min-h-[44px] sm:min-h-0 items-center rounded-full transition-colors ${
+                settings.featureToggles.enableAnalytics ? `bg-gradient-to-r ${theme.gradient}` : 'bg-[var(--color-muted)]'
               }`}
             >
               <span
@@ -411,21 +411,21 @@ export default function AdminSettingsPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="bg-white rounded-2xl shadow-sm p-6 sm:p-8"
+        className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 sm:p-8"
       >
-        <h2 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-[var(--color-foreground)] mb-6 flex items-center gap-2">
           <Globe className="w-5 h-5" />
           {t('adminSettings.platformConfig')}
         </h2>
 
         <div className="space-y-6">
           {/* Maintenance Mode */}
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+          <div className="flex items-center justify-between p-4 bg-[var(--color-muted)] rounded-xl">
             <div className="flex items-center gap-3">
               <Power className={`w-5 h-5 ${theme.text}`} />
               <div>
-                <p className="font-medium text-gray-900">{t('adminSettings.maintenanceMode')}</p>
-                <p className="text-sm text-gray-500">{t('adminSettings.maintenanceModeDesc')}</p>
+                <p className="font-medium text-[var(--color-foreground)]">{t('adminSettings.maintenanceMode')}</p>
+                <p className="text-sm text-[var(--color-muted-foreground)]">{t('adminSettings.maintenanceModeDesc')}</p>
               </div>
             </div>
             <button
@@ -438,8 +438,8 @@ export default function AdminSettingsPage() {
                   },
                 })
               }
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                settings.platformConfig.maintenanceMode ? `bg-gradient-to-r ${theme.gradient}` : 'bg-gray-300'
+              className={`relative inline-flex h-6 w-11 min-h-[44px] sm:min-h-0 items-center rounded-full transition-colors ${
+                settings.platformConfig.maintenanceMode ? `bg-gradient-to-r ${theme.gradient}` : 'bg-[var(--color-muted)]'
               }`}
             >
               <span
@@ -451,12 +451,12 @@ export default function AdminSettingsPage() {
           </div>
 
           {/* Allow Registration */}
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+          <div className="flex items-center justify-between p-4 bg-[var(--color-muted)] rounded-xl">
             <div className="flex items-center gap-3">
               <UserPlus className={`w-5 h-5 ${theme.text}`} />
               <div>
-                <p className="font-medium text-gray-900">{t('adminSettings.allowRegistration')}</p>
-                <p className="text-sm text-gray-500">{t('adminSettings.allowRegistrationDesc')}</p>
+                <p className="font-medium text-[var(--color-foreground)]">{t('adminSettings.allowRegistration')}</p>
+                <p className="text-sm text-[var(--color-muted-foreground)]">{t('adminSettings.allowRegistrationDesc')}</p>
               </div>
             </div>
             <button
@@ -469,8 +469,8 @@ export default function AdminSettingsPage() {
                   },
                 })
               }
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                settings.platformConfig.allowRegistration ? `bg-gradient-to-r ${theme.gradient}` : 'bg-gray-300'
+              className={`relative inline-flex h-6 w-11 min-h-[44px] sm:min-h-0 items-center rounded-full transition-colors ${
+                settings.platformConfig.allowRegistration ? `bg-gradient-to-r ${theme.gradient}` : 'bg-[var(--color-muted)]'
               }`}
             >
               <span

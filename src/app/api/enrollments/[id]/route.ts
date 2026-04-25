@@ -4,8 +4,11 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import Enrollment from '@/models/Enrollment';
-import Course from '@/models/Course';
+import { Course } from '@/models';
 import { logApiError, type LogContext } from '@/lib/logger';
+import { invalidatePattern } from '@/lib/redis';
+import { revalidateTag } from 'next/cache';
+import mongoose from 'mongoose';
 
 // PATCH /api/enrollments/[id] - Update enrollment progress
 export async function PATCH(
@@ -56,6 +59,12 @@ export async function PATCH(
     }
 
     await enrollment.save();
+
+    // Invalidate Redis cache for enrollments
+    await invalidatePattern(`enrollments:*`);
+
+    // Revalidate Next.js cache tags
+    revalidateTag('enrollments');
 
     return NextResponse.json(
       { message: 'Enrollment updated', enrollment },
@@ -112,6 +121,20 @@ export async function DELETE(
 
     // Delete enrollment
     await Enrollment.findByIdAndDelete(id);
+
+    // Get organizationId for cache invalidation
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const user = session.user as any;
+    const orgId = user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null;
+    const orgIdStr = orgId?.toString() || 'public';
+
+    // Invalidate Redis cache for courses and enrollments
+    await invalidatePattern(`courses:${orgIdStr}:*`);
+    await invalidatePattern(`enrollments:*`);
+
+    // Revalidate Next.js cache tags
+    revalidateTag(`courses:${orgIdStr}`);
+    revalidateTag('enrollments');
 
     return NextResponse.json(
       { message: 'Enrollment cancelled successfully' },

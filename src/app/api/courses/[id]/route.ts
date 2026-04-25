@@ -3,12 +3,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
-import Course from '@/models/Course';
+import { Course } from '@/models';
 import { updateCourseSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
 import mongoose from 'mongoose';
 import { validateContentAccess } from '@/lib/accessControl';
+import { invalidatePattern } from '@/lib/redis';
+import { revalidateTag } from 'next/cache';
 
 // GET /api/courses/[id] - Get a single course
 export async function GET(
@@ -142,6 +144,13 @@ export async function PATCH(
     await course.save();
     await course.populate('instructor', 'name email');
 
+    // Invalidate cache for this organization
+    const orgId = course.organizationId?.toString() || 'public';
+    await invalidatePattern(`courses:${orgId}:*`);
+    
+    // Revalidate Next.js cache tag
+    revalidateTag(`courses:${orgId}`);
+
     return NextResponse.json(course);
   } catch (error) {
     logApiError(error as Error, 'PATCH', '/api/courses/[id]', logContext);
@@ -195,6 +204,13 @@ export async function DELETE(
     }
 
     await Course.findByIdAndDelete(id);
+
+    // Invalidate cache for this organization
+    const orgId = course.organizationId?.toString() || 'public';
+    await invalidatePattern(`courses:${orgId}:*`);
+    
+    // Revalidate Next.js cache tag
+    revalidateTag(`courses:${orgId}`);
 
     return NextResponse.json({ message: 'Course deleted successfully' });
   } catch (error) {

@@ -4,14 +4,17 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import mongoose from 'mongoose';
-import '@/models/Lesson'; // Import to register Lesson model
-import Course from '@/models/Course';
+import { Course } from '@/models';
 import { requireFeature, checkTeacherLimit } from '@/lib/settingsHelpers';
 import { createCourseSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
 import { getAccessFilter } from '@/lib/accessControl';
 import { getCachedData, setCachedData, invalidatePattern } from '@/lib/redis';
+import { revalidateTag } from 'next/cache';
+
+// Configure Next.js caching for this route
+export const dynamic = 'force-dynamic';
 
 // GET /api/courses - Get all courses (with optional filtering)
 export async function GET(request: NextRequest) {
@@ -135,7 +138,7 @@ export async function GET(request: NextRequest) {
       {
         status: 200,
         headers: {
-          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+          'Cache-Control': 'no-store, no-cache, must-revalidate',
         },
       }
     );
@@ -226,6 +229,9 @@ export async function POST(request: NextRequest) {
 
     // Invalidate cache for this organization
     await invalidatePattern(`courses:${orgId}:*`);
+    
+    // Revalidate Next.js cache tag
+    revalidateTag(`courses:${orgId}`);
 
     return NextResponse.json(
       { message: 'Course created successfully', course },

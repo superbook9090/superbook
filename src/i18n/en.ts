@@ -20,13 +20,18 @@ export const en = {
     all: 'All',
     yes: 'Yes',
     no: 'No',
+    notAvailable: 'N/A',
+    courses: 'Courses',
+    quizzes: 'Quizzes',
+    performance: 'Performance',
+    aCourse: 'a course',
+    quiz: 'Quiz',
     // Sidebar
     dashboard: 'Dashboard',
     myCourses: 'My Courses',
     browse: 'Browse',
     blogs: 'Blogs',
     favorites: 'Favorites',
-    quizzes: 'Quizzes',
     progress: 'Progress',
     profile: 'Profile',
     analytics: 'Analytics',
@@ -43,6 +48,9 @@ export const en = {
     teacher: 'Teacher',
     administrator: 'Administrator',
     signOut: 'Sign out',
+    toggleMenu: 'Toggle menu',
+    english: 'English',
+    hindi: 'Hindi',
   },
 
   // Dashboard
@@ -83,6 +91,9 @@ export const en = {
     viewInsights: 'View insights',
     addNewContent: 'Add new content',
     studentsEnrolled: '{count} students enrolled',
+    limitReached: 'You have reached your {type} limit ({limit}). Please delete some {type} or contact admin.',
+    createBlog: 'Create Blog',
+    writeNewContent: 'Write new content',
   },
 
   // Quiz
@@ -210,6 +221,7 @@ export const en = {
     browseCourses: 'Browse Courses',
     browseDesc: 'Discover new courses and start learning today.',
     noAvailableCourses: 'No available courses found. You may already be enrolled in all available courses, or there are no published courses at the moment.',
+    allCoursesEnrolled: 'You have enrolled in all available courses. Check back later for new courses!',
     goToMyCourses: 'Go to My Courses',
   },
 

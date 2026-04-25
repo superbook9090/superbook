@@ -17,8 +17,9 @@ export interface IQuizAttempt extends Document {
   timeTaken: number; // in seconds
   startedAt: Date;
   submittedAt?: Date;
-  status: 'in_progress' | 'completed' | 'abandoned';
+  status: 'in_progress' | 'completed' | 'abandoned' | 'force_submitted';
   attemptNumber: number; // for multiple attempts
+  violationCount: number; // number of anti-cheating violations
 }
 
 const answerSchema = new Schema<IAnswer>({
@@ -39,8 +40,9 @@ const quizAttemptSchema = new Schema<IQuizAttempt>(
     timeTaken: { type: Number, default: 0 }, // seconds
     startedAt: { type: Date, default: Date.now },
     submittedAt: Date,
-    status: { type: String, enum: ['in_progress', 'completed', 'abandoned'], default: 'in_progress' },
+    status: { type: String, enum: ['in_progress', 'completed', 'abandoned', 'force_submitted'], default: 'in_progress' },
     attemptNumber: { type: Number, default: 1 },
+    violationCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

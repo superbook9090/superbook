@@ -109,13 +109,13 @@ export default function CreateBlogPage() {
       >
         <Link
           href="/dashboard/teacher/blogs"
-          className="inline-flex items-center text-emerald-600 hover:text-emerald-700 mb-4"
+          className="inline-flex items-center text-[var(--teacher-primary)] hover:text-[var(--teacher-primary)]/80 mb-4"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Blogs
         </Link>
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Create New Blog</h1>
-        <p className="text-gray-500 mt-1">Share your knowledge with students</p>
+        <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">Create New Blog</h1>
+        <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">Share your knowledge with students</p>
       </motion.div>
 
       {/* Form */}
@@ -124,10 +124,10 @@ export default function CreateBlogPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
         onSubmit={handleSubmit}
-        className="bg-white rounded-2xl shadow-sm p-6 sm:p-8"
+        className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 sm:p-8"
       >
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-xl text-red-600">
+          <div className="mb-6 p-4 bg-[var(--error-light)] border border-[var(--error)]/20 rounded-xl text-[var(--error)]">
             {error}
           </div>
         )}
@@ -135,7 +135,7 @@ export default function CreateBlogPage() {
         <div className="space-y-6">
           {/* Title */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-[var(--color-foreground)] mb-2">
               <Type className="w-4 h-4 inline mr-2" />
               Blog Title
             </label>
@@ -144,22 +144,22 @@ export default function CreateBlogPage() {
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               placeholder="Enter an engaging title..."
-              className="w-full px-4 py-3 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+              className="w-full min-h-[44px] px-4 py-3 bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--teacher-primary)]/20 focus:border-[var(--teacher-primary)]"
               maxLength={200}
             />
-            <p className="text-xs text-gray-400 mt-1">{formData.title.length}/200 characters</p>
+            <p className="text-xs text-[var(--color-muted-foreground)] mt-1">{formData.title.length}/200 characters</p>
           </div>
 
           {/* Topic */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-[var(--color-foreground)] mb-2">
               <Hash className="w-4 h-4 inline mr-2" />
               Topic
             </label>
             <select
               value={formData.topic}
               onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
-              className="w-full px-4 py-3 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+              className="w-full min-h-[44px] px-4 py-3 bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--teacher-primary)]/20 focus:border-[var(--teacher-primary)]"
             >
               <option value="">Select a topic...</option>
               {topics.map((topic) => (
@@ -172,14 +172,14 @@ export default function CreateBlogPage() {
 
           {/* Language */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-[var(--color-foreground)] mb-2">
               <BookOpen className="w-4 h-4 inline mr-2" />
               Language
             </label>
             <select
               value={formData.language}
               onChange={(e) => setFormData({ ...formData, language: e.target.value })}
-              className="w-full px-4 py-3 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+              className="w-full min-h-[44px] px-4 py-3 bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--teacher-primary)]/20 focus:border-[var(--teacher-primary)]"
             >
               <option value="en">English</option>
               <option value="hi">हिंदी</option>
@@ -188,7 +188,7 @@ export default function CreateBlogPage() {
 
           {/* Content */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-[var(--color-foreground)] mb-2">
               <FileText className="w-4 h-4 inline mr-2" />
               Content
             </label>
@@ -235,13 +235,13 @@ export default function CreateBlogPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="mt-6 bg-emerald-50 rounded-xl p-4"
+        className="mt-6 bg-[var(--success-light)] rounded-xl p-4"
       >
-        <h4 className="font-semibold text-emerald-800 mb-2 flex items-center">
+        <h4 className="font-semibold text-[var(--success)] mb-2 flex items-center">
           <BookOpen className="w-4 h-4 mr-2" />
           Writing Tips
         </h4>
-        <ul className="text-sm text-emerald-700 space-y-1">
+        <ul className="text-sm text-[var(--success)] space-y-1">
           <li>• Use clear, descriptive titles</li>
           <li>• Break content into sections with headings</li>
           <li>• Use lists to organize information</li>

@@ -92,7 +92,7 @@ export default function BlogDetailPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh] px-4">
-        <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+        <div className="w-12 h-12 border-4 border-[var(--color-muted)] border-t-[var(--student-primary)] rounded-full animate-spin" />
       </div>
     );
   }
@@ -100,16 +100,16 @@ export default function BlogDetailPage() {
   if (!blog) {
     return (
       <div className="text-center py-16 px-4">
-        <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+        <BookOpen className="w-16 h-16 text-[var(--color-muted-foreground)] mx-auto mb-4" />
+        <h3 className="text-xl font-semibold text-[var(--color-foreground)] mb-2">
           Blog not found
         </h3>
-        <p className="text-gray-500 mb-6">
+        <p className="text-[var(--color-muted-foreground)] mb-6">
           The blog you&apos;re looking for doesn&apos;t exist or has been removed.
         </p>
         <Link
           href="/dashboard/student/blogs"
-          className={`inline-flex items-center justify-center px-4 py-2.5 bg-gradient-to-r ${theme.gradient} text-white rounded-xl hover:opacity-90 transition-colors touch-manipulation`}
+          className={`inline-flex items-center justify-center min-h-[44px] px-4 py-3 sm:px-4 sm:py-2.5 bg-gradient-to-r ${theme.gradient} text-white rounded-xl hover:opacity-90 transition-colors touch-manipulation`}
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Blogs
@@ -128,7 +128,7 @@ export default function BlogDetailPage() {
       >
         <Link
           href="/dashboard/student/blogs"
-          className="inline-flex items-center text-indigo-600 hover:text-indigo-700 touch-manipulation"
+          className="inline-flex items-center text-[var(--student-primary)] hover:text-[var(--student-primary)]/80 touch-manipulation"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Blogs
@@ -151,7 +151,7 @@ export default function BlogDetailPage() {
         className="bg-white rounded-2xl shadow-sm overflow-hidden"
       >
         {/* Header */}
-        <div className="p-4 sm:p-6 lg:p-8 border-b border-gray-100">
+        <div className="p-4 sm:p-6 lg:p-8 border-b border-[var(--border)]">
           <div className="flex items-center gap-3 mb-4">
             <Badge variant="primary" size="md">
               <Hash className="w-3 h-3 mr-1" />
@@ -159,11 +159,11 @@ export default function BlogDetailPage() {
             </Badge>
           </div>
 
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-4 leading-tight">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[var(--color-foreground)] mb-4 leading-tight">
             {blog.title}
           </h1>
 
-          <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+          <div className="flex flex-wrap items-center gap-3 text-sm text-[var(--color-muted-foreground)]">
             <span className="flex items-center">
               <User className="w-4 h-4 mr-1" />
               {blog.author?.name || 'Teacher'}
@@ -182,17 +182,17 @@ export default function BlogDetailPage() {
         {/* Content */}
         <div className="p-4 sm:p-6 lg:p-8">
           <div
-            className="prose prose-sm sm:prose-base prose-indigo max-w-none text-gray-900 prose-headings:font-semibold prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-indigo-600 prose-a:no-underline hover:prose-a:underline prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-gray-700 prose-ul:list-disc prose-ol:list-decimal prose-li:text-gray-700 prose-img:rounded-lg prose-img:shadow-sm"
+            className="prose prose-sm sm:prose-base prose-indigo max-w-none text-[var(--color-foreground)] prose-headings:font-semibold prose-headings:text-[var(--color-foreground)] prose-p:text-[var(--color-muted-foreground)] prose-p:leading-relaxed prose-a:text-[var(--student-primary)] prose-a:no-underline hover:prose-a:underline prose-blockquote:border-l-4 prose-blockquote:border-[var(--border)] prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-[var(--color-muted-foreground)] prose-ul:list-disc prose-ol:list-decimal prose-li:text-[var(--color-muted-foreground)] prose-img:rounded-lg prose-img:shadow-sm"
             dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(blog.content) }}
           />
         </div>
 
         {/* Actions */}
-        <div className="p-4 sm:p-6 lg:p-8 bg-gray-50 border-t border-gray-100">
+        <div className="p-4 sm:p-6 lg:p-8 bg-[var(--color-muted)] border-t border-[var(--border)]">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <button
               onClick={toggleFavorite}
-              className={`flex items-center justify-center gap-2 px-4 py-3 sm:py-2.5 rounded-xl font-medium transition-all touch-manipulation ${
+              className={`flex items-center justify-center gap-2 min-h-[44px] sm:min-h-0 px-4 py-3 sm:px-4 sm:py-2.5 rounded-xl font-medium transition-all touch-manipulation ${
                 favorites.has(blogId)
                   ? `${theme.activeBg} ${theme.text} hover:opacity-80`
                   : `${theme.activeBg} ${theme.text} hover:opacity-70`
@@ -206,7 +206,7 @@ export default function BlogDetailPage() {
             </button>
 
             <button
-              className={`flex items-center justify-center gap-2 px-4 py-3 sm:py-2.5 bg-gradient-to-r ${theme.gradient} text-white rounded-xl hover:opacity-90 transition-all touch-manipulation`}
+              className={`flex items-center justify-center gap-2 min-h-[44px] sm:min-h-0 px-4 py-3 sm:px-4 sm:py-2.5 bg-gradient-to-r ${theme.gradient} text-white rounded-xl hover:opacity-90 transition-all touch-manipulation`}
             >
               <Share2 className="w-4 h-4" />
               Share

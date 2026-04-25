@@ -7,6 +7,7 @@ import MobileNav from '@/features/dashboard/components/MobileNav';
 import MobileBottomNav from '@/features/dashboard/components/MobileBottomNav';
 import DashboardHeader from '@/features/dashboard/components/DashboardHeader';
 import { RoleThemeProvider } from '@/contexts/RoleThemeContext';
+import { QuizProvider } from '@/contexts/QuizContext';
 
 // TODO: Add translation keys for navigation items
 // Currently using hardcoded strings - should use i18n system
@@ -60,43 +61,45 @@ export default async function DashboardLayout({
     : adminNavigation.filter((item) => !item.superadminOnly);
 
   return (
-    <div className="min-h-screen bg-[var(--color-foreground)] flex flex-col md:flex-row">
-      {/* Mobile Navigation Header - Fixed */}
-      <MobileNav
-        user={session.user}
-        navigation={isTeacherOrAdmin ? teacherNavigation : studentNavigation}
-        adminNavigation={isTeacherOrAdmin ? filteredAdminNavigation : []}
-      />
-
-      {/* Sidebar - Desktop Only */}
-      <aside className="hidden md:block flex-shrink-0">
-        {isTeacherOrAdmin ? (
-          <TeacherSidebar user={session.user} />
-        ) : (
-          <StudentSidebar user={session.user} />
-        )}
-      </aside>
-
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-h-screen md:min-h-0 md:h-screen overflow-hidden">
-        {/* Desktop Header - Sticky */}
-        <DashboardHeader isTeacherOrAdmin={isTeacherOrAdmin} />
-
-        {/* Main Content - Scrollable */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-[var(--color-foreground)] p-4 sm:p-6 lg:p-8 pb-24 md:pb-8">
-          <RoleThemeProvider role={role || 'student'}>
-            <div className="max-w-7xl mx-auto w-full">
-              {children}
-            </div>
-          </RoleThemeProvider>
-        </main>
-
-        {/* Mobile Bottom Navigation */}
-        <MobileBottomNav
+    <QuizProvider>
+      <div className="min-h-screen bg-[var(--color-foreground)] flex flex-col md:flex-row">
+        {/* Mobile Navigation Header - Fixed */}
+        <MobileNav
+          user={session.user}
           navigation={isTeacherOrAdmin ? teacherNavigation : studentNavigation}
-          colorScheme={isTeacherOrAdmin ? 'emerald' : 'indigo'}
+          adminNavigation={isTeacherOrAdmin ? filteredAdminNavigation : []}
         />
+
+        {/* Sidebar - Desktop Only */}
+        <aside className="hidden md:block flex-shrink-0">
+          {isTeacherOrAdmin ? (
+            <TeacherSidebar user={session.user} />
+          ) : (
+            <StudentSidebar user={session.user} />
+          )}
+        </aside>
+
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col min-h-screen md:min-h-0 md:h-screen overflow-hidden">
+          {/* Desktop Header - Sticky */}
+          <DashboardHeader isTeacherOrAdmin={isTeacherOrAdmin} />
+
+          {/* Main Content - Scrollable */}
+          <main className="flex-1 overflow-x-hidden overflow-y-auto bg-[var(--color-foreground)] p-4 sm:p-6 lg:p-8 pb-24 md:pb-8">
+            <RoleThemeProvider role={role || 'student'}>
+              <div className="max-w-7xl mx-auto w-full">
+                {children}
+              </div>
+            </RoleThemeProvider>
+          </main>
+
+          {/* Mobile Bottom Navigation */}
+          <MobileBottomNav
+            navigation={isTeacherOrAdmin ? teacherNavigation : studentNavigation}
+            colorScheme={isTeacherOrAdmin ? 'emerald' : 'indigo'}
+          />
+        </div>
       </div>
-    </div>
+    </QuizProvider>
   );
 }

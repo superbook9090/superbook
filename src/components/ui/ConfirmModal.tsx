@@ -14,7 +14,7 @@ interface ConfirmModalProps {
   title?: string;
   message: string;
   onConfirm: () => void;
-  onCancel: () => void;
+  onCancel?: () => void;
   confirmText?: string;
   cancelText?: string;
   type?: 'warning' | 'danger' | 'info' | 'success';
@@ -71,9 +71,9 @@ export default function ConfirmModal({
   title,
   message,
   onConfirm,
-  onCancel,
+  onCancel=()=>{},
   confirmText,
-  cancelText,
+  cancelText = '',
   type = 'warning',
   isLoading = false,
 }: ConfirmModalProps) {
@@ -210,14 +210,14 @@ export default function ConfirmModal({
 
                 {/* Buttons */}
                 <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4">
-                  <button
+                  {cancelText && <button
                     type="button"
                     onClick={onCancel}
                     disabled={isLoading}
                     className="flex-1 px-6 py-3 text-[var(--foreground)] bg-[var(--muted-light)] hover:opacity-80 rounded-xl font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[var(--border)] focus:ring-offset-2"
                   >
                     {defaultCancelText}
-                  </button>
+                  </button>}
                   <button
                     type="button"
                     onClick={handleConfirm}

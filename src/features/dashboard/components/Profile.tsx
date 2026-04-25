@@ -28,11 +28,11 @@ export default function Profile({ session, descriptionKey = 'manageAccount' }: P
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">{t('profile.name')}</label>
-              <p className="mt-1 text-sm text-gray-900">{session.user?.name}</p>
+              <p className="mt-1 text-sm text-gray-900">{session.user?.name ? session.user.name.charAt(0).toUpperCase() + session.user.name.slice(1) : session.user?.name}</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">{t('profile.email')}</label>
-              <p className="mt-1 text-sm text-gray-900">{session.user?.email}</p>
+              <p className="mt-1 text-sm text-gray-900">{session.user?.email?.toUpperCase()}</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">{t('profile.role')}</label>

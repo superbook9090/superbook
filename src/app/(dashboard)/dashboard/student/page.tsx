@@ -93,6 +93,14 @@ export default function StudentDashboardPage() {
     return new Date(item.enrolledAt).getTime();
   };
 
+  // Helper to safely format date
+  const formatDate = (dateString: string | undefined): string => {
+    if (!dateString) return t('common.notAvailable');
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return t('common.notAvailable');
+    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  };
+
   const recentActivity = activity
     .sort((a, b) => getActivityDate(b) - getActivityDate(a))
     .slice(0, 5);
@@ -148,14 +156,14 @@ export default function StudentDashboardPage() {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)] p-8 text-white shadow-xl"
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)] p-4 sm:p-6 lg:p-8 text-white shadow-xl"
       >
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute top-0 right-0 w-32 h-32 sm:w-48 sm:h-48 lg:w-64 lg:h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
         <div className="relative z-10">
-          <h1 className="text-3xl font-bold mb-2">
-            {t('dashboard.welcomeBack')}, {session?.user?.name}!
+          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold mb-2 truncate">
+            {t('dashboard.welcomeBack')}, {session?.user?.name ? session.user.name.charAt(0).toUpperCase() + session.user.name.slice(1) : session?.user?.name}!
           </h1>
-          <p className="text-white/80 text-lg">
+          <p className="text-white/80 text-sm sm:text-base truncate">
             {t('dashboard.continueLearning').replace('{count}', String(stats.enrolledCount))}
           </p>
         </div>
@@ -168,18 +176,18 @@ export default function StudentDashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+          className="group relative overflow-hidden rounded-2xl bg-white p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
         >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--student-soft)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-[var(--student-soft)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
           <div className="relative">
             <div className="flex items-center justify-between mb-4">
-              <div className="p-3 rounded-xl bg-[var(--student-soft)] text-[var(--student-primary)]">
-                <BookOpen className="w-6 h-6" />
+              <div className="p-2 sm:p-3 rounded-xl bg-[var(--student-soft)] text-[var(--student-primary)]">
+                <BookOpen className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Courses</span>
+              <span className="text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider">{t('common.courses')}</span>
             </div>
-            <div className="text-3xl font-bold text-gray-900 mb-1">{stats.enrolledCount}</div>
-            <div className="text-sm text-gray-500">{t('dashboard.enrolledCourses')}</div>
+            <div className="text-2xl sm:text-3xl font-bold text-[var(--color-foreground)] mb-1">{stats.enrolledCount}</div>
+            <div className="text-sm text-[var(--color-muted-foreground)]">{t('dashboard.enrolledCourses')}</div>
           </div>
         </motion.div>
 
@@ -188,18 +196,18 @@ export default function StudentDashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+          className="group relative overflow-hidden rounded-2xl bg-white p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
         >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--success-light)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-[var(--success-light)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
           <div className="relative">
             <div className="flex items-center justify-between mb-4">
-              <div className="p-3 rounded-xl bg-[var(--success-light)] text-[var(--success)]">
-                <CheckCircle className="w-6 h-6" />
+              <div className="p-2 sm:p-3 rounded-xl bg-[var(--success-light)] text-[var(--success)]">
+                <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Quizzes</span>
+              <span className="text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider">{t('common.quizzes')}</span>
             </div>
-            <div className="text-3xl font-bold text-gray-900 mb-1">{stats.completedQuizzes}</div>
-            <div className="text-sm text-gray-500">{t('dashboard.completedQuizzes')}</div>
+            <div className="text-2xl sm:text-3xl font-bold text-[var(--color-foreground)] mb-1">{stats.completedQuizzes}</div>
+            <div className="text-sm text-[var(--color-muted-foreground)]">{t('dashboard.completedQuizzes')}</div>
           </div>
         </motion.div>
 
@@ -208,18 +216,18 @@ export default function StudentDashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+          className="group relative overflow-hidden rounded-2xl bg-white p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
         >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--warning-light)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-[var(--warning-light)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
           <div className="relative">
             <div className="flex items-center justify-between mb-4">
-              <div className="p-3 rounded-xl bg-[var(--warning-light)] text-[var(--warning)]">
-                <TrendingUp className="w-6 h-6" />
+              <div className="p-2 sm:p-3 rounded-xl bg-[var(--warning-light)] text-[var(--warning)]">
+                <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Performance</span>
+              <span className="text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider">{t('common.performance')}</span>
             </div>
-            <div className="text-3xl font-bold text-gray-900 mb-1">{stats.averageScore}%</div>
-            <div className="text-sm text-gray-500">{t('dashboard.averageScore')}</div>
+            <div className="text-2xl sm:text-3xl font-bold text-[var(--color-foreground)] mb-1">{stats.averageScore}%</div>
+            <div className="text-sm text-[var(--color-muted-foreground)]">{t('dashboard.averageScore')}</div>
             <div className="mt-3 h-2 bg-[var(--border)] rounded-full overflow-hidden">
               <div 
                 className="h-full bg-gradient-to-r from-[var(--warning)] to-[var(--warning)] rounded-full transition-all duration-500"
@@ -237,21 +245,21 @@ export default function StudentDashboardPage() {
         transition={{ delay: 0.4 }}
         className="rounded-2xl bg-white shadow-md overflow-hidden"
       >
-        <div className="px-6 py-5 border-b border-[var(--border)] flex items-center justify-between">
+        <div className="px-4 py-4 sm:px-6 sm:py-5 border-b border-[var(--border)] flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">{t('dashboard.recentActivity')}</h3>
-            <p className="text-sm text-gray-500 mt-1">{t('dashboard.recentActivityDesc')}</p>
+            <h3 className="text-base sm:text-lg font-semibold text-[var(--color-foreground)]">{t('dashboard.recentActivity')}</h3>
+            <p className="text-sm text-[var(--color-muted-foreground)] mt-1">{t('dashboard.recentActivityDesc')}</p>
           </div>
-          <Activity className="w-5 h-5 text-gray-400" />
+          <Activity className="w-5 h-5 text-[var(--color-muted-foreground)]" />
         </div>
         <div className="divide-y divide-[var(--border)]">
           {recentActivity.length === 0 ? (
-            <div className="px-6 py-12 text-center">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--border)] flex items-center justify-center">
-                <Clock className="w-8 h-8 text-[var(--muted)]" />
+            <div className="px-4 py-8 sm:px-6 sm:py-12 text-center">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 rounded-full bg-[var(--border)] flex items-center justify-center">
+                <Clock className="w-6 h-6 sm:w-8 sm:h-8 text-[var(--muted)]" />
               </div>
-              <h4 className="text-gray-900 font-medium mb-1">{t('dashboard.noRecentActivity')}</h4>
-              <p className="text-sm text-gray-500">{t('dashboard.startEnrolling')}</p>
+              <h4 className="text-[var(--color-foreground)] font-medium mb-1">{t('dashboard.noRecentActivity')}</h4>
+              <p className="text-sm text-[var(--color-muted-foreground)]">{t('dashboard.startEnrolling')}</p>
             </div>
           ) : (
             recentActivity.map((item, index) => (
@@ -260,38 +268,38 @@ export default function StudentDashboardPage() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.5 + index * 0.05 }}
-                className="px-6 py-4 flex items-center space-x-4 hover:bg-[var(--background)]/50 transition-colors"
+                className="px-4 py-3 sm:px-6 sm:py-4 flex items-center space-x-3 sm:space-x-4 hover:bg-[var(--background)]/50 transition-colors"
               >
                 {/* Icon */}
-                <div className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center ${
+                <div className={`flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center ${
                   item.type === 'enrollment' 
                     ? 'bg-[var(--student-soft)] text-[var(--student-primary)]' 
                     : 'bg-[var(--success-light)] text-[var(--success)]'
                 }`}>
                   {item.type === 'enrollment' ? (
-                    <BookOpen className="w-5 h-5" />
+                    <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
                   ) : (
-                    <CheckCircle className="w-5 h-5" />
+                    <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
                   )}
                 </div>
                 {/* Content */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900">
+                  <p className="text-xs sm:text-sm font-semibold text-[var(--color-foreground)]">
                     {item.type === 'enrollment'
-                      ? t('dashboard.enrolledIn').replace('{title}', item.course?.title || 'a course')
-                      : t('dashboard.completed').replace('{title}', item.quiz?.title || 'Quiz')}
+                      ? t('dashboard.enrolledIn').replace('{title}', item.course?.title || t('common.aCourse'))
+                      : t('dashboard.completed').replace('{title}', item.quiz?.title || t('common.quiz'))}
                   </p>
-                  <p className="text-sm text-gray-500 mt-0.5">
+                  <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] mt-0.5">
                     {item.type === 'enrollment'
                       ? `${t('dashboard.progress')}: ${item.progress}%`
                       : `${t('dashboard.score')}: ${item.score}%`}
                   </p>
                 </div>
                 {/* Date */}
-                <div className="flex-shrink-0 text-sm text-gray-400">
+                <div className="flex-shrink-0 text-xs sm:text-sm text-[var(--color-muted-foreground)]">
                   {item.type === 'enrollment'
-                    ? new Date(item.enrolledAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-                    : new Date(item.submittedAt || item.startedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                    ? formatDate(item.enrolledAt)
+                    : formatDate(item.submittedAt || item.startedAt)}
                 </div>
               </motion.div>
             ))

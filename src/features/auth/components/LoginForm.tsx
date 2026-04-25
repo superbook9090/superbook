@@ -19,7 +19,7 @@ import {
 import Loader from '@/components/ui/Loader';
 
 export default function LoginForm() {
-  const { status } = useSessionStore();
+  const { status, fetchSession } = useSessionStore();
   const router = useRouter();
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
@@ -49,15 +49,33 @@ export default function LoginForm() {
 
       if (result?.error) {
         setError('Invalid email or password');
+        setIsLoading(false);
         return;
       }
+
+      console.log('Fetching session after login...');
+
+      // Directly fetch session to ensure it's visible in network tab
+      const sessionRes = await fetch(`/api/auth/session?_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+        },
+      });
+
+      console.log('Session fetch completed:', sessionRes.status);
+
+      // Also update Zustand store
+      await fetchSession(true);
+
+      // Delay to ensure session is fully loaded and network tab captures the request
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       // Redirect to /dashboard - server-side redirect will handle role-based routing
       router.push('/dashboard');
     } catch (error) {
       setError('An error occurred. Please try again.');
       console.error('Login error:', error);
-    } finally {
       setIsLoading(false);
     }
   };

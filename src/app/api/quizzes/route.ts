@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import Quiz from '@/models/Quiz';
-import Course from '@/models/Course';
+import { Course } from '@/models';
 import { requireFeature, checkTeacherLimit } from '@/lib/settingsHelpers';
 import { createQuizSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';

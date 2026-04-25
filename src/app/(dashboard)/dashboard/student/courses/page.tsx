@@ -6,40 +6,30 @@ import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
-import { useCachedStore } from '@/store/useCachedStore';
 import { Skeleton, CardSkeleton } from '@/components/ui/Skeleton';
 import CourseCard from '@/features/courses/components/CourseCard';
 import Alert from '@/components/ui/Alert';
 import ConfirmModal from '@/components/ui/ConfirmModal';
+import { useEnrollments, useDropEnrollment, type Enrollment } from '@/lib/react-query/hooks';
 
 export default function StudentCoursesPage() {
   const { session, status } = useSessionStore();
   const router = useRouter();
   const { t } = useTranslation();
   const { theme } = useRoleTheme();
-  const { enrollments: enrollmentsCache, fetchEnrollments, invalidateEnrollments } = useCachedStore();
   const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
   const [isDropModalOpen, setIsDropModalOpen] = useState(false);
   const [enrollmentToDrop, setEnrollmentToDrop] = useState<string | null>(null);
-  const [isDropping, setIsDropping] = useState(false);
 
-  const userId = session?.user?.id;
-  const enrollmentState = userId ? enrollmentsCache[userId] : null;
-  const enrollments = enrollmentState?.data || [];
-  const isLoading = enrollmentState?.loading ?? true;
-  const error = enrollmentState?.error || '';
+  const { data: enrollments = [], isLoading, error } = useEnrollments();
+  const dropEnrollment = useDropEnrollment();
 
   useEffect(() => {
     if (status === 'loading') return;
     if (!session) {
       router.push('/login');
-      return;
     }
-
-    if (userId) {
-      fetchEnrollments(userId);
-    }
-  }, [session, status, userId, fetchEnrollments, router]);
+  }, [status, session, router]);
 
   const handleDrop = async (enrollmentId: string) => {
     setEnrollmentToDrop(enrollmentId);
@@ -49,24 +39,13 @@ export default function StudentCoursesPage() {
   const confirmDrop = async () => {
     if (!enrollmentToDrop) return;
 
-    setIsDropping(true);
     try {
-      const response = await fetch(`/api/enrollments/${enrollmentToDrop}`, {
-        method: 'DELETE',
-      });
-      if (response.ok) {
-        invalidateEnrollments(userId);
-        setAlertState({ type: 'success', message: t('courses.dropSuccess') || 'Course dropped successfully' });
-      } else {
-        const data = await response.json();
-        setAlertState({ type: 'error', message: data.message || t('courses.dropFailed') });
-      }
-    } catch {
-      setAlertState({ type: 'error', message: t('courses.dropFailed') });
-    } finally {
-      setIsDropping(false);
+      await dropEnrollment.mutateAsync(enrollmentToDrop);
+      setAlertState({ type: 'success', message: t('courses.dropSuccess') || 'Course dropped successfully' });
       setIsDropModalOpen(false);
       setEnrollmentToDrop(null);
+    } catch {
+      setAlertState({ type: 'error', message: t('courses.dropFailed') });
     }
   };
 
@@ -97,15 +76,15 @@ export default function StudentCoursesPage() {
   return (
     <div className="px-4 sm:px-6 lg:px-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t('courses.myCourses')}</h1>
-          <p className="mt-2 text-gray-600">
+        <div className="w-full sm:w-auto">
+          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)] truncate">{t('courses.myCourses')}</h1>
+          <p className="mt-2 text-sm sm:text-base text-[var(--color-muted-foreground)]">
             {t('courses.continueLearning')}
           </p>
         </div>
         <a
           href="/dashboard/student/browse"
-          className={`inline-flex items-center justify-center px-4 py-2.5 sm:w-auto w-full border border-transparent text-sm font-medium rounded-xl text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 transition-all`}
+          className={`inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base font-medium rounded-xl text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 transition-opacity`}
         >
           {t('courses.browseMore')}
         </a>
@@ -120,28 +99,28 @@ export default function StudentCoursesPage() {
       )}
 
       {error && (
-        <div className="mt-4 bg-red-50 border-l-4 border-red-400 p-4">
-          <p className="text-sm text-red-700">{error}</p>
+        <div className="mt-4 bg-[var(--error-light)] border-l-4 border-[var(--error)] p-4">
+          <p className="text-sm text-[var(--error)]">{String(error)}</p>
         </div>
       )}
 
       <div className="mt-8">
         {enrollments.length === 0 ? (
           <div className="text-center py-12 px-4">
-            <p className="text-gray-500 mb-4">{t('courses.noCourses')}</p>
-            <p className="text-sm text-gray-400 mb-4">
+            <p className="text-[var(--color-muted-foreground)] mb-4">{t('courses.noCourses')}</p>
+            <p className="text-sm text-[var(--color-muted-foreground)]/60 mb-4">
               {t('courses.startLearning')}
             </p>
             <a
               href="/dashboard/student/browse"
-              className={`inline-flex items-center justify-center px-4 py-2.5 sm:w-auto w-full border border-transparent text-sm font-medium rounded-xl text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 transition-all`}
+              className={`inline-flex items-center justify-center min-h-[44px] px-4 py-3 sm:px-4 sm:py-2.5 sm:w-auto w-full border border-transparent text-sm font-medium rounded-xl text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 transition-all`}
             >
               {t('courses.browseMore')}
             </a>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {enrollments.map((enrollment) => (
+            {enrollments.map((enrollment: Enrollment) => (
               <CourseCard
                 key={enrollment._id}
                 course={enrollment}
@@ -163,7 +142,7 @@ export default function StudentCoursesPage() {
           setEnrollmentToDrop(null);
         }}
         type="warning"
-        isLoading={isDropping}
+        isLoading={dropEnrollment.isPending}
       />
     </div>
   );

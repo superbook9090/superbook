@@ -18,13 +18,13 @@ export default async function CreateCoursePage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Create New Course</h1>
-        <p className="mt-2 text-gray-600">
+        <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">Create New Course</h1>
+        <p className="mt-2 text-sm sm:text-base text-[var(--color-muted-foreground)]">
           Fill in the details below to create a new course.
         </p>
       </div>
 
-      <div className="bg-white shadow rounded-lg">
+      <div className="bg-[var(--card-solid)] shadow rounded-lg">
         <div className="px-4 py-5 sm:p-6">
           <CreateCourseForm />
         </div>

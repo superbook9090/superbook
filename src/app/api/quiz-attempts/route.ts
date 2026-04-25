@@ -49,12 +49,14 @@ export async function GET(request: NextRequest) {
     if (fields) {
       const fieldList = fields.split(',');
       fieldList.forEach(f => selectFields[f] = 1);
-    } else {
-      // Default fields to avoid over-fetching
+    } else if (!attemptId) {
+      // Default fields to avoid over-fetching, but only when not fetching specific attempt
       selectFields = { score: 1, status: 1, startedAt: 1, submittedAt: 1, timeTaken: 1, attemptNumber: 1, correctCount: 1, answers: 1, totalQuestions: 1 };
     }
 
-    const attempts = await QuizAttempt.find(query, selectFields)
+    // When fetching specific attempt, don't use field selection to ensure all fields are returned
+    const useProjection = !attemptId && Object.keys(selectFields).length > 0;
+    const attempts = await QuizAttempt.find(query, useProjection ? selectFields : undefined)
       .populate('quiz', 'title description timeLimit questions')
       .populate('course', 'title description')
       .populate('student', 'name email')
@@ -67,6 +69,17 @@ export async function GET(request: NextRequest) {
     // Use separate review endpoint for completed attempts with correct answers
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sanitizedAttempts = attempts.map((attempt: any) => {
+      // Ensure startedAt is properly serialized as ISO string
+      if (attempt.startedAt) {
+        attempt.startedAt = new Date(attempt.startedAt).toISOString();
+      } else {
+        // If startedAt is missing, set it to current time as fallback
+        attempt.startedAt = new Date().toISOString();
+      }
+      if (attempt.submittedAt) {
+        attempt.submittedAt = new Date(attempt.submittedAt).toISOString();
+      }
+      
       if (attempt.quiz && attempt.quiz.questions) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         attempt.quiz.questions = attempt.quiz.questions.map((q: any) => ({
@@ -188,45 +201,38 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find or create in-progress attempt
-    let attempt = await QuizAttempt.findOne({
-      student: session.user.id,
-      quiz: quizId,
-      status: 'in_progress',
-    });
-
-    // If starting new attempt
-    if (!attempt || action === 'start') {
-      // Count previous attempts
+    // If starting new attempt, always create fresh attempt
+    if (action === 'start') {
+      // Count previous attempts to get next attempt number
       const attemptCount = await QuizAttempt.countDocuments({
         student: session.user.id,
         quiz: quizId,
       });
 
-      // Check time limit for previous in-progress attempts
-      if (attempt) {
-        const timeLimitMs = quiz.timeLimit * 60 * 1000;
-        const elapsed = Date.now() - attempt.startedAt.getTime();
-        if (elapsed > timeLimitMs) {
-          attempt.status = 'abandoned';
-          await attempt.save();
-          attempt = null;
-        }
+      // Mark any existing in-progress attempt as abandoned
+      const existingAttempt = await QuizAttempt.findOne({
+        student: session.user.id,
+        quiz: quizId,
+        status: 'in_progress',
+      });
+      if (existingAttempt) {
+        existingAttempt.status = 'abandoned';
+        await existingAttempt.save();
       }
 
-      if (!attempt) {
-        attempt = new QuizAttempt({
-          student: session.user.id,
-          quiz: quizId,
-          course: quiz.course._id,
-          answers: [],
-          totalQuestions: quiz.questions.length,
-          startedAt: new Date(),
-          status: 'in_progress',
-          attemptNumber: attemptCount + 1,
-        });
-        await attempt.save();
-      }
+      // Create new attempt
+      const attempt = new QuizAttempt({
+        student: session.user.id,
+        quiz: quizId,
+        course: quiz.course._id,
+        answers: [],
+        totalQuestions: quiz.questions.length,
+        startedAt: new Date(),
+        status: 'in_progress',
+        attemptNumber: attemptCount + 1,
+        violationCount: 0,
+      });
+      await attempt.save();
 
       // Sanitize questions - remove correctAnswer before sending to frontend
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -239,6 +245,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { message: 'Quiz started', attempt, questions: sanitizedQuestions },
         { status: 201 }
+      );
+    }
+
+    // Find existing in-progress attempt (only if not starting new)
+    const attempt = await QuizAttempt.findOne({
+      student: session.user.id,
+      quiz: quizId,
+      status: 'in_progress',
+    });
+
+    if (!attempt) {
+      return NextResponse.json(
+        { message: 'No in-progress quiz found. Please start a new attempt.' },
+        { status: 404 }
       );
     }
 
@@ -271,6 +291,9 @@ export async function POST(request: NextRequest) {
         );
       }
 
+      // Check if this is a force submission (security violation)
+      const isForceSubmit = (body as { forceSubmit?: boolean }).forceSubmit === true;
+
       // Auto-grade the answers
       const gradedAnswers = answers.map((answer: { questionIndex: number; selectedOption: number }) => {
         const question = quiz.questions[answer.questionIndex];
@@ -290,7 +313,15 @@ export async function POST(request: NextRequest) {
       attempt.correctCount = correctCount;
       attempt.score = score;
       attempt.timeTaken = timeTaken || Math.floor((Date.now() - attempt.startedAt.getTime()) / 1000);
-      attempt.status = 'completed';
+      
+      // Set status based on whether it's a force submission
+      if (isForceSubmit) {
+        attempt.status = 'force_submitted';
+        attempt.violationCount = (attempt.violationCount || 0) + 1;
+      } else {
+        attempt.status = 'completed';
+      }
+      
       attempt.submittedAt = new Date();
 
       await attempt.save();

@@ -20,13 +20,18 @@ export const hi = {
     all: 'सभी',
     yes: 'हाँ',
     no: 'नहीं',
+    notAvailable: 'उपलब्ध नहीं',
+    courses: 'पाठ्यक्रम',
+    quizzes: 'क्विज़',
+    performance: 'प्रदर्शन',
+    aCourse: 'एक पाठ्यक्रम',
+    quiz: 'क्विज़',
     // Sidebar
     dashboard: 'डैशबोर्ड',
     myCourses: 'मेरे पाठ्यक्रम',
     browse: 'ब्राउज़ करें',
     blogs: 'ब्लॉग',
     favorites: 'पसंदीदा',
-    quizzes: 'क्विज़',
     progress: 'प्रगति',
     profile: 'प्रोफ़ाइल',
     analytics: 'विश्लेषण',
@@ -43,6 +48,9 @@ export const hi = {
     teacher: 'शिक्षक',
     administrator: 'एडमिनिस्ट्रेटर',
     signOut: 'साइन आउट',
+    toggleMenu: 'मेनू टॉगल करें',
+    english: 'अंग्रेज़ी',
+    hindi: 'हिंदी',
   },
 
   // Dashboard
@@ -83,6 +91,9 @@ export const hi = {
     viewInsights: 'अंतर्दृष्टि देखें',
     addNewContent: 'नई सामग्री जोड़ें',
     studentsEnrolled: '{count} छात्र नामांकित',
+    limitReached: 'आप {type} सीमा ({limit}) तक पहुँच गए हैं। कृपया कुछ {type} हटाएं या व्यवस्थापक से संपर्क करें।',
+    createBlog: 'ब्लॉग बनाएं',
+    writeNewContent: 'नई सामग्री लिखें',
   },
 
   // Quiz
@@ -210,6 +221,7 @@ export const hi = {
     browseCourses: 'पाठ्यक्रम ब्राउज़ करें',
     browseDesc: 'नए पाठ्यक्रम खोजें और आज ही सीखना शुरू करें।',
     noAvailableCourses: 'कोई उपलब्ध पाठ्यक्रम नहीं मिला। आप पहले से ही सभी उपलब्ध पाठ्यक्रमों में नामांकित हो सकते हैं, या फिलहाल कोई प्रकाशित पाठ्यक्रम नहीं हैं।',
+    allCoursesEnrolled: 'आप सभी उपलब्ध पाठ्यक्रमों में नामांकित हो चुके हैं। नए पाठ्यक्रमों के लिए बाद में जांच करें!',
     goToMyCourses: 'मेरे पाठ्यक्रमों पर जाएं',
   },
 

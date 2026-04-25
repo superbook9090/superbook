@@ -3,13 +3,7 @@
 
 import { cache } from 'react';
 import dbConnect from '@/lib/db';
-import AppSettings from '@/models/AppSettings';
-import Course from '@/models/Course';
-import Blog from '@/models/Blog';
-import Quiz from '@/models/Quiz';
-import Enrollment from '@/models/Enrollment';
-import QuizAttempt from '@/models/QuizAttempt';
-import User from '@/models/User';
+import { AppSettings, Course, Blog, Quiz, Enrollment, QuizAttempt, User } from '@/models';
 import type { IAppSettings } from '@/models/AppSettings';
 
 // ============================================

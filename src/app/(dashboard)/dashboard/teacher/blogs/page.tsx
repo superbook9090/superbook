@@ -20,21 +20,8 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
 import ConfirmModal from '@/components/ui/ConfirmModal';
-import useSWR from 'swr';
-import { fetcher } from '@/lib/swrFetcher';
 import { useSessionStore } from '@/store/useSessionStore';
-
-interface Blog {
-  _id: string;
-  title: string;
-  topic: string;
-  content: string;
-  language: string;
-  isPublished: boolean;
-  createdAt: string;
-  updatedAt: string;
-  author?: { _id: string; name: string };
-}
+import { useBlogs, useDeleteBlog, useUpdateBlog, type Blog } from '@/lib/react-query/hooks';
 
 export default function TeacherBlogsPage() {
   const session = useSessionStore((s) => s.session) as { user?: { id: string } };
@@ -64,16 +51,17 @@ export default function TeacherBlogsPage() {
     []
   );
 
-  // SWR hook for data fetching with automatic caching and deduplication
-  const { data: blogsData, mutate } = useSWR(session ? '/api/blogs?includeDrafts=true' : null, fetcher);
+  // Get orgId from session
+  const orgId = (session?.user as { organizationId?: string })?.organizationId || 'public';
+  const { data: allBlogs = [], isLoading } = useBlogs(orgId, true);
 
   // Filter blogs by current user
-  const allBlogs = blogsData?.blogs || [];
   const blogs = allBlogs.filter(
     (blog: Blog) => blog.author?._id === session?.user?.id
   );
 
-  const isLoading = status === 'loading' || !blogsData;
+  const deleteBlog = useDeleteBlog();
+  const updateBlog = useUpdateBlog();
 
   const handleDelete = async (id: string) => {
     setDeleteId(id);
@@ -84,17 +72,9 @@ export default function TeacherBlogsPage() {
     if (!deleteId) return;
 
     try {
-      const response = await fetch(`/api/blogs/${deleteId}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        mutate(); // Revalidate SWR cache
-        setShowDeleteModal(false);
-        setDeleteId(null);
-      } else {
-        setAlertState({ type: 'error', message: 'Failed to delete blog' });
-      }
+      await deleteBlog.mutateAsync(deleteId);
+      setShowDeleteModal(false);
+      setDeleteId(null);
     } catch (error) {
       console.error('Error deleting blog:', error);
       setAlertState({ type: 'error', message: 'Failed to delete blog' });
@@ -103,17 +83,10 @@ export default function TeacherBlogsPage() {
 
   const togglePublish = async (id: string, currentStatus: boolean) => {
     try {
-      const response = await fetch(`/api/blogs/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isPublished: !currentStatus }),
-      });
-
-      if (response.ok) {
-        mutate(); // Revalidate SWR cache
-      }
+      await updateBlog.mutateAsync({ blogId: id, data: { isPublished: !currentStatus } });
     } catch (error) {
       console.error('Error updating blog:', error);
+      setAlertState({ type: 'error', message: 'Failed to update blog' });
     }
   };
 
@@ -191,13 +164,13 @@ export default function TeacherBlogsPage() {
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
       >
-        <div className="flex-1">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">My Blogs</h1>
-          <p className="text-gray-500 mt-1">Manage your blog posts and content</p>
+        <div className="flex-1 w-full sm:w-auto">
+          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">My Blogs</h1>
+          <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">Manage your blog posts and content</p>
         </div>
         <Link
           href="/dashboard/teacher/blogs/create"
-          className={`inline-flex items-center justify-center px-4 py-2.5 sm:w-auto w-full bg-gradient-to-r ${theme.gradient} text-white font-medium rounded-xl shadow-md hover:shadow-lg transition-all`}
+          className={`inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base bg-gradient-to-r ${theme.gradient} text-white font-medium rounded-xl shadow-md hover:shadow-lg transition-all`}
         >
           <Plus className="w-5 h-5 mr-2" />
           Create Blog
@@ -217,28 +190,28 @@ export default function TeacherBlogsPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="bg-white rounded-2xl p-4 shadow-sm"
+        className="bg-[var(--card-solid)] rounded-2xl p-4 shadow-sm"
       >
         <div className="flex flex-col sm:flex-row gap-4">
           {/* Search */}
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-muted-foreground)]" />
             <input
               type="text"
               placeholder="Search blogs..."
               defaultValue={searchTerm}
               onChange={(e) => debouncedSearchHandler(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+              className="w-full pl-10 pr-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--teacher-primary)]/20 focus:border-[var(--teacher-primary)]"
             />
           </div>
 
           {/* Filter */}
           <div className="flex items-center gap-2">
-            <Filter className="w-5 h-5 text-gray-400 flex-shrink-0" />
+            <Filter className="w-5 h-5 text-[var(--color-muted-foreground)] flex-shrink-0" />
             <select
               value={filter}
               onChange={(e) => setFilter(e.target.value as 'all' | 'published' | 'draft')}
-              className="flex-1 sm:flex-none px-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+              className="flex-1 sm:flex-none px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--teacher-primary)]/20 focus:border-[var(--teacher-primary)]"
             >
               <option value="all">All Blogs</option>
               <option value="published">Published</option>
@@ -248,11 +221,11 @@ export default function TeacherBlogsPage() {
 
           {/* Language Filter */}
           <div className="flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-gray-400 flex-shrink-0" />
+            <BookOpen className="w-5 h-5 text-[var(--color-muted-foreground)] flex-shrink-0" />
             <select
               value={languageFilter}
               onChange={(e) => setLanguageFilter(e.target.value as 'all' | 'en' | 'hi')}
-              className="flex-1 sm:flex-none px-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+              className="flex-1 sm:flex-none px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--teacher-primary)]/20 focus:border-[var(--teacher-primary)]"
             >
               <option value="all">All Languages</option>
               <option value="en">English</option>
@@ -269,21 +242,21 @@ export default function TeacherBlogsPage() {
         transition={{ delay: 0.2 }}
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
       >
-        <div className="bg-white rounded-xl p-4 shadow-sm">
+        <div className="bg-[var(--card-solid)] rounded-xl p-4 shadow-sm">
           <p className={`text-2xl font-bold ${theme.text}`}>{blogs.length}</p>
-          <p className="text-sm text-gray-500">Total Blogs</p>
+          <p className="text-sm text-[var(--color-muted-foreground)]">Total Blogs</p>
         </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm">
+        <div className="bg-[var(--card-solid)] rounded-xl p-4 shadow-sm">
           <p className={`text-2xl font-bold ${theme.text}`}>
             {blogs.filter((b: Blog) => b.isPublished).length}
           </p>
-          <p className="text-sm text-gray-500">Published</p>
+          <p className="text-sm text-[var(--color-muted-foreground)]">Published</p>
         </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm">
-          <p className="text-2xl font-bold text-gray-600">
+        <div className="bg-[var(--card-solid)] rounded-xl p-4 shadow-sm">
+          <p className="text-2xl font-bold text-[var(--color-muted-foreground)]">
             {blogs.filter((b: Blog) => !b.isPublished).length}
           </p>
-          <p className="text-sm text-gray-500">Drafts</p>
+          <p className="text-sm text-[var(--color-muted-foreground)]">Drafts</p>
         </div>
       </motion.div>
 
@@ -295,12 +268,12 @@ export default function TeacherBlogsPage() {
         className="space-y-4"
       >
         {filteredBlogs.length === 0 ? (
-          <div className="text-center py-16 px-4 bg-white rounded-2xl shadow-sm">
-            <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+          <div className="text-center py-16 px-4 bg-[var(--card-solid)] rounded-2xl shadow-sm">
+            <BookOpen className="w-16 h-16 text-[var(--color-muted-foreground)] mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-[var(--color-foreground)] mb-2">
               {searchTerm ? 'No blogs found' : 'No blogs yet'}
             </h3>
-            <p className="text-gray-500 mb-6">
+            <p className="text-[var(--color-muted-foreground)] mb-6">
               {searchTerm
                 ? 'Try adjusting your search or filters'
                 : 'Create your first blog post to get started'}
@@ -308,7 +281,7 @@ export default function TeacherBlogsPage() {
             {!searchTerm && (
               <Link
                 href="/dashboard/teacher/blogs/create"
-                className={`inline-flex items-center justify-center px-4 py-2.5 sm:w-auto w-full bg-gradient-to-r ${theme.gradient} text-white font-medium rounded-xl shadow-md hover:shadow-lg transition-all touch-manipulation`}
+                className={`inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base bg-gradient-to-r ${theme.gradient} text-white font-medium rounded-xl shadow-md hover:shadow-lg transition-all touch-manipulation`}
               >
                 <Plus className="w-5 h-5 mr-2" />
                 Create Blog
@@ -322,12 +295,12 @@ export default function TeacherBlogsPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 * index }}
-              className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow"
+              className="bg-[var(--card-solid)] rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow"
             >
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-2 flex-wrap">
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 line-clamp-1">{blog.title}</h3>
+                    <h3 className="text-base sm:text-lg font-semibold text-[var(--color-foreground)] line-clamp-1">{blog.title}</h3>
                     <Badge
                       variant={blog.isPublished ? 'success' : 'default'}
                       size="sm"
@@ -335,7 +308,7 @@ export default function TeacherBlogsPage() {
                       {blog.isPublished ? 'Published' : 'Draft'}
                     </Badge>
                   </div>
-                  <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+                  <div className="flex flex-wrap items-center gap-3 text-sm text-[var(--color-muted-foreground)]">
                     <Badge variant="primary" size="sm">{blog.topic}</Badge>
                     <span className="flex items-center">
                       <Calendar className="w-4 h-4 mr-1" />
@@ -347,10 +320,10 @@ export default function TeacherBlogsPage() {
                 <div className="flex items-center gap-2 sm:gap-1">
                   <button
                     onClick={() => togglePublish(blog._id, blog.isPublished)}
-                    className={`p-2.5 sm:p-2 rounded-lg transition-colors touch-manipulation ${
+                    className={`p-2.5 sm:p-2 rounded-lg transition-colors touch-manipulation min-h-[44px] sm:min-h-0 ${
                       blog.isPublished
                         ? `${theme.activeBg} ${theme.text} hover:opacity-80`
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        : 'bg-[var(--color-muted)] text-[var(--color-muted-foreground)] hover:bg-[var(--color-muted)]/80'
                     }`}
                     title={blog.isPublished ? 'Unpublish' : 'Publish'}
                   >
@@ -358,14 +331,14 @@ export default function TeacherBlogsPage() {
                   </button>
                   <Link
                     href={`/dashboard/teacher/blogs/edit/${blog._id}`}
-                    className="p-2.5 sm:p-2 bg-gray-50 text-gray-600 rounded-lg hover:bg-gray-100 transition-colors touch-manipulation"
+                    className="p-2.5 sm:p-2 bg-[var(--color-muted)] text-[var(--color-muted-foreground)] rounded-lg hover:bg-[var(--color-muted)]/80 transition-colors touch-manipulation min-h-[44px] sm:min-h-0"
                     title="Edit"
                   >
                     <Edit2 className="w-5 h-5" />
                   </Link>
                   <button
                     onClick={() => handleDelete(blog._id)}
-                    className="p-2.5 sm:p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors touch-manipulation"
+                    className="p-2.5 sm:p-2 bg-[var(--error-light)] text-[var(--error)] rounded-lg hover:bg-[var(--error-light)]/80 transition-colors touch-manipulation min-h-[44px] sm:min-h-0"
                     title="Delete"
                   >
                     <Trash2 className="w-5 h-5" />

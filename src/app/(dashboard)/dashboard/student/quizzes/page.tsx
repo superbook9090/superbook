@@ -8,9 +8,8 @@ import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import QuizCard from '@/features/quizzes/components/QuizCard';
 import Alert from '@/components/ui/Alert';
 import { useSessionStore } from '@/store/useSessionStore';
-import { useCachedStore } from '@/store/useCachedStore';
 import { Skeleton, CardSkeleton } from '@/components/ui/Skeleton';
-import type { QuizAttempt, Quiz } from '@/store/useCachedStore';
+import { useEnrollments, useQuizAttempts, useQuizzes, type QuizAttempt, type Quiz } from '@/lib/react-query/hooks';
 
 export default function StudentQuizzesPage() {
   const session = useSessionStore((s) => s.session);
@@ -18,82 +17,52 @@ export default function StudentQuizzesPage() {
   const router = useRouter();
   const { t } = useTranslation();
   const { theme } = useRoleTheme();
-  const { enrollments: enrollmentsCache, quizAttempts: quizAttemptsCache, fetchEnrollments, fetchQuizAttempts } = useCachedStore();
-  const [availableQuizzes, setAvailableQuizzes] = useState<Quiz[]>([]);
   const [activeTab, setActiveTab] = useState<'available' | 'completed'>('available');
   const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
 
-  const userId = session?.user?.id;
-  const enrollmentState = userId ? enrollmentsCache[userId] : null;
-  const attemptsState = userId ? quizAttemptsCache[userId] : null;
-  const enrollments = useMemo(() => enrollmentState?.data || [], [enrollmentState?.data]);
-  const attempts = useMemo(() => attemptsState?.data || [], [attemptsState?.data]);
-  const isLoading = (enrollmentState?.loading ?? true) || (attemptsState?.loading ?? true);
-  const error = enrollmentState?.error || attemptsState?.error || '';
+  const orgId = (session?.user as { organizationId?: string })?.organizationId || 'public';
+  const { data: enrollments = [] } = useEnrollments();
+  const { data: attempts = [] } = useQuizAttempts();
+  const { data: allQuizzes = [], isLoading: quizzesLoading } = useQuizzes(orgId);
+  const isLoading = quizzesLoading;
 
   useEffect(() => {
     if (status === 'loading') return;
     if (!session) {
       router.push('/login');
-      return;
+    }
+  }, [status, session, router]);
+
+  // Derive available quizzes from enrollments using useMemo
+  const availableQuizzes = useMemo(() => {
+    if (enrollments.length === 0) {
+      return [];
     }
 
-    if (userId) {
-      fetchEnrollments(userId);
-      fetchQuizAttempts(userId);
-    }
-  }, [session, status, userId, fetchEnrollments, fetchQuizAttempts, router]);
-
-  // Derive available quizzes from enrollments
-  useEffect(() => {
-    const fetchAvailableQuizzes = async () => {
-      if (enrollments.length === 0) {
-        setAvailableQuizzes([]);
-        return;
-      }
-
-      const enrolledCourseIds = enrollments.map(
-        (e: { course: { _id: string } | string }) => {
-          if (typeof e.course === 'object' && e.course !== null) {
-            return e.course._id?.toString();
-          }
-          return e.course?.toString();
+    const enrolledCourseIds = enrollments.map(
+      (e: { course: { _id: string } | string }) => {
+        if (typeof e.course === 'object' && e.course !== null) {
+          return e.course._id?.toString();
         }
-      ).filter(Boolean);
-
-      try {
-        // Fetch all available quizzes
-        const quizzesRes = await fetch('/api/quizzes');
-        const quizzesData = await quizzesRes.json();
-
-        if (!quizzesRes.ok) {
-          setAlertState({ type: 'error', message: t('errors.failedLoadQuizzes') || 'Failed to load quizzes' });
-          return;
-        }
-
-        const allQuizzes = quizzesData.quizzes || [];
-
-        // Filter for published quizzes from enrolled courses that haven't been completed
-        const relevantQuizzes = allQuizzes.filter((q: Quiz) => {
-          const quizCourseId = q.course?._id?.toString();
-          const isEnrolled = quizCourseId && enrolledCourseIds.includes(quizCourseId);
-          
-          // Check if quiz has been completed
-          const isCompleted = attempts.some(
-            (a: QuizAttempt) => a.quiz?._id === q._id && a.status === 'completed'
-          );
-          
-          return q.isPublished && isEnrolled && !isCompleted;
-        });
-
-        setAvailableQuizzes(relevantQuizzes);
-      } catch (err) {
-        console.error('Error fetching quizzes:', err);
+        return e.course?.toString();
       }
-    };
+    ).filter(Boolean);
 
-    fetchAvailableQuizzes();
-  }, [enrollments, attempts]);
+    // Filter for published quizzes from enrolled courses that haven't been completed
+    const relevantQuizzes = allQuizzes.filter((q: Quiz) => {
+      const quizCourseId = q.course?._id?.toString();
+      const isEnrolled = quizCourseId && enrolledCourseIds.includes(quizCourseId);
+
+      // Check if quiz has been completed
+      const isCompleted = attempts.some(
+        (a: QuizAttempt) => a.quiz?._id === q._id && a.status === 'completed'
+      );
+
+      return q.isPublished && isEnrolled && !isCompleted;
+    });
+
+    return relevantQuizzes;
+  }, [enrollments, attempts, allQuizzes]);
 
   const handleStartQuiz = useCallback(async (quizId: string) => {
     console.log('Starting quiz with ID:', quizId);
@@ -119,7 +88,7 @@ export default function StudentQuizzesPage() {
   }, [t, router]);
 
   const completedAttempts = useMemo(() =>
-    attempts.filter((a) => a.status === 'completed'),
+    attempts.filter((a: QuizAttempt) => a.status === 'completed'),
     [attempts]
   );
 
@@ -144,8 +113,8 @@ export default function StudentQuizzesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900">{t('quiz.myQuizzes')}</h1>
-      <p className="mt-2 text-gray-600">
+      <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)] truncate">{t('quiz.myQuizzes')}</h1>
+      <p className="mt-2 text-sm sm:text-base text-[var(--color-muted-foreground)]">
         {t('quiz.quizzesDesc')}
       </p>
 
@@ -157,22 +126,16 @@ export default function StudentQuizzesPage() {
         />
       )}
 
-      {error && (
-        <div className="mt-4 bg-red-50 border-l-4 border-red-400 p-4">
-          <p className="text-sm text-red-700">{error}</p>
-        </div>
-      )}
-
       {/* Tabs */}
-      <div className="mt-6 border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8">
+      <div className="mt-6 border-b border-[var(--border)]">
+        <nav className="-mb-px flex space-x-4 sm:space-x-8 overflow-x-auto">
           <button
             onClick={() => setActiveTab('available')}
             className={`${
               activeTab === 'available'
-                ? 'border-green-500 text-green-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm`}
+                ? 'border-[var(--success)] text-[var(--success)]'
+                : 'border-transparent text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:border-[var(--border)]'
+            } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm min-h-[44px] flex items-center`}
           >
             {t('quiz.available')} ({availableQuizzes.length})
           </button>
@@ -180,9 +143,9 @@ export default function StudentQuizzesPage() {
             onClick={() => setActiveTab('completed')}
             className={`${
               activeTab === 'completed'
-                ? 'border-green-500 text-green-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm`}
+                ? 'border-[var(--success)] text-[var(--success)]'
+                : 'border-transparent text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:border-[var(--border)]'
+            } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm min-h-[44px] flex items-center`}
           >
             {t('quiz.completed')} ({completedAttempts.length})
           </button>
@@ -192,14 +155,14 @@ export default function StudentQuizzesPage() {
       <div className="mt-6">
         {activeTab === 'available' ? (
           availableQuizzes.length === 0 ? (
-            <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="bg-[var(--background)] overflow-hidden shadow rounded-lg">
               <div className="px-4 py-8 sm:p-6 text-center">
-                <p className="text-gray-500 mb-4">
+                <p className="text-[var(--color-muted-foreground)] mb-4">
                   {t('quiz.enrollCourse')}
                 </p>
                 <a
                   href="/dashboard/student/browse"
-                  className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90`}
+                  className={`inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base font-medium rounded-xl text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 transition-opacity`}
                 >
                   {t('courses.browseMore')}
                 </a>
@@ -207,7 +170,7 @@ export default function StudentQuizzesPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {availableQuizzes.map((quiz) => (
+              {availableQuizzes.map((quiz: Quiz) => (
                 <QuizCard
                   key={quiz._id}
                   quiz={quiz}
@@ -220,12 +183,12 @@ export default function StudentQuizzesPage() {
         ) : completedAttempts.length === 0 ? (
           <div className="bg-white overflow-hidden shadow rounded-lg">
             <div className="px-4 py-8 sm:p-6 text-center">
-              <p className="text-gray-500">{t('quiz.noCompleted')}</p>
+              <p className="text-[var(--color-muted-foreground)]">{t('quiz.noCompleted')}</p>
             </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {completedAttempts.map((attempt) => (
+            {completedAttempts.map((attempt: QuizAttempt) => (
               <QuizCard
                 key={`${attempt._id}-${attempt.attemptNumber}`}
                 quiz={attempt.quiz}

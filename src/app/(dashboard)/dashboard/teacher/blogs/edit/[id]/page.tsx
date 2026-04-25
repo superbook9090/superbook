@@ -139,7 +139,7 @@ export default function EditBlogPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-12 h-12 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin" />
+        <div className="w-12 h-12 border-4 border-[var(--color-muted)] border-t-[var(--teacher-primary)] rounded-full animate-spin" />
       </div>
     );
   }
@@ -162,13 +162,13 @@ export default function EditBlogPage() {
       >
         <Link
           href="/dashboard/teacher/blogs"
-          className="inline-flex items-center text-emerald-600 hover:text-emerald-700 mb-4"
+          className="inline-flex items-center text-[var(--teacher-primary)] hover:text-[var(--teacher-primary)]/80 mb-4"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Blogs
         </Link>
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Edit Blog</h1>
-        <p className="text-gray-500 mt-1">Update your blog post</p>
+        <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">Edit Blog</h1>
+        <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">Update your blog post</p>
       </motion.div>
 
       {/* Form */}
@@ -176,10 +176,10 @@ export default function EditBlogPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="bg-white rounded-2xl shadow-sm p-6 sm:p-8"
+        className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 sm:p-8"
       >
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-xl text-red-600">
+          <div className="mb-6 p-4 bg-[var(--error-light)] border border-[var(--error)]/20 rounded-xl text-[var(--error)]">
             {error}
           </div>
         )}
@@ -187,7 +187,7 @@ export default function EditBlogPage() {
         <div className="space-y-6">
           {/* Title */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-[var(--color-foreground)] mb-2">
               <Type className="w-4 h-4 inline mr-2" />
               Blog Title
             </label>
@@ -196,22 +196,22 @@ export default function EditBlogPage() {
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               placeholder="Enter an engaging title..."
-              className="w-full px-4 py-3 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+              className="w-full min-h-[44px] px-4 py-3 bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--teacher-primary)]/20 focus:border-[var(--teacher-primary)]"
               maxLength={200}
             />
-            <p className="text-xs text-gray-400 mt-1">{formData.title.length}/200 characters</p>
+            <p className="text-xs text-[var(--color-muted-foreground)] mt-1">{formData.title.length}/200 characters</p>
           </div>
 
           {/* Topic */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-[var(--color-foreground)] mb-2">
               <Hash className="w-4 h-4 inline mr-2" />
               Topic
             </label>
             <select
               value={formData.topic}
               onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
-              className="w-full px-4 py-3 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+              className="w-full min-h-[44px] px-4 py-3 bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--teacher-primary)]/20 focus:border-[var(--teacher-primary)]"
             >
               <option value="">Select a topic...</option>
               {topics.map((topic) => (
@@ -224,7 +224,7 @@ export default function EditBlogPage() {
 
           {/* Content */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-[var(--color-foreground)] mb-2">
               <FileText className="w-4 h-4 inline mr-2" />
               Content
             </label>

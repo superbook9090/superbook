@@ -10,6 +10,7 @@ import { updateBlogSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { validateContentAccess } from '@/lib/accessControl';
 import { invalidatePattern } from '@/lib/redis';
+import { revalidateTag } from 'next/cache';
 
 // GET /api/blogs/[id] - Get a single blog
 export async function GET(
@@ -161,6 +162,9 @@ export async function PATCH(
     // Invalidate cache for this organization
     const orgId = blog.organizationId?.toString() || 'public';
     await invalidatePattern(`blogs:${orgId}:*`);
+    
+    // Revalidate Next.js cache tag
+    revalidateTag(`blogs:${orgId}`);
 
     return NextResponse.json(blog);
   } catch (error) {
@@ -231,6 +235,9 @@ export async function DELETE(
     // Invalidate cache for this organization
     const orgId = blog.organizationId?.toString() || 'public';
     await invalidatePattern(`blogs:${orgId}:*`);
+    
+    // Revalidate Next.js cache tag
+    revalidateTag(`blogs:${orgId}`);
 
     return NextResponse.json({ message: 'Blog deleted successfully' });
   } catch (error) {

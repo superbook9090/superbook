@@ -121,7 +121,7 @@ export default function TeacherAnalyticsPage() {
   if (!stats) {
     return (
       <div className="text-center py-8">
-        {error && <p className="text-red-600 mb-4">{error}</p>}
+        {error && <p className="text-[var(--error)] mb-4">{error}</p>}
         <button
           onClick={fetchStats}
           className={`px-4 py-2 bg-gradient-to-r ${theme.gradient} text-white rounded-md hover:opacity-90`}
@@ -134,100 +134,100 @@ export default function TeacherAnalyticsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900">{t('analytics.myAnalytics')}</h1>
-      <p className="mt-2 text-gray-600">
+      <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">{t('analytics.myAnalytics')}</h1>
+      <p className="mt-2 text-sm sm:text-base text-[var(--color-muted-foreground)]">
         {t('analytics.analyticsDesc')}
       </p>
 
       {/* Overview Stats */}
       <div className="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <div className="bg-white rounded-lg shadow p-4 text-center">
-          <p className="text-3xl font-bold text-green-600">{stats.overview.totalCourses}</p>
-          <p className="text-sm text-gray-600">{t('analytics.totalCourses')}</p>
+        <div className="bg-[var(--card-solid)] rounded-lg shadow p-4 text-center">
+          <p className="text-3xl font-bold text-[var(--success)]">{stats.overview.totalCourses}</p>
+          <p className="text-sm text-[var(--color-muted-foreground)]">{t('analytics.totalCourses')}</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4 text-center">
-          <p className="text-3xl font-bold text-blue-600">{stats.overview.publishedCourses}</p>
-          <p className="text-sm text-gray-600">{t('analytics.published')}</p>
+        <div className="bg-[var(--card-solid)] rounded-lg shadow p-4 text-center">
+          <p className="text-3xl font-bold text-[var(--info)]">{stats.overview.publishedCourses}</p>
+          <p className="text-sm text-[var(--color-muted-foreground)]">{t('analytics.published')}</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4 text-center">
-          <p className="text-3xl font-bold text-indigo-600">{stats.overview.totalStudents}</p>
-          <p className="text-sm text-gray-600">{t('analytics.totalStudents')}</p>
+        <div className="bg-[var(--card-solid)] rounded-lg shadow p-4 text-center">
+          <p className="text-3xl font-bold text-[var(--student-primary)]">{stats.overview.totalStudents}</p>
+          <p className="text-sm text-[var(--color-muted-foreground)]">{t('analytics.totalStudents')}</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4 text-center">
-          <p className="text-3xl font-bold text-purple-600">{stats.overview.totalQuizzes}</p>
-          <p className="text-sm text-gray-600">{t('analytics.quizzes')}</p>
+        <div className="bg-[var(--card-solid)] rounded-lg shadow p-4 text-center">
+          <p className="text-3xl font-bold text-[var(--student-accent)]">{stats.overview.totalQuizzes}</p>
+          <p className="text-sm text-[var(--color-muted-foreground)]">{t('analytics.quizzes')}</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4 text-center">
-          <p className="text-3xl font-bold text-pink-600">{stats.overview.totalAttempts}</p>
-          <p className="text-sm text-gray-600">{t('analytics.quizAttempts')}</p>
+        <div className="bg-[var(--card-solid)] rounded-lg shadow p-4 text-center">
+          <p className="text-3xl font-bold text-[var(--admin-primary)]">{stats.overview.totalAttempts}</p>
+          <p className="text-sm text-[var(--color-muted-foreground)]">{t('analytics.quizAttempts')}</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4 text-center">
-          <p className="text-3xl font-bold text-orange-600">{stats.overview.averageScore}%</p>
-          <p className="text-sm text-gray-600">{t('analytics.avgScore')}</p>
+        <div className="bg-[var(--card-solid)] rounded-lg shadow p-4 text-center">
+          <p className="text-3xl font-bold text-[var(--warning)]">{stats.overview.averageScore}%</p>
+          <p className="text-sm text-[var(--color-muted-foreground)]">{t('analytics.avgScore')}</p>
         </div>
       </div>
 
       {/* Course Breakdown */}
       <div className="mt-8">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('analytics.coursePerformance')}</h2>
+        <h2 className="text-lg sm:text-xl font-semibold text-[var(--color-foreground)] mb-4">{t('analytics.coursePerformance')}</h2>
         {stats.courses.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-8 text-center">
-            <p className="text-gray-500 mb-4">{t('analytics.noCoursesYet')}</p>
+          <div className="bg-[var(--card-solid)] rounded-lg shadow p-8 text-center">
+            <p className="text-[var(--color-muted-foreground)] mb-4">{t('analytics.noCoursesYet')}</p>
             <a
               href="/dashboard/teacher/courses/create"
-              className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90`}
+              className={`inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base font-medium rounded-xl text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 transition-opacity`}
             >
               {t('analytics.createCourse')}
             </a>
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="bg-[var(--card-solid)] rounded-lg shadow overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-[var(--border)]">
+                <thead className="bg-[var(--color-muted)]">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider">
                       {t('analytics.course')}
                     </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider">
                       {t('analytics.students')}
                     </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider">
                       {t('analytics.quizzes')}
                     </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider">
                       {t('analytics.attempts')}
                     </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider">
                       {t('analytics.avgScore')}
                     </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider">
                       {t('analytics.status')}
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-[var(--card-solid)] divide-y divide-[var(--border)]">
                   {stats.courses.map((course) => (
                     <tr key={course._id}>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <p className="text-sm font-medium text-gray-900">{course.title}</p>
+                        <p className="text-sm font-medium text-[var(--color-foreground)]">{course.title}</p>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-center">
-                        <p className="text-sm text-gray-900">{course.students}</p>
+                        <p className="text-sm text-[var(--color-foreground)]">{course.students}</p>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-center">
-                        <p className="text-sm text-gray-900">{course.quizzes}</p>
+                        <p className="text-sm text-[var(--color-foreground)]">{course.quizzes}</p>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-center">
-                        <p className="text-sm text-gray-900">{course.attempts}</p>
+                        <p className="text-sm text-[var(--color-foreground)]">{course.attempts}</p>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-center">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                           course.averageScore >= 70
-                            ? 'bg-green-100 text-green-800'
+                            ? 'bg-[var(--success-light)] text-[var(--success)]'
                             : course.averageScore >= 50
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-red-100 text-red-800'
+                            ? 'bg-[var(--warning-light)] text-[var(--warning)]'
+                            : 'bg-[var(--error-light)] text-[var(--error)]'
                         }`}>
                           {course.averageScore}%
                         </span>
@@ -235,8 +235,8 @@ export default function TeacherAnalyticsPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-center">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                           course.isPublished
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-gray-100 text-gray-800'
+                            ? 'bg-[var(--success-light)] text-[var(--success)]'
+                            : 'bg-[var(--color-muted)] text-[var(--color-muted-foreground)]'
                         }`}>
                           {course.isPublished ? t('analytics.published') : t('analytics.draft')}
                         </span>
@@ -252,48 +252,48 @@ export default function TeacherAnalyticsPage() {
 
       {/* Top Students */}
       <div className="mt-8">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('analytics.topPerformingStudents')}</h2>
+        <h2 className="text-lg sm:text-xl font-semibold text-[var(--color-foreground)] mb-4">{t('analytics.topPerformingStudents')}</h2>
         {stats.topStudents.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-6 text-center">
-            <p className="text-gray-500">{t('analytics.noQuizAttempts')}</p>
+          <div className="bg-[var(--card-solid)] rounded-lg shadow p-6 text-center">
+            <p className="text-[var(--color-muted-foreground)]">{t('analytics.noQuizAttempts')}</p>
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+          <div className="bg-[var(--card-solid)] rounded-lg shadow overflow-hidden">
+            <table className="min-w-full divide-y divide-[var(--border)]">
+              <thead className="bg-[var(--color-muted)]">
                 <tr>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-center text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider">
                     {t('analytics.student')}
                   </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-center text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider">
                     {t('analytics.attempts')}
                   </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-center text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider">
                     {t('analytics.averageScore')}
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-[var(--card-solid)] divide-y divide-[var(--border)]">
                 {stats.topStudents.map((student, index) => (
                   <tr key={index}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <span className="flex-shrink-0 h-8 w-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-semibold text-sm">
+                        <span className="flex-shrink-0 h-8 w-8 rounded-full bg-[var(--success-light)] flex items-center justify-center text-[var(--success)] font-semibold text-sm">
                           {index + 1}
                         </span>
-                        <p className="ml-3 text-sm font-medium text-gray-900">{student.name}</p>
+                        <p className="ml-3 text-sm font-medium text-[var(--color-foreground)]">{student.name}</p>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <p className="text-sm text-gray-900">{student.attempts}</p>
+                      <p className="text-sm text-[var(--color-foreground)]">{student.attempts}</p>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                         student.averageScore >= 70
-                          ? 'bg-green-100 text-green-800'
+                          ? 'bg-[var(--success-light)] text-[var(--success)]'
                           : student.averageScore >= 50
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-red-100 text-red-800'
+                          ? 'bg-[var(--warning-light)] text-[var(--warning)]'
+                          : 'bg-[var(--error-light)] text-[var(--error)]'
                       }`}>
                         {student.averageScore}%
                       </span>

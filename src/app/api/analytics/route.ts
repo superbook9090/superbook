@@ -4,12 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import mongoose from 'mongoose';
-import '@/models/Lesson'; // Import to register Lesson model
-import User from '@/models/User';
-import Course from '@/models/Course';
-import Quiz from '@/models/Quiz';
-import Enrollment from '@/models/Enrollment';
-import QuizAttempt from '@/models/QuizAttempt';
+import { User, Course, Quiz, Enrollment, QuizAttempt } from '@/models';
 import { logApiError, type LogContext } from '@/lib/logger';
 
 // GET /api/analytics - Get analytics data

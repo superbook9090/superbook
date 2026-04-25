@@ -138,8 +138,8 @@ export default function StudentProgressPage() {
 
   return (
     <div className="px-4 sm:px-6 lg:px-8">
-      <h1 className="text-2xl font-bold text-gray-900">{t('progress.myProgress')}</h1>
-      <p className="mt-2 text-gray-600">
+      <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">{t('progress.myProgress')}</h1>
+      <p className="mt-2 text-sm sm:text-base text-[var(--color-muted-foreground)]">
         {t('progress.progressDesc')}
       </p>
 
@@ -152,51 +152,51 @@ export default function StudentProgressPage() {
       )}
 
       {error && (
-        <div className="mt-4 bg-red-50 border-l-4 border-red-400 p-4">
-          <p className="text-sm text-red-700">{error}</p>
+        <div className="mt-4 bg-[var(--error-light)] border-l-4 border-[var(--error)] p-4">
+          <p className="text-sm text-[var(--error)]">{error}</p>
         </div>
       )}
 
       {/* Overall Stats */}
       {overallStats && (
         <div className="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          <div className="bg-white rounded-lg shadow p-4 text-center">
-            <p className="text-2xl font-bold text-indigo-600">{overallStats.totalCourses}</p>
-            <p className="text-sm text-gray-600">{t('progress.coursesEnrolled')}</p>
+          <div className="bg-[var(--card-solid)] rounded-lg shadow p-4 text-center">
+            <p className="text-2xl font-bold text-[var(--student-primary)]">{overallStats.totalCourses}</p>
+            <p className="text-sm text-[var(--color-muted-foreground)]">{t('progress.coursesEnrolled')}</p>
           </div>
-          <div className="bg-white rounded-lg shadow p-4 text-center">
-            <p className="text-2xl font-bold text-green-600">{overallStats.completedCourses}</p>
-            <p className="text-sm text-gray-600">{t('progress.completed')}</p>
+          <div className="bg-[var(--card-solid)] rounded-lg shadow p-4 text-center">
+            <p className="text-2xl font-bold text-[var(--success)]">{overallStats.completedCourses}</p>
+            <p className="text-sm text-[var(--color-muted-foreground)]">{t('progress.completed')}</p>
           </div>
-          <div className="bg-white rounded-lg shadow p-4 text-center">
-            <p className="text-2xl font-bold text-yellow-600">{overallStats.inProgressCourses}</p>
-            <p className="text-sm text-gray-600">{t('progress.inProgress')}</p>
+          <div className="bg-[var(--card-solid)] rounded-lg shadow p-4 text-center">
+            <p className="text-2xl font-bold text-[var(--warning)]">{overallStats.inProgressCourses}</p>
+            <p className="text-sm text-[var(--color-muted-foreground)]">{t('progress.inProgress')}</p>
           </div>
-          <div className="bg-white rounded-lg shadow p-4 text-center">
-            <p className="text-2xl font-bold text-indigo-600">{overallStats.averageProgress}%</p>
-            <p className="text-sm text-gray-600">{t('progress.avgProgress')}</p>
+          <div className="bg-[var(--card-solid)] rounded-lg shadow p-4 text-center">
+            <p className="text-2xl font-bold text-[var(--student-primary)]">{overallStats.averageProgress}%</p>
+            <p className="text-sm text-[var(--color-muted-foreground)]">{t('progress.avgProgress')}</p>
           </div>
-          <div className="bg-white rounded-lg shadow p-4 text-center">
-            <p className="text-2xl font-bold text-blue-600">{overallStats.totalQuizzesTaken}</p>
-            <p className="text-sm text-gray-600">{t('progress.quizzesTaken')}</p>
+          <div className="bg-[var(--card-solid)] rounded-lg shadow p-4 text-center">
+            <p className="text-2xl font-bold text-[var(--info)]">{overallStats.totalQuizzesTaken}</p>
+            <p className="text-sm text-[var(--color-muted-foreground)]">{t('progress.quizzesTaken')}</p>
           </div>
-          <div className="bg-white rounded-lg shadow p-4 text-center">
-            <p className="text-2xl font-bold text-purple-600">{overallStats.overallAverageScore}%</p>
-            <p className="text-sm text-gray-600">{t('progress.avgQuizScore')}</p>
+          <div className="bg-[var(--card-solid)] rounded-lg shadow p-4 text-center">
+            <p className="text-2xl font-bold text-[var(--student-accent)]">{overallStats.overallAverageScore}%</p>
+            <p className="text-sm text-[var(--color-muted-foreground)]">{t('progress.avgQuizScore')}</p>
           </div>
         </div>
       )}
 
       {/* Course Progress */}
       <div className="mt-8">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('progress.courseProgress')}</h2>
+        <h2 className="text-lg sm:text-xl font-semibold text-[var(--color-foreground)] mb-4">{t('progress.courseProgress')}</h2>
 
         {progressData.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-8 text-center">
-            <p className="text-gray-500 mb-4">{t('progress.noProgressData')}</p>
+          <div className="bg-[var(--card-solid)] rounded-lg shadow p-8 text-center">
+            <p className="text-[var(--color-muted-foreground)] mb-4">{t('progress.noProgressData')}</p>
             <a
               href="/dashboard/student/browse"
-              className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90`}
+              className={`inline-flex items-center min-h-[44px] px-4 py-3 sm:px-4 sm:py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90`}
             >
               {t('progress.browseCourses')}
             </a>
@@ -206,7 +206,7 @@ export default function StudentProgressPage() {
             {progressData.map((item) => (
               <div
                 key={item.enrollment._id}
-                className="bg-white rounded-lg shadow overflow-hidden"
+                className="bg-[var(--card-solid)] rounded-lg shadow overflow-hidden"
               >
                 {/* Course Header */}
                 <div className="p-6">
@@ -222,45 +222,45 @@ export default function StudentProgressPage() {
                           />
                         </div>
                       ) : (
-                        <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center">
+                        <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-[var(--student-primary)] to-[var(--student-accent)] flex items-center justify-center">
                           <span className="text-white text-2xl">📚</span>
                         </div>
                       )}
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900">{item.course.title}</h3>
-                        <p className="text-sm text-gray-600 mt-1">{item.course.description}</p>
+                        <h3 className="text-lg font-semibold text-[var(--color-foreground)]">{item.course.title}</h3>
+                        <p className="text-sm text-[var(--color-muted-foreground)] mt-1">{item.course.description}</p>
                         <div className="flex items-center space-x-4 mt-2 text-sm">
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                             item.enrollment.status === 'completed'
-                              ? 'bg-green-100 text-green-800'
+                              ? 'bg-[var(--success-light)] text-[var(--success)]'
                               : item.enrollment.status === 'active'
-                              ? 'bg-indigo-100 text-indigo-800'
-                              : 'bg-red-100 text-red-800'
+                              ? 'bg-[var(--info-light)] text-[var(--info)]'
+                              : 'bg-[var(--error-light)] text-[var(--error)]'
                           }`}>
                             {item.enrollment.status.charAt(0).toUpperCase() + item.enrollment.status.slice(1)}
                           </span>
-                          <span className="text-gray-500">
+                          <span className="text-[var(--color-muted-foreground)]">
                             {t('progress.enrolled')}: {new Date(item.enrollment.enrolledAt).toLocaleDateString()}
                           </span>
                         </div>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-3xl font-bold text-indigo-600">{item.enrollment.progress}%</p>
-                      <p className="text-sm text-gray-500">{t('progress.complete')}</p>
+                      <p className="text-3xl font-bold text-[var(--student-primary)]">{item.enrollment.progress}%</p>
+                      <p className="text-sm text-[var(--color-muted-foreground)]">{t('progress.complete')}</p>
                     </div>
                   </div>
 
                   {/* Progress Bar */}
                   <div className="mt-4">
-                    <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div className="w-full bg-[var(--color-muted)] rounded-full h-3">
                       <div
                         className={`h-3 rounded-full transition-all ${
                           item.enrollment.progress >= 100
-                            ? 'bg-green-500'
+                            ? 'bg-[var(--success)]'
                             : item.enrollment.progress >= 50
                             ? `bg-gradient-to-r ${theme.gradient}`
-                            : 'bg-yellow-500'
+                            : 'bg-[var(--warning)]'
                         }`}
                         style={{ width: `${item.enrollment.progress}%` }}
                       />
@@ -268,22 +268,22 @@ export default function StudentProgressPage() {
                   </div>
 
                   {/* Quiz Stats */}
-                  <div className="mt-4 grid grid-cols-4 gap-4 bg-gray-50 rounded-lg p-4">
+                  <div className="mt-4 grid grid-cols-4 gap-4 bg-[var(--color-muted)] rounded-lg p-4">
                     <div className="text-center">
-                      <p className="text-lg font-semibold text-gray-900">{item.quizStats.total}</p>
-                      <p className="text-xs text-gray-600">{t('progress.totalQuizzes')}</p>
+                      <p className="text-lg font-semibold text-[var(--color-foreground)]">{item.quizStats.total}</p>
+                      <p className="text-xs text-[var(--color-muted-foreground)]">{t('progress.totalQuizzes')}</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-lg font-semibold text-gray-900">{item.quizStats.completed}</p>
-                      <p className="text-xs text-gray-600">{t('progress.completed')}</p>
+                      <p className="text-lg font-semibold text-[var(--color-foreground)]">{item.quizStats.completed}</p>
+                      <p className="text-xs text-[var(--color-muted-foreground)]">{t('progress.completed')}</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-lg font-semibold text-gray-900">{item.quizStats.averageScore}%</p>
-                      <p className="text-xs text-gray-600">{t('progress.avgScore')}</p>
+                      <p className="text-lg font-semibold text-[var(--color-foreground)]">{item.quizStats.averageScore}%</p>
+                      <p className="text-xs text-[var(--color-muted-foreground)]">{t('progress.avgScore')}</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-lg font-semibold text-gray-900">{item.quizStats.highestScore}%</p>
-                      <p className="text-xs text-gray-600">{t('progress.bestScore')}</p>
+                      <p className="text-lg font-semibold text-[var(--color-foreground)]">{item.quizStats.highestScore}%</p>
+                      <p className="text-xs text-[var(--color-muted-foreground)]">{t('progress.bestScore')}</p>
                     </div>
                   </div>
 
@@ -292,7 +292,7 @@ export default function StudentProgressPage() {
                     onClick={() => setSelectedCourse(
                       selectedCourse === item.enrollment._id ? null : item.enrollment._id
                     )}
-                    className="mt-4 text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+                    className="mt-4 min-h-[44px] sm:min-h-0 text-[var(--student-primary)] hover:text-[var(--student-primary)]/80 text-sm font-medium"
                   >
                     {selectedCourse === item.enrollment._id ? t('progress.hideDetails') : t('progress.viewQuizHistory')}
                   </button>
@@ -300,27 +300,27 @@ export default function StudentProgressPage() {
 
                 {/* Quiz History */}
                 {selectedCourse === item.enrollment._id && item.attempts.length > 0 && (
-                  <div className="border-t border-gray-200 bg-gray-50 px-6 py-4">
-                    <h4 className="text-sm font-semibold text-gray-900 mb-3">{t('progress.quizAttempts')}</h4>
+                  <div className="border-t border-[var(--border)] bg-[var(--color-muted)] px-6 py-4">
+                    <h4 className="text-sm font-semibold text-[var(--color-foreground)] mb-3">{t('progress.quizAttempts')}</h4>
                     <div className="space-y-2">
                       {item.attempts.map((attempt) => (
                         <div
                           key={attempt._id}
-                          className="bg-white rounded-lg p-3 flex items-center justify-between"
+                          className="bg-[var(--card-solid)] rounded-lg p-3 flex items-center justify-between"
                         >
                           <div>
-                            <p className="font-medium text-gray-900">{attempt.quizTitle}</p>
-                            <p className="text-xs text-gray-500">
+                            <p className="font-medium text-[var(--color-foreground)]">{attempt.quizTitle}</p>
+                            <p className="text-xs text-[var(--color-muted-foreground)]">
                               {t('progress.attempt')} #{attempt.attemptNumber} • {formatTime(attempt.timeTaken)}
                             </p>
                           </div>
                           <div className="text-right">
                             <p className={`font-semibold ${
-                              attempt.score >= 70 ? 'text-green-600' : attempt.score >= 50 ? 'text-yellow-600' : 'text-red-600'
+                              attempt.score >= 70 ? 'text-[var(--success)]' : attempt.score >= 50 ? 'text-[var(--warning)]' : 'text-[var(--error)]'
                             }`}>
                               {attempt.score}%
                             </p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-[var(--color-muted-foreground)]">
                               {attempt.correctCount}/{attempt.totalQuestions} {t('progress.correct')}
                             </p>
                           </div>

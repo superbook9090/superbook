@@ -6,7 +6,6 @@ import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import Image from 'next/image';
 import { useTranslation } from '@/hooks/useTranslation';
-import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import {
   LayoutDashboard,
   BookOpen,
@@ -63,21 +62,21 @@ function MobileNav({ user, navigation, adminNavigation = [] }: MobileNavProps) {
   const pathname = usePathname();
   const isAdmin = user?.role === 'admin';
   const { t, lang, setLang } = useTranslation();
-  const { theme } = useRoleTheme();
 
   // Memoize theme classes to avoid recalculation on every render
   const themeClasses = useMemo(() => {
+    const role = user?.role || 'student';
     return {
-      bg: `bg-gradient-to-r ${theme.gradient}`,
-      active: `bg-gradient-to-r ${theme.gradient}`,
+      bg: `bg-gradient-to-b from-[var(--${role}-primary)] to-[var(--${role}-primary-dark)]`,
+      active: `bg-gradient-to-b from-[var(--${role}-primary)] to-[var(--${role}-primary-dark)]`,
       hover: 'hover:opacity-80',
     };
-  }, [theme]);
+  }, [user?.role]);
 
   // Memoize navigation items to prevent unnecessary array creation
   const allNavItems = useMemo(() => {
     if (isAdmin && adminNavigation.length > 0) {
-      return [...navigation, { name: '— Admin —', href: '', icon: '' }, ...adminNavigation];
+      return [...navigation, { name: 'common.administration', href: '', icon: '' }, ...adminNavigation];
     }
     return navigation;
   }, [isAdmin, navigation, adminNavigation]);
@@ -117,13 +116,13 @@ function MobileNav({ user, navigation, adminNavigation = [] }: MobileNavProps) {
               onChange={(e) => setLang(e.target.value as 'en' | 'hi')}
               className="px-2 py-1 bg-white/20 border border-white/30 rounded text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/50"
             >
-              <option value="en" className="text-gray-900">EN</option>
-              <option value="hi" className="text-gray-900">HI</option>
+              <option value="en" className="text-gray-900">{t('common.english')}</option>
+              <option value="hi" className="text-gray-900">{t('common.hindi')}</option>
             </select>
             <button
               onClick={toggleMenu}
               className="text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 active:scale-95 transition-transform"
-              aria-label="Toggle menu"
+              aria-label={t('common.toggleMenu')}
             >
               {isOpen ? (
                 <X className="h-6 w-6" />
@@ -166,8 +165,8 @@ function MobileNav({ user, navigation, adminNavigation = [] }: MobileNavProps) {
             </nav>
             <div className="mt-4 pt-4 border-t border-white/20 px-4">
               <div className="text-white">
-                <div className="text-base font-medium truncate">{user?.name}</div>
-                <div className="text-sm text-white/70 truncate">{user?.email}</div>
+                <div className="text-base font-medium truncate">{user?.name ? user.name.charAt(0).toUpperCase() + user.name.slice(1) : user?.name}</div>
+                <div className="text-sm text-white/70 truncate">{user?.email?.toUpperCase()}</div>
               </div>
               <button
                 onClick={handleSignOut}

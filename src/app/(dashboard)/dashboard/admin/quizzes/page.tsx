@@ -170,8 +170,8 @@ export default function AdminQuizzesPage() {
           <HelpCircle className={`w-6 h-6 ${theme.text}`} />
         </div>
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">All Quizzes</h1>
-          <p className="text-gray-500 mt-1">Manage all quizzes on the platform</p>
+          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">All Quizzes</h1>
+          <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">Manage all quizzes on the platform</p>
         </div>
       </motion.div>
 
@@ -194,24 +194,24 @@ export default function AdminQuizzesPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="bg-white rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row gap-4"
+        className="bg-[var(--card-solid)] rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row gap-4"
       >
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-muted-foreground)]" />
           <input
             type="text"
             placeholder="Search quizzes..."
             value={searchInput}
             onChange={handleSearchChange}
-            className="w-full pl-10 pr-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+            className="w-full pl-10 pr-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)]/20 focus:border-[var(--admin-primary)]"
           />
         </div>
         <div className="flex items-center gap-2">
-          <Filter className="w-5 h-5 text-gray-400" />
+          <Filter className="w-5 h-5 text-[var(--color-muted-foreground)]" />
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value as 'all' | 'published' | 'draft')}
-            className="px-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+            className="px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)]/20 focus:border-[var(--admin-primary)]"
           >
             <option value="all">All Quizzes</option>
             <option value="published">Published</option>
@@ -227,17 +227,17 @@ export default function AdminQuizzesPage() {
         transition={{ delay: 0.2 }}
         className="grid grid-cols-3 gap-4"
       >
-        <div className="bg-white rounded-xl p-4 shadow-sm">
+        <div className="bg-[var(--card-solid)] rounded-xl p-4 shadow-sm">
           <p className={`text-2xl font-bold ${theme.text}`}>{quizzes.length}</p>
-          <p className="text-sm text-gray-500">Total Quizzes</p>
+          <p className="text-sm text-[var(--color-muted-foreground)]">Total Quizzes</p>
         </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm">
+        <div className="bg-[var(--card-solid)] rounded-xl p-4 shadow-sm">
           <p className={`text-2xl font-bold ${theme.text}`}>{quizzes.filter(q => q.isPublished).length}</p>
-          <p className="text-sm text-gray-500">Published</p>
+          <p className="text-sm text-[var(--color-muted-foreground)]">Published</p>
         </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm">
+        <div className="bg-[var(--card-solid)] rounded-xl p-4 shadow-sm">
           <p className={`text-2xl font-bold ${theme.text}`}>{quizzes.filter(q => !q.isPublished).length}</p>
-          <p className="text-sm text-gray-500">Drafts</p>
+          <p className="text-sm text-[var(--color-muted-foreground)]">Drafts</p>
         </div>
       </motion.div>
 
@@ -249,10 +249,10 @@ export default function AdminQuizzesPage() {
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
       >
         {filteredQuizzes.length === 0 ? (
-          <div className="col-span-full text-center py-16 bg-white rounded-2xl shadow-sm">
-            <HelpCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No quizzes found</h3>
-            <p className="text-gray-500">Try adjusting your search or filters</p>
+          <div className="col-span-full text-center py-16 bg-[var(--card-solid)] rounded-2xl shadow-sm">
+            <HelpCircle className="w-16 h-16 text-[var(--color-muted-foreground)] mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-[var(--color-foreground)] mb-2">No quizzes found</h3>
+            <p className="text-[var(--color-muted-foreground)]">Try adjusting your search or filters</p>
           </div>
         ) : (
           filteredQuizzes.map((quiz, index) => (
@@ -261,12 +261,12 @@ export default function AdminQuizzesPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 * index }}
-              className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-shadow overflow-hidden group"
+              className="bg-[var(--card-solid)] rounded-2xl shadow-sm hover:shadow-lg transition-shadow overflow-hidden group"
             >
               <div className="p-6">
                 {/* Header */}
                 <div className="flex items-start justify-between mb-4">
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 text-white">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-[var(--admin-primary)] to-[var(--admin-accent)] text-white">
                     <HelpCircle className="w-5 h-5" />
                   </div>
                   <Badge variant={quiz.isPublished ? 'primary' : 'default'} size="sm">
@@ -275,36 +275,36 @@ export default function AdminQuizzesPage() {
                 </div>
 
                 {/* Title */}
-                <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                <h3 className="text-lg font-semibold text-[var(--color-foreground)] mb-2 line-clamp-2">
                   {quiz.title}
                 </h3>
 
                 {/* Description */}
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                <p className="text-[var(--color-muted-foreground)] text-sm mb-4 line-clamp-2">
                   {quiz.description || 'No description'}
                 </p>
 
                 {/* Meta */}
                 <div className="space-y-2 mb-4">
-                  <div className="flex items-center text-sm text-gray-500">
+                  <div className="flex items-center text-sm text-[var(--color-muted-foreground)]">
                     <BookOpen className="w-4 h-4 mr-2" />
                     {quiz.course.title}
                   </div>
-                  <div className="flex items-center text-sm text-gray-500">
+                  <div className="flex items-center text-sm text-[var(--color-muted-foreground)]">
                     <HelpCircle className="w-4 h-4 mr-2" />
                     {quiz.questions?.length || 0} questions
                   </div>
-                  <div className="flex items-center text-sm text-gray-500">
+                  <div className="flex items-center text-sm text-[var(--color-muted-foreground)]">
                     <Calendar className="w-4 h-4 mr-2" />
                     {new Date(quiz.createdAt).toLocaleDateString()}
                   </div>
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-2 pt-4 border-t border-gray-100">
+                <div className="flex gap-2 pt-4 border-t border-[var(--border)]">
                   <button
                     onClick={() => handleTogglePublish(quiz._id, quiz.isPublished)}
-                    className="flex-1 flex items-center justify-center px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
+                    className="flex-1 flex items-center justify-center min-h-[44px] sm:min-h-0 px-3 py-2 bg-[var(--color-muted)] text-[var(--color-foreground)] rounded-lg hover:bg-[var(--color-muted)]/80 transition-colors text-sm"
                   >
                     {quiz.isPublished ? (
                       <>
@@ -320,7 +320,7 @@ export default function AdminQuizzesPage() {
                   </button>
                   <button
                     onClick={() => setDeleteId(quiz._id)}
-                    className="px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
+                    className="px-3 py-2 min-h-[44px] sm:min-h-0 bg-[var(--error-light)] text-[var(--error)] rounded-lg hover:bg-[var(--error-light)]/80 transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -330,20 +330,20 @@ export default function AdminQuizzesPage() {
               {/* Delete Confirmation */}
               {deleteId === quiz._id && (
                 <div className="px-6 pb-6">
-                  <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-                    <p className="text-sm text-red-800 mb-3">
+                  <div className="bg-[var(--error-light)] border border-[var(--error)] rounded-xl p-4">
+                    <p className="text-sm text-[var(--error)] mb-3">
                       Are you sure you want to delete this quiz? This action cannot be undone.
                     </p>
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleDelete(quiz._id)}
-                        className={`flex-1 px-3 py-2 bg-gradient-to-r ${theme.gradient} text-white rounded-lg hover:opacity-90 transition-colors text-sm`}
+                        className={`flex-1 min-h-[44px] sm:min-h-0 px-3 py-2 bg-gradient-to-r ${theme.gradient} text-white rounded-lg hover:opacity-90 transition-colors text-sm`}
                       >
                         Delete
                       </button>
                       <button
                         onClick={() => setDeleteId(null)}
-                        className="flex-1 px-3 py-2 bg-white text-red-700 border border-red-200 rounded-lg hover:bg-red-50 transition-colors text-sm"
+                        className="flex-1 min-h-[44px] sm:min-h-0 px-3 py-2 bg-[var(--card-solid)] text-[var(--error)] border border-[var(--error)] rounded-lg hover:bg-[var(--error-light)] transition-colors text-sm"
                       >
                         Cancel
                       </button>

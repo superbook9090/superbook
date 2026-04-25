@@ -10,6 +10,10 @@ import { sanitizeHtml } from '@/lib/sanitize';
 import mongoose from 'mongoose';
 import { getAccessFilter } from '@/lib/accessControl';
 import { getCachedData, setCachedData, invalidatePattern } from '@/lib/redis';
+import { revalidateTag } from 'next/cache';
+
+// Configure Next.js caching for this route
+export const dynamic = 'force-dynamic';
 
 // GET /api/blogs - Get all published blogs
 export async function GET(req: NextRequest) {
@@ -107,7 +111,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(responseData, {
       headers: {
-        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
       },
     });
   } catch (error) {
@@ -210,6 +214,9 @@ export async function POST(req: NextRequest) {
     // Invalidate cache for this organization
     const orgId = organizationId?.toString() || 'public';
     await invalidatePattern(`blogs:${orgId}:*`);
+    
+    // Revalidate Next.js cache tag
+    revalidateTag(`blogs:${orgId}`);
 
     return NextResponse.json(blog, { status: 201 });
   } catch (error) {

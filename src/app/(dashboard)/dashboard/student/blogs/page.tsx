@@ -7,7 +7,6 @@ import Link from 'next/link';
 import { useTranslation } from '@/hooks/useTranslation';
 import { debounce } from '@/lib/debounce';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
-import { useCachedStore } from '@/store/useCachedStore';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useFeature } from '@/contexts/AppSettingsContext';
 import {
@@ -22,16 +21,7 @@ import {
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
-
-interface Blog {
-  _id: string;
-  title: string;
-  topic: string;
-  content: string;
-  language: string;
-  createdAt: string;
-  author: { name: string };
-}
+import { useBlogs, useFavorites, useAddFavorite, useRemoveFavorite, type Blog } from '@/lib/react-query/hooks';
 
 const topics = [
   'all',
@@ -55,10 +45,11 @@ export default function StudentBlogsPage() {
   const { theme } = useRoleTheme();
   const featureEnabled = useFeature('enableBlogs');
 
-  // Use cached store for blogs
-  const orgId = session?.user?.organizationId || 'public';
-  const { blogs, fetchBlogs } = useCachedStore();
-  const blogState = blogs[orgId];
+  const orgId = (session?.user as { organizationId?: string })?.organizationId || 'public';
+  const { data: blogs = [], isLoading } = useBlogs(orgId);
+  const { data: favoritesData = [] } = useFavorites();
+  const addFavoriteMutation = useAddFavorite();
+  const removeFavoriteMutation = useRemoveFavorite();
   
   const [searchTerm, setSearchTerm] = useState('');
   const [searchInput, setSearchInput] = useState('');
@@ -72,18 +63,6 @@ export default function StudentBlogsPage() {
     debounce((...args: unknown[]) => setSearchTerm(args[0] as string), 300)(value);
   };
 
-  // Fetch blogs using cached store
-  useEffect(() => {
-    if (status === 'loading') return;
-    if (!session) {
-      router.push('/login');
-      return;
-    }
-    
-    // Fetch blogs from cached store
-    fetchBlogs(orgId);
-  }, [session, status, orgId, languageFilter, fetchBlogs, router]);
-
   useEffect(() => {
     if (status === 'loading') return;
     if (hasRedirected) return;
@@ -94,24 +73,36 @@ export default function StudentBlogsPage() {
       return;
     }
 
-    if (status === 'authenticated' && featureEnabled) {
-      fetchBlogs();
+    if (status === 'authenticated' && !featureEnabled) {
+      router.push('/dashboard/student');
     }
-  }, [status, featureEnabled, hasRedirected, fetchBlogs, router]);
+  }, [status, featureEnabled, hasRedirected, router]);
+
+  // Sync Zustand favorites with React Query data
+  useEffect(() => {
+    const favoriteIds = new Set(favoritesData.map((f: { blog: { _id: string } }) => f.blog._id));
+    favoritesData.forEach((f: { blog: { _id: string } }) => {
+      if (!favorites.has(f.blog._id)) {
+        addFavorite(f.blog._id);
+      }
+    });
+    // Remove favorites that are no longer in the API response
+    favorites.forEach((blogId) => {
+      if (!favoriteIds.has(blogId)) {
+        removeFavorite(blogId);
+      }
+    });
+  }, [favoritesData, favorites, addFavorite, removeFavorite]);
 
   const toggleFavorite = async (blogId: string) => {
     const isFavorited = favorites.has(blogId);
 
     try {
       if (isFavorited) {
-        await fetch(`/api/favorites/${blogId}`, { method: 'DELETE' });
+        await removeFavoriteMutation.mutateAsync(blogId);
         removeFavorite(blogId);
       } else {
-        await fetch('/api/favorites', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ blogId }),
-        });
+        await addFavoriteMutation.mutateAsync(blogId);
         addFavorite(blogId);
       }
     } catch (error) {
@@ -119,7 +110,7 @@ export default function StudentBlogsPage() {
     }
   };
 
-  const filteredBlogs = (blogState?.data || []).filter((blog) => {
+  const filteredBlogs = blogs.filter((blog: Blog) => {
     const matchesSearch =
       blog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       blog.topic.toLowerCase().includes(searchTerm.toLowerCase());
@@ -128,7 +119,7 @@ export default function StudentBlogsPage() {
     return matchesSearch && matchesTopic && matchesLanguage;
   });
 
-  if (blogState?.loading) {
+  if (isLoading) {
     return (
       <div className="px-4 sm:px-6 lg:px-8 space-y-6">
         {/* Header skeleton */}
@@ -173,15 +164,15 @@ export default function StudentBlogsPage() {
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
       >
-        <div className="flex-1">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{t('blog.learningBlog')}</h1>
-          <p className="text-gray-500 mt-1">
+        <div className="flex-1 w-full sm:w-auto">
+          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)] truncate">{t('blog.learningBlog')}</h1>
+          <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">
             {t('blog.blogDesc')}
           </p>
         </div>
         <Link
           href="/dashboard/student/favorites"
-          className={`inline-flex items-center justify-center px-4 py-2.5 sm:w-auto w-full bg-gradient-to-r ${theme.gradient} text-white font-medium rounded-xl shadow-md hover:shadow-lg transition-all`}
+          className={`inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base bg-gradient-to-r ${theme.gradient} text-white font-medium rounded-xl shadow-md hover:shadow-lg transition-all`}
         >
           <Bookmark className="w-5 h-5 mr-2" />
           {t('blog.myFavorites')}
@@ -193,31 +184,31 @@ export default function StudentBlogsPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="bg-white rounded-2xl p-4 shadow-sm"
+        className="bg-[var(--background)] rounded-2xl p-4 shadow-sm"
       >
         {/* Search */}
         <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-muted-foreground)]" />
           <input
             type="text"
             placeholder={t('blog.searchBlogs')}
             value={searchInput}
             onChange={handleSearchChange}
-            className="w-full pl-10 pr-4 py-3 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400"
+            className="w-full pl-10 pr-4 py-3 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
           />
         </div>
 
         {/* Topic Filter */}
         <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-2 px-2">
-          <Filter className="w-5 h-5 text-gray-400 flex-shrink-0" />
+          <Filter className="w-5 h-5 text-[var(--color-muted-foreground)] flex-shrink-0" />
           {topics.map((topic) => (
             <button
               key={topic}
               onClick={() => setSelectedTopic(topic)}
-              className={`px-4 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all touch-manipulation ${
+              className={`px-4 py-2.5 min-h-[44px] rounded-full text-sm font-medium whitespace-nowrap transition-all touch-manipulation ${
                 selectedTopic === topic
                   ? `${theme.primary} text-white`
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  : 'bg-[var(--color-muted)] text-[var(--color-muted-foreground)] hover:bg-[var(--color-muted)]/80'
               }`}
             >
               {t(`topics.${topic}`)}
@@ -227,11 +218,11 @@ export default function StudentBlogsPage() {
 
         {/* Language Filter */}
         <div className="flex items-center gap-2 mt-3">
-          <BookOpen className="w-5 h-5 text-gray-400 flex-shrink-0" />
+          <BookOpen className="w-5 h-5 text-[var(--color-muted-foreground)] flex-shrink-0" />
           <select
             value={languageFilter}
             onChange={(e) => setLanguageFilter(e.target.value as 'all' | 'en' | 'hi')}
-            className="flex-1 sm:flex-none px-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400"
+            className="flex-1 sm:flex-none px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
           >
             <option value="all">{t('blog.allLanguages')}</option>
             <option value="en">English</option>
@@ -247,13 +238,13 @@ export default function StudentBlogsPage() {
         transition={{ delay: 0.2 }}
         className="grid grid-cols-2 gap-4"
       >
-        <div className="bg-white rounded-xl p-4 shadow-sm">
-          <p className={`text-2xl font-bold ${theme.text}`}>{(blogState?.data || []).length}</p>
-          <p className="text-sm text-gray-500">{t('blog.totalArticles')}</p>
+        <div className="bg-[var(--background)] rounded-xl p-4 shadow-sm">
+          <p className={`text-2xl font-bold ${theme.text}`}>{blogs.length}</p>
+          <p className="text-sm text-[var(--color-muted-foreground)]">{t('blog.totalArticles')}</p>
         </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm">
-          <p className={`text-2xl font-bold ${theme.text}`}>{favorites.size}</p>
-          <p className="text-sm text-gray-500">{t('nav.favorites')}</p>
+        <div className="bg-[var(--background)] rounded-xl p-4 shadow-sm">
+          <p className={`text-2xl font-bold ${theme.text}`}>{favoritesData.length}</p>
+          <p className="text-sm text-[var(--color-muted-foreground)]">{t('nav.favorites')}</p>
         </div>
       </motion.div>
 
@@ -265,14 +256,14 @@ export default function StudentBlogsPage() {
         className="grid grid-cols-1 md:grid-cols-2 gap-6"
       >
         {filteredBlogs.length === 0 ? (
-          <div className="col-span-full text-center py-16 bg-white rounded-2xl shadow-sm">
-            <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+          <div className="col-span-full text-center py-16 bg-[var(--card-solid)] rounded-2xl shadow-sm">
+            <BookOpen className="w-16 h-16 text-[var(--color-muted-foreground)] mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-[var(--color-foreground)] mb-2">
               {searchTerm || selectedTopic !== 'all'
                 ? t('blog.noBlogsFound')
                 : t('blog.noBlogsYet')}
             </h3>
-            <p className="text-gray-500">
+            <p className="text-[var(--color-muted-foreground)]">
               {searchTerm || selectedTopic !== 'all'
                 ? t('blog.tryAdjusting')
                 : t('blog.checkBackLater')}
@@ -293,7 +284,7 @@ export default function StudentBlogsPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 * index }}
-                className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-shadow overflow-hidden group"
+                className="bg-[var(--card-solid)] rounded-2xl shadow-sm hover:shadow-lg transition-shadow overflow-hidden group"
               >
                 <div className="p-6">
                   {/* Topic Badge */}
@@ -303,30 +294,30 @@ export default function StudentBlogsPage() {
                     </Badge>
                     <button
                       onClick={() => toggleFavorite(blog._id)}
-                      className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                      className="p-2 min-h-[44px] sm:min-h-0 rounded-full hover:bg-[var(--color-muted)] transition-colors"
                     >
                       <Heart
                         className={`w-5 h-5 transition-colors ${
                           isFavorited
                             ? `fill-current ${theme.text}`
-                            : `text-gray-400 hover:${theme.text}`
+                            : `text-[var(--color-muted-foreground)] hover:${theme.text}`
                         }`}
                       />
                     </button>
                   </div>
 
                   {/* Title */}
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                  <h3 className="text-lg font-semibold text-[var(--color-foreground)] mb-2 line-clamp-2">
                     {blog.title}
                   </h3>
 
                   {/* Excerpt */}
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                  <p className="text-[var(--color-muted-foreground)] text-sm mb-4 line-clamp-3">
                     {excerpt}
                   </p>
 
                   {/* Meta */}
-                  <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 mb-4">
+                  <div className="flex flex-wrap items-center gap-3 text-sm text-[var(--color-muted-foreground)] mb-4">
                     <span className="flex items-center">
                       <User className="w-4 h-4 mr-1" />
                       {blog.author?.name || t('blog.teacher')}

@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AppSettingsProvider } from "@/contexts/AppSettingsContext";
 import MaintenanceCheck from '@/components/MaintenanceCheck';
 import { SessionProvider } from '@/components/providers/SessionProvider';
+import { QueryProvider } from '@/lib/react-query/QueryProvider';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,15 +37,18 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <SessionProvider>
-          <AppSettingsProvider>
-            <MaintenanceCheck>
-              <LanguageProvider>
-                {children}
-              </LanguageProvider>
-            </MaintenanceCheck>
-          </AppSettingsProvider>
-        </SessionProvider>
+        <GoogleAnalytics gaId="G-DRRECK67YF" />
+        <QueryProvider>
+          <SessionProvider>
+            <AppSettingsProvider>
+              <MaintenanceCheck>
+                <LanguageProvider>
+                  {children}
+                </LanguageProvider>
+              </MaintenanceCheck>
+            </AppSettingsProvider>
+          </SessionProvider>
+        </QueryProvider>
       </body>
     </html>
   );

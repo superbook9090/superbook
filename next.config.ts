@@ -5,7 +5,7 @@ const nextConfig = {
     domains: ['localhost'], // Add your image domains here
   },
   experimental: {
-    serverActions: true,
+    serverActions: {},
   },
   // Enable compression
   compress: true,

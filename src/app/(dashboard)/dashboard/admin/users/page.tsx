@@ -101,12 +101,12 @@ export default function AdminUsersPage() {
       } else {
         setMessage({ type: 'error', text: data.message || 'Failed to load users' });
       }
-    } catch (err) {
+    } catch {
       setMessage({ type: 'error', text: t('admin.errorLoadingUsers') || 'Error loading users' });
     } finally {
       setIsLoading(false);
     }
-  }, [search, roleFilter, page]);
+  }, [search, roleFilter, page, t]);
 
   const fetchOrganizations = useCallback(async () => {
     try {
@@ -280,12 +280,12 @@ export default function AdminUsersPage() {
         animate={{ opacity: 1, y: 0 }}
         className="flex items-center gap-3"
       >
-        <div className="p-3 bg-indigo-100 rounded-xl">
-          <Users className="w-6 h-6 text-indigo-600" />
+        <div className="p-3 bg-[var(--info-light)] rounded-xl">
+          <Users className="w-6 h-6 text-[var(--info)]" />
         </div>
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{t('admin.userManagement')}</h1>
-          <p className="text-gray-500 mt-1">{t('admin.userDesc')}</p>
+          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">{t('admin.userManagement')}</h1>
+          <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">{t('admin.userDesc')}</p>
         </div>
       </motion.div>
 
@@ -308,24 +308,24 @@ export default function AdminUsersPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="bg-white rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row gap-4"
+        className="bg-[var(--card-solid)] rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row gap-4"
       >
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-muted-foreground)]" />
           <input
             type="text"
             placeholder={t('admin.searchUsers')}
             defaultValue={search}
             onChange={handleSearchChange}
-            className="w-full pl-10 pr-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+            className="w-full pl-10 pr-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)]/20 focus:border-[var(--admin-primary)]"
           />
         </div>
         <div className="flex items-center gap-2">
-          <Filter className="w-5 h-5 text-gray-400" />
+          <Filter className="w-5 h-5 text-[var(--color-muted-foreground)]" />
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="px-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+            className="px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)]/20 focus:border-[var(--admin-primary)]"
           >
             <option value="">{t('admin.allRoles')}</option>
             <option value="student">{t('roles.student')}</option>
@@ -340,48 +340,48 @@ export default function AdminUsersPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="bg-white rounded-2xl shadow-sm overflow-hidden"
+        className="bg-[var(--card-solid)] rounded-2xl shadow-sm overflow-hidden"
       >
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+        <table className="min-w-full divide-y divide-[var(--border)]">
+          <thead className="bg-[var(--color-muted)]">
             <tr>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--color-muted-foreground)] uppercase tracking-wider">
                 {t('admin.user')}
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--color-muted-foreground)] uppercase tracking-wider">
                 {t('admin.role')}
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--color-muted-foreground)] uppercase tracking-wider">
                 Organization
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--color-muted-foreground)] uppercase tracking-wider">
                 {t('adminUsers.limits')}
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--color-muted-foreground)] uppercase tracking-wider">
                 {t('admin.joined')}
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--color-muted-foreground)] uppercase tracking-wider">
                 {t('admin.actions')}
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-[var(--card-solid)] divide-y divide-[var(--border)]">
             {users.map((user, index) => (
               <motion.tr
                 key={user._id}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 + index * 0.05 }}
-                className="hover:bg-gray-50 transition-colors"
+                className="hover:bg-[var(--color-muted)] transition-colors"
               >
                 <td className="px-6 py-4">
                   <div className="flex items-center">
-                    <div className="p-2 rounded-full bg-indigo-100 text-indigo-600 mr-3">
+                    <div className="p-2 rounded-full bg-[var(--info-light)] text-[var(--info)] mr-3">
                       <Shield className="w-4 h-4" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-900">{user.name}</p>
-                      <p className="text-sm text-gray-500 flex items-center">
+                      <p className="text-sm font-medium text-[var(--color-foreground)]">{user.name}</p>
+                      <p className="text-sm text-[var(--color-muted-foreground)] flex items-center">
                         <Mail className="w-3 h-3 mr-1" />
                         {user.email}
                       </p>
@@ -393,7 +393,7 @@ export default function AdminUsersPage() {
                     value={user.role}
                     onChange={(e) => handleRoleChange(user._id, e.target.value)}
                     disabled={user._id === session?.user?.id}
-                    className="text-sm px-3 py-2 bg-gray-50 text-gray-700 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    className="text-sm px-3 py-2 min-h-[44px] sm:min-h-0 bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)]/20 focus:border-[var(--admin-primary)] disabled:bg-[var(--color-muted)] disabled:cursor-not-allowed"
                   >
                     <option value="student">{t('roles.student')}</option>
                     <option value="teacher">{t('roles.teacher')}</option>
@@ -404,15 +404,15 @@ export default function AdminUsersPage() {
                   <div className="flex items-center gap-2">
                     {user.organization ? (
                       <div className="flex items-center gap-2">
-                        <Building2 className="w-4 h-4 text-indigo-500" />
-                        <span className="text-sm text-gray-700">{user.organization.name}</span>
+                        <Building2 className="w-4 h-4 text-[var(--info)]" />
+                        <span className="text-sm text-[var(--color-foreground)]">{user.organization.name}</span>
                       </div>
                     ) : (
-                      <span className="text-sm text-gray-400">None</span>
+                      <span className="text-sm text-[var(--color-muted-foreground)]">None</span>
                     )}
                     <button
                       onClick={() => handleOpenOrgAssign(user)}
-                      className="text-xs px-2 py-1 bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 transition-colors"
+                      className="text-xs px-2 py-1 min-h-[44px] sm:min-h-0 bg-[var(--info-light)] text-[var(--info)] rounded hover:bg-[var(--info-light)]/80 transition-colors"
                     >
                       Assign
                     </button>
@@ -421,21 +421,21 @@ export default function AdminUsersPage() {
                 <td className="px-6 py-4">
                   {user.role === 'teacher' ? (
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-700">
+                      <span className="text-sm text-[var(--color-foreground)]">
                         C: {user.limits?.courses || '-'} | Q: {user.limits?.quizzes || '-'} | B: {user.limits?.blogs || '-'}
                       </span>
                       <button
                         onClick={() => handleOpenLimits(user)}
-                        className="text-xs px-2 py-1 bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 transition-colors"
+                        className="text-xs px-2 py-1 min-h-[44px] sm:min-h-0 bg-[var(--info-light)] text-[var(--info)] rounded hover:bg-[var(--info-light)]/80 transition-colors"
                       >
                         {t('adminUsers.editLimits')}
                       </button>
                     </div>
                   ) : (
-                    <span className="text-sm text-gray-400">-</span>
+                    <span className="text-sm text-[var(--color-muted-foreground)]">-</span>
                   )}
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-500 flex items-center">
+                <td className="px-6 py-4 text-sm text-[var(--color-muted-foreground)] flex items-center">
                   <Calendar className="w-4 h-4 mr-2" />
                   {new Date(user.createdAt).toLocaleDateString()}
                 </td>
@@ -443,7 +443,7 @@ export default function AdminUsersPage() {
                   <button
                     onClick={() => setDeleteId(user._id)}
                     disabled={user._id === session?.user?.id}
-                    className="inline-flex items-center px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed text-sm"
+                    className="inline-flex items-center min-h-[44px] sm:min-h-0 px-3 py-2 bg-[var(--error-light)] text-[var(--error)] rounded-lg hover:bg-[var(--error-light)]/80 transition-colors disabled:bg-[var(--color-muted)] disabled:text-[var(--color-muted-foreground)] disabled:cursor-not-allowed text-sm"
                   >
                     <Trash2 className="w-4 h-4 mr-1" />
                     {t('admin.delete')}
@@ -456,20 +456,20 @@ export default function AdminUsersPage() {
 
         {/* Delete Confirmation */}
         {deleteId && (
-          <div className="p-4 bg-red-50 border-t border-red-200">
-            <p className="text-sm text-red-800 mb-3">
+          <div className="p-4 bg-[var(--error-light)] border-t border-[var(--error)]">
+            <p className="text-sm text-[var(--error)] mb-3">
               {t('admin.deleteConfirm')}
             </p>
             <div className="flex gap-2">
               <button
                 onClick={() => handleDelete(deleteId)}
-                className={`px-4 py-2 bg-gradient-to-r ${theme.gradient} text-white rounded-lg hover:opacity-90 transition-colors text-sm`}
+                className={`min-h-[44px] sm:min-h-0 px-4 py-2 bg-gradient-to-r ${theme.gradient} text-white rounded-lg hover:opacity-90 transition-colors text-sm`}
               >
                 {t('admin.delete')}
               </button>
               <button
                 onClick={() => setDeleteId(null)}
-                className="px-4 py-2 bg-white text-red-700 border border-red-200 rounded-lg hover:bg-red-50 transition-colors text-sm"
+                className="min-h-[44px] sm:min-h-0 px-4 py-2 bg-[var(--card-solid)] text-[var(--error)] border border-[var(--error)] rounded-lg hover:bg-[var(--error-light)] transition-colors text-sm"
               >
                 {t('common.cancel')}
               </button>
@@ -488,54 +488,54 @@ export default function AdminUsersPage() {
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl"
+            className="bg-[var(--card-solid)] rounded-2xl p-6 w-full max-w-md shadow-2xl"
           >
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('adminUsers.editTeacherLimits')}</h3>
+            <h3 className="text-lg font-semibold text-[var(--color-foreground)] mb-4">{t('adminUsers.editTeacherLimits')}</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">{t('adminUsers.coursesLimit')}</label>
+                <label className="block text-sm font-medium text-[var(--color-foreground)] mb-2">{t('adminUsers.coursesLimit')}</label>
                 <input
                   type="number"
                   min="1"
                   value={limitsForm.courses}
                   onChange={(e) => setLimitsForm({ ...limitsForm, courses: e.target.value })}
                   placeholder={t('adminUsers.leaveEmptyForGlobal')}
-                  className="w-full px-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)]/20 focus:border-[var(--admin-primary)]"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">{t('adminUsers.quizzesLimit')}</label>
+                <label className="block text-sm font-medium text-[var(--color-foreground)] mb-2">{t('adminUsers.quizzesLimit')}</label>
                 <input
                   type="number"
                   min="1"
                   value={limitsForm.quizzes}
                   onChange={(e) => setLimitsForm({ ...limitsForm, quizzes: e.target.value })}
                   placeholder={t('adminUsers.leaveEmptyForGlobal')}
-                  className="w-full px-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)]/20 focus:border-[var(--admin-primary)]"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">{t('adminUsers.blogsLimit')}</label>
+                <label className="block text-sm font-medium text-[var(--color-foreground)] mb-2">{t('adminUsers.blogsLimit')}</label>
                 <input
                   type="number"
                   min="1"
                   value={limitsForm.blogs}
                   onChange={(e) => setLimitsForm({ ...limitsForm, blogs: e.target.value })}
                   placeholder={t('adminUsers.leaveEmptyForGlobal')}
-                  className="w-full px-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)]/20 focus:border-[var(--admin-primary)]"
                 />
               </div>
             </div>
             <div className="flex gap-3 mt-6">
               <button
                 onClick={handleSaveLimits}
-                className={`flex-1 px-4 py-2.5 bg-gradient-to-r ${theme.gradient} text-white rounded-xl hover:opacity-90 transition-colors text-sm font-medium`}
+                className={`flex-1 min-h-[44px] sm:min-h-0 px-4 py-2.5 bg-gradient-to-r ${theme.gradient} text-white rounded-xl hover:opacity-90 transition-colors text-sm font-medium`}
               >
                 {t('adminUsers.saveLimits')}
               </button>
               <button
                 onClick={handleCloseLimits}
-                className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors text-sm font-medium"
+                className="flex-1 min-h-[44px] sm:min-h-0 px-4 py-2.5 bg-[var(--color-muted)] text-[var(--color-foreground)] rounded-xl hover:bg-[var(--color-muted)]/80 transition-colors text-sm font-medium"
               >
                 {t('common.cancel')}
               </button>
@@ -554,24 +554,24 @@ export default function AdminUsersPage() {
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl"
+            className="bg-[var(--card-solid)] rounded-2xl p-6 w-full max-w-md shadow-2xl"
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">{t('adminUsers.assignOrganization')}</h3>
+              <h3 className="text-lg font-semibold text-[var(--color-foreground)]">{t('adminUsers.assignOrganization')}</h3>
               <button
                 onClick={handleCloseOrgAssign}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">{t('adminUsers.selectOrganization')}</label>
+                <label className="block text-sm font-medium text-[var(--color-foreground)] mb-2">{t('adminUsers.selectOrganization')}</label>
                 <select
                   value={selectedOrganizationId || ''}
                   onChange={(e) => setSelectedOrganizationId(e.target.value || null)}
-                  className="w-full px-4 py-2.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)]/20 focus:border-[var(--admin-primary)]"
                 >
                   <option value="">{t('adminUsers.noOrganization')}</option>
                   {organizations.map((org) => (
@@ -585,13 +585,13 @@ export default function AdminUsersPage() {
             <div className="flex gap-3 mt-6">
               <button
                 onClick={handleSaveOrgAssign}
-                className={`flex-1 px-4 py-2.5 bg-gradient-to-r ${theme.gradient} text-white rounded-xl hover:opacity-90 transition-colors text-sm font-medium`}
+                className={`flex-1 min-h-[44px] sm:min-h-0 px-4 py-2.5 bg-gradient-to-r ${theme.gradient} text-white rounded-xl hover:opacity-90 transition-colors text-sm font-medium`}
               >
                 Save
               </button>
               <button
                 onClick={handleCloseOrgAssign}
-                className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors text-sm font-medium"
+                className="flex-1 min-h-[44px] sm:min-h-0 px-4 py-2.5 bg-[var(--color-muted)] text-[var(--color-foreground)] rounded-xl hover:bg-[var(--color-muted)]/80 transition-colors text-sm font-medium"
               >
                 Cancel
               </button>
@@ -608,24 +608,24 @@ export default function AdminUsersPage() {
           transition={{ delay: 0.3 }}
           className="flex justify-between items-center"
         >
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-[var(--color-muted-foreground)]">
             {t('admin.showing').replace('{current}', String(users.length)).replace('{total}', String(pagination.total))}
           </p>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setPage(page - 1)}
               disabled={page === 1}
-              className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-2 min-h-[44px] sm:min-h-0 border border-[var(--border)] rounded-lg hover:bg-[var(--color-muted)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <span className="px-3 py-2 text-sm text-gray-600">
+            <span className="px-3 py-2 text-sm text-[var(--color-muted-foreground)]">
               {t('admin.page').replace('{current}', String(page)).replace('{total}', String(pagination.totalPages))}
             </span>
             <button
               onClick={() => setPage(page + 1)}
               disabled={page === pagination.totalPages}
-              className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-2 min-h-[44px] sm:min-h-0 border border-[var(--border)] rounded-lg hover:bg-[var(--color-muted)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronRight className="w-4 h-4" />
             </button>

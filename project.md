@@ -22,6 +22,7 @@ Super Book is a modern Learning Management System (LMS) built with Next.js 15, f
 - **Animations**: Framer Motion
 - **Rich Text**: TipTap editor
 - **File Processing**: xlsx (Excel parsing)
+- **Analytics**: Google Analytics (@next/third-parties)
 
 ## 3. Authentication & Authorization
 
@@ -293,7 +294,85 @@ src/
     └── useCachedStore.ts
 ```
 
-## 10. Future Improvements
+## 10. Role-Based Theming System
+
+The platform features a comprehensive role-based theming system that provides consistent color schemes across all dashboards (student, teacher, admin, superadmin) on both mobile and desktop.
+
+### Theme Implementation
+
+**CSS Variables (globals.css):**
+- Role-specific primary colors: `--student-primary`, `--teacher-primary`, `--admin-primary`, `--superadmin-primary`
+- Dark variants for gradients: `--student-primary-dark`, `--teacher-primary-dark`, etc.
+- Accent colors, soft backgrounds, borders, and shadows for each role
+- Gradient definitions for smooth visual transitions
+
+**Theme Colors:**
+- **Student**: Indigo/Violet gradient (#6366f1 → #8b5cf6 → #a855f7)
+- **Teacher**: Emerald/Teal gradient (#10b981 → #14b8a6 → #06b6d4)
+- **Admin**: Rose/Pink gradient (#f43f5e → #ec4899 → #d946ef)
+- **Super Admin**: Slate dark gradient (#1e293b → #111827 → #020617)
+
+**Usage Pattern:**
+```css
+background: linear-gradient(135deg, var(--teacher-primary), var(--teacher-primary-dark));
+color: var(--teacher-primary);
+```
+
+**Components with Role-Based Theming:**
+- Desktop sidebars (TeacherSidebar, StudentSidebar, AdminSidebar)
+- Mobile navigation header (MobileNav)
+- Dashboard cards and buttons
+- Active navigation states
+
+**Mobile Consistency:**
+- Mobile header gradient matches desktop sidebar for each role
+- Dynamic CSS variable construction based on user role
+- No breakpoint-based color changes - colors are role-based, not device-based
+
+### Accessibility Enhancements
+
+**Touch Targets:**
+- All buttons and inputs have `min-h-[44px]` for mobile-friendly touch interaction
+- Consistent spacing and sizing across mobile and desktop
+
+## 11. Internationalization (i18n)
+
+The platform supports English and Hindi with instant language switching.
+
+**Translation Files:**
+- `src/i18n/en.ts` - English translations
+- `src/i18n/hi.ts` - Hindi translations
+
+**Mobile View Translations:**
+- Language selector options (English/Hindi)
+- Menu toggle aria-label
+- Administration section separator
+- All navigation items and user-facing text
+
+**Usage Pattern:**
+```javascript
+const { t, lang, setLang } = useTranslation();
+t('common.english') // "English" or "अंग्रेज़ी"
+```
+
+## 12. Recent Build Fixes
+
+### ESLint/TypeScript Errors Resolved
+- Fixed all `any` type errors by using proper type assertions
+- Removed unused variables and imports
+- Fixed React Hooks rules violations (hooks called before early returns)
+- Replaced `<a>` tags with Next.js `Link` components for navigation
+- Fixed unused parameters in interfaces and function signatures
+
+### Files Modified:
+- Admin/Teacher/Student blogs and courses pages
+- Student browse and quizzes pages
+- Student quiz take page
+- TeacherSidebar component
+- useQuizSecurity hook
+- API routes (enrollments, quiz-attempts)
+
+## 13. Future Improvements
 
 ### Performance
 - Add request deduplication (React Query or SWR)
