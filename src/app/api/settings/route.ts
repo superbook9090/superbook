@@ -46,7 +46,7 @@ export async function GET() {
           enableAnalytics: true,
         },
         platformConfig: {
-          siteName: 'Super Book',
+          siteName: 'quiz-do',
           siteDescription: 'Learning Management System',
           maintenanceMode: false,
           allowRegistration: true,

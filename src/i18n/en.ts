@@ -53,6 +53,63 @@ export const en = {
     hindi: 'Hindi',
   },
 
+  // Home / Landing Page
+  home: {
+    title: 'Learn Smarter, Grow Faster',
+    subtitle: 'The modern Learning Management System for everyone',
+    description: 'Join thousands of learners and educators on quiz-do. Access courses, take quizzes, track progress, and achieve your goals.',
+    badge: '#1 Learning Platform in India',
+    login: 'Login',
+    register: 'Register',
+    stats: {
+      learners: 'Active Learners',
+      courses: 'Expert Courses',
+      teachers: 'Expert Teachers',
+    },
+    features: {
+      title: 'Powerful Features',
+      subtitle: 'Everything you need to manage, learn, and grow in one powerful platform',
+      coursesManagement: 'Courses Management',
+      coursesDesc: 'Access hundreds of expertly crafted courses across multiple subjects. Learn at your own pace with structured content.',
+      quizSystem: 'Quiz System',
+      quizDesc: 'Test your knowledge with AI-powered quizzes. Get instant feedback and track your progress over time.',
+      blogPlatform: 'Blog Platform',
+      blogDesc: 'Stay updated with educational blogs, tips, and insights from industry experts and educators.',
+      analyticsDashboard: 'Analytics Dashboard',
+      analyticsDesc: 'Visualize your learning journey with detailed analytics. Track scores, completion rates, and improvement areas.',
+    },
+    roles: {
+      title: 'Built for Everyone',
+      subtitle: 'Designed for everyone in the learning ecosystem',
+      student: 'Student',
+      studentDesc: 'Learn, enroll in courses, attempt quizzes, and track your progress.',
+      teacher: 'Teacher',
+      teacherDesc: 'Create courses, design quizzes, write blogs, and manage students.',
+      admin: 'Admin',
+      adminDesc: 'Manage users, moderate content, and oversee platform operations.',
+    },
+    about: {
+      title: 'Why Choose quiz-do?',
+      description: 'quiz-do is a modern Learning Management System designed to revolutionize education. Whether you\'re a student eager to learn, a teacher passionate about sharing knowledge, or an administrator managing an institution—we\'ve got you covered.',
+      roleBasedAccess: 'Role-based Access',
+      roleBasedAccessDesc: 'Secure, granular permissions tailored to each user type.',
+      realtimeAnalytics: 'Real-time Analytics',
+      realtimeAnalyticsDesc: 'Live data visualization with Redis caching for speed.',
+      multiLanguage: 'Multi-language Support',
+      multiLanguageDesc: 'Full support for English and Hindi with more languages coming.',
+      optimizedPerformance: 'Optimized Performance',
+      optimizedPerformanceDesc: 'Built with Redis caching and Zustand for lightning-fast experience.',
+    },
+    footer: {
+      tagline: 'Modern Learning Management System for the next generation of education. Learn smarter, grow faster.',
+      product: 'Product',
+      getStarted: 'Get Started',
+      madeWith: 'Made with',
+      inIndia: 'in India',
+      rights: 'All rights reserved.',
+    },
+  },
+
   // Dashboard
   dashboard: {
     welcome: 'Welcome',

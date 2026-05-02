@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import Image from 'next/image';
 import { useTranslation } from '@/hooks/useTranslation';
+import PremiumLogo from '@/components/ui/PremiumLogo';
 import {
   LayoutDashboard,
   BookOpen,
@@ -103,14 +104,11 @@ function MobileNav({ user, navigation, adminNavigation = [] }: MobileNavProps) {
       <div className={`${themeClasses.bg} md:hidden fixed top-0 left-0 right-0 z-50`}>
         <div className="flex items-center justify-between px-4 py-3">
           <Link href={isStaff ? '/dashboard/teacher' : '/dashboard/student'} className="flex items-center gap-3 group">
-            <Image
-              src="/logo.svg"
-              alt="Super Book Logo"
-              width={44}
-              height={44}
-              className="h-11 w-auto bg-transparent object-contain transition-transform duration-300 group-hover:scale-105 group-hover:drop-shadow-[0_0_8px_rgba(99,102,241,0.4)]"
+            <PremiumLogo 
+              variant="default"
+              size="md"
+              theme={isStaff ? "teacher" : "student"}
             />
-            <span className="text-base font-semibold text-white leading-none tracking-tight">SUPER BOOK</span>
           </Link>
           <div className="flex items-center gap-2">
             <select

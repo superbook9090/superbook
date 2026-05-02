@@ -7,6 +7,7 @@ import { signOut } from 'next-auth/react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { useTranslation } from '@/hooks/useTranslation';
+import PremiumLogo from '@/components/ui/PremiumLogo';
 import {
   LayoutDashboard,
   BookOpen,
@@ -78,17 +79,11 @@ export default function StudentSidebar({ user }: { user: User | null }) {
         {/* Logo */}
         <div className="flex items-center flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4">
           <Link href="/dashboard/student" className="flex items-center gap-2 sm:gap-3 group">
-            <Image
-              src="/logo.svg"
-              alt="Super Book Logo"
-              width={36}
-              height={36}
-              className="h-8 w-auto sm:h-9 bg-transparent object-contain transition-transform duration-300 group-hover:scale-105 group-hover:drop-shadow-[0_0_8px_rgba(99,102,241,0.4)]"
+            <PremiumLogo 
+              variant="default"
+              size="xl"
+              theme="student"
             />
-            <div className="flex flex-col items-start">
-              <h1 className="text-white text-base sm:text-lg font-bold leading-none tracking-tight">SUPER BOOK</h1>
-              <p className="text-[var(--student-primary-light)] text-xs leading-none mt-0.5">{t('common.learningPlatform')}</p>
-            </div>
           </Link>
         </div>
 

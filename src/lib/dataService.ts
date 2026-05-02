@@ -36,7 +36,7 @@ export const getSettingsWithDefaults = cache(async (): Promise<IAppSettings> => 
       enableAnalytics: true,
     },
     platformConfig: {
-      siteName: 'Super Book',
+      siteName: 'quiz-do',
       siteDescription: 'A comprehensive learning platform',
       maintenanceMode: false,
       allowRegistration: true,

@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Super Book - The Future of Learning',
+  title: 'quiz-do - The Future of Learning',
   description: 'Learning Management System',
   icons: {
     icon: '/logo.svg',

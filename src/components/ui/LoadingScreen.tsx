@@ -50,7 +50,7 @@ export default function LoadingScreen({ fullScreen = true, message }: LoadingScr
           >
             <Image
               src="/logo.svg"
-              alt="Super Book Logo"
+              alt="quiz-do Logo"
               width={96}
               height={96}
               className="h-24 w-24 bg-transparent"

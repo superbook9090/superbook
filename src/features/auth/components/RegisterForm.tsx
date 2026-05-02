@@ -5,8 +5,10 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import PremiumLogo from '@/components/ui/PremiumLogo';
 import { signIn } from 'next-auth/react';
 import { useTranslation } from '@/hooks/useTranslation';
+import { roleThemes } from '@/lib/roleTheme';
 import { useSessionStore } from '@/store/useSessionStore';
 import {
   User,
@@ -25,6 +27,8 @@ export default function RegisterForm() {
   const { status, fetchSession } = useSessionStore();
   const router = useRouter();
   const { t } = useTranslation();
+  // Use student theme as base brand identity for auth pages
+  const theme = roleThemes.student;
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -111,8 +115,8 @@ export default function RegisterForm() {
   };
 
   const roles = [
-    { id: 'student', label: 'Student', icon: BookOpen, color: 'indigo', desc: 'I want to learn' },
-    { id: 'teacher', label: 'Teacher', icon: Users, color: 'emerald', desc: 'I want to teach' },
+    { id: 'student', label: 'Student', icon: BookOpen, theme: roleThemes.student, desc: 'I want to learn' },
+    { id: 'teacher', label: 'Teacher', icon: Users, theme: roleThemes.teacher, desc: 'I want to teach' },
   ];
 
   return (
@@ -120,7 +124,7 @@ export default function RegisterForm() {
       {/* Left Side - Branding (Desktop) */}
       <div className="hidden lg:flex lg:w-1/2 xl:w-[55%] relative overflow-hidden">
         {/* Animated Gradient Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700" />
+        <div className={`absolute inset-0 bg-gradient-to-br ${theme.gradient}`} />
 
         {/* Animated Shapes */}
         <motion.div
@@ -162,23 +166,20 @@ export default function RegisterForm() {
               transition={{ duration: 0.8, delay: 0.2 }}
               className="flex items-center justify-center gap-3 mb-6"
             >
-              <Image
-                src="/logo.svg"
-                alt="Super Book Logo"
-                width={64}
-                height={64}
-                className="h-16 w-auto bg-transparent object-contain transition-transform duration-300 hover:scale-105 hover:drop-shadow-[0_0_8px_rgba(99,102,241,0.4)]"
+              <PremiumLogo 
+                variant="default"
+                size="lg"
+                theme="student"
               />
-              <h1 className="text-white text-2xl font-bold leading-none tracking-tight">SUPER BOOK</h1>
             </motion.div>
 
             <h2 className="text-5xl xl:text-6xl font-bold text-white leading-tight mb-6">
               {t('register.startYour')}
               <br />
-              <span className="text-purple-200">{t('register.journeyToday')}</span>
+              <span className="text-white/80">{t('register.journeyToday')}</span>
             </h2>
 
-            <p className="text-xl text-purple-100 max-w-md mb-12">
+            <p className="text-xl text-white/70 max-w-md mb-12">
               {t('register.joinCommunity')}
             </p>
 
@@ -196,7 +197,7 @@ export default function RegisterForm() {
                   transition={{ delay: 0.6 + i * 0.1 }}
                 >
                   <div className="text-3xl font-bold text-white">{stat.value}</div>
-                  <div className="text-sm text-purple-200">{stat.label}</div>
+                  <div className="text-sm text-white/70">{stat.label}</div>
                 </motion.div>
               ))}
             </div>
@@ -207,7 +208,7 @@ export default function RegisterForm() {
       {/* Right Side - Register Form */}
       <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 relative">
         {/* Mobile Background */}
-        <div className="lg:hidden absolute inset-0 bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700" />
+        <div className={`lg:hidden absolute inset-0 bg-gradient-to-br ${theme.gradient}`} />
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -222,12 +223,10 @@ export default function RegisterForm() {
             transition={{ duration: 0.6 }}
             className="lg:hidden flex items-center justify-center mb-6"
           >
-            <Image
-              src="/logo.svg"
-              alt="Super Book Logo"
-              width={64}
-              height={64}
-              className="h-16 w-auto bg-transparent object-contain transition-transform duration-300 hover:scale-105 hover:drop-shadow-[0_0_8px_rgba(99,102,241,0.4)]"
+            <PremiumLogo 
+              variant="default"
+              size="lg"
+              theme="student"
             />
           </motion.div>
 
@@ -277,6 +276,7 @@ export default function RegisterForm() {
                   {roles.map((role) => {
                     const Icon = role.icon;
                     const isSelected = formData.role === role.id;
+                    const roleTheme = role.theme;
                     return (
                       <button
                         key={role.id}
@@ -284,18 +284,18 @@ export default function RegisterForm() {
                         onClick={() => setFormData(prev => ({ ...prev, role: role.id }))}
                         className={`flex flex-col items-center p-3 rounded-xl border-2 transition-all ${
                           isSelected
-                            ? `border-${role.color}-500 bg-${role.color}-50`
+                            ? `border-[${roleTheme.colors.primary}] ${roleTheme.activeBg}`
                             : 'border-gray-200 hover:border-gray-300 bg-white'
                         }`}
                       >
                         <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-2 ${
                           isSelected
-                            ? `bg-${role.color}-100 text-${role.color}-600`
+                            ? `${roleTheme.activeBg} ${roleTheme.text}`
                             : 'bg-gray-100 text-gray-500'
                         }`}>
                           <Icon className="w-5 h-5" />
                         </div>
-                        <span className={`font-semibold text-sm ${isSelected ? `text-${role.color}-700` : 'text-gray-700'}`}>
+                        <span className={`font-semibold text-sm ${isSelected ? roleTheme.activeText : 'text-gray-700'}`}>
                           {role.label}
                         </span>
                         <span className="text-xs text-gray-500 mt-0.5">{role.desc}</span>
@@ -323,7 +323,7 @@ export default function RegisterForm() {
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="John Doe"
-                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                    className={`w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:${theme.shadow} focus:${theme.border.replace('border-', 'border-')} transition-all`}
                   />
                 </div>
               </motion.div>
@@ -346,7 +346,7 @@ export default function RegisterForm() {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="you@example.com"
-                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                    className={`w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:${theme.shadow} focus:${theme.border.replace('border-', 'border-')} transition-all`}
                   />
                 </div>
               </motion.div>
@@ -369,7 +369,7 @@ export default function RegisterForm() {
                     value={formData.password}
                     onChange={handleChange}
                     placeholder="Create a password"
-                    className="w-full pl-12 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                    className={`w-full pl-12 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:${theme.shadow} focus:${theme.border.replace('border-', 'border-')} transition-all`}
                   />
                   <button
                     type="button"
@@ -399,7 +399,7 @@ export default function RegisterForm() {
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     placeholder="Confirm your password"
-                    className="w-full pl-12 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                    className={`w-full pl-12 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:${theme.shadow} focus:${theme.border.replace('border-', 'border-')} transition-all`}
                   />
                   <button
                     type="button"
@@ -428,7 +428,7 @@ export default function RegisterForm() {
                     value={formData.inviteCode}
                     onChange={handleChange}
                     placeholder="Enter invite code (optional)"
-                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                    className={`w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:${theme.shadow} focus:${theme.border.replace('border-', 'border-')} transition-all`}
                   />
                 </div>
               </motion.div>
@@ -445,7 +445,7 @@ export default function RegisterForm() {
                   disabled={isLoading}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="w-full flex items-center justify-center py-3.5 px-6 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-semibold rounded-xl shadow-lg shadow-violet-500/25 hover:shadow-xl hover:shadow-violet-500/30 focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:opacity-60 disabled:cursor-not-allowed transition-all"
+                  className={`w-full flex items-center justify-center py-3.5 px-6 bg-gradient-to-r ${theme.gradient} text-white font-semibold rounded-xl shadow-lg ${theme.shadow} hover:shadow-xl focus:outline-none focus:ring-2 focus:${theme.shadow} disabled:opacity-60 disabled:cursor-not-allowed transition-all`}
                 >
                   {isLoading ? (
                     <Loader size="sm" />
@@ -491,7 +491,7 @@ export default function RegisterForm() {
               {t('register.alreadyHaveAccount')}{' '}
               <Link
                 href="/login"
-                className="font-semibold text-violet-600 hover:text-violet-700 transition-colors"
+                className={`font-semibold ${theme.text} ${theme.hover.replace('hover:', 'hover:').replace('bg-', 'text-')} transition-colors`}
               >
                 {t('register.signIn')}
               </Link>

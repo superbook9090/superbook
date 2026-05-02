@@ -1,15 +1,40 @@
-import { getServerSession } from 'next-auth';
-import { redirect } from 'next/navigation';
-import { authOptions } from '@/lib/auth';
+'use client';
 
-export default async function HomePage() {
-  const session = await getServerSession(authOptions);
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Header from '@/components/home/Header';
+import Hero from '@/components/home/Hero';
+import Features from '@/components/home/Features';
+import Roles from '@/components/home/Roles';
+import About from '@/components/home/About';
+import Footer from '@/components/home/Footer';
+import { useSessionStore } from '@/store/useSessionStore';
 
-  // Not logged in → redirect to login
-  if (!session) {
-    redirect('/login');
-  }
+export default function HomePage() {
+  const { status } = useSessionStore();
+  const router = useRouter();
 
-  // Logged in → redirect to dashboard (which handles role-based routing)
-  redirect('/dashboard');
+  // Redirect authenticated users to dashboard
+  useEffect(() => {
+    if (status === 'authenticated') {
+      router.push('/dashboard');
+    }
+  }, [status, router]);
+
+  return (
+    <main className="min-h-screen">
+      <Header />
+      <Hero />
+      <section id="features">
+        <Features />
+      </section>
+      <section id="roles">
+        <Roles />
+      </section>
+      <section id="about">
+        <About />
+      </section>
+      <Footer />
+    </main>
+  );
 }

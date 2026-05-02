@@ -6,7 +6,9 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import PremiumLogo from '@/components/ui/PremiumLogo';
 import { useTranslation } from '@/hooks/useTranslation';
+import { roleThemes } from '@/lib/roleTheme';
 import { useSessionStore } from '@/store/useSessionStore';
 import {
   Mail,
@@ -22,6 +24,8 @@ export default function LoginForm() {
   const { status, fetchSession } = useSessionStore();
   const router = useRouter();
   const { t } = useTranslation();
+  // Use student theme as base brand identity for auth pages
+  const theme = roleThemes.student;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -75,7 +79,7 @@ export default function LoginForm() {
       {/* Left Side - Branding (Desktop) */}
       <div className="hidden lg:flex lg:w-1/2 xl:w-[55%] relative overflow-hidden">
         {/* Animated Gradient Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-700" />
+        <div className={`absolute inset-0 bg-gradient-to-br ${theme.gradient}`} />
         
         {/* Animated Shapes */}
         <motion.div
@@ -117,23 +121,20 @@ export default function LoginForm() {
               transition={{ duration: 0.8, delay: 0.2 }}
               className="flex items-center justify-center gap-3 mb-6"
             >
-              <Image
-                src="/logo.svg"
-                alt="Super Book Logo"
-                width={64}
-                height={64}
-                className="h-16 w-auto bg-transparent object-contain transition-transform duration-300 hover:scale-105 hover:drop-shadow-[0_0_8px_rgba(99,102,241,0.4)]"
+              <PremiumLogo 
+                variant="default"
+                size="lg"
+                theme="student"
               />
-              <h1 className="text-white text-2xl font-bold leading-none tracking-tight">SUPER BOOK</h1>
             </motion.div>
 
             <h2 className="text-5xl xl:text-6xl font-bold text-white leading-tight mb-6">
               {t('login.learnSmarter')}
               <br />
-              <span className="text-indigo-200">{t('login.growFaster')}</span>
+              <span className="text-white/80">{t('login.growFaster')}</span>
             </h2>
 
-            <p className="text-xl text-indigo-100 max-w-md mb-12">
+            <p className="text-xl text-white/70 max-w-md mb-12">
               {t('login.joinThousands')}
             </p>
 
@@ -159,7 +160,7 @@ export default function LoginForm() {
       {/* Right Side - Login Form */}
       <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 relative">
         {/* Mobile Background */}
-        <div className="lg:hidden absolute inset-0 bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-700" />
+        <div className={`lg:hidden absolute inset-0 bg-gradient-to-br ${theme.gradient}`} />
         
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -174,12 +175,10 @@ export default function LoginForm() {
             transition={{ duration: 0.6 }}
             className="lg:hidden flex items-center justify-center mb-6"
           >
-            <Image
-              src="/logo.svg"
-              alt="Super Book Logo"
-              width={64}
-              height={64}
-              className="h-16 w-auto bg-transparent object-contain transition-transform duration-300 hover:scale-105 hover:drop-shadow-[0_0_8px_rgba(99,102,241,0.4)]"
+            <PremiumLogo 
+              variant="default"
+              size="lg"
+              theme="student"
             />
           </motion.div>
 
@@ -233,7 +232,7 @@ export default function LoginForm() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
-                    className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                    className={`w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:${theme.shadow} focus:${theme.border.replace('border-', 'border-')} transition-all`}
                   />
                 </div>
               </motion.div>
@@ -255,7 +254,7 @@ export default function LoginForm() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter your password"
-                    className="w-full pl-12 pr-12 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                    className={`w-full pl-12 pr-12 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:${theme.shadow} focus:${theme.border.replace('border-', 'border-')} transition-all`}
                   />
                   <button
                     type="button"
@@ -281,13 +280,13 @@ export default function LoginForm() {
                 <label className="flex items-center cursor-pointer">
                   <input
                     type="checkbox"
-                    className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500/20"
+                    className={`w-4 h-4 rounded border-gray-300 ${theme.text} focus:${theme.shadow}`}
                   />
                   <span className="ml-2 text-sm text-gray-600">{t('login.rememberMe')}</span>
                 </label>
                 <Link
                   href="#"
-                  className="text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
+                  className={`text-sm font-medium ${theme.text} ${theme.hover.replace('hover:', 'hover:').replace('bg-', 'text-')} transition-colors`}
                 >
                   Forgot password?
                 </Link>
@@ -304,7 +303,7 @@ export default function LoginForm() {
                   disabled={isLoading}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="w-full flex items-center justify-center py-4 px-6 bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-60 disabled:cursor-not-allowed transition-all"
+                  className={`w-full flex items-center justify-center py-4 px-6 bg-gradient-to-r ${theme.gradient} text-white font-semibold rounded-xl shadow-lg ${theme.shadow} hover:shadow-xl focus:outline-none focus:ring-2 focus:${theme.shadow} disabled:opacity-60 disabled:cursor-not-allowed transition-all`}
                 >
                   {isLoading ? (
                     <Loader size="sm" />
@@ -350,7 +349,7 @@ export default function LoginForm() {
               {t('login.dontHaveAccount')}{' '}
               <Link
                 href="/register"
-                className="font-semibold text-indigo-600 hover:text-indigo-700 transition-colors"
+                className={`font-semibold ${theme.text} ${theme.hover.replace('hover:', 'hover:').replace('bg-', 'text-')} transition-colors`}
               >
                 {t('login.createOne')}
               </Link>
