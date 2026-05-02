@@ -1,14 +1,21 @@
 // src/app/(dashboard)/dashboard/student/progress/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useTranslation } from '@/hooks/useTranslation';
+import { formatDate } from '@/lib/dateUtils';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
 import { Skeleton } from '@/components/ui/Skeleton';
 import Alert from '@/components/ui/Alert';
+import { motion } from 'framer-motion';
+import { CheckCircle, Clock, Circle } from 'lucide-react';
+import ScoreTrendChart from '@/components/charts/ScoreTrendChart';
+import CourseProgressChart from '@/components/charts/CourseProgressChart';
+import QuizStatusChart from '@/components/charts/QuizStatusChart';
+import AverageScoreChart from '@/components/charts/AverageScoreChart';
 
 interface CourseProgress {
   enrollment: {
@@ -96,6 +103,86 @@ export default function StudentProgressPage() {
       setIsLoading(false);
     }
   };
+
+  // Process data for charts
+  const scoreTrendData = useMemo(() => {
+    if (!progressData.length) return [];
+    
+    const allAttempts = progressData.flatMap(course => course.attempts);
+    return allAttempts.map(attempt => ({
+      date: attempt.submittedAt,
+      score: attempt.score,
+      quizTitle: attempt.quizTitle
+    }));
+  }, [progressData]);
+
+  const courseProgressData = useMemo(() => {
+    if (!progressData.length) return [];
+    
+    return progressData.map(course => ({
+      courseTitle: course.course.title,
+      progress: course.enrollment.progress,
+      status: (course.enrollment.status === 'completed' ? 'completed' : 
+              course.enrollment.status === 'active' ? 'active' : 'inactive') as 'completed' | 'active' | 'inactive'
+    }));
+  }, [progressData]);
+
+  const quizStatusData = useMemo(() => {
+    if (!progressData.length) return [];
+    
+    const totalQuizzes = progressData.reduce((sum, course) => sum + course.quizStats.total, 0);
+    const completedQuizzes = progressData.reduce((sum, course) => sum + course.quizStats.completed, 0);
+    const inProgressQuizzes = progressData.reduce((sum, course) => {
+      return sum + (course.quizStats.total - course.quizStats.completed);
+    }, 0);
+
+    return [
+      { 
+        name: 'completed', 
+        value: completedQuizzes,
+        color: 'var(--success)',
+        icon: <CheckCircle className="w-4 h-4" />
+      },
+      { 
+        name: 'inProgress', 
+        value: inProgressQuizzes,
+        color: 'var(--warning)',
+        icon: <Clock className="w-4 h-4" />
+      },
+      { 
+        name: 'notStarted', 
+        value: Math.max(0, totalQuizzes - completedQuizzes - inProgressQuizzes),
+        color: 'var(--color-muted-foreground)',
+        icon: <Circle className="w-4 h-4" />
+      }
+    ];
+  }, [progressData]);
+
+  const averageScoreData = useMemo(() => {
+    if (!progressData.length) return [];
+    
+    const allAttempts = progressData.flatMap(course => course.attempts);
+    const groupedByDate = allAttempts.reduce((acc, attempt) => {
+      const date = new Date(attempt.submittedAt).toDateString();
+      if (!acc[date]) {
+        acc[date] = [];
+      }
+      acc[date].push(attempt.score);
+      return acc;
+    }, {} as Record<string, number[]>);
+
+    return Object.entries(groupedByDate)
+      .map(([date, scores]) => {
+        const average = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+        return {
+          date,
+          averageScore: average,
+          movingAverage: average, // Simplified - could be enhanced with actual moving average
+          attemptCount: scores.length
+        };
+      })
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }, [progressData]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -187,6 +274,45 @@ export default function StudentProgressPage() {
         </div>
       )}
 
+      {/* Charts Section */}
+      <div className="mt-8">
+        <h2 className="text-lg sm:text-xl font-semibold text-[var(--color-foreground)] mb-6">{t('progress.insights')}</h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <ScoreTrendChart data={scoreTrendData} title={t('progress.scoreTrend')} />
+          </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <CourseProgressChart data={courseProgressData} title={t('progress.courseProgress')} />
+          </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <QuizStatusChart data={quizStatusData} title={t('progress.quizDistribution')} />
+          </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
+            <AverageScoreChart data={averageScoreData} title={t('progress.averageScore')} />
+          </motion.div>
+        </div>
+      </div>
+
       {/* Course Progress */}
       <div className="mt-8">
         <h2 className="text-lg sm:text-xl font-semibold text-[var(--color-foreground)] mb-4">{t('progress.courseProgress')}</h2>
@@ -240,7 +366,7 @@ export default function StudentProgressPage() {
                             {item.enrollment.status.charAt(0).toUpperCase() + item.enrollment.status.slice(1)}
                           </span>
                           <span className="text-[var(--color-muted-foreground)]">
-                            {t('progress.enrolled')}: {new Date(item.enrollment.enrolledAt).toLocaleDateString()}
+                            {t('progress.enrolled')}: {formatDate(item.enrollment.enrolledAt)}
                           </span>
                         </div>
                       </div>

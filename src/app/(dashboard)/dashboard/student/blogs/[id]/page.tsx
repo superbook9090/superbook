@@ -7,6 +7,8 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
+import { useTranslation } from '@/hooks/useTranslation';
+import { formatDate } from '@/lib/dateUtils';
 import {
   ArrowLeft,
   Heart,
@@ -35,6 +37,7 @@ export default function BlogDetailPage() {
   const { theme } = useRoleTheme();
   const params = useParams();
   const blogId = params.id as string;
+  const { t } = useTranslation();
 
   const [blog, setBlog] = useState<Blog | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -85,7 +88,7 @@ export default function BlogDetailPage() {
         }
       }
     } catch {
-      setAlertState({ type: 'error', message: 'Failed to update favorite' });
+      setAlertState({ type: 'error', message: t('blog.failedUpdateFavorite') });
     }
   };
 
@@ -102,17 +105,17 @@ export default function BlogDetailPage() {
       <div className="text-center py-16 px-4">
         <BookOpen className="w-16 h-16 text-[var(--color-muted-foreground)] mx-auto mb-4" />
         <h3 className="text-xl font-semibold text-[var(--color-foreground)] mb-2">
-          Blog not found
+          {t('blog.blogNotFound')}
         </h3>
         <p className="text-[var(--color-muted-foreground)] mb-6">
-          The blog you&apos;re looking for doesn&apos;t exist or has been removed.
+          {t('blog.blogNotFoundDesc')}
         </p>
         <Link
           href="/dashboard/student/blogs"
           className={`inline-flex items-center justify-center min-h-[44px] px-4 py-3 sm:px-4 sm:py-2.5 bg-gradient-to-r ${theme.gradient} text-white rounded-xl hover:opacity-90 transition-colors touch-manipulation`}
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Blogs
+          {t('blog.backToBlogs')}
         </Link>
       </div>
     );
@@ -131,7 +134,7 @@ export default function BlogDetailPage() {
           className="inline-flex items-center text-[var(--student-primary)] hover:text-[var(--student-primary)]/80 touch-manipulation"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Blogs
+          {t('blog.backToBlogs')}
         </Link>
       </motion.div>
 
@@ -166,15 +169,11 @@ export default function BlogDetailPage() {
           <div className="flex flex-wrap items-center gap-3 text-sm text-[var(--color-muted-foreground)]">
             <span className="flex items-center">
               <User className="w-4 h-4 mr-1" />
-              {blog.author?.name || 'Teacher'}
+              {blog.author?.name || t('blog.teacher')}
             </span>
             <span className="flex items-center">
               <Calendar className="w-4 h-4 mr-1" />
-              {new Date(blog.createdAt).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
+              {formatDate(blog.createdAt)}
             </span>
           </div>
         </div>
@@ -201,15 +200,15 @@ export default function BlogDetailPage() {
               <Heart
                 className={`w-5 h-5 ${favorites.has(blogId) ? 'fill-current' : ''}`}
               />
-              <span className="hidden sm:inline">{favorites.has(blogId) ? 'Favorited' : 'Add to Favorites'}</span>
-              <span className="sm:hidden">{favorites.has(blogId) ? 'Saved' : 'Save'}</span>
+              <span className="hidden sm:inline">{favorites.has(blogId) ? t('blog.favorited') : t('blog.addToFavorites')}</span>
+              <span className="sm:hidden">{favorites.has(blogId) ? t('blog.saved') : t('blog.save')}</span>
             </button>
 
             <button
               className={`flex items-center justify-center gap-2 min-h-[44px] sm:min-h-0 px-4 py-3 sm:px-4 sm:py-2.5 bg-gradient-to-r ${theme.gradient} text-white rounded-xl hover:opacity-90 transition-all touch-manipulation`}
             >
               <Share2 className="w-4 h-4" />
-              Share
+              {t('blog.share')}
             </button>
           </div>
         </div>

@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: false, // Disabled to prevent double renders during debugging
   images: {
-    domains: ['localhost'], // Add your image domains here
+    domains: ['localhost', 'lh3.googleusercontent.com'], // Add your image domains here
   },
   experimental: {
     serverActions: {},

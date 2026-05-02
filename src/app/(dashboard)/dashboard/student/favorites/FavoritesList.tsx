@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useTranslation } from '@/hooks/useTranslation';
+import { formatDate } from '@/lib/dateUtils';
 import {
   Bookmark,
   Calendar,
@@ -152,7 +153,7 @@ export default function FavoritesList({ initialFavorites }: FavoritesListProps) 
                     </span>
                     <span className="flex items-center">
                       <Calendar className="w-4 h-4 mr-1" />
-                      {new Date(blog.createdAt).toLocaleDateString()}
+                      {formatDate(blog.createdAt)}
                     </span>
                   </div>
 

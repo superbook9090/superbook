@@ -1,0 +1,121 @@
+'use client';
+
+import { useMemo } from 'react';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Area,
+  AreaChart,
+} from 'recharts';
+import { TrendingUp, Calendar } from 'lucide-react';
+
+interface ScoreData {
+  date: string;
+  score: number;
+  quizTitle: string;
+}
+
+interface ScoreTrendChartProps {
+  data: ScoreData[];
+  title?: string;
+  height?: number;
+}
+
+export default function ScoreTrendChart({ 
+  data, 
+  title = "Score Trend",
+  height = 300 
+}: ScoreTrendChartProps) {
+  const processedData = useMemo(() => {
+    if (!data || data.length === 0) return [];
+
+    return data
+      .map(item => ({
+        ...item,
+        date: new Date(item.date).toLocaleDateString('en-US', { 
+          month: 'short', 
+          day: 'numeric' 
+        }),
+        displayScore: Math.round(item.score)
+      }))
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }, [data]);
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload[0]) {
+      return (
+        <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200">
+          <p className="text-sm font-medium text-gray-900">{label}</p>
+          <p className="text-sm text-gray-600">{payload[0].payload.quizTitle}</p>
+          <p className="text-lg font-bold text-[var(--student-primary)]">
+            {payload[0].value}%
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  if (!processedData || processedData.length === 0) {
+    return (
+      <div className="bg-white rounded-2xl p-5 shadow-sm h-[300px] flex flex-col items-center justify-center">
+        <Calendar className="w-12 h-12 text-gray-400 mb-3" />
+        <p className="text-gray-500 text-center">No quiz attempts yet</p>
+        <p className="text-gray-400 text-sm text-center mt-1">Start taking quizzes to see your progress</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-2xl p-5 shadow-sm">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <TrendingUp className="w-4 h-4" />
+          <span>{processedData.length} attempts</span>
+        </div>
+      </div>
+      
+      <ResponsiveContainer width="100%" height={height}>
+        <AreaChart data={processedData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+          <defs>
+            <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="var(--student-primary)" stopOpacity={0.8}/>
+              <stop offset="95%" stopColor="var(--student-primary)" stopOpacity={0.1}/>
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+          <XAxis 
+            dataKey="date" 
+            stroke="#9ca3af"
+            fontSize={12}
+            tickLine={false}
+            axisLine={false}
+          />
+          <YAxis 
+            stroke="#9ca3af"
+            fontSize={12}
+            tickLine={false}
+            axisLine={false}
+            domain={[0, 100]}
+          />
+          <Tooltip content={<CustomTooltip />} />
+          <Area
+            type="monotone"
+            dataKey="displayScore"
+            stroke="var(--student-primary)"
+            strokeWidth={2}
+            fill="url(#scoreGradient)"
+            dot={{ fill: 'var(--student-primary)', strokeWidth: 2, r: 4 }}
+            activeDot={{ r: 6 }}
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}

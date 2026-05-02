@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
+import { formatDate } from '@/lib/dateUtils';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { debounce } from '@/lib/debounce';
 import { motion } from 'framer-motion';
@@ -449,7 +450,7 @@ export default function AdminUsersPage() {
                 </td>
                 <td className="px-6 py-4 text-sm text-[var(--color-muted-foreground)] flex items-center">
                   <Calendar className="w-4 h-4 mr-2" />
-                  {new Date(user.createdAt).toLocaleDateString()}
+                  {formatDate(user.createdAt)}
                 </td>
                 <td className="px-6 py-4">
                   <span className="text-sm text-[var(--info)] font-medium">View Details</span>
@@ -525,7 +526,7 @@ export default function AdminUsersPage() {
                 <span className="text-xs text-[var(--color-muted-foreground)]">{t('admin.joined')}</span>
                 <div className="flex items-center text-sm text-[var(--color-muted-foreground)]">
                   <Calendar className="w-4 h-4 mr-2" />
-                  {new Date(user.createdAt).toLocaleDateString()}
+                  {formatDate(user.createdAt)}
                 </div>
               </div>
 

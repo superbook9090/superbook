@@ -93,12 +93,24 @@ export default function StudentDashboardPage() {
     return new Date(item.enrolledAt).getTime();
   };
 
-  // Helper to safely format date
+  // Helper to safely format date with time
   const formatDate = (dateString: string | undefined): string => {
     if (!dateString) return t('common.notAvailable');
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return t('common.notAvailable');
-    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    const isYesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000).toDateString() === date.toDateString();
+    
+    if (isToday) {
+      return date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    } else if (isYesterday) {
+      return `Yesterday, ${date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}`;
+    } else {
+      return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + 
+             ', ' + date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    }
   };
 
   const recentActivity = activity

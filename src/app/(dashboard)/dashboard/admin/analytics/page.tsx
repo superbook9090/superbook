@@ -17,6 +17,8 @@ import {
 import { Skeleton } from '@/components/ui/Skeleton';
 import Alert from '@/components/ui/Alert';
 import { useSessionStore } from '@/store/useSessionStore';
+import { useTranslation } from '@/hooks/useTranslation';
+import { formatDateTime } from '@/lib/dateUtils';
 
 interface AdminStats {
   users: {
@@ -57,6 +59,7 @@ interface AdminStats {
 
 export default function AdminAnalyticsPage() {
   const { session, status } = useSessionStore();
+  const { t } = useTranslation();
   const router = useRouter();
   const { theme } = useRoleTheme();
   const [stats, setStats] = useState<AdminStats | null>(null);
@@ -71,10 +74,10 @@ export default function AdminAnalyticsPage() {
       if (response.ok) {
         setStats(data.stats || null);
       } else {
-        setMessage({ type: 'error', text: data.message || 'Failed to load analytics' });
+        setMessage({ type: 'error', text: data.message || t('errors.failedLoadAnalytics') });
       }
     } catch (err) {
-      setMessage({ type: 'error', text: 'Error loading analytics' });
+      setMessage({ type: 'error', text: t('errors.errorLoadingAnalytics') });
       console.error('Analytics error:', err);
     } finally {
       setIsLoading(false);
@@ -145,8 +148,8 @@ export default function AdminAnalyticsPage() {
             <BarChart3 className="w-6 h-6 text-[var(--info)]" />
           </div>
           <div>
-            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">System Analytics</h1>
-            <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">Overview of platform usage and performance metrics</p>
+            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">{t('progress.systemAnalytics')}</h1>
+            <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">{t('progress.overviewDescription')}</p>
           </div>
         </div>
         <button
@@ -154,7 +157,7 @@ export default function AdminAnalyticsPage() {
           className="inline-flex items-center justify-center min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base bg-[var(--card-solid)] text-[var(--color-foreground)] rounded-xl shadow-sm hover:shadow-md transition-all"
         >
           <RefreshCw className="w-4 h-4 mr-2" />
-          Refresh
+          {t('progress.refresh')}
         </button>
       </motion.div>
 
@@ -175,8 +178,8 @@ export default function AdminAnalyticsPage() {
       {!stats ? (
         <div className="text-center py-16 bg-[var(--card-solid)] rounded-2xl shadow-sm">
           <BarChart3 className="w-16 h-16 text-[var(--color-muted-foreground)] mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-[var(--color-foreground)] mb-2">No analytics data available</h3>
-          <p className="text-[var(--color-muted-foreground)] mb-4">Try refreshing the page</p>
+          <h3 className="text-xl font-semibold text-[var(--color-foreground)] mb-2">{t('progress.noDataAvailable')}</h3>
+          <p className="text-[var(--color-muted-foreground)] mb-4">{t('progress.tryRefreshing')}</p>
         </div>
       ) : (
         <>
@@ -188,28 +191,28 @@ export default function AdminAnalyticsPage() {
           >
             <h2 className="text-lg sm:text-xl font-semibold text-[var(--color-foreground)] mb-4 flex items-center gap-2">
               <Users className="w-5 h-5" />
-              Users
+              {t('common.users')}
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
               <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
                 <p className="text-3xl font-bold text-[var(--info)]">{stats.users.total}</p>
-                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">Total Users</p>
+                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">{t('progress.totalUsers')}</p>
               </div>
               <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
                 <p className="text-3xl font-bold text-[var(--student-primary)]">{stats.users.students}</p>
-                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">Students</p>
+                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">{t('progress.students')}</p>
               </div>
               <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
                 <p className="text-3xl font-bold text-[var(--success)]">{stats.users.teachers}</p>
-                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">Teachers</p>
+                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">{t('progress.teachers')}</p>
               </div>
               <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
                 <p className="text-3xl font-bold text-[var(--primary)]">{stats.users.admins}</p>
-                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">Admins</p>
+                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">{t('progress.admins')}</p>
               </div>
               <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
                 <p className="text-3xl font-bold text-[var(--warning)]">{stats.users.newThisMonth}</p>
-                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">New This Month</p>
+                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">{t('progress.newThisMonth')}</p>
               </div>
             </div>
           </motion.div>
@@ -222,32 +225,32 @@ export default function AdminAnalyticsPage() {
           >
             <h2 className="text-lg sm:text-xl font-semibold text-[var(--color-foreground)] mb-4 flex items-center gap-2">
               <BookOpen className="w-5 h-5" />
-              Content & Engagement
+              {t('progress.contentEngagement')}
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
               <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
                 <p className="text-3xl font-bold text-[var(--info)]">{stats.courses.total}</p>
-                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">Total Courses</p>
+                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">{t('progress.totalCourses')}</p>
               </div>
               <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
                 <p className="text-3xl font-bold text-[var(--success)]">{stats.courses.published}</p>
-                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">Published</p>
+                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">{t('progress.published')}</p>
               </div>
               <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
                 <p className="text-3xl font-bold text-[var(--student-primary)]">{stats.enrollments.total}</p>
-                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">Enrollments</p>
+                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">{t('progress.enrollments')}</p>
               </div>
               <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
                 <p className="text-3xl font-bold text-[var(--warning)]">{stats.enrollments.active}</p>
-                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">Active</p>
+                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">{t('progress.activeEnrollments')}</p>
               </div>
               <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
                 <p className="text-3xl font-bold text-[var(--student-accent)]">{stats.quizzes.total}</p>
-                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">Quizzes</p>
+                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">{t('common.quizzes')}</p>
               </div>
               <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
                 <p className="text-3xl font-bold text-[var(--primary)]">{stats.quizzes.totalAttempts}</p>
-                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">Quiz Attempts</p>
+                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">{t('analytics.quizAttempts')}</p>
               </div>
             </div>
           </motion.div>
@@ -260,16 +263,16 @@ export default function AdminAnalyticsPage() {
           >
             <h2 className="text-lg sm:text-xl font-semibold text-[var(--color-foreground)] mb-4 flex items-center gap-2">
               <BookOpen className="w-5 h-5" />
-              Blogs
+              {t('common.blogs')}
             </h2>
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
                 <p className="text-3xl font-bold text-[var(--info)]">{stats.blogs?.total || 0}</p>
-                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">Total Blogs</p>
+                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">{t('progress.totalBlogs')}</p>
               </div>
               <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
                 <p className="text-3xl font-bold text-[var(--success)]">{stats.blogs?.published || 0}</p>
-                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">Published</p>
+                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">{t('progress.published')}</p>
               </div>
             </div>
           </motion.div>
@@ -282,11 +285,11 @@ export default function AdminAnalyticsPage() {
           >
             <h2 className="text-lg sm:text-xl font-semibold text-[var(--color-foreground)] mb-4 flex items-center gap-2">
               <Award className="w-5 h-5" />
-              Quiz Performance
+              {t('progress.quizPerformance')}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow">
-                <p className="text-sm text-[var(--color-muted-foreground)] mb-2">Average Score</p>
+                <p className="text-sm text-[var(--color-muted-foreground)] mb-2">{t('analytics.averageScore')}</p>
                 <div className="flex items-end">
                   <p className="text-4xl font-bold text-[var(--info)]">{stats.quizzes.averageScore}%</p>
                 </div>
@@ -298,7 +301,7 @@ export default function AdminAnalyticsPage() {
                 </div>
               </div>
               <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow">
-                <p className="text-sm text-[var(--color-muted-foreground)] mb-2">Highest Score</p>
+                <p className="text-sm text-[var(--color-muted-foreground)] mb-2">{t('progress.highestScore')}</p>
                 <p className="text-4xl font-bold text-[var(--success)]">{stats.quizzes.highestScore}%</p>
                 <div className="mt-4 w-full bg-[var(--border)] rounded-full h-2">
                   <div
@@ -308,14 +311,14 @@ export default function AdminAnalyticsPage() {
                 </div>
               </div>
               <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow">
-                <p className="text-sm text-[var(--color-muted-foreground)] mb-2">Completion Rate</p>
+                <p className="text-sm text-[var(--color-muted-foreground)] mb-2">{t('progress.completionRate')}</p>
                 <p className="text-4xl font-bold text-[var(--student-primary)]">
                   {stats.enrollments.total > 0
                     ? Math.round((stats.enrollments.completed / stats.enrollments.total) * 100)
                     : 0}%
                 </p>
                 <p className="text-sm text-[var(--color-muted-foreground)] mt-2">
-                  {stats.enrollments.completed} of {stats.enrollments.total} enrollments
+                  {t('progress.ofEnrollments', { completed: stats.enrollments.completed, total: stats.enrollments.total })}
                 </p>
               </div>
             </div>
@@ -329,11 +332,11 @@ export default function AdminAnalyticsPage() {
           >
             <h2 className="text-lg sm:text-xl font-semibold text-[var(--color-foreground)] mb-4 flex items-center gap-2">
               <Activity className="w-5 h-5" />
-              Recent Activity
+              {t('progress.recentActivity')}
             </h2>
             <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm overflow-hidden">
               {stats.recentActivity.length === 0 ? (
-                <p className="p-6 text-[var(--color-muted-foreground)] text-center">No recent activity</p>
+                <p className="p-6 text-[var(--color-muted-foreground)] text-center">{t('progress.noRecentActivity')}</p>
               ) : (
                 <div className="divide-y divide-[var(--border)]">
                   {stats.recentActivity.map((activity, index) => (
@@ -350,15 +353,15 @@ export default function AdminAnalyticsPage() {
                         </div>
                         <div>
                           <p className="text-sm font-medium text-[var(--color-foreground)]">
-                            {activity.user} enrolled in {activity.course}
+                            {t('progress.enrolledIn', { user: activity.user, course: activity.course })}
                           </p>
                           <p className="text-xs text-[var(--color-muted-foreground)]">
-                            {new Date(activity.date).toLocaleString()}
+                            {formatDateTime(activity.date)}
                           </p>
                         </div>
                       </div>
                       <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[var(--info-light)] text-[var(--info)]">
-                        Enrollment
+                        {t('progress.enrollment')}
                       </span>
                     </motion.div>
                   ))}

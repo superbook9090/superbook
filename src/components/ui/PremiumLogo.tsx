@@ -7,13 +7,15 @@ interface PremiumLogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
   theme?: 'student' | 'teacher' | 'white' | 'dark';
+  priority?: boolean;
 }
 
 export default function PremiumLogo({ 
   variant = 'default', 
   size = 'md', 
   className = '',
-  theme = 'student'
+  theme = 'student',
+  priority = false
 }: PremiumLogoProps) {
   // Theme-based background colors for better contrast
   const getBackgroundClass = () => {
@@ -52,6 +54,7 @@ export default function PremiumLogo({
       <Logo 
         variant={variant}
         size={size}
+        priority={priority}
         className="h-8 sm:h-9 w-auto object-contain"
       />
     </div>

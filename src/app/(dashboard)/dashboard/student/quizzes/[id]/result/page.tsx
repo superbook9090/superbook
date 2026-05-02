@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
+import { formatDateTime, formatDuration } from '@/lib/dateUtils';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
 import Loader from '@/components/ui/Loader';
@@ -77,12 +78,6 @@ export default function QuizResultPage() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   const getScoreColor = (score: number) => {
@@ -177,20 +172,19 @@ export default function QuizResultPage() {
             <p className="text-sm text-[var(--color-muted-foreground)]">{t('quizResult.incorrect')}</p>
           </div>
           <div className="bg-[var(--color-muted)] rounded-lg p-4 text-center">
-            <p className="text-2xl font-bold text-[var(--color-foreground)]">{formatTime(attempt.attempt.timeTaken)}</p>
+            <p className="text-2xl font-bold text-[var(--color-foreground)]">{formatDuration(attempt.attempt.timeTaken)}</p>
             <p className="text-sm text-[var(--color-muted-foreground)]">{t('quizResult.timeTaken')}</p>
           </div>
         </div>
 
         <div className="text-center text-sm text-[var(--color-muted-foreground)] mb-6">
-          {t('quizResult.attempt')} #{attempt.attempt.attemptNumber} • {t('quizResult.submittedOn')}{' '}
-          {new Date(attempt.attempt.submittedAt).toLocaleString(undefined, {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-          })}
+          {t('quizResult.attempt')} #{attempt.attempt.attemptNumber}
+          {attempt.attempt.submittedAt && (
+            <>
+              {' '}{'•'} {t('quizResult.submittedOn')}{' '}
+              {formatDateTime(attempt.attempt.submittedAt)}
+            </>
+          )}
         </div>
 
         {/* Actions */}

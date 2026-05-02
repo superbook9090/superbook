@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
+import { formatDateTime, formatDuration } from '@/lib/dateUtils';
 import {
   HelpCircle,
   Clock,
@@ -12,6 +13,7 @@ import {
   Play,
   RotateCcw,
   CheckCircle,
+  Trophy,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import Loader from '@/components/ui/Loader';
@@ -66,6 +68,10 @@ function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps) {
     if (attempt) {
       router.push(`/dashboard/student/quizzes/${attempt._id}/result`);
     }
+  };
+
+  const handleViewLeaderboard = () => {
+    router.push(`/dashboard/student/quizzes/${quiz._id}`);
   };
 
   const handleRetake = async () => {
@@ -143,25 +149,29 @@ function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps) {
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-blue-500" />
-                <span className="text-gray-600">{formatTime(attempt.timeTaken)}</span>
+                <span className="text-gray-600">{formatDuration(attempt.timeTaken)}</span>
               </div>
             </div>
             {attempt.submittedAt && (
               <p className="text-xs text-gray-400 mt-2">
-                {t('quiz.completed')} {new Date(attempt.submittedAt).toLocaleString(undefined, {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
+                {t('quiz.completed')} {formatDateTime(attempt.submittedAt)}
               </p>
             )}
           </div>
         )}
 
         {/* Actions */}
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleViewLeaderboard}
+            className="w-full flex items-center justify-center gap-2 bg-[var(--color-muted)] text-[var(--color-foreground)] py-2.5 px-4 rounded-xl font-medium hover:bg-[var(--color-muted)]/80 transition-all"
+          >
+            <Trophy className="w-4 h-4" />
+            {t('quiz.viewLeaderboard')}
+          </motion.button>
+
           {type === 'available' ? (
             <motion.button
               whileHover={{ scale: 1.02 }}
@@ -180,7 +190,7 @@ function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps) {
               )}
             </motion.button>
           ) : (
-            <>
+            <div className="flex gap-2">
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -206,7 +216,7 @@ function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps) {
                   </>
                 )}
               </motion.button>
-            </>
+            </div>
           )}
         </div>
       </div>

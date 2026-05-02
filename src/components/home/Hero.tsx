@@ -69,6 +69,7 @@ export default function Hero() {
             variant="default"
             size="xl"
             theme="student"
+            priority={true}
           />
         </motion.div>
 

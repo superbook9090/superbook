@@ -8,6 +8,7 @@ interface LogoProps {
   className?: string;
   width?: number;
   height?: number;
+  priority?: boolean;
 }
 
 export default function Logo({ 
@@ -15,7 +16,8 @@ export default function Logo({
   size = 'md', 
   className = '',
   width,
-  height
+  height,
+  priority = false
 }: LogoProps) {
   const sizeClasses = {
     sm: 'h-7 sm:h-8',
@@ -39,6 +41,7 @@ export default function Logo({
     <Image
       src={logoSrc}
       alt="quiz-do logo"
+      priority={priority}
       {...dimensions}
       className={`${sizeClass} w-auto object-contain ${className}`}
     />

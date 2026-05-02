@@ -166,13 +166,18 @@ export default function TakeQuizPage() {
     setIsLoading(true);
   }, [attemptId]);
 
+  // Store stopQuiz in a ref to avoid dependency issues
+  const stopQuizRef = useRef(quizSecurity.stopQuiz);
+  stopQuizRef.current = quizSecurity.stopQuiz;
+
   // Cleanup on unmount - restore sidebar and exit fullscreen
   useEffect(() => {
     return () => {
-      quizSecurity.stopQuiz();
+      stopQuizRef.current();
       setQuizActive(false);
     };
-  }, [quizSecurity, setQuizActive]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run on unmount
 
   useEffect(() => {
     if (status === 'loading') return;

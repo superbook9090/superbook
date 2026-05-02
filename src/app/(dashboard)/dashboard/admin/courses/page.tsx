@@ -19,6 +19,8 @@ import { Skeleton, CardSkeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
 import { useSessionStore } from '@/store/useSessionStore';
+import { useTranslation } from '@/hooks/useTranslation';
+import { formatDate } from '@/lib/dateUtils';
 
 interface Course {
   _id: string;
@@ -38,6 +40,7 @@ export default function AdminCoursesPage() {
   const { session, status } = useSessionStore();
   const router = useRouter();
   const { theme } = useRoleTheme();
+  const { t } = useTranslation();
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -74,7 +77,7 @@ export default function AdminCoursesPage() {
       const data = await response.json();
       setCourses(data.courses || []);
     } catch {
-      setMessage({ type: 'error', text: 'Failed to fetch courses' });
+      setMessage({ type: 'error', text: t('admin.failedFetchCourses') });
     } finally {
       setIsLoading(false);
     }
@@ -89,15 +92,15 @@ export default function AdminCoursesPage() {
       });
 
       if (!response.ok) throw new Error('Failed to update course');
-      setMessage({ type: 'success', text: 'Course updated successfully' });
+      setMessage({ type: 'success', text: t('admin.courseUpdated') });
       fetchCourses();
     } catch {
-      setMessage({ type: 'error', text: 'Failed to update course' });
+      setMessage({ type: 'error', text: t('admin.failedUpdateCourse') });
     }
   };
 
   const handleDelete = async (courseId: string) => {
-    if (!confirm('Are you sure you want to delete this course?')) return;
+    if (!confirm(t('admin.deleteCourseConfirm'))) return;
 
     try {
       const response = await fetch(`/api/courses/${courseId}`, {
@@ -105,11 +108,11 @@ export default function AdminCoursesPage() {
       });
 
       if (!response.ok) throw new Error('Failed to delete course');
-      setMessage({ type: 'success', text: 'Course deleted successfully' });
+      setMessage({ type: 'success', text: t('admin.courseDeleted') });
       setDeleteId(null);
       fetchCourses();
     } catch {
-      setMessage({ type: 'error', text: 'Failed to delete course' });
+      setMessage({ type: 'error', text: t('admin.failedDeleteCourse') });
     }
   };
 
@@ -161,8 +164,8 @@ export default function AdminCoursesPage() {
           <BookOpen className="w-6 h-6 text-[var(--info)]" />
         </div>
         <div>
-          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">All Courses</h1>
-          <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">Manage all courses on the platform</p>
+          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">{t('admin.allCourses')}</h1>
+          <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">{t('admin.manageCoursesDesc')}</p>
         </div>
       </motion.div>
 
@@ -192,7 +195,7 @@ export default function AdminCoursesPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-muted-foreground)]" />
           <input
             type="text"
-            placeholder="Search courses or instructors..."
+            placeholder={t('admin.searchCourses')}
             defaultValue={searchTerm}
             onChange={(e) => debouncedSearchHandler(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
@@ -207,9 +210,9 @@ export default function AdminCoursesPage() {
             onChange={(e) => setFilter(e.target.value as 'all' | 'published' | 'draft')}
             className="px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
           >
-            <option value="all">All Courses</option>
-            <option value="published">Published</option>
-            <option value="draft">Drafts</option>
+            <option value="all">{t('admin.allCourses')}</option>
+            <option value="published">{t('common.published')}</option>
+            <option value="draft">{t('common.draft')}</option>
           </select>
         </div>
       </motion.div>
@@ -223,15 +226,15 @@ export default function AdminCoursesPage() {
       >
         <div className="bg-[var(--card-solid)] rounded-xl p-4 shadow-sm">
           <p className="text-2xl font-bold text-[var(--info)]">{courses.length}</p>
-          <p className="text-sm text-[var(--color-muted-foreground)]">Total Courses</p>
+          <p className="text-sm text-[var(--color-muted-foreground)]">{t('admin.totalCourses')}</p>
         </div>
         <div className="bg-[var(--card-solid)] rounded-xl p-4 shadow-sm">
           <p className="text-2xl font-bold text-[var(--success)]">{courses.filter(c => c.isPublished).length}</p>
-          <p className="text-sm text-[var(--color-muted-foreground)]">Published</p>
+          <p className="text-sm text-[var(--color-muted-foreground)]">{t('common.published')}</p>
         </div>
         <div className="bg-[var(--card-solid)] rounded-xl p-4 shadow-sm">
           <p className="text-2xl font-bold text-[var(--warning)]">{courses.filter(c => !c.isPublished).length}</p>
-          <p className="text-sm text-[var(--color-muted-foreground)]">Drafts</p>
+          <p className="text-sm text-[var(--color-muted-foreground)]">{t('common.draft')}</p>
         </div>
       </motion.div>
 
@@ -245,8 +248,8 @@ export default function AdminCoursesPage() {
         {filteredCourses.length === 0 ? (
           <div className="col-span-full text-center py-16 bg-[var(--card-solid)] rounded-2xl shadow-sm">
             <BookOpen className="w-16 h-16 text-[var(--color-muted-foreground)] mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-[var(--color-foreground)] mb-2">No courses found</h3>
-            <p className="text-[var(--color-muted-foreground)]">Try adjusting your search or filters</p>
+            <h3 className="text-xl font-semibold text-[var(--color-foreground)] mb-2">{t('admin.noCoursesFound')}</h3>
+            <p className="text-[var(--color-muted-foreground)]">{t('admin.adjustSearch')}</p>
           </div>
         ) : (
           filteredCourses.map((course, index) => (
@@ -265,7 +268,7 @@ export default function AdminCoursesPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge variant={course.isPublished ? 'primary' : 'default'} size="sm">
-                      {course.isPublished ? 'Published' : 'Draft'}
+                      {course.isPublished ? t('common.published') : t('common.draft')}
                     </Badge>
                   </div>
                 </div>
@@ -277,7 +280,7 @@ export default function AdminCoursesPage() {
 
                 {/* Description */}
                 <p className="text-[var(--color-muted-foreground)] text-sm mb-4 line-clamp-2">
-                  {course.description || 'No description'}
+                  {course.description || t('courses.noDescription')}
                 </p>
 
                 {/* Meta */}
@@ -288,15 +291,15 @@ export default function AdminCoursesPage() {
                   </div>
                   <div className="flex items-center text-sm text-[var(--color-muted-foreground)]">
                     <Users className="w-4 h-4 mr-2" />
-                    {course.enrolledStudents?.length || 0} students enrolled
+                    {t('admin.studentsEnrolled', { count: course.enrolledStudents?.length || 0 })}
                   </div>
                   <div className="flex items-center text-sm text-[var(--color-muted-foreground)]">
                     <Calendar className="w-4 h-4 mr-2" />
-                    {new Date(course.createdAt).toLocaleDateString()}
+                    {formatDate(course.createdAt)}
                   </div>
                   <div className="flex items-center text-sm text-[var(--color-muted-foreground)]">
-                    <span className="mr-2">Language:</span>
-                    <span className="font-medium">{course.language === 'hi' ? 'हिंदी' : 'English'}</span>
+                    <span className="mr-2">{t('admin.languageLabel')}:</span>
+                    <span className="font-medium">{course.language === 'hi' ? t('common.hindi') : t('common.english')}</span>
                   </div>
                 </div>
 
@@ -309,12 +312,12 @@ export default function AdminCoursesPage() {
                     {course.isPublished ? (
                       <>
                         <EyeOff className="w-4 h-4 mr-1" />
-                        Unpublish
+                        {t('admin.unpublish')}
                       </>
                     ) : (
                       <>
                         <Eye className="w-4 h-4 mr-1" />
-                        Publish
+                        {t('admin.publish')}
                       </>
                     )}
                   </button>
@@ -332,20 +335,20 @@ export default function AdminCoursesPage() {
                 <div className="px-6 pb-6">
                   <div className="bg-[var(--error-light)] border border-[var(--error)] rounded-xl p-4">
                     <p className="text-sm text-[var(--error)] mb-3">
-                      Are you sure you want to delete this course? This action cannot be undone.
+                      {t('admin.deleteCourseConfirm')}
                     </p>
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleDelete(course._id)}
                         className={`flex-1 min-h-[44px] sm:min-h-0 px-3 py-2 bg-gradient-to-r ${theme.gradient} text-white rounded-lg hover:opacity-90 transition-colors text-sm`}
                       >
-                        Delete
+                        {t('common.delete')}
                       </button>
                       <button
                         onClick={() => setDeleteId(null)}
                         className="flex-1 min-h-[44px] sm:min-h-0 px-3 py-2 bg-[var(--card-solid)] text-[var(--error)] border border-[var(--error)] rounded-lg hover:bg-[var(--error-light)] transition-colors text-sm"
                       >
-                        Cancel
+                        {t('common.cancel')}
                       </button>
                     </div>
                   </div>

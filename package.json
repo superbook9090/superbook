@@ -35,6 +35,7 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-hook-form": "^7.64.0",
+    "recharts": "^3.8.1",
     "swr": "^2.4.1",
     "tailwind-merge": "^3.5.0",
     "zod": "^4.1.12",

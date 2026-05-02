@@ -57,4 +57,9 @@ quizAttemptSchema.index({ quiz: 1, score: 1 }); // for analytics
 quizAttemptSchema.index({ startedAt: -1 });
 quizAttemptSchema.index({ submittedAt: -1 });
 
+// Additional indexes for leaderboard performance
+quizAttemptSchema.index({ quiz: 1, status: 1, score: -1 }); // Quiz leaderboard sorting
+quizAttemptSchema.index({ course: 1, status: 1, score: -1 }); // Course leaderboard sorting
+quizAttemptSchema.index({ status: 1, score: -1 }); // General performance queries
+
 export default mongoose.models.QuizAttempt || mongoose.model<IQuizAttempt>('QuizAttempt', quizAttemptSchema);

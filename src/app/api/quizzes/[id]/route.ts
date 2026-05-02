@@ -10,6 +10,47 @@ import { logApiError, type LogContext } from '@/lib/logger';
 import mongoose from 'mongoose';
 import { validateContentAccess } from '@/lib/accessControl';
 
+// GET /api/quizzes/[id] - Get a single quiz by ID
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const logContext: LogContext = {
+    method: 'GET',
+    path: '/api/quizzes/[id]',
+  };
+
+  try {
+    const { id } = await params;
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (session.user) {
+      logContext.userId = session.user.id;
+    }
+
+    await dbConnect();
+
+    // Find quiz
+    const quiz = await Quiz.findById(id).populate('course', 'title description');
+    if (!quiz) {
+      return NextResponse.json({ message: 'Quiz not found' }, { status: 404 });
+    }
+
+    // Check if quiz is published or user has access
+    if (!quiz.isPublished && session.user?.role === 'student') {
+      return NextResponse.json({ message: 'Quiz not available' }, { status: 403 });
+    }
+
+    return NextResponse.json({ quiz }, { status: 200 });
+  } catch (error) {
+    logApiError(error as Error, 'GET', '/api/quizzes/[id]', logContext);
+    return NextResponse.json(
+      { message: 'Something went wrong. Please try again later.' },
+      { status: 500 }
+    );
+  }
+}
+
 // PATCH /api/quizzes/[id] - Update a quiz
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const logContext: LogContext = {

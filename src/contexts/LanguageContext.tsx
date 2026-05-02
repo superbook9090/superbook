@@ -6,7 +6,7 @@ import { translations, Language } from '@/i18n';
 interface LanguageContextType {
   lang: Language;
   setLang: (language: Language) => void;
-  t: (key: string) => string;
+  t: (key: string, params?: Record<string, string | number>) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -28,8 +28,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Translation function
-  const t = (key: string): string => {
+  // Translation function with interpolation support
+  const t = (key: string, params?: Record<string, string | number>): string => {
     const keys = key.split('.');
     let value: unknown = translations[lang];
 
@@ -39,7 +39,16 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    return typeof value === 'string' ? value : key;
+    let result = typeof value === 'string' ? value : key;
+
+    // Replace placeholders with params
+    if (params) {
+      Object.entries(params).forEach(([paramKey, paramValue]) => {
+        result = result.replace(new RegExp(`{${paramKey}}`, 'g'), String(paramValue));
+      });
+    }
+
+    return result;
   };
 
   // Load language from localStorage on mount
