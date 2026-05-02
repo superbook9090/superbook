@@ -151,10 +151,6 @@ export default function FavoritesList({ initialFavorites }: FavoritesListProps) 
                       <User className="w-4 h-4 mr-1" />
                       {blog.author?.name || t('blog.teacher')}
                     </span>
-                    <span className="flex items-center">
-                      <Calendar className="w-4 h-4 mr-1" />
-                      {formatDate(blog.createdAt)}
-                    </span>
                   </div>
 
                   {/* Read More */}

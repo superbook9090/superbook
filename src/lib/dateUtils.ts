@@ -5,8 +5,23 @@
  */
 export function formatDate(date: string | Date | null | undefined): string {
   if (!date) return 'N/A';
-  const d = typeof date === 'string' ? new Date(date) : date;
-  if (isNaN(d.getTime())) return 'N/A';
+  
+  // Handle different types of date inputs
+  let d: Date;
+  if (typeof date === 'string') {
+    // Handle empty string or invalid string
+    if (!date.trim()) return 'N/A';
+    d = new Date(date);
+  } else if (date instanceof Date) {
+    d = date;
+  } else {
+    return 'N/A';
+  }
+  
+  // Check if the date is valid
+  if (isNaN(d.getTime()) || d.getFullYear() < 1000 || d.getFullYear() > 9999) {
+    return 'N/A';
+  }
   
   return d.toLocaleDateString(undefined, {
     year: 'numeric',
@@ -20,8 +35,23 @@ export function formatDate(date: string | Date | null | undefined): string {
  */
 export function formatDateTime(date: string | Date | null | undefined): string {
   if (!date) return 'N/A';
-  const d = typeof date === 'string' ? new Date(date) : date;
-  if (isNaN(d.getTime())) return 'N/A';
+  
+  // Handle different types of date inputs
+  let d: Date;
+  if (typeof date === 'string') {
+    // Handle empty string or invalid string
+    if (!date.trim()) return 'N/A';
+    d = new Date(date);
+  } else if (date instanceof Date) {
+    d = date;
+  } else {
+    return 'N/A';
+  }
+  
+  // Check if the date is valid
+  if (isNaN(d.getTime()) || d.getFullYear() < 1000 || d.getFullYear() > 9999) {
+    return 'N/A';
+  }
   
   return d.toLocaleString(undefined, {
     year: 'numeric',
@@ -37,8 +67,23 @@ export function formatDateTime(date: string | Date | null | undefined): string {
  */
 export function formatShortDate(date: string | Date | null | undefined): string {
   if (!date) return 'N/A';
-  const d = typeof date === 'string' ? new Date(date) : date;
-  if (isNaN(d.getTime())) return 'N/A';
+  
+  // Handle different types of date inputs
+  let d: Date;
+  if (typeof date === 'string') {
+    // Handle empty string or invalid string
+    if (!date.trim()) return 'N/A';
+    d = new Date(date);
+  } else if (date instanceof Date) {
+    d = date;
+  } else {
+    return 'N/A';
+  }
+  
+  // Check if the date is valid
+  if (isNaN(d.getTime()) || d.getFullYear() < 1000 || d.getFullYear() > 9999) {
+    return 'N/A';
+  }
   
   return d.toLocaleDateString(undefined, {
     year: 'numeric',
@@ -52,8 +97,23 @@ export function formatShortDate(date: string | Date | null | undefined): string 
  */
 export function formatTime(date: string | Date | null | undefined): string {
   if (!date) return 'N/A';
-  const d = typeof date === 'string' ? new Date(date) : date;
-  if (isNaN(d.getTime())) return 'N/A';
+  
+  // Handle different types of date inputs
+  let d: Date;
+  if (typeof date === 'string') {
+    // Handle empty string or invalid string
+    if (!date.trim()) return 'N/A';
+    d = new Date(date);
+  } else if (date instanceof Date) {
+    d = date;
+  } else {
+    return 'N/A';
+  }
+  
+  // Check if the date is valid
+  if (isNaN(d.getTime()) || d.getFullYear() < 1000 || d.getFullYear() > 9999) {
+    return 'N/A';
+  }
   
   return d.toLocaleTimeString(undefined, {
     hour: '2-digit',
@@ -79,8 +139,23 @@ export function formatDuration(seconds: number | null | undefined): string {
  */
 export function getRelativeTime(date: string | Date | null | undefined): string {
   if (!date) return 'N/A';
-  const d = typeof date === 'string' ? new Date(date) : date;
-  if (isNaN(d.getTime())) return 'N/A';
+  
+  // Handle different types of date inputs
+  let d: Date;
+  if (typeof date === 'string') {
+    // Handle empty string or invalid string
+    if (!date.trim()) return 'N/A';
+    d = new Date(date);
+  } else if (date instanceof Date) {
+    d = date;
+  } else {
+    return 'N/A';
+  }
+  
+  // Check if the date is valid
+  if (isNaN(d.getTime()) || d.getFullYear() < 1000 || d.getFullYear() > 9999) {
+    return 'N/A';
+  }
   
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - d.getTime()) / 1000);

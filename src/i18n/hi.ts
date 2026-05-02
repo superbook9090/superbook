@@ -213,6 +213,11 @@ export const hi = {
       top: 'शीर्ष',
       timeTaken: 'समय',
     },
+
+  },
+
+  // Blog
+  blog: {
     readMore: 'और पढ़ें',
     share: 'साझा करें',
     favorite: 'पसंदीदा में जोड़ें',
@@ -814,3 +819,4 @@ export const hi = {
     signIn: 'साइन इन करें',
   },
 };
+  

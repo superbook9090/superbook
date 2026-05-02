@@ -25,36 +25,57 @@ export async function GET(req: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const skip = (page - 1) * limit;
-    const fields = searchParams.get('fields'); // Comma-separated fields to select
-
-    // Build select object for field selection
-    let selectFields: Record<string, number> = {};
-    if (fields) {
-      const fieldList = fields.split(',');
-      fieldList.forEach(f => selectFields[f] = 1);
-    } else {
-      // Default fields to avoid over-fetching
-      selectFields = { createdAt: 1 };
-    }
-
-    const favorites = await Favorite.find({ user: session.user.id }, selectFields)
+    // Get user's favorites document (new format)
+    const userFavorites = await Favorite.findOne({ user: session.user.id })
       .populate({
-        path: 'blog',
+        path: 'blogs',
         match: { isPublished: true },
         populate: { path: 'author', select: 'name' },
-      })
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean();
+        options: { sort: { createdAt: -1 } }
+      });
 
-    // Filter out favorites where blog is null (unpublished)
-    const validFavorites = favorites.filter(fav => fav.blog !== null);
+    if (!userFavorites || !userFavorites.blogs || userFavorites.blogs.length === 0) {
+      return NextResponse.json({
+        favorites: [],
+        pagination: {
+          page,
+          limit,
+          total: 0,
+          totalPages: 0,
+        }
+      }, {
+        headers: {
+          'Cache-Control': 'private, s-maxage=60, stale-while-revalidate=120',
+        },
+      });
+    }
+
+    // Filter out null blogs (unpublished ones)
+    const validBlogs = userFavorites.blogs.filter((blog: any) => blog !== null);
+
+    // Apply pagination
+    const paginatedBlogs = validBlogs.slice(skip, skip + limit);
+
+    // Transform blogs array back to the old format for backward compatibility
+    const transformedFavorites = paginatedBlogs.map((blog: any) => ({
+      _id: blog._id.toString(),
+      blog: {
+        _id: blog._id.toString(),
+        title: blog.title,
+        topic: blog.topic,
+        content: blog.content,
+        createdAt: blog.createdAt,
+        author: blog.author ? {
+          name: blog.author.name
+        } : null
+      },
+      createdAt: blog.createdAt,
+    }));
 
     // Apply serialization to convert ObjectIds to strings
-    const serializedFavorites = serialize(validFavorites);
+    const serializedFavorites = serialize(transformedFavorites);
 
-    const total = await Favorite.countDocuments({ user: session.user.id });
+    const total = validBlogs.length;
 
     return NextResponse.json({
       favorites: serializedFavorites,
@@ -114,30 +135,56 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if already favorited
-    const existingFavorite = await Favorite.findOne({
-      user: session.user.id,
-      blog: blogId,
-    }).lean();
-
-    if (existingFavorite) {
+    // Check if already favorited by looking at the blogs array
+    const userFavorites = await Favorite.findOne({ user: session.user.id });
+    
+    if (userFavorites && userFavorites.blogs.some((blogId: any) => blogId.toString() === blogId)) {
       return NextResponse.json(
         { message: 'Already in favorites' },
         { status: 409 }
       );
     }
 
-    const favorite = await Favorite.create({
-      user: session.user.id,
-      blog: blogId,
+    // Use $addToSet to add the blog to user's favorites array with upsert
+    const updatedFavorites = await Favorite.findOneAndUpdate(
+      { user: session.user.id },
+      { $addToSet: { blogs: blogId } },
+      { upsert: true, new: true }
+    ).populate({
+      path: 'blogs',
+      match: { _id: blogId },
+      populate: { path: 'author', select: 'name' }
     });
 
-    await favorite.populate({
-      path: 'blog',
-      populate: { path: 'author', select: 'name' },
-    });
+    // Get the newly added blog
+    const addedBlog = updatedFavorites.blogs?.find((blog: any) => 
+      blog && blog._id.toString() === blogId
+    );
 
-    return NextResponse.json(favorite, { status: 201 });
+    if (!addedBlog) {
+      return NextResponse.json(
+        { message: 'Failed to add favorite' },
+        { status: 500 }
+      );
+    }
+
+    // Transform to old format for backward compatibility
+    const transformedFavorite = {
+      _id: addedBlog._id.toString(),
+      blog: {
+        _id: addedBlog._id.toString(),
+        title: addedBlog.title,
+        topic: addedBlog.topic,
+        content: addedBlog.content,
+        createdAt: addedBlog.createdAt,
+        author: addedBlog.author ? {
+          name: addedBlog.author.name
+        } : null
+      },
+      createdAt: updatedFavorites.updatedAt,
+    };
+
+    return NextResponse.json(transformedFavorite, { status: 201 });
   } catch (error) {
     console.error('Error adding favorite:', error);
     

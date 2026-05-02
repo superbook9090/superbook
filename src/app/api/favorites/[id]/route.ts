@@ -31,34 +31,32 @@ export async function DELETE(
     await dbConnect();
     const { id } = await params;
 
-    // The id can be either the favorite _id or the blog _id
-    // We'll try to find by blog ID first
-    let favorite;
-    
-    if (mongoose.Types.ObjectId.isValid(id)) {
-      // Try to find by blog ID
-      favorite = await Favorite.findOne({
-        user: session.user.id,
-        blog: id,
-      });
-
-      // If not found, try by favorite ID
-      if (!favorite) {
-        favorite = await Favorite.findOne({
-          _id: id,
-          user: session.user.id,
-        });
-      }
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { message: 'Invalid ID' },
+        { status: 400 }
+      );
     }
 
-    if (!favorite) {
+    // Use $pull to remove the blog from user's favorites array
+    const result = await Favorite.updateOne(
+      { user: session.user.id },
+      { $pull: { blogs: id } }
+    );
+
+    if (result.matchedCount === 0) {
       return NextResponse.json(
-        { message: 'Favorite not found' },
+        { message: 'User favorites not found' },
         { status: 404 }
       );
     }
 
-    await Favorite.findByIdAndDelete(favorite._id);
+    if (result.modifiedCount === 0) {
+      return NextResponse.json(
+        { message: 'Blog not in favorites' },
+        { status: 404 }
+      );
+    }
 
     return NextResponse.json({ message: 'Removed from favorites' });
   } catch (error) {
