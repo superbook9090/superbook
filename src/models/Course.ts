@@ -10,7 +10,7 @@ export interface ICourse extends Document {
   category: string;
   isPublished: boolean;
   lessons: mongoose.Types.ObjectId[];
-  enrolledStudents: mongoose.Types.ObjectId[];
+  enrolledCount?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -25,7 +25,7 @@ const courseSchema = new Schema<ICourse>(
     thumbnail: String,
     category: String,
     isPublished: { type: Boolean, default: false },
-    enrolledStudents: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    enrolledCount: { type: Number, default: 0 },
     lessons: [{ type: Schema.Types.ObjectId, ref: 'Lesson' }],
   },
   { timestamps: true }

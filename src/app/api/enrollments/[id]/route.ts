@@ -114,9 +114,9 @@ export async function DELETE(
       );
     }
 
-    // Remove student from course's enrolledStudents array
+    // Update course enrolledCount for performance
     await Course.findByIdAndUpdate(enrollment.course, {
-      $pull: { enrolledStudents: session.user.id },
+      $inc: { enrolledCount: -1 }
     });
 
     // Delete enrollment

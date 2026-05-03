@@ -9,7 +9,7 @@ import { useSessionStore } from '@/store/useSessionStore';
 import CourseCard from '@/features/courses/components/CourseCard';
 import Alert from '@/components/ui/Alert';
 import { Skeleton, CardSkeleton } from '@/components/ui/Skeleton';
-import { useCourses, useEnrollments, useEnrollCourse, type Course, type Enrollment } from '@/lib/react-query/hooks';
+import { useAvailableCourses, useEnrollCourse, type Course } from '@/lib/react-query/hooks';
 
 export default function BrowseCoursesPage() {
   const { session, status } = useSessionStore();
@@ -18,13 +18,8 @@ export default function BrowseCoursesPage() {
   const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
 
   const orgId = (session?.user as { organizationId?: string })?.organizationId || 'public';
-  const { data: courses = [], isLoading: coursesLoading, error } = useCourses(orgId);
-  const { data: enrollments = [] } = useEnrollments();
+  const { data: availableCourses = [], isLoading: coursesLoading, error } = useAvailableCourses(orgId);
   const enrollCourse = useEnrollCourse();
-
-  // Get enrolled course IDs to filter them out
-  const enrolledCourseIds = new Set(enrollments.map((e: Enrollment) => e.course._id));
-  const availableCourses = courses.filter((course: Course) => !enrolledCourseIds.has(course._id));
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -87,7 +82,7 @@ export default function BrowseCoursesPage() {
           <div className="bg-[var(--background)] overflow-hidden shadow rounded-lg">
             <div className="px-4 py-8 sm:p-6 text-center">
               <p className="text-[var(--color-muted-foreground)] mb-4">
-                {courses.length === 0 ? t('courses.noAvailableCourses') : t('courses.allCoursesEnrolled')}
+                {t('courses.noAvailableCourses')}
               </p>
               <Link
                 href="/dashboard/student/courses"

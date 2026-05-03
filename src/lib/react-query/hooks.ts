@@ -12,7 +12,7 @@ export interface Course {
   price: number;
   instructor: { _id: string; name: string; email: string };
   isPublished: boolean;
-  enrolledStudents: string[];
+  enrolledCount?: number;
   createdAt: string;
 }
 
@@ -95,6 +95,36 @@ export function useCourses(orgId?: string) {
         cache: 'no-store',
       });
       if (!res.ok) throw new Error('Failed to fetch courses');
+      const data = await res.json();
+      return data.courses || [];
+    },
+    enabled: !!orgId || orgId === 'public',
+  });
+}
+
+export function useTeacherCourses(orgId?: string) {
+  return useQuery({
+    queryKey: ['courses', orgId || 'public', 'teacher'],
+    queryFn: async () => {
+      const res = await fetch(`/api/courses?orgId=${orgId || 'public'}&instructor=self`, {
+        cache: 'no-store',
+      });
+      if (!res.ok) throw new Error('Failed to fetch teacher courses');
+      const data = await res.json();
+      return data.courses || [];
+    },
+    enabled: !!orgId || orgId === 'public',
+  });
+}
+
+export function useAvailableCourses(orgId?: string) {
+  return useQuery({
+    queryKey: ['courses', orgId || 'public', 'available'],
+    queryFn: async () => {
+      const res = await fetch(`/api/courses?orgId=${orgId || 'public'}&available=true`, {
+        cache: 'no-store',
+      });
+      if (!res.ok) throw new Error('Failed to fetch available courses');
       const data = await res.json();
       return data.courses || [];
     },

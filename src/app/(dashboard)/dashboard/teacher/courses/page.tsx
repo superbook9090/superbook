@@ -9,7 +9,7 @@ import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
 import Alert from '@/components/ui/Alert';
 import { Skeleton, CardSkeleton } from '@/components/ui/Skeleton';
-import { useCourses, type Course } from '@/lib/react-query/hooks';
+import { useTeacherCourses, type Course } from '@/lib/react-query/hooks';
 
 export default function TeacherCoursesPage() {
   const { session, status } = useSessionStore();
@@ -20,7 +20,7 @@ export default function TeacherCoursesPage() {
 
   // Get orgId from session
   const orgId = (session?.user as { organizationId?: string })?.organizationId || 'public';
-  const { data: courses = [], isLoading, error } = useCourses(orgId);
+  const { data: courses = [], isLoading, error } = useTeacherCourses(orgId);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -130,7 +130,7 @@ export default function TeacherCoursesPage() {
                   <h3 className="text-lg font-semibold text-[var(--color-foreground)] mb-2">{course.title}</h3>
                   <p className="text-sm text-[var(--color-muted-foreground)] mb-4 line-clamp-2">{course.description || t('teacherCourses.noDescription')}</p>
                   <div className="flex items-center justify-between text-sm text-[var(--color-muted-foreground)]">
-                    <span>{course.enrolledStudents?.length || 0} {t('teacherCourses.studentsEnrolled')}</span>
+                    <span>{course.enrolledCount || 0} {t('teacherCourses.studentsEnrolled')}</span>
                     <span>{course.price > 0 ? `₹${course.price}` : t('teacherCourses.free')}</span>
                   </div>
                 </div>

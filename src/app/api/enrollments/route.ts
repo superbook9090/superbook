@@ -156,32 +156,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if already enrolled
-    const existingEnrollment = await Enrollment.findOne({
-      student: session.user.id,
-      course: courseId,
-    }).lean();
+    // Safety check: ensure only one enrollment exists per (student + course)
+    // Using findOneAndUpdate with upsert to prevent race conditions
+    const enrollment = await Enrollment.findOneAndUpdate(
+      {
+        student: session.user.id,
+        course: courseId,
+      },
+      {
+        $setOnInsert: {
+          student: session.user.id,
+          course: courseId,
+          status: 'active',
+          progress: 0,
+          enrolledAt: new Date(),
+        },
+      },
+      {
+        upsert: true,
+        new: true, // Return the new document if created
+        runValidators: true, // Ensure schema validation
+      }
+    );
 
-    if (existingEnrollment) {
+    // Check if this was an existing enrollment (not newly created)
+    const wasExisting = enrollment && enrollment.enrolledAt && 
+      new Date(enrollment.enrolledAt).getTime() < Date.now() - 5000; // 5 second buffer
+
+    if (wasExisting) {
       return NextResponse.json(
-        { message: 'You are already enrolled in this course' },
+        { message: 'You are already enrolled in this course', enrollment },
         { status: 400 }
       );
     }
 
-    // Create enrollment
-    const enrollment = new Enrollment({
-      student: session.user.id,
-      course: courseId,
-      status: 'active',
-      progress: 0,
-    });
-
-    await enrollment.save();
-
-    // Also add student to course's enrolledStudents array
+    // Update course enrolledCount for performance
     await Course.findByIdAndUpdate(courseId, {
-      $addToSet: { enrolledStudents: session.user.id },
+      $inc: { enrolledCount: 1 }
     });
 
     // Get organizationId for cache invalidation

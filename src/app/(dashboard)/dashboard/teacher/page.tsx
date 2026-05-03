@@ -22,7 +22,7 @@ import { fetcher } from '@/lib/swrFetcher';
 interface Course {
   _id: string;
   title: string;
-  enrolledStudents: string[];
+  enrolledCount?: number;
   isPublished: boolean;
 }
 
@@ -97,17 +97,16 @@ export default function TeacherDashboardPage() {
   // Filter blogs for this teacher
   const teacherBlogs = allBlogs.filter((b: Blog) => b.author?._id === session?.user?.id);
 
-  // Calculate total unique students across all courses
-  const allStudentIds = new Set<string>();
-  courses.forEach((course: Course) => {
-    course.enrolledStudents?.forEach((studentId: string) => allStudentIds.add(studentId));
-  });
+  // Calculate total students across all courses
+  const totalStudents = courses.reduce((sum: number, course: Course) => {
+    return sum + (course.enrolledCount || 0);
+  }, 0);
 
   const publishedCount = courses.filter((c: Course) => c.isPublished).length;
 
   const stats: Stats = {
     totalCourses: courses.length,
-    totalStudents: allStudentIds.size,
+    totalStudents: totalStudents,
     totalQuizzes: teacherQuizzes.length,
     totalBlogs: teacherBlogs.length,
     publishedCourses: publishedCount,
@@ -399,7 +398,7 @@ export default function TeacherDashboardPage() {
                 </div>
                 <h3 className="font-semibold text-[var(--color-foreground)] mb-1 truncate">{course.title}</h3>
                 <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)]">
-                  {t('dashboard.studentsEnrolled').replace('{count}', String(course.enrolledStudents?.length || 0))}
+                  {t('dashboard.studentsEnrolled').replace('{count}', String(course.enrolledCount || 0))}
                 </p>
               </motion.div>
             ))}

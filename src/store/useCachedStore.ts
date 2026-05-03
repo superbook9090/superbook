@@ -31,7 +31,7 @@ export interface Course {
   price: number;
   instructor: { _id: string; name: string; email: string };
   isPublished: boolean;
-  enrolledStudents: string[];
+  enrolledCount?: number;
   createdAt: string;
 }
 

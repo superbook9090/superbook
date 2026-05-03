@@ -43,7 +43,7 @@ interface Course {
   thumbnail?: string;
   instructor: { _id: string; name: string; email: string };
   isPublished: boolean;
-  enrolledStudents: string[];
+  enrolledCount?: number;
   createdAt: string;
 }
 

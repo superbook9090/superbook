@@ -30,7 +30,7 @@ interface Course {
   category: string;
   language: string;
   instructor: { _id: string; name: string; email: string };
-  enrolledStudents: string[];
+  enrolledCount?: number;
   isPublished: boolean;
   createdAt: string;
   thumbnail?: string;
@@ -291,7 +291,7 @@ export default function AdminCoursesPage() {
                   </div>
                   <div className="flex items-center text-sm text-[var(--color-muted-foreground)]">
                     <Users className="w-4 h-4 mr-2" />
-                    {t('admin.studentsEnrolled', { count: course.enrolledStudents?.length || 0 })}
+                    {t('admin.studentsEnrolled', { count: course.enrolledCount || 0 })}
                   </div>
                   <div className="flex items-center text-sm text-[var(--color-muted-foreground)]">
                     <Calendar className="w-4 h-4 mr-2" />

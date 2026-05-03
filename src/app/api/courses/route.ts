@@ -107,7 +107,6 @@ export async function GET(request: NextRequest) {
 
     const courses = await Course.find(query, selectFields)
       .populate('instructor', 'name email')
-      .populate('enrolledStudents', 'name email')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)

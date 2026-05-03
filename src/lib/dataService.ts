@@ -348,8 +348,8 @@ export const getTeacherStats = cache(async (teacherId: string) => {
 
   const allStudentIds = new Set<string>();
   enrollments.forEach((e: unknown) => {
-    const enrollment = e as { enrolledStudents?: string[] };
-    enrollment.enrolledStudents?.forEach((studentId: string) => allStudentIds.add(studentId));
+    const enrollment = e as { student: { toString: () => string } };
+    allStudentIds.add(enrollment.student.toString());
   });
 
   return {
