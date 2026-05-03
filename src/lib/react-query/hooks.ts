@@ -175,6 +175,28 @@ export function useEnrollments() {
   });
 }
 
+export function usePublishCourse() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ courseId, isPublished }: { courseId: string; isPublished: boolean }) => {
+      const res = await fetch(`/api/courses/${courseId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isPublished }),
+      });
+      if (!res.ok) throw new Error('Failed to update course');
+      return res.json();
+    },
+    onSuccess: (data, variables) => {
+      // Invalidate teacher courses cache
+      const orgId = data.organizationId || 'public';
+      queryClient.invalidateQueries({ queryKey: ['courses', orgId, 'teacher'] });
+      queryClient.invalidateQueries({ queryKey: ['courses', orgId] });
+    },
+  });
+}
+
 export function useQuizAttempts() {
   return useQuery({
     queryKey: ['quizAttempts'],

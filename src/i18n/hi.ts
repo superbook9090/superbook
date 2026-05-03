@@ -676,6 +676,12 @@ export const hi = {
     noDescription: 'कोई विवरण नहीं',
     studentsEnrolled: 'छात्र नामांकित',
     free: 'मुफ्त',
+    edit: 'संपादित करें',
+    publish: 'प्रकाशित करें',
+    unpublish: 'अप्रकाशित करें',
+    coursePublished: 'पाठ्यक्रम सफलतापूर्वक प्रकाशित हुआ',
+    courseUnpublished: 'पाठ्यक्रम सफलतापूर्वक अप्रकाशित हुआ',
+    publishError: 'पाठ्यक्रम स्थिति अपडेट करने में विफल',
   },
 
   // Maintenance

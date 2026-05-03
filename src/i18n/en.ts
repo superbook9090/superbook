@@ -679,6 +679,12 @@ export const en = {
     noDescription: 'No description',
     studentsEnrolled: 'students enrolled',
     free: 'Free',
+    edit: 'Edit',
+    publish: 'Publish',
+    unpublish: 'Unpublish',
+    coursePublished: 'Course published successfully',
+    courseUnpublished: 'Course unpublished successfully',
+    publishError: 'Failed to update course status',
   },
 
   // Maintenance
