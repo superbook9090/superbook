@@ -14,7 +14,8 @@ export interface AccessUser {
  *
  * Rules:
  * - Superadmin: full access (no filter)
- * - Admin: ONLY their org (no public content)
+ * - Admin (with org): ONLY their org courses (not public)
+ * - Admin (without org): ONLY public courses
  * - Student/Teacher with org: public + own org
  * - Student/Teacher without org: public only
  *
@@ -22,35 +23,41 @@ export interface AccessUser {
  * @returns MongoDB query filter object
  */
 export function getAccessFilter(user: AccessUser): Record<string, unknown> {
-  // Superadmin has full access
+  if (!user) return {};
+
   if (user.role === 'superadmin') {
     return {};
   }
 
-  // Admin can ONLY see content from their own organization (not public)
   if (user.role === 'admin') {
     if (user.organizationId) {
       return { organizationId: user.organizationId };
     }
-    // Admin without organization sees nothing
-    return { _id: null };
-  }
 
-  // If user has an organization (student or teacher), they can see:
-  // - Public content (organizationId is null)
-  // - Content from their organization (organizationId = user.organizationId)
-  if (user.organizationId) {
     return {
       $or: [
         { organizationId: null },
-        { organizationId: user.organizationId },
-      ],
+        { organizationId: { $exists: false } }
+      ]
     };
   }
 
-  // If user has NO organization, they can ONLY see public content
+  // student / teacher
+  if (user.organizationId) {
+    return {
+      $or: [
+        { organizationId: user.organizationId },
+        { organizationId: null },
+        { organizationId: { $exists: false } }
+      ]
+    };
+  }
+
   return {
-    organizationId: null,
+    $or: [
+      { organizationId: null },
+      { organizationId: { $exists: false } }
+    ]
   };
 }
 

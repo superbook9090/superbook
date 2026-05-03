@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
       const accessFilter = getAccessFilter({
         _id: new mongoose.Types.ObjectId(user.id),
         organizationId: user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null,
-        role: user.role as 'student' | 'teacher' | 'admin',
+        role: user.role as 'student' | 'teacher' | 'admin' | 'superadmin',
       });
       Object.assign(query, accessFilter);
     }
