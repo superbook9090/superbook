@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useState, useMemo, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
-import Image from 'next/image';
 import { useTranslation } from '@/hooks/useTranslation';
 import PremiumLogo from '@/components/ui/PremiumLogo';
 import {

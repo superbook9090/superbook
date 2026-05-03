@@ -1,7 +1,6 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import Image from 'next/image';
 import Link from 'next/link';
 import PremiumLogo from '@/components/ui/PremiumLogo';
 import { useTranslation } from '@/hooks/useTranslation';

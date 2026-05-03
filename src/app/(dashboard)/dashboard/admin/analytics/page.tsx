@@ -82,7 +82,7 @@ export default function AdminAnalyticsPage() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (status === 'loading') return;

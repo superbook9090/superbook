@@ -19,6 +19,15 @@ interface CourseData {
   status: 'completed' | 'active' | 'inactive';
 }
 
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: Array<{
+    payload: CourseData;
+    value: number;
+  }>;
+  label?: string;
+}
+
 interface CourseProgressChartProps {
   data: CourseData[];
   title?: string;
@@ -52,7 +61,7 @@ export default function CourseProgressChart({
     return 'var(--warning)';
   };
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
     if (active && payload && payload[0]) {
       const data = payload[0].payload;
       return (

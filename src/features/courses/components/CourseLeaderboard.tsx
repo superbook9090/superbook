@@ -1,15 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import Leaderboard from '@/components/ui/Leaderboard';
 import Loader from '@/components/ui/Loader';
 
-interface CourseLeaderboardEntry {
+interface LeaderboardApiResponse {
   userId: string;
   name: string;
   image?: string;
-  score: number; // Add this for compatibility with LeaderboardEntry
   totalScore: number;
   averageScore: number;
   bestScore: number;
@@ -17,6 +16,10 @@ interface CourseLeaderboardEntry {
   completedQuizzes: number;
   rank: number;
   lastCompletedAt: string;
+}
+
+interface CourseLeaderboardEntry extends LeaderboardApiResponse {
+  score: number; // Add this for compatibility with LeaderboardEntry
 }
 
 interface CourseLeaderboardProps {
@@ -40,7 +43,7 @@ export default function CourseLeaderboard({
     totalQuizzes: 0
   });
 
-  const fetchLeaderboard = async () => {
+  const fetchLeaderboard = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`/api/leaderboard/course/${courseId}`);
@@ -51,7 +54,7 @@ export default function CourseLeaderboard({
       
       const data = await response.json();
       // Map course leaderboard data to include score field
-      const mappedLeaderboard = (data.leaderboard || []).map((entry: any) => ({
+      const mappedLeaderboard = (data.leaderboard || []).map((entry: LeaderboardApiResponse): CourseLeaderboardEntry => ({
         ...entry,
         score: entry.averageScore || 0 // Use averageScore as the primary score display
       }));
@@ -65,13 +68,13 @@ export default function CourseLeaderboard({
     } finally {
       setLoading(false);
     }
-  };
+  }, [courseId]);
 
   useEffect(() => {
     if (courseId) {
       fetchLeaderboard();
     }
-  }, [courseId]);
+  }, [courseId, fetchLeaderboard]);
 
   if (loading) {
     return (

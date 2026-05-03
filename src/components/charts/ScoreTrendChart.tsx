@@ -2,8 +2,6 @@
 
 import { useMemo } from 'react';
 import {
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -18,6 +16,15 @@ interface ScoreData {
   date: string;
   score: number;
   quizTitle: string;
+}
+
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: Array<{
+    payload: ScoreData;
+    value: number;
+  }>;
+  label?: string;
 }
 
 interface ScoreTrendChartProps {
@@ -46,7 +53,7 @@ export default function ScoreTrendChart({
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [data]);
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
     if (active && payload && payload[0]) {
       return (
         <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200">

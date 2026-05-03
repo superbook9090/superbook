@@ -2,24 +2,20 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
-import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { motion } from 'framer-motion';
 import {
   Building2,
   Plus,
-  Search,
   Edit,
   Trash2,
   Copy,
   X,
   Check,
-  AlertCircle,
   Users,
   BookOpen,
   FileText,
   ClipboardList,
 } from 'lucide-react';
-import { Skeleton } from '@/components/ui/Skeleton';
 import Alert from '@/components/ui/Alert';
 import { useRouter } from 'next/navigation';
 import { useSessionStore } from '@/store/useSessionStore';

@@ -57,7 +57,6 @@ export default async function DashboardLayout({
   const isStaff = ['teacher', 'admin', 'superadmin'].includes(role || '');
   const isAdminUser = isAdmin(role);
   const isSuperAdminUser = isSuperAdmin(role);
-  const isStudent = role === 'student';
 
   // Filter admin navigation based on role
   const filteredAdminNavigation = isSuperAdminUser

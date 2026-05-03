@@ -18,6 +18,23 @@ interface QuizStatusData {
   icon: React.ReactNode;
 }
 
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: Array<{
+    payload: QuizStatusData;
+    value: number;
+  }>;
+}
+
+interface CustomLabelProps {
+  cx?: number;
+  cy?: number;
+  midAngle?: number;
+  innerRadius?: number;
+  outerRadius?: number;
+  percent?: number;
+}
+
 interface QuizStatusChartProps {
   data: QuizStatusData[];
   title?: string;
@@ -57,7 +74,7 @@ export default function QuizStatusChart({
     return processedData.reduce((sum, item) => sum + item.value, 0);
   }, [processedData]);
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
     if (active && payload && payload[0]) {
       const data = payload[0].payload;
       const percentage = ((data.value / totalQuizzes) * 100).toFixed(1);
@@ -77,7 +94,12 @@ export default function QuizStatusChart({
     return null;
   };
 
-  const CustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
+  const CustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: CustomLabelProps) => {
+    if (cx === undefined || cy === undefined || midAngle === undefined || 
+        innerRadius === undefined || outerRadius === undefined || percent === undefined) {
+      return null;
+    }
+
     const RADIAN = Math.PI / 180;
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
@@ -99,9 +121,15 @@ export default function QuizStatusChart({
     );
   };
 
-  const renderCustomizedLabel = (props: any) => {
-    return <CustomLabel {...props} />;
-  };
+interface LegendEntryProps {
+  value?: string | number;
+  payload?: QuizStatusData | object;
+  color?: string;
+}
+
+const renderCustomizedLabel = (props: CustomLabelProps) => {
+  return <CustomLabel {...props} />;
+};
 
   if (!processedData || processedData.length === 0) {
     return (
@@ -142,9 +170,11 @@ export default function QuizStatusChart({
           <Legend 
             verticalAlign="bottom" 
             height={36}
-            formatter={(value, entry: any) => (
+            formatter={(value, entry: LegendEntryProps) => (
               <div className="flex items-center gap-2">
-                <span style={{ color: entry.color }}>{entry.payload.icon}</span>
+                <span style={{ color: entry.color }}>
+                  {entry.payload && 'icon' in entry.payload ? entry.payload.icon : null}
+                </span>
                 <span className="capitalize">{value}</span>
               </div>
             )}

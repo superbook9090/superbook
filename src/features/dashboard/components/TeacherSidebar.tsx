@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { motion } from 'framer-motion';
-import Image from 'next/image';
 import { useTranslation } from '@/hooks/useTranslation';
 import PremiumLogo from '@/components/ui/PremiumLogo';
 import {
@@ -54,7 +53,6 @@ export default function TeacherSidebar({ user }: { user: User | null }) {
   const pathname = usePathname();
   const { t } = useTranslation();
   const { isQuizActive } = useQuiz();
-  const isStaff = ['teacher', 'admin', 'superadmin'].includes(user?.role || '');
   const isAdminUser = isAdmin(user?.role);
   const isSuperAdminUser = isSuperAdmin(user?.role);
 

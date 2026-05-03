@@ -4,11 +4,10 @@ import { authOptions } from '@/lib/auth';
 import mongoose from 'mongoose';
 import dbConnect from '@/lib/db';
 import QuizAttempt from '@/models/QuizAttempt';
-import User from '@/models/User';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { quizId: string } }
+  { params }: { params: Promise<{ quizId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -16,7 +15,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { quizId } = params;
+    const { quizId } = await params;
     await dbConnect();
 
     // Check if user has access to this quiz

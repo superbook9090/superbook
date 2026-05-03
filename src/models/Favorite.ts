@@ -27,7 +27,6 @@ const favoriteSchema = new Schema<IFavorite>(
 );
 
 // Indexes for optimal performance
-favoriteSchema.index({ user: 1 }, { unique: true }); // Fast user lookups
 favoriteSchema.index({ blogs: 1 }); // For reverse lookups if needed
 favoriteSchema.index({ updatedAt: -1 }); // For recent activity
 

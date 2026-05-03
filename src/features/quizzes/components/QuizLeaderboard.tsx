@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import Leaderboard from '@/components/ui/Leaderboard';
 import Loader from '@/components/ui/Loader';
@@ -35,7 +35,7 @@ export default function QuizLeaderboard({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchLeaderboard = async () => {
+  const fetchLeaderboard = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`/api/leaderboard/quiz/${quizId}`);
@@ -51,13 +51,13 @@ export default function QuizLeaderboard({
     } finally {
       setLoading(false);
     }
-  };
+  }, [quizId]);
 
   useEffect(() => {
     if (quizId) {
       fetchLeaderboard();
     }
-  }, [quizId]);
+  }, [quizId, fetchLeaderboard]);
 
   if (loading) {
     return (

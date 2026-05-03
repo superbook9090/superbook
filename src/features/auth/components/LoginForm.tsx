@@ -4,7 +4,6 @@ import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
 import PremiumLogo from '@/components/ui/PremiumLogo';
 import { useTranslation } from '@/hooks/useTranslation';

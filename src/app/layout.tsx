@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
@@ -7,16 +6,6 @@ import { AppSettingsProvider } from "@/contexts/AppSettingsContext";
 import MaintenanceCheck from '@/components/MaintenanceCheck';
 import { SessionProvider } from '@/components/providers/SessionProvider';
 import { QueryProvider } from '@/lib/react-query/QueryProvider';
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: 'quiz-do - The Future of Learning',
@@ -34,9 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className="antialiased">
         <GoogleAnalytics gaId="G-DRRECK67YF" />
         <QueryProvider>
           <SessionProvider>

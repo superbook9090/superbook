@@ -1,11 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+import mongoose from 'mongoose';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import Favorite from '@/models/Favorite';
 import Blog from '@/models/Blog'; // Import to ensure Blog model schema is registered for populate
 import { createFavoriteSchema } from '@/lib/validation';
 import { serialize } from '@/lib/serialize';
+
+// Define proper types for blog objects
+interface PopulatedBlog {
+  _id: string;
+  title: string;
+  topic: string;
+  content: string;
+  createdAt: Date;
+  author?: {
+    name: string;
+  };
+}
+
+interface TransformedFavorite {
+  _id: string;
+  blog: {
+    _id: string;
+    title: string;
+    topic: string;
+    content: string;
+    createdAt: Date;
+    author?: {
+      name: string;
+    };
+  };
+  createdAt: Date;
+}
 
 // GET /api/favorites - Get user's favorite blogs
 export async function GET(req: NextRequest) {
@@ -51,13 +79,15 @@ export async function GET(req: NextRequest) {
     }
 
     // Filter out null blogs (unpublished ones)
-    const validBlogs = userFavorites.blogs.filter((blog: any) => blog !== null);
+    const validBlogs = userFavorites.blogs.filter((blog: unknown): blog is PopulatedBlog => 
+      blog !== null && typeof blog === 'object' && blog !== undefined
+    );
 
     // Apply pagination
     const paginatedBlogs = validBlogs.slice(skip, skip + limit);
 
     // Transform blogs array back to the old format for backward compatibility
-    const transformedFavorites = paginatedBlogs.map((blog: any) => ({
+    const transformedFavorites = paginatedBlogs.map((blog: PopulatedBlog): TransformedFavorite => ({
       _id: blog._id.toString(),
       blog: {
         _id: blog._id.toString(),
@@ -67,7 +97,7 @@ export async function GET(req: NextRequest) {
         createdAt: blog.createdAt,
         author: blog.author ? {
           name: blog.author.name
-        } : null
+        } : undefined
       },
       createdAt: blog.createdAt,
     }));
@@ -138,7 +168,7 @@ export async function POST(req: NextRequest) {
     // Check if already favorited by looking at the blogs array
     const userFavorites = await Favorite.findOne({ user: session.user.id });
     
-    if (userFavorites && userFavorites.blogs.some((blogId: any) => blogId.toString() === blogId)) {
+    if (userFavorites && userFavorites.blogs.some((blogId: mongoose.Types.ObjectId) => blogId.toString() === blogId.toString())) {
       return NextResponse.json(
         { message: 'Already in favorites' },
         { status: 409 }
@@ -157,8 +187,9 @@ export async function POST(req: NextRequest) {
     });
 
     // Get the newly added blog
-    const addedBlog = updatedFavorites.blogs?.find((blog: any) => 
-      blog && blog._id.toString() === blogId
+    const addedBlog = updatedFavorites.blogs?.find((blog: unknown): blog is PopulatedBlog => 
+      blog !== null && blog !== undefined && typeof blog === 'object' && 
+      (blog as PopulatedBlog)._id.toString() === blogId
     );
 
     if (!addedBlog) {

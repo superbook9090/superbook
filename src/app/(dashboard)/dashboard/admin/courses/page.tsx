@@ -57,6 +57,19 @@ export default function AdminCoursesPage() {
     []
   );
 
+  const fetchCourses = useCallback(async () => {
+    try {
+      const response = await fetch('/api/courses');
+      if (!response.ok) throw new Error('Failed to fetch');
+      const data = await response.json();
+      setCourses(data.courses || []);
+    } catch {
+      setMessage({ type: 'error', text: t('admin.failedFetchCourses') });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [t]);
+
   useEffect(() => {
     if (status === 'loading') return;
     if (!session) {
@@ -68,20 +81,7 @@ export default function AdminCoursesPage() {
       // Role-based redirect handled in /dashboard/page.tsx
       fetchCourses();
     }
-  }, [status, session, router]);
-
-  const fetchCourses = async () => {
-    try {
-      const response = await fetch('/api/courses');
-      if (!response.ok) throw new Error('Failed to fetch');
-      const data = await response.json();
-      setCourses(data.courses || []);
-    } catch {
-      setMessage({ type: 'error', text: t('admin.failedFetchCourses') });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [status, session, router, fetchCourses]);
 
   const handleTogglePublish = async (courseId: string, currentStatus: boolean) => {
     try {

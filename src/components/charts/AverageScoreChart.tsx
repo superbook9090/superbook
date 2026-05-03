@@ -2,8 +2,6 @@
 
 import { useMemo } from 'react';
 import {
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -19,6 +17,17 @@ interface AverageScoreData {
   averageScore: number;
   movingAverage: number;
   attemptCount: number;
+  displayAverage?: number;
+  displayMovingAverage?: number;
+}
+
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: Array<{
+    payload: AverageScoreData;
+    value: number;
+  }>;
+  label?: string;
 }
 
 interface AverageScoreChartProps {
@@ -48,7 +57,7 @@ export default function AverageScoreChart({
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [data]);
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (

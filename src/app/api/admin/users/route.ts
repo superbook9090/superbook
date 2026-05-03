@@ -6,7 +6,7 @@ import User from '@/models/User';
 import dbConnect from '@/lib/db';
 import { sanitizeSearchQuery, validateObjectId } from '@/lib/sanitize';
 import { logApiError, type LogContext } from '@/lib/logger';
-import { hasAccess, isAdmin, isSuperAdmin } from '@/lib/roles';
+import { isAdmin, isSuperAdmin } from '@/lib/roles';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface QueryFilter { [key: string]: any }

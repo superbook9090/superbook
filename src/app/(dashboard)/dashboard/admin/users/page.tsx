@@ -208,14 +208,6 @@ export default function AdminUsersPage() {
     setShowUserDetail(false);
   };
 
-  const handleOpenLimits = (user: User) => {
-    setLimitsUserId(user._id);
-    setLimitsForm({
-      courses: user.limits?.courses?.toString() || '',
-      quizzes: user.limits?.quizzes?.toString() || '',
-      blogs: user.limits?.blogs?.toString() || '',
-    });
-  };
 
   const handleCloseLimits = () => {
     setLimitsUserId(null);
@@ -250,10 +242,6 @@ export default function AdminUsersPage() {
     }
   };
 
-  const handleOpenOrgAssign = (user: User) => {
-    setOrgAssignUserId(user._id);
-    setSelectedOrganizationId(user.organizationId || null);
-  };
 
   const handleCloseOrgAssign = () => {
     setOrgAssignUserId(null);

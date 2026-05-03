@@ -5,7 +5,6 @@ import mongoose from 'mongoose';
 import dbConnect from '@/lib/db';
 import QuizAttempt from '@/models/QuizAttempt';
 import Course, { ICourse } from '@/models/Course';
-import User from '@/models/User';
 
 export async function GET(
   request: NextRequest,

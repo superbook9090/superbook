@@ -4,10 +4,8 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useTranslation } from '@/hooks/useTranslation';
-import { formatDate } from '@/lib/dateUtils';
 import {
   Bookmark,
-  Calendar,
   User,
   ArrowRight,
   ArrowLeft,
