@@ -1,6 +1,24 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { DashboardData, StudentDashboardData, TeacherDashboardData } from '@/app/api/dashboard/route';
+
+// Re-export types for convenience
+export type { DashboardData, StudentDashboardData, TeacherDashboardData };
+
+// ============ QUERY KEYS ============
+// Centralized query keys for cache management
+export const QUERY_KEYS = {
+  DASHBOARD: ['dashboard'] as const,
+  COURSES: (orgId?: string) => ['courses', orgId || 'public'] as const,
+  TEACHER_COURSES: (orgId?: string) => ['courses', orgId || 'public', 'teacher'] as const,
+  AVAILABLE_COURSES: (orgId?: string) => ['courses', orgId || 'public', 'available'] as const,
+  BLOGS: (orgId?: string, includeDrafts?: boolean) => ['blogs', orgId || 'public', includeDrafts] as const,
+  QUIZZES: (orgId?: string) => ['quizzes', orgId || 'public'] as const,
+  ENROLLMENTS: ['enrollments'] as const,
+  QUIZ_ATTEMPTS: ['quizAttempts'] as const,
+  FAVORITES: ['favorites'] as const,
+};
 
 // Types
 export interface Course {
@@ -165,7 +183,7 @@ export function useQuizzes(orgId?: string) {
 
 export function useEnrollments() {
   return useQuery({
-    queryKey: ['enrollments'],
+    queryKey: QUERY_KEYS.ENROLLMENTS,
     queryFn: async () => {
       const res = await fetch('/api/enrollments', { cache: 'no-store' });
       if (!res.ok) throw new Error('Failed to fetch enrollments');
@@ -173,6 +191,42 @@ export function useEnrollments() {
       return data.enrollments || [];
     },
   });
+}
+
+// ============ DASHBOARD QUERIES ============
+
+/**
+ * Single source of truth for dashboard data
+ * Replaces multiple SWR calls with one React Query call
+ * Returns role-based data: student or teacher
+ */
+export function useDashboard() {
+  return useQuery<DashboardData>({
+    queryKey: QUERY_KEYS.DASHBOARD,
+    queryFn: async () => {
+      const res = await fetch('/api/dashboard', { cache: 'no-store' });
+      if (!res.ok) throw new Error('Failed to fetch dashboard');
+      return res.json();
+    },
+    staleTime: 60 * 1000, // 1 minute
+    gcTime: 5 * 60 * 1000, // 5 minutes
+    retry: 1,
+    refetchOnWindowFocus: false,
+  });
+}
+
+/**
+ * Type guard to check if dashboard data is for student
+ */
+export function isStudentDashboard(data: DashboardData): data is Extract<DashboardData, { role: 'student' }> {
+  return data.role === 'student';
+}
+
+/**
+ * Type guard to check if dashboard data is for teacher/admin
+ */
+export function isTeacherDashboard(data: DashboardData): data is Extract<DashboardData, { role: 'teacher' | 'admin' }> {
+  return data.role === 'teacher' || data.role === 'admin';
 }
 
 export function usePublishCourse() {
@@ -401,20 +455,22 @@ export function useDropEnrollment() {
       return res.json();
     },
     onMutate: async (enrollmentId) => {
-      await queryClient.cancelQueries({ queryKey: ['enrollments'] });
-      const previousEnrollments = queryClient.getQueryData<Enrollment[]>(['enrollments']);
-      queryClient.setQueryData<Enrollment[]>(['enrollments'], (old) =>
+      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.ENROLLMENTS });
+      const previousEnrollments = queryClient.getQueryData<Enrollment[]>(QUERY_KEYS.ENROLLMENTS);
+      queryClient.setQueryData<Enrollment[]>(QUERY_KEYS.ENROLLMENTS, (old) =>
         (old || []).filter((e) => e._id !== enrollmentId)
       );
       return { previousEnrollments };
     },
     onError: (err, enrollmentId, context) => {
       if (context?.previousEnrollments) {
-        queryClient.setQueryData(['enrollments'], context.previousEnrollments);
+        queryClient.setQueryData(QUERY_KEYS.ENROLLMENTS, context.previousEnrollments);
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['enrollments'] });
+      // Invalidate all related queries to refresh UI
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ENROLLMENTS });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.DASHBOARD });
       queryClient.invalidateQueries({ queryKey: ['courses'] });
     },
   });
@@ -434,7 +490,9 @@ export function useEnrollCourse() {
       return res.json();
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['enrollments'] });
+      // Invalidate all related queries to refresh UI
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ENROLLMENTS });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.DASHBOARD });
       queryClient.invalidateQueries({ queryKey: ['courses'] });
     },
   });
@@ -503,8 +561,10 @@ export function useSubmitQuizAttempt() {
       return res.json();
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['quizAttempts'] });
-      queryClient.invalidateQueries({ queryKey: ['enrollments'] });
+      // Invalidate all related queries to refresh UI
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.QUIZ_ATTEMPTS });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ENROLLMENTS });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.DASHBOARD });
     },
   });
 }

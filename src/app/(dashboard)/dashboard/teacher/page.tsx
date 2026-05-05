@@ -5,7 +5,11 @@ import { useState } from 'react';
 import { useSessionStore } from '@/store/useSessionStore';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
-import useSWR from 'swr';
+import {
+  useDashboard,
+  isTeacherDashboard,
+  type TeacherDashboardData,
+} from '@/lib/react-query/hooks';
 import {
   BookOpen,
   Users,
@@ -17,8 +21,8 @@ import {
 } from 'lucide-react';
 import Alert from '@/components/ui/Alert';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { fetcher } from '@/lib/swrFetcher';
 
+// Types are now imported from hooks
 interface Course {
   _id: string;
   title: string;
@@ -45,45 +49,38 @@ interface Blog {
   author?: { _id: string; name: string };
 }
 
-interface Stats {
-  totalCourses: number;
-  totalStudents: number;
-  totalQuizzes: number;
-  totalBlogs: number;
-  publishedCourses: number;
-}
-
-interface TeacherLimits {
-  courses: number;
-  quizzes: number;
-  blogs: number;
-  userLimits?: {
-    courses?: number;
-    quizzes?: number;
-    blogs?: number;
-  };
-}
+// Use the type from the API response
+type Stats = TeacherDashboardData['stats'];
+type TeacherLimits = TeacherDashboardData['limits'];
 
 export default function TeacherDashboardPage() {
   const session = useSessionStore((s) => s.session) as { user?: { id: string; role: string; name: string } };
-  const status = useSessionStore((s) => s.status);
   const { t } = useTranslation();
   const [limitAlert, setLimitAlert] = useState<{ type: 'courses' | 'quizzes' | 'blogs' } | null>(null);
 
-  const isAdmin = session?.user?.role === 'admin';
-  const settingsEndpoint = isAdmin ? '/api/admin/settings' : '/api/settings';
+  // Single React Query call replaces multiple SWR calls
+  const { data, isLoading, error } = useDashboard();
 
-  // SWR hooks for data fetching with automatic caching and deduplication
-  const { data: coursesData } = useSWR(session ? '/api/courses?instructor=self' : null, fetcher);
-  const { data: quizzesData } = useSWR(session ? '/api/quizzes' : null, fetcher);
-  const { data: blogsData } = useSWR(session ? '/api/blogs' : null, fetcher);
-  const { data: settingsData } = useSWR(session ? settingsEndpoint : null, fetcher);
+  // Type guard to ensure we have teacher data
+  const dashboardData = data && isTeacherDashboard(data) ? data : null;
 
-  // Process data when available
-  const courses = coursesData?.courses || [];
-  const allQuizzes = quizzesData?.quizzes || [];
-  const allBlogs = blogsData?.blogs || [];
-  const teacherLimits = settingsData?.teacherLimits || { courses: 5, quizzes: 10, blogs: 10 };
+  // Extract data from the consolidated API response
+  const courses: Course[] = dashboardData?.courses || [];
+  const allQuizzes: Quiz[] = dashboardData?.quizzes || [];
+  const allBlogs: Blog[] = dashboardData?.blogs || [];
+  const stats: Stats = dashboardData?.stats || {
+    totalCourses: 0,
+    totalStudents: 0,
+    totalQuizzes: 0,
+    totalBlogs: 0,
+    publishedCourses: 0,
+  };
+  const limits: TeacherLimits = dashboardData?.limits || {
+    courses: 5,
+    quizzes: 10,
+    blogs: 10,
+    userLimits: {},
+  };
 
   // Filter quizzes for this teacher's courses
   const courseIds = new Set(courses.map((c: Course) => c._id.toString()));
@@ -97,28 +94,11 @@ export default function TeacherDashboardPage() {
   // Filter blogs for this teacher
   const teacherBlogs = allBlogs.filter((b: Blog) => b.author?._id === session?.user?.id);
 
-  // Calculate total students across all courses
-  const totalStudents = courses.reduce((sum: number, course: Course) => {
-    return sum + (course.enrolledCount || 0);
-  }, 0);
-
-  const publishedCount = courses.filter((c: Course) => c.isPublished).length;
-
-  const stats: Stats = {
-    totalCourses: courses.length,
-    totalStudents: totalStudents,
+  // Update stats with filtered counts
+  const filteredStats: Stats = {
+    ...stats,
     totalQuizzes: teacherQuizzes.length,
     totalBlogs: teacherBlogs.length,
-    publishedCourses: publishedCount,
-  };
-
-  const limits: TeacherLimits = {
-    ...teacherLimits,
-    userLimits: {
-      courses: undefined,
-      quizzes: undefined,
-      blogs: undefined,
-    },
   };
 
   const recentCourses = courses.slice(0, 3);
@@ -129,7 +109,7 @@ export default function TeacherDashboardPage() {
 
   const getUsagePercentage = (type: 'courses' | 'quizzes' | 'blogs') => {
     const limit = getLimit(type);
-    const current = stats[`total${type.charAt(0).toUpperCase() + type.slice(1)}` as keyof Stats] as number;
+    const current = filteredStats[`total${type.charAt(0).toUpperCase() + type.slice(1)}` as keyof Stats] as number;
     return (current / limit) * 100;
   };
 
@@ -140,11 +120,21 @@ export default function TeacherDashboardPage() {
 
   const isAtLimit = (type: 'courses' | 'quizzes' | 'blogs') => {
     const limit = getLimit(type);
-    const current = stats[`total${type.charAt(0).toUpperCase() + type.slice(1)}` as keyof Stats] as number;
+    const current = filteredStats[`total${type.charAt(0).toUpperCase() + type.slice(1)}` as keyof Stats] as number;
     return current >= limit;
   };
 
-  const isLoading = status === 'loading' || !coursesData || !quizzesData || !blogsData || !settingsData;
+  // Error state
+  if (error) {
+    return (
+      <div className="px-4 sm:px-6 lg:px-8 space-y-6">
+        <Alert
+          type="error"
+          message={error.message || 'Failed to load dashboard data'}
+        />
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -309,7 +299,7 @@ export default function TeacherDashboardPage() {
               <HelpCircle className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div className="text-2xl sm:text-3xl font-bold text-[var(--color-foreground)] mb-1">
-              {stats.totalQuizzes} / {getLimit('quizzes')}
+              {filteredStats.totalQuizzes} / {getLimit('quizzes')}
             </div>
             <div className="text-sm text-[var(--color-muted-foreground)] mb-2">{t('dashboard.myQuizzes')}</div>
             <div className="w-full bg-[var(--border)] rounded-full h-2">
@@ -341,7 +331,7 @@ export default function TeacherDashboardPage() {
               <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div className="text-2xl sm:text-3xl font-bold text-[var(--color-foreground)] mb-1">
-              {stats.totalBlogs} / {getLimit('blogs')}
+              {filteredStats.totalBlogs} / {getLimit('blogs')}
             </div>
             <div className="text-sm text-[var(--color-muted-foreground)] mb-2">{t('dashboard.myBlogs')}</div>
             <div className="w-full bg-[var(--border)] rounded-full h-2">
@@ -461,23 +451,23 @@ export default function TeacherDashboardPage() {
           </motion.a>
 
           <motion.a
-            whileHover={{ scale: stats.totalCourses < limits.courses ? 1.02 : 1 }}
-            whileTap={{ scale: stats.totalCourses < limits.courses ? 0.98 : 1 }}
-            href={stats.totalCourses < limits.courses ? '/dashboard/teacher/courses/create' : '#'}
+            whileHover={{ scale: filteredStats.totalCourses < limits.courses ? 1.02 : 1 }}
+            whileTap={{ scale: filteredStats.totalCourses < limits.courses ? 0.98 : 1 }}
+            href={filteredStats.totalCourses < limits.courses ? '/dashboard/teacher/courses/create' : '#'}
             onClick={(e) => {
-              if (stats.totalCourses >= limits.courses) {
+              if (filteredStats.totalCourses >= limits.courses) {
                 e.preventDefault();
                 setLimitAlert({ type: 'courses' });
               }
             }}
             className={`flex items-center justify-center sm:justify-start w-full min-h-[44px] p-3 sm:p-4 rounded-xl transition-colors group ${
-              stats.totalCourses >= limits.courses
+              filteredStats.totalCourses >= limits.courses
                 ? 'bg-[var(--color-muted)] cursor-not-allowed'
                 : 'bg-[var(--warning-light)] hover:bg-[var(--warning-light)]/80'
             }`}
           >
             <div className={`p-2 sm:p-3 rounded-lg transition-colors ${
-              stats.totalCourses >= limits.courses
+              filteredStats.totalCourses >= limits.courses
                 ? 'bg-[var(--color-muted-foreground)] text-[var(--color-muted-foreground)]'
                 : 'bg-[var(--warning)]/20 text-[var(--warning)] group-hover:bg-[var(--warning)]/30'
             }`}>
@@ -485,30 +475,30 @@ export default function TeacherDashboardPage() {
             </div>
             <div className="ml-3 text-left">
               <div className={`font-semibold text-sm sm:text-base ${
-                stats.totalCourses >= limits.courses ? 'text-[var(--color-muted-foreground)]' : 'text-[var(--color-foreground)]'
+                filteredStats.totalCourses >= limits.courses ? 'text-[var(--color-muted-foreground)]' : 'text-[var(--color-foreground)]'
               }`}>{t('dashboard.createCourse')}</div>
               <div className="text-xs text-[var(--color-muted-foreground)]">{t('dashboard.addNewContent')}</div>
             </div>
           </motion.a>
 
           <motion.a
-            whileHover={{ scale: stats.totalBlogs < limits.blogs ? 1.02 : 1 }}
-            whileTap={{ scale: stats.totalBlogs < limits.blogs ? 0.98 : 1 }}
-            href={stats.totalBlogs < limits.blogs ? '/dashboard/teacher/blogs/create' : '#'}
+            whileHover={{ scale: filteredStats.totalBlogs < limits.blogs ? 1.02 : 1 }}
+            whileTap={{ scale: filteredStats.totalBlogs < limits.blogs ? 0.98 : 1 }}
+            href={filteredStats.totalBlogs < limits.blogs ? '/dashboard/teacher/blogs/create' : '#'}
             onClick={(e) => {
-              if (stats.totalBlogs >= limits.blogs) {
+              if (filteredStats.totalBlogs >= limits.blogs) {
                 e.preventDefault();
                 setLimitAlert({ type: 'blogs' });
               }
             }}
             className={`flex items-center justify-center sm:justify-start w-full min-h-[44px] p-3 sm:p-4 rounded-xl transition-colors group ${
-              stats.totalBlogs >= limits.blogs
+              filteredStats.totalBlogs >= limits.blogs
                 ? 'bg-[var(--color-muted)] cursor-not-allowed'
                 : 'bg-[var(--admin-soft)] hover:bg-[var(--admin-border)]'
             }`}
           >
             <div className={`p-2 sm:p-3 rounded-lg transition-colors ${
-              stats.totalBlogs >= limits.blogs
+              filteredStats.totalBlogs >= limits.blogs
                 ? 'bg-[var(--color-muted-foreground)] text-[var(--color-muted-foreground)]'
                 : 'bg-[var(--admin-primary)]/20 text-[var(--admin-primary)] group-hover:bg-[var(--admin-primary)]/30'
             }`}>
@@ -516,7 +506,7 @@ export default function TeacherDashboardPage() {
             </div>
             <div className="ml-3 text-left">
               <div className={`font-semibold text-sm sm:text-base ${
-                stats.totalBlogs >= limits.blogs ? 'text-[var(--color-muted-foreground)]' : 'text-[var(--color-foreground)]'
+                filteredStats.totalBlogs >= limits.blogs ? 'text-[var(--color-muted-foreground)]' : 'text-[var(--color-foreground)]'
               }`}>{t('dashboard.createBlog')}</div>
               <div className="text-xs text-[var(--color-muted-foreground)]">{t('dashboard.writeNewContent')}</div>
             </div>

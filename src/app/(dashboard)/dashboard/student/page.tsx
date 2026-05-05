@@ -3,7 +3,10 @@
 
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
-import useSWR from 'swr';
+import {
+  useDashboard,
+  isStudentDashboard,
+} from '@/lib/react-query/hooks';
 import {
   BookOpen,
   CheckCircle,
@@ -11,9 +14,9 @@ import {
   Activity,
   Clock
 } from 'lucide-react';
-import { fetcher } from '@/lib/swrFetcher';
-import { useSessionStore } from '@/store/useSessionStore';
+import Alert from '@/components/ui/Alert';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { useSessionStore } from '@/store/useSessionStore';
 
 interface Enrollment {
   _id: string;
@@ -54,27 +57,23 @@ interface Stats {
 
 export default function StudentDashboardPage() {
   const session = useSessionStore((s) => s.session) as { user?: { name: string } };
-  const status = useSessionStore((s) => s.status);
   const { t } = useTranslation();
 
-  // SWR hooks for data fetching with automatic caching and deduplication
-  const { data: enrollmentsData } = useSWR(session ? '/api/enrollments' : null, fetcher);
-  const { data: attemptsData } = useSWR(session ? '/api/quiz-attempts' : null, fetcher);
+  // Single React Query call replaces multiple SWR calls
+  const { data, isLoading, error } = useDashboard();
 
-  // Process data when available
-  const enrollments: Enrollment[] = enrollmentsData?.enrollments || [];
-  const attempts: Attempt[] = attemptsData?.attempts || [];
+  // Type guard to ensure we have student data
+  const dashboardData = data && isStudentDashboard(data) ? data : null;
 
-  // Calculate stats
-  const completedAttempts = attempts.filter((a) => a.status === 'completed');
-  const avgScore = completedAttempts.length > 0
-    ? Math.round(completedAttempts.reduce((sum, a) => sum + (a.score || 0), 0) / completedAttempts.length)
-    : 0;
+  // Extract data from the consolidated API response
+  const enrollments: Enrollment[] = dashboardData?.enrollments || [];
+  const attempts: Attempt[] = dashboardData?.quizAttempts || [];
 
-  const stats: Stats = {
-    enrolledCount: enrollments.length,
-    completedQuizzes: completedAttempts.length,
-    averageScore: avgScore,
+  // Get pre-calculated stats from API
+  const stats: Stats = dashboardData?.stats || {
+    enrolledCount: 0,
+    completedQuizzes: 0,
+    averageScore: 0,
   };
 
   // Combine and sort recent activity
@@ -98,17 +97,17 @@ export default function StudentDashboardPage() {
     if (!dateString) return t('common.notAvailable');
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return t('common.notAvailable');
-    
+
     const now = new Date();
     const isToday = date.toDateString() === now.toDateString();
     const isYesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000).toDateString() === date.toDateString();
-    
+
     if (isToday) {
       return date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
     } else if (isYesterday) {
       return `Yesterday, ${date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}`;
     } else {
-      return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + 
+      return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) +
              ', ' + date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
     }
   };
@@ -117,7 +116,17 @@ export default function StudentDashboardPage() {
     .sort((a, b) => getActivityDate(b) - getActivityDate(a))
     .slice(0, 5);
 
-  const isLoading = status === 'loading' || !enrollmentsData || !attemptsData;
+  // Error state
+  if (error) {
+    return (
+      <div className="px-4 sm:px-6 lg:px-8 space-y-6">
+        <Alert
+          type="error"
+          message={error.message || 'Failed to load dashboard data'}
+        />
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
