@@ -7,7 +7,7 @@ import { Enrollment, Course } from '@/models';
 import { createEnrollmentSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
-import { invalidatePattern } from '@/lib/redis';
+import { getCachedData, setCachedData, invalidatePattern } from '@/lib/redis';
 import { revalidateTag } from 'next/cache';
 import mongoose from 'mongoose';
 
@@ -39,6 +39,20 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20');
     const skip = (page - 1) * limit;
     const fields = searchParams.get('fields'); // Comma-separated fields to select
+
+    // Build cache key based on query params
+    const cacheKey = `enrollments:${session.user.id}:${course || 'all'}:page${page}:limit${limit}:fields${fields || 'default'}`;
+
+    // Try cache first
+    const cached = await getCachedData(cacheKey);
+    if (cached) {
+      return NextResponse.json(cached, {
+        status: 200,
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate',
+        },
+      });
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const query: Record<string, any> = { student: session.user.id };
@@ -83,7 +97,7 @@ export async function GET(request: NextRequest) {
 
     const total = await Enrollment.countDocuments(query);
 
-    return NextResponse.json({
+    const responseData = {
       enrollments: serializedEnrollments,
       pagination: {
         page,
@@ -91,7 +105,12 @@ export async function GET(request: NextRequest) {
         total,
         totalPages: Math.ceil(total / limit),
       }
-    }, {
+    };
+
+    // Cache for 2 minutes (enrollment data changes on new enrollments)
+    await setCachedData(cacheKey, responseData, 120);
+
+    return NextResponse.json(responseData, {
       status: 200,
       headers: {
         'Cache-Control': 'no-store, no-cache, must-revalidate',
@@ -201,9 +220,10 @@ export async function POST(request: NextRequest) {
     const orgId = user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null;
     const orgIdStr = orgId?.toString() || 'public';
 
-    // Invalidate Redis cache for courses and enrollments
+    // Invalidate Redis cache for courses, enrollments, and dashboard
     await invalidatePattern(`courses:${orgIdStr}:*`);
     await invalidatePattern(`enrollments:*`);
+    await invalidatePattern(`dashboard:${session.user.id}:*`);
 
     // Revalidate Next.js cache tags
     revalidateTag(`courses:${orgIdStr}`);

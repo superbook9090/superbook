@@ -4,7 +4,6 @@
  * Verifies only one enrollment exists per (student + course)
  */
 
-import mongoose from 'mongoose';
 import dbConnect from '@/lib/db';
 import Enrollment from '@/models/Enrollment';
 

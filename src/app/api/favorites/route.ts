@@ -167,8 +167,8 @@ export async function POST(req: NextRequest) {
 
     // Check if already favorited by looking at the blogs array
     const userFavorites = await Favorite.findOne({ user: session.user.id });
-    
-    if (userFavorites && userFavorites.blogs.some((blogId: mongoose.Types.ObjectId) => blogId.toString() === blogId.toString())) {
+
+    if (userFavorites && userFavorites.blogs.some((id: mongoose.Types.ObjectId) => id.toString() === blogId)) {
       return NextResponse.json(
         { message: 'Already in favorites' },
         { status: 409 }

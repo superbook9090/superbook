@@ -242,7 +242,7 @@ export function usePublishCourse() {
       if (!res.ok) throw new Error('Failed to update course');
       return res.json();
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (data) => {
       // Invalidate teacher courses cache
       const orgId = data.organizationId || 'public';
       queryClient.invalidateQueries({ queryKey: ['courses', orgId, 'teacher'] });

@@ -37,11 +37,12 @@ export default function TeacherCoursesPage() {
         type: 'success',
         message: isPublished ? t('teacherCourses.coursePublished') : t('teacherCourses.courseUnpublished')
       });
-    } catch (error) {
+    } catch (_error) {
       setAlertState({
         type: 'error',
         message: t('teacherCourses.publishError')
       });
+      console.error('Publish error:', _error);
     }
   };
 

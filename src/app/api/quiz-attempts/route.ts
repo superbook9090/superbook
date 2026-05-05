@@ -9,6 +9,7 @@ import Enrollment from '@/models/Enrollment';
 import { createQuizAttemptSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
+import { getCachedData, setCachedData, invalidatePattern } from '@/lib/redis';
 
 // GET /api/quiz-attempts - Get student's quiz attempts
 export async function GET(request: NextRequest) {
@@ -37,6 +38,20 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20');
     const skip = (page - 1) * limit;
     const fields = searchParams.get('fields'); // Comma-separated fields to select
+
+    // Build cache key based on query params
+    const cacheKey = `quiz-attempts:${session.user.id}:${quiz || 'all'}:${course || 'all'}:${attemptId || 'all'}:page${page}:limit${limit}`;
+
+    // Try cache first (quiz attempts don't change once completed)
+    const cached = await getCachedData(cacheKey);
+    if (cached) {
+      return NextResponse.json(cached, {
+        status: 200,
+        headers: {
+          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+        },
+      });
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const query: Record<string, any> = { student: session.user.id };
@@ -105,7 +120,7 @@ export async function GET(request: NextRequest) {
 
     const total = await QuizAttempt.countDocuments(query);
 
-    return NextResponse.json({
+    const responseData = {
       attempts: serializedAttempts,
       pagination: {
         page,
@@ -113,7 +128,12 @@ export async function GET(request: NextRequest) {
         total,
         totalPages: Math.ceil(total / limit),
       }
-    }, {
+    };
+
+    // Cache for 5 minutes (quiz attempts are mostly static after completion)
+    await setCachedData(cacheKey, responseData, 300);
+
+    return NextResponse.json(responseData, {
       status: 200,
       headers: {
         'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
@@ -347,6 +367,10 @@ export async function POST(request: NextRequest) {
         enrollment.completedAt = new Date();
       }
       await enrollment.save();
+
+      // Invalidate quiz attempts cache and dashboard for this user
+      await invalidatePattern(`quiz-attempts:${session.user.id}:*`);
+      await invalidatePattern(`dashboard:${session.user.id}:*`);
 
       return NextResponse.json(
         {

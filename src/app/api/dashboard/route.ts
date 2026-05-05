@@ -2,7 +2,7 @@
 // Consolidated dashboard API - Single source of truth for dashboard data
 // Returns role-based data: student or teacher
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
@@ -17,7 +17,6 @@ import { getCachedData, setCachedData } from '@/lib/redis';
 export const dynamic = 'force-dynamic';
 
 // Dashboard response types
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface StudentDashboardData {
   role: 'student';
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -31,7 +30,6 @@ export interface StudentDashboardData {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface TeacherDashboardData {
   role: 'teacher' | 'admin';
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -62,7 +60,7 @@ export interface TeacherDashboardData {
 export type DashboardData = StudentDashboardData | TeacherDashboardData;
 
 // GET /api/dashboard - Get consolidated dashboard data based on user role
-export async function GET(_request: NextRequest) {
+export async function GET() {
   const logContext: LogContext = {
     method: 'GET',
     path: '/api/dashboard',
