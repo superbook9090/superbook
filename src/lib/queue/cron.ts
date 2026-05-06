@@ -1,7 +1,6 @@
 // src/lib/queue/cron.ts
 // Cron job scheduler for recurring background tasks
 
-import { Queue } from 'bullmq';
 import { getQueue, QUEUES, addJob } from './config';
 
 // Define cron jobs

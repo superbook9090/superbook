@@ -3,7 +3,7 @@
 
 import { initializeQueues, closeQueues } from './config';
 import { initializeWorkers, closeWorkers, getWorkerStatus } from './workers';
-import { scheduleCronJobs, removeAllCronJobs, getScheduledJobs, triggerJobManually } from './cron';
+import { scheduleCronJobs, removeAllCronJobs, getScheduledJobs } from './cron';
 
 // Initialize the entire queue system
 export async function initializeQueueSystem(): Promise<void> {

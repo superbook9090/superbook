@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
 // GET /api/files/view/[id] - View file in browser instead of downloading
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const logContext: LogContext = { method: 'GET', path: '/api/files/view/[id]' };
 
@@ -23,7 +23,7 @@ export async function GET(
     }
     logContext.userId = session.user.id;
 
-    const { id } = params;
+    const { id } = await params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json({ message: 'Invalid file ID' }, { status: 400 });
