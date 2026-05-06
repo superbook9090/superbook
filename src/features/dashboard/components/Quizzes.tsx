@@ -7,15 +7,15 @@ export default function Quizzes() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900">{t('quizzesPage.quizzes')}</h1>
-      <p className="mt-2 text-gray-600">
+      <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{t('quizzesPage.quizzes')}</h1>
+      <p className="mt-2 text-sm sm:text-base text-gray-600">
         {t('quizzesPage.quizzesDesc')}
       </p>
 
-      <div className="mt-8">
+      <div className="mt-6 sm:mt-8">
         <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
-            <p className="text-gray-500">{t('quizzesPage.quizListPlaceholder')}</p>
+          <div className="px-3 sm:px-4 py-4 sm:py-6">
+            <p className="text-sm sm:text-base text-gray-500">{t('quizzesPage.quizListPlaceholder')}</p>
           </div>
         </div>
       </div>

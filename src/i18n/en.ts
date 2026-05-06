@@ -26,6 +26,8 @@ export const en = {
     performance: 'Performance',
     aCourse: 'a course',
     quiz: 'Quiz',
+    view: 'View',
+    create: 'Create',
     // Sidebar
     dashboard: 'Dashboard',
     myCourses: 'My Courses',
@@ -62,6 +64,7 @@ export const en = {
     empty: 'This folder is empty.',
     createFolder: 'New folder',
     uploadPdf: 'Upload PDF',
+    upload: 'Upload',
     newFolderPrompt: 'Folder name',
     renamePrompt: 'New name',
     renamed: 'Renamed',
