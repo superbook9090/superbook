@@ -113,3 +113,9 @@ export const searchSchema = z.object({
   instructor: z.string().optional(),
   role: z.enum(['student', 'teacher', 'admin']).optional(),
 });
+
+// File manager validation schemas
+export const createFolderSchema = z.object({
+  name: z.string().min(1, 'Name is required').max(255, 'Name must be less than 255 characters'),
+  parentId: objectIdSchema.nullable().optional(),
+});

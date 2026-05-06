@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint"
   },
@@ -26,6 +26,7 @@
     "@vercel/speed-insights": "^2.0.0",
     "bcryptjs": "^3.0.2",
     "bullmq": "^5.76.5",
+    "cloudinary": "^2.10.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
     "ioredis": "^5.10.1",

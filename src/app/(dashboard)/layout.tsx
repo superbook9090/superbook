@@ -16,6 +16,7 @@ const studentNavigation = [
   { name: 'Dashboard', href: '/dashboard/student', icon: 'LayoutDashboard' },
   { name: 'My Courses', href: '/dashboard/student/courses', icon: 'BookOpen' },
   { name: 'Browse', href: '/dashboard/student/browse', icon: 'Search' },
+  { name: 'Files', href: '/dashboard/student/files', icon: 'Folder' },
   { name: 'Blogs', href: '/dashboard/student/blogs', icon: 'Library' },
   { name: 'Quizzes', href: '/dashboard/student/quizzes', icon: 'HelpCircle' },
   { name: 'Progress', href: '/dashboard/student/progress', icon: 'TrendingUp' },
@@ -37,6 +38,7 @@ const adminNavigation = [
   { name: 'Courses', href: '/dashboard/admin/courses', icon: 'BookOpen' },
   { name: 'Quizzes', href: '/dashboard/admin/quizzes', icon: 'HelpCircle' },
   { name: 'Blogs', href: '/dashboard/admin/blogs', icon: 'Library' },
+  { name: 'Files', href: '/dashboard/admin/files', icon: 'Folder' },
   { name: 'Analytics', href: '/dashboard/admin/analytics', icon: 'BarChart3' },
   { name: 'Settings', href: '/dashboard/admin/settings', icon: 'User' },
 ];

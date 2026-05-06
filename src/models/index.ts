@@ -12,6 +12,7 @@ import './Enrollment';
 import './Favorite';
 import './QuizAttempt';
 import './AppSettings';
+import './FileNode';
 
 // Re-export models for convenience
 export { default as User } from './User';
@@ -24,3 +25,4 @@ export { default as Enrollment } from './Enrollment';
 export { default as Favorite } from './Favorite';
 export { default as QuizAttempt } from './QuizAttempt';
 export { default as AppSettings } from './AppSettings';
+export { default as FileNode } from './FileNode';

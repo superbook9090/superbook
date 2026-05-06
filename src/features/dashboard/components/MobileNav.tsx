@@ -20,7 +20,8 @@ import {
   X,
   LogOut,
   LucideIcon,
-  Building2
+  Building2,
+  Folder
 } from 'lucide-react';
 
 // Icon mapping for navigation items
@@ -35,6 +36,7 @@ const iconMap: Record<string, LucideIcon> = {
   Users,
   Library,
   Building2,
+  Folder,
 };
 
 interface NavItem {

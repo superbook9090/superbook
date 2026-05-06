@@ -16,7 +16,8 @@ import {
   User,
   LogOut,
   Newspaper,
-  Heart
+  Heart,
+  Folder
 } from 'lucide-react';
 import { useFeature } from '@/contexts/AppSettingsContext';
 import { useQuiz } from '@/contexts/QuizContext';
@@ -25,6 +26,7 @@ const studentNavigation = [
   { name: 'common.dashboard', href: '/dashboard/student', icon: LayoutDashboard },
   { name: 'common.myCourses', href: '/dashboard/student/courses', icon: BookOpen },
   { name: 'common.browse', href: '/dashboard/student/browse', icon: Search },
+  { name: 'common.files', href: '/dashboard/student/files', icon: Folder },
   { name: 'common.blogs', href: '/dashboard/student/blogs', icon: Newspaper, feature: 'enableBlogs' },
   { name: 'common.favorites', href: '/dashboard/student/favorites', icon: Heart, feature: 'enableBlogs' },
   { name: 'common.quizzes', href: '/dashboard/student/quizzes', icon: HelpCircle },
