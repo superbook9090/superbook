@@ -11,12 +11,14 @@ quiz-do is a modern Learning Management System (LMS) built with Next.js 15, feat
 - **Database**: MongoDB + Mongoose
 - **Authentication**: NextAuth (JWT-based session handling)
 - **State Management**: Zustand (client-side caching)
-- **Caching**: Redis (server-side, optional/fallback-safe)
+- **Caching**: Upstash Redis (server-side, optional/fallback-safe)
 - **Styling**: Tailwind CSS
 - **Animations**: Framer Motion
 - **Rich Text**: TipTap editor
-- **File Processing**: xlsx (Excel parsing)
-- **Analytics**: Google Analytics (@next/third-parties)
+- **File Processing**: xlsx (Excel parsing), BullMQ (job queue)
+- **Image Processing**: Cloudinary integration
+- **Analytics**: Vercel Analytics & Speed Insights
+- **Security**: DOMPurify (XSS protection), bcryptjs (password hashing)
 
 ## 3. Authentication & Authorization
 
@@ -185,7 +187,7 @@ All Redis operations are wrapped in try/catch:
 ```javascript
 try {
   const cached = await getCachedData(cacheKey);
-  if (cached) return JSON.parse(cached);
+  if (cached) return cached;
 } catch (error) {
   console.warn('[Redis] Cache unavailable, falling back to DB');
   // Continue to DB fetch
@@ -272,11 +274,13 @@ src/
 ├── i18n/                    # Translation files (en, hi)
 ├── lib/                     # Utility functions
 │   ├── db.ts                # Database connection
-│   ├── redis.ts             # Redis client
+│   ├── redis.ts             # Upstash Redis client
 │   ├── auth.ts              # NextAuth configuration
-│   ├── logger.ts            # Logging utilities
+│   ├── logger.ts            # Logging utilities with request tracing
 │   ├── accessControl.ts     # Authorization helpers
-│   └── serialize.ts         # MongoDB serialization
+│   ├── apiMiddleware.ts     # API middleware for rate limiting
+│   ├── serialize.ts         # MongoDB serialization
+│   └── files/               # File management utilities
 ├── models/                  # Mongoose schemas
 │   ├── User.ts
 │   ├── Organization.ts
@@ -286,10 +290,13 @@ src/
 │   ├── Enrollment.ts
 │   ├── Blog.ts
 │   ├── Favorite.ts
-│   └── AppSettings.ts
+│   ├── AppSettings.ts
+│   ├── File.ts
+│   └── Progress.ts
 └── store/                   # Zustand stores
     ├── useSessionStore.ts
     └── useCachedStore.ts
+├── scripts/                 # Database scripts and utilities
 ```
 
 ## 10. Role-Based Theming System
@@ -491,6 +498,7 @@ t('common.english') // "English" or "अंग्रेज़ी"
 - **Automatic Caching**: SWR handles caching and deduplication automatically
 - **Parallel Requests**: Multiple `useSWR` hooks run in parallel for optimal performance
 - **Role-Specific Queries**: Different endpoints for student vs teacher dashboard needs
+- **React Query Integration**: TanStack Query available for advanced data fetching patterns
 
 ### Student Dashboard
 - **Data Sources**: `/api/enrollments` and `/api/quiz-attempts` endpoints
@@ -515,32 +523,382 @@ t('common.english') // "English" or "अंग्रेज़ी"
 ## 19. Future Improvements
 
 ### Performance
-- Add request deduplication (React Query or SWR)
-- Implement Next.js server-side caching
-- Add background jobs for analytics aggregation
+- Add advanced request deduplication (TanStack Query)
+- Implement Next.js server-side caching with ISR
+- Add background jobs with BullMQ for analytics aggregation
 - Optimize bundle size with code splitting
 
 ### Features
-- Avatar upload functionality
+- Avatar upload functionality (Cloudinary integration)
 - Email verification system
 - Video lessons support
 - Course completion certificates
 - Real-time notifications (WebSocket)
-- Payment gateway integration
-- Advanced analytics with charts
+- Payment gateway integration (Stripe)
+- Advanced analytics with charts (Recharts)
 - Bulk user import (Excel)
 - Audit logs for admin actions
 - Content moderation system
 - Quiz multilingual data support
+- File management system
+- Leaderboard system
+- Progress tracking
 
 ### Architecture
 - Proper type definitions for SessionSync
 - Remove redundant SessionSync component (Zustand handles session)
 - Add API response caching headers
-- Implement rate limiting
-- Add request logging middleware
+- Implement rate limiting with API middleware
+- Add comprehensive request logging with logger utility
+- Add file upload security and validation
 
-## 20. Future Roadmap
+## 20. Database Schemas
+
+### User Schema
+
+**Collection**: `users`
+
+```typescript
+interface IUser {
+  _id: ObjectId;
+  name: string;                    // User's full name
+  email: string;                   // Unique email address
+  password?: string;               // Hashed password (credentials auth)
+  role: 'student' | 'teacher' | 'admin' | 'superadmin';
+  avatar?: string;                 // Profile picture URL
+  isVerified: boolean;            // Email verification status
+  isSuspended: boolean;           // Account suspension status
+  suspendedReason?: string;        // Reason for suspension
+  provider?: 'credentials' | 'google'; // Auth provider
+  organizationId?: ObjectId | null; // Organization reference
+  limits?: {                      // Teacher resource limits
+    courses: number;
+    quizzes: number;
+    blogs: number;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+**Indexes**:
+- `email` (unique)
+- `role: 1`
+- `createdAt: -1`
+- `isVerified: 1`
+- `isSuspended: 1`
+
+**Validation Rules**:
+- Admin users must have `organizationId`
+- Password is auto-hashed with bcrypt (12 rounds)
+- Email must be unique
+
+---
+
+### Organization Schema
+
+**Collection**: `organizations`
+
+```typescript
+interface IOrganization {
+  _id: ObjectId;
+  name: string;                   // Organization name
+  code: string;                   // Unique code (deprecated)
+  inviteCode: string;              // Unique invite code for joining
+  description?: string;           // Organization description
+  isActive: boolean;              // Active status
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+**Indexes**:
+- `code` (unique)
+- `inviteCode` (unique)
+- `isActive: 1`
+
+---
+
+### Course Schema
+
+**Collection**: `courses`
+
+```typescript
+interface ICourse {
+  _id: ObjectId;
+  title: string;                  // Course title
+  description: string;            // Course description
+  instructor: ObjectId;           // Reference to User (teacher)
+  organizationId?: ObjectId | null; // Organization reference
+  price: number;                   // Course price (0 = free)
+  thumbnail?: string;              // Course thumbnail URL
+  category?: string;               // Course category
+  isPublished: boolean;            // Publication status
+  lessons: ObjectId[];             // Array of Lesson references
+  enrolledCount?: number;          // Cached enrollment count
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+**Indexes**:
+- `instructor: 1`
+- `isPublished: 1`
+- `createdAt: -1`
+- `category: 1`
+
+---
+
+### Lesson Schema
+
+**Collection**: `lessons`
+
+```typescript
+interface ILesson {
+  _id: ObjectId;
+  title: string;                  // Lesson title
+  description: string;            // Lesson description
+  course: ObjectId;                // Reference to Course
+  content: string;                 // Lesson content (HTML/text)
+  videoUrl?: string;               // Video URL
+  order: number;                   // Order within course
+  duration: number;                // Duration in minutes
+  isPublished: boolean;            // Publication status
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+**Indexes**:
+- `course: 1, order: 1` (compound)
+- `course: 1`
+- `isPublished: 1`
+- `createdAt: -1`
+
+---
+
+### Quiz Schema
+
+**Collection**: `quizzes`
+
+```typescript
+interface IQuestion {
+  question: string;                // Question text
+  options: string[];              // Answer options
+  correctAnswer: number;          // Index of correct option
+}
+
+interface IQuiz {
+  _id: ObjectId;
+  title: string;                  // Quiz title
+  description: string;            // Quiz description
+  course: ObjectId;               // Reference to Course
+  instructor: ObjectId;           // Reference to User (teacher)
+  organizationId?: ObjectId | null; // Organization reference
+  questions: IQuestion[];        // Array of questions
+  timeLimit: number;              // Time limit in minutes
+  isPublished: boolean;          // Publication status
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+**Indexes**:
+- `course: 1`
+- `instructor: 1`
+- `isPublished: 1`
+- `createdAt: -1`
+
+---
+
+### QuizAttempt Schema
+
+**Collection**: `quizattempts`
+
+```typescript
+interface IAnswer {
+  questionIndex: number;          // Question index
+  selectedOption: number;        // Selected answer
+  isCorrect: boolean;             // Answer correctness
+}
+
+interface IQuizAttempt {
+  _id: ObjectId;
+  student: ObjectId;               // Reference to User (student)
+  quiz: ObjectId;                 // Reference to Quiz
+  course: ObjectId;               // Reference to Course
+  answers: IAnswer[];             // Student's answers
+  score: number;                  // Percentage score (0-100)
+  correctCount: number;           // Number of correct answers
+  totalQuestions: number;         // Total questions in quiz
+  timeTaken: number;              // Time taken in seconds
+  startedAt: Date;                // Quiz start time
+  submittedAt?: Date;            // Quiz submission time
+  status: 'in_progress' | 'completed' | 'abandoned' | 'force_submitted';
+  attemptNumber: number;          // Attempt number for retakes
+  violationCount: number;         // Anti-cheating violations
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+**Indexes**:
+- `student: 1, quiz: 1`
+- `student: 1, course: 1`
+- `quiz: 1, status: 1`
+- `course: 1, status: 1`
+- `quiz: 1, status: 1, score: -1` (leaderboard)
+- `course: 1, status: 1, score: -1` (leaderboard)
+- `startedAt: -1`
+- `submittedAt: -1`
+
+---
+
+### Enrollment Schema
+
+**Collection**: `enrollments`
+
+```typescript
+interface IEnrollment {
+  _id: ObjectId;
+  student: ObjectId;              // Reference to User (student)
+  course: ObjectId;               // Reference to Course
+  enrolledAt: Date;               // Enrollment date
+  progress: number;               // Progress percentage (0-100)
+  completedLessons: ObjectId[];    // Array of completed Lesson references
+  status: 'active' | 'completed' | 'dropped';
+  completedAt?: Date;             // Course completion date
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+**Indexes**:
+- `student: 1, course: 1` (unique)
+- `student: 1, status: 1`
+- `course: 1, status: 1`
+- `enrolledAt: -1`
+
+---
+
+### Blog Schema
+
+**Collection**: `blogs`
+
+```typescript
+interface IBlog {
+  _id: ObjectId;
+  title: string;                  // Blog title (max 200 chars)
+  content: string;                // Blog content
+  topic: string;                  // Blog topic (max 50 chars)
+  language: 'en' | 'hi';         // Blog language
+  author: ObjectId;               // Reference to User
+  organizationId?: ObjectId | null; // Organization reference
+  isPublished: boolean;          // Publication status
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+**Indexes**:
+- `topic: 1, isPublished: 1`
+- `author: 1`
+- `createdAt: -1`
+- `language: 1`
+
+---
+
+### Favorite Schema
+
+**Collection**: `favorites`
+
+```typescript
+interface IFavorite {
+  _id: ObjectId;
+  user: ObjectId;                 // Reference to User (unique)
+  blogs: ObjectId[];              // Array of favorited Blog references
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+**Indexes**:
+- `user: 1` (unique)
+- `blogs: 1`
+- `updatedAt: -1`
+
+---
+
+### FileNode Schema
+
+**Collection**: `filenodes`
+
+```typescript
+type FileNodeType = 'folder' | 'file';
+
+interface IFileNode {
+  _id: ObjectId;
+  name: string;                   // File/folder name (max 255 chars)
+  type: FileNodeType;             // 'folder' or 'file'
+  parentId?: ObjectId | null;      // Parent folder reference
+  fileUrl?: string;               // File URL (for files)
+  publicId?: string;              // Cloudinary public ID
+  fileType?: string;              // MIME type
+  size?: number;                  // File size in bytes
+  uploadedBy: ObjectId;            // Reference to User
+  organizationId?: ObjectId | null; // Organization reference
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+**Indexes**:
+- `parentId: 1, name: 1` (unique)
+- `parentId: 1, type: 1`
+- `organizationId: 1, parentId: 1`
+- `name: 'text'` (text search)
+
+---
+
+### AppSettings Schema
+
+**Collection**: `appsettings`
+
+```typescript
+interface IAppSettings {
+  _id: ObjectId;
+  teacherLimits: {
+    courses: number;              // Max courses per teacher (default: 5)
+    quizzes: number;              // Max quizzes per teacher (default: 10)
+    blogs: number;                // Max blogs per teacher (default: 2)
+  };
+  featureToggles: {
+    enableBlogs: boolean;         // Enable blog feature
+    enableQuizzes: boolean;       // Enable quiz feature
+    enableCourses: boolean;       // Enable course feature
+    enableAnalytics: boolean;      // Enable analytics feature
+  };
+  platformConfig: {
+    siteName: string;             // Site name (default: 'quiz-do')
+    siteDescription: string;       // Site description
+    maintenanceMode: boolean;     // Maintenance mode status
+    allowRegistration: boolean;    // Allow new user registration
+    defaultLanguage: 'en' | 'hi'; // Default language
+  };
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+**Indexes**:
+- `updatedAt: -1`
+
+**Constraints**:
+- Only one document allowed in collection (enforced by pre-save hook)
+
+---
+
+## 21. Future Roadmap
 
 ### Short Term (1-3 months)
 - **Real-time Features**: WebSocket integration for live updates

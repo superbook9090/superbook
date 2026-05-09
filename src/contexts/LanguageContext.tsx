@@ -1,7 +1,8 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
 import { translations, Language } from '@/i18n';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 
 interface LanguageContextType {
   lang: Language;
@@ -12,20 +13,19 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Language>(() => {
-    if (typeof window !== 'undefined') {
-      const savedLang = localStorage.getItem('language') as Language;
-      return savedLang && (savedLang === 'en' || savedLang === 'hi') ? savedLang : 'en';
+  const { storedValue: lang, setValue: setLangState } = useLocalStorage<Language>('language', 'en', {
+    serializer: {
+      read: (value: string) => {
+        const parsed = value as Language;
+        return (parsed === 'en' || parsed === 'hi') ? parsed : 'en';
+      },
+      write: JSON.stringify
     }
-    return 'en';
   });
 
   // Sync language state with localStorage and trigger re-renders
   const setLang = (language: Language) => {
     setLangState(language);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('language', language);
-    }
   };
 
   // Translation function with interpolation support
@@ -51,15 +51,6 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     return result;
   };
 
-  // Load language from localStorage on mount
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedLang = localStorage.getItem('language') as Language;
-      if (savedLang && (savedLang === 'en' || savedLang === 'hi')) {
-        setLangState(savedLang);
-      }
-    }
-  }, []);
 
   return (
     <LanguageContext.Provider value={{ lang, setLang, t }}>

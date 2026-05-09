@@ -21,15 +21,8 @@ import {
 import { Badge } from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
 import DOMPurify from 'isomorphic-dompurify';
+import type { Blog } from '@/types';
 
-interface Blog {
-  _id: string;
-  title: string;
-  topic: string;
-  content: string;
-  createdAt: string;
-  author: { name: string };
-}
 
 export default function BlogDetailPage() {
   const { status, favorites, addFavorite, removeFavorite } = useSessionStore();
@@ -158,7 +151,7 @@ export default function BlogDetailPage() {
           <div className="flex items-center gap-3 mb-4">
             <Badge variant="primary" size="md">
               <Hash className="w-3 h-3 mr-1" />
-              {blog.topic}
+              {blog.excerpt || 'Blog'}
             </Badge>
           </div>
 

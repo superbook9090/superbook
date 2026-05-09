@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/Skeleton';
 import Alert from '@/components/ui/Alert';
-import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 import { useRouter } from 'next/navigation';
 import { useSessionStore } from '@/store/useSessionStore';
 import { isSuperAdmin } from '@/lib/roles';
@@ -683,8 +683,8 @@ export default function AdminUsersPage() {
         </motion.div>
       )}
 
-      {/* Delete Confirmation Dialog */}
-      <ConfirmDialog
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
         isOpen={showDeleteDialog}
         title="Delete User"
         message="Are you sure you want to delete this user? This action cannot be undone."

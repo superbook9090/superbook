@@ -11,27 +11,10 @@ import {
   AreaChart,
 } from 'recharts';
 import { TrendingUp, Calendar } from 'lucide-react';
+import type { CustomTooltipProps, ScoreTrendChartProps } from '@/types';
 
-interface ScoreData {
-  date: string;
-  score: number;
-  quizTitle: string;
-}
 
-interface CustomTooltipProps {
-  active?: boolean;
-  payload?: Array<{
-    payload: ScoreData;
-    value: number;
-  }>;
-  label?: string;
-}
 
-interface ScoreTrendChartProps {
-  data: ScoreData[];
-  title?: string;
-  height?: number;
-}
 
 export default function ScoreTrendChart({ 
   data, 

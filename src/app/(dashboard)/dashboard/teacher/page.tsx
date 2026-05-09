@@ -130,7 +130,7 @@ export default function TeacherDashboardPage() {
       <div className="px-4 sm:px-6 lg:px-8 space-y-6">
         <Alert
           type="error"
-          message={error.message || 'Failed to load dashboard data'}
+          message={error.message || t('errors.failedLoadDashboardData')}
         />
       </div>
     );
@@ -236,7 +236,7 @@ export default function TeacherDashboardPage() {
       )}
 
       {/* Stats Cards - Modern Design */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
         {/* Courses with Progress */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -404,7 +404,7 @@ export default function TeacherDashboardPage() {
         className="rounded-2xl bg-white p-4 sm:p-6 shadow-md"
       >
         <h2 className="text-lg sm:text-xl font-semibold text-[var(--color-foreground)] mb-4">{t('dashboard.quickActions')}</h2>
-        <div className="flex flex-col sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
           <motion.a
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}

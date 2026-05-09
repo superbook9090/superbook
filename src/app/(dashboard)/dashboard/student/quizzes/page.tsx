@@ -65,7 +65,6 @@ export default function StudentQuizzesPage() {
   }, [enrollments, attempts, allQuizzes]);
 
   const handleStartQuiz = useCallback(async (quizId: string) => {
-    console.log('Starting quiz with ID:', quizId);
     try {
       const response = await fetch('/api/quiz-attempts', {
         method: 'POST',
@@ -79,7 +78,6 @@ export default function StudentQuizzesPage() {
         // Navigate to quiz taking page
         router.push(`/dashboard/student/quizzes/take?attemptId=${data.attempt._id}`);
       } else {
-        console.error('Failed to start quiz:', data);
         setAlertState({ type: 'error', message: data.message || t('errors.failedStartQuiz') });
       }
     } catch {
@@ -169,7 +167,7 @@ export default function StudentQuizzesPage() {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               {availableQuizzes.map((quiz: Quiz) => (
                 <QuizCard
                   key={quiz._id}
@@ -187,7 +185,7 @@ export default function StudentQuizzesPage() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
             {completedAttempts.map((attempt: QuizAttempt) => (
               <QuizCard
                 key={`${attempt._id}-${attempt.attemptNumber}`}

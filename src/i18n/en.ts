@@ -584,6 +584,7 @@ export const en = {
     errorLoadingQuizzes: 'Error loading quizzes',
     failedStartQuiz: 'Failed to start quiz',
     errorStartingQuiz: 'Error starting quiz',
+    failedLoadDashboardData: 'Failed to load dashboard data',
     unknownError: 'Unknown error',
   },
 

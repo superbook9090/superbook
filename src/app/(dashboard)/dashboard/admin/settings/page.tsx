@@ -20,6 +20,7 @@ import Button from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
 import Alert from '@/components/ui/Alert';
 import { useSessionStore } from '@/store/useSessionStore';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 
 interface AppSettings {
   teacherLimits: {
@@ -45,6 +46,7 @@ export default function AdminSettingsPage() {
   const router = useRouter();
   const { t } = useTranslation();
   const { theme } = useRoleTheme();
+  const {setValue} = useLocalStorage('settingsTimestamp', '')
   const [settings, setSettings] = useState<AppSettings>({
     teacherLimits: {
       courses: 5,
@@ -111,9 +113,9 @@ export default function AdminSettingsPage() {
 
       setMessage({ type: 'success', text: t('adminSettings.settingsSaved') });
 
+      setValue(Date.now().toString())
       // Force refresh of settings across the app by updating localStorage timestamp
-      localStorage.setItem('settingsTimestamp', Date.now().toString());
-    } catch {
+      } catch {
       setMessage({ type: 'error', text: t('adminSettings.failedSaveSettings') });
     } finally {
       setIsSaving(false);

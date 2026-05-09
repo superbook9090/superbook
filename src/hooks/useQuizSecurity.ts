@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 
 interface FullscreenElement extends HTMLElement {
   webkitRequestFullscreen?: () => Promise<void>;
@@ -34,6 +35,9 @@ export function useQuizSecurity({
 
   const isSubmittingRef = useRef(false);
   const sessionIdRef = useRef<string>(generateSessionId());
+  
+  // Use localStorage for active quiz session
+  const { storedValue: activeSession, setValue: setActiveSession } = useLocalStorage<string | null>('activeQuizSession', null);
 
   // Generate unique session ID for tab detection
   function generateSessionId(): string {
@@ -42,29 +46,21 @@ export function useQuizSecurity({
 
   // Store session ID in localStorage for multi-tab detection
   const setSessionStorage = useCallback(() => {
-    if (typeof window !== 'undefined') {
-      // Clear any existing session first to avoid false positives from stale data
-      localStorage.removeItem('activeQuizSession');
-      localStorage.setItem('activeQuizSession', sessionIdRef.current);
-    }
-  }, []);
+    // Clear any existing session first to avoid false positives from stale data
+    setActiveSession(sessionIdRef.current);
+  }, [setActiveSession]);
 
   const clearSessionStorage = useCallback(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('activeQuizSession');
-    }
-  }, []);
+    setActiveSession(null);
+  }, [setActiveSession]);
 
   // Check for duplicate tabs
   const checkDuplicateTab = useCallback(() => {
-    if (typeof window !== 'undefined') {
-      const activeSession = localStorage.getItem('activeQuizSession');
-      if (activeSession && activeSession !== sessionIdRef.current) {
-        return true;
-      }
+    if (activeSession && activeSession !== sessionIdRef.current) {
+      return true;
     }
     return false;
-  }, []);
+  }, [activeSession]);
 
   // Request fullscreen
   const requestFullscreen = useCallback(async () => {
@@ -248,7 +244,7 @@ export function useQuizSecurity({
     if (!enabled) return false;
 
     // Clear any existing session and regenerate session ID for each new quiz attempt
-    localStorage.removeItem('activeQuizSession');
+    setActiveSession(null);
     sessionIdRef.current = generateSessionId();
 
     // Set session in localStorage
@@ -266,7 +262,7 @@ export function useQuizSecurity({
     }));
 
     return fullscreenSuccess;
-  }, [enabled, setSessionStorage, requestFullscreen]);
+  }, [enabled, setSessionStorage, requestFullscreen, setActiveSession]);
 
   // Stop quiz security
   const stopQuiz = useCallback(() => {
@@ -324,7 +320,7 @@ export function useQuizSecurity({
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('resize', handleResize);
     };
-  }, [enabled, handleFullscreenChange, handleVisibilityChange, handleWindowBlur, handleBeforeUnload, handleKeyDown, handleResize, checkDuplicateTab, handleViolation]);
+  }, [enabled, handleFullscreenChange, handleVisibilityChange, handleWindowBlur, handleBeforeUnload, handleKeyDown, handleResize, checkDuplicateTab, handleViolation, setActiveSession]);
 
   // Reset submitting flag when not active
   useEffect(() => {

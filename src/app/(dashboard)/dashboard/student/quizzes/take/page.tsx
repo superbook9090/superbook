@@ -543,15 +543,15 @@ export default function TakeQuizPage() {
       {/* Submit Confirmation Modal */}
       <ConfirmModal
         isOpen={showSubmitModal}
-        title="Confirm Submission"
-        message="Are you sure you want to submit? You cannot change your answers after submission."
+        title={t('quiz.confirmSubmit')}
+        message={t('quiz.confirmSubmit')}
         onConfirm={() => {
           setShowSubmitModal(false);
           handleSubmit(true);
         }}
         onCancel={() => setShowSubmitModal(false)}
-        confirmText="Submit"
-        cancelText="Cancel"
+        confirmText={t('quiz.submit')}
+        cancelText={t('common.cancel')}
         type="warning"
         isLoading={submitQuizMutation.isPending}
       />

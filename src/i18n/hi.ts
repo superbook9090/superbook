@@ -581,6 +581,7 @@ export const hi = {
     errorLoadingQuizzes: 'क्विज़ लोड करने में त्रुटि',
     failedStartQuiz: 'क्विज़ शुरू करने में विफल',
     errorStartingQuiz: 'क्विज़ शुरू करने में त्रुटि',
+    failedLoadDashboardData: 'डैशबोर्ड डेटा लोड करने में विफल',
     unknownError: 'अज्ञात त्रुटि',
   },
 

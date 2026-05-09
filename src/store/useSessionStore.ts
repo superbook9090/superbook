@@ -2,29 +2,9 @@
 // Global session store using Zustand to eliminate repeated API calls
 
 import { create } from 'zustand';
+import type { Blog, Session } from '@/types';
 
-export interface SessionUser {
-  id: string;
-  name?: string;
-  email?: string;
-  image?: string;
-  role?: string;
-  organizationId?: string;
-}
 
-export interface Session {
-  user: SessionUser;
-  expires: string;
-}
-
-export interface Blog {
-  _id: string;
-  title: string;
-  topic: string;
-  content: string;
-  createdAt: string;
-  author: { name: string };
-}
 
 export interface Favorite {
   _id: string;

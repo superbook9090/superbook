@@ -122,7 +122,7 @@ export default function StudentDashboardPage() {
       <div className="px-4 sm:px-6 lg:px-8 space-y-6">
         <Alert
           type="error"
-          message={error.message || 'Failed to load dashboard data'}
+          message={error.message || t('errors.failedLoadDashboardData')}
         />
       </div>
     );

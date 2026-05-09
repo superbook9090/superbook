@@ -126,8 +126,8 @@ export default function About() {
                     <Zap className="w-4 h-4 text-green-600" />
                   </div>
                   <div>
-                    <div className="text-sm font-semibold text-gray-900">Fast</div>
-                    <div className="text-xs text-gray-500">&lt; 100ms</div>
+                    <div className="text-sm font-semibold text-gray-900">{t('home.about.fast')}</div>
+                    <div className="text-xs text-gray-500">{t('home.about.responseTime')}</div>
                   </div>
                 </div>
               </motion.div>
