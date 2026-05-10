@@ -823,6 +823,78 @@ export const en = {
     helpText: 'If you believe this is an error, please contact support.',
   },
 
+  // Payments
+  payments: {
+    payNow: 'Pay Now',
+    buyCourse: 'Buy Course',
+    secureCheckout: 'Secure Checkout',
+    paymentSuccess: 'Payment Successful',
+    paymentFailed: 'Payment Failed',
+    processing: 'Processing...',
+    scanQr: 'Scan QR Code',
+    upiSupported: 'UPI Supported',
+    enrollmentSuccess: 'Enrollment Successful',
+    enrolledSuccessfully: 'You have been successfully enrolled!',
+    retryPayment: 'Retry Payment',
+    coursePurchased: 'Course Purchased',
+    
+    // Payment Methods
+    methods: {
+      card: 'Credit/Debit Card',
+      cardDesc: 'Pay with Visa, Mastercard, Rupay',
+      upi: 'UPI',
+      upiDesc: 'Google Pay, PhonePe, Paytm',
+      upiQr: 'UPI QR',
+      upiQrDesc: 'Scan QR with any UPI app',
+      wallet: 'Wallets',
+      walletDesc: 'Paytm, Mobikwik, Freecharge',
+      netbanking: 'Net Banking',
+      netbankingDesc: 'All major banks supported'
+    },
+    
+    // Checkout
+    checkout: {
+      title: 'Secure Checkout',
+      subtitle: 'Complete your course purchase'
+    },
+    selectMethod: 'Select Payment Method',
+    popular: 'Popular',
+    
+    // Order Summary
+    orderSummary: 'Order Summary',
+    originalPrice: 'Original Price',
+    discount: 'Discount',
+    total: 'Total',
+    inclusiveAllTaxes: 'Inclusive of all taxes',
+    lifetimeAccess: 'Lifetime Access',
+    accessPeriod: 'Access Period',
+    certificateOnCompletion: 'Certificate on Completion',
+    mobileAccess: 'Mobile Access',
+    instantAccess: 'Instant Access',
+    acceptedMethods: 'Accepted Payment Methods',
+    securePayment: 'Secure Payment',
+    moneyBackGuarantee: 'Money Back Guarantee',
+    
+    // QR Code
+    qr: {
+      scanInstructions: 'Scan this QR code with any UPI app',
+      title: 'UPI QR Payment',
+      description: 'Use any UPI app to scan'
+    },
+    
+    // Security
+    securityDescription: 'Your payment information is encrypted and secure. We never store your card details.',
+    termsAndConditions: 'By completing this purchase you agree to our Terms of Service and Privacy Policy.',
+    
+    // Errors
+    errors: {
+      sdkLoadFailed: 'Failed to load payment gateway',
+      sdkNotLoaded: 'Payment gateway not ready',
+      verificationFailed: 'Payment verification failed',
+      initFailed: 'Payment initialization failed'
+    }
+  },
+
   // Login
   login: {
     learnSmarter: 'Learn Smarter,',

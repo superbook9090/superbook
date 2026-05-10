@@ -92,6 +92,62 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // =========================
+  // ✅ 5. PROTECT PAID COURSE CONTENT
+  // =========================
+  const courseContentPaths = [
+    '/api/lessons/',
+    '/api/quizzes/',
+    '/api/progress/',
+    '/courses/learn/',
+    '/api/courses/learn/'
+  ];
+
+  const isCourseContentPath = courseContentPaths.some(path => 
+    pathname.includes(path)
+  );
+
+  if (isCourseContentPath && token) {
+    // Extract course ID from URL
+    const courseIdMatch = pathname.match(/\/courses\/learn\/([^\/]+)/);
+    const apiCourseIdMatch = pathname.match(/(?:lessons|quizzes|progress).*courseId=([^&]+)/);
+    
+    const courseId = courseIdMatch?.[1] || apiCourseIdMatch?.[1];
+    
+    if (courseId) {
+      try {
+        // Verify enrollment by checking payment status
+        const enrollmentResponse = await fetch(
+          `${request.nextUrl.origin}/api/enrollments/verify/${courseId}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+
+        if (!enrollmentResponse.ok) {
+          // User is not enrolled
+          if (pathname.startsWith('/api/')) {
+            return NextResponse.json(
+              { error: 'Course enrollment required' },
+              { status: 403 }
+            );
+          }
+          
+          // Redirect to course page for purchase
+          const courseUrl = new URL(`/courses/${courseId}`, request.url);
+          return NextResponse.redirect(courseUrl);
+        }
+      } catch (error) {
+        console.error('Enrollment verification error:', error);
+        // Allow request to proceed if verification fails
+        // The individual API routes will handle the verification
+      }
+    }
+  }
+
   return NextResponse.next();
 }
 

@@ -3,13 +3,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
-import { Enrollment, Course } from '@/models';
+import { Enrollment, Course, Payment } from '@/models';
 import { createEnrollmentSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
 import { getCachedData, setCachedData, invalidatePattern } from '@/lib/redis';
 import { revalidateTag } from 'next/cache';
 import mongoose from 'mongoose';
+import { PaymentStatus } from '@/types/payment';
 
 // Configure Next.js caching for this route
 export const dynamic = 'force-dynamic';
@@ -167,12 +168,41 @@ export async function POST(request: NextRequest) {
     const { courseId } = validationResult.data;
 
     // Verify course exists and is published
-    const course = await Course.findOne({ _id: courseId, isPublished: true }).lean();
+    const course = await Course.findOne({ _id: courseId, isPublished: true });
     if (!course) {
       return NextResponse.json(
         { message: 'Course not found or not published' },
         { status: 404 }
       );
+    }
+
+    // Check if course is paid and requires payment
+    const finalPrice = course.getDiscountedPrice();
+    if (finalPrice > 0) {
+      // For paid courses, check if user has made a successful payment
+      const successfulPayment = await Payment.findOne({
+        userId: session.user.id,
+        courseId: courseId,
+        status: PaymentStatus.SUCCESS
+      });
+
+      if (!successfulPayment) {
+        return NextResponse.json(
+          { 
+            message: 'Payment required for this course. Please complete the purchase first.',
+            requiresPayment: true,
+            course: {
+              id: course._id,
+              title: course.title,
+              price: course.price,
+              discountPrice: course.discountPrice,
+              finalPrice: finalPrice,
+              currency: course.currency || 'INR'
+            }
+          },
+          { status: 402 }
+        );
+      }
     }
 
     // Safety check: ensure only one enrollment exists per (student + course)

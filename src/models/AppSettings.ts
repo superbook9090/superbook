@@ -17,6 +17,11 @@ export interface IAppSettings extends Document {
     allowRegistration: boolean;
     defaultLanguage: 'en' | 'hi';
   };
+  paymentConfig: {
+    teacherRegistrationFee: number;
+    teacherRegistrationRequired: boolean;
+    currency: string;
+  };
 }
 
 const appSettingsSchema = new Schema<IAppSettings>(
@@ -77,6 +82,22 @@ const appSettingsSchema = new Schema<IAppSettings>(
         type: String,
         enum: ['en', 'hi'],
         default: 'en',
+      },
+    },
+    paymentConfig: {
+      teacherRegistrationFee: {
+        type: Number,
+        default: 0,
+        min: 0,
+      },
+      teacherRegistrationRequired: {
+        type: Boolean,
+        default: false,
+      },
+      currency: {
+        type: String,
+        default: 'INR',
+        enum: ['INR', 'USD', 'EUR'],
       },
     },
   },

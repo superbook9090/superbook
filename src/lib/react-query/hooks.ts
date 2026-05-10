@@ -23,11 +23,18 @@ export const QUERY_KEYS = {
 // Types
 export interface Course {
   _id: string;
+  id: string; // Alias for _id to match PaymentSummary expectations
   title: string;
   description: string;
   thumbnail?: string;
   category?: string;
   price: number;
+  discountPrice?: number;
+  currency: string;
+  finalPrice: number;
+  hasDiscount: boolean;
+  subscriptionType: string;
+  lifetimeAccess: boolean;
   instructor: { _id: string; name: string; email: string };
   isPublished: boolean;
   enrolledCount?: number;
@@ -486,8 +493,20 @@ export function useEnrollCourse() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ courseId }),
       });
-      if (!res.ok) throw new Error('Failed to enroll in course');
-      return res.json();
+      
+      const data = await res.json();
+      
+      if (!res.ok) {
+        // Check if payment is required
+        if (res.status === 402 && data.requiresPayment) {
+          // Redirect to checkout for paid courses
+          window.location.href = `/checkout?courseId=${courseId}`;
+          throw new Error('Payment required');
+        }
+        throw new Error(data.message || 'Failed to enroll in course');
+      }
+      
+      return data;
     },
     onSettled: () => {
       // Invalidate all related queries to refresh UI

@@ -40,6 +40,9 @@ export default function RegisterForm() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [paymentRequired, setPaymentRequired] = useState(false);
+  const [paymentData, setPaymentData] = useState<any>(null);
+  const [showPayment, setShowPayment] = useState(false);
 
   // Client-side guard for UX improvement
   useEffect(() => {
@@ -82,6 +85,14 @@ export default function RegisterForm() {
       const data = await response.json();
 
       if (!response.ok) {
+        // Handle payment required case
+        if (response.status === 402 && data.requiresPayment) {
+          setPaymentRequired(true);
+          setPaymentData(data);
+          setShowPayment(true);
+          setIsLoading(false);
+          return;
+        }
         throw new Error(data.message || 'Registration failed');
       }
 
@@ -107,6 +118,40 @@ export default function RegisterForm() {
       router.push(dashboardPath);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Registration failed. Please try again.';
+      setError(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handlePayment = async () => {
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/payments/teacher-registration', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          inviteCode: formData.inviteCode || undefined,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Payment order creation failed');
+      }
+
+      // Redirect to payment page with order details
+      router.push(`/checkout?orderId=${data.order.orderId}&amount=${data.fee}&currency=${data.currency}&type=teacher-registration`);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Payment failed. Please try again.';
       setError(message);
     } finally {
       setIsLoading(false);
@@ -432,30 +477,83 @@ export default function RegisterForm() {
                 </div>
               </motion.div>
 
-              {/* Submit Button */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-                className="pt-2"
-              >
-                <motion.button
-                  type="submit"
-                  disabled={isLoading}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className={`w-full flex items-center justify-center py-3.5 px-6 bg-gradient-to-r ${theme.gradient} text-white font-semibold rounded-xl shadow-lg ${theme.shadow} hover:shadow-xl focus:outline-none focus:ring-2 focus:${theme.shadow} disabled:opacity-60 disabled:cursor-not-allowed transition-all`}
+              {/* Payment Required Notice */}
+              {showPayment && paymentData && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl"
                 >
-                  {isLoading ? (
-                    <Loader size="sm" />
-                  ) : (
-                    <>
-                      Create Account
-                      <ArrowRight className="w-5 h-5 ml-2" />
-                    </>
-                  )}
-                </motion.button>
-              </motion.div>
+                  <div className="flex items-start">
+                    <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center mr-3 mt-0.5">
+                      <span className="text-amber-600 text-xs">💰</span>
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-amber-900 mb-1">Teacher Registration Fee</h4>
+                      <p className="text-sm text-amber-700 mb-3">
+                        A one-time payment of {paymentData.currency} {paymentData.fee} is required for teacher registration.
+                      </p>
+                      <div className="flex gap-2">
+                        <motion.button
+                          type="button"
+                          onClick={handlePayment}
+                          disabled={isLoading}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="flex-1 flex items-center justify-center py-2.5 px-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-semibold rounded-lg shadow hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed transition-all"
+                        >
+                          {isLoading ? (
+                            <Loader size="sm" />
+                          ) : (
+                            <>
+                              Pay {paymentData.currency} {paymentData.fee}
+                              <ArrowRight className="w-4 h-4 ml-2" />
+                            </>
+                          )}
+                        </motion.button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowPayment(false);
+                            setPaymentRequired(false);
+                            setPaymentData(null);
+                          }}
+                          className="px-4 py-2.5 text-amber-700 hover:text-amber-900 font-medium transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Submit Button */}
+              {!showPayment && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6 }}
+                  className="pt-2"
+                >
+                  <motion.button
+                    type="submit"
+                    disabled={isLoading}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className={`w-full flex items-center justify-center py-3.5 px-6 bg-gradient-to-r ${theme.gradient} text-white font-semibold rounded-xl shadow-lg ${theme.shadow} hover:shadow-xl focus:outline-none focus:ring-2 focus:${theme.shadow} disabled:opacity-60 disabled:cursor-not-allowed transition-all`}
+                  >
+                    {isLoading ? (
+                      <Loader size="sm" />
+                    ) : (
+                      <>
+                        Create Account
+                        <ArrowRight className="w-5 h-5 ml-2" />
+                      </>
+                    )}
+                  </motion.button>
+                </motion.div>
+              )}
             </form>
 
             {/* Divider */}

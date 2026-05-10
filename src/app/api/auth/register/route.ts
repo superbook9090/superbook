@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import User from '@/models/User';
 import Organization from '@/models/Organization';
-import { isRegistrationAllowed } from '@/lib/settingsHelpers';
+import { isRegistrationAllowed, isTeacherPaymentRequired, getTeacherRegistrationFee } from '@/lib/settingsHelpers';
 import { logApiError, type LogContext } from '@/lib/logger';
 
 export async function POST(request: Request) {
@@ -33,6 +33,24 @@ export async function POST(request: Request) {
         { message: 'User already exists' },
         { status: 400 }
       );
+    }
+
+    // Check teacher registration payment requirement
+    if (role === 'teacher') {
+      const paymentRequired = await isTeacherPaymentRequired();
+      if (paymentRequired) {
+        const fee = await getTeacherRegistrationFee();
+        return NextResponse.json(
+          { 
+            message: 'Teacher registration requires payment',
+            requiresPayment: true,
+            fee: fee,
+            currency: 'INR',
+            role: 'teacher'
+          },
+          { status: 402 } // Payment Required
+        );
+      }
     }
 
     // Handle organization joining via invite code

@@ -15,6 +15,8 @@ import {
   Power,
   UserPlus,
   ToggleLeft,
+  CreditCard,
+  DollarSign,
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -38,6 +40,11 @@ interface AppSettings {
     maintenanceMode: boolean;
     allowRegistration: boolean;
     defaultLanguage: 'en' | 'hi';
+  };
+  paymentConfig: {
+    teacherRegistrationFee: number;
+    teacherRegistrationRequired: boolean;
+    currency: string;
   };
 }
 
@@ -63,6 +70,11 @@ export default function AdminSettingsPage() {
       maintenanceMode: false,
       allowRegistration: true,
       defaultLanguage: 'en',
+    },
+    paymentConfig: {
+      teacherRegistrationFee: 0,
+      teacherRegistrationRequired: false,
+      currency: 'INR',
     },
   });
   const [isLoading, setIsLoading] = useState(true);
@@ -482,6 +494,119 @@ export default function AdminSettingsPage() {
               />
             </button>
           </div>
+        </div>
+      </motion.div>
+
+      {/* Payment Configuration */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 sm:p-8"
+      >
+        <h2 className="text-lg font-semibold text-[var(--color-foreground)] mb-6 flex items-center gap-2">
+          <CreditCard className="w-5 h-5" />
+          Teacher Registration Payment
+        </h2>
+
+        <div className="space-y-6">
+          {/* Require Payment */}
+          <div className="flex items-center justify-between p-4 bg-[var(--color-muted)] rounded-xl">
+            <div className="flex items-center gap-3">
+              <DollarSign className={`w-5 h-5 ${theme.text}`} />
+              <div>
+                <p className="font-medium text-[var(--color-foreground)]">Require Payment for Teacher Registration</p>
+                <p className="text-sm text-[var(--color-muted-foreground)]">Charge a fee for users registering as teachers</p>
+              </div>
+            </div>
+            <button
+              onClick={() =>
+                setSettings({
+                  ...settings,
+                  paymentConfig: {
+                    ...settings.paymentConfig,
+                    teacherRegistrationRequired: !settings.paymentConfig.teacherRegistrationRequired,
+                  },
+                })
+              }
+              className={`relative inline-flex h-6 w-11 min-h-[44px] sm:min-h-0 items-center rounded-full transition-colors ${
+                settings.paymentConfig.teacherRegistrationRequired ? `bg-gradient-to-r ${theme.gradient}` : 'bg-[var(--color-muted)]'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  settings.paymentConfig.teacherRegistrationRequired ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+
+          {/* Registration Fee */}
+          {settings.paymentConfig.teacherRegistrationRequired && (
+            <div className="flex items-start gap-4">
+              <div className={`p-3 ${theme.activeBg} rounded-xl flex-shrink-0`}>
+                <DollarSign className={`w-5 h-5 ${theme.text}`} />
+              </div>
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-[var(--color-foreground)] mb-2">
+                  Teacher Registration Fee ({settings.paymentConfig.currency})
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={settings.paymentConfig.teacherRegistrationFee}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      paymentConfig: {
+                        ...settings.paymentConfig,
+                        teacherRegistrationFee: parseFloat(e.target.value) || 0,
+                      },
+                    })
+                  }
+                  className="w-full px-4 py-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg text-[var(--color-foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
+                />
+                <p className="text-xs text-[var(--color-muted-foreground)] mt-1">
+                  Amount charged for teacher registration (0 to disable)
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Currency */}
+          {settings.paymentConfig.teacherRegistrationRequired && (
+            <div className="flex items-start gap-4">
+              <div className={`p-3 ${theme.activeBg} rounded-xl flex-shrink-0`}>
+                <CreditCard className={`w-5 h-5 ${theme.text}`} />
+              </div>
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-[var(--color-foreground)] mb-2">
+                  Currency
+                </label>
+                <select
+                  value={settings.paymentConfig.currency}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      paymentConfig: {
+                        ...settings.paymentConfig,
+                        currency: e.target.value,
+                      },
+                    })
+                  }
+                  className="w-full px-4 py-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg text-[var(--color-foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
+                >
+                  <option value="INR">INR (Indian Rupee)</option>
+                  <option value="USD">USD (US Dollar)</option>
+                  <option value="EUR">EUR (Euro)</option>
+                </select>
+                <p className="text-xs text-[var(--color-muted-foreground)] mt-1">
+                  Currency for teacher registration fee
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </motion.div>
 

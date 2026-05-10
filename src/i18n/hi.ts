@@ -205,6 +205,7 @@ export const hi = {
     quizzesDesc: 'क्विज़ लें और अपनी प्रगति ट्रैक करें।',
     // Quiz card
     course: 'पाठ्यक्रम',
+    selectCourse: 'एक पाठ्यक्रम चुनें',
     questions: 'प्रश्न',
     noDescription: 'कोई विवरण उपलब्ध नहीं',
     timeLimit: 'समय सीमा',
@@ -222,7 +223,7 @@ export const hi = {
       title: 'लीडरबोर्ड',
       quizLeaderboard: 'क्विज़ लीडरबोर्ड',
       courseLeaderboard: 'पाठ्यक्रम लीडरबोर्ड',
-      topPerformers: 'शीर्ष प्रदर्शक',
+      topPerformers: 'शीर्ष प्रदर्शन',
       topStudents: 'शीर्ष छात्र',
       rank: 'रैंक',
       score: 'स्कोर',
@@ -231,11 +232,15 @@ export const hi = {
       quizzes: '{count} क्विज़',
       completed: 'पूर्ण',
       attempts: 'प्रयास',
-      noData: 'अभी तक कोई प्रयास नहीं',
-      beFirst: 'पूर्ण करने वाले पहले बनें!',
+      noData: 'अभी तक डेटा नहीं',
+      beFirst: 'पहले बनें!',
       yourRank: 'आपकी रैंक',
       you: 'आप',
       top: 'शीर्ष',
+      loading: 'लीडरबोर्ड लोड हो रहा है...',
+      error: 'लीडरबोर्ड लोड होने में विफलत',
+      tryAgain: 'फिर से कोशिश करें',
+      timeAgo: 'पूर्ण',
       timeTaken: 'समय',
     },
 
@@ -280,7 +285,9 @@ export const hi = {
     noBlogsYetMsg: 'अभी तक कोई ब्लॉग नहीं',
     createFirstBlog: 'शुरू करने के लिए अपना पहला ब्लॉग पोस्ट बनाएं',
     unpublish: 'अप्रकाशित करें',
+    hide: 'छुपाएं',
     publish: 'प्रकाशित करें',
+    show: 'दिखाएं',
     edit: 'संपादित करें',
     delete: 'हटाएं',
     deleteConfirmTitle: 'हटाने की पुष्टि',
@@ -556,11 +563,12 @@ export const hi = {
     attempt: 'प्रयास',
     submittedOn: 'जमा किया गया',
     showAnswers: 'उत्तर दिखाएं',
-    hideAnswers: 'उत्तर छुपाएं',
+    hideAnswers: 'उत्तर छिपाएं',
     answerReview: 'उत्तर समीक्षा',
     excellentWork: 'उत्कृष्ट कार्य!',
     goodJob: 'अच्छा कार्य!',
     keepPracticing: 'अभ्यास जारी रखें!',
+    loadinoDescription: 'कोई विवरण उपलब्ध नहीं',
     canDoBetter: 'आप बेहतर कर सकते हैं!',
     correctMark: '✓ सही',
     incorrectMark: '✗ गलत',
@@ -618,24 +626,24 @@ export const hi = {
 
   // CreateCourseForm
   createCourseForm: {
-    courseTitle: 'पाठ्यक्रम शीर्षक',
+    courseTitle: 'पाठ्यक्रम शीर्षक दर्ज करें',
     enterCourseTitle: 'पाठ्यक्रम शीर्षक दर्ज करें',
     description: 'विवरण',
     enterCourseDescription: 'पाठ्यक्रम विवरण दर्ज करें',
     price: 'मूल्य ($)',
     pricePlaceholder: '0',
     category: 'श्रेणी',
-    categoryPlaceholder: 'जैसे, प्रोग्रामिंग, डिजाइन',
+    categoryPlaceholder: 'जैसे., प्रोग्रामिंग, डिजाइन',
     language: 'भाषा',
     selectLanguage: 'भाषा चुनें',
     thumbnailUrl: 'थंबनेल URL',
     thumbnailPlaceholder: 'https://example.com/image.jpg',
     publishImmediately: 'तुरंत प्रकाशित करें',
     cancel: 'रद्द करें',
-    creating: 'बना रहा है...',
+    creating: 'बनाएं...',
     createCourse: 'पाठ्यक्रम बनाएं',
     failedCreateCourse: 'पाठ्यक्रम बनाने में विफल',
-    errorOccurred: 'एक त्रुटि हुई। कृपया पुनः प्रयास करें।',
+    errorOccurred: 'एक त्रुटि हुआ। कृपया फिर से कोशिश करें।',
   },
 
   // CreateQuizForm
@@ -690,24 +698,24 @@ export const hi = {
   // TeacherCourses
   teacherCourses: {
     myCourses: 'मेरे पाठ्यक्रम',
-    coursesDesc: 'अपने पाठ्यक्रमों, पाठों और नामांकित छात्रों का प्रबंधन करें।',
-    createNewCourse: 'नया पाठ्यक्रम बनाएं',
-    loadingCourses: 'पाठ्यक्रम लोड हो रहे हैं...',
+    coursesDesc: 'अपनी सामग्री प्रबंधित करें। सीखने के लिए किसी पाठ्यक्रमों तक पहुंचें। संरचित सामग्री के साथ अपनी गति से सीखें।',
+    createNewCourse: 'नई पाठ्यक्रम बनाएं',
+    loadingCourses: 'पाठ्यक्रम लोड हो रहा है...',
     failedLoadCourses: 'पाठ्यक्रम लोड करने में विफल',
     errorLoadingCourses: 'पाठ्यक्रम लोड करने में त्रुटि',
-    noCoursesYet: 'आपने अभी तक कोई पाठ्यक्रम नहीं बनाया है।',
-    createFirstCourse: 'अपना पहला पाठ्यक्रम बनाएं',
+    noCoursesYet: 'आपको अभी तक कोई पाठ्यक्रम नहीं। अपनी अपने पहले पाठ्यक्रम बनाएं',
+    createFirstCourse: 'अपनी पहले पाठ्यक्रम बनाएं',
     published: 'प्रकाशित',
     draft: 'ड्राफ्ट',
-    noDescription: 'कोई विवरण नहीं',
-    studentsEnrolled: 'छात्र नामांकित',
+    noDescription: 'कोई विवरण उपलब्ध नहीं',
+    studentsEnrolled: '{count} छात्र नामांकित',
     free: 'मुफ्त',
     edit: 'संपादित करें',
-    publish: 'प्रकाशित करें',
-    unpublish: 'अप्रकाशित करें',
-    coursePublished: 'पाठ्यक्रम सफलतापूर्वक प्रकाशित हुआ',
-    courseUnpublished: 'पाठ्यक्रम सफलतापूर्वक अप्रकाशित हुआ',
-    publishError: 'पाठ्यक्रम स्थिति अपडेट करने में विफल',
+    publish: 'प्रकाशित',
+    unpublish: 'अप्रकाशित',
+    coursePublished: 'पाठ्यक्रम प्रकाशित सफल',
+    courseUnpublished: 'पाठ्यक्रम अप्रकाशित सफल',
+    publishError: 'पाठ्यक्रम स्थित अपडेट करने में विफल',
   },
 
   // Maintenance
@@ -808,6 +816,78 @@ export const hi = {
     invalidInviteCode: 'अमान्य आमंत्रण कोड',
     failedFetchOrganizations: 'संगठन प्राप्त करने में विफल',
     namePlaceholder: 'जैसे, ABC स्कूल',
+  },
+
+  // Payments
+  payments: {
+    payNow: 'अभी भुगतानी करें',
+    buyCourse: 'कोर्स खरीदें',
+    secureCheckout: 'सुरक्षित चेकआउट',
+    paymentSuccess: 'भुगतानी सफल',
+    paymentFailed: 'भुगतानी विफल',
+    processing: 'प्रक्रिया में...',
+    scanQr: 'QR कोड स्कैन करें',
+    upiSupported: 'UPI समर्थित',
+    enrollmentSuccess: 'नामांकन सफल',
+    enrolledSuccessfully: 'आपका सफलतापूर्वक नामांकन हो गया है!',
+    retryPayment: 'भुगतानी दोहराएं',
+    coursePurchased: 'कोर्स खरीदा गया',
+    
+    // Payment Methods
+    methods: {
+      card: 'क्रेडिट/डेबिट कार्ड',
+      cardDesc: 'वीजा, मास्टरकार्ड, रुपे से भुगतानी करें',
+      upi: 'UPI',
+      upiDesc: 'Google Pay, PhonePe, Paytm',
+      upiQr: 'UPI QR',
+      upiQrDesc: 'किसी भी UPI ऐप से QR स्कैन करें',
+      wallet: 'वॉलेट',
+      walletDesc: 'Paytm, Mobikwik, Freecharge',
+      netbanking: 'नेट बैंकिंग',
+      netbankingDesc: 'सभी प्रमुख बैंक समर्थित'
+    },
+    
+    // Checkout
+    checkout: {
+      title: 'सुरक्षित चेकआउट',
+      subtitle: 'अपना कोर्स खरीदना पूरा करें'
+    },
+    selectMethod: 'भुगतानी विधि चुनें',
+    popular: 'लोकप्रिय',
+    
+    // Order Summary
+    orderSummary: 'ऑर्डर सारांश',
+    originalPrice: 'मूल मूल्य',
+    discount: 'छूट',
+    total: 'कुल',
+    inclusiveAllTaxes: 'सभी करों सहित',
+    lifetimeAccess: 'आजीवन अभिगम',
+    accessPeriod: 'अभिगम अवधि',
+    certificateOnCompletion: 'पूरा होने पर प्रमाणपत्र',
+    mobileAccess: 'मोबाइल अभिगम',
+    instantAccess: 'तत्काल अभिगम',
+    acceptedMethods: 'स्वीकृत भुगतानी विधियां',
+    securePayment: 'सुरक्षित भुगतानी',
+    moneyBackGuarantee: 'पैसा वापसी गारंटी',
+    
+    // QR Code
+    qr: {
+      scanInstructions: 'किसी भी UPI ऐप से इस QR कोड को स्कैन करें',
+      title: 'UPI QR भुगतानी',
+      description: 'किसी भी UPI ऐप का उपयोग करके स्कैन करें'
+    },
+    
+    // Security
+    securityDescription: 'आपकी भुगतानी जानकारी एन्क्रिप्टेड और सुरक्षित है। हम आपके कार्ड विवरण कभी स्टोर नहीं करते।',
+    termsAndConditions: 'इस खरीदारी को पूरा करके आप हमारी सेवा की शर्तों और गोपनीयता नीति से सहमत होते हैं।',
+    
+    // Errors
+    errors: {
+      sdkLoadFailed: 'भुगतानी गेटवे लोड करने में विफल',
+      sdkNotLoaded: 'भुगतानी गेटवे तैयार नहीं',
+      verificationFailed: 'भुगतानी सत्यापन विफल',
+      initFailed: 'भुगतानी प्रारंभ विफल'
+    }
   },
 
   // Not Found

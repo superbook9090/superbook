@@ -17,6 +17,8 @@ export interface IUser extends Document {
     quizzes: number;
     blogs: number;
   };
+  teacherRegistrationPaymentId?: mongoose.Types.ObjectId;
+  teacherRegistrationCompletedAt?: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -35,8 +37,8 @@ const userSchema = new Schema<IUser>(
     limits: {
       courses: { type: Number, default: undefined },
       quizzes: { type: Number, default: undefined },
-      blogs: { type: Number, default: undefined },
-    },
+      blogs: { type: Number, default: undefined }
+    }
   },
   { timestamps: true }
 );
@@ -69,4 +71,5 @@ userSchema.index({ createdAt: -1 });
 userSchema.index({ isVerified: 1 });
 userSchema.index({ isSuspended: 1 });
 
-export default mongoose.models.User || mongoose.model<IUser>('User', userSchema);
+const User = mongoose.models.User || mongoose.model<IUser>('User', userSchema);
+export default User;

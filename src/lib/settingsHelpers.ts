@@ -24,6 +24,12 @@ interface PlatformConfig {
   defaultLanguage: 'en' | 'hi';
 }
 
+interface PaymentConfig {
+  teacherRegistrationFee: number;
+  teacherRegistrationRequired: boolean;
+  currency: string;
+}
+
 /**
  * Get settings with defaults using centralized data service
  * @returns AppSettings document with defaults
@@ -137,4 +143,31 @@ export async function checkTeacherLimit(
 export async function getPlatformConfig(): Promise<PlatformConfig> {
   const settings = await getSettingsWithDefaults();
   return settings?.platformConfig as PlatformConfig;
+}
+
+/**
+ * Get payment configuration
+ * @returns The payment configuration
+ */
+export async function getPaymentConfig(): Promise<PaymentConfig> {
+  const settings = await getSettingsWithDefaults();
+  return settings?.paymentConfig as PaymentConfig;
+}
+
+/**
+ * Check if teacher registration payment is required
+ * @returns true if payment is required for teacher registration
+ */
+export async function isTeacherPaymentRequired(): Promise<boolean> {
+  const settings = await getSettingsWithDefaults();
+  return settings?.paymentConfig?.teacherRegistrationRequired ?? false;
+}
+
+/**
+ * Get teacher registration fee amount
+ * @returns The registration fee amount
+ */
+export async function getTeacherRegistrationFee(): Promise<number> {
+  const settings = await getSettingsWithDefaults();
+  return settings?.paymentConfig?.teacherRegistrationFee ?? 0;
 }

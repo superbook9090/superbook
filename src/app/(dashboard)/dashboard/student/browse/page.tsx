@@ -32,7 +32,11 @@ export default function BrowseCoursesPage() {
     try {
       await enrollCourse.mutateAsync(courseId);
       router.push('/dashboard/student/courses');
-    } catch {
+    } catch (error) {
+      // Don't show error for payment required redirects - the hook handles this
+      if (error instanceof Error && error.message === 'Payment required') {
+        return; // Let the hook handle the redirect
+      }
       setAlertState({ type: 'error', message: 'Error enrolling in course' });
     }
   };

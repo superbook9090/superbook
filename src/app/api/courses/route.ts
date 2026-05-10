@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import mongoose from 'mongoose';
-import { Course } from '@/models';
+import Course from '@/models/Course';
 import { requireFeature, checkTeacherLimit } from '@/lib/settingsHelpers';
 import { createCourseSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
@@ -25,14 +25,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
-
-    if (session.user) {
-      logContext.userId = session.user.id;
-    }
-
+    
     // Check if courses feature is enabled
     const featureCheck = await requireFeature('enableCourses');
     if (featureCheck) return featureCheck;
@@ -41,13 +34,22 @@ export async function GET(request: NextRequest) {
     const instructor = searchParams.get('instructor');
     const isPublished = searchParams.get('isPublished');
     const available = searchParams.get('available'); // For students to browse
+    
+    // Allow public access for available courses (course browsing)
+    if (!session && available !== 'true') {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (session?.user) {
+      logContext.userId = session.user.id;
+    }
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const skip = (page - 1) * limit;
     const fields = searchParams.get('fields'); // Comma-separated fields to select
 
     // Build cache key (only for public/available courses)
-    const orgId = session.user?.organizationId || 'public';
+    const orgId = session?.user?.organizationId || 'public';
     const cacheKey = `courses:${orgId}:${instructor || 'all'}:${isPublished || 'all'}:${available || 'false'}:${page}:${limit}`;
 
     // Try cache for available/public courses
@@ -63,8 +65,8 @@ export async function GET(request: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const query: Record<string, any> = {};
 
-    // Apply organization-based access control
-    if (session.user) {
+    // Apply organization-based access control only if session exists
+    if (session?.user) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const user = session.user as any;
       const accessFilter = getAccessFilter({
@@ -76,7 +78,7 @@ export async function GET(request: NextRequest) {
     }
 
     // If 'available' is set, return published courses student can enroll in
-    if (available === 'true' && session.user?.role === 'student') {
+    if (available === 'true' && session?.user?.role === 'student') {
       query.isPublished = true;
       // Exclude courses student is already enrolled in
       const Enrollment = (await import('@/models/Enrollment')).default;
@@ -88,7 +90,7 @@ export async function GET(request: NextRequest) {
     } else {
       // Handle 'self' keyword for getting own courses
       if (instructor === 'self') {
-        query.instructor = session.user.id;
+        query.instructor = session?.user?.id;
       } else if (instructor) {
         query.instructor = instructor;
       }
