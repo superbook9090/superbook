@@ -56,8 +56,6 @@ export default function LoginForm() {
         return;
       }
 
-      console.log('Fetching session after login...');
-
       // Also update Zustand store
       await fetchSession(true);
 

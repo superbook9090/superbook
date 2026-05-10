@@ -2,6 +2,7 @@
 // Redis caching utility for API routes
 
 import { Redis } from '@upstash/redis';
+import { logInfo, logError, logWarn, type LogContext } from '@/lib/logger';
 
 let redis: Redis | null = null;
 
@@ -11,7 +12,8 @@ export function getRedisClient(): Redis | null {
   const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
 
   if (!redisUrl || !redisToken) {
-    console.warn('⚠️ Redis not configured (missing UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN)');
+    const logContext: LogContext = { method: 'REDIS_INIT', path: 'redis' };
+    logWarn('Redis not configured (missing UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN)', logContext);
     return null;
   }
 
@@ -26,9 +28,11 @@ export function getRedisClient(): Redis | null {
           backoff: (retryCount) => Math.min(retryCount * 50, 500),
         },
       });
-      console.log('✅ Redis client initialized');
+      const logContext: LogContext = { method: 'REDIS_INIT', path: 'redis' };
+      logInfo('Redis client initialized', logContext);
     } catch (error) {
-      console.error('❌ Failed to initialize Redis client:', error);
+      const logContext: LogContext = { method: 'REDIS_INIT', path: 'redis' };
+      logError('Failed to initialize Redis client', logContext, { error: (error as Error).message });
       return null;
     }
   }
@@ -47,7 +51,8 @@ export async function getCachedData<T>(key: string): Promise<T | null> {
     }
     return null;
   } catch (error) {
-    console.error('Redis get error:', error);
+    const logContext: LogContext = { method: 'REDIS_GET', path: 'redis' };
+    logError('Redis get error', logContext, { error: (error as Error).message });
     return null;
   }
 }
@@ -63,7 +68,8 @@ export async function setCachedData<T>(
     
     await redis.set(key, data, { ex: ttl });
   } catch (error) {
-    console.error('Redis set error:', error);
+    const logContext: LogContext = { method: 'REDIS_SET', path: 'redis' };
+    logError('Redis set error', logContext, { error: (error as Error).message });
   }
 }
 
@@ -74,7 +80,8 @@ export async function invalidateCache(key: string): Promise<void> {
     
     await redis.del(key);
   } catch (error) {
-    console.error('Redis delete error:', error);
+    const logContext: LogContext = { method: 'REDIS_DELETE', path: 'redis' };
+    logError('Redis delete error', logContext, { error: (error as Error).message });
   }
 }
 
@@ -88,6 +95,7 @@ export async function invalidatePattern(pattern: string): Promise<void> {
       await redis.del(...keys);
     }
   } catch (error) {
-    console.error('Redis pattern delete error:', error);
+    const logContext: LogContext = { method: 'REDIS_INVALIDATE_PATTERN', path: 'redis' };
+    logError('Redis invalidate pattern error', logContext, { error: (error as Error).message });
   }
 }

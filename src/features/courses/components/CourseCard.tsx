@@ -17,17 +17,7 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import Loader from '@/components/ui/Loader';
-
-interface Course {
-  _id: string;
-  title: string;
-  description: string;
-  thumbnail?: string;
-  category?: string;
-  price: number;
-  instructor: { name: string; email: string };
-  isPublished: boolean;
-}
+import type { Course } from '@/types';
 
 interface Enrollment {
   _id: string;
@@ -87,6 +77,10 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
     }
   };
 
+  // Handle missing properties gracefully
+  const courseLanguage = courseData.language || 'en';
+  const courseUpdatedAt = courseData.updatedAt || courseData.createdAt;
+
   return (
     <motion.div
       whileHover={{ y: -4 }}
@@ -95,9 +89,9 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
     >
       {/* Thumbnail */}
       <div className="relative h-48 overflow-hidden">
-        {courseData.thumbnail ? (
+        {courseData.thumbnailUrl ? (
           <Image
-            src={courseData.thumbnail}
+            src={courseData.thumbnailUrl}
             alt={courseData.title}
             fill
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"

@@ -1,5 +1,6 @@
 // src/lib/db.ts
 import mongoose from 'mongoose';
+import { logInfo, logError, type LogContext } from '@/lib/logger';
 
 const MONGODB_URI = process.env.MONGODB_URI || '';
 
@@ -21,13 +22,18 @@ if (!cached) {
 }
 
 async function dbConnect() {
+  const logContext: LogContext = {
+    method: 'DB_CONNECT',
+    path: 'database',
+  };
+
   if (cached.conn) {
-    console.log('Using cached database connection');
+    logInfo('Using cached database connection', logContext);
     return cached.conn;
   }
 
   if (!cached.promise) {
-    console.log('Creating new database connection...');
+    logInfo('Creating new database connection...', logContext);
     
     const opts = {
       bufferCommands: false,
@@ -41,21 +47,21 @@ async function dbConnect() {
     try {
       // Add debug logging
       mongoose.set('debug', (collectionName, method, query, doc) => {
-        console.log(`Mongoose: ${collectionName}.${method}`, JSON.stringify(query), doc);
+        logInfo(`Mongoose: ${collectionName}.${method}`, logContext, { query, doc });
       });
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       cached.promise = mongoose.connect(MONGODB_URI, opts as any)
         .then(() => {
-          console.log('Successfully connected to MongoDB');
+          logInfo('Successfully connected to MongoDB', logContext);
           return mongoose;
         })
         .catch((err) => {
-          console.error('MongoDB connection error:', err);
+          logError('MongoDB connection error', logContext, { error: err.message });
           throw err;
         });
     } catch (err) {
-      console.error('Error creating MongoDB connection:', err);
+      logError('Error creating MongoDB connection', logContext, { error: (err as Error).message });
       throw err;
     }
   }
@@ -65,7 +71,7 @@ async function dbConnect() {
     cached.conn = await cached.promise as any;
   } catch (e) {
     cached.promise = null;
-    console.error('Failed to connect to MongoDB:', e);
+    logError('Failed to connect to MongoDB', logContext, { error: (e as Error).message });
     throw e;
   }
 

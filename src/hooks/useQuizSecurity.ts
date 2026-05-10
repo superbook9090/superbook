@@ -78,8 +78,8 @@ export function useQuizSecurity({
         await element.msRequestFullscreen();
       }
       return true;
-    } catch (error) {
-      console.error('Fullscreen request failed:', error);
+    } catch {
+      // Silently handle fullscreen errors - they're not critical for quiz functionality
       return false;
     }
   }, []);
@@ -109,8 +109,8 @@ export function useQuizSecurity({
       } else if (element.msExitFullscreen) {
         await element.msExitFullscreen();
       }
-    } catch (error) {
-      console.error('Fullscreen exit failed:', error);
+    } catch {
+      // Silently handle fullscreen exit errors - they're not critical for quiz functionality
     }
   }, []);
 
@@ -118,8 +118,6 @@ export function useQuizSecurity({
   const handleViolation = useCallback(
     (reason: string) => {
       if (isSubmittingRef.current) return;
-
-      console.log(`Quiz violation detected: ${reason}`);
 
       setState((prev) => {
         const newViolationCount = prev.violationCount + 1;

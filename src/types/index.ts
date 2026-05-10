@@ -25,19 +25,19 @@ export interface Course {
   title: string;
   description: string;
   price: number;
-  category: string;
-  language: string;
+  category?: string;
+  language?: string;
   thumbnailUrl?: string;
   isPublished: boolean;
   enrolledCount?: number;
   instructorId?: string;
   instructor?: {
-    _id: string;
+    _id?: string;
     name: string;
     email: string;
   };
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // Quiz types
@@ -90,6 +90,14 @@ export interface Blog {
   isPublished: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+// Favorite types
+export interface Favorite {
+  _id: string;
+  user: string;
+  blog: Blog;
+  createdAt: string;
 }
 
 // Enrollment types

@@ -335,6 +335,7 @@ export const hi = {
     blogDeleted: 'ब्लॉग सफलतापूर्वक हटाया गया',
     failedUpdateBlog: 'ब्लॉग अपडेट करने में विफल',
     failedDeleteBlog: 'ब्लॉग हटाने में विफल',
+    unknownInstructor: 'अज्ञात प्रशिक्षक',
     // Admin Course Management
     manageCoursesDesc: 'प्लेटफॉर्म पर सभी पाठ्यक्रमों का प्रबंधन करें',
     searchCourses: 'पाठ्यक्रम या प्रशिक्षक खोजें...',

@@ -337,6 +337,7 @@ export const en = {
     blogUpdated: 'Blog updated successfully',
     blogDeleted: 'Blog deleted successfully',
     failedUpdateBlog: 'Failed to update blog',
+    unknownInstructor: 'Unknown Instructor',
     failedDeleteBlog: 'Failed to delete blog',
     // Admin Course Management
     manageCoursesDesc: 'Manage all courses on the platform',

@@ -7,7 +7,7 @@ import QuizAttempt from '@/models/QuizAttempt';
 import Quiz from '@/models/Quiz';
 import Enrollment from '@/models/Enrollment';
 import { createQuizAttemptSchema } from '@/lib/validation';
-import { logApiError, type LogContext } from '@/lib/logger';
+import { logInfo, logError, logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
 import { getCachedData, setCachedData, invalidatePattern } from '@/lib/redis';
 
@@ -178,12 +178,12 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    console.log('Quiz attempt request body:', body);
+    logInfo('Quiz attempt request body', logContext, { body });
 
     // Validate input using Zod schema
     const validationResult = createQuizAttemptSchema.safeParse(body);
     if (!validationResult.success) {
-      console.error('Validation error:', validationResult.error.issues);
+      logError('Validation error', logContext, { issues: validationResult.error.issues });
       return NextResponse.json(
         { message: 'Invalid input', errors: validationResult.error.issues },
         { status: 400 }

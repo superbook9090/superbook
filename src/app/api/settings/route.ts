@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import AppSettings from '@/models/AppSettings';
-import { logApiError, type LogContext } from '@/lib/logger';
+import { logInfo, logApiError, type LogContext } from '@/lib/logger';
 import { getCachedData, setCachedData } from '@/lib/redis';
 
 // GET /api/settings - Get app settings
@@ -17,7 +17,7 @@ export async function GET() {
     // Try cache first
     const cached = await getCachedData(cacheKey);
     if (cached) {
-      console.log(`✅ Redis Cache HIT: ${cacheKey}`);
+      logInfo(`Redis Cache HIT: ${cacheKey}`, logContext);
       return NextResponse.json(cached, {
         headers: {
           'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
@@ -25,7 +25,7 @@ export async function GET() {
       });
     }
 
-    console.log(`❌ Redis Cache MISS: ${cacheKey}`);
+    logInfo(`Redis Cache MISS: ${cacheKey}`, logContext);
 
     await dbConnect();
 
@@ -56,7 +56,7 @@ export async function GET() {
 
       // Cache default settings
       await setCachedData(cacheKey, defaultSettings, 300); // 5 minutes
-      console.log(`✅ Redis Cache SET: ${cacheKey}`);
+      logInfo(`Redis Cache SET: ${cacheKey}`, logContext);
 
       return NextResponse.json(defaultSettings, {
         headers: {
@@ -67,7 +67,7 @@ export async function GET() {
 
     // Cache the settings
     await setCachedData(cacheKey, settings, 300); // 5 minutes
-    console.log(`✅ Redis Cache SET: ${cacheKey}`);
+    logInfo(`Redis Cache SET: ${cacheKey}`, logContext);
 
     return NextResponse.json(settings, {
       headers: {

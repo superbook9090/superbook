@@ -21,20 +21,7 @@ import Alert from '@/components/ui/Alert';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useTranslation } from '@/hooks/useTranslation';
 import { formatDate } from '@/lib/dateUtils';
-
-interface Course {
-  _id: string;
-  title: string;
-  description: string;
-  price: number;
-  category: string;
-  language: string;
-  instructor: { _id: string; name: string; email: string };
-  enrolledCount?: number;
-  isPublished: boolean;
-  createdAt: string;
-  thumbnail?: string;
-}
+import type { Course } from '@/types';
 
 export default function AdminCoursesPage() {
   const { session, status } = useSessionStore();
@@ -118,7 +105,7 @@ export default function AdminCoursesPage() {
 
   const filteredCourses = courses.filter(course => {
     const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         course.instructor.name.toLowerCase().includes(searchTerm.toLowerCase());
+                         course.instructor?.name?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filter === 'all' ||
                          (filter === 'published' && course.isPublished) ||
                          (filter === 'draft' && !course.isPublished);
@@ -287,7 +274,7 @@ export default function AdminCoursesPage() {
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center text-sm text-[var(--color-muted-foreground)]">
                     <Users className="w-4 h-4 mr-2" />
-                    {course.instructor.name}
+                    {course.instructor?.name || t('admin.unknownInstructor')}
                   </div>
                   <div className="flex items-center text-sm text-[var(--color-muted-foreground)]">
                     <Users className="w-4 h-4 mr-2" />
