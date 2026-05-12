@@ -8,6 +8,12 @@ import { formatDateTime, formatDuration } from '@/lib/dateUtils';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
 import Loader from '@/components/ui/Loader';
+import { 
+  QuizAnalysisModal, 
+  AnalysisButton, 
+  useQuizAnalysis,
+  QuizAnalysisRequest 
+} from '@/features/ai';
 
 interface Question {
   question: string;
@@ -53,6 +59,18 @@ export default function QuizResultPage() {
   const [attempt, setAttempt] = useState<Attempt | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showAnswers, setShowAnswers] = useState(false);
+  
+  // AI Analysis state
+  const [showAnalysisModal, setShowAnalysisModal] = useState(false);
+  const [currentAnalysisQuestion, setCurrentAnalysisQuestion] = useState<{
+    question: string;
+    options: string[];
+    selectedAnswer: number;
+    correctAnswer: number;
+    questionIndex: number;
+  } | null>(null);
+  
+  const { analyze, state: analysisState, error: analysisError, data: analysisData, reset: resetAnalysis } = useQuizAnalysis();
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -92,6 +110,68 @@ export default function QuizResultPage() {
     if (score >= 40) return t('quizResult.keepPracticing');
     return t('quizResult.canDoBetter');
   };
+
+  // AI Analysis handlers
+  const handleAnalyzeAnswer = (questionIndex: number) => {
+    if (!attempt) return;
+    
+    const question = attempt.quiz.questions[questionIndex];
+    const answer = attempt.answers.find((a) => a.questionIndex === questionIndex);
+    
+    if (!question || !answer) return;
+
+    const analysisData = {
+      question: question.question,
+      options: question.options,
+      selectedAnswer: answer.selectedOption,
+      correctAnswer: question.correctAnswer,
+      questionIndex,
+    };
+    
+    setCurrentAnalysisQuestion(analysisData);
+    resetAnalysis();
+    setShowAnalysisModal(true);
+  };
+
+  const handleGenerateAnalysis = async () => {
+    if (!currentAnalysisQuestion) {
+      return;
+    }
+
+    try {
+      const request: QuizAnalysisRequest = {
+        question: currentAnalysisQuestion.question,
+        options: currentAnalysisQuestion.options,
+        selectedAnswer: currentAnalysisQuestion.selectedAnswer,
+        correctAnswer: currentAnalysisQuestion.correctAnswer,
+        questionType: 'multiple-choice',
+        difficulty: 'medium',
+        subject: 'general',
+      };
+
+      await analyze(request);
+    } catch (error) {
+      // Error will be handled by the hook
+    }
+  };
+
+  const handleCloseAnalysisModal = () => {
+    setShowAnalysisModal(false);
+    setCurrentAnalysisQuestion(null);
+    resetAnalysis();
+  };
+
+  const handleRetryAnalysis = () => {
+    resetAnalysis();
+    handleGenerateAnalysis();
+  };
+
+  // Effect to trigger analysis when modal opens
+  useEffect(() => {
+    if (currentAnalysisQuestion && showAnalysisModal) {
+      handleGenerateAnalysis();
+    }
+  }, [currentAnalysisQuestion, showAnalysisModal]);
 
   if (status === 'loading' || isLoading) {
     return <Loader size="lg" text={t('common.loading')} />;
@@ -195,7 +275,7 @@ export default function QuizResultPage() {
           >
             {showAnswers ? t('quizResult.hideAnswers') : t('quizResult.showAnswers')}
           </button>
-          <button
+                    <button
             onClick={() => router.push('/dashboard/student/quizzes')}
             className="min-h-[44px] sm:min-h-0 px-4 py-3 sm:px-4 sm:py-2 border border-[var(--border)] text-[var(--color-foreground)] rounded-md hover:bg-[var(--color-muted)]"
           >
@@ -252,6 +332,15 @@ export default function QuizResultPage() {
                         );
                       })}
                     </div>
+                    
+                    {/* AI Analysis Button */}
+                    <div className="mt-4 pt-4 border-t border-[var(--border)]">
+                      <AnalysisButton
+                        onClick={() => handleAnalyzeAnswer(index)}
+                        loading={analysisState === 'generating' && currentAnalysisQuestion?.questionIndex === index}
+                        disabled={analysisState === 'generating'}
+                      />
+                    </div>
                   </div>
                 );
               })}
@@ -259,6 +348,20 @@ export default function QuizResultPage() {
           </div>
         )}
       </div>
+
+      {/* AI Analysis Modal */}
+      <QuizAnalysisModal
+        isOpen={showAnalysisModal}
+        onClose={handleCloseAnalysisModal}
+        question={currentAnalysisQuestion?.question || ''}
+        options={currentAnalysisQuestion?.options || []}
+        selectedAnswer={currentAnalysisQuestion?.selectedAnswer || 0}
+        correctAnswer={currentAnalysisQuestion?.correctAnswer || 0}
+        analysis={analysisData || undefined}
+        loading={analysisState === 'generating'}
+        error={analysisError?.message}
+        onRetry={handleRetryAnalysis}
+      />
     </div>
   );
 }
