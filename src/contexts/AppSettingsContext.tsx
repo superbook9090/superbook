@@ -1,7 +1,8 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { fetchPublicSettings } from '@/lib/api/settings';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface FeatureToggles {
   enableBlogs: boolean;
@@ -59,22 +60,23 @@ const defaultSettings: AppSettings = {
 };
 
 export function AppSettingsProvider({ children }: { children: ReactNode }) {
+  const { t } = useTranslation();
   const [settings, setSettings] = useState<AppSettings>(defaultSettings);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchSettings = async () => {
+  const fetchSettings = useCallback(async () => {
     try {
       const data = (await fetchPublicSettings()) as AppSettings;
       setSettings(data);
       setError(null);
     } catch (err) {
       console.error('Error fetching settings:', err);
-      setError('Failed to load settings');
+      setError(t('adminSettings.failedLoadSettings'));
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [t]);
 
   const refetchSettings = async () => {
     setIsLoading(true);
@@ -96,7 +98,7 @@ export function AppSettingsProvider({ children }: { children: ReactNode }) {
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, []);
+  }, [fetchSettings]);
 
   const isFeatureEnabled = (feature: keyof FeatureToggles): boolean => {
     return settings?.featureToggles?.[feature] ?? true;

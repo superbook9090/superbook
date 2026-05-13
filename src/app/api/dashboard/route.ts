@@ -128,13 +128,18 @@ export async function GET() {
 
 // Helper function to get student dashboard data
 async function getStudentDashboardData(userId: string): Promise<StudentDashboardData> {
-  // Fetch enrollments with course data
-  const enrollments = await Enrollment.find({ student: userId })
-    .populate('course', 'title description thumbnail category instructor price')
-    .populate('student', 'name email')
-    .populate('completedLessons', 'title')
-    .sort({ enrolledAt: -1 })
-    .lean();
+  const [enrollments, quizAttempts] = await Promise.all([
+    Enrollment.find({ student: userId })
+      .populate('course', 'title description thumbnail category instructor price')
+      .populate('completedLessons', 'title')
+      .sort({ enrolledAt: -1 })
+      .lean(),
+    QuizAttempt.find({ student: userId })
+      .populate('quiz', 'title description timeLimit')
+      .populate('course', 'title description')
+      .sort({ startedAt: -1 })
+      .lean(),
+  ]);
 
   // Sanitize enrollments
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -150,14 +155,6 @@ async function getStudentDashboardData(userId: string): Promise<StudentDashboard
     return sanitized;
   });
 
-  // Fetch quiz attempts
-  const quizAttempts = await QuizAttempt.find({ student: userId })
-    .populate('quiz', 'title description timeLimit')
-    .populate('course', 'title description')
-    .populate('student', 'name email')
-    .sort({ startedAt: -1 })
-    .lean();
-
   // Sanitize attempts
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sanitizedAttempts: any[] = quizAttempts.map((attempt) => {
@@ -169,13 +166,20 @@ async function getStudentDashboardData(userId: string): Promise<StudentDashboard
     if (sanitized.submittedAt) {
       sanitized.submittedAt = new Date(sanitized.submittedAt).toISOString();
     }
-    // Remove correct answers from quiz questions for security
+    // Strip correct answers from embedded quiz questions when present (defense in depth)
     if (sanitized.quiz && typeof sanitized.quiz === 'object' && 'questions' in sanitized.quiz) {
-      sanitized.quiz = sanitized.quiz.questions?.map((q: { _id?: { toString(): string }; question?: string; options?: string[] }) => ({
-        _id: q._id?.toString(),
-        question: q.question,
-        options: q.options,
-      }));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const quizDoc = sanitized.quiz as any;
+      sanitized.quiz = {
+        ...quizDoc,
+        questions: (quizDoc.questions || []).map(
+          (q: { _id?: { toString(): string }; question?: string; options?: string[] }) => ({
+            _id: q._id?.toString?.() ?? q._id,
+            question: q.question,
+            options: q.options,
+          })
+        ),
+      };
     }
     return sanitized;
   });
@@ -213,23 +217,42 @@ async function getTeacherDashboardData(
     courseQuery.organizationId = organizationId;
   }
 
-  // Fetch courses
-  const courses = await Course.find(courseQuery, {
-    title: 1,
-    description: 1,
-    price: 1,
-    category: 1,
-    thumbnail: 1,
-    isPublished: 1,
-    language: 1,
-    createdAt: 1,
-    enrolledCount: 1,
-  })
-    .populate('instructor', 'name email')
-    .sort({ createdAt: -1 })
-    .lean();
+  const blogQuery: Record<string, unknown> = { author: userId };
+  if (organizationId) {
+    blogQuery.organizationId = organizationId;
+  }
 
-  // Fetch quizzes for this teacher's courses
+  const [courses, blogs, settings] = await Promise.all([
+    Course.find(courseQuery, {
+      title: 1,
+      description: 1,
+      price: 1,
+      category: 1,
+      thumbnail: 1,
+      isPublished: 1,
+      language: 1,
+      createdAt: 1,
+      enrolledCount: 1,
+    })
+      .populate('instructor', 'name email')
+      .sort({ createdAt: -1 })
+      .lean(),
+    Blog.find(blogQuery, {
+      title: 1,
+      topic: 1,
+      language: 1,
+      isPublished: 1,
+      author: 1,
+      organizationId: 1,
+      createdAt: 1,
+      updatedAt: 1,
+    })
+      .populate('author', 'name email')
+      .sort({ createdAt: -1 })
+      .lean(),
+    AppSettings.findOne().select('teacherLimits').lean(),
+  ]);
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const courseIds: string[] = courses.map((c: any) => c._id?.toString()).filter(Boolean);
   const quizzes = await Quiz.find(
@@ -247,20 +270,9 @@ async function getTeacherDashboardData(
     .sort({ createdAt: -1 })
     .lean();
 
-  // Fetch blogs for this teacher
-  const blogQuery: Record<string, unknown> = { author: userId };
-  if (organizationId) {
-    blogQuery.organizationId = organizationId;
-  }
-  const blogs = await Blog.find(blogQuery)
-    .populate('author', 'name email')
-    .sort({ createdAt: -1 })
-    .lean();
-
-  // Fetch settings for limits
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const settings: any = await AppSettings.findOne().lean();
-  const teacherLimits = settings?.teacherLimits || { courses: 5, quizzes: 10, blogs: 10 };
+  const teacherLimits =
+    (settings as { teacherLimits?: { courses: number; quizzes: number; blogs: number } } | null)?.teacherLimits ||
+    { courses: 5, quizzes: 10, blogs: 10 };
 
   // Calculate stats
   const totalStudents = courses.reduce((sum, course) => {

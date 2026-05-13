@@ -33,7 +33,7 @@ export default function BrowseCoursesPage() {
       await enrollCourse.mutateAsync(courseId);
       router.push('/dashboard/student/courses');
     } catch {
-      setAlertState({ type: 'error', message: 'Error enrolling in course' });
+      setAlertState({ type: 'error', message: t('courses.errorEnrolling') });
     }
   };
 

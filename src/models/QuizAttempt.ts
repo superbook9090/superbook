@@ -47,13 +47,12 @@ const quizAttemptSchema = new Schema<IQuizAttempt>(
   { timestamps: true }
 );
 
-// Optimized indexes - avoid duplicates and redundancy
-quizAttemptSchema.index({ student: 1, quiz: 1 }); // Student's quiz attempts
-quizAttemptSchema.index({ student: 1, course: 1 }); // Student's course attempts
-quizAttemptSchema.index({ quiz: 1, status: 1 }); // Quiz status filtering
-quizAttemptSchema.index({ course: 1, status: 1 }); // Course status filtering
-quizAttemptSchema.index({ quiz: 1, status: 1, score: -1 }); // Quiz leaderboard sorting
-quizAttemptSchema.index({ course: 1, status: 1, score: -1 }); // Course leaderboard sorting
+// Optimized indexes — compound { field, status, score } covers queries on { field, status } alone
+quizAttemptSchema.index({ student: 1, quiz: 1 });
+quizAttemptSchema.index({ student: 1, course: 1 });
+quizAttemptSchema.index({ student: 1, startedAt: -1 });
+quizAttemptSchema.index({ quiz: 1, status: 1, score: -1 });
+quizAttemptSchema.index({ course: 1, status: 1, score: -1 });
 quizAttemptSchema.index({ startedAt: -1 });
 quizAttemptSchema.index({ submittedAt: -1 });
 

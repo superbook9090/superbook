@@ -63,6 +63,9 @@
   --border: #e6eaf0;
   --muted: #6b7280;
   --muted-light: #9ca3af;
+  /* Fills for inputs, table bands, hovers — NOT for body text (use --color-muted-foreground / --color-muted for text) */
+  --surface-muted: color-mix(in srgb, var(--foreground) 5%, var(--background));
+  --surface-muted-strong: color-mix(in srgb, var(--foreground) 8%, var(--background));
 
   /* Status */
   --success: #22c55e;
@@ -84,6 +87,8 @@
   --color-foreground: var(--foreground);
   --color-muted-foreground: var(--muted);
   --color-muted: var(--muted-light);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-muted-strong: var(--surface-muted-strong);
   --color-border: var(--border);
   --color-card: var(--card);
   --color-accent: var(--primary-soft);
@@ -96,8 +101,11 @@
   --color-error-light: var(--error-light);
   --color-info: var(--info);
   --color-info-light: var(--info-light);
-  --color-error: var(--error);
-  --color-error-light: var(--error-light);
+}
+
+[data-role="student"] {
+  --surface-muted: color-mix(in srgb, var(--student-soft) 42%, var(--background));
+  --surface-muted-strong: color-mix(in srgb, var(--student-soft) 55%, var(--background));
 }
 
 [data-role="teacher"],
@@ -112,6 +120,8 @@
   --primary-shadow: var(--teacher-shadow);
   --color-primary: var(--teacher-primary);
   --color-accent: var(--teacher-soft);
+  --surface-muted: color-mix(in srgb, var(--teacher-soft) 45%, var(--background));
+  --surface-muted-strong: color-mix(in srgb, var(--teacher-soft) 58%, var(--background));
 }
 
 /* =========================

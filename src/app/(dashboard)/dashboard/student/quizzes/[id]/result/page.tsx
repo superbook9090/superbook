@@ -158,17 +158,17 @@ export default function QuizResultPage() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="bg-[var(--color-muted)] rounded-lg p-4 text-center">
+          <div className="bg-[var(--color-surface-muted)] rounded-lg p-4 text-center">
             <p className="text-2xl font-bold text-[var(--color-foreground)]">{attempt.attempt.correctCount}</p>
             <p className="text-sm text-[var(--color-muted-foreground)]">{t('quizResult.correct')}</p>
           </div>
-          <div className="bg-[var(--color-muted)] rounded-lg p-4 text-center">
+          <div className="bg-[var(--color-surface-muted)] rounded-lg p-4 text-center">
             <p className="text-2xl font-bold text-[var(--color-foreground)]">
               {attempt.attempt.totalQuestions - attempt.attempt.correctCount}
             </p>
             <p className="text-sm text-[var(--color-muted-foreground)]">{t('quizResult.incorrect')}</p>
           </div>
-          <div className="bg-[var(--color-muted)] rounded-lg p-4 text-center">
+          <div className="bg-[var(--color-surface-muted)] rounded-lg p-4 text-center">
             <p className="text-2xl font-bold text-[var(--color-foreground)]">{formatDuration(attempt.attempt.timeTaken)}</p>
             <p className="text-sm text-[var(--color-muted-foreground)]">{t('quizResult.timeTaken')}</p>
           </div>
@@ -194,7 +194,7 @@ export default function QuizResultPage() {
           </button>
           <button
             onClick={() => router.push('/dashboard/student/quizzes')}
-            className="min-h-[44px] sm:min-h-0 px-4 py-3 sm:px-4 sm:py-2 border border-[var(--border)] text-[var(--color-foreground)] rounded-md hover:bg-[var(--color-muted)]"
+            className="min-h-[44px] sm:min-h-0 px-4 py-3 sm:px-4 sm:py-2 border border-[var(--border)] text-[var(--color-foreground)] rounded-md hover:bg-[var(--color-surface-muted)]"
           >
             {t('quizResult.backToQuizzes')}
           </button>
@@ -234,7 +234,7 @@ export default function QuizResultPage() {
                                 ? 'bg-[var(--success)]/20 text-[var(--success)]'
                                 : isSelected
                                 ? 'bg-[var(--error)]/20 text-[var(--error)]'
-                                : 'bg-[var(--color-muted)] text-[var(--color-muted-foreground)]'
+                                : 'bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)]'
                             }`}
                           >
                             <span className="font-medium mr-2">{String.fromCharCode(65 + optIndex)}.</span>

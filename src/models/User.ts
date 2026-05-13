@@ -64,6 +64,8 @@ userSchema.methods.comparePassword = async function (candidatePassword: string) 
 
 // Add indexes for frequently queried fields
 // Note: email already has unique: true in field definition, no duplicate index needed
+userSchema.index({ organizationId: 1 });
+userSchema.index({ organizationId: 1, role: 1 });
 userSchema.index({ role: 1 });
 userSchema.index({ createdAt: -1 });
 userSchema.index({ isVerified: 1 });

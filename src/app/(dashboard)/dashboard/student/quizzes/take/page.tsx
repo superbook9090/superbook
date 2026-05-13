@@ -61,19 +61,30 @@ export default function TakeQuizPage() {
   const forceSubmitQuizRef = useRef<(() => Promise<void>) | null>(null);
   const { setQuizActive } = useQuiz();
 
+  const getSecurityReasonMessage = useCallback(
+    (reason: string) => {
+      const keys: Record<string, string> = {
+        fullscreen_exit: 'quiz.violationFullscreenExit',
+        tab_switch: 'quiz.violationTabSwitch',
+        window_blur: 'quiz.violationWindowBlur',
+        page_exit: 'quiz.violationPageExit',
+        duplicate_tab: 'quiz.violationDuplicateTab',
+        dev_tools: 'quiz.violationDevTools',
+      };
+      const key = keys[reason];
+      return key ? t(key) : t('quiz.violationGeneric');
+    },
+    [t]
+  );
+
   // Quiz security hook - violation handler
-  const handleViolation = useCallback((reason: string) => {
-    const reasonMap: Record<string, string> = {
-      fullscreen_exit: 'You exited fullscreen mode',
-      tab_switch: 'You switched tabs',
-      window_blur: 'You switched windows',
-      page_exit: 'You attempted to leave the page',
-      duplicate_tab: 'Quiz is open in another tab',
-      dev_tools: 'You opened developer tools',
-    };
-    setSecurityWarning(reasonMap[reason] || 'Security violation detected');
-    setShowViolationModal(true);
-  }, []);
+  const handleViolation = useCallback(
+    (reason: string) => {
+      setSecurityWarning(getSecurityReasonMessage(reason));
+      setShowViolationModal(true);
+    },
+    [getSecurityReasonMessage]
+  );
 
   const quizSecurity = useQuizSecurity({
     onViolation: handleViolation,
@@ -119,9 +130,9 @@ export default function TakeQuizPage() {
       router.push(`/dashboard/student/quizzes/${attempt._id}/result`);
     } catch (err) {
       console.error('Error force-submitting quiz:', err);
-      setError('Failed to submit quiz due to security violation');
+      setError(t('errors.securityForceSubmitFailed'));
     }
-  }, [attempt, answers, timeRemaining, router, submitQuizMutation, setQuizActive, quizSecurity]);
+  }, [attempt, answers, timeRemaining, router, submitQuizMutation, setQuizActive, quizSecurity, t]);
 
   // Update ref when forceSubmitQuiz changes
   useEffect(() => {
@@ -136,7 +147,7 @@ export default function TakeQuizPage() {
     const isDevToolsOpen = widthDiff > 160 || heightDiff > 160;
 
     if (isDevToolsOpen) {
-      setSecurityWarning('Please close developer tools before continuing');
+      setSecurityWarning(t('errors.closeDevTools'));
       // Keep modal open
       return;
     }
@@ -155,7 +166,7 @@ export default function TakeQuizPage() {
       setViolationRetryCount((prev) => prev + 1);
       await quizSecurity.startQuiz();
     }
-  }, [violationRetryCount, forceSubmitQuiz, quizSecurity]);
+  }, [violationRetryCount, forceSubmitQuiz, quizSecurity, t]);
 
   // Reset all state when attemptId changes (fresh attempt)
   useEffect(() => {
@@ -219,7 +230,7 @@ export default function TakeQuizPage() {
 
   const fetchAttempt = async () => {
     if (!attemptId) {
-      setError('Quiz attempt not found');
+      setError(t('errors.quizAttemptNotFound'));
       setIsLoading(false);
       return;
     }
@@ -248,11 +259,11 @@ export default function TakeQuizPage() {
         setAttempt(foundAttempt);
         setError('quiz_completed');
       } else {
-        setError('Quiz attempt not found');
+        setError(t('errors.quizAttemptNotFound'));
       }
     } catch (err) {
       setError(
-        err instanceof ApiClientError ? err.message : 'Error loading quiz'
+        err instanceof ApiClientError ? err.message : t('errors.errorLoadingQuiz')
       );
     } finally {
       setIsLoading(false);
@@ -274,7 +285,7 @@ export default function TakeQuizPage() {
       const data = await startQuizMutation.mutateAsync(attempt.quiz._id);
       router.push(`/dashboard/student/quizzes/take?attemptId=${data.attempt._id}`);
     } catch {
-      setError('Error starting new attempt');
+      setError(t('errors.errorStartingNewAttempt'));
       setIsLoading(false);
     }
   };
@@ -323,11 +334,11 @@ export default function TakeQuizPage() {
 
       router.push(`/dashboard/student/quizzes/${data.attempt._id}/result`);
     } catch {
-      const errorMsg = 'Error submitting quiz';
+      const errorMsg = t('errors.errorSubmittingQuiz');
       setError(errorMsg);
       setAlertState({ type: 'error', message: errorMsg });
     }
-  }, [attempt, answers, timeRemaining, router, submitQuizMutation, quizSecurity, setQuizActive]);
+  }, [attempt, answers, timeRemaining, router, submitQuizMutation, quizSecurity, setQuizActive, t]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -351,30 +362,30 @@ export default function TakeQuizPage() {
         )}
         {error === 'quiz_completed' ? (
           <>
-            <p className="text-[var(--color-muted-foreground)] mb-4">You have already completed this quiz.</p>
+            <p className="text-[var(--color-muted-foreground)] mb-4">{t('quiz.takeAlreadyCompleted')}</p>
             <div className="flex gap-4 justify-center">
               <button
                 onClick={handleRetry}
                 className={`min-h-[44px] px-4 py-3 sm:px-4 sm:py-2 bg-gradient-to-r ${theme.gradient} text-white rounded-md`}
               >
-                Retry Quiz
+                {t('quiz.takeRetryQuiz')}
               </button>
               <button
                 onClick={() => router.push('/dashboard/student/quizzes')}
-                className="min-h-[44px] px-4 py-3 sm:px-4 sm:py-2 bg-[var(--color-muted)] text-[var(--color-foreground)] rounded-md hover:bg-[var(--color-muted)]/80"
+                className="min-h-[44px] px-4 py-3 sm:px-4 sm:py-2 bg-[var(--color-surface-muted)] text-[var(--color-foreground)] rounded-md hover:bg-[var(--color-surface-muted)]/80"
               >
-                Back to Quizzes
+                {t('quiz.takeBackToQuizzes')}
               </button>
             </div>
           </>
         ) : (
           <>
-            <p className="text-[var(--error)] mb-4">{error || 'Quiz not found'}</p>
+            <p className="text-[var(--error)] mb-4">{error || t('quiz.takeQuizNotFound')}</p>
             <button
               onClick={() => router.push('/dashboard/student/quizzes')}
               className={`min-h-[44px] px-4 py-3 sm:px-4 sm:py-2 bg-gradient-to-r ${theme.gradient} text-white rounded-md`}
             >
-              Back to Quizzes
+              {t('quiz.takeBackToQuizzes')}
             </button>
           </>
         )}
@@ -422,7 +433,7 @@ export default function TakeQuizPage() {
 
         {/* Progress bar */}
         <div className="mt-4">
-          <div className="w-full bg-[var(--color-muted)] rounded-full h-2">
+          <div className="w-full bg-[var(--color-surface-muted)] rounded-full h-2">
             <div
               className={`bg-gradient-to-r ${theme.gradient} h-2 rounded-full transition-all`}
               style={{ width: `${progress}%` }}
@@ -457,7 +468,7 @@ export default function TakeQuizPage() {
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium mr-3 ${
                     answers[currentQuestion] === index
                       ? `bg-gradient-to-r ${theme.gradient} text-white`
-                      : 'bg-[var(--color-muted)] text-[var(--color-muted-foreground)]'
+                      : 'bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)]'
                   }`}
                 >
                   {String.fromCharCode(65 + index)}
@@ -474,7 +485,7 @@ export default function TakeQuizPage() {
         <button
           onClick={() => setCurrentQuestion((prev) => Math.max(0, prev - 1))}
           disabled={currentQuestion === 0}
-          className="min-h-[44px] sm:min-h-0 px-4 py-3 sm:px-4 sm:py-2 border border-[var(--border)] rounded-md text-[var(--color-foreground)] hover:bg-[var(--color-muted)] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="min-h-[44px] sm:min-h-0 px-4 py-3 sm:px-4 sm:py-2 border border-[var(--border)] rounded-md text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted)] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {t('common.previous')}
         </button>
@@ -490,7 +501,7 @@ export default function TakeQuizPage() {
                   ? `bg-gradient-to-r ${theme.gradient}`
                   : answers[index] !== undefined
                   ? 'bg-[var(--success)]'
-                  : 'bg-[var(--color-muted)]'
+                  : 'bg-[var(--color-surface-muted)]'
               }`}
             />
           ))}
@@ -550,11 +561,18 @@ export default function TakeQuizPage() {
       {/* Violation Warning Modal */}
       <ConfirmModal
         isOpen={showViolationModal}
-        title="Security Violation"
-        message={`${securityWarning}. You have ${3 - violationRetryCount - 1} ${3 - violationRetryCount - 1 === 0 ? 'retry' : 'retries'} remaining. Click Continue to re-enter.`}
+        title={t('quiz.securityViolationTitle')}
+        message={t('quiz.violationModalMessage', {
+          warning: securityWarning || t('quiz.violationGeneric'),
+          count: 3 - violationRetryCount - 1,
+          retriesWord:
+            3 - violationRetryCount - 1 === 1
+              ? t('quiz.violationRetrySingular')
+              : t('quiz.violationRetriesPlural'),
+        })}
         onConfirm={handleViolationContinue}
         // onCancel={() => setShowViolationModal(false)}
-        confirmText="Continue"
+        confirmText={t('quiz.violationContinue')}
         // cancelText="Cancel"
         type="danger"
       />

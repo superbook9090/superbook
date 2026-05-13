@@ -42,11 +42,11 @@ export default function QuizLeaderboard({
       const data = (await fetchQuizLeaderboard(quizId)) as { leaderboard?: QuizLeaderboardEntry[] };
       setLeaderboard(data.leaderboard || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : t('errors.leaderboardLoadFailed'));
     } finally {
       setLoading(false);
     }
-  }, [quizId]);
+  }, [quizId, t]);
 
   useEffect(() => {
     if (quizId) {
@@ -70,7 +70,7 @@ export default function QuizLeaderboard({
           onClick={fetchLeaderboard}
           className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
         >
-          Try Again
+          {t('quiz.leaderboard.tryAgain')}
         </button>
       </div>
     );
@@ -84,7 +84,11 @@ export default function QuizLeaderboard({
     >
       <Leaderboard
         data={leaderboard}
-        title={`${quizTitle || 'Quiz'} Leaderboard`}
+        title={
+          quizTitle
+            ? `${quizTitle} — ${t('quiz.leaderboard.title')}`
+            : t('quiz.leaderboard.quizLeaderboard')
+        }
         subtitle={t('quiz.firstAttemptResults')}
         showUserRank={showUserRank ? currentUserId : undefined}
         type="quiz"

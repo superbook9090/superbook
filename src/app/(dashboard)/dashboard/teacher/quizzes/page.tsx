@@ -82,7 +82,7 @@ export default function TeacherQuizzesPage() {
 
       setQuizzes(teacherQuizzes);
     } catch (err) {
-      setError(err instanceof ApiClientError ? err.message : 'Error loading quizzes');
+      setError(err instanceof ApiClientError ? err.message : t('errors.errorLoadingQuizzes'));
     } finally {
       setIsLoading(false);
     }
@@ -192,7 +192,7 @@ export default function TeacherQuizzesPage() {
                       className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ml-2 ${
                         quiz.isPublished
                           ? 'bg-[var(--success-light)] text-[var(--success)]'
-                          : 'bg-[var(--color-muted)] text-[var(--color-muted-foreground)]'
+                          : 'bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)]'
                       }`}
                     >
                       {quiz.isPublished ? t('teacherQuizzes.published') : t('teacherQuizzes.draft')}
@@ -229,7 +229,7 @@ export default function TeacherQuizzesPage() {
             {/* Desktop Table View */}
             <div className="hidden md:block bg-[var(--card-solid)] shadow overflow-hidden rounded-lg">
               <table className="min-w-full divide-y divide-[var(--border)]">
-                <thead className="bg-[var(--color-muted)]">
+                <thead className="bg-[var(--color-surface-muted)]">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider">{t('teacherQuizzes.tableQuiz')}</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider">{t('teacherQuizzes.tableCourse')}</th>
@@ -262,7 +262,7 @@ export default function TeacherQuizzesPage() {
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                             quiz.isPublished
                               ? 'bg-[var(--success-light)] text-[var(--success)]'
-                              : 'bg-[var(--color-muted)] text-[var(--color-muted-foreground)]'
+                              : 'bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)]'
                           }`}
                         >
                           {quiz.isPublished ? t('teacherQuizzes.published') : t('teacherQuizzes.draft')}

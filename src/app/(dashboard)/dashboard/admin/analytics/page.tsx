@@ -310,7 +310,7 @@ export default function AdminAnalyticsPage() {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.5 + index * 0.05 }}
-                      className="p-4 flex items-center justify-between hover:bg-[var(--color-muted)] transition-colors"
+                      className="p-4 flex items-center justify-between hover:bg-[var(--color-surface-muted)] transition-colors"
                     >
                       <div className="flex items-center gap-3">
                         <div className="p-2 rounded-full bg-[var(--info-light)] text-[var(--info)]">

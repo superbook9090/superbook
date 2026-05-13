@@ -11,6 +11,7 @@ import { PageSkeleton } from '@/components/ui/Skeleton';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useCreateBlog } from '@/lib/react-query/hooks';
 import { ApiClientError } from '@/lib/api/http';
+import { useTranslation } from '@/hooks/useTranslation';
 
 const RichTextEditor = lazy(() => import('@/components/ui/RichTextEditor'));
 
@@ -30,6 +31,7 @@ const topics = [
 
 export default function CreateBlogPage() {
   const { status } = useSessionStore();
+  const { t } = useTranslation();
   const router = useRouter();
   const createBlogMutation = useCreateBlog();
   const isLoading = createBlogMutation.isPending;
@@ -59,7 +61,7 @@ export default function CreateBlogPage() {
     setError('');
 
     if (!formData.title.trim() || !formData.topic || isContentEmpty(formData.content)) {
-      const errorMsg = 'Please fill in all fields';
+      const errorMsg = t('blog.fillAllFields');
       setError(errorMsg);
       setAlertState({ type: 'error', message: errorMsg });
       return;
@@ -73,7 +75,7 @@ export default function CreateBlogPage() {
       router.push('/dashboard/teacher/blogs');
     } catch (err) {
       const errorMsg =
-        err instanceof ApiClientError ? err.message : 'An error occurred. Please try again.';
+        err instanceof ApiClientError ? err.message : t('blog.saveErrorGeneric');
       setError(errorMsg);
       setAlertState({ type: 'error', message: errorMsg });
     }
@@ -132,7 +134,7 @@ export default function CreateBlogPage() {
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               placeholder="Enter an engaging title..."
-              className="w-full min-h-[44px] px-4 py-3 bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--teacher-primary)]/20 focus:border-[var(--teacher-primary)]"
+              className="w-full min-h-[44px] px-4 py-3 bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--teacher-primary)]/20 focus:border-[var(--teacher-primary)]"
               maxLength={200}
             />
             <p className="text-xs text-[var(--color-muted-foreground)] mt-1">{formData.title.length}/200 characters</p>
@@ -147,7 +149,7 @@ export default function CreateBlogPage() {
             <select
               value={formData.topic}
               onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
-              className="w-full min-h-[44px] px-4 py-3 bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--teacher-primary)]/20 focus:border-[var(--teacher-primary)]"
+              className="w-full min-h-[44px] px-4 py-3 bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--teacher-primary)]/20 focus:border-[var(--teacher-primary)]"
             >
               <option value="">Select a topic...</option>
               {topics.map((topic) => (
@@ -167,7 +169,7 @@ export default function CreateBlogPage() {
             <select
               value={formData.language}
               onChange={(e) => setFormData({ ...formData, language: e.target.value })}
-              className="w-full min-h-[44px] px-4 py-3 bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--teacher-primary)]/20 focus:border-[var(--teacher-primary)]"
+              className="w-full min-h-[44px] px-4 py-3 bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--teacher-primary)]/20 focus:border-[var(--teacher-primary)]"
             >
               <option value="en">English</option>
               <option value="hi">हिंदी</option>

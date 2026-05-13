@@ -1,6 +1,11 @@
 // src/i18n/en.ts
 
 export const en = {
+  metadata: {
+    siteTitle: 'quiz-do - The Future of Learning',
+    siteDescription: 'Learning Management System',
+  },
+
   // Common
   common: {
     loading: 'Loading...',
@@ -216,6 +221,24 @@ export const en = {
     review: 'Review',
     retake: 'Retake',
     viewLeaderboard: 'View Leaderboard',
+    // Take quiz / security
+    takeAlreadyCompleted: 'You have already completed this quiz.',
+    takeRetryQuiz: 'Retry Quiz',
+    takeBackToQuizzes: 'Back to Quizzes',
+    takeQuizNotFound: 'Quiz not found',
+    securityViolationTitle: 'Security Violation',
+    violationContinue: 'Continue',
+    violationModalMessage:
+      '{warning}. You have {count} {retriesWord} remaining. Click Continue to re-enter.',
+    violationRetrySingular: 'retry',
+    violationRetriesPlural: 'retries',
+    violationFullscreenExit: 'You exited fullscreen mode',
+    violationTabSwitch: 'You switched tabs',
+    violationWindowBlur: 'You switched windows',
+    violationPageExit: 'You attempted to leave the page',
+    violationDuplicateTab: 'Quiz is open in another tab',
+    violationDevTools: 'You opened developer tools',
+    violationGeneric: 'Security violation detected',
     // Leaderboard
     firstAttemptResults: 'First attempt results (Score • Time • Date)',
     leaderboard: {
@@ -291,6 +314,9 @@ export const en = {
     cancel: 'Cancel',
     failedDeleteBlog: 'Failed to delete blog',
     failedUpdateBlog: 'Failed to update blog',
+    fillAllFields: 'Please fill in all fields',
+    failedToLoadBlog: 'Failed to load blog',
+    saveErrorGeneric: 'An error occurred. Please try again.',
   },
 
   // Admin
@@ -412,6 +438,8 @@ export const en = {
     noAvailableCourses: 'No available courses found. You may already be enrolled in all available courses, or there are no published courses at the moment.',
     allCoursesEnrolled: 'You have enrolled in all available courses. Check back later for new courses!',
     goToMyCourses: 'Go to My Courses',
+    dropSuccess: 'Course dropped successfully',
+    errorEnrolling: 'Error enrolling in course',
   },
 
   // Language
@@ -499,6 +527,7 @@ export const en = {
     analyticsDesc: 'Track your courses, students, and quiz performance.',
     loadingAnalytics: 'Loading analytics...',
     retry: 'Retry',
+    errorLoading: 'Error loading analytics',
     totalCourses: 'Total Courses',
     published: 'Published',
     totalStudents: 'Total Students',
@@ -587,6 +616,20 @@ export const en = {
     errorStartingQuiz: 'Error starting quiz',
     failedLoadDashboardData: 'Failed to load dashboard data',
     unknownError: 'Unknown error',
+    errorLoadingAnalytics: 'Error loading analytics data',
+    quizNotFound: 'Quiz not found',
+    failedToLoadQuiz: 'Failed to load quiz',
+    securityForceSubmitFailed: 'Failed to submit quiz due to security violation',
+    closeDevTools: 'Please close developer tools before continuing',
+    quizAttemptNotFound: 'Quiz attempt not found',
+    errorLoadingQuiz: 'Error loading quiz',
+    errorStartingNewAttempt: 'Error starting new attempt',
+    errorSubmittingQuiz: 'Error submitting quiz',
+    genericError: 'An error occurred',
+    leaderboardLoadFailed: 'Failed to load leaderboard',
+    pageErrorTitle: 'Something went wrong',
+    pageErrorDescription: 'An unexpected error occurred. Please try again later.',
+    tryAgainButton: 'Try again',
   },
 
   // Favorites
@@ -777,6 +820,8 @@ export const en = {
     noOrganization: 'No Organization',
     userOrganizationUpdated: 'User organization updated successfully',
     failedUpdateOrganization: 'Failed to update user organization',
+    userRoleUpdatedSuccess: 'User role updated successfully',
+    userDeletedSuccess: 'User deleted successfully',
   },
 
   // Organization Management
@@ -840,6 +885,8 @@ export const en = {
     continueWithGoogle: 'Continue with Google',
     dontHaveAccount: 'Don\'t have an account?',
     createOne: 'Create one',
+    invalidCredentials: 'Invalid email or password',
+    genericError: 'An error occurred. Please try again.',
   },
 
   // Register
@@ -853,5 +900,6 @@ export const en = {
     confirmPassword: 'Confirm Password',
     alreadyHaveAccount: 'Already have an account?',
     signIn: 'Sign in',
+    passwordsDoNotMatch: 'Passwords do not match',
   },
 };

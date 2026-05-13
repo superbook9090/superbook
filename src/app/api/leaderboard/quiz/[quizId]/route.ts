@@ -24,46 +24,62 @@ export async function GET(
       return NextResponse.json({ error: 'Quiz not found' }, { status: 404 });
     }
 
-    // Get leaderboard for this quiz - show only first attempts
-    const leaderboard = await QuizAttempt.aggregate([
-      { $match: { quiz: new mongoose.Types.ObjectId(quizId), status: 'completed', attemptNumber: 1 } },
+    const quizObjectId = new mongoose.Types.ObjectId(quizId);
+
+    const [facetResult] = await QuizAttempt.aggregate([
       {
-        $lookup: {
-          from: 'users',
-          localField: 'student',
-          foreignField: '_id',
-          as: 'user'
-        }
+        $facet: {
+          meta: [
+            { $match: { quiz: quizObjectId, status: 'completed' } },
+            { $count: 'n' },
+          ],
+          leaderboard: [
+            { $match: { quiz: quizObjectId, status: 'completed', attemptNumber: 1 } },
+            {
+              $lookup: {
+                from: 'users',
+                let: { sid: '$student' },
+                pipeline: [
+                  { $match: { $expr: { $eq: ['$_id', '$$sid'] } } },
+                  { $project: { name: 1, avatar: 1 } },
+                ],
+                as: 'user',
+              },
+            },
+            { $unwind: '$user' },
+            {
+              $project: {
+                userId: '$student',
+                name: { $ifNull: ['$user.name', 'Anonymous'] },
+                image: { $ifNull: ['$user.avatar', null] },
+                score: '$score',
+                rank: { $literal: 0 },
+                completedAt: '$submittedAt',
+                timeTaken: '$timeTaken',
+                attemptNumber: '$attemptNumber',
+              },
+            },
+            { $sort: { score: -1, timeTaken: 1, completedAt: 1 } },
+            { $limit: 50 },
+          ],
+        },
       },
-      { $unwind: '$user' },
-      {
-        $project: {
-          userId: '$student',
-          name: { $ifNull: ['$user.name', 'Anonymous'] },
-          image: { $ifNull: ['$user.avatar', null] },
-          score: '$score',
-          rank: { $literal: 0 }, // Will be set in next stage
-          completedAt: '$submittedAt',
-          timeTaken: '$timeTaken',
-          attemptNumber: '$attemptNumber'
-        }
-      },
-      { $sort: { score: -1, timeTaken: 1, completedAt: 1 } }, // Higher score first, then faster time, then earlier date
-      { $limit: 50 } // Top 50
     ]);
 
-    // Add rank numbers
-    const rankedLeaderboard = leaderboard.map((entry, index) => ({
+    const totalAttempts = facetResult?.meta?.[0]?.n ?? 0;
+    const leaderboard = facetResult?.leaderboard ?? [];
+
+    const rankedLeaderboard = leaderboard.map((entry: Record<string, unknown>, index: number) => ({
       ...entry,
-      rank: index + 1
+      rank: index + 1,
     }));
 
     return NextResponse.json({
       leaderboard: rankedLeaderboard,
       quiz: {
         id: quizId,
-        totalAttempts: await QuizAttempt.countDocuments({ quiz: quizId, status: 'completed' })
-      }
+        totalAttempts,
+      },
     });
 
   } catch (error) {

@@ -121,7 +121,7 @@ export default function TeacherCoursesPage() {
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                       course.isPublished
                         ? 'bg-[var(--success-light)] text-[var(--success)]'
-                        : 'bg-[var(--color-muted)] text-[var(--color-muted-foreground)]'
+                        : 'bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)]'
                     }`}>
                       {course.isPublished ? t('teacherCourses.published') : t('teacherCourses.draft')}
                     </span>

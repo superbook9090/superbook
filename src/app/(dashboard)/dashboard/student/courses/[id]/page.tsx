@@ -114,7 +114,7 @@ export default function CourseDetailPage() {
           <span className="text-sm font-medium text-[var(--color-muted-foreground)]">Course Progress</span>
           <span className="text-sm font-bold text-[var(--student-primary)]">{enrollment.progress}%</span>
         </div>
-        <div className="w-full bg-[var(--color-muted)]/30 rounded-full h-3">
+        <div className="w-full bg-[var(--color-surface-muted)]/30 rounded-full h-3">
           <div
             className="h-full rounded-full bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-primary-light)] transition-all duration-500"
             style={{ width: `${enrollment.progress}%` }}

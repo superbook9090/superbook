@@ -188,7 +188,7 @@ export default function AdminSettingsPage() {
                     },
                   })
                 }
-                className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
+                className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
               />
               <p className="text-xs text-[var(--color-muted-foreground)] mt-1">
                 {t('adminSettings.coursesLimitDesc')}
@@ -218,7 +218,7 @@ export default function AdminSettingsPage() {
                     },
                   })
                 }
-                className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
+                className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
               />
               <p className="text-xs text-[var(--color-muted-foreground)] mt-1">
                 {t('adminSettings.quizzesLimitDesc')}
@@ -248,7 +248,7 @@ export default function AdminSettingsPage() {
                     },
                   })
                 }
-                className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
+                className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
               />
               <p className="text-xs text-[var(--color-muted-foreground)] mt-1">
                 {t('adminSettings.blogsLimitDesc')}
@@ -272,7 +272,7 @@ export default function AdminSettingsPage() {
 
         <div className="space-y-4">
           {/* Enable Blogs */}
-          <div className="flex items-center justify-between p-4 bg-[var(--color-muted)] rounded-xl">
+          <div className="flex items-center justify-between p-4 bg-[var(--color-surface-muted)] rounded-xl">
             <div className="flex items-center gap-3">
               <BookOpen className={`w-5 h-5 ${theme.text}`} />
               <div>
@@ -291,7 +291,7 @@ export default function AdminSettingsPage() {
                 })
               }
               className={`relative inline-flex h-6 w-11 min-h-[44px] sm:min-h-0 items-center rounded-full transition-colors ${
-                settings.featureToggles.enableBlogs ? `bg-gradient-to-r ${theme.gradient}` : 'bg-[var(--color-muted)]'
+                settings.featureToggles.enableBlogs ? `bg-gradient-to-r ${theme.gradient}` : 'bg-[var(--color-surface-muted)]'
               }`}
             >
               <span
@@ -303,7 +303,7 @@ export default function AdminSettingsPage() {
           </div>
 
           {/* Enable Quizzes */}
-          <div className="flex items-center justify-between p-4 bg-[var(--color-muted)] rounded-xl">
+          <div className="flex items-center justify-between p-4 bg-[var(--color-surface-muted)] rounded-xl">
             <div className="flex items-center gap-3">
               <FileText className={`w-5 h-5 ${theme.text}`} />
               <div>
@@ -322,7 +322,7 @@ export default function AdminSettingsPage() {
                 })
               }
               className={`relative inline-flex h-6 w-11 min-h-[44px] sm:min-h-0 items-center rounded-full transition-colors ${
-                settings.featureToggles.enableQuizzes ? `bg-gradient-to-r ${theme.gradient}` : 'bg-[var(--color-muted)]'
+                settings.featureToggles.enableQuizzes ? `bg-gradient-to-r ${theme.gradient}` : 'bg-[var(--color-surface-muted)]'
               }`}
             >
               <span
@@ -334,7 +334,7 @@ export default function AdminSettingsPage() {
           </div>
 
           {/* Enable Courses */}
-          <div className="flex items-center justify-between p-4 bg-[var(--color-muted)] rounded-xl">
+          <div className="flex items-center justify-between p-4 bg-[var(--color-surface-muted)] rounded-xl">
             <div className="flex items-center gap-3">
               <GraduationCap className={`w-5 h-5 ${theme.text}`} />
               <div>
@@ -353,7 +353,7 @@ export default function AdminSettingsPage() {
                 })
               }
               className={`relative inline-flex h-6 w-11 min-h-[44px] sm:min-h-0 items-center rounded-full transition-colors ${
-                settings.featureToggles.enableCourses ? `bg-gradient-to-r ${theme.gradient}` : 'bg-[var(--color-muted)]'
+                settings.featureToggles.enableCourses ? `bg-gradient-to-r ${theme.gradient}` : 'bg-[var(--color-surface-muted)]'
               }`}
             >
               <span
@@ -365,7 +365,7 @@ export default function AdminSettingsPage() {
           </div>
 
           {/* Enable Analytics */}
-          <div className="flex items-center justify-between p-4 bg-[var(--color-muted)] rounded-xl">
+          <div className="flex items-center justify-between p-4 bg-[var(--color-surface-muted)] rounded-xl">
             <div className="flex items-center gap-3">
               <Settings className={`w-5 h-5 ${theme.text}`} />
               <div>
@@ -384,7 +384,7 @@ export default function AdminSettingsPage() {
                 })
               }
               className={`relative inline-flex h-6 w-11 min-h-[44px] sm:min-h-0 items-center rounded-full transition-colors ${
-                settings.featureToggles.enableAnalytics ? `bg-gradient-to-r ${theme.gradient}` : 'bg-[var(--color-muted)]'
+                settings.featureToggles.enableAnalytics ? `bg-gradient-to-r ${theme.gradient}` : 'bg-[var(--color-surface-muted)]'
               }`}
             >
               <span
@@ -411,7 +411,7 @@ export default function AdminSettingsPage() {
 
         <div className="space-y-6">
           {/* Maintenance Mode */}
-          <div className="flex items-center justify-between p-4 bg-[var(--color-muted)] rounded-xl">
+          <div className="flex items-center justify-between p-4 bg-[var(--color-surface-muted)] rounded-xl">
             <div className="flex items-center gap-3">
               <Power className={`w-5 h-5 ${theme.text}`} />
               <div>
@@ -430,7 +430,7 @@ export default function AdminSettingsPage() {
                 })
               }
               className={`relative inline-flex h-6 w-11 min-h-[44px] sm:min-h-0 items-center rounded-full transition-colors ${
-                settings.platformConfig.maintenanceMode ? `bg-gradient-to-r ${theme.gradient}` : 'bg-[var(--color-muted)]'
+                settings.platformConfig.maintenanceMode ? `bg-gradient-to-r ${theme.gradient}` : 'bg-[var(--color-surface-muted)]'
               }`}
             >
               <span
@@ -442,7 +442,7 @@ export default function AdminSettingsPage() {
           </div>
 
           {/* Allow Registration */}
-          <div className="flex items-center justify-between p-4 bg-[var(--color-muted)] rounded-xl">
+          <div className="flex items-center justify-between p-4 bg-[var(--color-surface-muted)] rounded-xl">
             <div className="flex items-center gap-3">
               <UserPlus className={`w-5 h-5 ${theme.text}`} />
               <div>
@@ -461,7 +461,7 @@ export default function AdminSettingsPage() {
                 })
               }
               className={`relative inline-flex h-6 w-11 min-h-[44px] sm:min-h-0 items-center rounded-full transition-colors ${
-                settings.platformConfig.allowRegistration ? `bg-gradient-to-r ${theme.gradient}` : 'bg-[var(--color-muted)]'
+                settings.platformConfig.allowRegistration ? `bg-gradient-to-r ${theme.gradient}` : 'bg-[var(--color-surface-muted)]'
               }`}
             >
               <span

@@ -59,7 +59,7 @@ export default function RegisterForm() {
     setError('');
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('register.passwordsDoNotMatch'));
       return;
     }
 

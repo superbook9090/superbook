@@ -8,10 +8,11 @@ import { AppSettingsProvider } from "@/contexts/AppSettingsContext";
 import MaintenanceCheck from '@/components/MaintenanceCheck';
 import { SessionProvider } from '@/components/providers/SessionProvider';
 import { QueryProvider } from '@/lib/react-query/QueryProvider';
+import { en } from '@/i18n/en';
 
 export const metadata: Metadata = {
-  title: 'quiz-do - The Future of Learning',
-  description: 'Learning Management System',
+  title: en.metadata.siteTitle,
+  description: en.metadata.siteDescription,
   icons: {
     icon: '/logo.svg',
     apple: '/logo.svg',
@@ -29,13 +30,13 @@ export default function RootLayout({
         <GoogleAnalytics gaId="G-DRRECK67YF" />
         <QueryProvider>
           <SessionProvider>
-            <AppSettingsProvider>
-              <MaintenanceCheck>
-                <LanguageProvider>
+            <LanguageProvider>
+              <AppSettingsProvider>
+                <MaintenanceCheck>
                   {children}
-                </LanguageProvider>
-              </MaintenanceCheck>
-            </AppSettingsProvider>
+                </MaintenanceCheck>
+              </AppSettingsProvider>
+            </LanguageProvider>
           </SessionProvider>
         </QueryProvider>
         <Analytics />

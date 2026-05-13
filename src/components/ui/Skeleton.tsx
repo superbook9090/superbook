@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface SkeletonProps {
   className?: string;
@@ -40,9 +41,10 @@ export type PageSkeletonVariant = 'full' | 'content' | 'embed';
  * - `embed` — single large block (`<Suspense>` fallbacks)
  */
 export function PageSkeleton({ variant = 'full' }: { variant?: PageSkeletonVariant }) {
+  const { t } = useTranslation();
   if (variant === 'embed') {
     return (
-      <div className="page-shell" aria-busy="true" aria-label="Loading">
+      <div className="page-shell" aria-busy="true" aria-label={t('common.loading')}>
         <Skeleton className="h-64 w-full rounded-2xl" />
       </div>
     );
@@ -50,14 +52,14 @@ export function PageSkeleton({ variant = 'full' }: { variant?: PageSkeletonVaria
 
   if (variant === 'content') {
     return (
-      <div className="w-full" aria-busy="true" aria-label="Loading">
+      <div className="w-full" aria-busy="true" aria-label={t('common.loading')}>
         <CompactRowSkeletonGrid />
       </div>
     );
   }
 
   return (
-    <div className="page-shell stack-page" aria-busy="true" aria-label="Loading">
+    <div className="page-shell stack-page" aria-busy="true" aria-label={t('common.loading')}>
       <div className="page-skeleton-header">
         <div className="min-w-0 flex-1 space-y-2">
           <Skeleton className="h-8 w-48 max-w-full rounded-lg" />

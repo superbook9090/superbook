@@ -41,7 +41,7 @@ interface Blog {
   _id: string;
   title: string;
   topic: string;
-  content: string;
+  content?: string;
   language: string;
   isPublished: boolean;
   createdAt: string;
@@ -171,7 +171,7 @@ export default function TeacherDashboardPage() {
               }}
               className={`inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base text-[var(--teacher-primary)] rounded-xl font-semibold shadow-lg transition-all ${
                 isAtLimit('courses')
-                  ? 'bg-[var(--color-muted)] cursor-not-allowed'
+                  ? 'bg-[var(--color-surface-muted)] cursor-not-allowed'
                   : 'bg-white hover:shadow-xl'
               }`}
             >
@@ -423,7 +423,7 @@ export default function TeacherDashboardPage() {
             }}
             className={`flex items-center justify-center sm:justify-start w-full min-h-[44px] p-3 sm:p-4 rounded-xl transition-colors group ${
               filteredStats.totalCourses >= limits.courses
-                ? 'bg-[var(--color-muted)] cursor-not-allowed'
+                ? 'bg-[var(--color-surface-muted)] cursor-not-allowed'
                 : 'bg-[var(--warning-light)] hover:bg-[var(--warning-light)]/80'
             }`}
           >
@@ -454,7 +454,7 @@ export default function TeacherDashboardPage() {
             }}
             className={`flex items-center justify-center sm:justify-start w-full min-h-[44px] p-3 sm:p-4 rounded-xl transition-colors group ${
               filteredStats.totalBlogs >= limits.blogs
-                ? 'bg-[var(--color-muted)] cursor-not-allowed'
+                ? 'bg-[var(--color-surface-muted)] cursor-not-allowed'
                 : 'bg-[var(--admin-soft)] hover:bg-[var(--admin-border)]'
             }`}
           >

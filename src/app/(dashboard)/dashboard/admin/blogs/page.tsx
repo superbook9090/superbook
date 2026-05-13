@@ -134,7 +134,7 @@ export default function AdminBlogsPage() {
             placeholder={t('admin.searchBlogs')}
             defaultValue={searchTerm}
             onChange={(e) => debouncedSearchHandler(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
+            className="w-full pl-10 pr-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -142,7 +142,7 @@ export default function AdminBlogsPage() {
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value as 'all' | 'published' | 'draft')}
-            className="flex-1 sm:flex-none px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
+            className="flex-1 sm:flex-none px-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
           >
             <option value="all">{t('admin.allBlogs')}</option>
             <option value="published">{t('admin.published')}</option>
@@ -154,7 +154,7 @@ export default function AdminBlogsPage() {
           <select
             value={languageFilter}
             onChange={(e) => setLanguageFilter(e.target.value as 'all' | 'en' | 'hi')}
-            className="flex-1 sm:flex-none px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
+            className="flex-1 sm:flex-none px-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
           >
             <option value="all">{t('admin.allLanguages')}</option>
             <option value="en">{t('admin.english')}</option>
@@ -252,7 +252,7 @@ export default function AdminBlogsPage() {
                 <div className="flex gap-2 pt-4 border-t border-[var(--border)]">
                   <button
                     onClick={() => handleTogglePublish(blog._id, blog.isPublished)}
-                    className="flex-1 flex items-center justify-center min-h-[44px] sm:min-h-0 px-3 py-2.5 bg-[var(--color-muted)] text-[var(--color-foreground)] rounded-lg hover:bg-[var(--color-muted)]/80 transition-colors text-sm touch-manipulation"
+                    className="flex-1 flex items-center justify-center min-h-[44px] sm:min-h-0 px-3 py-2.5 bg-[var(--color-surface-muted)] text-[var(--color-foreground)] rounded-lg hover:bg-[var(--color-surface-muted)]/80 transition-colors text-sm touch-manipulation"
                   >
                     {blog.isPublished ? (
                       <>

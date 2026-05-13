@@ -51,7 +51,7 @@ export default function LoginForm() {
       });
 
       if (result?.error) {
-        setError('Invalid email or password');
+        setError(t('login.invalidCredentials'));
         setIsLoading(false);
         return;
       }
@@ -65,7 +65,7 @@ export default function LoginForm() {
       // Redirect to /dashboard - server-side redirect will handle role-based routing
       router.push('/dashboard');
     } catch (error) {
-      setError('An error occurred. Please try again.');
+      setError(t('login.genericError'));
       console.error('Login error:', error);
       setIsLoading(false);
     }

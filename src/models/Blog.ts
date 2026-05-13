@@ -57,8 +57,10 @@ const blogSchema = new Schema<IBlog>(
 );
 
 // Index for faster queries
+blogSchema.index({ organizationId: 1 });
+blogSchema.index({ organizationId: 1, isPublished: 1, createdAt: -1 });
+blogSchema.index({ author: 1, createdAt: -1 });
 blogSchema.index({ topic: 1, isPublished: 1 });
-blogSchema.index({ author: 1 });
 blogSchema.index({ createdAt: -1 });
 blogSchema.index({ language: 1 });
 

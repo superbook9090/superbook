@@ -158,7 +158,7 @@ export default function AdminCoursesPage() {
             placeholder={t('admin.searchCourses')}
             defaultValue={searchTerm}
             onChange={(e) => debouncedSearchHandler(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
+            className="w-full pl-10 pr-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
           />
         </div>
 
@@ -168,7 +168,7 @@ export default function AdminCoursesPage() {
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value as 'all' | 'published' | 'draft')}
-            className="px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
+            className="px-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
           >
             <option value="all">{t('admin.allCourses')}</option>
             <option value="published">{t('common.published')}</option>
@@ -267,7 +267,7 @@ export default function AdminCoursesPage() {
                 <div className="flex gap-2 pt-4 border-t border-[var(--border)]">
                   <button
                     onClick={() => handleTogglePublish(course._id, course.isPublished)}
-                    className="flex-1 flex items-center justify-center min-h-[44px] sm:min-h-0 px-3 py-2 bg-[var(--color-muted)] text-[var(--color-foreground)] rounded-lg hover:bg-[var(--color-muted)]/80 transition-colors text-sm"
+                    className="flex-1 flex items-center justify-center min-h-[44px] sm:min-h-0 px-3 py-2 bg-[var(--color-surface-muted)] text-[var(--color-foreground)] rounded-lg hover:bg-[var(--color-surface-muted)]/80 transition-colors text-sm"
                   >
                     {course.isPublished ? (
                       <>

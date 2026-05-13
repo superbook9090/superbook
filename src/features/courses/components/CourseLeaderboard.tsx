@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import Leaderboard from '@/components/ui/Leaderboard';
 import { Loader } from '@/components/ui/Loader';
 import { fetchCourseLeaderboard } from '@/lib/api/leaderboard';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface LeaderboardApiResponse {
   userId: string;
@@ -36,6 +37,7 @@ export default function CourseLeaderboard({
   showUserRank = false,
   currentUserId 
 }: CourseLeaderboardProps) {
+  const { t } = useTranslation();
   const [leaderboard, setLeaderboard] = useState<CourseLeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -64,11 +66,11 @@ export default function CourseLeaderboard({
         totalQuizzes: data.course?.totalQuizzes || 0
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : t('errors.leaderboardLoadFailed'));
     } finally {
       setLoading(false);
     }
-  }, [courseId]);
+  }, [courseId, t]);
 
   useEffect(() => {
     if (courseId) {
@@ -92,7 +94,7 @@ export default function CourseLeaderboard({
           onClick={fetchLeaderboard}
           className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
         >
-          Try Again
+          {t('quiz.leaderboard.tryAgain')}
         </button>
       </div>
     );
@@ -106,7 +108,11 @@ export default function CourseLeaderboard({
     >
       <Leaderboard
         data={leaderboard}
-        title={`${courseTitle || 'Course'} Leaderboard`}
+        title={
+          courseTitle
+            ? `${courseTitle} — ${t('quiz.leaderboard.title')}`
+            : t('quiz.leaderboard.courseLeaderboard')
+        }
         subtitle={`${courseStats.totalStudents} students • ${courseStats.totalQuizzes} quizzes`}
         showUserRank={showUserRank ? currentUserId : undefined}
         type="course"

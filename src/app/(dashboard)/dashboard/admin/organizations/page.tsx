@@ -158,10 +158,10 @@ export default function OrganizationsPage() {
   if (isLoading) {
     return (
       <div className="px-4 sm:px-6 lg:px-8 space-y-6">
-        <div className="w-32 h-8 bg-[var(--color-muted)] rounded-lg animate-pulse mb-4" />
+        <div className="w-32 h-8 bg-[var(--color-surface-muted)] rounded-lg animate-pulse mb-4" />
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-20 bg-[var(--color-muted)] rounded-lg animate-pulse" />
+            <div key={i} className="h-20 bg-[var(--color-surface-muted)] rounded-lg animate-pulse" />
           ))}
         </div>
       </div>
@@ -216,14 +216,14 @@ export default function OrganizationsPage() {
                 key={org._id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-6 hover:bg-[var(--color-muted)] transition-colors"
+                className="p-6 hover:bg-[var(--color-surface-muted)] transition-colors"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-lg font-semibold text-[var(--color-foreground)]">{org.name}</h3>
                       {!org.isActive && (
-                        <span className="px-2 py-1 text-xs font-medium bg-[var(--color-muted)] text-[var(--color-muted-foreground)] rounded-full">
+                        <span className="px-2 py-1 text-xs font-medium bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)] rounded-full">
                           {t('organizations.inactive')}
                         </span>
                       )}
@@ -234,7 +234,7 @@ export default function OrganizationsPage() {
 
                     {/* Codes */}
                     <div className="flex flex-wrap gap-4 mb-4">
-                      <div className="flex items-center gap-2 bg-[var(--color-muted)] px-3 py-1.5 rounded-lg">
+                      <div className="flex items-center gap-2 bg-[var(--color-surface-muted)] px-3 py-1.5 rounded-lg">
                         <span className="text-xs text-[var(--color-muted-foreground)]">{t('organizations.code')}:</span>
                         <code className="text-sm font-mono text-[var(--color-foreground)]">{org.code}</code>
                         <button
@@ -370,7 +370,7 @@ export default function OrganizationsPage() {
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="flex-1 min-h-[44px] sm:min-h-0 px-4 py-2 border border-[var(--border)] text-[var(--color-foreground)] rounded-lg hover:bg-[var(--color-muted)] transition-colors"
+                  className="flex-1 min-h-[44px] sm:min-h-0 px-4 py-2 border border-[var(--border)] text-[var(--color-foreground)] rounded-lg hover:bg-[var(--color-surface-muted)] transition-colors"
                 >
                   {t('organizations.cancel')}
                 </button>
@@ -448,7 +448,7 @@ export default function OrganizationsPage() {
                 <button
                   type="button"
                   onClick={() => setShowEditModal(false)}
-                  className="flex-1 min-h-[44px] sm:min-h-0 px-4 py-2 border border-[var(--border)] text-[var(--color-foreground)] rounded-lg hover:bg-[var(--color-muted)] transition-colors"
+                  className="flex-1 min-h-[44px] sm:min-h-0 px-4 py-2 border border-[var(--border)] text-[var(--color-foreground)] rounded-lg hover:bg-[var(--color-surface-muted)] transition-colors"
                 >
                   {t('organizations.cancel')}
                 </button>

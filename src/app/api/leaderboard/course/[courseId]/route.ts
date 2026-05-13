@@ -37,51 +37,79 @@ export async function GET(
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
-    // Get course leaderboard
-    const leaderboard = await QuizAttempt.aggregate([
-      { $match: { course: new mongoose.Types.ObjectId(courseId), status: 'completed' } },
+    const courseOid = new mongoose.Types.ObjectId(courseId);
+
+    const [packed] = await QuizAttempt.aggregate([
+      { $match: { course: courseOid, status: 'completed' } },
       {
-        $group: {
-          _id: '$student',
-          totalScore: { $sum: '$score' },
-          quizCount: { $sum: 1 },
-          averageScore: { $avg: '$score' },
-          bestScore: { $max: '$score' },
-          completedQuizzes: { $sum: 1 },
-          lastCompletedAt: { $max: '$submittedAt' }
-        }
+        $facet: {
+          meta: [
+            {
+              $group: {
+                _id: null,
+                students: { $addToSet: '$student' },
+                quizzes: { $addToSet: '$quiz' },
+              },
+            },
+            {
+              $project: {
+                _id: 0,
+                totalStudents: { $size: '$students' },
+                totalQuizzes: { $size: '$quizzes' },
+              },
+            },
+          ],
+          leaderboard: [
+            {
+              $group: {
+                _id: '$student',
+                totalScore: { $sum: '$score' },
+                quizCount: { $sum: 1 },
+                averageScore: { $avg: '$score' },
+                bestScore: { $max: '$score' },
+                completedQuizzes: { $sum: 1 },
+                lastCompletedAt: { $max: '$submittedAt' },
+              },
+            },
+            {
+              $lookup: {
+                from: 'users',
+                let: { sid: '$_id' },
+                pipeline: [
+                  { $match: { $expr: { $eq: ['$_id', '$$sid'] } } },
+                  { $project: { name: 1, avatar: 1 } },
+                ],
+                as: 'user',
+              },
+            },
+            { $unwind: '$user' },
+            {
+              $project: {
+                userId: '$_id',
+                name: { $ifNull: ['$user.name', 'Anonymous'] },
+                image: { $ifNull: ['$user.avatar', null] },
+                totalScore: '$totalScore',
+                averageScore: { $round: ['$averageScore', 2] },
+                bestScore: '$bestScore',
+                quizCount: '$quizCount',
+                completedQuizzes: '$completedQuizzes',
+                rank: { $literal: 0 },
+                lastCompletedAt: '$lastCompletedAt',
+              },
+            },
+            { $sort: { totalScore: -1, lastCompletedAt: 1 } },
+            { $limit: 50 },
+          ],
+        },
       },
-      {
-        $lookup: {
-          from: 'users',
-          localField: '_id',
-          foreignField: '_id',
-          as: 'user'
-        }
-      },
-      { $unwind: '$user' },
-      {
-        $project: {
-          userId: '$_id',
-          name: { $ifNull: ['$user.name', 'Anonymous'] },
-          image: { $ifNull: ['$user.avatar', null] },
-          totalScore: '$totalScore',
-          averageScore: { $round: ['$averageScore', 2] },
-          bestScore: '$bestScore',
-          quizCount: '$quizCount',
-          completedQuizzes: '$completedQuizzes',
-          rank: { $literal: 0 }, // Will be set in next stage
-          lastCompletedAt: '$lastCompletedAt'
-        }
-      },
-      { $sort: { totalScore: -1, lastCompletedAt: 1 } }, // Higher total score first, then recent activity
-      { $limit: 50 } // Top 50
     ]);
 
-    // Add rank numbers
-    const rankedLeaderboard = leaderboard.map((entry, index) => ({
+    const meta = packed?.meta?.[0] || { totalStudents: 0, totalQuizzes: 0 };
+    const leaderboard = packed?.leaderboard ?? [];
+
+    const rankedLeaderboard = leaderboard.map((entry: Record<string, unknown>, index: number) => ({
       ...entry,
-      rank: index + 1
+      rank: index + 1,
     }));
 
     return NextResponse.json({
@@ -89,9 +117,9 @@ export async function GET(
       course: {
         id: courseId,
         title: course.title,
-        totalStudents: (await QuizAttempt.distinct('student', { course: courseId, status: 'completed' })).length,
-        totalQuizzes: (await QuizAttempt.distinct('quiz', { course: courseId, status: 'completed' })).length
-      }
+        totalStudents: meta.totalStudents ?? 0,
+        totalQuizzes: meta.totalQuizzes ?? 0,
+      },
     });
 
   } catch (error) {

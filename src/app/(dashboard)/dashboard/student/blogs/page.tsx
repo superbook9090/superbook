@@ -162,7 +162,7 @@ export default function StudentBlogsPage() {
             placeholder={t('blog.searchBlogs')}
             value={searchInput}
             onChange={handleSearchChange}
-            className="w-full pl-10 pr-4 py-3 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
+            className="w-full pl-10 pr-4 py-3 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
           />
         </div>
 
@@ -176,7 +176,7 @@ export default function StudentBlogsPage() {
               className={`px-4 py-2.5 min-h-[44px] rounded-full text-sm font-medium whitespace-nowrap transition-all touch-manipulation ${
                 selectedTopic === topic
                   ? `${theme.primary} text-white`
-                  : 'bg-[var(--color-muted)] text-[var(--color-muted-foreground)] hover:bg-[var(--color-muted)]/80'
+                  : 'bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)] hover:bg-[var(--color-surface-muted)]/80'
               }`}
             >
               {t(`topics.${topic}`)}
@@ -190,7 +190,7 @@ export default function StudentBlogsPage() {
           <select
             value={languageFilter}
             onChange={(e) => setLanguageFilter(e.target.value as 'all' | 'en' | 'hi')}
-            className="flex-1 sm:flex-none px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
+            className="flex-1 sm:flex-none px-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
           >
             <option value="all">{t('blog.allLanguages')}</option>
             <option value="en">English</option>
@@ -262,7 +262,7 @@ export default function StudentBlogsPage() {
                     </Badge>
                     <button
                       onClick={() => toggleFavorite(blog._id)}
-                      className="p-2 min-h-[44px] sm:min-h-0 rounded-full hover:bg-[var(--color-muted)] transition-colors"
+                      className="p-2 min-h-[44px] sm:min-h-0 rounded-full hover:bg-[var(--color-surface-muted)] transition-colors"
                     >
                       <Heart
                         className={`w-5 h-5 transition-colors ${

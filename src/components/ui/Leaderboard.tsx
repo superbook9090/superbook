@@ -119,7 +119,7 @@ export default function Leaderboard({
                   className={`
                     flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 sm:p-5 rounded-xl border
                     transition-all duration-200 cursor-pointer
-                    ${entry.rank <= 3 ? top3Style : 'bg-[var(--color-muted)]/30 border-[var(--color-border)]'}
+                    ${entry.rank <= 3 ? top3Style : 'bg-[var(--color-surface-muted)]/30 border-[var(--color-border)]'}
                     ${currentUser ? 'ring-2 ring-[var(--student-primary)]/30 border-[var(--student-primary)]/50' : ''}
                     hover:shadow-xl hover:border-[var(--color-border-hover)]
                   `}
@@ -177,7 +177,7 @@ export default function Leaderboard({
                       </div>
                     </div>
                     {scoreDisplay.details && (
-                      <div className="text-xs text-[var(--color-muted-foreground)]/70 bg-[var(--color-muted)]/50 px-2 py-1 rounded-lg">
+                      <div className="text-xs text-[var(--color-muted-foreground)]/70 bg-[var(--color-surface-muted)]/50 px-2 py-1 rounded-lg">
                         {scoreDisplay.details}
                       </div>
                     )}

@@ -152,7 +152,7 @@ export default function TeacherBlogsPage() {
               placeholder={t('blog.searchBlogs')}
               defaultValue={searchTerm}
               onChange={(e) => debouncedSearchHandler(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--teacher-primary)]/20 focus:border-[var(--teacher-primary)]"
+              className="w-full pl-10 pr-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--teacher-primary)]/20 focus:border-[var(--teacher-primary)]"
             />
           </div>
 
@@ -162,7 +162,7 @@ export default function TeacherBlogsPage() {
             <select
               value={filter}
               onChange={(e) => setFilter(e.target.value as 'all' | 'published' | 'draft')}
-              className="flex-1 sm:flex-none px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--teacher-primary)]/20 focus:border-[var(--teacher-primary)]"
+              className="flex-1 sm:flex-none px-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--teacher-primary)]/20 focus:border-[var(--teacher-primary)]"
             >
               <option value="all">{t('blog.allBlogs')}</option>
               <option value="published">{t('blog.published')}</option>
@@ -176,7 +176,7 @@ export default function TeacherBlogsPage() {
             <select
               value={languageFilter}
               onChange={(e) => setLanguageFilter(e.target.value as 'all' | 'en' | 'hi')}
-              className="flex-1 sm:flex-none px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--teacher-primary)]/20 focus:border-[var(--teacher-primary)]"
+              className="flex-1 sm:flex-none px-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--teacher-primary)]/20 focus:border-[var(--teacher-primary)]"
             >
               <option value="all">{t('blog.allLanguages')}</option>
               <option value="en">{t('common.english')}</option>
@@ -274,7 +274,7 @@ export default function TeacherBlogsPage() {
                     className={`p-2.5 sm:p-2 rounded-lg transition-colors touch-manipulation min-h-[44px] sm:min-h-0 ${
                       blog.isPublished
                         ? `${theme.activeBg} ${theme.text} hover:opacity-80`
-                        : 'bg-[var(--color-muted)] text-[var(--color-muted-foreground)] hover:bg-[var(--color-muted)]/80'
+                        : 'bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)] hover:bg-[var(--color-surface-muted)]/80'
                     }`}
                     title={blog.isPublished ? t('blog.unpublish') : t('blog.publish')}
                   >
@@ -282,7 +282,7 @@ export default function TeacherBlogsPage() {
                   </button>
                   <Link
                     href={`/dashboard/teacher/blogs/edit/${blog._id}`}
-                    className="p-2.5 sm:p-2 bg-[var(--color-muted)] text-[var(--color-muted-foreground)] rounded-lg hover:bg-[var(--color-muted)]/80 transition-colors touch-manipulation min-h-[44px] sm:min-h-0"
+                    className="p-2.5 sm:p-2 bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)] rounded-lg hover:bg-[var(--color-surface-muted)]/80 transition-colors touch-manipulation min-h-[44px] sm:min-h-0"
                     title={t('blog.edit')}
                   >
                     <Edit2 className="w-5 h-5" />

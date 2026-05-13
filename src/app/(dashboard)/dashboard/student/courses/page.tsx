@@ -41,7 +41,7 @@ export default function StudentCoursesPage() {
 
     try {
       await dropEnrollment.mutateAsync(enrollmentToDrop);
-      setAlertState({ type: 'success', message: t('courses.dropSuccess') || 'Course dropped successfully' });
+      setAlertState({ type: 'success', message: t('courses.dropSuccess') });
       setIsDropModalOpen(false);
       setEnrollmentToDrop(null);
     } catch {

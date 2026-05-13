@@ -110,7 +110,7 @@ export default function AdminUsersPage() {
         text:
           err instanceof ApiClientError
             ? err.message
-            : t('admin.errorLoadingUsers') || 'Error loading users',
+            : t('adminSettings.errorLoadingUsers'),
       });
     } finally {
       setIsLoading(false);
@@ -143,14 +143,14 @@ export default function AdminUsersPage() {
     try {
       await patchAdminUser({ userId, updates: { role: newRole } });
       setUsers(users.map((u) => (u._id === userId ? { ...u, role: newRole } : u)));
-      setMessage({ type: 'success', text: 'User role updated successfully' });
+      setMessage({ type: 'success', text: t('adminUsers.userRoleUpdatedSuccess') });
     } catch (err) {
       setMessage({
         type: 'error',
         text:
           err instanceof ApiClientError
             ? err.message
-            : t('admin.errorUpdatingUser') || 'Error updating user',
+            : t('adminSettings.errorUpdatingUser'),
       });
     }
   };
@@ -159,7 +159,7 @@ export default function AdminUsersPage() {
     try {
       await deleteAdminUser(userId);
       setUsers(users.filter((u) => u._id !== userId));
-      setMessage({ type: 'success', text: 'User deleted successfully' });
+      setMessage({ type: 'success', text: t('adminUsers.userDeletedSuccess') });
       setDeleteId(null);
       setShowDeleteDialog(false);
     } catch (err) {
@@ -168,7 +168,7 @@ export default function AdminUsersPage() {
         text:
           err instanceof ApiClientError
             ? err.message
-            : t('admin.errorDeletingUser') || 'Error deleting user',
+            : t('adminSettings.errorDeletingUser'),
       });
     }
   };
@@ -245,7 +245,7 @@ export default function AdminUsersPage() {
       })) as Partial<User>;
 
       setUsers(users.map((u) => (u._id === orgAssignUserId ? { ...u, ...data } : u)));
-      setMessage({ type: 'success', text: 'User organization updated successfully' });
+      setMessage({ type: 'success', text: t('adminUsers.userOrganizationUpdated') });
       handleCloseOrgAssign();
     } catch (err) {
       setMessage({
@@ -253,7 +253,7 @@ export default function AdminUsersPage() {
         text:
           err instanceof ApiClientError
             ? err.message
-            : t('admin.errorUpdatingOrganization') || 'Error updating user organization',
+            : t('adminSettings.errorUpdatingOrganization'),
       });
     }
   };
@@ -307,7 +307,7 @@ export default function AdminUsersPage() {
             placeholder={t('admin.searchUsers')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
+            className="w-full pl-10 pr-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -315,7 +315,7 @@ export default function AdminUsersPage() {
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
+            className="px-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
           >
             <option value="">{t('admin.allRoles')}</option>
             <option value="student">{t('roles.student')}</option>
@@ -333,7 +333,7 @@ export default function AdminUsersPage() {
         className="bg-[var(--card-solid)] rounded-2xl shadow-sm overflow-hidden hidden sm:block"
       >
         <table className="min-w-full divide-y divide-[var(--border)]">
-          <thead className="bg-[var(--color-muted)]">
+          <thead className="bg-[var(--color-surface-muted)]">
             <tr>
               <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--color-muted-foreground)] uppercase tracking-wider">
                 {t('admin.user')}
@@ -362,7 +362,7 @@ export default function AdminUsersPage() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 + index * 0.05 }}
-                className="hover:bg-[var(--color-muted)] transition-colors cursor-pointer"
+                className="hover:bg-[var(--color-surface-muted)] transition-colors cursor-pointer"
                 onClick={() => handleOpenUserDetail(user)}
               >
                 <td className="px-6 py-4">
@@ -432,7 +432,7 @@ export default function AdminUsersPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 + index * 0.05 }}
-            className="bg-[var(--card-solid)] rounded-2xl p-4 border border-[var(--border)] cursor-pointer hover:bg-[var(--color-muted)] transition-colors"
+            className="bg-[var(--card-solid)] rounded-2xl p-4 border border-[var(--border)] cursor-pointer hover:bg-[var(--color-surface-muted)] transition-colors"
             onClick={() => handleOpenUserDetail(user)}
           >
             <div className="flex items-center justify-between mb-4">
@@ -519,7 +519,7 @@ export default function AdminUsersPage() {
                   value={limitsForm.courses}
                   onChange={(e) => setLimitsForm({ ...limitsForm, courses: e.target.value })}
                   placeholder={t('adminUsers.leaveEmptyForGlobal')}
-                  className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
+                  className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
                 />
               </div>
               <div>
@@ -530,7 +530,7 @@ export default function AdminUsersPage() {
                   value={limitsForm.quizzes}
                   onChange={(e) => setLimitsForm({ ...limitsForm, quizzes: e.target.value })}
                   placeholder={t('adminUsers.leaveEmptyForGlobal')}
-                  className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
+                  className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
                 />
               </div>
               <div>
@@ -541,7 +541,7 @@ export default function AdminUsersPage() {
                   value={limitsForm.blogs}
                   onChange={(e) => setLimitsForm({ ...limitsForm, blogs: e.target.value })}
                   placeholder={t('adminUsers.leaveEmptyForGlobal')}
-                  className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
+                  className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
                 />
               </div>
             </div>
@@ -554,7 +554,7 @@ export default function AdminUsersPage() {
               </button>
               <button
                 onClick={handleCloseLimits}
-                className="flex-1 min-h-[44px] sm:min-h-0 px-4 py-2.5 bg-[var(--color-muted)] text-[var(--color-foreground)] rounded-xl hover:bg-[var(--color-muted)]/80 transition-colors text-sm font-medium"
+                className="flex-1 min-h-[44px] sm:min-h-0 px-4 py-2.5 bg-[var(--color-surface-muted)] text-[var(--color-foreground)] rounded-xl hover:bg-[var(--color-surface-muted)]/80 transition-colors text-sm font-medium"
               >
                 {t('common.cancel')}
               </button>
@@ -590,7 +590,7 @@ export default function AdminUsersPage() {
                 <select
                   value={selectedOrganizationId || ''}
                   onChange={(e) => setSelectedOrganizationId(e.target.value || null)}
-                  className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
+                  className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
                 >
                   <option value="">{t('adminUsers.noOrganization')}</option>
                   {organizations.map((org) => (
@@ -610,7 +610,7 @@ export default function AdminUsersPage() {
               </button>
               <button
                 onClick={handleCloseOrgAssign}
-                className="flex-1 min-h-[44px] sm:min-h-0 px-4 py-2.5 bg-[var(--color-muted)] text-[var(--color-foreground)] rounded-xl hover:bg-[var(--color-muted)]/80 transition-colors text-sm font-medium"
+                className="flex-1 min-h-[44px] sm:min-h-0 px-4 py-2.5 bg-[var(--color-surface-muted)] text-[var(--color-foreground)] rounded-xl hover:bg-[var(--color-surface-muted)]/80 transition-colors text-sm font-medium"
               >
                 Cancel
               </button>
@@ -634,7 +634,7 @@ export default function AdminUsersPage() {
             <button
               onClick={() => setPage(page - 1)}
               disabled={page === 1}
-              className="p-2 min-h-[44px] sm:min-h-0 border border-[var(--border)] rounded-lg hover:bg-[var(--color-muted)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-2 min-h-[44px] sm:min-h-0 border border-[var(--border)] rounded-lg hover:bg-[var(--color-surface-muted)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -644,7 +644,7 @@ export default function AdminUsersPage() {
             <button
               onClick={() => setPage(page + 1)}
               disabled={page === pagination.totalPages}
-              className="p-2 min-h-[44px] sm:min-h-0 border border-[var(--border)] rounded-lg hover:bg-[var(--color-muted)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-2 min-h-[44px] sm:min-h-0 border border-[var(--border)] rounded-lg hover:bg-[var(--color-surface-muted)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -697,7 +697,7 @@ export default function AdminUsersPage() {
                 </div>
                 <button
                   onClick={handleCloseUserDetail}
-                  className="p-2 hover:bg-[var(--color-muted)] rounded-lg transition-colors"
+                  className="p-2 hover:bg-[var(--color-surface-muted)] rounded-lg transition-colors"
                 >
                   <X className="w-5 h-5 text-[var(--color-muted-foreground)]" />
                 </button>
@@ -705,15 +705,15 @@ export default function AdminUsersPage() {
 
               {/* User Info */}
               <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="p-4 bg-[var(--color-muted)]/30 rounded-xl">
+                <div className="p-4 bg-[var(--color-surface-muted)]/30 rounded-xl">
                   <p className="text-xs text-[var(--color-muted-foreground)] mb-1">Role</p>
                   <p className="text-sm font-medium text-[var(--color-foreground)] capitalize">{selectedUser.role}</p>
                 </div>
-                <div className="p-4 bg-[var(--color-muted)]/30 rounded-xl">
+                <div className="p-4 bg-[var(--color-surface-muted)]/30 rounded-xl">
                   <p className="text-xs text-[var(--color-muted-foreground)] mb-1">Joined</p>
                   <p className="text-sm font-medium text-[var(--color-foreground)]">{new Date(selectedUser.createdAt).toLocaleDateString()}</p>
                 </div>
-                <div className="p-4 bg-[var(--color-muted)]/30 rounded-xl col-span-2">
+                <div className="p-4 bg-[var(--color-surface-muted)]/30 rounded-xl col-span-2">
                   <p className="text-xs text-[var(--color-muted-foreground)] mb-1">Organization</p>
                   <p className="text-sm font-medium text-[var(--color-foreground)]">
                     {selectedUser.organizationId
@@ -732,7 +732,7 @@ export default function AdminUsersPage() {
                     value={selectedUser.role}
                     onChange={(e) => handleRoleChange(selectedUser._id, e.target.value)}
                     disabled={selectedUser._id === session?.user?.id}
-                    className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] disabled:bg-[var(--color-muted)] disabled:cursor-not-allowed"
+                    className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] disabled:bg-[var(--color-surface-muted)] disabled:cursor-not-allowed"
                   >
                     <option value="student">{t('roles.student')}</option>
                     <option value="teacher">{t('roles.teacher')}</option>
@@ -750,7 +750,7 @@ export default function AdminUsersPage() {
                         setOrgAssignUserId(selectedUser._id);
                         setSelectedOrganizationId(e.target.value || null);
                       }}
-                      className="flex-1 px-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
+                      className="flex-1 px-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
                     >
                       <option value="">None</option>
                       {organizations.map(org => (
@@ -782,7 +782,7 @@ export default function AdminUsersPage() {
                             setLimitsForm({ ...limitsForm, courses: e.target.value });
                           }}
                           placeholder="Unlimited"
-                          className="w-full px-3 py-2 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
+                          className="w-full px-3 py-2 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
                         />
                       </div>
                       <div>
@@ -796,7 +796,7 @@ export default function AdminUsersPage() {
                             setLimitsForm({ ...limitsForm, quizzes: e.target.value });
                           }}
                           placeholder="Unlimited"
-                          className="w-full px-3 py-2 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
+                          className="w-full px-3 py-2 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
                         />
                       </div>
                       <div>
@@ -810,7 +810,7 @@ export default function AdminUsersPage() {
                             setLimitsForm({ ...limitsForm, blogs: e.target.value });
                           }}
                           placeholder="Unlimited"
-                          className="w-full px-3 py-2 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
+                          className="w-full px-3 py-2 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
                         />
                       </div>
                     </div>
@@ -833,7 +833,7 @@ export default function AdminUsersPage() {
                       handleDeleteClick(selectedUser._id);
                     }}
                     disabled={selectedUser._id === session?.user?.id || selectedUser.role === 'superadmin'}
-                    className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--error-light)] text-[var(--error)] rounded-xl hover:bg-[var(--error-light)]/80 transition-colors disabled:bg-[var(--color-muted)] disabled:text-[var(--color-muted-foreground)] disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--error-light)] text-[var(--error)] rounded-xl hover:bg-[var(--error-light)]/80 transition-colors disabled:bg-[var(--color-surface-muted)] disabled:text-[var(--color-muted-foreground)] disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     <Trash2 className="w-4 h-4" />
                     {t('admin.delete')}

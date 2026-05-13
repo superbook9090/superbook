@@ -1,6 +1,11 @@
 // src/i18n/hi.ts
 
 export const hi = {
+  metadata: {
+    siteTitle: 'quiz-do - सीखने का भविष्य',
+    siteDescription: 'लर्निंग मैनेजमेंट सिस्टम',
+  },
+
   // Common
   common: {
     loading: 'लोड हो रहा है...',
@@ -216,6 +221,23 @@ export const hi = {
     review: 'समीक्षा करें',
     retake: 'पुनः लें',
     viewLeaderboard: 'लीडरबोर्ड देखें',
+    takeAlreadyCompleted: 'आप पहले ही यह क्विज़ पूरा कर चुके हैं।',
+    takeRetryQuiz: 'क्विज़ फिर से दें',
+    takeBackToQuizzes: 'क्विज़ पर वापस जाएं',
+    takeQuizNotFound: 'क्विज़ नहीं मिली',
+    securityViolationTitle: 'सुरक्षा उल्लंघन',
+    violationContinue: 'जारी रखें',
+    violationModalMessage:
+      '{warning}. आपके पास {count} {retriesWord} बचे हैं। फिर से शुरू करने के लिए जारी रखें पर क्लिक करें।',
+    violationRetrySingular: 'प्रयास',
+    violationRetriesPlural: 'प्रयास',
+    violationFullscreenExit: 'आपने पूर्णस्क्रीन मोड छोड़ दिया',
+    violationTabSwitch: 'आपने टैब बदल लिया',
+    violationWindowBlur: 'आपने विंडो बदल ली',
+    violationPageExit: 'आपने पेज छोड़ने का प्रयास किया',
+    violationDuplicateTab: 'क्विज़ दूसरे टैब में खुली है',
+    violationDevTools: 'आपने डेवलपर टूल खोले',
+    violationGeneric: 'सुरक्षा उल्लंघन पाया गया',
     firstAttemptResults: 'पहले प्रयास के परिणाम (स्कोर • समय • तारीख)',
     // Leaderboard
     leaderboard: {
@@ -236,6 +258,10 @@ export const hi = {
       yourRank: 'आपकी रैंक',
       you: 'आप',
       top: 'शीर्ष',
+      loading: 'लीडरबोर्ड लोड हो रहा है...',
+      error: 'लीडरबोर्ड लोड करने में विफल',
+      tryAgain: 'पुनः प्रयास करें',
+      timeAgo: 'पूर्ण',
       timeTaken: 'समय',
     },
 
@@ -288,6 +314,9 @@ export const hi = {
     cancel: 'रद्द करें',
     failedDeleteBlog: 'ब्लॉग हटाने में विफल',
     failedUpdateBlog: 'ब्लॉग अपडेट करने में विफल',
+    fillAllFields: 'कृपया सभी फ़ील्ड भरें',
+    failedToLoadBlog: 'ब्लॉग लोड करने में विफल',
+    saveErrorGeneric: 'एक त्रुटि हुई। कृपया पुनः प्रयास करें।',
   },
 
   // Admin
@@ -409,6 +438,8 @@ export const hi = {
     noAvailableCourses: 'कोई उपलब्ध पाठ्यक्रम नहीं मिला। आप पहले से ही सभी उपलब्ध पाठ्यक्रमों में नामांकित हो सकते हैं, या फिलहाल कोई प्रकाशित पाठ्यक्रम नहीं हैं।',
     allCoursesEnrolled: 'आप सभी उपलब्ध पाठ्यक्रमों में नामांकित हो चुके हैं। नए पाठ्यक्रमों के लिए बाद में जांच करें!',
     goToMyCourses: 'मेरे पाठ्यक्रमों पर जाएं',
+    dropSuccess: 'पाठ्यक्रम सफलतापूर्वक छोड़ दिया गया',
+    errorEnrolling: 'पाठ्यक्रम में नामांकन करने में त्रुटि',
   },
 
   // Language
@@ -496,6 +527,7 @@ export const hi = {
     analyticsDesc: 'अपने पाठ्यक्रमों, छात्रों और क्विज़ प्रदर्शन को ट्रैक करें।',
     loadingAnalytics: 'विश्लेषिकी लोड हो रही है...',
     retry: 'पुनः प्रयास करें',
+    errorLoading: 'विश्लेषिकी लोड करने में त्रुटि',
     totalCourses: 'कुल पाठ्यक्रम',
     published: 'प्रकाशित',
     totalStudents: 'कुल छात्र',
@@ -584,6 +616,20 @@ export const hi = {
     errorStartingQuiz: 'क्विज़ शुरू करने में त्रुटि',
     failedLoadDashboardData: 'डैशबोर्ड डेटा लोड करने में विफल',
     unknownError: 'अज्ञात त्रुटि',
+    errorLoadingAnalytics: 'एनालिटिक्स डेटा लोड करने में त्रुटि',
+    quizNotFound: 'क्विज़ नहीं मिली',
+    failedToLoadQuiz: 'क्विज़ लोड करने में विफल',
+    securityForceSubmitFailed: 'सुरक्षा उल्लंन के कारण क्विज़ जमा करने में विफल',
+    closeDevTools: 'जारी रखने से पहले कृपया डेवलपर टूल बंद करें',
+    quizAttemptNotFound: 'क्विज़ प्रयास नहीं मिला',
+    errorLoadingQuiz: 'क्विज़ लोड करने में त्रुटि',
+    errorStartingNewAttempt: 'नया प्रयास शुरू करने में त्रुटि',
+    errorSubmittingQuiz: 'क्विज़ जमा करने में त्रुटि',
+    genericError: 'एक त्रुटि हुई',
+    leaderboardLoadFailed: 'लीडरबोर्ड लोड करने में विफल',
+    pageErrorTitle: 'कुछ गलत हो गया',
+    pageErrorDescription: 'एक अप्रत्याशित त्रुटि हुई। कृपया बाद में पुनः प्रयास करें।',
+    tryAgainButton: 'पुनः प्रयास करें',
   },
 
   // Favorites
@@ -774,6 +820,8 @@ export const hi = {
     noOrganization: 'कोई संगठन नहीं',
     userOrganizationUpdated: 'उपयोगकर्ता संगठन सफलतापूर्वक अपडेट किया गया',
     failedUpdateOrganization: 'संगठन अपडेट करने में विफल',
+    userRoleUpdatedSuccess: 'उपयोगकर्ता भूमिका सफलतापूर्वक अपडेट की गई',
+    userDeletedSuccess: 'उपयोगकर्ता सफलतापूर्वक हटाया गया',
   },
 
   // Organization Management
@@ -837,6 +885,8 @@ export const hi = {
     continueWithGoogle: 'Google के साथ जारी रखें',
     dontHaveAccount: 'खाता नहीं है?',
     createOne: 'बनाएं',
+    invalidCredentials: 'अमान्य ईमेल या पासवर्ड',
+    genericError: 'एक त्रुटि हुई। कृपया पुनः प्रयास करें।',
   },
 
   // Register
@@ -850,6 +900,6 @@ export const hi = {
     confirmPassword: 'पासवर्ड की पुष्टि करें',
     alreadyHaveAccount: 'पहले से खाता है?',
     signIn: 'साइन इन करें',
+    passwordsDoNotMatch: 'पासवर्ड मेल नहीं खाते',
   },
 };
-  

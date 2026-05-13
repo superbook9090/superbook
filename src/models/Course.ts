@@ -33,6 +33,9 @@ const courseSchema = new Schema<ICourse>(
 
 // Add indexes for frequently queried fields
 courseSchema.index({ instructor: 1 });
+courseSchema.index({ organizationId: 1 });
+courseSchema.index({ organizationId: 1, isPublished: 1 });
+courseSchema.index({ instructor: 1, organizationId: 1 });
 courseSchema.index({ isPublished: 1 });
 courseSchema.index({ createdAt: -1 });
 courseSchema.index({ category: 1 });

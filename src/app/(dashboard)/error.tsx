@@ -1,6 +1,7 @@
 'use client';
 
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function Error({
   reset,
@@ -9,6 +10,7 @@ export default function Error({
   reset: () => void;
 }) {
   const { theme } = useRoleTheme();
+  const { t } = useTranslation();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[var(--color-background)]">
@@ -30,16 +32,16 @@ export default function Error({
             </svg>
           </div>
           <h2 className="text-2xl font-bold text-[var(--color-foreground)] mb-2">
-            Something went wrong
+            {t('errors.pageErrorTitle')}
           </h2>
           <p className="text-[var(--color-muted)] mb-6">
-            An unexpected error occurred. Please try again later.
+            {t('errors.pageErrorDescription')}
           </p>
           <button
             onClick={reset}
             className={`inline-flex items-center px-6 py-3 bg-gradient-to-r ${theme.gradient} text-white font-medium rounded-xl hover:opacity-90 transition-colors`}
           >
-            Try again
+            {t('errors.tryAgainButton')}
           </button>
         </div>
       </div>

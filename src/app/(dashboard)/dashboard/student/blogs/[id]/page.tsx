@@ -82,7 +82,7 @@ export default function BlogDetailPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh] px-4">
-        <div className="w-12 h-12 border-4 border-[var(--color-muted)] border-t-[var(--student-primary)] rounded-full animate-spin" />
+        <div className="w-12 h-12 border-4 border-[var(--color-surface-muted)] border-t-[var(--student-primary)] rounded-full animate-spin" />
       </div>
     );
   }
@@ -174,7 +174,7 @@ export default function BlogDetailPage() {
         </div>
 
         {/* Actions */}
-        <div className="p-4 sm:p-6 lg:p-8 bg-[var(--color-muted)] border-t border-[var(--border)]">
+        <div className="p-4 sm:p-6 lg:p-8 bg-[var(--color-surface-muted)] border-t border-[var(--border)]">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <button
               onClick={toggleFavorite}

@@ -348,7 +348,7 @@ export default function StudentProgressPage() {
 
                   {/* Progress Bar */}
                   <div className="mt-4">
-                    <div className="w-full bg-[var(--color-muted)] rounded-full h-3">
+                    <div className="w-full bg-[var(--color-surface-muted)] rounded-full h-3">
                       <div
                         className={`h-3 rounded-full transition-all ${
                           item.enrollment.progress >= 100
@@ -363,7 +363,7 @@ export default function StudentProgressPage() {
                   </div>
 
                   {/* Quiz Stats */}
-                  <div className="mt-4 grid grid-cols-4 gap-4 bg-[var(--color-muted)] rounded-lg p-4">
+                  <div className="mt-4 grid grid-cols-4 gap-4 bg-[var(--color-surface-muted)] rounded-lg p-4">
                     <div className="text-center">
                       <p className="text-lg font-semibold text-[var(--color-foreground)]">{item.quizStats.total}</p>
                       <p className="text-xs text-[var(--color-muted-foreground)]">{t('progress.totalQuizzes')}</p>
@@ -395,7 +395,7 @@ export default function StudentProgressPage() {
 
                 {/* Quiz History */}
                 {selectedCourse === item.enrollment._id && item.attempts.length > 0 && (
-                  <div className="border-t border-[var(--border)] bg-[var(--color-muted)] px-6 py-4">
+                  <div className="border-t border-[var(--border)] bg-[var(--color-surface-muted)] px-6 py-4">
                     <h4 className="text-sm font-semibold text-[var(--color-foreground)] mb-3">{t('progress.quizAttempts')}</h4>
                     <div className="space-y-2">
                       {item.attempts.map((attempt) => (

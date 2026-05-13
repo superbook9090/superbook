@@ -58,14 +58,14 @@ export default function TeacherAnalyticsPage() {
     // Role-based redirect handled in /dashboard/page.tsx - no redirect here
 
     fetchStats();
-  }, [session, status, router]);
+  }, [session, status, router, t]);
 
   const fetchStats = async () => {
     try {
       const data = (await fetchAnalytics('teacher')) as { stats?: TeacherStats };
       setStats(data.stats || null);
     } catch (err) {
-      setError(err instanceof ApiClientError ? err.message : 'Error loading analytics');
+      setError(err instanceof ApiClientError ? err.message : t('analytics.errorLoading'));
     } finally {
       setIsLoading(false);
     }
@@ -141,7 +141,7 @@ export default function TeacherAnalyticsPage() {
           <div className="bg-[var(--card-solid)] rounded-lg shadow overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-[var(--border)]">
-                <thead className="bg-[var(--color-muted)]">
+                <thead className="bg-[var(--color-surface-muted)]">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider">
                       {t('analytics.course')}
@@ -193,7 +193,7 @@ export default function TeacherAnalyticsPage() {
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                           course.isPublished
                             ? 'bg-[var(--success-light)] text-[var(--success)]'
-                            : 'bg-[var(--color-muted)] text-[var(--color-muted-foreground)]'
+                            : 'bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)]'
                         }`}>
                           {course.isPublished ? t('analytics.published') : t('analytics.draft')}
                         </span>
@@ -217,7 +217,7 @@ export default function TeacherAnalyticsPage() {
         ) : (
           <div className="bg-[var(--card-solid)] rounded-lg shadow overflow-hidden">
             <table className="min-w-full divide-y divide-[var(--border)]">
-              <thead className="bg-[var(--color-muted)]">
+              <thead className="bg-[var(--color-surface-muted)]">
                 <tr>
                   <th className="px-6 py-3 text-center text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider">
                     {t('analytics.student')}

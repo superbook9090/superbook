@@ -66,62 +66,75 @@ async function getAdminStats(organizationId?: string | null, isSuperAdmin: boole
   // Build organization filter
   const orgFilter = isSuperAdmin ? {} : (organizationId ? { organizationId } : { organizationId: null });
 
-  // User stats
-  const totalUsers = await User.countDocuments(orgFilter);
-  const students = await User.countDocuments({ ...orgFilter, role: 'student' });
-  const teachers = await User.countDocuments({ ...orgFilter, role: 'teacher' });
-  const admins = await User.countDocuments({ ...orgFilter, role: 'admin' });
-
-  // New users this month
   const startOfMonth = new Date();
   startOfMonth.setDate(1);
   startOfMonth.setHours(0, 0, 0, 0);
-  const newUsersThisMonth = await User.countDocuments({
-    ...orgFilter,
-    createdAt: { $gte: startOfMonth },
-  });
 
-  // Course stats
-  const totalCourses = await Course.countDocuments(orgFilter);
-  const publishedCourses = await Course.countDocuments({ ...orgFilter, isPublished: true });
-
-  // Enrollment stats - filter by users in the organization
-  const orgUserIds = await User.find(orgFilter).select('_id').lean();
-  const userIds = orgUserIds.map(u => u._id);
-
-  const totalEnrollments = await Enrollment.countDocuments({ student: { $in: userIds } });
-  const activeEnrollments = await Enrollment.countDocuments({ student: { $in: userIds }, status: 'active' });
-  const completedEnrollments = await Enrollment.countDocuments({ student: { $in: userIds }, status: 'completed' });
-
-  // Quiz stats
-  const totalQuizzes = await Quiz.countDocuments(orgFilter);
-  const publishedQuizzes = await Quiz.countDocuments({ ...orgFilter, isPublished: true });
-
-  // Quiz attempt stats - filter by quizzes in the organization
-  const orgQuizIds = await Quiz.find(orgFilter).select('_id').lean();
-  const quizIds = orgQuizIds.map(q => q._id);
-
-  const totalAttempts = await QuizAttempt.countDocuments({ quiz: { $in: quizIds }, status: 'completed' });
-
-  // Average scores
-  const scoreStats = await QuizAttempt.aggregate([
-    { $match: { quiz: { $in: quizIds }, status: 'completed' } },
-    {
-      $group: {
-        _id: null,
-        avgScore: { $avg: '$score' },
-        highestScore: { $max: '$score' },
-      },
-    },
+  const [
+    totalUsers,
+    students,
+    teachers,
+    admins,
+    newUsersThisMonth,
+    totalCourses,
+    publishedCourses,
+    totalQuizzes,
+    publishedQuizzes,
+  ] = await Promise.all([
+    User.countDocuments(orgFilter),
+    User.countDocuments({ ...orgFilter, role: 'student' }),
+    User.countDocuments({ ...orgFilter, role: 'teacher' }),
+    User.countDocuments({ ...orgFilter, role: 'admin' }),
+    User.countDocuments({
+      ...orgFilter,
+      createdAt: { $gte: startOfMonth },
+    }),
+    Course.countDocuments(orgFilter),
+    Course.countDocuments({ ...orgFilter, isPublished: true }),
+    Quiz.countDocuments(orgFilter),
+    Quiz.countDocuments({ ...orgFilter, isPublished: true }),
   ]);
 
-  // Recent activity
-  const recentEnrollments = await Enrollment.find({ student: { $in: userIds } })
-    .sort({ createdAt: -1 })
-    .limit(5)
-    .populate('student', 'name')
-    .populate('course', 'title')
-    .lean();
+  const [orgUserIds, orgQuizIds] = await Promise.all([
+    User.find(orgFilter).select('_id').lean(),
+    Quiz.find(orgFilter).select('_id').lean(),
+  ]);
+  const userIds = orgUserIds.map((u) => u._id);
+  const quizIds = orgQuizIds.map((q) => q._id);
+
+  const [
+    totalEnrollments,
+    activeEnrollments,
+    completedEnrollments,
+    totalAttempts,
+    scoreStats,
+    recentEnrollments,
+  ] = await Promise.all([
+    Enrollment.countDocuments({ student: { $in: userIds } }),
+    Enrollment.countDocuments({ student: { $in: userIds }, status: 'active' }),
+    Enrollment.countDocuments({ student: { $in: userIds }, status: 'completed' }),
+    quizIds.length
+      ? QuizAttempt.countDocuments({ quiz: { $in: quizIds }, status: 'completed' })
+      : Promise.resolve(0),
+    quizIds.length
+      ? QuizAttempt.aggregate([
+          { $match: { quiz: { $in: quizIds }, status: 'completed' } },
+          {
+            $group: {
+              _id: null,
+              avgScore: { $avg: '$score' },
+              highestScore: { $max: '$score' },
+            },
+          },
+        ])
+      : Promise.resolve([]),
+    Enrollment.find({ student: { $in: userIds } })
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .populate('student', 'name')
+      .populate('course', 'title')
+      .lean(),
+  ]);
 
   return {
     users: {
@@ -201,14 +214,19 @@ async function getTeacherStats(teacherId: string) {
     {
       $addFields: {
         attemptCount: { $size: '$completedAttempts' },
+        // Same-stage $field refs for $cond are unreliable across MongoDB versions; size the array directly.
         avgScore: {
           $cond: {
-            if: { $gt: ['$attemptCount', 0] },
-            then: { $avg: '$completedAttempts.score' },
-            else: 0
-          }
-        }
-      }
+            if: { $gt: [{ $size: '$completedAttempts' }, 0] },
+            then: {
+              $avg: {
+                $map: { input: '$completedAttempts', as: 'a', in: '$$a.score' },
+              },
+            },
+            else: null,
+          },
+        },
+      },
     },
     {
       $project: {
@@ -216,34 +234,43 @@ async function getTeacherStats(teacherId: string) {
         title: 1,
         isPublished: 1,
         students: '$enrollmentCount',
+        quizIds: '$quizzes._id',
         quizzes: '$quizCount',
         attempts: '$attemptCount',
-        averageScore: { $round: ['$avgScore', 0] }
-      }
-    }
+        averageScore: { $round: [{ $ifNull: ['$avgScore', 0] }, 0] },
+      },
+    },
   ]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const quizIdsForTop = courseStats.flatMap((c: any) => c.quizIds || []);
+  // Strip internal quizIds from API payload
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const courses = courseStats.map(({ quizIds: _omit, ...rest }: any) => rest);
+
   // Calculate overview stats from aggregated data
-  const totalCourses = courseStats.length;
+  const totalCourses = courses.length;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const publishedCourses = courseStats.filter((c: any) => c.isPublished).length;
+  const publishedCourses = courses.filter((c: any) => c.isPublished).length;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const totalStudents = courseStats.reduce((sum: number, c: any) => sum + c.students, 0);
+  const totalStudents = courses.reduce((sum: number, c: any) => sum + c.students, 0);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const totalQuizzes = courseStats.reduce((sum: number, c: any) => sum + c.quizzes, 0);
+  const totalQuizzes = courses.reduce((sum: number, c: any) => sum + c.quizzes, 0);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const totalAttempts = courseStats.reduce((sum: number, c: any) => sum + c.attempts, 0);
+  const totalAttempts = courses.reduce((sum: number, c: any) => sum + c.attempts, 0);
   const averageScore = totalAttempts > 0
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ? Math.round(courseStats.reduce((sum: number, c: any) => sum + c.averageScore * c.attempts, 0) / totalAttempts)
+    ? Math.round(courses.reduce((sum: number, c: any) => sum + c.averageScore * c.attempts, 0) / totalAttempts)
     : 0;
 
   // Get top performing students using aggregation
-  const topStudents = await QuizAttempt.aggregate([
+  const topStudents =
+    quizIdsForTop.length === 0
+      ? []
+      : await QuizAttempt.aggregate([
     {
       $match: {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        quiz: { $in: courseStats.flatMap((c: any) => c.quizzes) },
+        quiz: { $in: quizIdsForTop },
         status: 'completed'
       }
     },
@@ -285,7 +312,7 @@ async function getTeacherStats(teacherId: string) {
   ]);
 
   return {
-    courses: courseStats,
+    courses,
     overview: {
       totalCourses,
       totalStudents,
@@ -300,21 +327,40 @@ async function getTeacherStats(teacherId: string) {
 
 async function getUserOverview(userId: string, role: string) {
   if (role === 'student') {
-    const enrollments = await Enrollment.countDocuments({ student: userId });
-    const completedCourses = await Enrollment.countDocuments({
-      student: userId,
-      status: 'completed',
-    });
-    const attempts = await QuizAttempt.find({ student: userId, status: 'completed' }).lean();
+    const oid = new mongoose.Types.ObjectId(userId);
+    const [enrollmentAgg, attemptAgg] = await Promise.all([
+      Enrollment.aggregate([
+        { $match: { student: oid } },
+        {
+          $facet: {
+            total: [{ $count: 'n' }],
+            completed: [{ $match: { status: 'completed' } }, { $count: 'n' }],
+          },
+        },
+      ]),
+      QuizAttempt.aggregate([
+        { $match: { student: oid, status: 'completed' } },
+        {
+          $group: {
+            _id: null,
+            n: { $sum: 1 },
+            avg: { $avg: '$score' },
+          },
+        },
+      ]),
+    ]);
+
+    const enrollments = enrollmentAgg[0]?.total[0]?.n ?? 0;
+    const completedCourses = enrollmentAgg[0]?.completed[0]?.n ?? 0;
+    const quizzesTaken = attemptAgg[0]?.n ?? 0;
+    const averageScore =
+      quizzesTaken > 0 ? Math.round((attemptAgg[0]?.avg as number) || 0) : 0;
 
     return {
       enrollments,
       completedCourses,
-      quizzesTaken: attempts.length,
-      averageScore:
-        attempts.length > 0
-          ? Math.round(attempts.reduce((sum, a) => sum + a.score, 0) / attempts.length)
-          : 0,
+      quizzesTaken,
+      averageScore,
     };
   }
 

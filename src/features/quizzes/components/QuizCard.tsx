@@ -161,7 +161,7 @@ function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps) {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleViewLeaderboard}
-            className="w-full flex items-center justify-center gap-2 bg-[var(--color-muted)] text-[var(--color-foreground)] py-2.5 px-4 rounded-xl font-medium hover:bg-[var(--color-muted)]/80 transition-all"
+            className="w-full flex items-center justify-center gap-2 bg-[var(--color-surface-muted)] text-[var(--color-foreground)] py-2.5 px-4 rounded-xl font-medium hover:bg-[var(--color-surface-muted)]/80 transition-all"
           >
             <Trophy className="w-4 h-4" />
             {t('quiz.viewLeaderboard')}
