@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
+import { createCourse } from '@/lib/api/courses';
+import { ApiClientError } from '@/lib/api/http';
 
 export default function CreateCourseForm() {
   const { t } = useTranslation();
@@ -35,25 +37,20 @@ export default function CreateCourseForm() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/courses', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          price: Number(formData.price) || 0,
-        }),
+      await createCourse({
+        ...formData,
+        price: Number(formData.price) || 0,
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || t('createCourseForm.failedCreateCourse'));
-      }
 
       // Success - redirect to teacher courses page
       router.push('/dashboard/teacher/courses');
     } catch (err) {
-      const message = err instanceof Error ? err.message : t('createCourseForm.errorOccurred');
+      const message =
+        err instanceof ApiClientError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : t('createCourseForm.errorOccurred');
       setError(message);
     } finally {
       setIsLoading(false);

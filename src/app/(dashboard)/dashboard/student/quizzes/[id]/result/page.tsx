@@ -7,7 +7,8 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { formatDateTime, formatDuration } from '@/lib/dateUtils';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
-import Loader from '@/components/ui/Loader';
+import { PageSkeleton } from '@/components/ui/Skeleton';
+import { getQuizAttemptReview } from '@/lib/api/quizAttempts';
 
 interface Question {
   question: string;
@@ -67,12 +68,8 @@ export default function QuizResultPage() {
 
   const fetchAttempt = async () => {
     try {
-      const response = await fetch(`/api/quiz-attempts/${attemptId}/review`);
-      const data = await response.json();
-
-      if (response.ok) {
-        setAttempt(data);
-      }
+      const data = (await getQuizAttemptReview(attemptId)) as Attempt;
+      setAttempt(data);
     } catch {
       // Error handled silently - UI shows loading state
     } finally {
@@ -94,7 +91,7 @@ export default function QuizResultPage() {
   };
 
   if (status === 'loading' || isLoading) {
-    return <Loader size="lg" text={t('common.loading')} />;
+    return <PageSkeleton />;
   }
 
   if (!attempt) {

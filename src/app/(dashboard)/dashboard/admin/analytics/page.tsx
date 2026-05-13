@@ -14,11 +14,13 @@ import {
   Activity,
   GraduationCap,
 } from 'lucide-react';
-import { Skeleton } from '@/components/ui/Skeleton';
+import { PageSkeleton } from '@/components/ui/Skeleton';
 import Alert from '@/components/ui/Alert';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useTranslation } from '@/hooks/useTranslation';
 import { formatDateTime } from '@/lib/dateUtils';
+import { fetchAnalytics } from '@/lib/api/analytics';
+import { ApiClientError } from '@/lib/api/http';
 
 interface AdminStats {
   users: {
@@ -68,16 +70,14 @@ export default function AdminAnalyticsPage() {
 
   const fetchStats = useCallback(async () => {
     try {
-      const response = await fetch('/api/analytics?type=admin');
-      const data = await response.json();
-
-      if (response.ok) {
-        setStats(data.stats || null);
-      } else {
-        setMessage({ type: 'error', text: data.message || t('errors.failedLoadAnalytics') });
-      }
+      const data = (await fetchAnalytics('admin')) as { stats?: AdminStats };
+      setStats(data.stats || null);
     } catch (err) {
-      setMessage({ type: 'error', text: t('errors.errorLoadingAnalytics') });
+      setMessage({
+        type: 'error',
+        text:
+          err instanceof ApiClientError ? err.message : t('errors.errorLoadingAnalytics'),
+      });
       console.error('Analytics error:', err);
     } finally {
       setIsLoading(false);
@@ -97,42 +97,7 @@ export default function AdminAnalyticsPage() {
   }, [session, status, fetchStats, router]);
 
   if (status === 'loading' || isLoading) {
-    return (
-      <div className="space-y-6 px-4 sm:px-6 lg:px-8">
-        {/* Header skeleton */}
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-10 w-32" />
-        </div>
-
-        {/* Stats grid skeleton */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="bg-white rounded-xl p-6 shadow-sm">
-              <Skeleton className="h-12 w-12 mb-4" />
-              <Skeleton className="h-4 w-24 mb-2" />
-              <Skeleton className="h-8 w-16" />
-            </div>
-          ))}
-        </div>
-
-        {/* Content sections skeleton */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl p-6 shadow-sm">
-              <Skeleton className="h-6 w-32 mb-4" />
-              <Skeleton className="h-64 w-full" />
-            </div>
-          </div>
-          <div className="space-y-4">
-            <div className="bg-white rounded-xl p-6 shadow-sm">
-              <Skeleton className="h-6 w-32 mb-4" />
-              <Skeleton className="h-48 w-full" />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    return <PageSkeleton />;
   }
 
   return (

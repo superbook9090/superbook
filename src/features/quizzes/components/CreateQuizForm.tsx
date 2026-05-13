@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import * as XLSX from 'xlsx';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
+import { listTeacherCoursesSelf } from '@/lib/api/courses';
+import { createQuiz } from '@/lib/api/quizzes';
+import { ApiClientError } from '@/lib/api/http';
 
 interface Course {
   _id: string;
@@ -55,10 +58,9 @@ export default function CreateQuizForm() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await fetch('/api/courses?instructor=self');
-        const data = await response.json();
-        if (response.ok && data.courses) {
-          setCourses(data.courses);
+        const data = await listTeacherCoursesSelf();
+        if (data.courses) {
+          setCourses(data.courses as Course[]);
         }
       } catch (err) {
         console.error('Error fetching courses:', err);
@@ -316,26 +318,21 @@ export default function CreateQuizForm() {
     }
 
     try {
-      const response = await fetch('/api/quizzes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          timeLimit: Number(formData.timeLimit),
-          questions,
-        }),
+      await createQuiz({
+        ...formData,
+        timeLimit: Number(formData.timeLimit),
+        questions,
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || t('createQuizForm.failedCreateQuiz'));
-      }
 
       // Success - redirect to teacher quizzes page
       router.push('/dashboard/teacher/quizzes');
     } catch (err) {
-      const message = err instanceof Error ? err.message : t('createQuizForm.errorOccurred');
+      const message =
+        err instanceof ApiClientError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : t('createQuizForm.errorOccurred');
       setError(message);
     } finally {
       setIsLoading(false);

@@ -7,7 +7,11 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
 import QuizLeaderboard from '@/features/quizzes/components/QuizLeaderboard';
-import Loader from '@/components/ui/Loader';
+import { useStartQuizAttempt } from '@/lib/react-query/hooks';
+import { ApiClientError } from '@/lib/api/http';
+import { getQuizById } from '@/lib/api/quizzes';
+import { Loader } from '@/components/ui/Loader';
+import { PageSkeleton } from '@/components/ui/Skeleton';
 import Alert from '@/components/ui/Alert';
 import { motion } from 'framer-motion';
 import { HelpCircle, Clock, BookOpen, ArrowLeft, Play } from 'lucide-react';
@@ -31,11 +35,11 @@ export default function QuizDetailPage() {
   const params = useParams();
   const quizId = params.id as string;
   const { theme } = useRoleTheme();
+  const startQuiz = useStartQuizAttempt();
 
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [starting, setStarting] = useState(false);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -51,19 +55,14 @@ export default function QuizDetailPage() {
   const fetchQuiz = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`/api/quizzes/${quizId}`);
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error(t('errors.quizNotFound'));
-        }
-        throw new Error(t('errors.failedToLoadQuiz'));
-      }
-
-      const data = await response.json();
-      setQuiz(data.quiz);
+      const data = await getQuizById(quizId);
+      setQuiz(data.quiz as Quiz);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.errorOccurred'));
+      if (err instanceof ApiClientError && err.status === 404) {
+        setError(t('errors.quizNotFound'));
+      } else {
+        setError(err instanceof ApiClientError ? err.message : t('errors.failedToLoadQuiz'));
+      }
     } finally {
       setIsLoading(false);
     }
@@ -71,33 +70,17 @@ export default function QuizDetailPage() {
 
   const handleStartQuiz = async () => {
     try {
-      setStarting(true);
-      const response = await fetch('/api/quiz-attempts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ quizId, action: 'start' }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        router.push(`/dashboard/student/quizzes/take?attemptId=${data.attempt._id}`);
-      } else {
-        setError(data.message || t('errors.failedStartQuiz'));
-      }
-    } catch {
-      setError(t('errors.errorStartingQuiz'));
-    } finally {
-      setStarting(false);
+      const data = await startQuiz.mutateAsync(quizId);
+      router.push(`/dashboard/student/quizzes/take?attemptId=${data.attempt._id}`);
+    } catch (e) {
+      setError(
+        e instanceof ApiClientError ? e.message : t('errors.errorStartingQuiz')
+      );
     }
   };
 
   if (status === 'loading' || isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-[60vh]">
-        <Loader size="lg" />
-      </div>
-    );
+    return <PageSkeleton />;
   }
 
   if (error) {
@@ -167,10 +150,10 @@ export default function QuizDetailPage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleStartQuiz}
-              disabled={starting}
+              disabled={startQuiz.isPending}
               className="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-white text-[var(--primary)] rounded-xl font-semibold hover:bg-white/90 transition-all disabled:opacity-50"
             >
-              {starting ? (
+              {startQuiz.isPending ? (
                 <Loader size="sm" />
               ) : (
                 <>

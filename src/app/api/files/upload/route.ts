@@ -8,6 +8,7 @@ import { logApiError, type LogContext } from '@/lib/logger';
 import { invalidatePattern } from '@/lib/redis';
 import { assertParentIsFolder, normalizeParentId } from '@/lib/fileNodes';
 import { cloudinary, isCloudinaryConfigured } from '@/lib/cloudinary';
+import { requireFilesSuperadmin } from '@/lib/filesAccess';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,14 +50,10 @@ export async function POST(request: NextRequest) {
 
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
-    logContext.userId = session.user.id;
-
-    if (session.user.role !== 'superadmin') {
-      return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
-    }
+    const denied = requireFilesSuperadmin(session);
+    if (denied) return denied;
+    const authUser = session!.user;
+    logContext.userId = authUser.id;
 
     if (!isCloudinaryConfigured()) {
       return NextResponse.json(
@@ -105,8 +102,8 @@ export async function POST(request: NextRequest) {
 
     const uploaded = await uploadRawToCloudinary(buffer, { folder, publicId });
 
-    const organizationId = session.user.organizationId
-      ? new mongoose.Types.ObjectId(session.user.organizationId)
+    const organizationId = authUser.organizationId
+      ? new mongoose.Types.ObjectId(authUser.organizationId)
       : null;
 
     const node = await FileNode.create({
@@ -117,11 +114,11 @@ export async function POST(request: NextRequest) {
       publicId: uploaded.public_id,
       fileType: 'pdf',
       size: uploaded.bytes,
-      uploadedBy: new mongoose.Types.ObjectId(session.user.id),
+      uploadedBy: new mongoose.Types.ObjectId(authUser.id),
       organizationId,
     });
 
-    const orgKey = session.user.organizationId || 'public';
+    const orgKey = authUser.organizationId || 'public';
     const parentKey = parentId ? parentId.toString() : 'root';
     await invalidatePattern(`files:${orgKey}:${parentKey}:*`);
 

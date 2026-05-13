@@ -17,10 +17,12 @@ import {
   ToggleLeft,
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
-import { Skeleton } from '@/components/ui/Skeleton';
+import { PageSkeleton } from '@/components/ui/Skeleton';
 import Alert from '@/components/ui/Alert';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { fetchAdminSettings, patchAdminSettings } from '@/lib/api/adminSettings';
+import { ApiClientError } from '@/lib/api/http';
 
 interface AppSettings {
   teacherLimits: {
@@ -71,9 +73,7 @@ export default function AdminSettingsPage() {
 
   const fetchSettings = useCallback(async () => {
     try {
-      const response = await fetch('/api/admin/settings');
-      if (!response.ok) throw new Error('Failed to fetch settings');
-      const data = await response.json();
+      const data = (await fetchAdminSettings()) as AppSettings;
       setSettings(data);
     } catch {
       setMessage({ type: 'error', text: t('adminSettings.failedLoadSettings') });
@@ -100,37 +100,26 @@ export default function AdminSettingsPage() {
     setMessage(null);
 
     try {
-      const response = await fetch('/api/admin/settings', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(settings),
-      });
-
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.message || 'Failed to save settings');
-      }
-
+      await patchAdminSettings(settings);
       setMessage({ type: 'success', text: t('adminSettings.settingsSaved') });
 
-      setValue(Date.now().toString())
+      setValue(Date.now().toString());
       // Force refresh of settings across the app by updating localStorage timestamp
-      } catch {
-      setMessage({ type: 'error', text: t('adminSettings.failedSaveSettings') });
+    } catch (err) {
+      setMessage({
+        type: 'error',
+        text:
+          err instanceof ApiClientError
+            ? err.message
+            : t('adminSettings.failedSaveSettings'),
+      });
     } finally {
       setIsSaving(false);
     }
   };
 
   if (status === 'loading' || isLoading) {
-    return (
-      <div className="px-4 sm:px-6 lg:px-8 space-y-6">
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-10 w-32" />
-        </div>
-      </div>
-    );
+    return <PageSkeleton />;
   }
 
   return (

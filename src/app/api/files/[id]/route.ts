@@ -8,6 +8,7 @@ import { logApiError, type LogContext } from '@/lib/logger';
 import { invalidatePattern } from '@/lib/redis';
 import { cloudinary, isCloudinaryConfigured } from '@/lib/cloudinary';
 import { collectSubtreeFiles, collectSubtreeIds } from '@/lib/fileNodes';
+import { requireFilesSuperadmin } from '@/lib/filesAccess';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,14 +21,9 @@ export async function PATCH(
 
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
-    logContext.userId = session.user.id;
-
-    if (session.user.role !== 'superadmin') {
-      return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
-    }
+    const denied = requireFilesSuperadmin(session);
+    if (denied) return denied;
+    logContext.userId = session!.user!.id;
 
     const { id } = await params;
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -53,7 +49,7 @@ export async function PATCH(
     node.name = name;
     await node.save();
 
-    const orgKey = session.user.organizationId || 'public';
+    const orgKey = session!.user!.organizationId || 'public';
     await invalidatePattern(`files:${orgKey}:*`);
 
     return NextResponse.json({ node }, { status: 200 });
@@ -83,14 +79,9 @@ export async function DELETE(
 
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
-    logContext.userId = session.user.id;
-
-    if (session.user.role !== 'superadmin') {
-      return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
-    }
+    const denied = requireFilesSuperadmin(session);
+    if (denied) return denied;
+    logContext.userId = session!.user!.id;
 
     await dbConnect();
 
@@ -118,7 +109,7 @@ export async function DELETE(
 
     await FileNode.deleteMany({ _id: { $in: ids } });
 
-    const orgKey = session.user.organizationId || 'public';
+    const orgKey = session!.user!.organizationId || 'public';
     await invalidatePattern(`files:${orgKey}:*`);
 
     return NextResponse.json({ message: 'Deleted successfully' }, { status: 200 });

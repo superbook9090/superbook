@@ -6,7 +6,7 @@ import { logInfo, logError, logWarn, type LogContext } from '@/lib/logger';
 
 let redis: Redis | null = null;
 
-export function getRedisClient(): Redis | null {
+function getRedisClient(): Redis | null {
   // Check if Redis environment variables are configured
   const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
   const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
@@ -70,18 +70,6 @@ export async function setCachedData<T>(
   } catch (error) {
     const logContext: LogContext = { method: 'REDIS_SET', path: 'redis' };
     logError('Redis set error', logContext, { error: (error as Error).message });
-  }
-}
-
-export async function invalidateCache(key: string): Promise<void> {
-  try {
-    const redis = getRedisClient();
-    if (!redis) return;
-    
-    await redis.del(key);
-  } catch (error) {
-    const logContext: LogContext = { method: 'REDIS_DELETE', path: 'redis' };
-    logError('Redis delete error', logContext, { error: (error as Error).message });
   }
 }
 

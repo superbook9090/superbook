@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
-import { Skeleton, CardSkeleton } from '@/components/ui/Skeleton';
+import { PageSkeleton } from '@/components/ui/Skeleton';
 import CourseCard from '@/features/courses/components/CourseCard';
 import Alert from '@/components/ui/Alert';
 import ConfirmModal from '@/components/ui/ConfirmModal';
@@ -50,27 +50,7 @@ export default function StudentCoursesPage() {
   };
 
   if (status === 'loading' || isLoading) {
-    return (
-      <div className="px-4 sm:px-6 lg:px-8">
-        {/* Header skeleton */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <Skeleton className="h-8 w-48 mb-2" />
-            <Skeleton className="h-5 w-64" />
-          </div>
-          <Skeleton className="h-10 w-32" />
-        </div>
-
-        {/* Course grid skeleton */}
-        <div className="mt-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <CardSkeleton key={i} />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+    return <PageSkeleton />;
   }
 
   return (

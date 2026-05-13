@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useTranslation } from '@/hooks/useTranslation';
 import { formatDate } from '@/lib/dateUtils';
-import { debounce } from '@/lib/debounce';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useFeature } from '@/contexts/AppSettingsContext';
@@ -20,7 +20,7 @@ import {
   ArrowRight,
   Bookmark,
 } from 'lucide-react';
-import { Skeleton } from '@/components/ui/Skeleton';
+import { PageSkeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
 import { useBlogs, useFavorites, useAddFavorite, useRemoveFavorite, type Blog } from '@/lib/react-query/hooks';
 
@@ -52,16 +52,14 @@ export default function StudentBlogsPage() {
   const addFavoriteMutation = useAddFavorite();
   const removeFavoriteMutation = useRemoveFavorite();
   
-  const [searchTerm, setSearchTerm] = useState('');
   const [searchInput, setSearchInput] = useState('');
+  const debouncedSearch = useDebouncedValue(searchInput, 300);
   const [selectedTopic, setSelectedTopic] = useState('all');
   const [languageFilter, setLanguageFilter] = useState<'all' | 'en' | 'hi'>('all');
   const [hasRedirected, setHasRedirected] = useState(false);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchInput(value);
-    debounce((...args: unknown[]) => setSearchTerm(args[0] as string), 300)(value);
+    setSearchInput(e.target.value);
   };
 
   useEffect(() => {
@@ -112,49 +110,18 @@ export default function StudentBlogsPage() {
   };
 
   const filteredBlogs = blogs.filter((blog: Blog) => {
+    const q = debouncedSearch.toLowerCase();
     const matchesSearch =
-      blog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      blog.topic.toLowerCase().includes(searchTerm.toLowerCase());
+      !q ||
+      blog.title.toLowerCase().includes(q) ||
+      blog.topic.toLowerCase().includes(q);
     const matchesTopic = selectedTopic === 'all' || blog.topic.toLowerCase() === selectedTopic.toLowerCase();
     const matchesLanguage = languageFilter === 'all' || blog.language === languageFilter;
     return matchesSearch && matchesTopic && matchesLanguage;
   });
 
   if (isLoading) {
-    return (
-      <div className="px-4 sm:px-6 lg:px-8 space-y-6">
-        {/* Header skeleton */}
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-10 w-32" />
-        </div>
-
-        {/* Blog cards skeleton */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="bg-white rounded-2xl p-6 shadow-sm">
-              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                <div className="flex-1 min-w-0 space-y-3">
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <Skeleton className="h-5 w-48" />
-                    <Skeleton className="h-5 w-16" />
-                  </div>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <Skeleton className="h-4 w-20" />
-                    <Skeleton className="h-4 w-24" />
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Skeleton className="h-10 w-10" />
-                  <Skeleton className="h-10 w-10" />
-                  <Skeleton className="h-10 w-10" />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
+    return <PageSkeleton />;
   }
 
   return (
@@ -260,12 +227,12 @@ export default function StudentBlogsPage() {
           <div className="col-span-full text-center py-16 bg-[var(--card-solid)] rounded-2xl shadow-sm">
             <BookOpen className="w-16 h-16 text-[var(--color-muted-foreground)] mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-[var(--color-foreground)] mb-2">
-              {searchTerm || selectedTopic !== 'all'
+              {debouncedSearch || selectedTopic !== 'all'
                 ? t('blog.noBlogsFound')
                 : t('blog.noBlogsYet')}
             </h3>
             <p className="text-[var(--color-muted-foreground)]">
-              {searchTerm || selectedTopic !== 'all'
+              {debouncedSearch || selectedTopic !== 'all'
                 ? t('blog.tryAdjusting')
                 : t('blog.checkBackLater')}
             </p>

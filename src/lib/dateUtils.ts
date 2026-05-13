@@ -1,28 +1,24 @@
-// src/lib/dateUtils.ts
-
-/**
- * Format a date to a localized date string (e.g., "Jan 15, 2024")
- */
-export function formatDate(date: string | Date | null | undefined): string {
-  if (!date) return 'N/A';
-  
-  // Handle different types of date inputs
+function parseValidDate(date: string | Date | null | undefined): Date | null {
+  if (!date) return null;
   let d: Date;
   if (typeof date === 'string') {
-    // Handle empty string or invalid string
-    if (!date.trim()) return 'N/A';
+    if (!date.trim()) return null;
     d = new Date(date);
   } else if (date instanceof Date) {
     d = date;
   } else {
-    return 'N/A';
+    return null;
   }
-  
-  // Check if the date is valid
-  if (isNaN(d.getTime()) || d.getFullYear() < 1000 || d.getFullYear() > 9999) {
-    return 'N/A';
+  if (Number.isNaN(d.getTime()) || d.getFullYear() < 1000 || d.getFullYear() > 9999) {
+    return null;
   }
-  
+  return d;
+}
+
+/** Localized date (e.g. "Jan 15, 2024") */
+export function formatDate(date: string | Date | null | undefined): string {
+  const d = parseValidDate(date);
+  if (!d) return 'N/A';
   return d.toLocaleDateString(undefined, {
     year: 'numeric',
     month: 'short',
@@ -30,29 +26,10 @@ export function formatDate(date: string | Date | null | undefined): string {
   });
 }
 
-/**
- * Format a date to a localized date and time string (e.g., "Jan 15, 2024, 2:30 PM")
- */
+/** Localized date and time */
 export function formatDateTime(date: string | Date | null | undefined): string {
-  if (!date) return 'N/A';
-  
-  // Handle different types of date inputs
-  let d: Date;
-  if (typeof date === 'string') {
-    // Handle empty string or invalid string
-    if (!date.trim()) return 'N/A';
-    d = new Date(date);
-  } else if (date instanceof Date) {
-    d = date;
-  } else {
-    return 'N/A';
-  }
-  
-  // Check if the date is valid
-  if (isNaN(d.getTime()) || d.getFullYear() < 1000 || d.getFullYear() > 9999) {
-    return 'N/A';
-  }
-  
+  const d = parseValidDate(date);
+  if (!d) return 'N/A';
   return d.toLocaleString(undefined, {
     year: 'numeric',
     month: 'short',
@@ -62,29 +39,10 @@ export function formatDateTime(date: string | Date | null | undefined): string {
   });
 }
 
-/**
- * Format a date to a short date string (e.g., "01/15/2024" or "15/01/2024" based on locale)
- */
+/** Short numeric date per locale */
 export function formatShortDate(date: string | Date | null | undefined): string {
-  if (!date) return 'N/A';
-  
-  // Handle different types of date inputs
-  let d: Date;
-  if (typeof date === 'string') {
-    // Handle empty string or invalid string
-    if (!date.trim()) return 'N/A';
-    d = new Date(date);
-  } else if (date instanceof Date) {
-    d = date;
-  } else {
-    return 'N/A';
-  }
-  
-  // Check if the date is valid
-  if (isNaN(d.getTime()) || d.getFullYear() < 1000 || d.getFullYear() > 9999) {
-    return 'N/A';
-  }
-  
+  const d = parseValidDate(date);
+  if (!d) return 'N/A';
   return d.toLocaleDateString(undefined, {
     year: 'numeric',
     month: '2-digit',
@@ -92,38 +50,17 @@ export function formatShortDate(date: string | Date | null | undefined): string 
   });
 }
 
-/**
- * Format time only (e.g., "2:30 PM")
- */
+/** Time only (e.g. "2:30 PM") */
 export function formatTime(date: string | Date | null | undefined): string {
-  if (!date) return 'N/A';
-  
-  // Handle different types of date inputs
-  let d: Date;
-  if (typeof date === 'string') {
-    // Handle empty string or invalid string
-    if (!date.trim()) return 'N/A';
-    d = new Date(date);
-  } else if (date instanceof Date) {
-    d = date;
-  } else {
-    return 'N/A';
-  }
-  
-  // Check if the date is valid
-  if (isNaN(d.getTime()) || d.getFullYear() < 1000 || d.getFullYear() > 9999) {
-    return 'N/A';
-  }
-  
+  const d = parseValidDate(date);
+  if (!d) return 'N/A';
   return d.toLocaleTimeString(undefined, {
     hour: '2-digit',
     minute: '2-digit',
   });
 }
 
-/**
- * Format duration in seconds to a readable string (e.g., "2m 30s")
- */
+/** Duration in seconds → "2m 30s" */
 export function formatDuration(seconds: number | null | undefined): string {
   if (!seconds || seconds <= 0) return 'N/A';
   const mins = Math.floor(seconds / 60);
@@ -134,36 +71,18 @@ export function formatDuration(seconds: number | null | undefined): string {
   return `${secs}s`;
 }
 
-/**
- * Get relative time (e.g., "2 hours ago", "yesterday")
- */
+/** Relative time or falls back to formatDate */
 export function getRelativeTime(date: string | Date | null | undefined): string {
-  if (!date) return 'N/A';
-  
-  // Handle different types of date inputs
-  let d: Date;
-  if (typeof date === 'string') {
-    // Handle empty string or invalid string
-    if (!date.trim()) return 'N/A';
-    d = new Date(date);
-  } else if (date instanceof Date) {
-    d = date;
-  } else {
-    return 'N/A';
-  }
-  
-  // Check if the date is valid
-  if (isNaN(d.getTime()) || d.getFullYear() < 1000 || d.getFullYear() > 9999) {
-    return 'N/A';
-  }
-  
+  const d = parseValidDate(date);
+  if (!d) return 'N/A';
+
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - d.getTime()) / 1000);
-  
+
   if (diffInSeconds < 60) return 'just now';
   if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
   if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
   if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
-  
+
   return formatDate(d);
 }

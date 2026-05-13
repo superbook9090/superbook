@@ -21,7 +21,9 @@ import {
 import { Badge } from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
 import DOMPurify from 'isomorphic-dompurify';
-import type { Blog } from '@/types';
+import { getBlogById, type BlogDocument } from '@/lib/api/blogs';
+import { addFavorite as postFavorite, removeFavorite as removeFavoriteApi } from '@/lib/api/favorites';
+import { ApiClientError } from '@/lib/api/http';
 
 
 export default function BlogDetailPage() {
@@ -32,15 +34,13 @@ export default function BlogDetailPage() {
   const blogId = params.id as string;
   const { t } = useTranslation();
 
-  const [blog, setBlog] = useState<Blog | null>(null);
+  const [blog, setBlog] = useState<BlogDocument | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
 
   const fetchBlog = useCallback(async () => {
     try {
-      const response = await fetch(`/api/blogs/${blogId}`);
-      if (!response.ok) throw new Error('Failed to fetch');
-      const data = await response.json();
+      const data = await getBlogById(blogId);
       setBlog(data);
     } catch (error) {
       console.error('Error fetching blog:', error);
@@ -64,24 +64,18 @@ export default function BlogDetailPage() {
     const isFavorited = favorites.has(blogId);
     try {
       if (isFavorited) {
-        await fetch(`/api/favorites/${blogId}`, { method: 'DELETE' });
+        await removeFavoriteApi(blogId);
         removeFavorite(blogId);
-        // Refetch favorites to sync across pages
         mutate('/api/favorites');
       } else {
-        const response = await fetch('/api/favorites', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ blogId }),
-        });
-        if (response.ok || response.status === 409) {
-          addFavorite(blogId);
-          // Refetch favorites to sync across pages
-          mutate('/api/favorites');
-        }
+        await postFavorite(blogId);
+        addFavorite(blogId);
+        mutate('/api/favorites');
       }
-    } catch {
-      setAlertState({ type: 'error', message: t('blog.failedUpdateFavorite') });
+    } catch (err) {
+      const message =
+        err instanceof ApiClientError ? err.message : t('blog.failedUpdateFavorite');
+      setAlertState({ type: 'error', message });
     }
   };
 

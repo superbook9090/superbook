@@ -1,4 +1,3 @@
-// Logging utility with request ID generation for tracing
 export interface LogContext {
   requestId?: string;
   userId?: string;
@@ -6,15 +5,6 @@ export interface LogContext {
   method?: string;
   path?: string;
   userAgent?: string;
-}
-
-// Generate unique request ID (edge runtime compatible)
-export function generateRequestId(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    const r = Math.random() * 16 | 0;
-    const v = c === 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
 }
 
 // Log levels
@@ -57,20 +47,6 @@ export function logFailedRequest(
     `Failed request: ${method} ${path} - ${statusCode}`,
     context,
     error ? { error: error.message, stack: error.stack } : undefined
-  );
-}
-
-// Log rate limit hit
-export function logRateLimitHit(
-  identifier: string,
-  path: string,
-  limitType: string,
-  context?: LogContext
-) {
-  logWarn(
-    `Rate limit hit for ${identifier} on ${path} (${limitType})`,
-    context,
-    { limitType, identifier }
   );
 }
 

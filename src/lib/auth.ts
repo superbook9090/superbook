@@ -1,5 +1,5 @@
 // src/lib/auth.ts
-import NextAuth, { AuthOptions, DefaultSession } from 'next-auth';
+import { AuthOptions, DefaultSession } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
 import User from '@/models/User';
@@ -133,5 +133,3 @@ export const authOptions: AuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === 'development',
 };
-
-export default NextAuth(authOptions);

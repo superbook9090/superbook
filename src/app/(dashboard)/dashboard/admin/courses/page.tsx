@@ -15,13 +15,15 @@ import {
   Users,
   GraduationCap,
 } from 'lucide-react';
-import { Skeleton, CardSkeleton } from '@/components/ui/Skeleton';
+import { PageSkeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useTranslation } from '@/hooks/useTranslation';
 import { formatDate } from '@/lib/dateUtils';
 import type { Course } from '@/types';
+import { listCoursesAdmin, patchCourse, deleteCourse } from '@/lib/api/courses';
+import { ApiClientError } from '@/lib/api/http';
 
 export default function AdminCoursesPage() {
   const { session, status } = useSessionStore();
@@ -46,12 +48,12 @@ export default function AdminCoursesPage() {
 
   const fetchCourses = useCallback(async () => {
     try {
-      const response = await fetch('/api/courses');
-      if (!response.ok) throw new Error('Failed to fetch');
-      const data = await response.json();
-      setCourses(data.courses || []);
-    } catch {
-      setMessage({ type: 'error', text: t('admin.failedFetchCourses') });
+      const data = await listCoursesAdmin();
+      setCourses((data.courses || []) as Course[]);
+    } catch (err) {
+      const text =
+        err instanceof ApiClientError ? err.message : t('admin.failedFetchCourses');
+      setMessage({ type: 'error', text });
     } finally {
       setIsLoading(false);
     }
@@ -72,17 +74,13 @@ export default function AdminCoursesPage() {
 
   const handleTogglePublish = async (courseId: string, currentStatus: boolean) => {
     try {
-      const response = await fetch(`/api/courses/${courseId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isPublished: !currentStatus }),
-      });
-
-      if (!response.ok) throw new Error('Failed to update course');
+      await patchCourse(courseId, { isPublished: !currentStatus });
       setMessage({ type: 'success', text: t('admin.courseUpdated') });
       fetchCourses();
-    } catch {
-      setMessage({ type: 'error', text: t('admin.failedUpdateCourse') });
+    } catch (err) {
+      const text =
+        err instanceof ApiClientError ? err.message : t('admin.failedUpdateCourse');
+      setMessage({ type: 'error', text });
     }
   };
 
@@ -90,16 +88,14 @@ export default function AdminCoursesPage() {
     if (!confirm(t('admin.deleteCourseConfirm'))) return;
 
     try {
-      const response = await fetch(`/api/courses/${courseId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) throw new Error('Failed to delete course');
+      await deleteCourse(courseId);
       setMessage({ type: 'success', text: t('admin.courseDeleted') });
       setDeleteId(null);
       fetchCourses();
-    } catch {
-      setMessage({ type: 'error', text: t('admin.failedDeleteCourse') });
+    } catch (err) {
+      const text =
+        err instanceof ApiClientError ? err.message : t('admin.failedDeleteCourse');
+      setMessage({ type: 'error', text });
     }
   };
 
@@ -113,30 +109,7 @@ export default function AdminCoursesPage() {
   });
 
   if (isLoading) {
-    return (
-      <div className="px-4 sm:px-6 lg:px-8 space-y-6">
-        {/* Header skeleton */}
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-10 w-32" />
-        </div>
-
-        {/* Filters skeleton */}
-        <div className="bg-white rounded-xl p-4 shadow-sm">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-32" />
-          </div>
-        </div>
-
-        {/* Course cards skeleton */}
-        <div className="space-y-4">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <CardSkeleton key={i} />
-          ))}
-        </div>
-      </div>
-    );
+    return <PageSkeleton />;
   }
 
   return (

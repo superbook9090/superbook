@@ -4,8 +4,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { formatDate } from '@/lib/dateUtils';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
-import { debounce } from '@/lib/debounce';
 import { motion } from 'framer-motion';
 import {
   Users,
@@ -20,12 +20,20 @@ import {
   Building2,
   X,
 } from 'lucide-react';
-import { Skeleton } from '@/components/ui/Skeleton';
+import { PageSkeleton } from '@/components/ui/Skeleton';
 import Alert from '@/components/ui/Alert';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import { useRouter } from 'next/navigation';
 import { useSessionStore } from '@/store/useSessionStore';
 import { isSuperAdmin } from '@/lib/roles';
+import {
+  listAdminUsers,
+  patchAdminUser,
+  deleteAdminUser,
+  patchAdminUserOrganization,
+} from '@/lib/api/adminUsers';
+import { listOrganizations } from '@/lib/api/organizations';
+import { ApiClientError } from '@/lib/api/http';
 
 interface User {
   _id: string;
@@ -68,13 +76,9 @@ export default function AdminUsersPage() {
   }, [session, status, router]);
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [search, setSearch] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearch = useDebouncedValue(searchQuery, 300);
   const [roleFilter, setRoleFilter] = useState('');
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    debounce((...args: unknown[]) => setSearch(args[0] as string), 300)(value);
-  };
 
   const [page, setPage] = useState(1);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -93,35 +97,30 @@ export default function AdminUsersPage() {
 
   const fetchUsers = useCallback(async () => {
     try {
-      const params = new URLSearchParams();
-      if (search) params.append('search', search);
-      if (roleFilter) params.append('role', roleFilter);
-      params.append('page', page.toString());
-
-      const response = await fetch(`/api/admin/users?${params}`);
-      const data = await response.json();
-
-      if (response.ok) {
-        setUsers(data.users || []);
-        setPagination(data.pagination || { total: 0, totalPages: 1 });
-      } else {
-        setMessage({ type: 'error', text: data.message || 'Failed to load users' });
-      }
-    } catch {
-      setMessage({ type: 'error', text: t('admin.errorLoadingUsers') || 'Error loading users' });
+      const data = await listAdminUsers({
+        search: debouncedSearch || undefined,
+        role: roleFilter || undefined,
+        page,
+      });
+      setUsers((data.users || []) as User[]);
+      setPagination(data.pagination || { total: 0, totalPages: 1 });
+    } catch (err) {
+      setMessage({
+        type: 'error',
+        text:
+          err instanceof ApiClientError
+            ? err.message
+            : t('admin.errorLoadingUsers') || 'Error loading users',
+      });
     } finally {
       setIsLoading(false);
     }
-  }, [search, roleFilter, page, t]);
+  }, [debouncedSearch, roleFilter, page, t]);
 
   const fetchOrganizations = useCallback(async () => {
     try {
-      const response = await fetch('/api/organizations');
-      const data = await response.json();
-
-      if (response.ok) {
-        setOrganizations(data.organizations || []);
-      }
+      const data = await listOrganizations();
+      setOrganizations((data.organizations || []) as Array<{ _id: string; name: string }>);
     } catch {
       // Organizations fetch failed, handled silently
     }
@@ -142,43 +141,35 @@ export default function AdminUsersPage() {
 
   const handleRoleChange = async (userId: string, newRole: string) => {
     try {
-      const response = await fetch('/api/admin/users', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, updates: { role: newRole } }),
+      await patchAdminUser({ userId, updates: { role: newRole } });
+      setUsers(users.map((u) => (u._id === userId ? { ...u, role: newRole } : u)));
+      setMessage({ type: 'success', text: 'User role updated successfully' });
+    } catch (err) {
+      setMessage({
+        type: 'error',
+        text:
+          err instanceof ApiClientError
+            ? err.message
+            : t('admin.errorUpdatingUser') || 'Error updating user',
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setUsers(users.map(u => u._id === userId ? { ...u, role: newRole } : u));
-        setMessage({ type: 'success', text: 'User role updated successfully' });
-      } else {
-        setMessage({ type: 'error', text: data.message || 'Failed to update user' });
-      }
-    } catch {
-      setMessage({ type: 'error', text: t('admin.errorUpdatingUser') || 'Error updating user' });
     }
   };
 
   const handleDelete = async (userId: string) => {
     try {
-      const response = await fetch(`/api/admin/users?id=${userId}`, {
-        method: 'DELETE',
+      await deleteAdminUser(userId);
+      setUsers(users.filter((u) => u._id !== userId));
+      setMessage({ type: 'success', text: 'User deleted successfully' });
+      setDeleteId(null);
+      setShowDeleteDialog(false);
+    } catch (err) {
+      setMessage({
+        type: 'error',
+        text:
+          err instanceof ApiClientError
+            ? err.message
+            : t('admin.errorDeletingUser') || 'Error deleting user',
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setUsers(users.filter(u => u._id !== userId));
-        setMessage({ type: 'success', text: 'User deleted successfully' });
-        setDeleteId(null);
-        setShowDeleteDialog(false);
-      } else {
-        setMessage({ type: 'error', text: data.message || 'Failed to delete user' });
-      }
-    } catch {
-      setMessage({ type: 'error', text: t('admin.errorDeletingUser') || 'Error deleting user' });
     }
   };
 
@@ -222,23 +213,21 @@ export default function AdminUsersPage() {
       if (limitsForm.quizzes) updates.limits = { ...updates.limits, quizzes: parseInt(limitsForm.quizzes) };
       if (limitsForm.blogs) updates.limits = { ...updates.limits, blogs: parseInt(limitsForm.blogs) };
 
-      const response = await fetch('/api/admin/users', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: limitsUserId, updates }),
+      await patchAdminUser({ userId: limitsUserId, updates });
+
+      setUsers(
+        users.map((u) => (u._id === limitsUserId ? { ...u, limits: updates.limits } : u))
+      );
+      setMessage({ type: 'success', text: t('adminUsers.userLimitsUpdated') });
+      handleCloseLimits();
+    } catch (err) {
+      setMessage({
+        type: 'error',
+        text:
+          err instanceof ApiClientError
+            ? err.message
+            : t('adminUsers.failedUpdateLimits'),
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setUsers(users.map(u => u._id === limitsUserId ? { ...u, limits: updates.limits } : u));
-        setMessage({ type: 'success', text: t('adminUsers.userLimitsUpdated') });
-        handleCloseLimits();
-      } else {
-        setMessage({ type: 'error', text: data.message || t('adminUsers.failedUpdateLimits') });
-      }
-    } catch {
-      setMessage({ type: 'error', text: t('admin.errorUpdatingLimits') || 'Error updating limits' });
     }
   };
 
@@ -249,48 +238,28 @@ export default function AdminUsersPage() {
   };
 
   const handleSaveOrgAssign = async () => {
+    if (!orgAssignUserId) return;
     try {
-      const response = await fetch(`/api/admin/users/${orgAssignUserId}/organization`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ organizationId: selectedOrganizationId }),
+      const data = (await patchAdminUserOrganization(orgAssignUserId, {
+        organizationId: selectedOrganizationId,
+      })) as Partial<User>;
+
+      setUsers(users.map((u) => (u._id === orgAssignUserId ? { ...u, ...data } : u)));
+      setMessage({ type: 'success', text: 'User organization updated successfully' });
+      handleCloseOrgAssign();
+    } catch (err) {
+      setMessage({
+        type: 'error',
+        text:
+          err instanceof ApiClientError
+            ? err.message
+            : t('admin.errorUpdatingOrganization') || 'Error updating user organization',
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setUsers(users.map(u => u._id === orgAssignUserId ? { ...u, ...data } : u));
-        setMessage({ type: 'success', text: 'User organization updated successfully' });
-        handleCloseOrgAssign();
-      } else {
-        setMessage({ type: 'error', text: data.message || 'Failed to update user organization' });
-      }
-    } catch {
-      setMessage({ type: 'error', text: t('admin.errorUpdatingOrganization') || 'Error updating user organization' });
     }
   };
 
   if (status === 'loading' || isLoading) {
-    return (
-      <div className="px-4 sm:px-6 lg:px-8 space-y-6">
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-10 w-32" />
-        </div>
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <div className="p-4 space-y-3">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-4">
-                <Skeleton className="h-10 w-10 rounded-full" />
-                <Skeleton className="h-5 w-32" />
-                <Skeleton className="h-5 w-40" />
-                <Skeleton className="h-5 w-24 ml-auto" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+    return <PageSkeleton />;
   }
 
   return (
@@ -336,8 +305,8 @@ export default function AdminUsersPage() {
           <input
             type="text"
             placeholder={t('admin.searchUsers')}
-            defaultValue={search}
-            onChange={handleSearchChange}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 min-h-[44px] bg-[var(--color-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
           />
         </div>

@@ -8,7 +8,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
 import Alert from '@/components/ui/Alert';
-import { Skeleton, CardSkeleton } from '@/components/ui/Skeleton';
+import { PageSkeleton } from '@/components/ui/Skeleton';
 import { useTeacherCourses, usePublishCourse, type Course } from '@/lib/react-query/hooks';
 
 export default function TeacherCoursesPage() {
@@ -47,22 +47,7 @@ export default function TeacherCoursesPage() {
   };
 
   if (status === 'loading' || isLoading) {
-    return (
-      <div className="px-4 sm:px-6 lg:px-8 space-y-6">
-        {/* Header skeleton */}
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-10 w-32" />
-        </div>
-
-        {/* Course cards skeleton */}
-        <div className="space-y-4">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <CardSkeleton key={i} />
-          ))}
-        </div>
-      </div>
-    );
+    return <PageSkeleton />;
   }
 
   return (

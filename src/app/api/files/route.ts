@@ -9,6 +9,7 @@ import { getCachedData, setCachedData } from '@/lib/redis';
 import { serialize } from '@/lib/serialize';
 import { paginationSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
+import { requireAuthenticatedSession } from '@/lib/filesAccess';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,10 +19,12 @@ export async function GET(request: NextRequest) {
 
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
-    logContext.userId = session.user.id;
+    const denied = requireAuthenticatedSession(session);
+    if (denied) return denied;
+
+    const authUser = session!.user;
+    logContext.userId = authUser.id;
+    const isSuperadmin = authUser.role === 'superadmin';
 
     const { searchParams } = new URL(request.url);
     const parentIdRaw = searchParams.get('parentId');
@@ -35,9 +38,10 @@ export async function GET(request: NextRequest) {
     const limit = paginationParsed.success ? paginationParsed.data.limit || 50 : 50;
     const skip = (page - 1) * limit;
 
-    const orgId = session.user.organizationId || 'public';
+    const orgId = authUser.organizationId || 'public';
     const parentKey = parentIdRaw || 'root';
-    const cacheKey = `files:${orgId}:${parentKey}:${page}:${limit}`;
+    const cacheScope = isSuperadmin ? 'full' : 'ro';
+    const cacheKey = `files:${orgId}:${parentKey}:${page}:${limit}:${cacheScope}`;
 
     const cached = await getCachedData<unknown>(cacheKey);
     if (cached) {
@@ -47,11 +51,11 @@ export async function GET(request: NextRequest) {
     await dbConnect();
 
     const user = {
-      _id: new mongoose.Types.ObjectId(session.user.id),
-      organizationId: session.user.organizationId
-        ? new mongoose.Types.ObjectId(session.user.organizationId)
+      _id: new mongoose.Types.ObjectId(authUser.id),
+      organizationId: authUser.organizationId
+        ? new mongoose.Types.ObjectId(authUser.organizationId)
         : null,
-      role: session.user.role as 'student' | 'teacher' | 'admin' | 'superadmin',
+      role: authUser.role as 'student' | 'teacher' | 'admin' | 'superadmin',
     };
 
     const accessFilter = getAccessFilter(user);
@@ -63,6 +67,10 @@ export async function GET(request: NextRequest) {
       parentId,
     };
 
+    const fileFields = isSuperadmin
+      ? 'name type parentId fileUrl fileType size createdAt updatedAt'
+      : 'name type parentId fileType size createdAt updatedAt';
+
     const [folders, files, foldersTotal, filesTotal] = await Promise.all([
       FileNode.find({ ...baseQuery, type: 'folder' })
         .select('name type parentId organizationId createdAt updatedAt')
@@ -71,7 +79,7 @@ export async function GET(request: NextRequest) {
         .limit(limit)
         .lean(),
       FileNode.find({ ...baseQuery, type: 'file' })
-        .select('name type parentId fileUrl fileType size createdAt updatedAt')
+        .select(fileFields)
         .sort({ name: 1 })
         .skip(skip)
         .limit(limit)

@@ -99,36 +99,8 @@ export function sanitizeHtml(html: string): string {
   return result;
 }
 
-// Sanitize text input to prevent injection
-export function sanitizeText(text: string): string {
-  return text
-    .replace(/[<>]/g, '') // Remove potential HTML tags
-    .trim();
-}
-
-// Validate and sanitize ObjectId
 export function validateObjectId(id: string): boolean {
   return /^[0-9a-fA-F]{24}$/.test(id);
-}
-
-// Sanitize user input for queries to prevent NoSQL injection
-export function sanitizeQueryValue(value: unknown): unknown {
-  if (typeof value === 'string') {
-    // Remove potential NoSQL injection operators
-    return value.replace(/^\$/, '');
-  }
-  if (typeof value === 'object' && value !== null) {
-    // Recursively sanitize nested objects
-    const sanitized: Record<string, unknown> = {};
-    for (const key in value) {
-      // Skip keys that look like MongoDB operators
-      if (!key.startsWith('$')) {
-        sanitized[key] = sanitizeQueryValue((value as Record<string, unknown>)[key]);
-      }
-    }
-    return sanitized;
-  }
-  return value;
 }
 
 // Sanitize search query

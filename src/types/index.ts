@@ -147,6 +147,14 @@ export interface ApiResponse<T = unknown> {
   code?: string;
 }
 
+/** Standard JSON error payload for App Router `NextResponse.json` handlers. */
+export interface ApiJsonErrorBody {
+  ok: false;
+  message: string;
+  code?: string;
+  errors?: unknown;
+}
+
 export interface PaginatedResponse<T = unknown> {
   data: T[];
   pagination: {

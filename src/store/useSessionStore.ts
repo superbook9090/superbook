@@ -3,6 +3,8 @@
 
 import { create } from 'zustand';
 import type { Session, Favorite } from '@/types';
+import { authSignOut, fetchAuthSessionJson } from '@/lib/api/auth';
+import { listFavorites } from '@/lib/api/favorites';
 
 interface SessionState {
   session: Session | null;
@@ -55,17 +57,11 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      const res = await fetch('/api/auth/session', {
-        cache: 'no-store',
-        headers: {
-          'Cache-Control': 'no-cache',
-        },
-      });
-      const data = await res.json();
+      const data = await fetchAuthSessionJson();
 
       if (data.user) {
         set({
-          session: data,
+          session: data as unknown as Session,
           status: 'authenticated',
           loading: false,
           lastFetched: now,
@@ -106,13 +102,12 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     set({ favoritesLoading: true });
 
     try {
-      const res = await fetch('/api/favorites');
-      const data = await res.json();
-
-      const favoriteIds = new Set<string>(data.favorites?.map((fav: Favorite) => fav.blog._id) || []);
+      const data = await listFavorites();
+      const favoritesList = (data.favorites || []) as Favorite[];
+      const favoriteIds = new Set<string>(favoritesList.map((fav) => fav.blog._id));
       set({
         favorites: favoriteIds,
-        favoritesData: data.favorites || [],
+        favoritesData: favoritesList,
         favoritesLoading: false,
         favoritesLastFetched: now,
       });
@@ -127,7 +122,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
   clearSession: () => set({ session: null, status: 'unauthenticated', lastFetched: null }),
 
   logout: async () => {
-    await fetch('/api/auth/signout', { method: 'POST' });
+    await authSignOut();
     set({ session: null, status: 'unauthenticated', lastFetched: null, favorites: new Set(), favoritesData: [], favoritesLastFetched: null });
   },
 

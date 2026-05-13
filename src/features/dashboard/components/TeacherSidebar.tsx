@@ -39,7 +39,7 @@ const adminNavigation = [
   { name: 'common.allCourses', href: '/dashboard/admin/courses', icon: Library },
   { name: 'common.allQuizzes', href: '/dashboard/admin/quizzes', icon: HelpCircle },
   { name: 'common.allBlogs', href: '/dashboard/admin/blogs', icon: Newspaper, feature: 'enableBlogs' },
-  { name: 'common.files', href: '/dashboard/admin/files', icon: Folder },
+  { name: 'common.files', href: '/dashboard/admin/files', icon: Folder, superadminOnly: true },
   { name: 'common.analytics', href: '/dashboard/admin/analytics', icon: BarChart3 },
   { name: 'common.settings', href: '/dashboard/admin/settings', icon: User },
 ];

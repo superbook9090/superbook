@@ -8,8 +8,9 @@ import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import QuizCard from '@/features/quizzes/components/QuizCard';
 import Alert from '@/components/ui/Alert';
 import { useSessionStore } from '@/store/useSessionStore';
-import { Skeleton, CardSkeleton } from '@/components/ui/Skeleton';
-import { useEnrollments, useQuizAttempts, useQuizzes, type QuizAttempt, type Quiz } from '@/lib/react-query/hooks';
+import { PageSkeleton } from '@/components/ui/Skeleton';
+import { useStartQuizAttempt, useEnrollments, useQuizAttempts, useQuizzes, type QuizAttempt, type Quiz } from '@/lib/react-query/hooks';
+import { ApiClientError } from '@/lib/api/http';
 
 export default function StudentQuizzesPage() {
   const session = useSessionStore((s) => s.session);
@@ -25,6 +26,8 @@ export default function StudentQuizzesPage() {
   const { data: attempts = [] } = useQuizAttempts();
   const { data: allQuizzes = [], isLoading: quizzesLoading } = useQuizzes(orgId);
   const isLoading = quizzesLoading;
+
+  const startQuiz = useStartQuizAttempt();
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -64,26 +67,19 @@ export default function StudentQuizzesPage() {
     return relevantQuizzes;
   }, [enrollments, attempts, allQuizzes]);
 
-  const handleStartQuiz = useCallback(async (quizId: string) => {
-    try {
-      const response = await fetch('/api/quiz-attempts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ quizId, action: 'start' }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        // Navigate to quiz taking page
+  const handleStartQuiz = useCallback(
+    async (quizId: string) => {
+      try {
+        const data = await startQuiz.mutateAsync(quizId);
         router.push(`/dashboard/student/quizzes/take?attemptId=${data.attempt._id}`);
-      } else {
-        setAlertState({ type: 'error', message: data.message || t('errors.failedStartQuiz') });
+      } catch (e) {
+        const message =
+          e instanceof ApiClientError ? e.message : t('errors.errorStartingQuiz');
+        setAlertState({ type: 'error', message: message || t('errors.failedStartQuiz') });
       }
-    } catch {
-      setAlertState({ type: 'error', message: t('errors.errorStartingQuiz') });
-    }
-  }, [t, router]);
+    },
+    [startQuiz, router, t]
+  );
 
   const completedAttempts = useMemo(() =>
     attempts.filter((a: QuizAttempt) => a.status === 'completed'),
@@ -91,22 +87,7 @@ export default function StudentQuizzesPage() {
   );
 
   if (status === 'loading' || isLoading) {
-    return (
-      <div className="px-4 sm:px-6 lg:px-8 space-y-6">
-        {/* Header skeleton */}
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-10 w-32" />
-        </div>
-
-        {/* Quiz cards skeleton */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <CardSkeleton key={i} />
-          ))}
-        </div>
-      </div>
-    );
+    return <PageSkeleton />;
   }
 
   return (

@@ -15,7 +15,7 @@ import {
   Clock
 } from 'lucide-react';
 import Alert from '@/components/ui/Alert';
-import { Skeleton } from '@/components/ui/Skeleton';
+import { PageSkeleton } from '@/components/ui/Skeleton';
 import { useSessionStore } from '@/store/useSessionStore';
 
 interface Enrollment {
@@ -129,46 +129,7 @@ export default function StudentDashboardPage() {
   }
 
   if (isLoading) {
-    return (
-      <div className="px-4 sm:px-6 lg:px-8 space-y-6">
-        {/* Header skeleton */}
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-10 w-32" />
-        </div>
-
-        {/* Stats grid skeleton */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="bg-white rounded-xl p-6 shadow-sm">
-              <Skeleton className="h-12 w-12 mb-4" />
-              <Skeleton className="h-4 w-24 mb-2" />
-              <Skeleton className="h-8 w-16" />
-            </div>
-          ))}
-        </div>
-
-        {/* Recent activity skeleton */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white rounded-xl p-6 shadow-sm">
-            <Skeleton className="h-6 w-32 mb-4" />
-            <div className="space-y-3">
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-5/6" />
-              <Skeleton className="h-4 w-4/5" />
-            </div>
-          </div>
-          <div className="bg-white rounded-xl p-6 shadow-sm">
-            <Skeleton className="h-6 w-32 mb-4" />
-            <div className="space-y-3">
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-5/6" />
-              <Skeleton className="h-4 w-4/5" />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    return <PageSkeleton />;
   }
 
   return (

@@ -17,7 +17,7 @@ import {
   ArrowRight,
   Sparkles
 } from 'lucide-react';
-import Loader from '@/components/ui/Loader';
+import { Loader } from '@/components/ui/Loader';
 
 export default function LoginForm() {
   const { status, fetchSession } = useSessionStore();

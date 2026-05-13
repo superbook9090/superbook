@@ -8,7 +8,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { useSessionStore } from '@/store/useSessionStore';
 import CourseCard from '@/features/courses/components/CourseCard';
 import Alert from '@/components/ui/Alert';
-import { Skeleton, CardSkeleton } from '@/components/ui/Skeleton';
+import { PageSkeleton } from '@/components/ui/Skeleton';
 import { useAvailableCourses, useEnrollCourse, type Course } from '@/lib/react-query/hooks';
 
 export default function BrowseCoursesPage() {
@@ -38,22 +38,7 @@ export default function BrowseCoursesPage() {
   };
 
   if (status === 'loading' || coursesLoading) {
-    return (
-      <div className="px-4 sm:px-6 lg:px-8 space-y-6">
-        {/* Header skeleton */}
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-10 w-32" />
-        </div>
-
-        {/* Course cards skeleton */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <CardSkeleton key={i} />
-          ))}
-        </div>
-      </div>
-    );
+    return <PageSkeleton />;
   }
 
   return (

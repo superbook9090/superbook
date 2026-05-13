@@ -38,7 +38,7 @@ const adminNavigation = [
   { name: 'Courses', href: '/dashboard/admin/courses', icon: 'BookOpen' },
   { name: 'Quizzes', href: '/dashboard/admin/quizzes', icon: 'HelpCircle' },
   { name: 'Blogs', href: '/dashboard/admin/blogs', icon: 'Library' },
-  { name: 'Files', href: '/dashboard/admin/files', icon: 'Folder' },
+  { name: 'Files', href: '/dashboard/admin/files', icon: 'Folder', superadminOnly: true },
   { name: 'Analytics', href: '/dashboard/admin/analytics', icon: 'BarChart3' },
   { name: 'Settings', href: '/dashboard/admin/settings', icon: 'User' },
 ];
@@ -73,7 +73,7 @@ export default async function DashboardLayout({
 
   return (
     <QuizProvider>
-      <div className="min-h-screen bg-[var(--color-foreground)] flex flex-col md:flex-row overflow-x-hidden">
+      <div className="min-h-screen bg-[var(--color-background)] flex flex-col md:flex-row overflow-x-hidden">
         {/* Mobile Navigation Header - Fixed */}
         <MobileNav
           user={session.user}
@@ -96,7 +96,7 @@ export default async function DashboardLayout({
           <DashboardHeader isTeacherOrAdmin={isStaff} />
 
           {/* Main Content - Scrollable */}
-          <main className="flex-1 overflow-x-hidden overflow-y-auto bg-[var(--color-foreground)] p-4 sm:p-6 lg:p-8 pb-24 md:pb-8">
+          <main className="flex-1 overflow-x-hidden overflow-y-auto bg-[var(--color-background)] p-4 sm:p-6 lg:p-8 pb-24 md:pb-8">
             <RoleThemeProvider role={role || 'student'}>
               <div className="max-w-7xl mx-auto w-full">
                 {children}

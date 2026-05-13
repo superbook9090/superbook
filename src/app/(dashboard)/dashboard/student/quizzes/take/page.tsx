@@ -6,11 +6,14 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useQuiz } from '@/contexts/QuizContext';
-import { useSubmitQuizAttempt } from '@/lib/react-query/hooks';
+import { useSubmitQuizAttempt, useStartQuizAttempt } from '@/lib/react-query/hooks';
+import { getQuizAttemptByAttemptId } from '@/lib/api/quizAttempts';
+import { ApiClientError } from '@/lib/api/http';
 import { useQuizSecurity } from '@/hooks/useQuizSecurity';
 import Alert from '@/components/ui/Alert';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import { useSessionStore } from '@/store/useSessionStore';
+import { PageSkeleton } from '@/components/ui/Skeleton';
 
 interface Question {
   question: string;
@@ -41,6 +44,7 @@ export default function TakeQuizPage() {
   const { t } = useTranslation();
   const { theme } = useRoleTheme();
   const submitQuizMutation = useSubmitQuizAttempt();
+  const startQuizMutation = useStartQuizAttempt();
 
   const [attempt, setAttempt] = useState<Attempt | null>(null);
   const [answers, setAnswers] = useState<{ [key: number]: number }>({});
@@ -214,38 +218,42 @@ export default function TakeQuizPage() {
   }, [attempt]);
 
   const fetchAttempt = async () => {
+    if (!attemptId) {
+      setError('Quiz attempt not found');
+      setIsLoading(false);
+      return;
+    }
     try {
-      const response = await fetch(`/api/quiz-attempts?attemptId=${attemptId}`);
-      const data = await response.json();
+      const data = await getQuizAttemptByAttemptId(attemptId);
+      const foundAttempt = data.attempts?.[0] as Attempt | undefined;
+      if (foundAttempt && foundAttempt.status === 'in_progress') {
+        setAttempt(foundAttempt);
 
-      if (response.ok) {
-        const foundAttempt = data.attempts?.[0];
-        if (foundAttempt && foundAttempt.status === 'in_progress') {
-          setAttempt(foundAttempt);
+        // Calculate remaining time
+        const elapsedSeconds = Math.floor(
+          (Date.now() - new Date(foundAttempt.startedAt).getTime()) / 1000
+        );
+        const totalSeconds = foundAttempt.quiz.timeLimit * 60;
+        const remaining = Math.max(0, totalSeconds - elapsedSeconds);
+        setTimeRemaining(remaining);
 
-          // Calculate remaining time
-          const elapsedSeconds = Math.floor(
-            (Date.now() - new Date(foundAttempt.startedAt).getTime()) / 1000
-          );
-          const totalSeconds = foundAttempt.quiz.timeLimit * 60;
-          const remaining = Math.max(0, totalSeconds - elapsedSeconds);
-          setTimeRemaining(remaining);
-
-          // Start fullscreen mode and set quiz active
-          await quizSecurity.startQuiz();
-          setQuizActive(true);
-        } else if (foundAttempt && (foundAttempt.status === 'completed' || foundAttempt.status === 'force_submitted')) {
-          // Attempt is completed, allow retry
-          setAttempt(foundAttempt);
-          setError('quiz_completed');
-        } else {
-          setError('Quiz attempt not found');
-        }
+        // Start fullscreen mode and set quiz active
+        await quizSecurity.startQuiz();
+        setQuizActive(true);
+      } else if (
+        foundAttempt &&
+        (foundAttempt.status === 'completed' || foundAttempt.status === 'force_submitted')
+      ) {
+        // Attempt is completed, allow retry
+        setAttempt(foundAttempt);
+        setError('quiz_completed');
       } else {
-        setError(data.message || 'Failed to load quiz');
+        setError('Quiz attempt not found');
       }
-    } catch {
-      setError('Error loading quiz');
+    } catch (err) {
+      setError(
+        err instanceof ApiClientError ? err.message : 'Error loading quiz'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -263,25 +271,8 @@ export default function TakeQuizPage() {
     setIsLoading(true);
 
     try {
-      // Call API to start new attempt
-      const response = await fetch('/api/quiz-attempts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          quizId: attempt.quiz._id,
-          action: 'start',
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        // Navigate to new attempt
-        router.push(`/dashboard/student/quizzes/take?attemptId=${data.attempt._id}`);
-      } else {
-        setError(data.message || 'Failed to start new attempt');
-        setIsLoading(false);
-      }
+      const data = await startQuizMutation.mutateAsync(attempt.quiz._id);
+      router.push(`/dashboard/student/quizzes/take?attemptId=${data.attempt._id}`);
     } catch {
       setError('Error starting new attempt');
       setIsLoading(false);
@@ -345,7 +336,7 @@ export default function TakeQuizPage() {
   };
 
   if (status === 'loading' || isLoading) {
-    return <div className="text-center py-8">Loading quiz...</div>;
+    return <PageSkeleton />;
   }
 
   if (error || !attempt) {

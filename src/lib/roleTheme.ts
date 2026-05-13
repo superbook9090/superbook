@@ -118,14 +118,3 @@ export function getRoleTheme(role: string = 'student'): RoleTheme {
   const normalizedRole = role.toLowerCase() as UserRole;
   return roleThemes[normalizedRole] || roleThemes.student;
 }
-
-// Helper to get color scheme for layout (legacy support)
-export function getColorScheme(role: string = 'student'): 'indigo' | 'blue' | 'red' | 'gray' {
-  const themeMap: Record<string, 'indigo' | 'blue' | 'red' | 'gray'> = {
-    student: 'indigo',
-    teacher: 'blue',
-    admin: 'red',
-    superadmin: 'gray',
-  };
-  return themeMap[role.toLowerCase()] || 'indigo';
-}

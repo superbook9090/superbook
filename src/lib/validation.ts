@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
-// Common validation schemas
-export const objectIdSchema = z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid ObjectId');
+const objectIdSchema = z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid ObjectId');
 
 // Course validation schemas
 export const createCourseSchema = z.object({
@@ -42,19 +41,6 @@ export const createQuizSchema = z.object({
 });
 
 export const updateQuizSchema = createQuizSchema.partial();
-
-// User validation schemas
-export const updateUserSchema = z.object({
-  name: z.string().min(1, 'Name is required').max(100, 'Name must be less than 100 characters').optional(),
-  email: z.string().email('Invalid email address').optional(),
-  role: z.enum(['student', 'teacher', 'admin']).optional(),
-  isSuspended: z.boolean().optional(),
-  limits: z.object({
-    courses: z.number().int().min(0).optional(),
-    quizzes: z.number().int().min(0).optional(),
-    blogs: z.number().int().min(0).optional(),
-  }).optional(),
-});
 
 // Enrollment validation schemas
 export const createEnrollmentSchema = z.object({
@@ -103,15 +89,6 @@ export const updateSettingsSchema = z.object({
 export const paginationSchema = z.object({
   page: z.string().regex(/^\d+$/).transform(Number).optional(),
   limit: z.string().regex(/^\d+$/).transform(Number).optional(),
-});
-
-// Search validation
-export const searchSchema = z.object({
-  search: z.string().max(100).optional(),
-  topic: z.string().optional(),
-  language: z.enum(['en', 'hi']).optional(),
-  instructor: z.string().optional(),
-  role: z.enum(['student', 'teacher', 'admin']).optional(),
 });
 
 // File manager validation schemas

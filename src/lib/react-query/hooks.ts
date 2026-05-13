@@ -1,14 +1,18 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { DashboardData, StudentDashboardData, TeacherDashboardData } from '@/app/api/dashboard/route';
+import type { DashboardData, TeacherDashboardData } from '@/app/api/dashboard/route';
+import { listBlogs, createBlog, deleteBlog, updateBlog, type CreateBlogInput } from '@/lib/api/blogs';
+import { addFavorite, listFavorites, removeFavorite } from '@/lib/api/favorites';
+import { fetchDashboard } from '@/lib/api/dashboard';
+import { listTeacherCoursesByOrg, listAvailableCoursesByOrg, patchCourse } from '@/lib/api/courses';
+import { listQuizzesByOrg } from '@/lib/api/quizzes';
+import { listEnrollments, enrollInCourse, dropEnrollment } from '@/lib/api/enrollments';
+import { listQuizAttempts, startQuizAttempt, submitQuizAttempt, type SubmitQuizAttemptInput } from '@/lib/api/quizAttempts';
+export type { DashboardData, TeacherDashboardData };
 
-// Re-export types for convenience
-export type { DashboardData, StudentDashboardData, TeacherDashboardData };
-
-// ============ QUERY KEYS ============
 // Centralized query keys for cache management
-export const QUERY_KEYS = {
+const QUERY_KEYS = {
   DASHBOARD: ['dashboard'] as const,
   COURSES: (orgId?: string) => ['courses', orgId || 'public'] as const,
   TEACHER_COURSES: (orgId?: string) => ['courses', orgId || 'public', 'teacher'] as const,
@@ -105,31 +109,12 @@ export interface Favorite {
 
 // ============ QUERIES ============
 
-export function useCourses(orgId?: string) {
-  return useQuery({
-    queryKey: ['courses', orgId || 'public'],
-    queryFn: async () => {
-      const res = await fetch(`/api/courses?orgId=${orgId || 'public'}`, {
-        cache: 'no-store',
-      });
-      if (!res.ok) throw new Error('Failed to fetch courses');
-      const data = await res.json();
-      return data.courses || [];
-    },
-    enabled: !!orgId || orgId === 'public',
-  });
-}
-
 export function useTeacherCourses(orgId?: string) {
   return useQuery({
     queryKey: ['courses', orgId || 'public', 'teacher'],
     queryFn: async () => {
-      const res = await fetch(`/api/courses?orgId=${orgId || 'public'}&instructor=self`, {
-        cache: 'no-store',
-      });
-      if (!res.ok) throw new Error('Failed to fetch teacher courses');
-      const data = await res.json();
-      return data.courses || [];
+      const data = await listTeacherCoursesByOrg(orgId || 'public');
+      return (data.courses || []) as Course[];
     },
     enabled: !!orgId || orgId === 'public',
   });
@@ -139,12 +124,8 @@ export function useAvailableCourses(orgId?: string) {
   return useQuery({
     queryKey: ['courses', orgId || 'public', 'available'],
     queryFn: async () => {
-      const res = await fetch(`/api/courses?orgId=${orgId || 'public'}&available=true`, {
-        cache: 'no-store',
-      });
-      if (!res.ok) throw new Error('Failed to fetch available courses');
-      const data = await res.json();
-      return data.courses || [];
+      const data = await listAvailableCoursesByOrg(orgId || 'public');
+      return (data.courses || []) as Course[];
     },
     enabled: !!orgId || orgId === 'public',
   });
@@ -154,13 +135,8 @@ export function useBlogs(orgId?: string, includeDrafts = false) {
   return useQuery({
     queryKey: ['blogs', orgId || 'public', includeDrafts],
     queryFn: async () => {
-      const url = includeDrafts 
-        ? `/api/blogs?includeDrafts=true&orgId=${orgId || 'public'}`
-        : `/api/blogs?orgId=${orgId || 'public'}`;
-      const res = await fetch(url, { cache: 'no-store' });
-      if (!res.ok) throw new Error('Failed to fetch blogs');
-      const data = await res.json();
-      return data.blogs || [];
+      const data = await listBlogs(orgId || 'public', includeDrafts);
+      return (data.blogs || []) as Blog[];
     },
     enabled: !!orgId || orgId === 'public',
   });
@@ -170,12 +146,8 @@ export function useQuizzes(orgId?: string) {
   return useQuery({
     queryKey: ['quizzes', orgId || 'public'],
     queryFn: async () => {
-      const res = await fetch(`/api/quizzes?orgId=${orgId || 'public'}`, {
-        cache: 'no-store',
-      });
-      if (!res.ok) throw new Error('Failed to fetch quizzes');
-      const data = await res.json();
-      return data.quizzes || [];
+      const data = await listQuizzesByOrg(orgId || 'public');
+      return (data.quizzes || []) as Quiz[];
     },
     enabled: !!orgId || orgId === 'public',
   });
@@ -185,10 +157,8 @@ export function useEnrollments() {
   return useQuery({
     queryKey: QUERY_KEYS.ENROLLMENTS,
     queryFn: async () => {
-      const res = await fetch('/api/enrollments', { cache: 'no-store' });
-      if (!res.ok) throw new Error('Failed to fetch enrollments');
-      const data = await res.json();
-      return data.enrollments || [];
+      const data = await listEnrollments();
+      return (data.enrollments || []) as Enrollment[];
     },
   });
 }
@@ -203,11 +173,7 @@ export function useEnrollments() {
 export function useDashboard() {
   return useQuery<DashboardData>({
     queryKey: QUERY_KEYS.DASHBOARD,
-    queryFn: async () => {
-      const res = await fetch('/api/dashboard', { cache: 'no-store' });
-      if (!res.ok) throw new Error('Failed to fetch dashboard');
-      return res.json();
-    },
+    queryFn: () => fetchDashboard(),
     staleTime: 60 * 1000, // 1 minute
     gcTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,
@@ -234,13 +200,7 @@ export function usePublishCourse() {
   
   return useMutation({
     mutationFn: async ({ courseId, isPublished }: { courseId: string; isPublished: boolean }) => {
-      const res = await fetch(`/api/courses/${courseId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isPublished }),
-      });
-      if (!res.ok) throw new Error('Failed to update course');
-      return res.json();
+      return patchCourse(courseId, { isPublished }) as Promise<{ organizationId?: string }>;
     },
     onSuccess: (data) => {
       // Invalidate teacher courses cache
@@ -255,10 +215,8 @@ export function useQuizAttempts() {
   return useQuery({
     queryKey: ['quizAttempts'],
     queryFn: async () => {
-      const res = await fetch('/api/quiz-attempts', { cache: 'no-store' });
-      if (!res.ok) throw new Error('Failed to fetch quiz attempts');
-      const data = await res.json();
-      return data.attempts || [];
+      const data = await listQuizAttempts();
+      return (data.attempts || []) as QuizAttempt[];
     },
   });
 }
@@ -267,109 +225,31 @@ export function useFavorites() {
   return useQuery({
     queryKey: ['favorites'],
     queryFn: async () => {
-      const res = await fetch('/api/favorites', { cache: 'no-store' });
-      if (!res.ok) throw new Error('Failed to fetch favorites');
-      const data = await res.json();
-      return data.favorites || [];
-    },
-  });
-}
-
-// ============ COURSE MUTATIONS ============
-
-export function useDeleteCourse() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (courseId: string) => {
-      const res = await fetch(`/api/courses/${courseId}`, {
-        method: 'DELETE',
-      });
-      if (!res.ok) throw new Error('Failed to delete course');
-      return res.json();
-    },
-    onMutate: async (courseId) => {
-      await queryClient.cancelQueries({ queryKey: ['courses'] });
-      const previousCourses = queryClient.getQueryData<Course[]>(['courses']);
-      queryClient.setQueryData<Course[]>(['courses'], (old) =>
-        (old || []).filter((c) => c._id !== courseId)
-      );
-      return { previousCourses };
-    },
-    onError: (err, courseId, context) => {
-      if (context?.previousCourses) {
-        queryClient.setQueryData(['courses'], context.previousCourses);
-      }
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['courses'] });
-    },
-  });
-}
-
-export function useCreateCourse() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (data: Partial<Course>) => {
-      const res = await fetch('/api/courses', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error('Failed to create course');
-      return res.json();
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['courses'] });
-    },
-  });
-}
-
-export function useUpdateCourse() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({ courseId, data }: { courseId: string; data: Partial<Course> }) => {
-      const res = await fetch(`/api/courses/${courseId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error('Failed to update course');
-      return res.json();
-    },
-    onMutate: async ({ courseId, data }) => {
-      await queryClient.cancelQueries({ queryKey: ['courses'] });
-      const previousCourses = queryClient.getQueryData<Course[]>(['courses']);
-      queryClient.setQueryData<Course[]>(['courses'], (old) =>
-        (old || []).map((c) => (c._id === courseId ? { ...c, ...data } : c))
-      );
-      return { previousCourses };
-    },
-    onError: (err, variables, context) => {
-      if (context?.previousCourses) {
-        queryClient.setQueryData(['courses'], context.previousCourses);
-      }
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['courses'] });
+      const data = await listFavorites();
+      return (data.favorites || []) as Favorite[];
     },
   });
 }
 
 // ============ BLOG MUTATIONS ============
 
+export function useCreateBlog() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: CreateBlogInput) => createBlog(input),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['blogs'] });
+    },
+  });
+}
+
 export function useDeleteBlog() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (blogId: string) => {
-      const res = await fetch(`/api/blogs/${blogId}`, {
-        method: 'DELETE',
-      });
-      if (!res.ok) throw new Error('Failed to delete blog');
-      return res.json();
+      return deleteBlog(blogId);
     },
     onMutate: async (blogId) => {
       await queryClient.cancelQueries({ queryKey: ['blogs'] });
@@ -390,37 +270,12 @@ export function useDeleteBlog() {
   });
 }
 
-export function useCreateBlog() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (data: Partial<Blog>) => {
-      const res = await fetch('/api/blogs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error('Failed to create blog');
-      return res.json();
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['blogs'] });
-    },
-  });
-}
-
 export function useUpdateBlog() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ blogId, data }: { blogId: string; data: Partial<Blog> }) => {
-      const res = await fetch(`/api/blogs/${blogId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error('Failed to update blog');
-      return res.json();
+      return updateBlog(blogId, data);
     },
     onMutate: async ({ blogId, data }) => {
       await queryClient.cancelQueries({ queryKey: ['blogs'] });
@@ -447,13 +302,7 @@ export function useDropEnrollment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (enrollmentId: string) => {
-      const res = await fetch(`/api/enrollments/${enrollmentId}`, {
-        method: 'DELETE',
-      });
-      if (!res.ok) throw new Error('Failed to drop enrollment');
-      return res.json();
-    },
+    mutationFn: (enrollmentId: string) => dropEnrollment(enrollmentId),
     onMutate: async (enrollmentId) => {
       await queryClient.cancelQueries({ queryKey: QUERY_KEYS.ENROLLMENTS });
       const previousEnrollments = queryClient.getQueryData<Enrollment[]>(QUERY_KEYS.ENROLLMENTS);
@@ -480,15 +329,7 @@ export function useEnrollCourse() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (courseId: string) => {
-      const res = await fetch('/api/enrollments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ courseId }),
-      });
-      if (!res.ok) throw new Error('Failed to enroll in course');
-      return res.json();
-    },
+    mutationFn: (courseId: string) => enrollInCourse(courseId),
     onSettled: () => {
       // Invalidate all related queries to refresh UI
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ENROLLMENTS });
@@ -502,13 +343,7 @@ export function useRemoveFavorite() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (blogId: string) => {
-      const res = await fetch(`/api/favorites/${blogId}`, {
-        method: 'DELETE',
-      });
-      if (!res.ok) throw new Error('Failed to remove favorite');
-      return res.json();
-    },
+    mutationFn: (blogId: string) => removeFavorite(blogId),
     onMutate: async (blogId) => {
       await queryClient.cancelQueries({ queryKey: ['favorites'] });
       const previousFavorites = queryClient.getQueryData<Favorite[]>(['favorites']);
@@ -532,17 +367,22 @@ export function useAddFavorite() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (blogId: string) => {
-      const res = await fetch('/api/favorites', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ blogId }),
-      });
-      if (!res.ok) throw new Error('Failed to add favorite');
-      return res.json();
-    },
+    mutationFn: (blogId: string) => addFavorite(blogId),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['favorites'] });
+    },
+  });
+}
+
+export function useStartQuizAttempt() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (quizId: string) => startQuizAttempt(quizId),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.QUIZ_ATTEMPTS });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ENROLLMENTS });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.DASHBOARD });
     },
   });
 }
@@ -551,17 +391,8 @@ export function useSubmitQuizAttempt() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: { quizId: string; action: string; answers: { questionIndex: number; selectedOption: number }[]; timeTaken?: number }) => {
-      const res = await fetch('/api/quiz-attempts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error('Failed to submit quiz');
-      return res.json();
-    },
+    mutationFn: (data: SubmitQuizAttemptInput) => submitQuizAttempt(data),
     onSettled: () => {
-      // Invalidate all related queries to refresh UI
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.QUIZ_ATTEMPTS });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ENROLLMENTS });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.DASHBOARD });

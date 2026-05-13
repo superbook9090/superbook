@@ -16,7 +16,7 @@ import {
   Trophy,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
-import Loader from '@/components/ui/Loader';
+import { Loader } from '@/components/ui/Loader';
 
 interface Quiz {
   _id: string;

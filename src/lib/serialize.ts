@@ -45,23 +45,3 @@ export function serialize(data: unknown): unknown {
   // Handle primitives
   return data;
 }
-
-/**
- * Serialize array of documents
- */
-export function serializeArray<T>(data: T[]): T[] {
-  return data.map(item => serialize(item)) as T[];
-}
-
-/**
- * Safe serialization using JSON.parse(JSON.stringify())
- * Use this as a fallback for complex nested objects
- */
-export function safeSerialize(data: unknown): unknown {
-  try {
-    return JSON.parse(JSON.stringify(data));
-  } catch (error) {
-    console.error('Serialization error:', error);
-    return data;
-  }
-}

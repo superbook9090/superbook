@@ -3,7 +3,7 @@
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { ButtonHTMLAttributes, forwardRef } from 'react';
-import Loader from '@/components/ui/Loader';
+import { Loader } from '@/components/ui/Loader';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {

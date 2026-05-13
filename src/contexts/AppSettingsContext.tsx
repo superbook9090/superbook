@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { fetchPublicSettings } from '@/lib/api/settings';
 
 interface FeatureToggles {
   enableBlogs: boolean;
@@ -64,9 +65,7 @@ export function AppSettingsProvider({ children }: { children: ReactNode }) {
 
   const fetchSettings = async () => {
     try {
-      const response = await fetch('/api/settings');
-      if (!response.ok) throw new Error('Failed to fetch settings');
-      const data = await response.json();
+      const data = (await fetchPublicSettings()) as AppSettings;
       setSettings(data);
       setError(null);
     } catch (err) {

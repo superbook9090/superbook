@@ -6,7 +6,7 @@
 import { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle, AlertTriangle, Info, CheckCircle } from 'lucide-react';
-import Loader from '@/components/ui/Loader';
+import { Loader } from '@/components/ui/Loader';
 import { useTranslation } from '@/hooks/useTranslation';
 
 interface ConfirmModalProps {

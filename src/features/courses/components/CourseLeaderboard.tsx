@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import Leaderboard from '@/components/ui/Leaderboard';
-import Loader from '@/components/ui/Loader';
+import { Loader } from '@/components/ui/Loader';
+import { fetchCourseLeaderboard } from '@/lib/api/leaderboard';
 
 interface LeaderboardApiResponse {
   userId: string;
@@ -46,18 +47,17 @@ export default function CourseLeaderboard({
   const fetchLeaderboard = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/leaderboard/course/${courseId}`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch leaderboard');
-      }
-      
-      const data = await response.json();
+      const data = (await fetchCourseLeaderboard(courseId)) as {
+        leaderboard?: LeaderboardApiResponse[];
+        course?: { totalStudents?: number; totalQuizzes?: number };
+      };
       // Map course leaderboard data to include score field
-      const mappedLeaderboard = (data.leaderboard || []).map((entry: LeaderboardApiResponse): CourseLeaderboardEntry => ({
-        ...entry,
-        score: entry.averageScore || 0 // Use averageScore as the primary score display
-      }));
+      const mappedLeaderboard = (data.leaderboard || []).map(
+        (entry: LeaderboardApiResponse): CourseLeaderboardEntry => ({
+          ...entry,
+          score: entry.averageScore || 0, // Use averageScore as the primary score display
+        })
+      );
       setLeaderboard(mappedLeaderboard);
       setCourseStats({
         totalStudents: data.course?.totalStudents || 0,

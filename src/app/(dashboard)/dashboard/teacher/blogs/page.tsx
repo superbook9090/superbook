@@ -16,7 +16,7 @@ import {
   Edit2,
   Plus,
 } from 'lucide-react';
-import { Skeleton } from '@/components/ui/Skeleton';
+import { PageSkeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
 import ConfirmModal from '@/components/ui/ConfirmModal';
@@ -104,59 +104,7 @@ export default function TeacherBlogsPage() {
   });
 
   if (isLoading) {
-    return (
-      <div className="px-4 sm:px-6 lg:px-8 space-y-6">
-        {/* Header skeleton */}
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-10 w-32" />
-        </div>
-
-        {/* Filters skeleton */}
-        <div className="bg-white rounded-xl p-4 shadow-sm">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-32" />
-          </div>
-        </div>
-
-        {/* Stats grid skeleton */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-white rounded-xl p-6 shadow-sm">
-              <Skeleton className="h-12 w-12 mb-4" />
-              <Skeleton className="h-4 w-24 mb-2" />
-              <Skeleton className="h-8 w-16" />
-            </div>
-          ))}
-        </div>
-
-        {/* Blog cards skeleton */}
-        <div className="space-y-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="bg-white rounded-2xl p-6 shadow-sm">
-              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                <div className="flex-1 min-w-0 space-y-3">
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <Skeleton className="h-5 w-48" />
-                    <Skeleton className="h-5 w-16" />
-                  </div>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <Skeleton className="h-4 w-20" />
-                    <Skeleton className="h-4 w-24" />
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Skeleton className="h-10 w-10" />
-                  <Skeleton className="h-10 w-10" />
-                  <Skeleton className="h-10 w-10" />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
+    return <PageSkeleton />;
   }
 
   return (

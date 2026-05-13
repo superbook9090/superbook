@@ -8,6 +8,7 @@ import { createFolderSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { invalidatePattern } from '@/lib/redis';
 import { assertParentIsFolder, normalizeParentId } from '@/lib/fileNodes';
+import { requireFilesSuperadmin } from '@/lib/filesAccess';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,14 +18,9 @@ export async function POST(request: NextRequest) {
 
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
-    logContext.userId = session.user.id;
-
-    if (session.user.role !== 'superadmin') {
-      return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
-    }
+    const denied = requireFilesSuperadmin(session);
+    if (denied) return denied;
+    logContext.userId = session!.user!.id;
 
     await dbConnect();
 
@@ -40,19 +36,21 @@ export async function POST(request: NextRequest) {
     const parentId = normalizeParentId(parsed.data.parentId ?? null);
     await assertParentIsFolder(parentId);
 
-    const organizationId = session.user.organizationId
-      ? new mongoose.Types.ObjectId(session.user.organizationId)
+    const authUser = session!.user;
+
+    const organizationId = authUser.organizationId
+      ? new mongoose.Types.ObjectId(authUser.organizationId)
       : null;
 
     const node = await FileNode.create({
       name: parsed.data.name,
       type: 'folder',
       parentId,
-      uploadedBy: new mongoose.Types.ObjectId(session.user.id),
+      uploadedBy: new mongoose.Types.ObjectId(authUser.id),
       organizationId,
     });
 
-    const orgKey = session.user.organizationId || 'public';
+    const orgKey = authUser.organizationId || 'public';
     const parentKey = parentId ? parentId.toString() : 'root';
     await invalidatePattern(`files:${orgKey}:${parentKey}:*`);
 

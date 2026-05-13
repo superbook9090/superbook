@@ -3,8 +3,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import Leaderboard from '@/components/ui/Leaderboard';
-import Loader from '@/components/ui/Loader';
+import { Loader } from '@/components/ui/Loader';
 import { useTranslation } from '@/hooks/useTranslation';
+import { fetchQuizLeaderboard } from '@/lib/api/leaderboard';
 
 interface QuizLeaderboardEntry {
   userId: string;
@@ -38,13 +39,7 @@ export default function QuizLeaderboard({
   const fetchLeaderboard = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/leaderboard/quiz/${quizId}`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch leaderboard');
-      }
-      
-      const data = await response.json();
+      const data = (await fetchQuizLeaderboard(quizId)) as { leaderboard?: QuizLeaderboardEntry[] };
       setLeaderboard(data.leaderboard || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');

@@ -6,8 +6,11 @@ import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
+import { listTeacherCoursesSelf } from '@/lib/api/courses';
+import { listQuizzesAll, patchQuiz, deleteQuiz } from '@/lib/api/quizzes';
+import { ApiClientError } from '@/lib/api/http';
 import Alert from '@/components/ui/Alert';
-import { Skeleton, CardSkeleton } from '@/components/ui/Skeleton';
+import { PageSkeleton } from '@/components/ui/Skeleton';
 
 interface Course {
   _id: string;
@@ -56,47 +59,30 @@ export default function TeacherQuizzesPage() {
 
   const fetchData = async () => {
     try {
-      // Fetch teacher's courses first
-      const coursesRes = await fetch('/api/courses?instructor=self');
-      const coursesData = await coursesRes.json();
-
-      if (!coursesRes.ok) {
-        setError(coursesData.message || 'Failed to load courses');
-        setIsLoading(false);
-        return;
-      }
-
-      const teacherCourses: Course[] = coursesData.courses || [];
+      const coursesData = await listTeacherCoursesSelf();
+      const teacherCourses: Course[] = (coursesData.courses || []) as Course[];
       setCourses(teacherCourses);
 
       if (teacherCourses.length === 0) {
         setQuizzes([]);
-        setIsLoading(false);
         return;
       }
 
-      // Fetch all quizzes and filter for teacher's courses
-      const quizzesRes = await fetch('/api/quizzes');
-      const quizzesData = await quizzesRes.json();
+      const quizzesData = await listQuizzesAll();
+      const allQuizzes: Quiz[] = (quizzesData.quizzes || []) as Quiz[];
+      const courseIds = new Set(teacherCourses.map((c) => c._id));
 
-      if (quizzesRes.ok) {
-        const allQuizzes: Quiz[] = quizzesData.quizzes || [];
-        const courseIds = new Set(teacherCourses.map((c) => c._id));
-
-        // Filter quizzes for this teacher's courses
-        const teacherQuizzes = allQuizzes.filter((q) => {
-          const quizCourseId = typeof q.course === 'object' && q.course !== null
+      const teacherQuizzes = allQuizzes.filter((q) => {
+        const quizCourseId =
+          typeof q.course === 'object' && q.course !== null
             ? q.course._id?.toString()
             : q.course?.toString();
-          return quizCourseId && courseIds.has(quizCourseId);
-        });
+        return quizCourseId && courseIds.has(quizCourseId);
+      });
 
-        setQuizzes(teacherQuizzes);
-      } else {
-        setError(quizzesData.message || 'Failed to load quizzes');
-      }
-    } catch {
-      setError('Error loading quizzes');
+      setQuizzes(teacherQuizzes);
+    } catch (err) {
+      setError(err instanceof ApiClientError ? err.message : 'Error loading quizzes');
     } finally {
       setIsLoading(false);
     }
@@ -104,21 +90,16 @@ export default function TeacherQuizzesPage() {
 
   const handleTogglePublish = useCallback(async (quizId: string, currentStatus: boolean) => {
     try {
-      const response = await fetch(`/api/quizzes/${quizId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isPublished: !currentStatus }),
+      await patchQuiz(quizId, { isPublished: !currentStatus });
+      setQuizzes((prev) =>
+        prev.map((q) => (q._id === quizId ? { ...q, isPublished: !currentStatus } : q))
+      );
+    } catch (err) {
+      setAlertState({
+        type: 'error',
+        message:
+          err instanceof ApiClientError ? err.message : t('teacherQuizzes.errorUpdateQuiz'),
       });
-
-      if (response.ok) {
-        setQuizzes(prev => prev.map((q) =>
-          q._id === quizId ? { ...q, isPublished: !currentStatus } : q
-        ));
-      } else {
-        setAlertState({ type: 'error', message: t('teacherQuizzes.failedUpdateQuiz') });
-      }
-    } catch {
-      setAlertState({ type: 'error', message: t('teacherQuizzes.errorUpdateQuiz') });
     }
   }, [t]);
 
@@ -126,37 +107,19 @@ export default function TeacherQuizzesPage() {
     if (!confirm(t('teacherQuizzes.confirmDeleteQuiz'))) return;
 
     try {
-      const response = await fetch(`/api/quizzes/${quizId}`, {
-        method: 'DELETE',
+      await deleteQuiz(quizId);
+      setQuizzes((prev) => prev.filter((q) => q._id !== quizId));
+    } catch (err) {
+      setAlertState({
+        type: 'error',
+        message:
+          err instanceof ApiClientError ? err.message : t('teacherQuizzes.errorDeleteQuiz'),
       });
-
-      if (response.ok) {
-        setQuizzes(prev => prev.filter((q) => q._id !== quizId));
-      } else {
-        setAlertState({ type: 'error', message: t('teacherQuizzes.failedDeleteQuiz') });
-      }
-    } catch {
-      setAlertState({ type: 'error', message: t('teacherQuizzes.errorDeleteQuiz') });
     }
   }, [t]);
 
   if (status === 'loading' || isLoading) {
-    return (
-      <div className="px-4 sm:px-6 lg:px-8 space-y-6">
-        {/* Header skeleton */}
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-10 w-32" />
-        </div>
-
-        {/* Quiz cards skeleton */}
-        <div className="space-y-4">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <CardSkeleton key={i} />
-          ))}
-        </div>
-      </div>
-    );
+    return <PageSkeleton />;
   }
 
   return (

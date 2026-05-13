@@ -8,7 +8,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { formatDate } from '@/lib/dateUtils';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
-import { Skeleton } from '@/components/ui/Skeleton';
+import { PageSkeleton } from '@/components/ui/Skeleton';
 import Alert from '@/components/ui/Alert';
 import { motion } from 'framer-motion';
 import { CheckCircle, Clock, Circle } from 'lucide-react';
@@ -16,6 +16,8 @@ import ScoreTrendChart from '@/components/charts/ScoreTrendChart';
 import CourseProgressChart from '@/components/charts/CourseProgressChart';
 import QuizStatusChart from '@/components/charts/QuizStatusChart';
 import AverageScoreChart from '@/components/charts/AverageScoreChart';
+import { fetchStudentProgress } from '@/lib/api/progress';
+import { ApiClientError } from '@/lib/api/http';
 
 interface CourseProgress {
   enrollment: {
@@ -84,19 +86,15 @@ export default function StudentProgressPage() {
 
   const fetchProgress = async () => {
     try {
-      const response = await fetch('/api/progress');
-      const data = await response.json();
-
-      if (response.ok) {
-        setProgressData(data.progress || []);
-        setOverallStats(data.overallStats || null);
-      } else {
-        const errorMsg = data.message || t('progress.failedLoadProgress');
-        setError(errorMsg);
-        setAlertState({ type: 'error', message: errorMsg });
-      }
-    } catch {
-      const errorMsg = t('progress.errorLoadingProgress');
+      const data = (await fetchStudentProgress()) as {
+        progress?: CourseProgress[];
+        overallStats?: OverallStats;
+      };
+      setProgressData(data.progress || []);
+      setOverallStats(data.overallStats || null);
+    } catch (err) {
+      const errorMsg =
+        err instanceof ApiClientError ? err.message : t('progress.errorLoadingProgress');
       setError(errorMsg);
       setAlertState({ type: 'error', message: errorMsg });
     } finally {
@@ -191,36 +189,7 @@ export default function StudentProgressPage() {
   };
 
   if (status === 'loading' || isLoading) {
-    return (
-      <div className="px-4 sm:px-6 lg:px-8 space-y-6">
-        {/* Header skeleton */}
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-10 w-32" />
-        </div>
-
-        {/* Stats grid skeleton */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="bg-white rounded-xl p-6 shadow-sm">
-              <Skeleton className="h-12 w-12 mb-4" />
-              <Skeleton className="h-4 w-24 mb-2" />
-              <Skeleton className="h-8 w-16" />
-            </div>
-          ))}
-        </div>
-
-        {/* Progress sections skeleton */}
-        <div className="bg-white rounded-xl p-6 shadow-sm">
-          <Skeleton className="h-6 w-32 mb-4" />
-          <div className="space-y-3">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-5/6" />
-            <Skeleton className="h-4 w-4/5" />
-          </div>
-        </div>
-      </div>
-    );
+    return <PageSkeleton />;
   }
 
   return (

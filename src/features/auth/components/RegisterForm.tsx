@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import PremiumLogo from '@/components/ui/PremiumLogo';
 import { signIn } from 'next-auth/react';
 import { useTranslation } from '@/hooks/useTranslation';
+import { registerAccount } from '@/lib/api/auth';
 import { roleThemes } from '@/lib/roleTheme';
 import { useSessionStore } from '@/store/useSessionStore';
 import {
@@ -20,7 +21,7 @@ import {
   Users,
   Building2
 } from 'lucide-react';
-import Loader from '@/components/ui/Loader';
+import { Loader } from '@/components/ui/Loader';
 
 export default function RegisterForm() {
   const { status, fetchSession } = useSessionStore();
@@ -65,25 +66,13 @@ export default function RegisterForm() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-          role: formData.role,
-          inviteCode: formData.inviteCode || undefined,
-        }),
+      await registerAccount({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role,
+        inviteCode: formData.inviteCode || undefined,
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Registration failed');
-      }
 
       // Automatically sign in after successful registration
       const signInResult = await signIn('credentials', {

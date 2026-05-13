@@ -16,7 +16,7 @@ import {
   Trash2
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
-import Loader from '@/components/ui/Loader';
+import { Loader } from '@/components/ui/Loader';
 import type { Course } from '@/types';
 
 interface Enrollment {
@@ -76,10 +76,6 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
       default: return 'default';
     }
   };
-
-  // Handle missing properties gracefully
-  const courseLanguage = courseData.language || 'en';
-  const courseUpdatedAt = courseData.updatedAt || courseData.createdAt;
 
   return (
     <motion.div

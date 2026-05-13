@@ -7,8 +7,10 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Eye, EyeOff, BookOpen, Hash, FileText, Type } from 'lucide-react';
 import Alert from '@/components/ui/Alert';
 import Button from '@/components/ui/Button';
-import { Skeleton } from '@/components/ui/Skeleton';
+import { PageSkeleton } from '@/components/ui/Skeleton';
 import { useSessionStore } from '@/store/useSessionStore';
+import { useCreateBlog } from '@/lib/react-query/hooks';
+import { ApiClientError } from '@/lib/api/http';
 
 const RichTextEditor = lazy(() => import('@/components/ui/RichTextEditor'));
 
@@ -29,7 +31,8 @@ const topics = [
 export default function CreateBlogPage() {
   const { status } = useSessionStore();
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const createBlogMutation = useCreateBlog();
+  const isLoading = createBlogMutation.isPending;
   const [isDraft, setIsDraft] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
@@ -54,40 +57,25 @@ export default function CreateBlogPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setIsLoading(true);
 
     if (!formData.title.trim() || !formData.topic || isContentEmpty(formData.content)) {
       const errorMsg = 'Please fill in all fields';
       setError(errorMsg);
       setAlertState({ type: 'error', message: errorMsg });
-      setIsLoading(false);
       return;
     }
 
     try {
-      const response = await fetch('/api/blogs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          isPublished: !isDraft,
-        }),
+      await createBlogMutation.mutateAsync({
+        ...formData,
+        isPublished: !isDraft,
       });
-
-      if (response.ok) {
-        router.push('/dashboard/teacher/blogs');
-      } else {
-        const data = await response.json();
-        const errorMsg = data.message || 'Failed to create blog';
-        setError(errorMsg);
-        setAlertState({ type: 'error', message: errorMsg });
-      }
-    } catch {
-      const errorMsg = 'An error occurred. Please try again.';
+      router.push('/dashboard/teacher/blogs');
+    } catch (err) {
+      const errorMsg =
+        err instanceof ApiClientError ? err.message : 'An error occurred. Please try again.';
       setError(errorMsg);
       setAlertState({ type: 'error', message: errorMsg });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -192,7 +180,7 @@ export default function CreateBlogPage() {
               <FileText className="w-4 h-4 inline mr-2" />
               Content
             </label>
-            <Suspense fallback={<Skeleton className="h-64 w-full" />}>
+            <Suspense fallback={<PageSkeleton variant="embed" />}>
               <RichTextEditor
                 content={formData.content}
                 onChange={(content) => setFormData({ ...formData, content })}

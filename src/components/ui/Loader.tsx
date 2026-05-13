@@ -70,17 +70,3 @@ export function Loader({
     </div>
   );
 }
-
-export function PageLoader({ text }: { text?: string }) {
-  return (
-    <div className="fixed inset-0 flex items-center justify-center bg-[var(--color-background)]/90 z-50">
-      <Loader size="lg" text={text} />
-    </div>
-  );
-}
-
-export function ButtonLoader() {
-  return <Loader variant="dots" size="sm" />;
-}
-
-export default Loader;

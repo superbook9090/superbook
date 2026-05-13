@@ -20,6 +20,13 @@ import Alert from '@/components/ui/Alert';
 import { useRouter } from 'next/navigation';
 import { useSessionStore } from '@/store/useSessionStore';
 import { isSuperAdmin } from '@/lib/roles';
+import {
+  listOrganizations,
+  createOrganization,
+  updateOrganization,
+  deleteOrganization,
+} from '@/lib/api/organizations';
+import { ApiClientError } from '@/lib/api/http';
 
 interface Organization {
   _id: string;
@@ -69,16 +76,11 @@ export default function OrganizationsPage() {
 
   const fetchOrganizations = useCallback(async () => {
     try {
-      const response = await fetch('/api/organizations');
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || t('organizations.failedFetchOrganizations'));
-      }
-
-      setOrganizations(data.organizations);
+      const data = await listOrganizations();
+      setOrganizations(data.organizations as Organization[]);
     } catch (err) {
-      const message = err instanceof Error ? err.message : t('organizations.failedFetchOrganizations');
+      const message =
+        err instanceof ApiClientError ? err.message : t('organizations.failedFetchOrganizations');
       setError(message);
     } finally {
       setIsLoading(false);
@@ -94,23 +96,13 @@ export default function OrganizationsPage() {
     setError('');
 
     try {
-      const response = await fetch('/api/organizations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || t('organizations.failedCreateOrganization'));
-      }
-
+      await createOrganization(formData);
       setShowCreateModal(false);
       setFormData({ name: '', description: '', isActive: true });
       fetchOrganizations();
     } catch (err) {
-      const message = err instanceof Error ? err.message : t('organizations.failedCreateOrganization');
+      const message =
+        err instanceof ApiClientError ? err.message : t('organizations.failedCreateOrganization');
       setError(message);
     }
   };
@@ -120,24 +112,14 @@ export default function OrganizationsPage() {
     if (!selectedOrg) return;
 
     try {
-      const response = await fetch(`/api/organizations/${selectedOrg._id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || t('organizations.failedUpdateOrganization'));
-      }
-
+      await updateOrganization(selectedOrg._id, formData);
       setShowEditModal(false);
       setSelectedOrg(null);
       setFormData({ name: '', description: '', isActive: true });
       fetchOrganizations();
     } catch (err) {
-      const message = err instanceof Error ? err.message : t('organizations.failedUpdateOrganization');
+      const message =
+        err instanceof ApiClientError ? err.message : t('organizations.failedUpdateOrganization');
       setError(message);
     }
   };
@@ -148,19 +130,11 @@ export default function OrganizationsPage() {
     }
 
     try {
-      const response = await fetch(`/api/organizations/${id}`, {
-        method: 'DELETE',
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || t('organizations.failedDeleteOrganization'));
-      }
-
+      await deleteOrganization(id);
       fetchOrganizations();
     } catch (err) {
-      const message = err instanceof Error ? err.message : t('organizations.failedDeleteOrganization');
+      const message =
+        err instanceof ApiClientError ? err.message : t('organizations.failedDeleteOrganization');
       setError(message);
     }
   };

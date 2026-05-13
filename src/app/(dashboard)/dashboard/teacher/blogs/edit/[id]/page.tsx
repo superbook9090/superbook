@@ -14,8 +14,10 @@ import {
 } from 'lucide-react';
 import Alert from '@/components/ui/Alert';
 import Button from '@/components/ui/Button';
-import { Skeleton } from '@/components/ui/Skeleton';
+import { PageSkeleton } from '@/components/ui/Skeleton';
 import { useSessionStore } from '@/store/useSessionStore';
+import { getBlogById, updateBlog, type BlogDocument } from '@/lib/api/blogs';
+import { ApiClientError } from '@/lib/api/http';
 
 const RichTextEditor = lazy(() => import('@/components/ui/RichTextEditor'));
 
@@ -32,14 +34,6 @@ const topics = [
   'Literature',
   'Other',
 ];
-
-interface Blog {
-  _id: string;
-  title: string;
-  topic: string;
-  content: string;
-  isPublished: boolean;
-}
 
 export default function EditBlogPage() {
   const { status } = useSessionStore();
@@ -72,18 +66,15 @@ export default function EditBlogPage() {
 
   const fetchBlog = async () => {
     try {
-      const response = await fetch(`/api/blogs/${blogId}`);
-      if (!response.ok) throw new Error('Failed to fetch');
-      const blog: Blog = await response.json();
-
+      const blog: BlogDocument = await getBlogById(blogId);
       setFormData({
         title: blog.title,
         topic: blog.topic,
         content: blog.content,
         isPublished: blog.isPublished,
       });
-    } catch {
-      const errorMsg = 'Failed to load blog';
+    } catch (err) {
+      const errorMsg = err instanceof ApiClientError ? err.message : 'Failed to load blog';
       setError(errorMsg);
     } finally {
       setIsLoading(false);
@@ -110,25 +101,16 @@ export default function EditBlogPage() {
     }
 
     try {
-      const response = await fetch(`/api/blogs/${blogId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          isPublished: !saveAsDraft,
-        }),
+      await updateBlog(blogId, {
+        ...formData,
+        isPublished: !saveAsDraft,
       });
-
-      if (response.ok) {
-        router.push('/dashboard/teacher/blogs');
-      } else {
-        const data = await response.json();
-        const errorMsg = data.message || 'Failed to update blog';
-        setError(errorMsg);
-        setAlertState({ type: 'error', message: errorMsg });
-      }
-    } catch {
-      const errorMsg = 'An error occurred. Please try again.';
+      router.push('/dashboard/teacher/blogs');
+    } catch (err) {
+      const errorMsg =
+        err instanceof ApiClientError
+          ? err.message
+          : 'An error occurred. Please try again.';
       setError(errorMsg);
       setAlertState({ type: 'error', message: errorMsg });
     } finally {
@@ -228,7 +210,7 @@ export default function EditBlogPage() {
               <FileText className="w-4 h-4 inline mr-2" />
               Content
             </label>
-            <Suspense fallback={<Skeleton className="h-64 w-full" />}>
+            <Suspense fallback={<PageSkeleton variant="embed" />}>
               <RichTextEditor
                 content={formData.content}
                 onChange={(content) => setFormData({ ...formData, content })}

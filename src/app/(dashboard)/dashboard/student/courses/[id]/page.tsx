@@ -4,8 +4,8 @@ import { useEffect, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSessionStore } from '@/store/useSessionStore';
-import { Skeleton } from '@/components/ui/Skeleton';
-import { useEnrollments, useQuizzes, useQuizAttempts, type Enrollment, type Quiz, type QuizAttempt } from '@/lib/react-query/hooks';
+import { PageSkeleton } from '@/components/ui/Skeleton';
+import { useEnrollments, useQuizzes, useQuizAttempts, useStartQuizAttempt, type Enrollment, type Quiz, type QuizAttempt } from '@/lib/react-query/hooks';
 import { Play, RotateCcw, Clock, CheckCircle } from 'lucide-react';
 import CourseLeaderboard from '@/features/courses/components/CourseLeaderboard';
 
@@ -19,6 +19,7 @@ export default function CourseDetailPage() {
   const { data: enrollments = [], isLoading: enrollmentsLoading } = useEnrollments();
   const { data: allQuizzes = [], isLoading: quizzesLoading } = useQuizzes('public');
   const { data: attempts = [] } = useQuizAttempts();
+  const startQuiz = useStartQuizAttempt();
 
   const enrollment = enrollments.find((e: Enrollment) => e.course._id === courseId);
   
@@ -56,17 +57,8 @@ export default function CourseDetailPage() {
 
   const handleStartQuiz = async (quizId: string) => {
     try {
-      const response = await fetch('/api/quiz-attempts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ quizId, action: 'start' }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        router.push(`/dashboard/student/quizzes/take?attemptId=${data.attempt._id}`);
-      }
+      const data = await startQuiz.mutateAsync(quizId);
+      router.push(`/dashboard/student/quizzes/take?attemptId=${data.attempt._id}`);
     } catch (error) {
       console.error('Error starting quiz:', error);
     }
@@ -81,13 +73,7 @@ export default function CourseDetailPage() {
   };
 
   if (status === 'loading' || enrollmentsLoading || quizzesLoading) {
-    return (
-      <div className="space-y-6">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-64 w-full" />
-        <Skeleton className="h-32 w-full" />
-      </div>
-    );
+    return <PageSkeleton />;
   }
 
   if (!enrollment) {

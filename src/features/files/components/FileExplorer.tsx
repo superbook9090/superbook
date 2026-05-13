@@ -14,9 +14,17 @@ import {
   Upload,
 } from 'lucide-react';
 import Alert from '@/components/ui/Alert';
-import { Skeleton } from '@/components/ui/Skeleton';
+import { PageSkeleton } from '@/components/ui/Skeleton';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSessionStore } from '@/store/useSessionStore';
+import {
+  listFolderContents,
+  createFileFolder,
+  uploadFile,
+  deleteFileNode,
+  renameFileNode,
+} from '@/lib/api/files';
+import { ApiClientError } from '@/lib/api/http';
 
 type NodeType = 'folder' | 'file';
 
@@ -35,7 +43,7 @@ interface FolderNode extends FileNodeBase {
 
 interface FileNode extends FileNodeBase {
   type: 'file';
-  fileUrl: string;
+  fileUrl?: string;
   fileType: string;
   size: number;
 }
@@ -77,20 +85,22 @@ export default function FileExplorer() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const canMutate = session?.user?.role === 'superadmin';
-  const canView = session?.user?.role === 'student' || session?.user?.role === 'admin' || session?.user?.role === 'superadmin';
-  const canRename = session?.user?.role === 'superadmin';
+  const canRename = canMutate;
+  const canView =
+    !!session?.user?.role &&
+    ['student', 'teacher', 'admin', 'superadmin'].includes(session.user.role);
 
   const loadContents = useCallback(async (pid: string | null) => {
     setIsLoading(true);
     setMessage(null);
     try {
-      const url = pid ? `/api/files?parentId=${pid}` : '/api/files';
-      const res = await fetch(url);
-      if (!res.ok) throw new Error('Failed to fetch');
-      const data = (await res.json()) as FolderContentsResponse;
-      setContents({ folders: data.folders || [], files: data.files || [] });
-    } catch {
-      setMessage({ type: 'error', text: t('common.error') });
+      const data = await listFolderContents(pid);
+      setContents({ folders: (data.folders || []) as FolderNode[], files: (data.files || []) as FileNode[] });
+    } catch (err) {
+      setMessage({
+        type: 'error',
+        text: err instanceof ApiClientError ? err.message : t('common.error'),
+      });
     } finally {
       setIsLoading(false);
     }
@@ -134,19 +144,14 @@ export default function FileExplorer() {
     if (!name) return;
 
     try {
-      const res = await fetch('/api/files/folder', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, parentId }),
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body?.message || 'Failed');
-      }
+      await createFileFolder({ name, parentId });
       setMessage({ type: 'success', text: t('files.folderCreated') });
       await loadContents(parentId);
     } catch (e) {
-      setMessage({ type: 'error', text: (e as Error).message || t('common.error') });
+      setMessage({
+        type: 'error',
+        text: e instanceof ApiClientError ? e.message : t('common.error'),
+      });
     }
   }, [t, parentId, loadContents]);
 
@@ -155,11 +160,7 @@ export default function FileExplorer() {
     fd.append('file', file);
     if (parentId) fd.append('parentId', parentId);
 
-    const res = await fetch('/api/files/upload', { method: 'POST', body: fd });
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      throw new Error(body?.message || 'Upload failed');
-    }
+    await uploadFile(fd);
   }, [parentId]);
 
   const handlePickUpload = useCallback(() => {
@@ -173,22 +174,24 @@ export default function FileExplorer() {
       setMessage({ type: 'success', text: t('files.uploaded') });
       await loadContents(parentId);
     } catch (e) {
-      setMessage({ type: 'error', text: (e as Error).message || t('common.error') });
+      setMessage({
+        type: 'error',
+        text: e instanceof ApiClientError ? e.message : t('common.error'),
+      });
     }
   }, [uploadPdf, t, loadContents, parentId]);
 
   const handleDeleteNode = useCallback(async (id: string, name: string) => {
     if (!confirm(t('files.deleteConfirm', { name }))) return;
     try {
-      const res = await fetch(`/api/files/${id}`, { method: 'DELETE' });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body?.message || 'Delete failed');
-      }
+      await deleteFileNode(id);
       setMessage({ type: 'success', text: t('files.deleted') });
       await loadContents(parentId);
     } catch (e) {
-      setMessage({ type: 'error', text: (e as Error).message || t('common.error') });
+      setMessage({
+        type: 'error',
+        text: e instanceof ApiClientError ? e.message : t('common.error'),
+      });
     }
   }, [t, loadContents, parentId]);
 
@@ -197,33 +200,20 @@ export default function FileExplorer() {
     if (!name || name.trim() === currentName) return;
 
     try {
-      const res = await fetch(`/api/files/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim() }),
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body?.message || 'Rename failed');
-      }
+      await renameFileNode(id, name.trim());
       setMessage({ type: 'success', text: t('files.renamed') });
       await loadContents(parentId);
     } catch (e) {
-      setMessage({ type: 'error', text: (e as Error).message || t('common.error') });
+      setMessage({
+        type: 'error',
+        text: e instanceof ApiClientError ? e.message : t('common.error'),
+      });
     }
   }, [t, loadContents, parentId]);
 
-  const handleViewFile = useCallback(async (file: FileNode) => {
-    if (!canView) return;
-    
-    // For PDF files, open in viewer instead of direct download
-    if (file.fileType?.toLowerCase() === 'pdf') {
-      window.open(`/api/files/view/${file._id}`, '_blank');
-    } else {
-      // For other files, fallback to direct link
-      window.open(file.fileUrl, '_blank');
-    }
-  }, [canView]);
+  const handleViewFile = useCallback((file: FileNode) => {
+    window.open(`/api/files/view/${file._id}`, '_blank', 'noopener,noreferrer');
+  }, []);
 
   const onDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
@@ -265,6 +255,14 @@ export default function FileExplorer() {
       </div>
     );
   }, [canMutate, handleCreateFolder, handlePickUpload, t, handleFilePicked]);
+
+  if (status === 'loading') {
+    return <PageSkeleton />;
+  }
+
+  if (!session) {
+    return null;
+  }
 
   return (
     <div className="p-4 sm:p-6">
@@ -350,10 +348,8 @@ export default function FileExplorer() {
             </div>
 
             {isLoading ? (
-              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <Skeleton key={i} className="h-16 w-full" />
-                ))}
+              <div className="mt-4">
+                <PageSkeleton variant="content" />
               </div>
             ) : (
               <div className={viewMode === 'grid'
