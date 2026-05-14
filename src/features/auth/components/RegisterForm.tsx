@@ -103,8 +103,8 @@ export default function RegisterForm() {
   };
 
   const roles = [
-    { id: 'student', label: 'Student', icon: BookOpen, theme: roleThemes.student, desc: 'I want to learn' },
-    { id: 'teacher', label: 'Teacher', icon: Users, theme: roleThemes.teacher, desc: 'I want to teach' },
+    { id: 'student', label: t('common.student'), icon: BookOpen, theme: roleThemes.student, desc: t('register.iWantToLearn') },
+    { id: 'teacher', label: t('common.teacher'), icon: Users, theme: roleThemes.teacher, desc: t('register.iWantToTeach') },
   ];
 
   return (
@@ -128,7 +128,7 @@ export default function RegisterForm() {
           }}
         />
         <motion.div
-          className="absolute bottom-20 left-20 w-96 h-96 bg-purple-400/20 rounded-full blur-3xl"
+          className="absolute bottom-20 left-20 w-96 h-96 bg-[var(--student-accent)]/20 rounded-full blur-3xl"
           animate={{
             scale: [1.2, 1, 1.2],
             opacity: [0.2, 0.4, 0.2],
@@ -174,9 +174,9 @@ export default function RegisterForm() {
             {/* Stats */}
             <div className="flex gap-8">
               {[
-                { value: '10K+', label: 'Students' },
-                { value: '500+', label: 'Courses' },
-                { value: '50+', label: 'Teachers' },
+                { value: '10K+', label: t('home.stats.learners') },
+                { value: '500+', label: t('home.stats.courses') },
+                { value: '50+', label: t('home.stats.teachers') },
               ].map((stat, i) => (
                 <motion.div
                   key={stat.label}
@@ -227,11 +227,11 @@ export default function RegisterForm() {
           >
             {/* Header */}
             <div className="text-center mb-6">
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-                Create Account
+              <h2 className="text-2xl sm:text-3xl font-bold text-[var(--color-foreground)] mb-2">
+                {t('register.createAccount')}
               </h2>
-              <p className="text-gray-500 text-sm">
-                Join our learning community today
+              <p className="text-[var(--color-muted-foreground)] text-sm">
+                {t('register.joinCommunityDesc')}
               </p>
             </div>
 
@@ -240,12 +240,12 @@ export default function RegisterForm() {
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-4 p-3 bg-red-50 border border-red-100 rounded-xl flex items-start"
+                className="mb-4 p-3 bg-[var(--error-light)] border border-[var(--error)]/20 rounded-xl flex items-start"
               >
-                <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center mr-3 mt-0.5">
-                  <span className="text-red-500 text-xs">!</span>
+                <div className="w-5 h-5 rounded-full bg-[var(--error)]/10 flex items-center justify-center mr-3 mt-0.5">
+                  <span className="text-[var(--error)] text-xs">!</span>
                 </div>
-                <p className="text-sm text-red-600">{error}</p>
+                <p className="text-sm text-[var(--error)]">{error}</p>
               </motion.div>
             )}
 
@@ -257,8 +257,8 @@ export default function RegisterForm() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 }}
               >
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  I want to
+                <label className="block text-sm font-semibold text-[var(--color-foreground)] mb-2">
+                  {t('register.iWantTo')}
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   {roles.map((role) => {
@@ -273,20 +273,20 @@ export default function RegisterForm() {
                         className={`flex flex-col items-center p-3 rounded-xl border-2 transition-all ${
                           isSelected
                             ? `border-[${roleTheme.colors.primary}] ${roleTheme.activeBg}`
-                            : 'border-gray-200 hover:border-gray-300 bg-white'
+                            : 'border-[var(--color-border)] hover:border-[var(--color-muted)] bg-[var(--card-solid)]'
                         }`}
                       >
                         <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-2 ${
                           isSelected
                             ? `${roleTheme.activeBg} ${roleTheme.text}`
-                            : 'bg-gray-100 text-gray-500'
+                            : 'bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)]'
                         }`}>
                           <Icon className="w-5 h-5" />
                         </div>
-                        <span className={`font-semibold text-sm ${isSelected ? roleTheme.activeText : 'text-gray-700'}`}>
+                        <span className={`font-semibold text-sm ${isSelected ? roleTheme.activeText : 'text-[var(--color-foreground)]'}`}>
                           {role.label}
                         </span>
-                        <span className="text-xs text-gray-500 mt-0.5">{role.desc}</span>
+                        <span className="text-xs text-[var(--color-muted-foreground)] mt-0.5">{role.desc}</span>
                       </button>
                     );
                   })}
@@ -299,11 +299,11 @@ export default function RegisterForm() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                <label className="block text-sm font-semibold text-[var(--color-foreground)] mb-1.5">
                   {t('register.fullName')}
                 </label>
                 <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-muted)]" />
                   <input
                     type="text"
                     name="name"
@@ -311,7 +311,7 @@ export default function RegisterForm() {
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="John Doe"
-                    className={`w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:${theme.shadow} focus:${theme.border.replace('border-', 'border-')} transition-all`}
+                    className={`w-full pl-12 pr-4 py-3 bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-xl text-[var(--color-foreground)] placeholder-[var(--color-muted)] focus:outline-none focus:ring-2 focus:${theme.shadow} focus:${theme.border.replace('border-', 'border-')} transition-all`}
                   />
                 </div>
               </motion.div>
@@ -322,11 +322,11 @@ export default function RegisterForm() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                <label className="block text-sm font-semibold text-[var(--color-foreground)] mb-1.5">
                   {t('register.emailAddress')}
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-muted)]" />
                   <input
                     type="email"
                     name="email"
@@ -334,7 +334,7 @@ export default function RegisterForm() {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="you@example.com"
-                    className={`w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:${theme.shadow} focus:${theme.border.replace('border-', 'border-')} transition-all`}
+                    className={`w-full pl-12 pr-4 py-3 bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-xl text-[var(--color-foreground)] placeholder-[var(--color-muted)] focus:outline-none focus:ring-2 focus:${theme.shadow} focus:${theme.border.replace('border-', 'border-')} transition-all`}
                   />
                 </div>
               </motion.div>
@@ -345,11 +345,11 @@ export default function RegisterForm() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.4 }}
               >
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                <label className="block text-sm font-semibold text-[var(--color-foreground)] mb-1.5">
                   {t('register.password')}
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-muted)]" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     name="password"
@@ -357,12 +357,12 @@ export default function RegisterForm() {
                     value={formData.password}
                     onChange={handleChange}
                     placeholder="Create a password"
-                    className={`w-full pl-12 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:${theme.shadow} focus:${theme.border.replace('border-', 'border-')} transition-all`}
+                    className={`w-full pl-12 pr-12 py-3 bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-xl text-[var(--color-foreground)] placeholder-[var(--color-muted)] focus:outline-none focus:ring-2 focus:${theme.shadow} focus:${theme.border.replace('border-', 'border-')} transition-all`}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-foreground)] transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
@@ -375,11 +375,11 @@ export default function RegisterForm() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.5 }}
               >
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                <label className="block text-sm font-semibold text-[var(--color-foreground)] mb-1.5">
                   {t('register.confirmPassword')}
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-muted)]" />
                   <input
                     type={showConfirmPassword ? 'text' : 'password'}
                     name="confirmPassword"
@@ -387,12 +387,12 @@ export default function RegisterForm() {
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     placeholder="Confirm your password"
-                    className={`w-full pl-12 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:${theme.shadow} focus:${theme.border.replace('border-', 'border-')} transition-all`}
+                    className={`w-full pl-12 pr-12 py-3 bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-xl text-[var(--color-foreground)] placeholder-[var(--color-muted)] focus:outline-none focus:ring-2 focus:${theme.shadow} focus:${theme.border.replace('border-', 'border-')} transition-all`}
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-foreground)] transition-colors"
                   >
                     {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
@@ -405,18 +405,18 @@ export default function RegisterForm() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.55 }}
               >
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                  Invite Code <span className="font-normal text-gray-400">(Optional)</span>
+                <label className="block text-sm font-semibold text-[var(--color-foreground)] mb-1.5">
+                  {t('register.inviteCode')} <span className="font-normal text-[var(--color-muted)]">({t('register.optional')})</span>
                 </label>
                 <div className="relative">
-                  <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-muted)]" />
                   <input
                     type="text"
                     name="inviteCode"
                     value={formData.inviteCode}
                     onChange={handleChange}
                     placeholder="Enter invite code (optional)"
-                    className={`w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:${theme.shadow} focus:${theme.border.replace('border-', 'border-')} transition-all`}
+                    className={`w-full pl-12 pr-4 py-3 bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-xl text-[var(--color-foreground)] placeholder-[var(--color-muted)] focus:outline-none focus:ring-2 focus:${theme.shadow} focus:${theme.border.replace('border-', 'border-')} transition-all`}
                   />
                 </div>
               </motion.div>
@@ -439,7 +439,7 @@ export default function RegisterForm() {
                     <Loader size="sm" />
                   ) : (
                     <>
-                      Create Account
+                      {t('register.createAccount')}
                       <ArrowRight className="w-5 h-5 ml-2" />
                     </>
                   )}
@@ -450,10 +450,10 @@ export default function RegisterForm() {
             {/* Divider */}
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200" />
+                <div className="w-full border-t border-[var(--color-border)]" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500">or</span>
+                <span className="px-4 bg-[var(--card-solid)] text-[var(--color-muted-foreground)]">{t('register.or')}</span>
               </div>
             </div>
 
@@ -463,7 +463,7 @@ export default function RegisterForm() {
               onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full flex items-center justify-center py-3 px-4 bg-white border-2 border-gray-200 rounded-xl hover:border-gray-300 hover:bg-gray-50 transition-all"
+              className="w-full flex items-center justify-center py-3 px-4 bg-[var(--card-solid)] border-2 border-[var(--color-border)] rounded-xl hover:border-[var(--color-muted)] hover:bg-[var(--color-surface-muted)] transition-all"
             >
               <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -471,11 +471,11 @@ export default function RegisterForm() {
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
               </svg>
-              <span className="font-medium text-gray-700">Continue with Google</span>
+              <span className="font-medium text-[var(--color-foreground)]">{t('register.continueWithGoogle')}</span>
             </motion.button>
 
             {/* Login Link */}
-            <p className="mt-6 text-center text-sm text-gray-500">
+            <p className="mt-6 text-center text-sm text-[var(--color-muted-foreground)]">
               {t('register.alreadyHaveAccount')}{' '}
               <Link
                 href="/login"

@@ -31,7 +31,7 @@ export default function Features() {
   const { t } = useTranslation();
 
   return (
-    <section className="py-20 sm:py-32 bg-white">
+    <section className="py-20 sm:py-32 bg-[var(--card-solid)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
@@ -41,10 +41,10 @@ export default function Features() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-3xl sm:text-4xl font-bold text-[var(--color-foreground)] mb-4">
             {t('home.features.title')}
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-[var(--color-muted-foreground)] max-w-2xl mx-auto">
             {t('home.features.subtitle')}
           </p>
         </motion.div>
@@ -58,18 +58,18 @@ export default function Features() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="group relative p-6 bg-gray-50 rounded-2xl hover:bg-white hover:shadow-xl transition-all duration-300 border border-gray-100"
+              className="group relative p-6 bg-[var(--color-surface-muted)] rounded-2xl hover:bg-[var(--card-solid)] hover:shadow-xl transition-all duration-300 border border-[var(--color-border)]"
             >
               {/* Icon */}
-              <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-indigo-600 transition-colors duration-300">
-                <feature.icon className="w-6 h-6 text-indigo-600 group-hover:text-white transition-colors duration-300" />
+              <div className="w-12 h-12 bg-[var(--color-accent)] rounded-xl flex items-center justify-center mb-4 group-hover:bg-[var(--color-primary)] transition-colors duration-300">
+                <feature.icon className="w-6 h-6 text-[var(--color-primary)] group-hover:text-white transition-colors duration-300" />
               </div>
 
               {/* Content */}
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold text-[var(--color-foreground)] mb-2">
                 {feature.title}
               </h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
+              <p className="text-sm text-[var(--color-muted-foreground)] leading-relaxed">
                 {feature.description}
               </p>
             </motion.div>

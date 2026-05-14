@@ -75,14 +75,14 @@ export default function RichTextEditor({
 
   const themeColors = {
     indigo: {
-      active: 'bg-indigo-100 text-indigo-700',
+      active: 'bg-[var(--student-soft)] text-[var(--student-primary)]',
       hover: 'hover:bg-[var(--color-accent)]',
-      ring: 'focus-visible:ring-indigo-500',
+      ring: 'focus-visible:ring-[var(--student-primary)]',
     },
     emerald: {
-      active: 'bg-emerald-100 text-emerald-700',
+      active: 'bg-[var(--teacher-soft)] text-[var(--teacher-primary)]',
       hover: 'hover:bg-[var(--color-accent)]',
-      ring: 'focus-visible:ring-emerald-500',
+      ring: 'focus-visible:ring-[var(--teacher-primary)]',
     },
   };
 

@@ -23,7 +23,7 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-gray-900 text-white">
+    <footer className="bg-[var(--color-foreground)] text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           {/* Brand */}
@@ -41,7 +41,7 @@ export default function Footer() {
                 theme="dark"
               />
             </div>
-            <p className="text-gray-400 max-w-sm">
+            <p className="text-[var(--color-muted)] max-w-sm">
               {t('home.footer.tagline')}
             </p>
           </motion.div>
@@ -92,11 +92,11 @@ export default function Footer() {
         </div>
 
         {/* Bottom */}
-        <div className="pt-8 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-gray-400 text-sm">
+        <div className="pt-8 border-t border-[var(--color-surface-muted-strong)] flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-[var(--color-muted)] text-sm">
             © {currentYear} quiz-do. {t('home.footer.rights')}
           </p>
-          <p className="text-gray-400 text-sm flex items-center gap-1">
+          <p className="text-[var(--color-muted)] text-sm flex items-center gap-1">
             {t('home.footer.madeWith')} <Heart className="w-4 h-4 text-red-500 fill-red-500" /> {t('home.footer.inIndia')}
           </p>
         </div>

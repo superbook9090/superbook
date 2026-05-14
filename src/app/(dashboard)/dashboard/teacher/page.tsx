@@ -172,7 +172,7 @@ export default function TeacherDashboardPage() {
               className={`inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base text-[var(--teacher-primary)] rounded-xl font-semibold shadow-lg transition-all ${
                 isAtLimit('courses')
                   ? 'bg-[var(--color-surface-muted)] cursor-not-allowed'
-                  : 'bg-white hover:shadow-xl'
+                  : 'bg-[var(--card-solid)] hover:shadow-xl'
               }`}
             >
               <Plus className="w-5 h-5 mr-2" />
@@ -203,7 +203,7 @@ export default function TeacherDashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="group relative overflow-hidden rounded-2xl bg-white p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+          className="group relative overflow-hidden rounded-2xl bg-[var(--card-solid)] p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
         >
           <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-[var(--teacher-soft)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
           <div className="relative">
@@ -235,7 +235,7 @@ export default function TeacherDashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="group relative overflow-hidden rounded-2xl bg-white p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+          className="group relative overflow-hidden rounded-2xl bg-[var(--card-solid)] p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
         >
           <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-[var(--info-light)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
           <div className="relative">
@@ -252,7 +252,7 @@ export default function TeacherDashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="group relative overflow-hidden rounded-2xl bg-white p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+          className="group relative overflow-hidden rounded-2xl bg-[var(--card-solid)] p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
         >
           <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-[var(--student-soft)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
           <div className="relative">
@@ -284,7 +284,7 @@ export default function TeacherDashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="group relative overflow-hidden rounded-2xl bg-white p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+          className="group relative overflow-hidden rounded-2xl bg-[var(--card-solid)] p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
         >
           <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-[var(--admin-soft)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
           <div className="relative">
@@ -335,7 +335,7 @@ export default function TeacherDashboardPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 + index * 0.1 }}
-                className="group bg-white rounded-2xl p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                className="group bg-[var(--card-solid)] rounded-2xl p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="p-2 sm:p-3 rounded-xl bg-gradient-to-r from-[var(--teacher-primary)] to-[var(--teacher-accent)] text-white">
@@ -362,7 +362,7 @@ export default function TeacherDashboardPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.7 }}
-        className="rounded-2xl bg-white p-4 sm:p-6 shadow-md"
+        className="rounded-2xl bg-[var(--card-solid)] p-4 sm:p-6 shadow-md"
       >
         <h2 className="text-lg sm:text-xl font-semibold text-[var(--color-foreground)] mb-4">{t('dashboard.quickActions')}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">

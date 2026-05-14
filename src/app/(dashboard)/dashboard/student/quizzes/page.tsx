@@ -160,7 +160,7 @@ export default function StudentQuizzesPage() {
             </div>
           )
         ) : completedAttempts.length === 0 ? (
-          <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div className="bg-[var(--card-solid)] overflow-hidden shadow rounded-lg">
             <div className="px-4 py-8 sm:p-6 text-center">
               <p className="text-[var(--color-muted-foreground)]">{t('quiz.noCompleted')}</p>
             </div>

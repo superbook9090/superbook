@@ -158,7 +158,7 @@ export default function StudentDashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="group relative overflow-hidden rounded-2xl bg-white p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+          className="group relative overflow-hidden rounded-2xl bg-[var(--card-solid)] p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
         >
           <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-[var(--student-soft)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
           <div className="relative">
@@ -178,7 +178,7 @@ export default function StudentDashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="group relative overflow-hidden rounded-2xl bg-white p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+          className="group relative overflow-hidden rounded-2xl bg-[var(--card-solid)] p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
         >
           <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-[var(--success-light)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
           <div className="relative">
@@ -198,7 +198,7 @@ export default function StudentDashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="group relative overflow-hidden rounded-2xl bg-white p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+          className="group relative overflow-hidden rounded-2xl bg-[var(--card-solid)] p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
         >
           <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-[var(--warning-light)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
           <div className="relative">
@@ -225,7 +225,7 @@ export default function StudentDashboardPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className="rounded-2xl bg-white shadow-md overflow-hidden"
+        className="rounded-2xl bg-[var(--card-solid)] shadow-md overflow-hidden"
       >
         <div className="px-4 py-4 sm:px-6 sm:py-5 border-b border-[var(--border)] flex items-center justify-between">
           <div>

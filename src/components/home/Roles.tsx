@@ -33,7 +33,7 @@ export default function Roles() {
   const { t } = useTranslation();
 
   return (
-    <section className="py-20 sm:py-32 bg-gray-50">
+    <section className="py-20 sm:py-32 bg-[var(--color-surface-muted)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
@@ -43,10 +43,10 @@ export default function Roles() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-3xl sm:text-4xl font-bold text-[var(--color-foreground)] mb-4">
             {t('home.roles.title')}
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-[var(--color-muted-foreground)] max-w-2xl mx-auto">
             {t('home.roles.subtitle')}
           </p>
         </motion.div>
@@ -60,7 +60,7 @@ export default function Roles() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="group relative p-6 bg-white rounded-2xl hover:shadow-xl transition-all duration-300 border border-gray-100"
+              className="group relative p-6 bg-[var(--card-solid)] rounded-2xl hover:shadow-xl transition-all duration-300 border border-[var(--color-border)]"
             >
               {/* Gradient Top Border */}
               <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${role.theme.gradient} rounded-t-2xl`} />
@@ -71,10 +71,10 @@ export default function Roles() {
               </div>
 
               {/* Content */}
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold text-[var(--color-foreground)] mb-2">
                 {role.title}
               </h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
+              <p className="text-sm text-[var(--color-muted-foreground)] leading-relaxed">
                 {role.description}
               </p>
             </motion.div>

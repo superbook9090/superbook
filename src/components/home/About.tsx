@@ -35,7 +35,7 @@ export default function About() {
   return (
     <section className="py-20 sm:py-32 relative overflow-hidden">
       {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 to-violet-900" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[var(--student-primary-dark)] to-[var(--student-primary)]" />
 
       {/* Animated Shapes */}
       <motion.div
@@ -122,12 +122,12 @@ export default function About() {
                 className="absolute -top-4 -right-4 bg-white rounded-xl p-3 shadow-xl"
               >
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                    <Zap className="w-4 h-4 text-green-600" />
+                  <div className="w-8 h-8 bg-[var(--success-light)] rounded-lg flex items-center justify-center">
+                    <Zap className="w-4 h-4 text-[var(--success)]" />
                   </div>
                   <div>
-                    <div className="text-sm font-semibold text-gray-900">{t('home.about.fast')}</div>
-                    <div className="text-xs text-gray-500">{t('home.about.responseTime')}</div>
+                    <div className="text-sm font-semibold text-[var(--color-foreground)]">{t('home.about.fast')}</div>
+                    <div className="text-xs text-[var(--color-muted-foreground)]">{t('home.about.responseTime')}</div>
                   </div>
                 </div>
               </motion.div>

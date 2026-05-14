@@ -21,12 +21,12 @@ export default function LanguageSwitcher() {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent shadow-sm"
+        className="flex items-center gap-2 px-3 py-2 bg-[var(--card-solid)] border border-[var(--color-border)] rounded-lg text-sm font-medium text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted)] hover:border-[var(--color-muted)] transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent shadow-sm"
       >
-        <Globe className="w-4 h-4 text-gray-500" />
+        <Globe className="w-4 h-4 text-[var(--color-muted)]" />
         <span className="hidden sm:inline">{selectedLanguage.name}</span>
         <span className="sm:hidden uppercase">{selectedLanguage.code}</span>
-        <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-4 h-4 text-[var(--color-muted-foreground)] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && (
@@ -35,7 +35,7 @@ export default function LanguageSwitcher() {
             className="fixed inset-0 z-10"
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-20 overflow-hidden">
+          <div className="absolute right-0 mt-2 w-48 bg-[var(--card-solid)] border border-[var(--color-border)] rounded-lg shadow-lg z-20 overflow-hidden">
             {languages.map((language) => (
               <button
                 key={language.code}
@@ -45,13 +45,13 @@ export default function LanguageSwitcher() {
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${
                   lang === language.code
-                    ? 'bg-indigo-50 text-indigo-700'
-                    : 'text-gray-700 hover:bg-gray-50'
+                    ? 'bg-[var(--color-accent)] text-[var(--color-primary)]'
+                    : 'text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted)]'
                 }`}
               >
                 <span>{language.name}</span>
                 {lang === language.code && (
-                  <span className="ml-auto text-indigo-600">✓</span>
+                  <span className="ml-auto text-[var(--color-primary)]">✓</span>
                 )}
               </button>
             ))}

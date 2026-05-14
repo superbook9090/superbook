@@ -60,10 +60,10 @@ const colorMap = {
 };
 
 const defaultTitles = {
-  warning: 'Confirm Action',
-  danger: 'Confirm Deletion',
-  info: 'Confirm Action',
-  success: 'Confirm Action',
+  warning: 'common.confirmAction',
+  danger: 'common.confirmDeletion',
+  info: 'common.confirmAction',
+  success: 'common.confirmAction',
 };
 
 export default function ConfirmModal({
@@ -81,7 +81,7 @@ export default function ConfirmModal({
   const modalRef = useRef<HTMLDivElement>(null);
   const Icon = iconMap[type];
   const colors = colorMap[type];
-  const modalTitle = title || defaultTitles[type];
+  const modalTitle = title || t(defaultTitles[type]);
   const defaultConfirmText = confirmText || t('common.confirm');
   const defaultCancelText = cancelText || t('common.cancel');
 
@@ -195,7 +195,7 @@ export default function ConfirmModal({
                 {/* Title */}
                 <h2
                   id="modal-title"
-                  className="text-2xl font-bold text-[var(--color-card-foreground)] text-center mb-2"
+                  className="text-2xl font-bold text-[var(--color-foreground)] text-center mb-2"
                 >
                   {modalTitle}
                 </h2>
@@ -214,7 +214,7 @@ export default function ConfirmModal({
                     type="button"
                     onClick={onCancel}
                     disabled={isLoading}
-                    className="flex-1 px-6 py-3 text-[var(--foreground)] bg-[var(--muted-light)] hover:opacity-80 rounded-xl font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[var(--border)] focus:ring-offset-2"
+                    className="flex-1 px-6 py-3 text-[var(--color-foreground)] bg-[var(--color-surface-muted)] hover:opacity-80 rounded-xl font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[var(--color-border)] focus:ring-offset-2"
                   >
                     {defaultCancelText}
                   </button>}

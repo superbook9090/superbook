@@ -125,7 +125,7 @@ export default function QuizDetailPage() {
       >
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-4">
-            <Badge variant="default" size="sm" className="bg-white/20 text-white">
+            <Badge variant="default" size="sm" className="bg-[var(--card-solid)]/20 text-white">
               <BookOpen className="w-3 h-3 mr-1" />
               {quiz.course?.title || t('quiz.course')}
             </Badge>
@@ -151,7 +151,7 @@ export default function QuizDetailPage() {
               whileTap={{ scale: 0.98 }}
               onClick={handleStartQuiz}
               disabled={startQuiz.isPending}
-              className="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-white text-[var(--primary)] rounded-xl font-semibold hover:bg-white/90 transition-all disabled:opacity-50"
+              className="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-[var(--card-solid)] text-[var(--primary)] rounded-xl font-semibold hover:bg-[var(--card-solid)]/90 transition-all disabled:opacity-50"
             >
               {startQuiz.isPending ? (
                 <Loader size="sm" />

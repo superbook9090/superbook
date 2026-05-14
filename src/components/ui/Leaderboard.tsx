@@ -39,21 +39,21 @@ export default function Leaderboard({
   const { t } = useTranslation();
 
   const getRankIcon = (rank: number) => {
-    if (rank === 1) return <Trophy className="w-6 h-6 text-yellow-500" />;
-    if (rank === 2) return <Medal className="w-5 h-5 text-gray-400" />;
-    if (rank === 3) return <Medal className="w-5 h-5 text-orange-600" />;
+    if (rank === 1) return <Trophy className="w-6 h-6 text-[var(--warning)]" />;
+    if (rank === 2) return <Medal className="w-5 h-5 text-[var(--color-muted)]" />;
+    if (rank === 3) return <Medal className="w-5 h-5 text-[var(--error)]" />;
     return <span className="w-8 h-8 flex items-center justify-center text-base font-bold text-[var(--color-muted-foreground)]">#{rank}</span>;
   };
 
   const getTop3Styles = (rank: number) => {
     if (rank === 1) {
-      return 'bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200 shadow-yellow-100';
+      return 'bg-gradient-to-r from-[var(--warning-light)] to-[var(--warning-light)]/80 border-[var(--warning)]/30 shadow-[var(--warning)]/10';
     }
     if (rank === 2) {
-      return 'bg-gradient-to-r from-slate-50 to-gray-50 border-slate-200';
+      return 'bg-gradient-to-r from-[var(--color-surface-muted)] to-[var(--color-surface-muted)]/80 border-[var(--color-border)]';
     }
     if (rank === 3) {
-      return 'bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200';
+      return 'bg-gradient-to-r from-[var(--error-light)]/50 to-[var(--warning-light)]/50 border-[var(--error)]/30';
     }
     return '';
   };

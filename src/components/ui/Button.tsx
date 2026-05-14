@@ -44,15 +44,15 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         'focus-visible:ring-offset-2 focus-visible:ring-2'
       ),
       secondary: cn(
-        'bg-gray-100 text-gray-900',
-        'hover:bg-gray-200',
-        'active:bg-gray-300',
-        'focus-visible:ring-gray-500'
+        'bg-[var(--color-surface-muted)] text-[var(--color-foreground)]',
+        'hover:bg-[var(--color-surface-muted-strong)]',
+        'active:bg-[var(--color-muted)]',
+        'focus-visible:ring-[var(--color-muted)]'
       ),
       outline: cn(
         `border-2 ${theme.border} ${theme.text}`,
-        'hover:bg-gray-50',
-        'active:bg-gray-100',
+        'hover:bg-[var(--color-surface-muted)]',
+        'active:bg-[var(--color-surface-muted-strong)]',
         'focus-visible:ring-offset-2 focus-visible:ring-2'
       ),
       ghost: cn(
