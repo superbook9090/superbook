@@ -6,7 +6,7 @@ import * as XLSX from 'xlsx';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { listTeacherCoursesSelf } from '@/lib/api/courses';
-import { createQuiz } from '@/lib/api/quizzes';
+import { createQuiz, getQuizForEdit, patchQuiz } from '@/lib/api/quizzes';
 import { ApiClientError } from '@/lib/api/http';
 
 interface Course {
@@ -29,7 +29,12 @@ interface ExcelRow {
   correctAnswer: number; // 0-3 representing A-D
 }
 
-export default function CreateQuizForm() {
+type Props = {
+  /** When set, form loads this quiz and PATCHes on submit (teacher edit). */
+  quizId?: string;
+};
+
+export default function CreateQuizForm({ quizId }: Props) {
   const { t } = useTranslation();
   const router = useRouter();
   const { theme } = useRoleTheme();
@@ -54,23 +59,86 @@ export default function CreateQuizForm() {
   const [uploadError, setUploadError] = useState('');
   const [isParsing, setIsParsing] = useState(false);
 
-  // Fetch teacher's courses
+  // Fetch teacher's courses (and quiz when editing)
   useEffect(() => {
-    const fetchCourses = async () => {
+    let cancelled = false;
+
+    const run = async () => {
+      setIsFetching(true);
+      setError('');
       try {
         const data = await listTeacherCoursesSelf();
+        if (cancelled) return;
         if (data.courses) {
           setCourses(data.courses as Course[]);
         }
+
+        if (quizId) {
+          const res = await getQuizForEdit(quizId);
+          if (cancelled) return;
+          const { quiz, questions: rawQuestions } = res;
+          const apiQuestions = [...(rawQuestions ?? [])].sort(
+            (a, b) => (a.order ?? 0) - (b.order ?? 0)
+          );
+          const courseRef =
+            typeof quiz.course === 'object' && quiz.course !== null && '_id' in quiz.course
+              ? String((quiz.course as { _id: string })._id)
+              : String(quiz.course ?? '');
+          const courseTitle =
+            typeof quiz.course === 'object' && quiz.course !== null && 'title' in quiz.course
+              ? String((quiz.course as { title?: string }).title || '')
+              : '';
+
+          setCourses((prev) => {
+            if (!courseRef || prev.some((c) => c._id === courseRef)) return prev;
+            return [...prev, { _id: courseRef, title: courseTitle || t('teacherQuizzes.unknownCourse') }];
+          });
+
+          setFormData({
+            title: quiz.title ?? '',
+            description: quiz.description ?? '',
+            course: courseRef,
+            timeLimit: String(quiz.timeLimit ?? 30),
+            isPublished: !!quiz.isPublished,
+          });
+          if (apiQuestions && apiQuestions.length > 0) {
+            setQuestions(
+              apiQuestions.map((q) => ({
+                question: q.question ?? '',
+                options: [...(q.options ?? [])],
+                correctAnswer:
+                  typeof q.correctAnswer === 'number' && q.correctAnswer >= 0
+                    ? q.correctAnswer
+                    : 0,
+              }))
+            );
+          }
+        }
       } catch (err) {
-        console.error('Error fetching courses:', err);
+        if (!cancelled) {
+          const message =
+            err instanceof ApiClientError
+              ? err.message
+              : quizId
+                ? t('createQuizForm.loadError')
+                : t('createQuizForm.loadingCourses');
+          setError(quizId ? message || t('createQuizForm.loadError') : '');
+          if (!quizId) {
+            console.error('Error fetching courses:', err);
+          }
+        }
       } finally {
-        setIsFetching(false);
+        if (!cancelled) {
+          setIsFetching(false);
+        }
       }
     };
 
-    fetchCourses();
-  }, []);
+    void run();
+    return () => {
+      cancelled = true;
+    };
+  }, [quizId, t]);
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -318,13 +386,22 @@ export default function CreateQuizForm() {
     }
 
     try {
-      await createQuiz({
-        ...formData,
-        timeLimit: Number(formData.timeLimit),
-        questions,
-      });
+      if (quizId) {
+        await patchQuiz(quizId, {
+          title: formData.title,
+          description: formData.description,
+          timeLimit: Number(formData.timeLimit),
+          isPublished: formData.isPublished,
+          questions,
+        });
+      } else {
+        await createQuiz({
+          ...formData,
+          timeLimit: Number(formData.timeLimit),
+          questions,
+        });
+      }
 
-      // Success - redirect to teacher quizzes page
       router.push('/dashboard/teacher/quizzes');
     } catch (err) {
       const message =
@@ -332,7 +409,9 @@ export default function CreateQuizForm() {
           ? err.message
           : err instanceof Error
             ? err.message
-            : t('createQuizForm.errorOccurred');
+            : quizId
+              ? t('createQuizForm.updateFailed')
+              : t('createQuizForm.errorOccurred');
       setError(message);
     } finally {
       setIsLoading(false);
@@ -389,10 +468,11 @@ export default function CreateQuizForm() {
         <select
           name="course"
           id="course"
-          required
+          required={!quizId}
+          disabled={!!quizId}
           value={formData.course}
           onChange={handleChange}
-          className="mt-1 px-3 py-2 block w-full rounded-md border-[var(--color-border)] shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-[var(--color-foreground)]"
+          className="mt-1 px-3 py-2 block w-full rounded-md border-[var(--color-border)] shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-[var(--color-foreground)] disabled:opacity-60 disabled:cursor-not-allowed"
         >
           <option value="">{t('createQuizForm.selectCourse')}</option>
           {courses.map(course => (
@@ -404,6 +484,11 @@ export default function CreateQuizForm() {
         {courses.length === 0 && (
           <p className="mt-2 text-sm text-amber-600">
             {t('createQuizForm.needCourseFirst')}
+          </p>
+        )}
+        {quizId && (
+          <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
+            {t('createQuizForm.courseLockedInEdit')}
           </p>
         )}
       </div>
@@ -644,10 +729,16 @@ export default function CreateQuizForm() {
         </button>
         <button
           type="submit"
-          disabled={isLoading || courses.length === 0}
+          disabled={isLoading || (!quizId && courses.length === 0)}
           className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed`}
         >
-          {isLoading ? t('createQuizForm.creating') : t('createQuizForm.createQuiz')}
+          {isLoading
+            ? quizId
+              ? t('createQuizForm.saving')
+              : t('createQuizForm.creating')
+            : quizId
+              ? t('createQuizForm.saveChanges')
+              : t('createQuizForm.createQuiz')}
         </button>
       </div>
     </form>

@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import dbConnect from '@/lib/db';
-import Favorite from '@/models/Favorite';
 import mongoose from 'mongoose';
+import { authOptions } from '@/lib/auth';
 import { logApiError, type LogContext } from '@/lib/logger';
+import { jsonSuccess, jsonApiError } from '@/lib/server/api-response';
+import { removeFavoriteBlog } from '@/lib/server/services/favorites-service';
 
 // DELETE /api/favorites/[id] - Remove blog from favorites
 export async function DELETE(
@@ -20,50 +20,29 @@ export async function DELETE(
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
-      return NextResponse.json(
-        { message: 'Unauthorized' },
-        { status: 401 }
-      );
+      return jsonApiError('UNAUTHORIZED', 'Unauthorized', 401);
     }
 
     logContext.userId = session.user.id;
 
-    await dbConnect();
     const { id } = await params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json(
-        { message: 'Invalid ID' },
-        { status: 400 }
-      );
+      return jsonApiError('VALIDATION', 'Invalid ID', 400);
     }
 
-    // Use $pull to remove the blog from user's favorites array
-    const result = await Favorite.updateOne(
-      { user: session.user.id },
-      { $pull: { blogs: id } }
-    );
+    const outcome = await removeFavoriteBlog(session.user.id, id);
 
-    if (result.matchedCount === 0) {
-      return NextResponse.json(
-        { message: 'User favorites not found' },
-        { status: 404 }
-      );
+    if (outcome === 'no_document') {
+      return jsonApiError('NOT_FOUND', 'User favorites not found', 404);
+    }
+    if (outcome === 'not_in_list') {
+      return jsonApiError('NOT_FOUND', 'Blog not in favorites', 404);
     }
 
-    if (result.modifiedCount === 0) {
-      return NextResponse.json(
-        { message: 'Blog not in favorites' },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({ message: 'Removed from favorites' });
+    return jsonSuccess({ removed: true });
   } catch (error) {
     logApiError(error as Error, 'DELETE', '/api/favorites/[id]', logContext);
-    return NextResponse.json(
-      { message: 'Something went wrong. Please try again later.' },
-      { status: 500 }
-    );
+    return jsonApiError('INTERNAL', 'Something went wrong. Please try again later.', 500);
   }
 }

@@ -3,12 +3,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { DashboardData, TeacherDashboardData } from '@/app/api/dashboard/route';
 import { listBlogs, createBlog, deleteBlog, updateBlog, type CreateBlogInput } from '@/lib/api/blogs';
-import { addFavorite, listFavorites, removeFavorite } from '@/lib/api/favorites';
+import { addFavorite, listFavorites, removeFavorite, type FavoritesListResult } from '@/lib/api/favorites';
 import { fetchDashboard } from '@/lib/api/dashboard';
 import { listTeacherCoursesByOrg, listAvailableCoursesByOrg, patchCourse } from '@/lib/api/courses';
 import { listQuizzesByOrg } from '@/lib/api/quizzes';
 import { listEnrollments, enrollInCourse, dropEnrollment } from '@/lib/api/enrollments';
 import { listQuizAttempts, startQuizAttempt, submitQuizAttempt, type SubmitQuizAttemptInput } from '@/lib/api/quizAttempts';
+import { queryKeys, favoritesListDefaults } from '@/lib/react-query/query-keys';
+import { useSessionStore } from '@/store/useSessionStore';
 export type { DashboardData, TeacherDashboardData };
 
 // Centralized query keys for cache management
@@ -21,7 +23,7 @@ const QUERY_KEYS = {
   QUIZZES: (orgId?: string) => ['quizzes', orgId || 'public'] as const,
   ENROLLMENTS: ['enrollments'] as const,
   QUIZ_ATTEMPTS: ['quizAttempts'] as const,
-  FAVORITES: ['favorites'] as const,
+  FAVORITES: queryKeys.favorites.all,
 };
 
 // Types
@@ -58,7 +60,8 @@ export interface Quiz {
   instructor: { _id: string; name: string; email: string };
   isPublished: boolean;
   timeLimit: number;
-  questions: { question: string; options: string[]; correctAnswer: number }[];
+  questionCount?: number;
+  version?: number;
   createdAt: string;
 }
 
@@ -95,12 +98,15 @@ export interface QuizAttempt {
 
 export interface Favorite {
   _id: string;
-  user: string;
+  user?: string;
   blog: {
     _id: string;
     title: string;
-    content: string;
+    /** Full HTML when explicitly requested from the API (e.g. after add). */
+    content?: string;
+    excerpt?: string;
     topic: string;
+    language?: string;
     author?: { name: string };
     createdAt: string;
   };
@@ -222,12 +228,15 @@ export function useQuizAttempts() {
 }
 
 export function useFavorites() {
+  const { page, limit } = favoritesListDefaults;
   return useQuery({
-    queryKey: ['favorites'],
-    queryFn: async () => {
-      const data = await listFavorites();
-      return (data.favorites || []) as Favorite[];
-    },
+    queryKey: queryKeys.favorites.list(page, limit),
+    queryFn: () => listFavorites(page, limit),
+    staleTime: 60 * 1000,
+    select: (res: FavoritesListResult) => ({
+      favorites: (res.favorites || []) as Favorite[],
+      meta: res.meta,
+    }),
   });
 }
 
@@ -341,24 +350,36 @@ export function useEnrollCourse() {
 
 export function useRemoveFavorite() {
   const queryClient = useQueryClient();
+  const listKey = queryKeys.favorites.list(favoritesListDefaults.page, favoritesListDefaults.limit);
 
   return useMutation({
     mutationFn: (blogId: string) => removeFavorite(blogId),
     onMutate: async (blogId) => {
-      await queryClient.cancelQueries({ queryKey: ['favorites'] });
-      const previousFavorites = queryClient.getQueryData<Favorite[]>(['favorites']);
-      queryClient.setQueryData<Favorite[]>(['favorites'], (old) =>
-        (old || []).filter((f) => f.blog._id !== blogId)
-      );
-      return { previousFavorites };
+      await queryClient.cancelQueries({ queryKey: queryKeys.favorites.all });
+      const previous = queryClient.getQueryData<FavoritesListResult>(listKey);
+      queryClient.setQueryData<FavoritesListResult>(listKey, (old) => {
+        if (!old) return old;
+        const next = (old.favorites || []).filter((f) => (f as Favorite).blog._id !== blogId);
+        const prevTotal = old.meta?.total ?? next.length + 1;
+        return {
+          favorites: next,
+          meta: old.meta
+            ? { ...old.meta, total: Math.max(0, prevTotal - 1), hasMore: old.meta.hasMore }
+            : old.meta,
+        };
+      });
+      return { previous };
     },
-    onError: (err, blogId, context) => {
-      if (context?.previousFavorites) {
-        queryClient.setQueryData(['favorites'], context.previousFavorites);
+    onError: (_err, _blogId, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(listKey, context.previous);
       }
     },
+    onSuccess: (_data, blogId) => {
+      useSessionStore.getState().removeFavorite(blogId);
+    },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['favorites'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.favorites.all });
     },
   });
 }
@@ -368,8 +389,11 @@ export function useAddFavorite() {
 
   return useMutation({
     mutationFn: (blogId: string) => addFavorite(blogId),
+    onSuccess: (_data, blogId) => {
+      useSessionStore.getState().addFavorite(blogId);
+    },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['favorites'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.favorites.all });
     },
   });
 }

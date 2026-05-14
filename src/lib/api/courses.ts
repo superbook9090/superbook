@@ -2,6 +2,19 @@ import { apiJson } from '@/lib/api/http';
 
 const BASE = '/api/courses';
 
+export type CourseDetail = {
+  _id: string;
+  title: string;
+  description?: string;
+  price: number;
+  category?: string;
+  thumbnail?: string;
+  isPublished: boolean;
+  locale?: 'en' | 'hi';
+  /** Legacy field before `locale` rename; treat as UI language when `locale` is absent. */
+  language?: 'en' | 'hi';
+};
+
 export type CoursesListPayload = { courses: unknown[]; organizationId?: string };
 
 export function listCoursesAdmin(): Promise<CoursesListPayload> {
@@ -20,6 +33,10 @@ export function listTeacherCoursesByOrg(orgId: string): Promise<CoursesListPaylo
 export function listAvailableCoursesByOrg(orgId: string): Promise<CoursesListPayload> {
   const o = orgId || 'public';
   return apiJson(`${BASE}?orgId=${encodeURIComponent(o)}&available=true`, { method: 'GET' });
+}
+
+export function getCourseById(courseId: string): Promise<CourseDetail> {
+  return apiJson<CourseDetail>(`${BASE}/${encodeURIComponent(courseId)}`, { method: 'GET' });
 }
 
 export function createCourse(body: unknown): Promise<unknown> {

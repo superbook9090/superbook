@@ -12,6 +12,7 @@ import { serialize } from '@/lib/serialize';
 import mongoose from 'mongoose';
 import { getAccessFilter } from '@/lib/accessControl';
 import { getCachedData, setCachedData, invalidatePattern } from '@/lib/redis';
+import { setQuizQuestions } from '@/domain/learning/quizContent';
 
 // GET /api/quizzes - Get all quizzes (with optional filtering)
 export async function GET(request: NextRequest) {
@@ -82,7 +83,7 @@ export async function GET(request: NextRequest) {
       fieldList.forEach(f => selectFields[f] = 1);
     } else {
       // Default fields to avoid over-fetching
-      selectFields = { title: 1, description: 1, timeLimit: 1, isPublished: 1, createdAt: 1 };
+      selectFields = { title: 1, description: 1, timeLimit: 1, isPublished: 1, createdAt: 1, questionCount: 1, version: 1 };
     }
 
     const quizzes = await Quiz.find(query, selectFields)
@@ -219,25 +220,36 @@ export async function POST(request: NextRequest) {
     const organizationId = user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null;
     const orgId = organizationId?.toString() || 'public';
 
-    // Create quiz
     const quiz = new Quiz({
       title,
       description,
       course,
       instructor: session.user.id,
       organizationId,
-      questions,
       timeLimit: timeLimit || 30,
       isPublished: isPublished || false,
+      questionCount: 0,
+      version: 1,
     });
 
     await quiz.save();
+    await setQuizQuestions(
+      quiz._id as mongoose.Types.ObjectId,
+      questions.map((q) => ({
+        question: q.question,
+        options: q.options,
+        correctAnswer: q.correctAnswer,
+      })),
+      { bumpVersion: false }
+    );
+
+    const fresh = await Quiz.findById(quiz._id).lean();
 
     // Invalidate cache for this organization
     await invalidatePattern(`quizzes:${orgId}:*`);
 
     return NextResponse.json(
-      { message: 'Quiz created successfully', quiz },
+      { message: 'Quiz created successfully', quiz: fresh },
       { status: 201 }
     );
   } catch (error) {

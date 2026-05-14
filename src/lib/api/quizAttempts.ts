@@ -11,7 +11,7 @@ export type StartQuizAttemptResponse = {
 export type SubmitQuizAttemptInput = {
   quizId: string;
   action: 'submit';
-  answers: { questionIndex: number; selectedOption: number }[];
+  answers: { questionId: string; selectedOption: number }[];
   timeTaken?: number;
   forceSubmit?: boolean;
 };
@@ -39,6 +39,7 @@ export function submitQuizAttempt(input: SubmitQuizAttemptInput): Promise<Submit
 
 export type QuizAttemptsListResponse = {
   attempts: unknown[];
+  questions?: unknown[];
   pagination?: { page: number; limit: number; total: number; totalPages: number };
 };
 

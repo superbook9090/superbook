@@ -172,7 +172,7 @@ export default function CourseDetailPage() {
                       <div className="w-8 h-8 bg-[var(--color-muted-foreground)]/10 rounded-lg flex items-center justify-center">
                         <span className="text-xs font-bold">?</span>
                       </div>
-                      <span>{quiz.questions?.length || 0} questions</span>
+                      <span>{quiz.questionCount ?? 0} questions</span>
                     </div>
                   </div>
 

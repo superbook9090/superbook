@@ -23,7 +23,7 @@ interface Quiz {
   title: string;
   description: string;
   timeLimit: number;
-  questions: { question: string; options: string[]; correctAnswer: number }[];
+  questionCount?: number;
   course: { _id: string; title: string };
   isPublished: boolean;
 }
@@ -108,7 +108,7 @@ function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps) {
         <div className="absolute top-4 right-4">
           <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full text-sm font-medium text-gray-700">
             <HelpCircle className="w-4 h-4" />
-            {quiz.questions?.length || 0} {t('quiz.questions')}
+            {quiz.questionCount ?? 0} {t('quiz.questions')}
           </div>
         </div>
       </div>

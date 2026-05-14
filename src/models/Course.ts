@@ -1,5 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
+/** Course aggregate — no embedded lesson ids; use Chapter / Lesson collections + counters. */
 export interface ICourse extends Document {
   title: string;
   description: string;
@@ -8,9 +9,15 @@ export interface ICourse extends Document {
   price: number;
   thumbnail: string;
   category: string;
+  /** UI locale (en/hi). Named `locale` so it never collides with MongoDB text-index `language` override. */
+  locale: 'en' | 'hi';
   isPublished: boolean;
-  lessons: mongoose.Types.ObjectId[];
-  enrolledCount?: number;
+  /** Denormalized for listing cards and sort. */
+  chapterCount: number;
+  lessonCount: number;
+  enrolledCount: number;
+  /** For continue-learning tiles without loading lessons. */
+  lastPublishedLesson?: mongoose.Types.ObjectId | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -24,20 +31,21 @@ const courseSchema = new Schema<ICourse>(
     price: { type: Number, default: 0 },
     thumbnail: String,
     category: String,
+    locale: { type: String, enum: ['en', 'hi'], default: 'en' },
     isPublished: { type: Boolean, default: false },
+    chapterCount: { type: Number, default: 0 },
+    lessonCount: { type: Number, default: 0 },
     enrolledCount: { type: Number, default: 0 },
-    lessons: [{ type: Schema.Types.ObjectId, ref: 'Lesson' }],
+    lastPublishedLesson: { type: Schema.Types.ObjectId, ref: 'Lesson', default: null },
   },
   { timestamps: true }
 );
 
-// Add indexes for frequently queried fields
 courseSchema.index({ instructor: 1 });
-courseSchema.index({ organizationId: 1 });
-courseSchema.index({ organizationId: 1, isPublished: 1 });
+courseSchema.index({ organizationId: 1, isPublished: 1, lessonCount: -1 });
+courseSchema.index({ organizationId: 1, isPublished: 1, createdAt: -1 });
 courseSchema.index({ instructor: 1, organizationId: 1 });
-courseSchema.index({ isPublished: 1 });
+courseSchema.index({ isPublished: 1, category: 1 });
 courseSchema.index({ createdAt: -1 });
-courseSchema.index({ category: 1 });
 
 export default mongoose.models.Course || mongoose.model<ICourse>('Course', courseSchema);

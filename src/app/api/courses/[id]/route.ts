@@ -131,7 +131,7 @@ export async function PATCH(
       );
     }
 
-    const { title, description, price, category, thumbnail, isPublished, language } = validationResult.data;
+    const { title, description, price, category, thumbnail, isPublished, locale } = validationResult.data;
 
     if (title) course.title = title;
     if (description) course.description = description;
@@ -139,7 +139,7 @@ export async function PATCH(
     if (category) course.category = category;
     if (thumbnail) course.thumbnail = thumbnail;
     if (typeof isPublished === 'boolean') course.isPublished = isPublished;
-    if (language) course.language = language;
+    if (locale) course.locale = locale;
 
     await course.save();
     await course.populate('instructor', 'name email');

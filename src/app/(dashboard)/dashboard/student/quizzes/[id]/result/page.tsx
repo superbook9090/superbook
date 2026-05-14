@@ -11,13 +11,16 @@ import { PageSkeleton } from '@/components/ui/Skeleton';
 import { getQuizAttemptReview } from '@/lib/api/quizAttempts';
 
 interface Question {
+  _id: string;
+  order?: number;
   question: string;
   options: string[];
   correctAnswer: number;
 }
 
 interface Answer {
-  questionIndex: number;
+  questionId: string;
+  order: number;
   selectedOption: number;
   isCorrect: boolean;
 }
@@ -207,13 +210,13 @@ export default function QuizResultPage() {
             <h2 className="text-lg sm:text-xl font-bold text-[var(--color-foreground)] mb-4">{t('quizResult.answerReview')}</h2>
             <div className="space-y-4">
               {attempt.quiz.questions.map((question, index) => {
-                const answer = attempt.answers.find((a) => a.questionIndex === index);
+                const answer = attempt.answers.find((a) => a.questionId === question._id);
                 const isCorrect = answer?.isCorrect || false;
                 const selectedOption = answer?.selectedOption ?? -1;
 
                 return (
                   <div
-                    key={index}
+                    key={question._id}
                     className={`p-4 rounded-lg border-l-4 ${
                       isCorrect ? 'bg-[var(--success-light)] border-[var(--success)]' : 'bg-[var(--error-light)] border-[var(--error)]'
                     }`}

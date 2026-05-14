@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { mutate } from 'swr';
+import { useQueryClient } from '@tanstack/react-query';
 import { useRouter, useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
@@ -24,9 +24,11 @@ import DOMPurify from 'isomorphic-dompurify';
 import { getBlogById, type BlogDocument } from '@/lib/api/blogs';
 import { addFavorite as postFavorite, removeFavorite as removeFavoriteApi } from '@/lib/api/favorites';
 import { ApiClientError } from '@/lib/api/http';
+import { queryKeys } from '@/lib/react-query/query-keys';
 
 
 export default function BlogDetailPage() {
+  const queryClient = useQueryClient();
   const { status, favorites, addFavorite, removeFavorite } = useSessionStore();
   const router = useRouter();
   const { theme } = useRoleTheme();
@@ -66,12 +68,11 @@ export default function BlogDetailPage() {
       if (isFavorited) {
         await removeFavoriteApi(blogId);
         removeFavorite(blogId);
-        mutate('/api/favorites');
       } else {
         await postFavorite(blogId);
         addFavorite(blogId);
-        mutate('/api/favorites');
       }
+      queryClient.invalidateQueries({ queryKey: queryKeys.favorites.all });
     } catch (err) {
       const message =
         err instanceof ApiClientError ? err.message : t('blog.failedUpdateFavorite');

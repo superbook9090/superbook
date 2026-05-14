@@ -1,7 +1,8 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-export interface IAnswer {
-  questionIndex: number;
+export interface IGradedAnswer {
+  question: mongoose.Types.ObjectId;
+  order: number;
   selectedOption: number;
   isCorrect: boolean;
 }
@@ -10,50 +11,57 @@ export interface IQuizAttempt extends Document {
   student: mongoose.Types.ObjectId;
   quiz: mongoose.Types.ObjectId;
   course: mongoose.Types.ObjectId;
-  answers: IAnswer[];
-  score: number; // percentage 0-100
+  quizVersion: number;
+  answers: IGradedAnswer[];
+  score: number;
   correctCount: number;
   totalQuestions: number;
-  timeTaken: number; // in seconds
+  timeTaken: number;
   startedAt: Date;
   submittedAt?: Date;
   status: 'in_progress' | 'completed' | 'abandoned' | 'force_submitted';
-  attemptNumber: number; // for multiple attempts
-  violationCount: number; // number of anti-cheating violations
+  attemptNumber: number;
+  violationCount: number;
 }
 
-const answerSchema = new Schema<IAnswer>({
-  questionIndex: { type: Number, required: true },
-  selectedOption: { type: Number, required: true },
-  isCorrect: { type: Boolean, required: true },
-});
+const gradedAnswerSchema = new Schema<IGradedAnswer>(
+  {
+    question: { type: Schema.Types.ObjectId, ref: 'QuizQuestion', required: true },
+    order: { type: Number, required: true },
+    selectedOption: { type: Number, required: true },
+    isCorrect: { type: Boolean, required: true },
+  },
+  { _id: false }
+);
 
 const quizAttemptSchema = new Schema<IQuizAttempt>(
   {
     student: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     quiz: { type: Schema.Types.ObjectId, ref: 'Quiz', required: true },
     course: { type: Schema.Types.ObjectId, ref: 'Course', required: true },
-    answers: [answerSchema],
+    quizVersion: { type: Number, required: true, default: 1 },
+    answers: [gradedAnswerSchema],
     score: { type: Number, default: 0, min: 0, max: 100 },
     correctCount: { type: Number, default: 0 },
     totalQuestions: { type: Number, required: true },
-    timeTaken: { type: Number, default: 0 }, // seconds
+    timeTaken: { type: Number, default: 0 },
     startedAt: { type: Date, default: Date.now },
     submittedAt: Date,
-    status: { type: String, enum: ['in_progress', 'completed', 'abandoned', 'force_submitted'], default: 'in_progress' },
+    status: {
+      type: String,
+      enum: ['in_progress', 'completed', 'abandoned', 'force_submitted'],
+      default: 'in_progress',
+    },
     attemptNumber: { type: Number, default: 1 },
     violationCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
 
-// Optimized indexes — compound { field, status, score } covers queries on { field, status } alone
 quizAttemptSchema.index({ student: 1, quiz: 1 });
-quizAttemptSchema.index({ student: 1, course: 1 });
+quizAttemptSchema.index({ student: 1, course: 1, startedAt: -1 });
 quizAttemptSchema.index({ student: 1, startedAt: -1 });
 quizAttemptSchema.index({ quiz: 1, status: 1, score: -1 });
 quizAttemptSchema.index({ course: 1, status: 1, score: -1 });
-quizAttemptSchema.index({ startedAt: -1 });
-quizAttemptSchema.index({ submittedAt: -1 });
 
 export default mongoose.models.QuizAttempt || mongoose.model<IQuizAttempt>('QuizAttempt', quizAttemptSchema);

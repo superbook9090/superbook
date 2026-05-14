@@ -11,6 +11,7 @@ import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
 import { getAccessFilter } from '@/lib/accessControl';
 import { getCachedData, setCachedData, invalidatePattern } from '@/lib/redis';
+import { createDefaultChapter } from '@/domain/learning/courseBootstrap';
 import { revalidateTag } from 'next/cache';
 
 // Configure Next.js caching for this route
@@ -102,7 +103,7 @@ export async function GET(request: NextRequest) {
       fieldList.forEach(f => selectFields[f] = 1);
     } else {
       // Default fields to avoid over-fetching
-      selectFields = { title: 1, description: 1, price: 1, category: 1, thumbnail: 1, isPublished: 1, language: 1, createdAt: 1, enrolledCount: 1 };
+      selectFields = { title: 1, description: 1, price: 1, category: 1, thumbnail: 1, isPublished: 1, locale: 1, createdAt: 1, enrolledCount: 1, chapterCount: 1, lessonCount: 1 };
     }
 
     const courses = await Course.find(query, selectFields)
@@ -193,7 +194,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { title, description, price, category, thumbnail, isPublished, language } = validationResult.data;
+    const { title, description, price, category, thumbnail, isPublished, locale } = validationResult.data;
 
     // Check teacher limits (skip for admins)
     if (session.user?.role === 'teacher') {
@@ -220,11 +221,12 @@ export async function POST(request: NextRequest) {
       price: price || 0,
       category,
       thumbnail,
-      language: language || 'en',
+      locale: locale || 'en',
       isPublished: isPublished || false,
     });
 
     await course.save();
+    await createDefaultChapter(course._id as mongoose.Types.ObjectId);
 
     // Invalidate cache for this organization
     await invalidatePattern(`courses:${orgId}:*`);

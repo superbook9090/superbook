@@ -19,8 +19,11 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     return () => clearInterval(sessionInterval);
   }, [fetchSession]);
 
-  // Fetch favorites when user is authenticated (only once)
   useEffect(() => {
+    if (status === 'unauthenticated') {
+      hasFetchedFavorites.current = false;
+      return;
+    }
     if (status === 'authenticated' && !hasFetchedFavorites.current) {
       hasFetchedFavorites.current = true;
       fetchFavorites();

@@ -22,13 +22,13 @@ import {
 } from 'lucide-react';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
-import { useBlogs, useFavorites, useAddFavorite, useRemoveFavorite, type Blog } from '@/lib/react-query/hooks';
+import { useBlogs, useAddFavorite, useRemoveFavorite, type Blog } from '@/lib/react-query/hooks';
 import { blogTopicKeys, supportedLanguages, type BlogTopicKey } from '@/i18n/config';
 
 const topics = ['all', ...blogTopicKeys] as const;
 
 export default function StudentBlogsPage() {
-  const { session, status, favorites, addFavorite, removeFavorite } = useSessionStore();
+  const { session, status, favorites } = useSessionStore();
   const router = useRouter();
   const { t } = useTranslation();
   const { theme } = useRoleTheme();
@@ -36,7 +36,6 @@ export default function StudentBlogsPage() {
 
   const orgId = (session?.user as { organizationId?: string })?.organizationId || 'public';
   const { data: blogs = [], isLoading } = useBlogs(orgId);
-  const { data: favoritesData = [] } = useFavorites();
   const addFavoriteMutation = useAddFavorite();
   const removeFavoriteMutation = useRemoveFavorite();
   
@@ -65,32 +64,14 @@ export default function StudentBlogsPage() {
     }
   }, [status, featureEnabled, hasRedirected, router]);
 
-  // Sync Zustand favorites with React Query data
-  useEffect(() => {
-    const favoriteIds = new Set(favoritesData.map((f: { blog: { _id: string } }) => f.blog._id));
-    favoritesData.forEach((f: { blog: { _id: string } }) => {
-      if (!favorites.has(f.blog._id)) {
-        addFavorite(f.blog._id);
-      }
-    });
-    // Remove favorites that are no longer in the API response
-    favorites.forEach((blogId) => {
-      if (!favoriteIds.has(blogId)) {
-        removeFavorite(blogId);
-      }
-    });
-  }, [favoritesData, favorites, addFavorite, removeFavorite]);
-
   const toggleFavorite = async (blogId: string) => {
     const isFavorited = favorites.has(blogId);
 
     try {
       if (isFavorited) {
         await removeFavoriteMutation.mutateAsync(blogId);
-        removeFavorite(blogId);
       } else {
         await addFavoriteMutation.mutateAsync(blogId);
-        addFavorite(blogId);
       }
     } catch (error) {
       console.error('Error toggling favorite:', error);
@@ -202,7 +183,7 @@ export default function StudentBlogsPage() {
           <p className="text-sm text-[var(--color-muted-foreground)]">{t('blog.totalArticles')}</p>
         </div>
         <div className="bg-[var(--background)] rounded-xl p-4 shadow-sm">
-          <p className={`text-2xl font-bold ${theme.text}`}>{favoritesData.length}</p>
+          <p className={`text-2xl font-bold ${theme.text}`}>{favorites.size}</p>
           <p className="text-sm text-[var(--color-muted-foreground)]">{t('nav.favorites')}</p>
         </div>
       </motion.div>

@@ -10,7 +10,7 @@ export const createCourseSchema = z.object({
   category: z.string().optional(),
   thumbnail: z.preprocess((val) => val === '' ? undefined : val, z.string().url('Invalid thumbnail URL').optional()),
   isPublished: z.boolean().optional(),
-  language: z.enum(['en', 'hi']).optional(),
+  locale: z.enum(['en', 'hi']).optional(),
 });
 
 export const updateCourseSchema = createCourseSchema.partial();
@@ -52,8 +52,8 @@ export const createQuizAttemptSchema = z.object({
   quizId: objectIdSchema,
   action: z.enum(['start', 'submit']),
   answers: z.array(z.object({
-    questionIndex: z.number().int().min(0),
-    selectedOption: z.number().int().min(-1), // -1 for unanswered
+    questionId: objectIdSchema,
+    selectedOption: z.number().int().min(-1),
   })).optional(),
   timeTaken: z.number().int().min(0).nullable().optional(),
 });

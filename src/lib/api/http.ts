@@ -1,12 +1,37 @@
+export interface ApiResponseMeta {
+  page?: number;
+  limit?: number;
+  total?: number;
+  hasMore?: boolean;
+}
+
 export class ApiClientError extends Error {
   constructor(
     message: string,
     public status: number,
-    public body?: unknown
+    public body?: unknown,
+    public code?: string
   ) {
     super(message);
     this.name = 'ApiClientError';
   }
+}
+
+function parseErrorMessage(data: unknown): { message: string; code?: string } {
+  if (typeof data !== 'object' || data === null) {
+    return { message: 'Request failed' };
+  }
+  const o = data as Record<string, unknown>;
+  if (o.success === false && o.error && typeof o.error === 'object' && o.error !== null) {
+    const err = o.error as Record<string, unknown>;
+    const message = typeof err.message === 'string' ? err.message : 'Request failed';
+    const code = typeof err.code === 'string' ? err.code : undefined;
+    return { message, code };
+  }
+  if (typeof o.message === 'string') {
+    return { message: o.message };
+  }
+  return { message: 'Request failed' };
 }
 
 type JsonInit = Omit<RequestInit, 'body'> & {
@@ -39,17 +64,62 @@ export async function apiJson<T>(url: string, init: JsonInit = {}): Promise<T> {
   }
 
   if (!res.ok && !acceptStatuses.includes(res.status)) {
-    const msg =
-      typeof data === 'object' &&
-      data !== null &&
-      'message' in data &&
-      typeof (data as { message: unknown }).message === 'string'
-        ? (data as { message: string }).message
-        : res.statusText || 'Request failed';
-    throw new ApiClientError(msg, res.status, data);
+    const { message, code } = parseErrorMessage(data);
+    throw new ApiClientError(message || res.statusText || 'Request failed', res.status, data, code);
   }
 
   return data as T;
+}
+
+/**
+ * Parses `{ success, data, meta }` envelopes from API routes; falls back to treating the body as `T` for legacy routes.
+ */
+export async function apiJsonData<T>(
+  url: string,
+  init: JsonInit = {}
+): Promise<{ data: T; meta?: ApiResponseMeta }> {
+  const { body, headers, acceptStatuses = [], ...rest } = init;
+  const hasBody = body !== undefined;
+
+  const res = await fetch(url, {
+    ...rest,
+    headers: {
+      ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
+      ...(headers as Record<string, string> | undefined),
+    },
+    body: hasBody ? JSON.stringify(body) : undefined,
+    cache: 'no-store',
+  });
+
+  let raw: unknown = {};
+  try {
+    raw = await res.json();
+  } catch {
+    raw = {};
+  }
+
+  if (!res.ok && !acceptStatuses.includes(res.status)) {
+    const { message, code } = parseErrorMessage(raw);
+    throw new ApiClientError(message || res.statusText || 'Request failed', res.status, raw, code);
+  }
+
+  if (typeof raw === 'object' && raw !== null && 'success' in raw) {
+    const envelope = raw as { success: boolean; data?: unknown; meta?: ApiResponseMeta; error?: { code: string; message: string } };
+    if (envelope.success === false) {
+      if (acceptStatuses.includes(res.status)) {
+        return { data: raw as T };
+      }
+      throw new ApiClientError(
+        envelope.error?.message ?? 'Request failed',
+        res.status,
+        raw,
+        envelope.error?.code
+      );
+    }
+    return { data: envelope.data as T, meta: envelope.meta };
+  }
+
+  return { data: raw as T };
 }
 
 /**
@@ -72,14 +142,8 @@ export async function apiFormJson<T>(url: string, formData: FormData, init: Omit
   }
 
   if (!res.ok) {
-    const msg =
-      typeof data === 'object' &&
-      data !== null &&
-      'message' in data &&
-      typeof (data as { message: unknown }).message === 'string'
-        ? (data as { message: string }).message
-        : res.statusText || 'Request failed';
-    throw new ApiClientError(msg, res.status, data);
+    const { message, code } = parseErrorMessage(data);
+    throw new ApiClientError(message || res.statusText || 'Request failed', res.status, data, code);
   }
 
   return data as T;

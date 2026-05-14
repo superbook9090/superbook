@@ -18,6 +18,35 @@ export function getQuizById(quizId: string): Promise<{ quiz: unknown }> {
   return apiJson<{ quiz: unknown }>(`${BASE}/${encodeURIComponent(quizId)}`, { method: 'GET' });
 }
 
+/** Teacher edit: loads quiz + questions with correct answers. */
+export type QuizEditQuestion = {
+  _id?: string;
+  order?: number;
+  question: string;
+  options: string[];
+  correctAnswer?: number;
+};
+
+export type QuizEditResponse = {
+  quiz: {
+    _id: string;
+    title: string;
+    description?: string;
+    timeLimit: number;
+    isPublished: boolean;
+    course?: string | { _id: string; title?: string };
+  };
+  questions?: QuizEditQuestion[];
+};
+
+export function getQuizForEdit(quizId: string): Promise<QuizEditResponse> {
+  const qs = new URLSearchParams({ include: 'questions,answers' });
+  return apiJson<QuizEditResponse>(
+    `${BASE}/${encodeURIComponent(quizId)}?${qs.toString()}`,
+    { method: 'GET' }
+  );
+}
+
 export function createQuiz(body: unknown): Promise<unknown> {
   return apiJson(BASE, { method: 'POST', body });
 }

@@ -16,9 +16,10 @@ import { useSessionStore } from '@/store/useSessionStore';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 
 interface Question {
+  _id: string;
+  order?: number;
   question: string;
   options: string[];
-  correctAnswer: number;
 }
 
 interface Attempt {
@@ -27,8 +28,9 @@ interface Attempt {
     _id: string;
     title: string;
     timeLimit: number;
-    questions: Question[];
   };
+  /** Loaded separately from quiz document (GET ?attemptId= or start response). */
+  questions: Question[];
   status: string;
   startedAt: string;
   attemptNumber: number;
@@ -47,7 +49,7 @@ export default function TakeQuizPage() {
   const startQuizMutation = useStartQuizAttempt();
 
   const [attempt, setAttempt] = useState<Attempt | null>(null);
-  const [answers, setAnswers] = useState<{ [key: number]: number }>({});
+  const [answers, setAnswers] = useState<Record<string, number>>({});
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -99,18 +101,14 @@ export default function TakeQuizPage() {
 
     try {
       // Format answers for API
-      const formattedAnswers = Object.entries(answers).map(([questionIndex, selectedOption]) => ({
-        questionIndex: parseInt(questionIndex),
+      const formattedAnswers = Object.entries(answers).map(([questionId, selectedOption]) => ({
+        questionId,
         selectedOption,
       }));
 
-      // Add unanswered questions as -1
-      attempt.quiz.questions.forEach((_, index) => {
-        if (!(index in answers)) {
-          formattedAnswers.push({
-            questionIndex: index,
-            selectedOption: -1,
-          });
+      attempt.questions.forEach((q) => {
+        if (!(q._id in answers)) {
+          formattedAnswers.push({ questionId: q._id, selectedOption: -1 });
         }
       });
 
@@ -237,8 +235,13 @@ export default function TakeQuizPage() {
     try {
       const data = await getQuizAttemptByAttemptId(attemptId);
       const foundAttempt = data.attempts?.[0] as Attempt | undefined;
+      const extraQuestions = (data as { questions?: Question[] }).questions;
       if (foundAttempt && foundAttempt.status === 'in_progress') {
-        setAttempt(foundAttempt);
+        const merged: Attempt = {
+          ...foundAttempt,
+          questions: extraQuestions?.length ? extraQuestions : (foundAttempt as { questions?: Question[] }).questions || [],
+        };
+        setAttempt(merged);
 
         // Calculate remaining time
         const elapsedSeconds = Math.floor(
@@ -256,7 +259,7 @@ export default function TakeQuizPage() {
         (foundAttempt.status === 'completed' || foundAttempt.status === 'force_submitted')
       ) {
         // Attempt is completed, allow retry
-        setAttempt(foundAttempt);
+        setAttempt({ ...foundAttempt, questions: [] });
         setError('quiz_completed');
       } else {
         setError(t('errors.quizAttemptNotFound'));
@@ -290,8 +293,8 @@ export default function TakeQuizPage() {
     }
   };
 
-  const handleAnswer = (questionIndex: number, optionIndex: number) => {
-    setAnswers((prev) => ({ ...prev, [questionIndex]: optionIndex }));
+  const handleAnswer = (questionId: string, optionIndex: number) => {
+    setAnswers((prev) => ({ ...prev, [questionId]: optionIndex }));
   };
 
   const handleSubmit = useCallback(async (autoSubmit = false) => {
@@ -302,19 +305,14 @@ export default function TakeQuizPage() {
       return;
     }
 
-    // Format answers for API
-    const formattedAnswers = Object.entries(answers).map(([questionIndex, selectedOption]) => ({
-      questionIndex: parseInt(questionIndex),
+    const formattedAnswers = Object.entries(answers).map(([questionId, selectedOption]) => ({
+      questionId,
       selectedOption,
     }));
 
-    // Add unanswered questions as -1
-    attempt.quiz.questions.forEach((_, index) => {
-      if (!(index in answers)) {
-        formattedAnswers.push({
-          questionIndex: index,
-          selectedOption: -1,
-        });
+    attempt.questions.forEach((q) => {
+      if (!(q._id in answers)) {
+        formattedAnswers.push({ questionId: q._id, selectedOption: -1 });
       }
     });
 
@@ -393,9 +391,11 @@ export default function TakeQuizPage() {
     );
   }
 
-  const questions = attempt.quiz.questions || [];
+  const questions = attempt.questions || [];
+  const currentQ = questions[currentQuestion];
+  const currentQid = currentQ?._id;
   const progress = questions.length > 0 ? ((currentQuestion + 1) / questions.length) * 100 : 0;
-  const answeredCount = Object.keys(answers).length;
+  const answeredCount = questions.filter((q) => answers[q._id] !== undefined).length;
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -449,16 +449,16 @@ export default function TakeQuizPage() {
       {/* Question */}
       <div className="bg-[var(--card-solid)] rounded-lg shadow-md p-6 mb-6">
         <h3 className="text-lg font-medium text-[var(--color-foreground)] mb-4">
-          {questions[currentQuestion].question}
+          {currentQ?.question}
         </h3>
 
         <div className="space-y-3">
-          {questions[currentQuestion].options.map((option, index) => (
+          {(currentQ?.options || []).map((option, index) => (
             <button
               key={index}
-              onClick={() => handleAnswer(currentQuestion, index)}
+              onClick={() => currentQid && handleAnswer(currentQid, index)}
               className={`w-full text-left p-4 min-h-[44px] rounded-lg border-2 transition-all ${
-                answers[currentQuestion] === index
+                currentQid && answers[currentQid] === index
                   ? 'border-[var(--student-primary)] bg-[var(--student-primary)]/10'
                   : 'border-[var(--border)] hover:border-[var(--student-primary)]/50'
               }`}
@@ -466,7 +466,7 @@ export default function TakeQuizPage() {
               <div className="flex items-center">
                 <span
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium mr-3 ${
-                    answers[currentQuestion] === index
+                    currentQid && answers[currentQid] === index
                       ? `bg-gradient-to-r ${theme.gradient} text-white`
                       : 'bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)]'
                   }`}
@@ -492,14 +492,14 @@ export default function TakeQuizPage() {
 
         {/* Question dots */}
         <div className="flex space-x-2">
-          {questions.map((_, index) => (
+          {questions.map((q, index) => (
             <button
-              key={index}
+              key={q._id}
               onClick={() => setCurrentQuestion(index)}
               className={`w-3 h-3 rounded-full ${
                 index === currentQuestion
                   ? `bg-gradient-to-r ${theme.gradient}`
-                  : answers[index] !== undefined
+                  : answers[q._id] !== undefined
                   ? 'bg-[var(--success)]'
                   : 'bg-[var(--color-surface-muted)]'
               }`}

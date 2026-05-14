@@ -22,7 +22,7 @@ interface Quiz {
   title: string;
   description?: string;
   timeLimit: number;
-  questions: { question: string }[];
+  questionCount?: number;
   course: Course | { _id: string } | string;
   isPublished: boolean;
   createdAt: string;
@@ -204,11 +204,18 @@ export default function TeacherQuizzesPage() {
                   )}
 
                   <div className="flex items-center gap-4 text-sm text-[var(--color-muted-foreground)]">
-                    <span>{quiz.questions?.length || 0} {t('teacherQuizzes.questions')}</span>
+                    <span>{quiz.questionCount ?? 0} {t('teacherQuizzes.questions')}</span>
                     <span>{quiz.timeLimit} {t('teacherQuizzes.min')}</span>
                   </div>
 
                   <div className="flex gap-2 pt-2 border-t border-[var(--border)]">
+                    <button
+                      type="button"
+                      onClick={() => router.push(`/dashboard/teacher/quizzes/${quiz._id}/edit`)}
+                      className="flex-1 min-h-[44px] sm:min-h-0 px-3 py-2 text-sm font-medium text-[var(--teacher-primary)] bg-[var(--teacher-soft)] rounded-lg hover:bg-[var(--teacher-border)] transition-colors touch-manipulation"
+                    >
+                      {t('teacherQuizzes.edit')}
+                    </button>
                     <button
                       onClick={() => handleTogglePublish(quiz._id, quiz.isPublished)}
                       className={`flex-1 min-h-[44px] sm:min-h-0 px-3 py-2 text-sm font-medium ${theme.text} ${theme.activeBg} rounded-lg hover:opacity-80 touch-manipulation`}
@@ -252,7 +259,7 @@ export default function TeacherQuizzesPage() {
                         {getCourseTitle(quiz.course)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-muted-foreground)]">
-                        {quiz.questions?.length || 0}
+                        {quiz.questionCount ?? 0}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-muted-foreground)]">
                         {quiz.timeLimit} {t('teacherQuizzes.min')}
@@ -269,6 +276,13 @@ export default function TeacherQuizzesPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button
+                          type="button"
+                          onClick={() => router.push(`/dashboard/teacher/quizzes/${quiz._id}/edit`)}
+                          className="text-[var(--teacher-primary)] hover:text-[var(--teacher-primary)]/80 mr-4"
+                        >
+                          {t('teacherQuizzes.edit')}
+                        </button>
                         <button
                           onClick={() => handleTogglePublish(quiz._id, quiz.isPublished)}
                           className="text-[var(--teacher-primary)] hover:text-[var(--teacher-primary)]/80 mr-4"

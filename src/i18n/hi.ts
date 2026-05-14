@@ -559,11 +559,14 @@ export const hi = {
     createCourse: 'पाठ्यक्रम बनाएं',
     noQuizzesYet: 'आपने अभी तक कोई क्विज़ नहीं बनाया है।',
     createFirstQuiz: 'अपना पहला क्विज़ बनाएं',
+    published: 'प्रकाशित',
+    draft: 'ड्राफ्ट',
     questions: 'प्रश्न',
     min: 'मिनट',
     unpublish: 'अप्रकाशित करें',
     publish: 'प्रकाशित करें',
     delete: 'हटाएं',
+    edit: 'संपादित करें',
     loadingQuizzes: 'क्विज़ लोड हो रहे हैं...',
     unknownCourse: 'अज्ञात पाठ्यक्रम',
     failedUpdateQuiz: 'क्विज़ अपडेट करने में विफल',
@@ -669,6 +672,8 @@ export const hi = {
   createCoursePage: {
     title: 'नया पाठ्यक्रम बनाएं',
     description: 'नया पाठ्यक्रम बनाने के लिए नीचे विवरण भरें।',
+    editTitle: 'पाठ्यक्रम संपादित करें',
+    editDescription: 'नीचे अपने पाठ्यक्रम का विवरण अपडेट करें।',
   },
 
   createCourseForm: {
@@ -690,12 +695,18 @@ export const hi = {
     createCourse: 'पाठ्यक्रम बनाएं',
     failedCreateCourse: 'पाठ्यक्रम बनाने में विफल',
     errorOccurred: 'एक त्रुटि हुई। कृपया पुनः प्रयास करें।',
+    saving: 'सहेज रहा है...',
+    saveChanges: 'परिवर्तन सहेजें',
+    loadError: 'यह पाठ्यक्रम लोड नहीं हो सका। हटाया गया हो सकता है या आपके पास पहुंच नहीं है।',
+    updateFailed: 'परिवर्तन सहेजने में विफल। कृपया पुनः प्रयास करें।',
   },
 
   // CreateQuizForm
   createQuizPage: {
     title: 'नया क्विज़ बनाएं',
     description: 'अपने किसी पाठ्यक्रम के लिए क्विज़ बनाएं।',
+    editTitle: 'क्विज़ संपादित करें',
+    editDescription: 'नीचे क्विज़ विवरण और प्रश्न अपडेट करें।',
   },
 
   createQuizForm: {
@@ -727,7 +738,9 @@ export const hi = {
     addOption: '+ विकल्प जोड़ें',
     addQuestion: '+ प्रश्न जोड़ें',
     publishImmediately: 'तुरंत प्रकाशित करें',
+    cancel: 'रद्द करें',
     createQuiz: 'क्विज़ बनाएं',
+    creating: 'बना रहा है...',
     failedCreateQuiz: 'क्विज़ बनाने में विफल',
     errorOccurred: 'एक त्रुटि हुई। कृपया पुनः प्रयास करें।',
     loadingCourses: 'पाठ्यक्रम लोड हो रहे हैं...',
@@ -744,6 +757,11 @@ export const hi = {
     correctAnswerInvalid: 'सही उत्तर A, B, C, D या 1, 2, 3, 4 होना चाहिए',
     validationErrors: 'सत्यापन त्रुटियां:',
     andMoreErrors: '... और {count} और त्रुटियां',
+    saving: 'सहेज रहा है...',
+    saveChanges: 'परिवर्तन सहेजें',
+    loadError: 'यह क्विज़ लोड नहीं हो सका। हटाया गया हो सकता है या आपके पास पहुंच नहीं है।',
+    updateFailed: 'क्विज़ सहेजने में विफल। कृपया पुनः प्रयास करें।',
+    courseLockedInEdit: 'क्विज़ बनने के बाद पाठ्यक्रम बदला नहीं जा सकता।',
   },
 
   createBlogPage: {

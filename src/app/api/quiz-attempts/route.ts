@@ -1,8 +1,9 @@
-// src/app/api/quiz-attempts/route.ts
+// src/app/api/quiz-attempts/route.ts — greenfield: normalized QuizQuestion + compact attempts
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
+import '@/models';
 import QuizAttempt from '@/models/QuizAttempt';
 import Quiz from '@/models/Quiz';
 import Enrollment from '@/models/Enrollment';
@@ -10,23 +11,33 @@ import { createQuizAttemptSchema } from '@/lib/validation';
 import { logInfo, logError, logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
 import { getCachedData, setCachedData, invalidatePattern } from '@/lib/redis';
+import { listQuestionsForQuiz } from '@/domain/learning/quizContent';
+import type { Types } from 'mongoose';
 
-// GET /api/quiz-attempts - Get student's quiz attempts
+function toClientQuestions(rows: { _id: Types.ObjectId; order: number; prompt: string; options: string[] }[]) {
+  return rows.map((q) => ({
+    _id: q._id.toString(),
+    order: q.order,
+    question: q.prompt,
+    options: q.options,
+  }));
+}
+
+async function loadSanitizedQuestions(quizId: Types.ObjectId) {
+  const rows = await listQuestionsForQuiz(quizId);
+  return toClientQuestions(rows as unknown as { _id: Types.ObjectId; order: number; prompt: string; options: string[] }[]);
+}
+
+// GET /api/quiz-attempts
 export async function GET(request: NextRequest) {
-  const logContext: LogContext = {
-    method: 'GET',
-    path: '/api/quiz-attempts',
-  };
+  const logContext: LogContext = { method: 'GET', path: '/api/quiz-attempts' };
 
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
-
-    if (session.user) {
-      logContext.userId = session.user.id;
-    }
+    if (session.user) logContext.userId = session.user.id;
 
     await dbConnect();
 
@@ -34,45 +45,43 @@ export async function GET(request: NextRequest) {
     const quiz = searchParams.get('quiz');
     const course = searchParams.get('course');
     const attemptId = searchParams.get('attemptId');
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '20');
+    const page = parseInt(searchParams.get('page') || '1', 10);
+    const limit = parseInt(searchParams.get('limit') || '20', 10);
     const skip = (page - 1) * limit;
-    const fields = searchParams.get('fields'); // Comma-separated fields to select
 
-    // Build cache key based on query params
     const cacheKey = `quiz-attempts:${session.user.id}:${quiz || 'all'}:${course || 'all'}:${attemptId || 'all'}:page${page}:limit${limit}`;
 
-    // Try cache first (quiz attempts don't change once completed)
     const cached = await getCachedData(cacheKey);
     if (cached) {
       return NextResponse.json(cached, {
         status: 200,
-        headers: {
-          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
-        },
+        headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120' },
       });
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const query: Record<string, any> = { student: session.user.id };
+    const query: Record<string, unknown> = { student: session.user.id };
     if (quiz) query.quiz = quiz;
     if (course) query.course = course;
     if (attemptId) query._id = attemptId;
 
-    // Build select object for field selection
-    let selectFields: Record<string, number> = {};
-    if (fields) {
-      const fieldList = fields.split(',');
-      fieldList.forEach(f => selectFields[f] = 1);
-    } else if (!attemptId) {
-      // Default fields to avoid over-fetching, but only when not fetching specific attempt
-      selectFields = { score: 1, status: 1, startedAt: 1, submittedAt: 1, timeTaken: 1, attemptNumber: 1, correctCount: 1, answers: 1, totalQuestions: 1 };
-    }
+    const selectFields = !attemptId
+      ? {
+          quiz: 1,
+          course: 1,
+          score: 1,
+          status: 1,
+          startedAt: 1,
+          submittedAt: 1,
+          timeTaken: 1,
+          attemptNumber: 1,
+          correctCount: 1,
+          totalQuestions: 1,
+          quizVersion: 1,
+        }
+      : undefined;
 
-    // When fetching specific attempt, don't use field selection to ensure all fields are returned
-    const useProjection = !attemptId && Object.keys(selectFields).length > 0;
-    const attempts = await QuizAttempt.find(query, useProjection ? selectFields : undefined)
-      .populate('quiz', 'title description timeLimit questions')
+    const attempts = await QuizAttempt.find(query, selectFields)
+      .populate('quiz', 'title description timeLimit questionCount version course')
       .populate('course', 'title description')
       .populate('student', 'name email')
       .sort({ startedAt: -1 })
@@ -80,156 +89,97 @@ export async function GET(request: NextRequest) {
       .limit(limit)
       .lean();
 
-    // Sanitize quiz questions - remove correctAnswer before sending to frontend
-    // Use separate review endpoint for completed attempts with correct answers
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sanitizedAttempts = attempts.map((attempt: any) => {
-      // Ensure startedAt is properly serialized as ISO string
-      if (attempt.startedAt) {
-        attempt.startedAt = new Date(attempt.startedAt).toISOString();
-      } else {
-        // If startedAt is missing, set it to current time as fallback
-        attempt.startedAt = new Date().toISOString();
-      }
-      if (attempt.submittedAt) {
-        attempt.submittedAt = new Date(attempt.submittedAt).toISOString();
-      }
-      
-      if (attempt.quiz && attempt.quiz.questions) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        attempt.quiz.questions = attempt.quiz.questions.map((q: any) => ({
-          _id: q._id?.toString(),
-          question: q.question,
-          options: q.options,
-        }));
-      }
-      // For completed attempts, include isCorrect in answers
-      if (attempt.status === 'completed' && attempt.answers) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        attempt.answers = attempt.answers.map((a: any) => ({
-          questionIndex: a.questionIndex,
-          selectedOption: a.selectedOption,
-          isCorrect: a.isCorrect,
-        }));
-      }
-      return attempt;
+    const sanitizedAttempts = attempts.map((attempt) => {
+      const a = { ...attempt } as Record<string, unknown>;
+      if (a.startedAt) a.startedAt = new Date(a.startedAt as Date).toISOString();
+      if (a.submittedAt) a.submittedAt = new Date(a.submittedAt as Date).toISOString();
+      return a;
     });
 
-    // Apply serialization to convert ObjectIds to strings
-    const serializedAttempts = serialize(sanitizedAttempts);
+    let questions: ReturnType<typeof toClientQuestions> | undefined;
+    if (attemptId && sanitizedAttempts[0]) {
+      const qid = (sanitizedAttempts[0].quiz as { _id: Types.ObjectId })?._id;
+      if (qid) questions = await loadSanitizedQuestions(qid);
+    }
 
+    const serializedAttempts = serialize(sanitizedAttempts);
     const total = await QuizAttempt.countDocuments(query);
 
     const responseData = {
       attempts: serializedAttempts,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      }
+      ...(questions ? { questions } : {}),
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
     };
 
-    // Cache for 5 minutes (quiz attempts are mostly static after completion)
     await setCachedData(cacheKey, responseData, 300);
 
     return NextResponse.json(responseData, {
       status: 200,
-      headers: {
-        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
-      },
+      headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120' },
     });
   } catch (error) {
     logApiError(error as Error, 'GET', '/api/quiz-attempts', logContext);
-    return NextResponse.json(
-      { message: 'Something went wrong. Please try again later.' },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: 'Something went wrong. Please try again later.' }, { status: 500 });
   }
 }
 
-// POST /api/quiz-attempts - Start or submit a quiz attempt
+// POST — start | submit
 export async function POST(request: NextRequest) {
-  const logContext: LogContext = {
-    method: 'POST',
-    path: '/api/quiz-attempts',
-  };
+  const logContext: LogContext = { method: 'POST', path: '/api/quiz-attempts' };
 
   try {
     const session = await getServerSession(authOptions);
-
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
+    if (session.user) logContext.userId = session.user.id;
 
-    if (session.user) {
-      logContext.userId = session.user.id;
-    }
-
-    // Only students can attempt quizzes
     if (session.user?.role !== 'student') {
-      return NextResponse.json(
-        { message: 'Only students can attempt quizzes' },
-        { status: 403 }
-      );
+      return NextResponse.json({ message: 'Only students can attempt quizzes' }, { status: 403 });
     }
 
     await dbConnect();
 
     const body = await request.json();
-
     logInfo('Quiz attempt request body', logContext, { body });
 
-    // Validate input using Zod schema
     const validationResult = createQuizAttemptSchema.safeParse(body);
     if (!validationResult.success) {
       logError('Validation error', logContext, { issues: validationResult.error.issues });
-      return NextResponse.json(
-        { message: 'Invalid input', errors: validationResult.error.issues },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: 'Invalid input', errors: validationResult.error.issues }, { status: 400 });
     }
 
     const { quizId, action, answers, timeTaken } = validationResult.data;
 
-    // Get quiz details
-    const quiz = await Quiz.findById(quizId).populate('course', '_id');
+    const quiz = (await Quiz.findById(quizId).populate('course', '_id').lean()) as {
+      _id: Types.ObjectId;
+      isPublished: boolean;
+      course: { _id: Types.ObjectId };
+      version: number;
+    } | null;
     if (!quiz) {
-      return NextResponse.json(
-        { message: 'Quiz not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: 'Quiz not found' }, { status: 404 });
     }
-
     if (!quiz.isPublished) {
-      return NextResponse.json(
-        { message: 'This quiz is not available' },
-        { status: 403 }
-      );
+      return NextResponse.json({ message: 'This quiz is not available' }, { status: 403 });
     }
 
-    // Check if student is enrolled in the course
+    const courseId = (quiz.course as { _id: Types.ObjectId })._id;
+
     const enrollment = await Enrollment.findOne({
       student: session.user.id,
-      course: quiz.course._id,
+      course: courseId,
     });
-
     if (!enrollment) {
-      return NextResponse.json(
-        { message: 'You must enroll in the course to take this quiz' },
-        { status: 403 }
-      );
+      return NextResponse.json({ message: 'You must enroll in the course to take this quiz' }, { status: 403 });
     }
 
-    // If starting new attempt, always create fresh attempt
-    if (action === 'start') {
-      // Count previous attempts to get next attempt number
-      const attemptCount = await QuizAttempt.countDocuments({
-        student: session.user.id,
-        quiz: quizId,
-      });
+    const qRows = await listQuestionsForQuiz(quiz._id);
+    const questionList = qRows as unknown as { _id: Types.ObjectId; order: number; correctOption: number }[];
+    const totalQuestions = questionList.length;
 
-      // Mark any existing in-progress attempt as abandoned
+    if (action === 'start') {
+      const attemptCount = await QuizAttempt.countDocuments({ student: session.user.id, quiz: quizId });
       const existingAttempt = await QuizAttempt.findOne({
         student: session.user.id,
         quiz: quizId,
@@ -240,13 +190,13 @@ export async function POST(request: NextRequest) {
         await existingAttempt.save();
       }
 
-      // Create new attempt
       const attempt = new QuizAttempt({
         student: session.user.id,
         quiz: quizId,
-        course: quiz.course._id,
+        course: courseId,
+        quizVersion: quiz.version,
         answers: [],
-        totalQuestions: quiz.questions.length,
+        totalQuestions,
         startedAt: new Date(),
         status: 'in_progress',
         attemptNumber: attemptCount + 1,
@@ -254,121 +204,77 @@ export async function POST(request: NextRequest) {
       });
       await attempt.save();
 
-      // Sanitize questions - remove correctAnswer before sending to frontend
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const sanitizedQuestions = quiz.questions.map((q: any) => ({
-        _id: q._id,
-        question: q.question,
-        options: q.options,
-      }));
-
-      return NextResponse.json(
-        { message: 'Quiz started', attempt, questions: sanitizedQuestions },
-        { status: 201 }
+      const questions = toClientQuestions(
+        qRows as unknown as { _id: Types.ObjectId; order: number; prompt: string; options: string[] }[]
       );
+
+      return NextResponse.json({ message: 'Quiz started', attempt, questions }, { status: 201 });
     }
 
-    // Find existing in-progress attempt (only if not starting new)
     const attempt = await QuizAttempt.findOne({
       student: session.user.id,
       quiz: quizId,
       status: 'in_progress',
     });
-
     if (!attempt) {
-      return NextResponse.json(
-        { message: 'No in-progress quiz found. Please start a new attempt.' },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: 'No in-progress quiz found. Please start a new attempt.' }, { status: 404 });
     }
 
-    // Submitting the quiz
     if (action === 'submit' && answers) {
-      // Validate: check if attempt is in progress
       if (attempt.status !== 'in_progress') {
-        return NextResponse.json(
-          { message: 'Quiz has already been submitted' },
-          { status: 400 }
-        );
+        return NextResponse.json({ message: 'Quiz has already been submitted' }, { status: 400 });
       }
 
-      // Validate: check if answers length matches questions length
-      if (answers.length !== quiz.questions.length) {
-        return NextResponse.json(
-          { message: 'Invalid number of answers' },
-          { status: 400 }
-        );
+      if (answers.length !== totalQuestions) {
+        return NextResponse.json({ message: 'Invalid number of answers' }, { status: 400 });
       }
 
-      // Validate: check if all question indices are valid
-      const validIndices = answers.every((a: { questionIndex: number }) =>
-        a.questionIndex >= 0 && a.questionIndex < quiz.questions.length
-      );
-      if (!validIndices) {
-        return NextResponse.json(
-          { message: 'Invalid question index in answers' },
-          { status: 400 }
-        );
+      const byId = new Map(questionList.map((q) => [q._id.toString(), q]));
+      const valid = answers.every((a) => byId.has(a.questionId));
+      if (!valid) {
+        return NextResponse.json({ message: 'Unknown question id in answers' }, { status: 400 });
       }
 
-      // Check if this is a force submission (security violation)
       const isForceSubmit = (body as { forceSubmit?: boolean }).forceSubmit === true;
 
-      // Auto-grade the answers
-      const gradedAnswers = answers.map((answer: { questionIndex: number; selectedOption: number }) => {
-        const question = quiz.questions[answer.questionIndex];
-        const isCorrect = question && answer.selectedOption !== -1 && answer.selectedOption === question.correctAnswer;
+      const gradedAnswers = answers.map((answer) => {
+        const q = byId.get(answer.questionId)!;
+        const isCorrect = answer.selectedOption !== -1 && answer.selectedOption === q.correctOption;
         return {
-          questionIndex: answer.questionIndex,
+          question: q._id,
+          order: q.order,
           selectedOption: answer.selectedOption,
-          isCorrect: isCorrect || false,
+          isCorrect: !!isCorrect,
         };
       });
 
-      const correctCount = gradedAnswers.filter((a: { isCorrect: boolean }) => a.isCorrect).length;
-      const score = Math.round((correctCount / quiz.questions.length) * 100);
+      const correctCount = gradedAnswers.filter((a) => a.isCorrect).length;
+      const score = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
 
-      // Update attempt
       attempt.answers = gradedAnswers;
       attempt.correctCount = correctCount;
       attempt.score = score;
       attempt.timeTaken = timeTaken || Math.floor((Date.now() - attempt.startedAt.getTime()) / 1000);
-      
-      // Set status based on whether it's a force submission
-      if (isForceSubmit) {
-        attempt.status = 'force_submitted';
-        attempt.violationCount = (attempt.violationCount || 0) + 1;
-      } else {
-        attempt.status = 'completed';
-      }
-      
+      attempt.status = isForceSubmit ? 'force_submitted' : 'completed';
+      if (isForceSubmit) attempt.violationCount = (attempt.violationCount || 0) + 1;
       attempt.submittedAt = new Date();
-
       await attempt.save();
 
-      // Update enrollment progress based on quiz completion
-      // Find all completed quizzes for this course
-      const courseQuizzes = await Quiz.find({ course: quiz.course._id, isPublished: true }).lean();
-      const completedAttempts = await QuizAttempt.find({
+      const courseQuizzes = await Quiz.countDocuments({ course: courseId, isPublished: true });
+      const completedDistinct = await QuizAttempt.distinct('quiz', {
         student: session.user.id,
-        course: quiz.course._id,
-        status: 'completed',
-      }).lean();
-
-      // Count unique quizzes completed (not total attempts)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const completedQuizzes = new Set(completedAttempts.map((a: any) => a.quiz.toString())).size;
-
-      // Update course progress based on quiz completion (simplified)
-      const quizProgress = courseQuizzes.length > 0 ? (completedQuizzes / courseQuizzes.length) * 100 : 0;
-      enrollment.progress = Math.min(100, Math.round(quizProgress)); // Cap at 100
+        course: courseId,
+        status: { $in: ['completed', 'force_submitted'] },
+      });
+      const completedQuizzes = completedDistinct.length;
+      const quizProgress = courseQuizzes > 0 ? (completedQuizzes / courseQuizzes) * 100 : 0;
+      enrollment.progress = Math.min(100, Math.round(quizProgress));
       if (enrollment.progress >= 100) {
         enrollment.status = 'completed';
         enrollment.completedAt = new Date();
       }
       await enrollment.save();
 
-      // Invalidate quiz attempts cache and dashboard for this user
       await invalidatePattern(`quiz-attempts:${session.user.id}:*`);
       await invalidatePattern(`dashboard:${session.user.id}:*`);
 
@@ -377,9 +283,9 @@ export async function POST(request: NextRequest) {
           message: 'Quiz submitted successfully',
           attempt: {
             ...attempt.toObject(),
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            answers: gradedAnswers.map((a: any) => ({
-              questionIndex: a.questionIndex,
+            answers: gradedAnswers.map((a) => ({
+              question: a.question.toString(),
+              order: a.order,
               selectedOption: a.selectedOption,
             })),
           },
@@ -388,15 +294,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      { message: 'Invalid action', attempt },
-      { status: 400 }
-    );
+    return NextResponse.json({ message: 'Invalid action', attempt }, { status: 400 });
   } catch (error) {
     logApiError(error as Error, 'POST', '/api/quiz-attempts', logContext);
-    return NextResponse.json(
-      { message: 'Something went wrong. Please try again later.' },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: 'Something went wrong. Please try again later.' }, { status: 500 });
   }
 }

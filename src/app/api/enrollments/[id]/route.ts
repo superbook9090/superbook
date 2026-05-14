@@ -33,7 +33,7 @@ export async function PATCH(
 
     await dbConnect();
 
-    const { progress, status, completedLessons } = await request.json();
+    const { progress, status, lessonCompletedCount } = await request.json();
 
     const enrollment = await Enrollment.findOne({
       _id: id,
@@ -50,7 +50,7 @@ export async function PATCH(
     // Update fields
     if (progress !== undefined) enrollment.progress = Math.min(100, Math.max(0, progress));
     if (status) enrollment.status = status;
-    if (completedLessons) enrollment.completedLessons = completedLessons;
+    if (lessonCompletedCount !== undefined) enrollment.lessonCompletedCount = lessonCompletedCount;
 
     // If progress is 100%, mark as completed
     if (enrollment.progress >= 100 && enrollment.status !== 'completed') {

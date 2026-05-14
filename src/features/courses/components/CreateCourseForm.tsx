@@ -1,35 +1,86 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
-import { createCourse } from '@/lib/api/courses';
+import { createCourse, getCourseById, patchCourse } from '@/lib/api/courses';
 import { ApiClientError } from '@/lib/api/http';
 import { supportedLanguages } from '@/i18n/config';
+import { useSessionStore } from '@/store/useSessionStore';
 
-export default function CreateCourseForm() {
+type Props = {
+  /** When set, form loads this course and PATCHes on submit. */
+  courseId?: string;
+};
+
+export default function CreateCourseForm({ courseId }: Props) {
   const { t } = useTranslation();
   const router = useRouter();
   const { theme } = useRoleTheme();
+  const queryClient = useQueryClient();
+  const session = useSessionStore((s) => s.session);
+  const orgId = (session?.user as { organizationId?: string })?.organizationId || 'public';
+
   const [isLoading, setIsLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(!!courseId);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     price: '',
     category: '',
-    language: 'en',
+    locale: 'en' as 'en' | 'hi',
     thumbnail: '',
     isPublished: false,
   });
 
+  const loadCourse = useCallback(async () => {
+    if (!courseId) return;
+    setInitialLoading(true);
+    setError('');
+    try {
+      const data = await getCourseById(courseId);
+      const loc = data.locale ?? data.language ?? 'en';
+      setFormData({
+        title: data.title ?? '',
+        description: data.description ?? '',
+        price: String(data.price ?? 0),
+        category: data.category ?? '',
+        locale: loc === 'hi' ? 'hi' : 'en',
+        thumbnail: data.thumbnail ?? '',
+        isPublished: !!data.isPublished,
+      });
+    } catch (err) {
+      const message =
+        err instanceof ApiClientError
+          ? err.message
+          : t('createCourseForm.loadError');
+      setError(message || t('createCourseForm.loadError'));
+    } finally {
+      setInitialLoading(false);
+    }
+  }, [courseId, t]);
+
+  useEffect(() => {
+    if (courseId) {
+      void loadCourse();
+    }
+  }, [courseId, loadCourse]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
     }));
+  };
+
+  const invalidateCourseLists = () => {
+    queryClient.invalidateQueries({ queryKey: ['courses', orgId, 'teacher'] });
+    queryClient.invalidateQueries({ queryKey: ['courses', orgId] });
+    queryClient.invalidateQueries({ queryKey: ['dashboard'] });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,32 +88,58 @@ export default function CreateCourseForm() {
     setError('');
     setIsLoading(true);
 
-    try {
-      await createCourse({
-        ...formData,
-        price: Number(formData.price) || 0,
-      });
+    const body = {
+      ...formData,
+      price: Number(formData.price) || 0,
+    };
 
-      // Success - redirect to teacher courses page
-      router.push('/dashboard/teacher/courses');
+    try {
+      if (courseId) {
+        await patchCourse(courseId, body);
+        invalidateCourseLists();
+        router.push('/dashboard/teacher/courses');
+      } else {
+        await createCourse(body);
+        invalidateCourseLists();
+        router.push('/dashboard/teacher/courses');
+      }
     } catch (err) {
       const message =
         err instanceof ApiClientError
           ? err.message
           : err instanceof Error
             ? err.message
-            : t('createCourseForm.errorOccurred');
+            : courseId
+              ? t('createCourseForm.updateFailed')
+              : t('createCourseForm.errorOccurred');
       setError(message);
     } finally {
       setIsLoading(false);
     }
   };
 
+  if (initialLoading) {
+    return (
+      <div className="py-12 text-center text-sm text-gray-600" role="status">
+        {t('common.loading')}
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       {error && (
         <div className="bg-red-50 border-l-4 border-red-400 p-3 sm:p-4 rounded-r-lg">
           <p className="text-sm text-red-700">{error}</p>
+          {courseId && (
+            <button
+              type="button"
+              onClick={() => router.push('/dashboard/teacher/courses')}
+              className="mt-3 text-sm font-medium text-red-800 underline"
+            >
+              {t('createCourseForm.cancel')}
+            </button>
+          )}
         </div>
       )}
 
@@ -131,13 +208,13 @@ export default function CreateCourseForm() {
         </div>
 
         <div>
-          <label htmlFor="language" className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label htmlFor="locale" className="block text-sm font-medium text-gray-700 mb-1.5">
             {t('createCourseForm.language')}
           </label>
           <select
-            name="language"
-            id="language"
-            value={formData.language}
+            name="locale"
+            id="locale"
+            value={formData.locale}
             onChange={handleChange}
             className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base sm:text-sm text-gray-900"
           >
@@ -192,7 +269,13 @@ export default function CreateCourseForm() {
           disabled={isLoading}
           className={`px-4 py-3 sm:py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation`}
         >
-          {isLoading ? t('createCourseForm.creating') : t('createCourseForm.createCourse')}
+          {isLoading
+            ? courseId
+              ? t('createCourseForm.saving')
+              : t('createCourseForm.creating')
+            : courseId
+              ? t('createCourseForm.saveChanges')
+              : t('createCourseForm.createCourse')}
         </button>
       </div>
     </form>

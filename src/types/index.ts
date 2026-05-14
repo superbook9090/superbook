@@ -26,7 +26,7 @@ export interface Course {
   description: string;
   price: number;
   category?: string;
-  language?: string;
+  locale?: string;
   thumbnailUrl?: string;
   isPublished: boolean;
   enrolledCount?: number;
@@ -171,7 +171,7 @@ export interface CreateCourseForm {
   description: string;
   price: number;
   category: string;
-  language: string;
+  locale: string;
   thumbnailUrl?: string;
   publishImmediately: boolean;
 }

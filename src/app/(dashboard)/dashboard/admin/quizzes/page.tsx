@@ -29,18 +29,10 @@ interface Quiz {
   description: string;
   course: { _id: string; title: string };
   instructor: { _id: string; name: string };
-  questions: Question[];
+  questionCount?: number;
   timeLimit: number;
   isPublished: boolean;
   createdAt: string;
-}
-
-interface Question {
-  _id: string;
-  question: string;
-  options: string[];
-  correctAnswer: number;
-  explanation?: string;
 }
 
 export default function AdminQuizzesPage() {
@@ -268,7 +260,7 @@ export default function AdminQuizzesPage() {
                   </div>
                   <div className="flex items-center text-sm text-[var(--color-muted-foreground)]">
                     <HelpCircle className="w-4 h-4 mr-2" />
-                    {t('admin.questions', { count: quiz.questions?.length || 0 })}
+                    {t('admin.questions', { count: quiz.questionCount ?? 0 })}
                   </div>
                   <div className="flex items-center text-sm text-[var(--color-muted-foreground)]">
                     <Calendar className="w-4 h-4 mr-2" />

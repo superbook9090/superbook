@@ -4,10 +4,11 @@ export interface ILesson extends Document {
   title: string;
   description: string;
   course: mongoose.Types.ObjectId;
+  chapter: mongoose.Types.ObjectId;
   content: string;
   videoUrl?: string;
   order: number;
-  duration: number; // in minutes
+  duration: number;
   isPublished: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -17,7 +18,8 @@ const lessonSchema = new Schema<ILesson>(
   {
     title: { type: String, required: true },
     description: String,
-    course: { type: Schema.Types.ObjectId, ref: 'Course', required: true },
+    course: { type: Schema.Types.ObjectId, ref: 'Course', required: true, index: true },
+    chapter: { type: Schema.Types.ObjectId, ref: 'Chapter', required: true, index: true },
     content: String,
     videoUrl: String,
     order: { type: Number, default: 0 },
@@ -27,10 +29,8 @@ const lessonSchema = new Schema<ILesson>(
   { timestamps: true }
 );
 
-// Index for ordering lessons within a course
-lessonSchema.index({ course: 1, order: 1 });
-lessonSchema.index({ course: 1 });
-lessonSchema.index({ isPublished: 1 });
-lessonSchema.index({ createdAt: -1 });
+lessonSchema.index({ course: 1, chapter: 1, order: 1 });
+lessonSchema.index({ course: 1, isPublished: 1 });
+lessonSchema.index({ chapter: 1, order: 1 });
 
 export default mongoose.models.Lesson || mongoose.model<ILesson>('Lesson', lessonSchema);

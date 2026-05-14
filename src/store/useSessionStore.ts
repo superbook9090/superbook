@@ -2,9 +2,9 @@
 // Global session store using Zustand to eliminate repeated API calls
 
 import { create } from 'zustand';
-import type { Session, Favorite } from '@/types';
+import type { Session } from '@/types';
 import { authSignOut, fetchAuthSessionJson } from '@/lib/api/auth';
-import { listFavorites } from '@/lib/api/favorites';
+import { listFavoriteIds } from '@/lib/api/favorites';
 
 interface SessionState {
   session: Session | null;
@@ -14,7 +14,6 @@ interface SessionState {
   lastFetched: number | null;
   CACHE_TIME: number; // 5 minutes
   favorites: Set<string>;
-  favoritesData: Favorite[];
   favoritesLoading: boolean;
   favoritesLastFetched: number | null;
   fetchSession: (force?: boolean) => Promise<void>;
@@ -37,7 +36,6 @@ export const useSessionStore = create<SessionState>((set, get) => ({
   lastFetched: null,
   CACHE_TIME,
   favorites: new Set<string>(),
-  favoritesData: [],
   favoritesLoading: false,
   favoritesLastFetched: null,
 
@@ -91,10 +89,8 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     const state = get();
     const now = Date.now();
 
-    // Prevent duplicate calls
     if (state.favoritesLoading) return;
 
-    // Use cache if fresh (5 minutes)
     if (state.favoritesLastFetched && now - state.favoritesLastFetched < CACHE_TIME) {
       return;
     }
@@ -102,12 +98,9 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     set({ favoritesLoading: true });
 
     try {
-      const data = await listFavorites();
-      const favoritesList = (data.favorites || []) as Favorite[];
-      const favoriteIds = new Set<string>(favoritesList.map((fav) => fav.blog._id));
+      const ids = await listFavoriteIds();
       set({
-        favorites: favoriteIds,
-        favoritesData: favoritesList,
+        favorites: new Set(ids),
         favoritesLoading: false,
         favoritesLastFetched: now,
       });
@@ -123,7 +116,13 @@ export const useSessionStore = create<SessionState>((set, get) => ({
 
   logout: async () => {
     await authSignOut();
-    set({ session: null, status: 'unauthenticated', lastFetched: null, favorites: new Set(), favoritesData: [], favoritesLastFetched: null });
+    set({
+      session: null,
+      status: 'unauthenticated',
+      lastFetched: null,
+      favorites: new Set(),
+      favoritesLastFetched: null,
+    });
   },
 
   addFavorite: (blogId: string) => {

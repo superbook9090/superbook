@@ -1,21 +1,19 @@
-// src/app/api/quizzes/[id]/route.ts
+// src/app/api/quizzes/[id]/route.ts — greenfield: questions via QuizQuestion + ?include=
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import Quiz from '@/models/Quiz';
+import QuizQuestion from '@/models/QuizQuestion';
 import { Course } from '@/models';
 import { updateQuizSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
 import mongoose from 'mongoose';
 import { validateContentAccess } from '@/lib/accessControl';
+import { listQuestionsForQuiz, setQuizQuestions } from '@/domain/learning/quizContent';
 
-// GET /api/quizzes/[id] - Get a single quiz by ID
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const logContext: LogContext = {
-    method: 'GET',
-    path: '/api/quizzes/[id]',
-  };
+  const logContext: LogContext = { method: 'GET', path: '/api/quizzes/[id]' };
 
   try {
     const { id } = await params;
@@ -23,40 +21,50 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
-
-    if (session.user) {
-      logContext.userId = session.user.id;
-    }
+    if (session.user) logContext.userId = session.user.id;
 
     await dbConnect();
 
-    // Find quiz
-    const quiz = await Quiz.findById(id).populate('course', 'title description');
+    const quiz = (await Quiz.findById(id).populate('course', 'title description').lean()) as {
+      _id: mongoose.Types.ObjectId;
+      isPublished: boolean;
+      [key: string]: unknown;
+    } | null;
     if (!quiz) {
       return NextResponse.json({ message: 'Quiz not found' }, { status: 404 });
     }
 
-    // Check if quiz is published or user has access
     if (!quiz.isPublished && session.user?.role === 'student') {
       return NextResponse.json({ message: 'Quiz not available' }, { status: 403 });
     }
 
-    return NextResponse.json({ quiz }, { status: 200 });
+    const { searchParams } = new URL(request.url);
+    const include = searchParams.get('include')?.split(',').map((s) => s.trim()) ?? [];
+
+    const payload: Record<string, unknown> = { quiz };
+    if (include.includes('questions')) {
+      const rows = await listQuestionsForQuiz(quiz._id);
+      const staff = ['teacher', 'admin', 'superadmin'].includes(session.user?.role || '');
+      payload.questions = rows.map((q) => ({
+        _id: q._id,
+        order: q.order,
+        question: q.prompt,
+        options: q.options,
+        ...(include.includes('answers') && staff
+          ? { correctAnswer: (q as unknown as { correctOption: number }).correctOption }
+          : {}),
+      }));
+    }
+
+    return NextResponse.json(payload, { status: 200 });
   } catch (error) {
     logApiError(error as Error, 'GET', '/api/quizzes/[id]', logContext);
-    return NextResponse.json(
-      { message: 'Something went wrong. Please try again later.' },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: 'Something went wrong. Please try again later.' }, { status: 500 });
   }
 }
 
-// PATCH /api/quizzes/[id] - Update a quiz
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const logContext: LogContext = {
-    method: 'PATCH',
-    path: '/api/quizzes/[id]',
-  };
+  const logContext: LogContext = { method: 'PATCH', path: '/api/quizzes/[id]' };
 
   try {
     const { id } = await params;
@@ -64,40 +72,27 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
-
-    // Only teachers and admins can update quizzes
     if (session.user?.role !== 'teacher' && session.user?.role !== 'admin') {
       return NextResponse.json({ message: 'Only teachers can update quizzes' }, { status: 403 });
     }
-
-    if (session.user) {
-      logContext.userId = session.user.id;
-    }
+    if (session.user) logContext.userId = session.user.id;
 
     await dbConnect();
 
     const body = await request.json();
-
-    // Validate input using Zod schema
     const validationResult = updateQuizSchema.safeParse(body);
     if (!validationResult.success) {
-      return NextResponse.json(
-        { message: 'Invalid input', errors: validationResult.error.issues },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: 'Invalid input', errors: validationResult.error.issues }, { status: 400 });
     }
 
     const { title, description, questions, timeLimit, isPublished } = validationResult.data;
 
-    // Find quiz and verify ownership
     const quiz = await Quiz.findById(id);
     if (!quiz) {
       return NextResponse.json({ message: 'Quiz not found' }, { status: 404 });
     }
 
-    // Apply organization-based access control
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const user = session.user as any;
+    const user = session.user as { id: string; organizationId?: string | null; role: string };
     validateContentAccess(
       quiz.organizationId,
       {
@@ -108,41 +103,49 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       'quiz'
     );
 
-    // Verify the course belongs to this instructor
     const course = await Course.findOne({
       _id: quiz.course,
       instructor: session.user.id,
     });
-
     if (!course && session.user?.role !== 'admin') {
       return NextResponse.json({ message: 'Not authorized to update this quiz' }, { status: 403 });
     }
 
-    // Update fields
     if (title !== undefined) quiz.title = title;
     if (description !== undefined) quiz.description = description;
-    if (questions !== undefined) quiz.questions = questions;
     if (timeLimit !== undefined) quiz.timeLimit = timeLimit;
     if (isPublished !== undefined) quiz.isPublished = isPublished;
+
+    if (questions !== undefined) {
+      if (!questions.length) {
+        return NextResponse.json({ message: 'At least one question is required' }, { status: 400 });
+      }
+      for (const q of questions) {
+        if (!q.question || !q.options || q.options.length < 2 || q.correctAnswer === undefined) {
+          return NextResponse.json(
+            { message: 'Each question must have text, at least 2 options, and a correct answer' },
+            { status: 400 }
+          );
+        }
+      }
+      await setQuizQuestions(
+        quiz._id as mongoose.Types.ObjectId,
+        questions.map((q) => ({ question: q.question, options: q.options, correctAnswer: q.correctAnswer })),
+        { bumpVersion: true }
+      );
+    }
 
     await quiz.save();
 
     return NextResponse.json({ message: 'Quiz updated successfully', quiz }, { status: 200 });
   } catch (error) {
     logApiError(error as Error, 'PATCH', '/api/quizzes/[id]', logContext);
-    return NextResponse.json(
-      { message: 'Something went wrong. Please try again later.' },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: 'Something went wrong. Please try again later.' }, { status: 500 });
   }
 }
 
-// DELETE /api/quizzes/[id] - Delete a quiz
-export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const logContext: LogContext = {
-    method: 'DELETE',
-    path: '/api/quizzes/[id]',
-  };
+export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const logContext: LogContext = { method: 'DELETE', path: '/api/quizzes/[id]' };
 
   try {
     const { id } = await params;
@@ -150,27 +153,19 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
-
-    // Only teachers and admins can delete quizzes
     if (session.user?.role !== 'teacher' && session.user?.role !== 'admin') {
       return NextResponse.json({ message: 'Only teachers can delete quizzes' }, { status: 403 });
     }
-
-    if (session.user) {
-      logContext.userId = session.user.id;
-    }
+    if (session.user) logContext.userId = session.user.id;
 
     await dbConnect();
 
-    // Find quiz and verify ownership
     const quiz = await Quiz.findById(id);
     if (!quiz) {
       return NextResponse.json({ message: 'Quiz not found' }, { status: 404 });
     }
 
-    // Apply organization-based access control
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const user = session.user as any;
+    const user = session.user as { id: string; organizationId?: string | null; role: string };
     validateContentAccess(
       quiz.organizationId,
       {
@@ -181,24 +176,20 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       'quiz'
     );
 
-    // Verify the course belongs to this instructor
     const course = await Course.findOne({
       _id: quiz.course,
       instructor: session.user.id,
     });
-
     if (!course && session.user?.role !== 'admin') {
       return NextResponse.json({ message: 'Not authorized to delete this quiz' }, { status: 403 });
     }
 
+    await QuizQuestion.deleteMany({ quiz: quiz._id });
     await Quiz.findByIdAndDelete(id);
 
     return NextResponse.json({ message: 'Quiz deleted successfully' }, { status: 200 });
   } catch (error) {
     logApiError(error as Error, 'DELETE', '/api/quizzes/[id]', logContext);
-    return NextResponse.json(
-      { message: 'Something went wrong. Please try again later.' },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: 'Something went wrong. Please try again later.' }, { status: 500 });
   }
 }

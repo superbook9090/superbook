@@ -259,7 +259,7 @@ export default function AdminCoursesPage() {
                   </div>
                   <div className="flex items-center text-sm text-[var(--color-muted-foreground)]">
                     <span className="mr-2">{t('admin.languageLabel')}:</span>
-                    <span className="font-medium">{course.language === 'hi' ? t('common.hindi') : t('common.english')}</span>
+                    <span className="font-medium">{course.locale === 'hi' ? t('common.hindi') : t('common.english')}</span>
                   </div>
                 </div>
 

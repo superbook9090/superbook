@@ -11,7 +11,9 @@ export default function FavoritesPage() {
   const { status } = useSessionStore();
   const router = useRouter();
   const featureEnabled = useFeature('enableBlogs');
-  const { data: favorites = [], isLoading } = useFavorites();
+  const { data, isLoading } = useFavorites();
+  const favorites = data?.favorites ?? [];
+  const totalFavorites = data?.meta?.total ?? favorites.length;
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -32,5 +34,5 @@ export default function FavoritesPage() {
     );
   }
 
-  return <FavoritesList initialFavorites={favorites} />;
+  return <FavoritesList initialFavorites={favorites} totalCount={totalFavorites} />;
 }

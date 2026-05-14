@@ -131,11 +131,10 @@ async function getStudentDashboardData(userId: string): Promise<StudentDashboard
   const [enrollments, quizAttempts] = await Promise.all([
     Enrollment.find({ student: userId })
       .populate('course', 'title description thumbnail category instructor price')
-      .populate('completedLessons', 'title')
       .sort({ enrolledAt: -1 })
       .lean(),
     QuizAttempt.find({ student: userId })
-      .populate('quiz', 'title description timeLimit')
+      .populate('quiz', 'title description timeLimit questionCount')
       .populate('course', 'title description')
       .sort({ startedAt: -1 })
       .lean(),
@@ -165,21 +164,6 @@ async function getStudentDashboardData(userId: string): Promise<StudentDashboard
     }
     if (sanitized.submittedAt) {
       sanitized.submittedAt = new Date(sanitized.submittedAt).toISOString();
-    }
-    // Strip correct answers from embedded quiz questions when present (defense in depth)
-    if (sanitized.quiz && typeof sanitized.quiz === 'object' && 'questions' in sanitized.quiz) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const quizDoc = sanitized.quiz as any;
-      sanitized.quiz = {
-        ...quizDoc,
-        questions: (quizDoc.questions || []).map(
-          (q: { _id?: { toString(): string }; question?: string; options?: string[] }) => ({
-            _id: q._id?.toString?.() ?? q._id,
-            question: q.question,
-            options: q.options,
-          })
-        ),
-      };
     }
     return sanitized;
   });
@@ -230,9 +214,11 @@ async function getTeacherDashboardData(
       category: 1,
       thumbnail: 1,
       isPublished: 1,
-      language: 1,
+      locale: 1,
       createdAt: 1,
       enrolledCount: 1,
+      chapterCount: 1,
+      lessonCount: 1,
     })
       .populate('instructor', 'name email')
       .sort({ createdAt: -1 })
@@ -264,6 +250,8 @@ async function getTeacherDashboardData(
       isPublished: 1,
       course: 1,
       createdAt: 1,
+      questionCount: 1,
+      version: 1,
     }
   )
     .populate('course', 'title description')

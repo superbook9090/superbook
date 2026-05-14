@@ -65,13 +65,12 @@ export async function GET(request: NextRequest) {
       fieldList.forEach(f => selectFields[f] = 1);
     } else {
       // Default fields to avoid over-fetching
-      selectFields = { status: 1, progress: 1, enrolledAt: 1, completedAt: 1 };
+      selectFields = { status: 1, progress: 1, enrolledAt: 1, completedAt: 1, lessonCompletedCount: 1 };
     }
 
     const enrollments = await Enrollment.find(query, selectFields)
       .populate('course', 'title description thumbnail category instructor price')
       .populate('student', 'name email')
-      .populate('completedLessons', 'title')
       .sort({ enrolledAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -188,6 +187,7 @@ export async function POST(request: NextRequest) {
           course: courseId,
           status: 'active',
           progress: 0,
+          lessonCompletedCount: 0,
           enrolledAt: new Date(),
         },
       },

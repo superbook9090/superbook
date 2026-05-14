@@ -559,11 +559,14 @@ export const en = {
     createCourse: 'Create Course',
     noQuizzesYet: 'You haven\'t created any quizzes yet.',
     createFirstQuiz: 'Create Your First Quiz',
+    published: 'Published',
+    draft: 'Draft',
     questions: 'questions',
     min: 'min',
     unpublish: 'Unpublish',
     publish: 'Publish',
     delete: 'Delete',
+    edit: 'Edit',
     loadingQuizzes: 'Loading quizzes...',
     unknownCourse: 'Unknown Course',
     failedUpdateQuiz: 'Failed to update quiz',
@@ -669,6 +672,8 @@ export const en = {
   createCoursePage: {
     title: 'Create New Course',
     description: 'Fill in the details below to create a new course.',
+    editTitle: 'Edit Course',
+    editDescription: 'Update your course details below.',
   },
 
   createCourseForm: {
@@ -690,12 +695,18 @@ export const en = {
     createCourse: 'Create Course',
     failedCreateCourse: 'Failed to create course',
     errorOccurred: 'An error occurred. Please try again.',
+    saving: 'Saving...',
+    saveChanges: 'Save changes',
+    loadError: 'Could not load this course. It may have been removed or you may not have access.',
+    updateFailed: 'Failed to save changes. Please try again.',
   },
 
   // CreateQuizForm
   createQuizPage: {
     title: 'Create New Quiz',
     description: 'Create a quiz for one of your courses.',
+    editTitle: 'Edit Quiz',
+    editDescription: 'Update quiz details and questions below.',
   },
 
   createQuizForm: {
@@ -727,7 +738,9 @@ export const en = {
     addOption: '+ Add Option',
     addQuestion: '+ Add Question',
     publishImmediately: 'Publish immediately',
+    cancel: 'Cancel',
     createQuiz: 'Create Quiz',
+    creating: 'Creating...',
     failedCreateQuiz: 'Failed to create quiz',
     errorOccurred: 'An error occurred. Please try again.',
     loadingCourses: 'Loading courses...',
@@ -744,6 +757,11 @@ export const en = {
     correctAnswerInvalid: 'Correct answer must be A, B, C, D or 1, 2, 3, 4',
     validationErrors: 'Validation errors:',
     andMoreErrors: '... and {count} more errors',
+    saving: 'Saving...',
+    saveChanges: 'Save changes',
+    loadError: 'Could not load this quiz. It may have been removed or you may not have access.',
+    updateFailed: 'Failed to save quiz. Please try again.',
+    courseLockedInEdit: 'Course cannot be changed after the quiz is created.',
   },
 
   createBlogPage: {

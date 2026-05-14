@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -17,12 +17,18 @@ import { useRemoveFavorite, type Favorite } from '@/lib/react-query/hooks';
 
 interface FavoritesListProps {
   initialFavorites: Favorite[];
+  /** Total favorites (may exceed loaded page). */
+  totalCount: number;
 }
 
-export default function FavoritesList({ initialFavorites }: FavoritesListProps) {
+export default function FavoritesList({ initialFavorites, totalCount }: FavoritesListProps) {
   const { t } = useTranslation();
   const [favorites, setFavorites] = useState<Favorite[]>(initialFavorites);
   const removeFavoriteMutation = useRemoveFavorite();
+
+  useEffect(() => {
+    setFavorites(initialFavorites);
+  }, [initialFavorites]);
 
   const removeFavorite = async (favoriteId: string, blogId: string) => {
     try {
@@ -71,7 +77,7 @@ export default function FavoritesList({ initialFavorites }: FavoritesListProps) 
             <Bookmark className="w-7 h-7 fill-white" />
           </div>
           <div>
-            <p className="text-3xl font-bold">{favorites.length}</p>
+            <p className="text-3xl font-bold">{totalCount}</p>
             <p className="text-white/80">{t('favorites.savedArticles')}</p>
           </div>
         </div>
@@ -104,11 +110,9 @@ export default function FavoritesList({ initialFavorites }: FavoritesListProps) 
         ) : (
           favorites.map((favorite, index) => {
             const blog = favorite.blog;
-            // Strip HTML tags for excerpt
-            const plainText = blog.content.replace(/<[^>]*>/g, '');
+            const excerptSource = blog.excerpt ?? (blog.content ? blog.content.replace(/<[^>]*>/g, '') : '');
             const excerpt =
-              plainText.substring(0, 100) +
-              (plainText.length > 100 ? '...' : '');
+              excerptSource.substring(0, 100) + (excerptSource.length > 100 ? '...' : '');
 
             return (
               <motion.div
