@@ -10,6 +10,7 @@ import {
   Legend,
 } from 'recharts';
 import { PieChart as PieChartIcon, CheckCircle, Clock, Circle } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface QuizStatusData {
   name: string;
@@ -55,9 +56,11 @@ const DEFAULT_ICONS = {
 
 export default function QuizStatusChart({ 
   data, 
-  title = "Quiz Status Distribution",
+  title,
   height = 300 
 }: QuizStatusChartProps) {
+  const { t } = useTranslation();
+  const resolvedTitle = title ?? t('charts.quizStatusDistribution');
   const processedData = useMemo(() => {
     if (!data || data.length === 0) return [];
 
@@ -85,9 +88,9 @@ export default function QuizStatusChart({
             <p className="text-sm font-medium text-gray-900 capitalize">{data.name}</p>
           </div>
           <p className="text-lg font-bold" style={{ color: data.color }}>
-            {data.value} quizzes
+            {t('charts.quizzesCount', { count: data.value })}
           </p>
-          <p className="text-sm text-gray-500">{percentage}% of total</p>
+          <p className="text-sm text-gray-500">{t('charts.percentOfTotal', { percent: percentage })}</p>
         </div>
       );
     }
@@ -135,8 +138,8 @@ const renderCustomizedLabel = (props: CustomLabelProps) => {
     return (
       <div className="bg-white rounded-2xl p-5 shadow-sm h-[300px] flex flex-col items-center justify-center">
         <PieChartIcon className="w-12 h-12 text-gray-400 mb-3" />
-        <p className="text-gray-500 text-center">No quiz data available</p>
-        <p className="text-gray-400 text-sm text-center mt-1">Take quizzes to see your engagement</p>
+        <p className="text-gray-500 text-center">{t('charts.noQuizData')}</p>
+        <p className="text-gray-400 text-sm text-center mt-1">{t('charts.takeQuizzesToSeeEngagement')}</p>
       </div>
     );
   }
@@ -144,9 +147,9 @@ const renderCustomizedLabel = (props: CustomLabelProps) => {
   return (
     <div className="bg-white rounded-2xl p-5 shadow-sm">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+        <h3 className="text-lg font-semibold text-gray-900">{resolvedTitle}</h3>
         <div className="text-sm text-gray-500">
-          {totalQuizzes} total quizzes
+          {t('charts.totalQuizzes', { count: totalQuizzes })}
         </div>
       </div>
       

@@ -12,15 +12,18 @@ import {
 } from 'recharts';
 import { TrendingUp, Calendar } from 'lucide-react';
 import type { CustomTooltipProps, ScoreTrendChartProps } from '@/types';
+import { useTranslation } from '@/hooks/useTranslation';
 
 
 
 
 export default function ScoreTrendChart({ 
   data, 
-  title = "Score Trend",
+  title,
   height = 300 
 }: ScoreTrendChartProps) {
+  const { t } = useTranslation();
+  const resolvedTitle = title ?? t('charts.scoreTrend');
   const processedData = useMemo(() => {
     if (!data || data.length === 0) return [];
 
@@ -55,8 +58,8 @@ export default function ScoreTrendChart({
     return (
       <div className="bg-white rounded-2xl p-5 shadow-sm h-[300px] flex flex-col items-center justify-center">
         <Calendar className="w-12 h-12 text-gray-400 mb-3" />
-        <p className="text-gray-500 text-center">No quiz attempts yet</p>
-        <p className="text-gray-400 text-sm text-center mt-1">Start taking quizzes to see your progress</p>
+        <p className="text-gray-500 text-center">{t('charts.noQuizAttemptsYet')}</p>
+        <p className="text-gray-400 text-sm text-center mt-1">{t('charts.startQuizzesToSeeProgress')}</p>
       </div>
     );
   }
@@ -64,10 +67,10 @@ export default function ScoreTrendChart({
   return (
     <div className="bg-white rounded-2xl p-5 shadow-sm">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+        <h3 className="text-lg font-semibold text-gray-900">{resolvedTitle}</h3>
         <div className="flex items-center gap-2 text-sm text-gray-500">
           <TrendingUp className="w-4 h-4" />
-          <span>{processedData.length} attempts</span>
+          <span>{t('charts.attemptsCount', { count: processedData.length })}</span>
         </div>
       </div>
       

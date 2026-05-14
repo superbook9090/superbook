@@ -246,7 +246,11 @@ async function getTeacherStats(teacherId: string) {
   const quizIdsForTop = courseStats.flatMap((c: any) => c.quizIds || []);
   // Strip internal quizIds from API payload
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const courses = courseStats.map(({ quizIds: _omit, ...rest }: any) => rest);
+  const courses = courseStats.map((course: any) => {
+    const sanitizedCourse = { ...course };
+    delete sanitizedCourse.quizIds;
+    return sanitizedCourse;
+  });
 
   // Calculate overview stats from aggregated data
   const totalCourses = courses.length;

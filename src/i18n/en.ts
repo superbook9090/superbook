@@ -59,6 +59,8 @@ export const en = {
     toggleMenu: 'Toggle menu',
     english: 'English',
     hindi: 'Hindi',
+    switchToEnglish: 'Switch to English',
+    switchToHindi: 'Switch to Hindi',
     draft: 'Draft',
     published: 'Published',
   },
@@ -664,6 +666,11 @@ export const en = {
   },
 
   // CreateCourseForm
+  createCoursePage: {
+    title: 'Create New Course',
+    description: 'Fill in the details below to create a new course.',
+  },
+
   createCourseForm: {
     courseTitle: 'Course Title',
     enterCourseTitle: 'Enter course title',
@@ -686,6 +693,11 @@ export const en = {
   },
 
   // CreateQuizForm
+  createQuizPage: {
+    title: 'Create New Quiz',
+    description: 'Create a quiz for one of your courses.',
+  },
+
   createQuizForm: {
     quizTitle: 'Quiz Title',
     enterQuizTitle: 'Enter quiz title',
@@ -732,6 +744,74 @@ export const en = {
     correctAnswerInvalid: 'Correct answer must be A, B, C, D or 1, 2, 3, 4',
     validationErrors: 'Validation errors:',
     andMoreErrors: '... and {count} more errors',
+  },
+
+  createBlogPage: {
+    title: 'Create New Blog',
+    description: 'Share your knowledge with students',
+    blogTitle: 'Blog Title',
+    titlePlaceholder: 'Enter an engaging title...',
+    charactersCount: '{count}/{max} characters',
+    topic: 'Topic',
+    selectTopic: 'Select a topic...',
+    language: 'Language',
+    content: 'Content',
+    contentPlaceholder: 'Write your blog content here. Use the toolbar to format your text.',
+    publish: 'Publish Blog',
+    saveDraft: 'Save as Draft',
+    tipsTitle: 'Writing Tips',
+    tipTitle: 'Use clear, descriptive titles',
+    tipSections: 'Break content into sections with headings',
+    tipLists: 'Use lists to organize information',
+    tipLinks: 'Add links to reference materials',
+    tipProofread: 'Check for spelling and grammar',
+  },
+
+  editBlogPage: {
+    title: 'Edit Blog',
+    description: 'Update your blog post',
+    updateAndPublish: 'Update & Publish',
+    publish: 'Publish',
+  },
+
+  richTextEditor: {
+    placeholder: 'Write something...',
+    enterUrlPrompt: 'Enter URL',
+    bold: 'Bold',
+    italic: 'Italic',
+    heading1: 'Heading 1',
+    heading2: 'Heading 2',
+    heading3: 'Heading 3',
+    bulletList: 'Bullet List',
+    numberedList: 'Numbered List',
+    addLink: 'Add Link',
+    quote: 'Quote',
+    undo: 'Undo',
+    redo: 'Redo',
+  },
+
+  charts: {
+    scoreTrend: 'Score Trend',
+    averageScoreTrend: 'Average Score Trend',
+    courseProgress: 'Course Progress',
+    quizStatusDistribution: 'Quiz Status Distribution',
+    average: 'Average',
+    trend: 'Trend',
+    attempts: 'Attempts',
+    attemptsCount: '{count} attempts',
+    coursesCount: '{count} courses',
+    quizzesCount: '{count} quizzes',
+    totalQuizzes: '{count} total quizzes',
+    percentOfTotal: '{percent}% of total',
+    sevenDayMovingAverage: '7-day moving average',
+    noScoreData: 'No score data available',
+    completeMoreQuizzes: 'Complete more quizzes to see trends',
+    noCourseData: 'No course data available',
+    enrollToTrackProgress: 'Enroll in courses to track your progress',
+    noQuizData: 'No quiz data available',
+    takeQuizzesToSeeEngagement: 'Take quizzes to see your engagement',
+    noQuizAttemptsYet: 'No quiz attempts yet',
+    startQuizzesToSeeProgress: 'Start taking quizzes to see your progress',
   },
 
   // TeacherCourses

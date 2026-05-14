@@ -1,7 +1,7 @@
 // src/app/(dashboard)/dashboard/teacher/analytics/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
@@ -48,6 +48,17 @@ export default function TeacherAnalyticsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const fetchStats = useCallback(async () => {
+    try {
+      const data = (await fetchAnalytics('teacher')) as { stats?: TeacherStats };
+      setStats(data.stats || null);
+    } catch (err) {
+      setError(err instanceof ApiClientError ? err.message : t('analytics.errorLoading'));
+    } finally {
+      setIsLoading(false);
+    }
+  }, [t]);
+
   useEffect(() => {
     if (status === 'loading') return;
     if (!session) {
@@ -58,18 +69,7 @@ export default function TeacherAnalyticsPage() {
     // Role-based redirect handled in /dashboard/page.tsx - no redirect here
 
     fetchStats();
-  }, [session, status, router, t]);
-
-  const fetchStats = async () => {
-    try {
-      const data = (await fetchAnalytics('teacher')) as { stats?: TeacherStats };
-      setStats(data.stats || null);
-    } catch (err) {
-      setError(err instanceof ApiClientError ? err.message : t('analytics.errorLoading'));
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [session, status, router, fetchStats]);
 
   if (status === 'loading' || isLoading) {
     return <PageSkeleton />;

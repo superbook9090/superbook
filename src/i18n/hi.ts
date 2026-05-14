@@ -59,6 +59,8 @@ export const hi = {
     toggleMenu: 'मेनू टॉगल करें',
     english: 'अंग्रेज़ी',
     hindi: 'हिंदी',
+    switchToEnglish: 'अंग्रेज़ी पर स्विच करें',
+    switchToHindi: 'हिंदी पर स्विच करें',
     draft: 'ड्राफ्ट',
     published: 'प्रकाशित',
   },
@@ -664,6 +666,11 @@ export const hi = {
   },
 
   // CreateCourseForm
+  createCoursePage: {
+    title: 'नया पाठ्यक्रम बनाएं',
+    description: 'नया पाठ्यक्रम बनाने के लिए नीचे विवरण भरें।',
+  },
+
   createCourseForm: {
     courseTitle: 'पाठ्यक्रम शीर्षक',
     enterCourseTitle: 'पाठ्यक्रम शीर्षक दर्ज करें',
@@ -686,6 +693,11 @@ export const hi = {
   },
 
   // CreateQuizForm
+  createQuizPage: {
+    title: 'नया क्विज़ बनाएं',
+    description: 'अपने किसी पाठ्यक्रम के लिए क्विज़ बनाएं।',
+  },
+
   createQuizForm: {
     quizTitle: 'क्विज़ शीर्षक',
     enterQuizTitle: 'क्विज़ शीर्षक दर्ज करें',
@@ -732,6 +744,74 @@ export const hi = {
     correctAnswerInvalid: 'सही उत्तर A, B, C, D या 1, 2, 3, 4 होना चाहिए',
     validationErrors: 'सत्यापन त्रुटियां:',
     andMoreErrors: '... और {count} और त्रुटियां',
+  },
+
+  createBlogPage: {
+    title: 'नया ब्लॉग बनाएं',
+    description: 'छात्रों के साथ अपना ज्ञान साझा करें',
+    blogTitle: 'ब्लॉग शीर्षक',
+    titlePlaceholder: 'एक आकर्षक शीर्षक दर्ज करें...',
+    charactersCount: '{count}/{max} अक्षर',
+    topic: 'विषय',
+    selectTopic: 'एक विषय चुनें...',
+    language: 'भाषा',
+    content: 'सामग्री',
+    contentPlaceholder: 'अपनी ब्लॉग सामग्री यहाँ लिखें। टेक्स्ट को फॉर्मेट करने के लिए टूलबार का उपयोग करें।',
+    publish: 'ब्लॉग प्रकाशित करें',
+    saveDraft: 'ड्राफ्ट के रूप में सहेजें',
+    tipsTitle: 'लेखन सुझाव',
+    tipTitle: 'स्पष्ट और वर्णनात्मक शीर्षक उपयोग करें',
+    tipSections: 'शीर्षकों के साथ सामग्री को अनुभागों में विभाजित करें',
+    tipLists: 'जानकारी व्यवस्थित करने के लिए सूचियों का उपयोग करें',
+    tipLinks: 'संदर्भ सामग्री के लिए लिंक जोड़ें',
+    tipProofread: 'वर्तनी और व्याकरण जांचें',
+  },
+
+  editBlogPage: {
+    title: 'ब्लॉग संपादित करें',
+    description: 'अपने ब्लॉग पोस्ट को अपडेट करें',
+    updateAndPublish: 'अपडेट करें और प्रकाशित करें',
+    publish: 'प्रकाशित करें',
+  },
+
+  richTextEditor: {
+    placeholder: 'कुछ लिखें...',
+    enterUrlPrompt: 'URL दर्ज करें',
+    bold: 'बोल्ड',
+    italic: 'इटैलिक',
+    heading1: 'शीर्षक 1',
+    heading2: 'शीर्षक 2',
+    heading3: 'शीर्षक 3',
+    bulletList: 'बुलेट सूची',
+    numberedList: 'क्रमांकित सूची',
+    addLink: 'लिंक जोड़ें',
+    quote: 'उद्धरण',
+    undo: 'पूर्ववत करें',
+    redo: 'फिर से करें',
+  },
+
+  charts: {
+    scoreTrend: 'स्कोर ट्रेंड',
+    averageScoreTrend: 'औसत स्कोर ट्रेंड',
+    courseProgress: 'पाठ्यक्रम प्रगति',
+    quizStatusDistribution: 'क्विज़ स्थिति वितरण',
+    average: 'औसत',
+    trend: 'रुझान',
+    attempts: 'प्रयास',
+    attemptsCount: '{count} प्रयास',
+    coursesCount: '{count} पाठ्यक्रम',
+    quizzesCount: '{count} क्विज़',
+    totalQuizzes: 'कुल {count} क्विज़',
+    percentOfTotal: 'कुल का {percent}%',
+    sevenDayMovingAverage: '7-दिन चल औसत',
+    noScoreData: 'कोई स्कोर डेटा उपलब्ध नहीं है',
+    completeMoreQuizzes: 'रुझान देखने के लिए और क्विज़ पूरा करें',
+    noCourseData: 'कोई पाठ्यक्रम डेटा उपलब्ध नहीं है',
+    enrollToTrackProgress: 'अपनी प्रगति ट्रैक करने के लिए पाठ्यक्रमों में नामांकन करें',
+    noQuizData: 'कोई क्विज़ डेटा उपलब्ध नहीं है',
+    takeQuizzesToSeeEngagement: 'अपनी भागीदारी देखने के लिए क्विज़ लें',
+    noQuizAttemptsYet: 'अभी तक कोई क्विज़ प्रयास नहीं',
+    startQuizzesToSeeProgress: 'अपनी प्रगति देखने के लिए क्विज़ देना शुरू करें',
   },
 
   // TeacherCourses

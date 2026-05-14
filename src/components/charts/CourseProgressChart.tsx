@@ -12,6 +12,7 @@ import {
   Cell,
 } from 'recharts';
 import { BookOpen, Target } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface CourseData {
   courseTitle: string;
@@ -36,9 +37,11 @@ interface CourseProgressChartProps {
 
 export default function CourseProgressChart({ 
   data, 
-  title = "Course Progress",
+  title,
   height = 300 
 }: CourseProgressChartProps) {
+  const { t } = useTranslation();
+  const resolvedTitle = title ?? t('charts.courseProgress');
   const processedData = useMemo(() => {
     if (!data || data.length === 0) return [];
 
@@ -79,21 +82,21 @@ export default function CourseProgressChart({
 
   if (!processedData || processedData.length === 0) {
     return (
-      <div className="bg-white rounded-2xl p-5 shadow-sm h-[300px] flex flex-col items-center justify-center">
+        <div className="bg-white rounded-2xl p-5 shadow-sm h-[300px] flex flex-col items-center justify-center">
         <BookOpen className="w-12 h-12 text-gray-400 mb-3" />
-        <p className="text-gray-500 text-center">No course data available</p>
-        <p className="text-gray-400 text-sm text-center mt-1">Enroll in courses to track your progress</p>
-      </div>
-    );
+        <p className="text-gray-500 text-center">{t('charts.noCourseData')}</p>
+        <p className="text-gray-400 text-sm text-center mt-1">{t('charts.enrollToTrackProgress')}</p>
+        </div>
+      );
   }
 
   return (
     <div className="bg-white rounded-2xl p-5 shadow-sm">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+        <h3 className="text-lg font-semibold text-gray-900">{resolvedTitle}</h3>
         <div className="flex items-center gap-2 text-sm text-gray-500">
           <Target className="w-4 h-4" />
-          <span>{processedData.length} courses</span>
+          <span>{t('charts.coursesCount', { count: processedData.length })}</span>
         </div>
       </div>
       

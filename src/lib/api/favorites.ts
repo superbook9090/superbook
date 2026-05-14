@@ -1,33 +1,12 @@
-import { ApiClientError, apiJson } from '@/lib/api/http';
-
-function messageFromBody(data: unknown, fallback: string): string {
-  if (
-    typeof data === 'object' &&
-    data !== null &&
-    'message' in data &&
-    typeof (data as { message: unknown }).message === 'string'
-  ) {
-    return (data as { message: string }).message;
-  }
-  return fallback;
-}
+import { apiJson } from '@/lib/api/http';
 
 /** POST favorite; 201/409 are treated as success (already favorited). */
 export async function addFavorite(blogId: string): Promise<void> {
-  const res = await fetch('/api/favorites', {
+  await apiJson('/api/favorites', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ blogId }),
-    cache: 'no-store',
+    body: { blogId },
+    acceptStatuses: [409],
   });
-  if (res.ok || res.status === 409) return;
-  let data: unknown = {};
-  try {
-    data = await res.json();
-  } catch {
-    data = {};
-  }
-  throw new ApiClientError(messageFromBody(data, res.statusText || 'Request failed'), res.status, data);
 }
 
 export function removeFavorite(blogId: string): Promise<unknown> {

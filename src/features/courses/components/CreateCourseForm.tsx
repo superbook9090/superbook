@@ -6,6 +6,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { createCourse } from '@/lib/api/courses';
 import { ApiClientError } from '@/lib/api/http';
+import { supportedLanguages } from '@/i18n/config';
 
 export default function CreateCourseForm() {
   const { t } = useTranslation();
@@ -140,8 +141,11 @@ export default function CreateCourseForm() {
             onChange={handleChange}
             className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base sm:text-sm text-gray-900"
           >
-            <option value="en">English</option>
-            <option value="hi">हिंदी</option>
+            {supportedLanguages.map((language) => (
+              <option key={language} value={language}>
+                {t(language === 'en' ? 'common.english' : 'common.hindi')}
+              </option>
+            ))}
           </select>
         </div>
       </div>

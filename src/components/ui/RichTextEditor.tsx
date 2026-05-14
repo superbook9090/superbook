@@ -18,6 +18,7 @@ import {
   Redo,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface RichTextEditorProps {
   content: string;
@@ -30,10 +31,12 @@ interface RichTextEditorProps {
 export default function RichTextEditor({
   content,
   onChange,
-  placeholder = 'Write something...',
+  placeholder,
   className,
   theme = 'emerald',
 }: RichTextEditorProps) {
+  const { t } = useTranslation();
+  const resolvedPlaceholder = placeholder ?? t('richTextEditor.placeholder');
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -54,7 +57,7 @@ export default function RichTextEditor({
         linkOnPaste: true,
       }),
       Placeholder.configure({
-        placeholder,
+        placeholder: resolvedPlaceholder,
       }),
     ],
     content,
@@ -118,7 +121,7 @@ export default function RichTextEditor({
 
   const setLink = () => {
     const previousUrl = editor.getAttributes('link').href;
-    const url = window.prompt('Enter URL', previousUrl);
+    const url = window.prompt(t('richTextEditor.enterUrlPrompt'), previousUrl);
 
     if (url === null) return;
 
@@ -144,14 +147,14 @@ export default function RichTextEditor({
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleBold().run()}
             isActive={editor.isActive('bold')}
-            title="Bold"
+            title={t('richTextEditor.bold')}
           >
             <Bold className="w-4 h-4" />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleItalic().run()}
             isActive={editor.isActive('italic')}
-            title="Italic"
+            title={t('richTextEditor.italic')}
           >
             <Italic className="w-4 h-4" />
           </ToolbarButton>
@@ -164,21 +167,21 @@ export default function RichTextEditor({
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
             isActive={editor.isActive('heading', { level: 1 })}
-            title="Heading 1"
+            title={t('richTextEditor.heading1')}
           >
             <Heading1 className="w-4 h-4" />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
             isActive={editor.isActive('heading', { level: 2 })}
-            title="Heading 2"
+            title={t('richTextEditor.heading2')}
           >
             <Heading2 className="w-4 h-4" />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
             isActive={editor.isActive('heading', { level: 3 })}
-            title="Heading 3"
+            title={t('richTextEditor.heading3')}
           >
             <Heading3 className="w-4 h-4" />
           </ToolbarButton>
@@ -191,14 +194,14 @@ export default function RichTextEditor({
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleBulletList().run()}
             isActive={editor.isActive('bulletList')}
-            title="Bullet List"
+            title={t('richTextEditor.bulletList')}
           >
             <List className="w-4 h-4" />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleOrderedList().run()}
             isActive={editor.isActive('orderedList')}
-            title="Numbered List"
+            title={t('richTextEditor.numberedList')}
           >
             <ListOrdered className="w-4 h-4" />
           </ToolbarButton>
@@ -211,14 +214,14 @@ export default function RichTextEditor({
           <ToolbarButton
             onClick={setLink}
             isActive={editor.isActive('link')}
-            title="Add Link"
+            title={t('richTextEditor.addLink')}
           >
             <LinkIcon className="w-4 h-4" />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleBlockquote().run()}
             isActive={editor.isActive('blockquote')}
-            title="Quote"
+            title={t('richTextEditor.quote')}
           >
             <Quote className="w-4 h-4" />
           </ToolbarButton>
@@ -231,14 +234,14 @@ export default function RichTextEditor({
           <ToolbarButton
             onClick={() => editor.chain().focus().undo().run()}
             disabled={!editor.can().undo()}
-            title="Undo"
+            title={t('richTextEditor.undo')}
           >
             <Undo className="w-4 h-4" />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => editor.chain().focus().redo().run()}
             disabled={!editor.can().redo()}
-            title="Redo"
+            title={t('richTextEditor.redo')}
           >
             <Redo className="w-4 h-4" />
           </ToolbarButton>

@@ -47,17 +47,7 @@ export default function TeacherQuizzesPage() {
     return t('teacherQuizzes.unknownCourse');
   }, [t]);
 
-  useEffect(() => {
-    if (status === 'loading') return;
-    if (!session) {
-      router.push('/login');
-      return;
-    }
-
-    fetchData();
-  }, [session, status, router]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const coursesData = await listTeacherCoursesSelf();
       const teacherCourses: Course[] = (coursesData.courses || []) as Course[];
@@ -86,7 +76,17 @@ export default function TeacherQuizzesPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [t]);
+
+  useEffect(() => {
+    if (status === 'loading') return;
+    if (!session) {
+      router.push('/login');
+      return;
+    }
+
+    fetchData();
+  }, [session, status, router, fetchData]);
 
   const handleTogglePublish = useCallback(async (quizId: string, currentStatus: boolean) => {
     try {

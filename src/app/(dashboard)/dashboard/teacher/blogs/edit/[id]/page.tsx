@@ -19,22 +19,9 @@ import { useSessionStore } from '@/store/useSessionStore';
 import { getBlogById, updateBlog, type BlogDocument } from '@/lib/api/blogs';
 import { ApiClientError } from '@/lib/api/http';
 import { useTranslation } from '@/hooks/useTranslation';
+import { blogTopicKeys, blogTopicValues, type BlogTopicKey } from '@/i18n/config';
 
 const RichTextEditor = lazy(() => import('@/components/ui/RichTextEditor'));
-
-const topics = [
-  'Mathematics',
-  'Science',
-  'English',
-  'History',
-  'Geography',
-  'Computer Science',
-  'Physics',
-  'Chemistry',
-  'Biology',
-  'Literature',
-  'Other',
-];
 
 export default function EditBlogPage() {
   const { status } = useSessionStore();
@@ -149,10 +136,10 @@ export default function EditBlogPage() {
           className="inline-flex items-center text-[var(--teacher-primary)] hover:text-[var(--teacher-primary)]/80 mb-4"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Blogs
+          {t('blog.backToBlogs')}
         </Link>
-        <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">Edit Blog</h1>
-        <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">Update your blog post</p>
+        <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">{t('editBlogPage.title')}</h1>
+        <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">{t('editBlogPage.description')}</p>
       </motion.div>
 
       {/* Form */}
@@ -173,34 +160,36 @@ export default function EditBlogPage() {
           <div>
             <label className="block text-sm font-semibold text-[var(--color-foreground)] mb-2">
               <Type className="w-4 h-4 inline mr-2" />
-              Blog Title
+              {t('createBlogPage.blogTitle')}
             </label>
             <input
               type="text"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              placeholder="Enter an engaging title..."
+              placeholder={t('createBlogPage.titlePlaceholder')}
               className="w-full min-h-[44px] px-4 py-3 bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--teacher-primary)]/20 focus:border-[var(--teacher-primary)]"
               maxLength={200}
             />
-            <p className="text-xs text-[var(--color-muted-foreground)] mt-1">{formData.title.length}/200 characters</p>
+            <p className="text-xs text-[var(--color-muted-foreground)] mt-1">
+              {t('createBlogPage.charactersCount', { count: formData.title.length, max: 200 })}
+            </p>
           </div>
 
           {/* Topic */}
           <div>
             <label className="block text-sm font-semibold text-[var(--color-foreground)] mb-2">
               <Hash className="w-4 h-4 inline mr-2" />
-              Topic
+              {t('createBlogPage.topic')}
             </label>
             <select
               value={formData.topic}
               onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
               className="w-full min-h-[44px] px-4 py-3 bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--teacher-primary)]/20 focus:border-[var(--teacher-primary)]"
             >
-              <option value="">Select a topic...</option>
-              {topics.map((topic) => (
-                <option key={topic} value={topic}>
-                  {topic}
+              <option value="">{t('createBlogPage.selectTopic')}</option>
+              {blogTopicKeys.map((topic) => (
+                <option key={topic} value={blogTopicValues[topic]}>
+                  {t(`topics.${topic}` as `topics.${BlogTopicKey}`)}
                 </option>
               ))}
             </select>
@@ -210,13 +199,13 @@ export default function EditBlogPage() {
           <div>
             <label className="block text-sm font-semibold text-[var(--color-foreground)] mb-2">
               <FileText className="w-4 h-4 inline mr-2" />
-              Content
+              {t('createBlogPage.content')}
             </label>
             <Suspense fallback={<PageSkeleton variant="embed" />}>
               <RichTextEditor
                 content={formData.content}
                 onChange={(content) => setFormData({ ...formData, content })}
-                placeholder="Write your blog content here... Use the toolbar to format your text."
+                placeholder={t('createBlogPage.contentPlaceholder')}
                 theme="emerald"
               />
             </Suspense>
@@ -232,7 +221,7 @@ export default function EditBlogPage() {
               className="flex-1"
             >
               <Eye className="w-5 h-5 mr-2" />
-              {formData.isPublished ? 'Update & Publish' : 'Publish'}
+              {formData.isPublished ? t('editBlogPage.updateAndPublish') : t('editBlogPage.publish')}
             </Button>
 
             <Button
@@ -244,7 +233,7 @@ export default function EditBlogPage() {
               className="flex-1 sm:flex-none"
             >
               <EyeOff className="w-5 h-5 mr-2" />
-              Save as Draft
+              {t('createBlogPage.saveDraft')}
             </Button>
           </div>
         </div>

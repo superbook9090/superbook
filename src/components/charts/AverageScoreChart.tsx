@@ -11,6 +11,7 @@ import {
   AreaChart,
 } from 'recharts';
 import { TrendingUp, BarChart3 } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface AverageScoreData {
   date: string;
@@ -38,9 +39,11 @@ interface AverageScoreChartProps {
 
 export default function AverageScoreChart({ 
   data, 
-  title = "Average Score Trend",
+  title,
   height = 300 
 }: AverageScoreChartProps) {
+  const { t } = useTranslation();
+  const resolvedTitle = title ?? t('charts.averageScoreTrend');
   const processedData = useMemo(() => {
     if (!data || data.length === 0) return [];
 
@@ -65,19 +68,19 @@ export default function AverageScoreChart({
           <p className="text-sm font-medium text-gray-900">{label}</p>
           <div className="mt-2 space-y-1">
             <div className="flex items-center justify-between gap-4">
-              <span className="text-sm text-gray-600">Average:</span>
+              <span className="text-sm text-gray-600">{t('charts.average')}</span>
               <span className="text-sm font-bold text-[var(--student-primary)]">
                 {data.displayAverage}%
               </span>
             </div>
             <div className="flex items-center justify-between gap-4">
-              <span className="text-sm text-gray-600">Trend:</span>
+              <span className="text-sm text-gray-600">{t('charts.trend')}</span>
               <span className="text-sm font-bold text-[var(--student-accent)]">
                 {data.displayMovingAverage}%
               </span>
             </div>
             <div className="flex items-center justify-between gap-4">
-              <span className="text-sm text-gray-600">Attempts:</span>
+              <span className="text-sm text-gray-600">{t('charts.attempts')}</span>
               <span className="text-sm text-gray-500">{data.attemptCount}</span>
             </div>
           </div>
@@ -91,8 +94,8 @@ export default function AverageScoreChart({
     return (
       <div className="bg-white rounded-2xl p-5 shadow-sm h-[300px] flex flex-col items-center justify-center">
         <BarChart3 className="w-12 h-12 text-gray-400 mb-3" />
-        <p className="text-gray-500 text-center">No score data available</p>
-        <p className="text-gray-400 text-sm text-center mt-1">Complete more quizzes to see trends</p>
+        <p className="text-gray-500 text-center">{t('charts.noScoreData')}</p>
+        <p className="text-gray-400 text-sm text-center mt-1">{t('charts.completeMoreQuizzes')}</p>
       </div>
     );
   }
@@ -100,10 +103,10 @@ export default function AverageScoreChart({
   return (
     <div className="bg-white rounded-2xl p-5 shadow-sm">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+        <h3 className="text-lg font-semibold text-gray-900">{resolvedTitle}</h3>
         <div className="flex items-center gap-2 text-sm text-gray-500">
           <TrendingUp className="w-4 h-4" />
-          <span>7-day moving average</span>
+          <span>{t('charts.sevenDayMovingAverage')}</span>
         </div>
       </div>
       

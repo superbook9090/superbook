@@ -7,6 +7,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import PremiumLogo from '@/components/ui/PremiumLogo';
 import { roleThemes } from '@/lib/roleTheme';
 import { Menu, X } from 'lucide-react';
+import { supportedLanguages } from '@/i18n/config';
 
 export default function Header() {
   const { t, lang, setLang } = useTranslation();
@@ -23,7 +24,8 @@ export default function Header() {
   }, []);
 
   const toggleLanguage = () => {
-    setLang(lang === 'en' ? 'hi' : 'en');
+    const nextLanguage = supportedLanguages.find((language) => language !== lang) ?? 'en';
+    setLang(nextLanguage);
   };
 
   return (
@@ -139,7 +141,7 @@ export default function Header() {
                 }}
                 className="block w-full py-3 text-center text-gray-600 font-medium border border-gray-200 rounded-xl hover:bg-gray-50"
               >
-                {lang === 'en' ? 'Switch to Hindi' : 'Switch to English'}
+                {lang === 'en' ? t('common.switchToHindi') : t('common.switchToEnglish')}
               </button>
             </div>
           </motion.div>

@@ -11,13 +11,14 @@ export class ApiClientError extends Error {
 
 type JsonInit = Omit<RequestInit, 'body'> & {
   body?: unknown;
+  acceptStatuses?: number[];
 };
 
 /**
  * JSON fetch helper: sets Content-Type when body is sent, parses JSON, throws {@link ApiClientError} on non-OK.
  */
 export async function apiJson<T>(url: string, init: JsonInit = {}): Promise<T> {
-  const { body, headers, ...rest } = init;
+  const { body, headers, acceptStatuses = [], ...rest } = init;
   const hasBody = body !== undefined;
 
   const res = await fetch(url, {
@@ -37,7 +38,7 @@ export async function apiJson<T>(url: string, init: JsonInit = {}): Promise<T> {
     data = {};
   }
 
-  if (!res.ok) {
+  if (!res.ok && !acceptStatuses.includes(res.status)) {
     const msg =
       typeof data === 'object' &&
       data !== null &&

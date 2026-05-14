@@ -23,21 +23,9 @@ import {
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
 import { useBlogs, useFavorites, useAddFavorite, useRemoveFavorite, type Blog } from '@/lib/react-query/hooks';
+import { blogTopicKeys, supportedLanguages, type BlogTopicKey } from '@/i18n/config';
 
-const topics = [
-  'all',
-  'mathematics',
-  'science',
-  'english',
-  'history',
-  'geography',
-  'computerScience',
-  'physics',
-  'chemistry',
-  'biology',
-  'literature',
-  'other',
-];
+const topics = ['all', ...blogTopicKeys] as const;
 
 export default function StudentBlogsPage() {
   const { session, status, favorites, addFavorite, removeFavorite } = useSessionStore();
@@ -179,7 +167,7 @@ export default function StudentBlogsPage() {
                   : 'bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)] hover:bg-[var(--color-surface-muted)]/80'
               }`}
             >
-              {t(`topics.${topic}`)}
+              {topic === 'all' ? t('topics.all') : t(`topics.${topic}` as `topics.${BlogTopicKey}`)}
             </button>
           ))}
         </div>
@@ -193,8 +181,11 @@ export default function StudentBlogsPage() {
             className="flex-1 sm:flex-none px-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
           >
             <option value="all">{t('blog.allLanguages')}</option>
-            <option value="en">English</option>
-            <option value="hi">हिंदी</option>
+            {supportedLanguages.map((language) => (
+              <option key={language} value={language}>
+                {t(language === 'en' ? 'common.english' : 'common.hindi')}
+              </option>
+            ))}
           </select>
         </div>
       </motion.div>
