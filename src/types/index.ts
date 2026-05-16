@@ -27,6 +27,7 @@ export interface Course {
   price: number;
   category?: string;
   locale?: string;
+  thumbnail?: string;
   thumbnailUrl?: string;
   isPublished: boolean;
   enrolledCount?: number;

@@ -96,3 +96,25 @@ export const createFolderSchema = z.object({
   name: z.string().min(1, 'Name is required').max(255, 'Name must be less than 255 characters'),
   parentId: objectIdSchema.nullable().optional(),
 });
+
+// Chapter validation schemas
+export const createChapterSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(200, 'Title must be less than 200 characters'),
+  summary: z.string().max(2000, 'Summary must be less than 2000 characters').optional(),
+  order: z.number().int().min(0).optional(),
+});
+
+export const updateChapterSchema = createChapterSchema.partial();
+
+// Lesson validation schemas
+export const createLessonSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(200, 'Title must be less than 200 characters'),
+  description: z.string().max(2000, 'Description must be less than 2000 characters').optional(),
+  content: z.string().optional(),
+  videoUrl: z.string().url('Invalid video URL').optional().or(z.literal('')),
+  duration: z.number().min(0).optional(),
+  isPublished: z.boolean().optional(),
+  order: z.number().int().min(0).optional(),
+});
+
+export const updateLessonSchema = createLessonSchema.partial();

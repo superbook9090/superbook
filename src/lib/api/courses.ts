@@ -50,3 +50,36 @@ export function patchCourse(courseId: string, body: unknown): Promise<unknown> {
 export function deleteCourse(courseId: string): Promise<unknown> {
   return apiJson(`${BASE}/${encodeURIComponent(courseId)}`, { method: 'DELETE' });
 }
+
+// Curriculum APIs
+export function getCourseCurriculum(courseId: string): Promise<unknown> {
+  return apiJson(`${BASE}/${encodeURIComponent(courseId)}/curriculum`, { method: 'GET' });
+}
+
+export function addChapter(courseId: string, body: unknown): Promise<unknown> {
+  return apiJson(`${BASE}/${encodeURIComponent(courseId)}/curriculum`, { method: 'POST', body });
+}
+
+export function updateChapter(chapterId: string, body: unknown): Promise<unknown> {
+  return apiJson(`/api/chapters/${encodeURIComponent(chapterId)}`, { method: 'PATCH', body });
+}
+
+export function deleteChapter(chapterId: string): Promise<unknown> {
+  return apiJson(`/api/chapters/${encodeURIComponent(chapterId)}`, { method: 'DELETE' });
+}
+
+export function addLesson(chapterId: string, body: unknown): Promise<unknown> {
+  return apiJson(`/api/chapters/${encodeURIComponent(chapterId)}/lessons`, { method: 'POST', body });
+}
+
+export function updateLesson(lessonId: string, body: unknown): Promise<unknown> {
+  return apiJson(`/api/lessons/${encodeURIComponent(lessonId)}`, { method: 'PATCH', body });
+}
+
+export function deleteLesson(lessonId: string): Promise<unknown> {
+  return apiJson(`/api/lessons/${encodeURIComponent(lessonId)}`, { method: 'DELETE' });
+}
+
+export function getLesson(lessonId: string): Promise<unknown> {
+  return apiJson(`/api/lessons/${encodeURIComponent(lessonId)}`, { method: 'GET' });
+}

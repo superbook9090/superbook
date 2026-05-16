@@ -103,7 +103,7 @@ export async function GET(request: NextRequest) {
       fieldList.forEach(f => selectFields[f] = 1);
     } else {
       // Default fields to avoid over-fetching
-      selectFields = { title: 1, description: 1, price: 1, category: 1, thumbnail: 1, isPublished: 1, locale: 1, createdAt: 1, enrolledCount: 1, chapterCount: 1, lessonCount: 1 };
+      selectFields = { title: 1, description: 1, price: 1, category: 1, thumbnail: 1, instructor: 1, isPublished: 1, locale: 1, createdAt: 1, enrolledCount: 1, chapterCount: 1, lessonCount: 1 };
     }
 
     const courses = await Course.find(query, selectFields)

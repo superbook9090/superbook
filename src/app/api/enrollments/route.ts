@@ -69,7 +69,11 @@ export async function GET(request: NextRequest) {
     }
 
     const enrollments = await Enrollment.find(query, selectFields)
-      .populate('course', 'title description thumbnail category instructor price')
+      .populate({
+        path: 'course',
+        select: 'title description thumbnail category instructor price',
+        populate: { path: 'instructor', select: 'name email' }
+      })
       .populate('student', 'name email')
       .sort({ enrolledAt: -1 })
       .skip(skip)

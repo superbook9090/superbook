@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, AlertCircle, CheckCircle, Info } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { cn } from '@/lib/utils';
 
 interface AlertProps {
   type?: 'error' | 'success' | 'info';
@@ -11,9 +12,18 @@ interface AlertProps {
   duration?: number;
   index?: number;
   showProgressBar?: boolean;
+  className?: string;
 }
 
-export default function Alert({ type = 'info', message, onClose, duration = 4000, index = 0, showProgressBar = true }: AlertProps) {
+export default function Alert({ 
+  type = 'info', 
+  message, 
+  onClose, 
+  duration = 4000, 
+  index = 0, 
+  showProgressBar = true,
+  className
+}: AlertProps) {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [progress, setProgress] = useState(100);
   const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -79,12 +89,12 @@ export default function Alert({ type = 'info', message, onClose, duration = 4000
           duration: 0.3,
           delay: index * 0.1,
         }}
-        className={`
-          fixed top-5 right-5 sm:right-5 sm:left-auto left-1/2 -translate-x-1/2 sm:translate-x-0
-          z-50 flex flex-col gap-2 px-4 py-3 rounded-xl border shadow-lg
-          ${styles[type]}
-          w-80 max-w-[calc(100vw-2rem)]
-        `}
+        className={cn(
+          "fixed top-5 right-5 sm:right-5 sm:left-auto left-1/2 -translate-x-1/2 sm:translate-x-0",
+          "z-50 flex flex-col gap-2 px-4 py-3 rounded-xl border shadow-lg w-80 max-w-[calc(100vw-2rem)]",
+          styles[type],
+          className
+        )}
         role="alert"
         aria-live="assertive"
         style={{ top: `calc(20px + ${index * 90}px)` }}

@@ -9,7 +9,9 @@ import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
 import Alert from '@/components/ui/Alert';
 import { PageSkeleton } from '@/components/ui/Skeleton';
-import { useTeacherCourses, usePublishCourse, type Course } from '@/lib/react-query/hooks';
+import { useTeacherCourses, usePublishCourse, useDeleteCourse, type Course } from '@/lib/react-query/hooks';
+import { Trash2 } from 'lucide-react';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 
 export default function TeacherCoursesPage() {
   const { session, status } = useSessionStore();
@@ -17,11 +19,13 @@ export default function TeacherCoursesPage() {
   const { t } = useTranslation();
   const { theme } = useRoleTheme();
   const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+  const [confirmDeleteCourse, setConfirmDeleteCourse] = useState<string | null>(null);
 
   // Get orgId from session
   const orgId = (session?.user as { organizationId?: string })?.organizationId || 'public';
   const { data: courses = [], isLoading, error } = useTeacherCourses(orgId);
   const publishCourse = usePublishCourse();
+  const deleteCourse = useDeleteCourse();
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -43,6 +47,23 @@ export default function TeacherCoursesPage() {
         message: t('teacherCourses.publishError')
       });
       console.error('Publish error:', _error);
+    }
+  };
+
+  const handleDeleteCourse = async (courseId: string) => {
+    try {
+      await deleteCourse.mutateAsync(courseId);
+      setAlertState({
+        type: 'success',
+        message: t('teacherCourses.courseDeleted')
+      });
+      setConfirmDeleteCourse(null);
+    } catch (_error) {
+      setAlertState({
+        type: 'error',
+        message: t('teacherCourses.deleteError')
+      });
+      console.error('Delete error:', _error);
     }
   };
 
@@ -165,6 +186,13 @@ export default function TeacherCoursesPage() {
                         course.isPublished ? t('teacherCourses.unpublish') : t('teacherCourses.publish')
                       )}
                     </button>
+                    <button
+                      onClick={() => setConfirmDeleteCourse(course._id)}
+                      className="p-2 text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+                      title={t('teacherCourses.deleteCourse') || 'Delete Course'}
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
                   </div>
                 </div>
               </div>
@@ -173,6 +201,21 @@ export default function TeacherCoursesPage() {
         )}
       </div>
     </div>
+
+    <ConfirmModal
+      isOpen={!!confirmDeleteCourse}
+      title={t('teacherCourses.deleteConfirmTitle') || 'Delete Course'}
+      message={t('teacherCourses.deleteConfirmMessage') || 'Are you sure you want to delete this course? This action cannot be undone.'}
+      onConfirm={() => {
+        if (confirmDeleteCourse) {
+          handleDeleteCourse(confirmDeleteCourse);
+        }
+      }}
+      onCancel={() => setConfirmDeleteCourse(null)}
+      confirmText={t('common.delete')}
+      type="danger"
+      isLoading={deleteCourse.isPending}
+    />
     </>
   );
 }

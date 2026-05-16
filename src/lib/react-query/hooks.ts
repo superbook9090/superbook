@@ -5,7 +5,20 @@ import type { DashboardData, TeacherDashboardData } from '@/app/api/dashboard/ro
 import { listBlogs, createBlog, deleteBlog, updateBlog, type CreateBlogInput } from '@/lib/api/blogs';
 import { addFavorite, listFavorites, removeFavorite, type FavoritesListResult } from '@/lib/api/favorites';
 import { fetchDashboard } from '@/lib/api/dashboard';
-import { listTeacherCoursesByOrg, listAvailableCoursesByOrg, patchCourse } from '@/lib/api/courses';
+import { 
+  listTeacherCoursesByOrg, 
+  listAvailableCoursesByOrg, 
+  patchCourse,
+  deleteCourse,
+  getCourseCurriculum,
+  addChapter,
+  updateChapter,
+  deleteChapter,
+  addLesson,
+  updateLesson,
+  deleteLesson,
+  getLesson
+} from '@/lib/api/courses';
 import { listQuizzesByOrg } from '@/lib/api/quizzes';
 import { listEnrollments, enrollInCourse, dropEnrollment } from '@/lib/api/enrollments';
 import { listQuizAttempts, startQuizAttempt, submitQuizAttempt, type SubmitQuizAttemptInput } from '@/lib/api/quizAttempts';
@@ -113,6 +126,30 @@ export interface Favorite {
   createdAt: string;
 }
 
+export interface Lesson {
+  _id: string;
+  title: string;
+  description?: string;
+  content?: string;
+  videoUrl?: string;
+  duration: number;
+  order: number;
+  isPublished: boolean;
+  course: string;
+  chapter: string;
+  createdAt: string;
+}
+
+export interface Chapter {
+  _id: string;
+  title: string;
+  summary?: string;
+  order: number;
+  lessonCount: number;
+  lessons?: Lesson[];
+  course: string;
+}
+
 // ============ QUERIES ============
 
 export function useTeacherCourses(orgId?: string) {
@@ -213,6 +250,18 @@ export function usePublishCourse() {
       const orgId = data.organizationId || 'public';
       queryClient.invalidateQueries({ queryKey: ['courses', orgId, 'teacher'] });
       queryClient.invalidateQueries({ queryKey: ['courses', orgId] });
+    },
+  });
+}
+
+export function useDeleteCourse() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (courseId: string) => deleteCourse(courseId),
+    onSuccess: () => {
+      // Invalidate teacher courses cache
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
     },
   });
 }
@@ -420,6 +469,99 @@ export function useSubmitQuizAttempt() {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.QUIZ_ATTEMPTS });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ENROLLMENTS });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.DASHBOARD });
+    },
+  });
+}
+
+// ============ CURRICULUM QUERIES & MUTATIONS ============
+
+export function useLesson(lessonId: string) {
+  return useQuery({
+    queryKey: ['lessons', lessonId],
+    queryFn: () => getLesson(lessonId) as Promise<Lesson>,
+    enabled: !!lessonId,
+  });
+}
+
+export function useCourseCurriculum(courseId: string) {
+  return useQuery({
+    queryKey: ['courses', courseId, 'curriculum'],
+    queryFn: () => getCourseCurriculum(courseId) as Promise<Chapter[]>,
+    enabled: !!courseId,
+  });
+}
+
+
+
+export function useLessonDetails(lessonId: string) {
+  return useQuery({
+    queryKey: ['lessons', lessonId],
+    queryFn: () => getLesson(lessonId) as Promise<Lesson>,
+    enabled: !!lessonId,
+  });
+}
+
+export function useAddChapter() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ courseId, data }: { courseId: string; data: Partial<Chapter> }) => 
+      addChapter(courseId, data) as Promise<Chapter>,
+    onSuccess: (_, { courseId }) => {
+      queryClient.invalidateQueries({ queryKey: ['courses', courseId, 'curriculum'] });
+    },
+  });
+}
+
+export function useUpdateChapter() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ chapterId, data }: { chapterId: string; data: Partial<Chapter> }) => 
+      updateChapter(chapterId, data) as Promise<Chapter>,
+    onSuccess: (data: Chapter) => {
+      queryClient.invalidateQueries({ queryKey: ['courses', data.course, 'curriculum'] });
+    },
+  });
+}
+
+export function useDeleteChapter() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (chapterId: string) => deleteChapter(chapterId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
+    },
+  });
+}
+
+export function useAddLesson() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ chapterId, data }: { chapterId: string; data: Partial<Lesson> }) => 
+      addLesson(chapterId, data) as Promise<Lesson>,
+    onSuccess: (data: Lesson) => {
+      queryClient.invalidateQueries({ queryKey: ['courses', data.course, 'curriculum'] });
+    },
+  });
+}
+
+export function useUpdateLesson() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ lessonId, data }: { lessonId: string; data: Partial<Lesson> }) => 
+      updateLesson(lessonId, data) as Promise<Lesson>,
+    onSuccess: (data: Lesson) => {
+      queryClient.invalidateQueries({ queryKey: ['courses', data.course, 'curriculum'] });
+      queryClient.invalidateQueries({ queryKey: ['lessons', data._id] });
+    },
+  });
+}
+
+export function useDeleteLesson() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (lessonId: string) => deleteLesson(lessonId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
     },
   });
 }

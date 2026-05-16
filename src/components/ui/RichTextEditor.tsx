@@ -168,6 +168,23 @@ export default function RichTextEditor({
             margin-bottom: 0.5rem;
             color: var(--color-foreground);
           }
+          .ProseMirror ul {
+            list-style-type: disc !important;
+            padding-left: 2rem !important;
+            margin: 1rem 0 !important;
+            display: block !important;
+          }
+          .ProseMirror ol {
+            list-style-type: decimal !important;
+            padding-left: 2rem !important;
+            margin: 1rem 0 !important;
+            display: block !important;
+          }
+          .ProseMirror li {
+            display: list-item !important;
+            margin-bottom: 0.5rem !important;
+            padding-left: 0.5rem !important;
+          }
           .ProseMirror .taskList {
             list-style: none;
             padding: 0;

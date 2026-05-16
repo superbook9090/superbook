@@ -1,21 +1,28 @@
 // src/app/(dashboard)/dashboard/student/browse/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSessionStore } from '@/store/useSessionStore';
 import CourseCard from '@/features/courses/components/CourseCard';
 import Alert from '@/components/ui/Alert';
 import { PageSkeleton } from '@/components/ui/Skeleton';
-import { useAvailableCourses, useEnrollCourse, type Course } from '@/lib/react-query/hooks';
+import { useAvailableCourses, useEnrollCourse } from '@/lib/react-query/hooks';
+import { BookOpen, ArrowLeft, Sparkles } from 'lucide-react';
+import CourseFilters from '@/features/courses/components/CourseFilters';
 
 export default function BrowseCoursesPage() {
   const { session, status } = useSessionStore();
   const { t } = useTranslation();
   const router = useRouter();
+  
+  // States
   const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [selectedInstructor, setSelectedInstructor] = useState<string>('All');
 
   const orgId = (session?.user as { organizationId?: string })?.organizationId || 'public';
   const { data: availableCourses = [], isLoading: coursesLoading, error } = useAvailableCourses(orgId);
@@ -28,6 +35,39 @@ export default function BrowseCoursesPage() {
     }
   }, [status, session, router]);
 
+  // Derived Data
+  const categories = useMemo(() => {
+    const cats = new Set<string>();
+    cats.add('All');
+    availableCourses.forEach(c => {
+      if (c.category) cats.add(c.category);
+    });
+    return Array.from(cats);
+  }, [availableCourses]);
+
+  const instructors = useMemo(() => {
+    const insts = new Set<string>();
+    insts.add('All');
+    availableCourses.forEach(c => {
+      if (c.instructor?.name) insts.add(c.instructor.name);
+    });
+    return Array.from(insts);
+  }, [availableCourses]);
+
+  const filteredCourses = useMemo(() => {
+    return availableCourses.filter(c => {
+      const searchLower = searchQuery.toLowerCase();
+      const matchesSearch = c.title.toLowerCase().includes(searchLower) || 
+                           c.description?.toLowerCase().includes(searchLower) ||
+                           c.instructor?.name?.toLowerCase().includes(searchLower);
+      
+      const matchesCategory = selectedCategory === 'All' || c.category === selectedCategory;
+      const matchesInstructor = selectedInstructor === 'All' || c.instructor?.name === selectedInstructor;
+
+      return matchesSearch && matchesCategory && matchesInstructor;
+    });
+  }, [availableCourses, searchQuery, selectedCategory, selectedInstructor]);
+
   const handleEnroll = async (courseId: string) => {
     try {
       await enrollCourse.mutateAsync(courseId);
@@ -37,16 +77,71 @@ export default function BrowseCoursesPage() {
     }
   };
 
+  const clearFilters = () => {
+    setSearchQuery('');
+    setSelectedCategory('All');
+    setSelectedInstructor('All');
+  };
+
   if (status === 'loading' || coursesLoading) {
     return <PageSkeleton />;
   }
 
   return (
-    <div>
-      <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)] truncate">{t('courses.browseCourses')}</h1>
-      <p className="mt-2 text-sm sm:text-base text-[var(--color-muted-foreground)]">
-        {t('courses.browseDesc')}
-      </p>
+    <div className="space-y-6 lg:space-y-8 pb-12">
+      {/* Header Area */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)] p-6 sm:p-8 text-white shadow-xl"
+      >
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="relative z-10 space-y-4">
+          <button 
+            onClick={() => router.push('/dashboard/student/courses')}
+            className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-white/70 hover:text-white transition-colors group"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            {t('courses.backToCourses')}
+          </button>
+          
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-2">
+              <h1 className="heading-xl text-white">{t('courses.browseCourses')}</h1>
+              <p className="text-white/80 text-sm sm:text-base max-w-xl">
+                {t('courses.browseDesc')}
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-4 bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/10 min-w-[180px]">
+              <div className="text-right flex-1">
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/50">{t('courses.available')}</p>
+                <p className="text-2xl font-black leading-none mt-1">{availableCourses.length}</p>
+              </div>
+              <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+                <Sparkles className="w-6 h-6" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Filters Section */}
+      <div className="bg-[var(--card-solid)] border border-[var(--border)] rounded-2xl p-4 lg:p-6 shadow-sm">
+        <CourseFilters
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          selectedCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
+          categories={categories}
+          selectedInstructor={selectedInstructor}
+          onInstructorChange={setSelectedInstructor}
+          instructors={instructors}
+          onClear={clearFilters}
+          showStatusFilter={false}
+          searchPlaceholder={t('common.search')}
+        />
+      </div>
 
       {alertState && (
         <Alert
@@ -57,37 +152,41 @@ export default function BrowseCoursesPage() {
       )}
 
       {error && (
-        <div className="mt-4 bg-[var(--error-light)] border-l-4 border-[var(--error)] p-4 rounded-r-lg">
-          <p className="text-sm text-[var(--error)]">{String(error)}</p>
-        </div>
+        <Alert
+          type="error"
+          message={String(error)}
+        />
       )}
 
-      <div className="mt-8">
-        {availableCourses.length === 0 ? (
-          <div className="bg-[var(--background)] overflow-hidden shadow rounded-lg">
-            <div className="px-4 py-8 sm:p-6 text-center">
-              <p className="text-[var(--color-muted-foreground)] mb-4">
-                {t('courses.noAvailableCourses')}
-              </p>
-              <Link
-                href="/dashboard/student/courses"
-                className="inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base font-medium rounded-xl text-[var(--student-primary)] bg-[var(--student-soft)] hover:bg-[var(--student-border)] transition-colors"
-              >
-                {t('courses.goToMyCourses')}
-              </Link>
-            </div>
+      {/* Grid Content */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {filteredCourses.length === 0 ? (
+          <div className="col-span-full text-center py-20 bg-gray-50/50 border border-dashed border-[var(--border)] rounded-2xl">
+            <BookOpen className="w-12 h-12 text-[var(--muted)] mx-auto mb-4 opacity-20" />
+            <h3 className="heading-md text-[var(--color-foreground)] mb-1">{t('courses.noAvailableCourses')}</h3>
+            <p className="text-sm text-[var(--color-muted-foreground)] mb-6">{t('courses.tryAdjustingFilters')}</p>
+            <button 
+              onClick={clearFilters}
+              className="px-6 py-2 bg-[var(--color-foreground)] text-white rounded-xl text-sm font-bold hover:opacity-90 transition-opacity"
+            >
+              {t('common.reset')}
+            </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-            {availableCourses.map((course: Course) => (
+          filteredCourses.map((course) => (
+            <motion.div
+              key={course._id}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.2 }}
+            >
               <CourseCard
-                key={course._id}
                 course={course}
                 type="available"
                 onEnroll={handleEnroll}
               />
-            ))}
-          </div>
+            </motion.div>
+          ))
         )}
       </div>
     </div>

@@ -65,6 +65,7 @@ export const en = {
     switchToHindi: 'Switch to Hindi',
     draft: 'Draft',
     published: 'Published',
+    overview: 'Overview',
   },
 
   files: {
@@ -166,6 +167,7 @@ export const en = {
     enrolledIn: 'Enrolled in {title}',
     completed: 'Completed: {title}',
     progress: 'Progress',
+    averageProgress: "Average Progress",
     score: 'Score',
     // Teacher dashboard
     manageContent: 'Manage your content.',
@@ -429,6 +431,12 @@ export const en = {
     startLearning: 'Start by enrolling in a course to begin your learning journey.',
     dropCourse: 'Are you sure you want to drop this course?',
     dropFailed: 'Failed to drop course',
+    category: 'Category',
+    teacher: 'Teacher',
+    inProgress: 'In Progress',
+    completed: 'Completed',
+    noCoursesFound: 'No courses found',
+    tryAdjustingFilters: 'Try adjusting your filters or search query to find what you are looking for.',
     // Course card
     free: 'Free',
     noDescription: 'No description available',
@@ -438,6 +446,11 @@ export const en = {
     start: 'Start',
     review: 'Review',
     continue: 'Continue',
+    retake: 'Retake',
+    noEnrollmentFound: 'No Enrollment Found',
+    noEnrollmentDesc: 'You are not enrolled in this course.',
+    backToCourses: 'Back to My Courses',
+    noQuizzes: 'No quizzes available for this course.',
     // Browse page
     browseCourses: 'Browse Courses',
     browseDesc: 'Discover new courses and start learning today.',
@@ -446,6 +459,23 @@ export const en = {
     goToMyCourses: 'Go to My Courses',
     dropSuccess: 'Course dropped successfully',
     errorEnrolling: 'Error enrolling in course',
+    // Course Detail & Viewer
+    courseContent: 'Course Content',
+    leaderboard: 'Top Students',
+    backToCourse: 'Back to Course',
+    nextLesson: 'Next Lesson',
+    previousLesson: 'Previous Lesson',
+    readingMode: 'Reading Mode',
+    lessonNotFound: 'Lesson Not Found',
+    lessonNotFoundDesc: 'The lesson you are looking for doesn\'t exist or you don\'t have access.',
+    finishCourse: 'Finish Course Content',
+    noContentYet: 'No course content available yet.',
+    checkBackSoon: 'Please check back soon!',
+    minutesRead: '{count} minutes read',
+    educationalContent: 'Educational Content',
+    watchExternally: 'Watch Externally',
+    visualLearning: 'This lesson focuses on visual learning through video.',
+    checkVideoNotes: 'Check the video above or notes if provided.',
   },
 
   // Language
@@ -854,9 +884,14 @@ export const en = {
     edit: 'Edit',
     publish: 'Publish',
     unpublish: 'Unpublish',
+    deleteCourse: 'Delete Course',
     coursePublished: 'Course published successfully',
     courseUnpublished: 'Course unpublished successfully',
+    courseDeleted: 'Course deleted successfully',
     publishError: 'Failed to update course status',
+    deleteError: 'Failed to delete course',
+    deleteConfirmTitle: 'Delete Course?',
+    deleteConfirmMessage: 'Are you sure you want to delete this course and all its content? This action cannot be undone.',
   },
 
   // Maintenance
@@ -1024,5 +1059,28 @@ export const en = {
     invalidFileType: 'Please upload an image file',
     fileTooLarge: 'File too large (max 1MB)',
     formatHint: 'PNG, JPG, WebP up to 1MB',
+  },
+
+  courseEdit: {
+    basicInfo: 'Basic Info',
+    curriculum: 'Curriculum',
+  },
+
+  curriculum: {
+    title: 'Course Curriculum',
+    addChapter: 'Add Module',
+    addLesson: 'Add Lesson',
+    newChapterTitle: 'New Module',
+    lessons: 'lessons',
+    editLesson: 'Edit Lesson',
+    addNewLesson: 'Add New Lesson',
+    lessonTitle: 'Lesson Title',
+    videoUrl: 'Video URL',
+    duration: 'Duration',
+    lessonContent: 'Lesson Content',
+    deleteChapterTitle: 'Delete Module',
+    deleteChapterMessage: 'Are you sure you want to delete this module and all its lessons? This action cannot be undone.',
+    deleteLessonTitle: 'Delete Lesson',
+    deleteLessonMessage: 'Are you sure you want to delete this lesson?',
   },
 };

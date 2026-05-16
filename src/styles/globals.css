@@ -273,6 +273,78 @@ pre,
    PREMIUM UI UTILITIES
 ========================= */
 
+.heading-xl {
+  font-size: 1.875rem; /* 30px */
+  line-height: 1.2;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+@media (min-width: 640px) {
+  .heading-xl {
+    font-size: 2.25rem; /* 36px */
+  }
+}
+
+.heading-lg {
+  font-size: 1.5rem; /* 24px */
+  line-height: 1.3;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+
+.heading-md {
+  font-size: 1.125rem; /* 18px */
+  line-height: 1.4;
+  font-weight: 800;
+}
+
+.text-body {
+  font-size: 0.9375rem; /* 15px */
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+.btn-premium {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: all 0.3s ease;
+  background: var(--primary-gradient);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.btn-premium:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  opacity: 0.95;
+}
+
+.card-premium {
+  background: var(--card-solid);
+  border: 1px solid var(--border);
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+@media (min-width: 640px) {
+  .card-premium {
+    padding: 2rem;
+    border-radius: 2rem;
+  }
+}
+
 .glass {
   background: var(--card);
   backdrop-filter: var(--blur-glass);
@@ -351,3 +423,178 @@ body.quiz-fullscreen header {
 body.quiz-fullscreen nav {
   display: none !important;
 }
+
+/* =========================
+   RICH TEXT / PROSE STYLES
+   (For Lesson Content)
+========================= */
+
+.prose {
+  color: var(--color-foreground);
+  line-height: 1.625;
+  font-size: 1rem;
+}
+
+.prose p {
+  margin-top: 1.25em;
+  margin-bottom: 1.25em;
+}
+
+.prose h1 {
+  font-size: 1.875em;
+  margin-top: 0;
+  margin-bottom: 0.8em;
+  line-height: 1.2;
+  font-weight: 800;
+}
+
+.prose h2 {
+  font-size: 1.5em;
+  margin-top: 1.6em;
+  margin-bottom: 0.8em;
+  line-height: 1.3;
+  font-weight: 700;
+}
+
+.prose h3 {
+  font-size: 1.25em;
+  margin-top: 1.4em;
+  margin-bottom: 0.6em;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+
+.prose strong {
+  color: var(--color-foreground);
+  font-weight: 600;
+}
+
+.prose ul {
+  margin-top: 1.25em;
+  margin-bottom: 1.25em;
+  padding-left: 1.625em;
+  list-style-type: disc;
+}
+
+.prose ol {
+  margin-top: 1.25em;
+  margin-bottom: 1.25em;
+  padding-left: 1.625em;
+  list-style-type: decimal;
+}
+
+.prose li {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  padding-left: 0.375em;
+}
+
+.prose li::marker {
+  color: var(--student-primary);
+  font-weight: 600;
+}
+
+.prose blockquote {
+  font-weight: 500;
+  font-style: italic;
+  color: var(--color-foreground);
+  border-left-width: 0.25rem;
+  border-left-color: var(--student-primary);
+  margin-top: 1.6em;
+  margin-bottom: 1.6em;
+  padding-left: 1.06em;
+}
+
+.prose img {
+  margin-top: 2em;
+  margin-bottom: 2em;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+}
+
+.prose pre {
+  color: #e2e8f0;
+  background-color: #1e293b;
+  overflow-x: auto;
+  font-size: 0.875em;
+  line-height: 1.71;
+  margin-top: 1.71em;
+  margin-bottom: 1.71em;
+  border-radius: 0.75rem;
+  padding: 1.14em 1.71em;
+}
+
+.prose code {
+  color: var(--color-foreground);
+  font-weight: 600;
+  font-size: 0.875em;
+}
+
+.prose code::before {
+  content: "`";
+}
+
+.prose code::after {
+  content: "`";
+}
+
+.prose pre code {
+  background-color: transparent;
+  border-width: 0;
+  border-radius: 0;
+  padding: 0;
+  font-weight: 400;
+  color: inherit;
+  font-size: inherit;
+  font-family: inherit;
+  line-height: inherit;
+}
+
+.prose pre code::before {
+  content: none;
+}
+
+.prose pre code::after {
+  content: none;
+}
+
+.prose a {
+  color: var(--student-primary);
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.prose a:hover {
+  color: var(--student-hover);
+}
+
+.prose ul[data-type="taskList"] {
+  list-style: none;
+  padding: 0;
+}
+
+.prose ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.prose ul[data-type="taskList"] li > label {
+  flex: 0 0 auto;
+  user-select: none;
+  margin-top: 0.25rem;
+}
+
+.prose ul[data-type="taskList"] li > div {
+  flex: 1 1 auto;
+}
+
+.prose input[type="checkbox"] {
+  cursor: pointer;
+  width: 1.25rem;
+  height: 1.25rem;
+  accent-color: var(--student-primary);
+}
+
+

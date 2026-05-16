@@ -65,6 +65,7 @@ export const hi = {
     switchToHindi: 'हिंदी पर स्विच करें',
     draft: 'ड्राफ्ट',
     published: 'प्रकाशित',
+    overview: 'अवलोकन',
   },
 
   files: {
@@ -167,6 +168,7 @@ export const hi = {
     completed: 'पूर्ण: {title}',
     progress: 'प्रगति',
     score: 'स्कोर',
+    averageProgress: "औसत प्रगति",
     // Teacher dashboard
     manageContent: 'अपनी सामग्री प्रबंधित करें।',
     createCourse: 'पाठ्यक्रम बनाएं',
@@ -429,6 +431,12 @@ export const hi = {
     startLearning: 'अपनी शिक्षा यात्रा शुरू करने के लिए किसी पाठ्यक्रम में नामांकन करें।',
     dropCourse: 'क्या आप सुनिश्चित हैं कि आप इस पाठ्यक्रम को छोड़ना चाहते हैं?',
     dropFailed: 'पाठ्यक्रम छोड़ने में विफल',
+    category: 'श्रेणी',
+    teacher: 'शिक्षक',
+    inProgress: 'प्रगति में',
+    completed: 'पूरा हो गया',
+    noCoursesFound: 'कोई पाठ्यक्रम नहीं मिला',
+    tryAdjustingFilters: 'जो आप खोज रहे हैं उसे खोजने के लिए अपने फ़िल्टर या खोज क्वेरी को समायोजित करने का प्रयास करें।',
     // Course card
     free: 'मुफ्त',
     noDescription: 'कोई विवरण उपलब्ध नहीं',
@@ -438,6 +446,11 @@ export const hi = {
     start: 'शुरू करें',
     review: 'समीक्षा करें',
     continue: 'जारी रखें',
+    retake: 'पुनः प्रयास करें',
+    noEnrollmentFound: 'नामांकन नहीं मिला',
+    noEnrollmentDesc: 'आप इस पाठ्यक्रम में नामांकित नहीं हैं।',
+    backToCourses: 'मेरे पाठ्यक्रमों पर वापस जाएं',
+    noQuizzes: 'इस पाठ्यक्रम के लिए कोई क्विज़ उपलब्ध नहीं है।',
     // Browse page
     browseCourses: 'पाठ्यक्रम ब्राउज़ करें',
     browseDesc: 'नए पाठ्यक्रम खोजें और आज ही सीखना शुरू करें।',
@@ -445,7 +458,24 @@ export const hi = {
     allCoursesEnrolled: 'आप सभी उपलब्ध पाठ्यक्रमों में नामांकित हो चुके हैं। नए पाठ्यक्रमों के लिए बाद में जांच करें!',
     goToMyCourses: 'मेरे पाठ्यक्रमों पर जाएं',
     dropSuccess: 'पाठ्यक्रम सफलतापूर्वक छोड़ दिया गया',
-    errorEnrolling: 'पाठ्यक्रम में नामांकन करने में त्रुटि',
+    errorEnrolling: 'पाठ्यक्रम में नामांकन में त्रुटि',
+    // Course Detail & Viewer
+    courseContent: 'पाठ्यक्रम सामग्री',
+    leaderboard: 'शीर्ष छात्र',
+    backToCourse: 'पाठ्यक्रम पर वापस जाएं',
+    nextLesson: 'अगला पाठ',
+    previousLesson: 'पिछला पाठ',
+    readingMode: 'रीडिंग मोड',
+    lessonNotFound: 'पाठ नहीं मिला',
+    lessonNotFoundDesc: 'आप जिस पाठ की तलाश कर रहे हैं वह मौजूद नहीं है या आपके पास इसकी पहुंच नहीं है।',
+    finishCourse: 'पाठ्यक्रम सामग्री समाप्त करें',
+    noContentYet: 'अभी तक कोई पाठ्यक्रम सामग्री उपलब्ध नहीं है।',
+    checkBackSoon: 'कृपया जल्द ही वापस देखें!',
+    minutesRead: '{count} मिनट का पाठ',
+    educationalContent: 'शैक्षिक सामग्री',
+    watchExternally: 'बाहर देखें',
+    visualLearning: 'यह पाठ वीडियो के माध्यम से दृश्य सीखने पर केंद्रित है।',
+    checkVideoNotes: 'ऊपर वीडियो या नोट्स देखें यदि दिए गए हैं।',
   },
 
   // Language
@@ -854,9 +884,14 @@ export const hi = {
     edit: 'संपादित करें',
     publish: 'प्रकाशित करें',
     unpublish: 'अप्रकाशित करें',
+    deleteCourse: 'पाठ्यक्रम हटाएं',
     coursePublished: 'पाठ्यक्रम सफलतापूर्वक प्रकाशित हुआ',
     courseUnpublished: 'पाठ्यक्रम सफलतापूर्वक अप्रकाशित हुआ',
+    courseDeleted: 'पाठ्यक्रम सफलतापूर्वक हटा दिया गया',
     publishError: 'पाठ्यक्रम स्थिति अपडेट करने में विफल',
+    deleteError: 'पाठ्यक्रम हटाने में विफल',
+    deleteConfirmTitle: 'पाठ्यक्रम हटाएं?',
+    deleteConfirmMessage: 'क्या आप वाकई इस पाठ्यक्रम और इसकी सभी सामग्री को हटाना चाहते हैं? यह क्रिया पूर्ववत नहीं की जा सकती।',
   },
 
   // Maintenance
@@ -1024,5 +1059,28 @@ export const hi = {
     invalidFileType: 'कृपया एक छवि फ़ाइल अपलोड करें',
     fileTooLarge: 'फ़ाइल बहुत बड़ी है (अधिकतम 1MB)',
     formatHint: 'PNG, JPG, WebP 1MB तक',
+  },
+
+  courseEdit: {
+    basicInfo: 'बुनियादी जानकारी',
+    curriculum: 'पाठ्यक्रम',
+  },
+
+  curriculum: {
+    title: 'कोर्स पाठ्यक्रम',
+    addChapter: 'मॉड्यूल जोड़ें',
+    addLesson: 'पाठ जोड़ें',
+    newChapterTitle: 'नया मॉड्यूल',
+    lessons: 'पाठ',
+    editLesson: 'पाठ संपादित करें',
+    addNewLesson: 'नया पाठ जोड़ें',
+    lessonTitle: 'पाठ का शीर्षक',
+    videoUrl: 'वीडियो यूआरएल',
+    duration: 'अवधि',
+    lessonContent: 'पाठ की सामग्री',
+    deleteChapterTitle: 'मॉड्यूल हटाएं',
+    deleteChapterMessage: 'क्या आप वाकई इस मॉड्यूल और इसके सभी पाठों को हटाना चाहते हैं? इस क्रिया को पूर्ववत नहीं किया जा सकता है।',
+    deleteLessonTitle: 'पाठ हटाएं',
+    deleteLessonMessage: 'क्या आप वाकई इस पाठ को हटाना चाहते हैं?',
   },
 };
