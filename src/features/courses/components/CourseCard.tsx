@@ -17,7 +17,8 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Loader } from '@/components/ui/Loader';
-import type { Course, Enrollment } from '@/types';
+import type { Course } from '@/types';
+import type { Enrollment } from '@/lib/react-query/hooks';
 import { cn } from '@/lib/utils';
 
 interface CourseCardProps {
@@ -60,14 +61,6 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
 
   const handleContinue = () => {
     router.push(`/dashboard/student/courses/${courseData._id}`);
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed': return 'success';
-      case 'active': return 'primary';
-      default: return 'default';
-    }
   };
 
   return (

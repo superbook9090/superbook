@@ -85,6 +85,7 @@ export interface Enrollment {
     title: string;
     description: string;
     thumbnail?: string;
+    thumbnailUrl?: string;
     category?: string;
     price: number;
     instructor: { name: string; email: string };

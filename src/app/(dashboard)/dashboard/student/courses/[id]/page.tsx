@@ -13,15 +13,9 @@ import {
   useQuizAttempts, 
   useStartQuizAttempt, 
   useCourseCurriculum, 
-  type Enrollment, 
-  type Quiz, 
-  type QuizAttempt, 
-  type Chapter as ChapterType, 
-  type Lesson as LessonType 
 } from '@/lib/react-query/hooks';
 import { 
-  Play, 
-  RotateCcw, 
+  Play,
   CheckCircle, 
   ChevronDown, 
   ChevronRight, 
@@ -31,13 +25,9 @@ import {
   ArrowLeft,
   Clock,
   Target,
-  Sparkles,
   Info,
-  ListChecks,
-  TrendingUp
 } from 'lucide-react';
 import CourseLeaderboard from '@/features/courses/components/CourseLeaderboard';
-import StatCard from '@/components/ui/StatCard';
 
 type TabType = 'curriculum' | 'overview' | 'quizzes' | 'leaderboard';
 
