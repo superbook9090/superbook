@@ -17,7 +17,7 @@ export default function BrowseCoursesPage() {
   const { session, status } = useSessionStore();
   const { t } = useTranslation();
   const router = useRouter();
-  
+
   // States
   const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -57,10 +57,10 @@ export default function BrowseCoursesPage() {
   const filteredCourses = useMemo(() => {
     return availableCourses.filter(c => {
       const searchLower = searchQuery.toLowerCase();
-      const matchesSearch = c.title.toLowerCase().includes(searchLower) || 
-                           c.description?.toLowerCase().includes(searchLower) ||
-                           c.instructor?.name?.toLowerCase().includes(searchLower);
-      
+      const matchesSearch = c.title.toLowerCase().includes(searchLower) ||
+        c.description?.toLowerCase().includes(searchLower) ||
+        c.instructor?.name?.toLowerCase().includes(searchLower);
+
       const matchesCategory = selectedCategory === 'All' || c.category === selectedCategory;
       const matchesInstructor = selectedInstructor === 'All' || c.instructor?.name === selectedInstructor;
 
@@ -90,21 +90,21 @@ export default function BrowseCoursesPage() {
   return (
     <div className="space-y-6 lg:space-y-8 pb-12">
       {/* Header Area */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)] p-6 sm:p-8 text-white shadow-xl"
       >
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
         <div className="relative z-10 space-y-4">
-          <button 
+          <button
             onClick={() => router.push('/dashboard/student/courses')}
             className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-white/70 hover:text-white transition-colors group"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
             {t('courses.backToCourses')}
           </button>
-          
+
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-2">
               <h1 className="heading-xl text-white">{t('courses.browseCourses')}</h1>
@@ -112,10 +112,10 @@ export default function BrowseCoursesPage() {
                 {t('courses.browseDesc')}
               </p>
             </div>
-            
+
             <div className="flex items-center gap-4 bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/10 min-w-[180px]">
               <div className="text-right flex-1">
-                <p className="text-[10px] font-black uppercase tracking-widest text-white/50">{t('courses.available')}</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/50">{t('courses.availableCourses')}</p>
                 <p className="text-2xl font-black leading-none mt-1">{availableCourses.length}</p>
               </div>
               <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
@@ -165,7 +165,7 @@ export default function BrowseCoursesPage() {
             <BookOpen className="w-12 h-12 text-[var(--muted)] mx-auto mb-4 opacity-20" />
             <h3 className="heading-md text-[var(--color-foreground)] mb-1">{t('courses.noAvailableCourses')}</h3>
             <p className="text-sm text-[var(--color-muted-foreground)] mb-6">{t('courses.tryAdjustingFilters')}</p>
-            <button 
+            <button
               onClick={clearFilters}
               className="px-6 py-2 bg-[var(--color-foreground)] text-white rounded-xl text-sm font-bold hover:opacity-90 transition-opacity"
             >

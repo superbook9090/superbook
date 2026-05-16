@@ -8,6 +8,7 @@ export const en = {
 
   // Common
   common: {
+    reset: "Reset",
     loading: 'Loading...',
     error: 'Error',
     success: 'Success',
@@ -424,6 +425,7 @@ export const en = {
 
   // Courses
   courses: {
+    availableCourses: 'Available Courses',
     myCourses: 'My Courses',
     continueLearning: 'Continue your learning journey.',
     browseMore: 'Browse More Courses',
@@ -454,8 +456,8 @@ export const en = {
     // Browse page
     browseCourses: 'Browse Courses',
     browseDesc: 'Discover new courses and start learning today.',
-    noAvailableCourses: 'No available courses found. You may already be enrolled in all available courses, or there are no published courses at the moment.',
-    allCoursesEnrolled: 'You have enrolled in all available courses. Check back later for new courses!',
+    noAvailableCourses: 'No available courses found.',
+    allCoursesEnrolled: 'You have enrolled in all available courses.',
     goToMyCourses: 'Go to My Courses',
     dropSuccess: 'Course dropped successfully',
     errorEnrolling: 'Error enrolling in course',

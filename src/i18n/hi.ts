@@ -8,6 +8,7 @@ export const hi = {
 
   // Common
   common: {
+    reset: 'रीसेट करें',
     loading: 'लोड हो रहा है...',
     error: 'त्रुटि',
     success: 'सफलता',
@@ -424,6 +425,7 @@ export const hi = {
 
   // Courses
   courses: {
+    availableCourses: 'उपलब्ध पाठ्यक्रम',
     myCourses: 'मेरे पाठ्यक्रम',
     continueLearning: 'अपनी शिक्षा यात्रा जारी रखें।',
     browseMore: 'अधिक पाठ्यक्रम ब्राउज़ करें',
@@ -454,8 +456,8 @@ export const hi = {
     // Browse page
     browseCourses: 'पाठ्यक्रम ब्राउज़ करें',
     browseDesc: 'नए पाठ्यक्रम खोजें और आज ही सीखना शुरू करें।',
-    noAvailableCourses: 'कोई उपलब्ध पाठ्यक्रम नहीं मिला। आप पहले से ही सभी उपलब्ध पाठ्यक्रमों में नामांकित हो सकते हैं, या फिलहाल कोई प्रकाशित पाठ्यक्रम नहीं हैं।',
-    allCoursesEnrolled: 'आप सभी उपलब्ध पाठ्यक्रमों में नामांकित हो चुके हैं। नए पाठ्यक्रमों के लिए बाद में जांच करें!',
+    noAvailableCourses: 'कोई उपलब्ध पाठ्यक्रम नहीं मिला।',
+    allCoursesEnrolled: 'आप सभी उपलब्ध पाठ्यक्रमों में नामांकित हो चुके हैं।',
     goToMyCourses: 'मेरे पाठ्यक्रमों पर जाएं',
     dropSuccess: 'पाठ्यक्रम सफलतापूर्वक छोड़ दिया गया',
     errorEnrolling: 'पाठ्यक्रम में नामांकन में त्रुटि',
