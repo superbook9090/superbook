@@ -2,7 +2,20 @@
 const nextConfig = {
   reactStrictMode: false, // Disabled to prevent double renders during debugging
   images: {
-    domains: ['localhost', 'lh3.googleusercontent.com'], // Add your image domains here
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+    ],
   },
   experimental: {
     serverActions: {},

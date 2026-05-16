@@ -150,7 +150,7 @@ export default function RichTextEditor({
             font-weight: 800;
             margin-top: 1.5rem;
             margin-bottom: 1rem;
-            color: var(--foreground);
+            color: var(--color-foreground);
           }
           .ProseMirror h2 {
             font-size: 1.875rem;
@@ -158,7 +158,7 @@ export default function RichTextEditor({
             font-weight: 700;
             margin-top: 1.25rem;
             margin-bottom: 0.75rem;
-            color: var(--foreground);
+            color: var(--color-foreground);
           }
           .ProseMirror h3 {
             font-size: 1.5rem;
@@ -166,7 +166,7 @@ export default function RichTextEditor({
             font-weight: 600;
             margin-top: 1rem;
             margin-bottom: 0.5rem;
-            color: var(--foreground);
+            color: var(--color-foreground);
           }
           .ProseMirror .taskList {
             list-style: none;

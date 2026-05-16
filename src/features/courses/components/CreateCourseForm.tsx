@@ -9,6 +9,7 @@ import { createCourse, getCourseById, patchCourse } from '@/lib/api/courses';
 import { ApiClientError } from '@/lib/api/http';
 import { supportedLanguages } from '@/i18n/config';
 import { useSessionStore } from '@/store/useSessionStore';
+import { ImageUpload } from '@/components/ui/ImageUpload';
 
 type Props = {
   /** When set, form loads this course and PATCHes on submit. */
@@ -144,7 +145,7 @@ export default function CreateCourseForm({ courseId }: Props) {
       )}
 
       <div>
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1.5">
+        <label htmlFor="title" className="block text-sm font-medium text-[var(--color-foreground)] mb-1.5">
           {t('createCourseForm.courseTitle')} *
         </label>
         <input
@@ -154,13 +155,13 @@ export default function CreateCourseForm({ courseId }: Props) {
           required
           value={formData.title}
           onChange={handleChange}
-          className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base sm:text-sm text-gray-900 placeholder-gray-400 touch-manipulation"
+          className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-[var(--color-border)] bg-[var(--card-solid)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] text-base sm:text-sm text-[var(--color-foreground)] placeholder-[var(--color-muted)] touch-manipulation"
           placeholder={t('createCourseForm.enterCourseTitle')}
         />
       </div>
 
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1.5">
+        <label htmlFor="description" className="block text-sm font-medium text-[var(--color-foreground)] mb-1.5">
           {t('createCourseForm.description')}
         </label>
         <textarea
@@ -169,14 +170,14 @@ export default function CreateCourseForm({ courseId }: Props) {
           rows={4}
           value={formData.description}
           onChange={handleChange}
-          className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base sm:text-sm text-gray-900 placeholder-gray-400 resize-y"
+          className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-[var(--color-border)] bg-[var(--card-solid)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] text-base sm:text-sm text-[var(--color-foreground)] placeholder-[var(--color-muted)] resize-y"
           placeholder={t('createCourseForm.enterCourseDescription')}
         />
       </div>
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
         <div>
-          <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label htmlFor="price" className="block text-sm font-medium text-[var(--color-foreground)] mb-1.5">
             {t('createCourseForm.price')}
           </label>
           <input
@@ -187,13 +188,13 @@ export default function CreateCourseForm({ courseId }: Props) {
             step="0.01"
             value={formData.price}
             onChange={handleChange}
-            className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base sm:text-sm text-gray-900 placeholder-gray-400"
+            className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-[var(--color-border)] bg-[var(--card-solid)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] text-base sm:text-sm text-[var(--color-foreground)] placeholder-[var(--color-muted)]"
             placeholder={t('createCourseForm.pricePlaceholder')}
           />
         </div>
 
         <div>
-          <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label htmlFor="category" className="block text-sm font-medium text-[var(--color-foreground)] mb-1.5">
             {t('createCourseForm.category')}
           </label>
           <input
@@ -202,13 +203,13 @@ export default function CreateCourseForm({ courseId }: Props) {
             id="category"
             value={formData.category}
             onChange={handleChange}
-            className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base sm:text-sm text-gray-900 placeholder-gray-400"
+            className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-[var(--color-border)] bg-[var(--card-solid)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] text-base sm:text-sm text-[var(--color-foreground)] placeholder-[var(--color-muted)]"
             placeholder={t('createCourseForm.categoryPlaceholder')}
           />
         </div>
 
         <div>
-          <label htmlFor="locale" className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label htmlFor="locale" className="block text-sm font-medium text-[var(--color-foreground)] mb-1.5">
             {t('createCourseForm.language')}
           </label>
           <select
@@ -216,7 +217,7 @@ export default function CreateCourseForm({ courseId }: Props) {
             id="locale"
             value={formData.locale}
             onChange={handleChange}
-            className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base sm:text-sm text-gray-900"
+            className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-[var(--color-border)] bg-[var(--card-solid)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] text-base sm:text-sm text-[var(--color-foreground)]"
           >
             {supportedLanguages.map((language) => (
               <option key={language} value={language}>
@@ -227,20 +228,12 @@ export default function CreateCourseForm({ courseId }: Props) {
         </div>
       </div>
 
-      <div>
-        <label htmlFor="thumbnail" className="block text-sm font-medium text-gray-700 mb-1.5">
-          {t('createCourseForm.thumbnailUrl')}
-        </label>
-        <input
-          type="url"
-          name="thumbnail"
-          id="thumbnail"
-          value={formData.thumbnail}
-          onChange={handleChange}
-          className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base sm:text-sm text-gray-900 placeholder-gray-400"
-          placeholder={t('createCourseForm.thumbnailPlaceholder')}
-        />
-      </div>
+      <ImageUpload
+        label={t('createCourseForm.thumbnailUrl')}
+        value={formData.thumbnail}
+        onChange={(url) => setFormData(prev => ({ ...prev, thumbnail: url }))}
+        aspectRatio="video"
+      />
 
       <div className="flex items-center py-2">
         <input
@@ -249,25 +242,25 @@ export default function CreateCourseForm({ courseId }: Props) {
           id="isPublished"
           checked={formData.isPublished}
           onChange={handleChange}
-          className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer"
+          className="h-5 w-5 text-[var(--color-primary)] focus:ring-[var(--color-primary)] border-[var(--color-border)] rounded cursor-pointer"
         />
-        <label htmlFor="isPublished" className="ml-3 block text-base sm:text-sm text-gray-900 cursor-pointer">
+        <label htmlFor="isPublished" className="ml-3 block text-base sm:text-sm text-[var(--color-foreground)] cursor-pointer">
           {t('createCourseForm.publishImmediately')}
         </label>
       </div>
 
-      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t border-gray-200">
+      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t border-[var(--color-border)]">
         <button
           type="button"
           onClick={() => router.push('/dashboard/teacher/courses')}
-          className="px-4 py-3 sm:py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 touch-manipulation"
+          className="px-4 py-3 sm:py-2 border border-[var(--color-border)] rounded-lg shadow-sm text-sm font-medium text-[var(--color-foreground)] bg-[var(--card-solid)] hover:bg-[var(--color-background)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)] touch-manipulation"
         >
           {t('createCourseForm.cancel')}
         </button>
         <button
           type="submit"
           disabled={isLoading}
-          className={`px-4 py-3 sm:py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation`}
+          className={`px-4 py-3 sm:py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)] disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation`}
         >
           {isLoading
             ? courseId

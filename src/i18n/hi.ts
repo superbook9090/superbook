@@ -1015,4 +1015,14 @@ export const hi = {
     or: 'या',
     continueWithGoogle: 'Google के साथ जारी रखें',
   },
+
+  imageUpload: {
+    clickToUpload: 'अपलोड करने के लिए क्लिक करें या ड्रैग और ड्रॉप करें',
+    uploading: 'अपलोड हो रहा है...',
+    changeImage: 'छवि बदलें',
+    removeImage: 'छवि हटाएं',
+    invalidFileType: 'कृपया एक छवि फ़ाइल अपलोड करें',
+    fileTooLarge: 'फ़ाइल बहुत बड़ी है (अधिकतम 1MB)',
+    formatHint: 'PNG, JPG, WebP 1MB तक',
+  },
 };

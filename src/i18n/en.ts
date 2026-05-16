@@ -1015,4 +1015,14 @@ export const en = {
     or: 'or',
     continueWithGoogle: 'Continue with Google',
   },
+
+  imageUpload: {
+    clickToUpload: 'Click to upload or drag and drop',
+    uploading: 'Uploading...',
+    changeImage: 'Change Image',
+    removeImage: 'Remove Image',
+    invalidFileType: 'Please upload an image file',
+    fileTooLarge: 'File too large (max 1MB)',
+    formatHint: 'PNG, JPG, WebP up to 1MB',
+  },
 };
