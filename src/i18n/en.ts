@@ -990,6 +990,7 @@ export const en = {
     createOne: 'Create one',
     invalidCredentials: 'Invalid email or password',
     genericError: 'An error occurred. Please try again.',
+    signIn: 'Sign in',
   },
 
   // Register

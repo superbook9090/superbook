@@ -9,6 +9,8 @@ import { useSessionStore } from '@/store/useSessionStore';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { fetchAnalytics } from '@/lib/api/analytics';
 import { ApiClientError } from '@/lib/api/http';
+import StatCard from '@/components/ui/StatCard';
+import { BookOpen, Users, HelpCircle, Award } from 'lucide-react';
 
 interface CourseStat {
   _id: string;
@@ -98,30 +100,49 @@ export default function TeacherAnalyticsPage() {
 
       {/* Overview Stats */}
       <div className="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <div className="bg-[var(--card-solid)] rounded-lg shadow p-4 text-center">
-          <p className="text-3xl font-bold text-[var(--success)]">{stats.overview.totalCourses}</p>
-          <p className="text-sm text-[var(--color-muted-foreground)]">{t('analytics.totalCourses')}</p>
-        </div>
-        <div className="bg-[var(--card-solid)] rounded-lg shadow p-4 text-center">
-          <p className="text-3xl font-bold text-[var(--info)]">{stats.overview.publishedCourses}</p>
-          <p className="text-sm text-[var(--color-muted-foreground)]">{t('analytics.published')}</p>
-        </div>
-        <div className="bg-[var(--card-solid)] rounded-lg shadow p-4 text-center">
-          <p className="text-3xl font-bold text-[var(--student-primary)]">{stats.overview.totalStudents}</p>
-          <p className="text-sm text-[var(--color-muted-foreground)]">{t('analytics.totalStudents')}</p>
-        </div>
-        <div className="bg-[var(--card-solid)] rounded-lg shadow p-4 text-center">
-          <p className="text-3xl font-bold text-[var(--student-accent)]">{stats.overview.totalQuizzes}</p>
-          <p className="text-sm text-[var(--color-muted-foreground)]">{t('analytics.quizzes')}</p>
-        </div>
-        <div className="bg-[var(--card-solid)] rounded-lg shadow p-4 text-center">
-          <p className="text-3xl font-bold text-[var(--admin-primary)]">{stats.overview.totalAttempts}</p>
-          <p className="text-sm text-[var(--color-muted-foreground)]">{t('analytics.quizAttempts')}</p>
-        </div>
-        <div className="bg-[var(--card-solid)] rounded-lg shadow p-4 text-center">
-          <p className="text-3xl font-bold text-[var(--warning)]">{stats.overview.averageScore}%</p>
-          <p className="text-sm text-[var(--color-muted-foreground)]">{t('analytics.avgScore')}</p>
-        </div>
+        <StatCard
+          icon={BookOpen}
+          value={stats.overview.totalCourses}
+          label={t('analytics.totalCourses')}
+          color="success"
+          delay={0.1}
+        />
+        <StatCard
+          icon={BookOpen}
+          value={stats.overview.publishedCourses}
+          label={t('analytics.published')}
+          color="info"
+          delay={0.15}
+        />
+        <StatCard
+          icon={Users}
+          value={stats.overview.totalStudents}
+          label={t('analytics.totalStudents')}
+          color="student"
+          delay={0.2}
+        />
+        <StatCard
+          icon={HelpCircle}
+          value={stats.overview.totalQuizzes}
+          label={t('analytics.quizzes')}
+          color="student"
+          delay={0.25}
+        />
+        <StatCard
+          icon={HelpCircle}
+          value={stats.overview.totalAttempts}
+          label={t('analytics.quizAttempts')}
+          color="admin"
+          delay={0.3}
+        />
+        <StatCard
+          icon={Award}
+          value={stats.overview.averageScore}
+          label={t('analytics.avgScore')}
+          color="warning"
+          delay={0.35}
+          suffix="%"
+        />
       </div>
 
       {/* Course Breakdown */}

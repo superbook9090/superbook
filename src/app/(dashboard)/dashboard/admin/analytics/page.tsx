@@ -3,7 +3,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { motion } from 'framer-motion';
 import {
   Users,
@@ -21,6 +20,8 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { formatDateTime } from '@/lib/dateUtils';
 import { fetchAnalytics } from '@/lib/api/analytics';
 import { ApiClientError } from '@/lib/api/http';
+import StatCard from '@/components/ui/StatCard';
+import ActivityCard from '@/components/ui/ActivityCard';
 
 interface AdminStats {
   users: {
@@ -63,7 +64,6 @@ export default function AdminAnalyticsPage() {
   const { session, status } = useSessionStore();
   const { t } = useTranslation();
   const router = useRouter();
-  const { theme } = useRoleTheme();
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -159,26 +159,41 @@ export default function AdminAnalyticsPage() {
               {t('common.users')}
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-              <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
-                <p className="text-3xl font-bold text-[var(--info)]">{stats.users.total}</p>
-                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">{t('progress.totalUsers')}</p>
-              </div>
-              <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
-                <p className="text-3xl font-bold text-[var(--student-primary)]">{stats.users.students}</p>
-                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">{t('progress.students')}</p>
-              </div>
-              <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
-                <p className="text-3xl font-bold text-[var(--success)]">{stats.users.teachers}</p>
-                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">{t('progress.teachers')}</p>
-              </div>
-              <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
-                <p className="text-3xl font-bold text-[var(--primary)]">{stats.users.admins}</p>
-                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">{t('progress.admins')}</p>
-              </div>
-              <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
-                <p className="text-3xl font-bold text-[var(--warning)]">{stats.users.newThisMonth}</p>
-                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">{t('progress.newThisMonth')}</p>
-              </div>
+              <StatCard
+                icon={Users}
+                value={stats.users.total}
+                label={t('progress.totalUsers')}
+                color="info"
+                delay={0.1}
+              />
+              <StatCard
+                icon={Users}
+                value={stats.users.students}
+                label={t('progress.students')}
+                color="student"
+                delay={0.15}
+              />
+              <StatCard
+                icon={Users}
+                value={stats.users.teachers}
+                label={t('progress.teachers')}
+                color="success"
+                delay={0.2}
+              />
+              <StatCard
+                icon={Users}
+                value={stats.users.admins}
+                label={t('progress.admins')}
+                color="admin"
+                delay={0.25}
+              />
+              <StatCard
+                icon={Users}
+                value={stats.users.newThisMonth}
+                label={t('progress.newThisMonth')}
+                color="warning"
+                delay={0.3}
+              />
             </div>
           </motion.div>
 
@@ -193,30 +208,48 @@ export default function AdminAnalyticsPage() {
               {t('progress.contentEngagement')}
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-              <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
-                <p className="text-3xl font-bold text-[var(--info)]">{stats.courses.total}</p>
-                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">{t('progress.totalCourses')}</p>
-              </div>
-              <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
-                <p className="text-3xl font-bold text-[var(--success)]">{stats.courses.published}</p>
-                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">{t('progress.published')}</p>
-              </div>
-              <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
-                <p className="text-3xl font-bold text-[var(--student-primary)]">{stats.enrollments.total}</p>
-                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">{t('progress.enrollments')}</p>
-              </div>
-              <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
-                <p className="text-3xl font-bold text-[var(--warning)]">{stats.enrollments.active}</p>
-                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">{t('progress.activeEnrollments')}</p>
-              </div>
-              <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
-                <p className="text-3xl font-bold text-[var(--student-accent)]">{stats.quizzes.total}</p>
-                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">{t('common.quizzes')}</p>
-              </div>
-              <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
-                <p className="text-3xl font-bold text-[var(--primary)]">{stats.quizzes.totalAttempts}</p>
-                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">{t('analytics.quizAttempts')}</p>
-              </div>
+              <StatCard
+                icon={BookOpen}
+                value={stats.courses.total}
+                label={t('progress.totalCourses')}
+                color="info"
+                delay={0.1}
+              />
+              <StatCard
+                icon={BookOpen}
+                value={stats.courses.published}
+                label={t('progress.published')}
+                color="success"
+                delay={0.15}
+              />
+              <StatCard
+                icon={BookOpen}
+                value={stats.enrollments.total}
+                label={t('progress.enrollments')}
+                color="student"
+                delay={0.2}
+              />
+              <StatCard
+                icon={BookOpen}
+                value={stats.enrollments.active}
+                label={t('progress.activeEnrollments')}
+                color="warning"
+                delay={0.25}
+              />
+              <StatCard
+                icon={BookOpen}
+                value={stats.quizzes.total}
+                label={t('common.quizzes')}
+                color="student"
+                delay={0.3}
+              />
+              <StatCard
+                icon={BookOpen}
+                value={stats.quizzes.totalAttempts}
+                label={t('analytics.quizAttempts')}
+                color="admin"
+                delay={0.35}
+              />
             </div>
           </motion.div>
 
@@ -231,14 +264,20 @@ export default function AdminAnalyticsPage() {
               {t('common.blogs')}
             </h2>
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
-                <p className="text-3xl font-bold text-[var(--info)]">{stats.blogs?.total || 0}</p>
-                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">{t('progress.totalBlogs')}</p>
-              </div>
-              <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
-                <p className="text-3xl font-bold text-[var(--success)]">{stats.blogs?.published || 0}</p>
-                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">{t('progress.published')}</p>
-              </div>
+              <StatCard
+                icon={BookOpen}
+                value={stats.blogs?.total || 0}
+                label={t('progress.totalBlogs')}
+                color="info"
+                delay={0.1}
+              />
+              <StatCard
+                icon={BookOpen}
+                value={stats.blogs?.published || 0}
+                label={t('progress.published')}
+                color="success"
+                delay={0.15}
+              />
             </div>
           </motion.div>
 
@@ -253,39 +292,37 @@ export default function AdminAnalyticsPage() {
               {t('progress.quizPerformance')}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow">
-                <p className="text-sm text-[var(--color-muted-foreground)] mb-2">{t('analytics.averageScore')}</p>
-                <div className="flex items-end">
-                  <p className="text-4xl font-bold text-[var(--info)]">{stats.quizzes.averageScore}%</p>
-                </div>
-                <div className="mt-4 w-full bg-[var(--border)] rounded-full h-2">
-                  <div
-                    className={`bg-gradient-to-r ${theme.gradient} h-2 rounded-full transition-all`}
-                    style={{ width: `${stats.quizzes.averageScore}%` }}
-                  />
-                </div>
-              </div>
-              <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow">
-                <p className="text-sm text-[var(--color-muted-foreground)] mb-2">{t('progress.highestScore')}</p>
-                <p className="text-4xl font-bold text-[var(--success)]">{stats.quizzes.highestScore}%</p>
-                <div className="mt-4 w-full bg-[var(--border)] rounded-full h-2">
-                  <div
-                    className={`bg-gradient-to-r ${theme.gradient} h-2 rounded-full transition-all`}
-                    style={{ width: `${stats.quizzes.highestScore}%` }}
-                  />
-                </div>
-              </div>
-              <div className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow">
-                <p className="text-sm text-[var(--color-muted-foreground)] mb-2">{t('progress.completionRate')}</p>
-                <p className="text-4xl font-bold text-[var(--student-primary)]">
-                  {stats.enrollments.total > 0
-                    ? Math.round((stats.enrollments.completed / stats.enrollments.total) * 100)
-                    : 0}%
-                </p>
-                <p className="text-sm text-[var(--color-muted-foreground)] mt-2">
-                  {t('progress.ofEnrollments', { completed: stats.enrollments.completed, total: stats.enrollments.total })}
-                </p>
-              </div>
+              <StatCard
+                icon={Award}
+                value={stats.quizzes.averageScore}
+                label={t('analytics.averageScore')}
+                color="info"
+                delay={0.1}
+                suffix="%"
+                showProgress={true}
+                progress={stats.quizzes.averageScore}
+              />
+              <StatCard
+                icon={Award}
+                value={stats.quizzes.highestScore}
+                label={t('progress.highestScore')}
+                color="success"
+                delay={0.15}
+                suffix="%"
+                showProgress={true}
+                progress={stats.quizzes.highestScore}
+              />
+              <StatCard
+                icon={Award}
+                value={stats.enrollments.total > 0 ? Math.round((stats.enrollments.completed / stats.enrollments.total) * 100) : 0}
+                label={t('progress.completionRate')}
+                color="student"
+                delay={0.2}
+                suffix="%"
+                description={t('progress.ofEnrollments', { completed: stats.enrollments.completed, total: stats.enrollments.total })}
+                showProgress={true}
+                progress={stats.enrollments.total > 0 ? Math.round((stats.enrollments.completed / stats.enrollments.total) * 100) : 0}
+              />
             </div>
           </motion.div>
 
@@ -305,30 +342,15 @@ export default function AdminAnalyticsPage() {
               ) : (
                 <div className="divide-y divide-[var(--border)]">
                   {stats.recentActivity.map((activity, index) => (
-                    <motion.div
+                    <ActivityCard
                       key={index}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.5 + index * 0.05 }}
-                      className="p-4 flex items-center justify-between hover:bg-[var(--color-surface-muted)] transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-full bg-[var(--info-light)] text-[var(--info)]">
-                          <GraduationCap className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-[var(--color-foreground)]">
-                            {t('progress.enrolledIn', { user: activity.user, course: activity.course })}
-                          </p>
-                          <p className="text-xs text-[var(--color-muted-foreground)]">
-                            {formatDateTime(activity.date)}
-                          </p>
-                        </div>
-                      </div>
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[var(--info-light)] text-[var(--info)]">
-                        {t('progress.enrollment')}
-                      </span>
-                    </motion.div>
+                      icon={GraduationCap}
+                      title={t('progress.enrolledIn', { user: activity.user, course: activity.course })}
+                      description={t('progress.enrollment')}
+                      date={formatDateTime(activity.date)}
+                      color="info"
+                      delay={0.5 + index * 0.05}
+                    />
                   ))}
                 </div>
               )}

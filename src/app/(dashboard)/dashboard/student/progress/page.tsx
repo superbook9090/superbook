@@ -12,10 +12,24 @@ import { PageSkeleton } from '@/components/ui/Skeleton';
 import Alert from '@/components/ui/Alert';
 import { motion } from 'framer-motion';
 import { CheckCircle, Clock, Circle } from 'lucide-react';
-import ScoreTrendChart from '@/components/charts/ScoreTrendChart';
-import CourseProgressChart from '@/components/charts/CourseProgressChart';
-import QuizStatusChart from '@/components/charts/QuizStatusChart';
-import AverageScoreChart from '@/components/charts/AverageScoreChart';
+import dynamic from 'next/dynamic';
+
+const ScoreTrendChart = dynamic(() => import('@/components/charts/ScoreTrendChart'), {
+  loading: () => <div className="h-[300px] bg-white rounded-2xl p-5 shadow-sm flex items-center justify-center text-[var(--color-muted-foreground)]">Loading chart...</div>,
+  ssr: false
+});
+const CourseProgressChart = dynamic(() => import('@/components/charts/CourseProgressChart'), {
+  loading: () => <div className="h-[300px] bg-white rounded-2xl p-5 shadow-sm flex items-center justify-center text-[var(--color-muted-foreground)]">Loading chart...</div>,
+  ssr: false
+});
+const QuizStatusChart = dynamic(() => import('@/components/charts/QuizStatusChart'), {
+  loading: () => <div className="h-[300px] bg-white rounded-2xl p-5 shadow-sm flex items-center justify-center text-[var(--color-muted-foreground)]">Loading chart...</div>,
+  ssr: false
+});
+const AverageScoreChart = dynamic(() => import('@/components/charts/AverageScoreChart'), {
+  loading: () => <div className="h-[300px] bg-white rounded-2xl p-5 shadow-sm flex items-center justify-center text-[var(--color-muted-foreground)]">Loading chart...</div>,
+  ssr: false
+});
 import { fetchStudentProgress } from '@/lib/api/progress';
 import { ApiClientError } from '@/lib/api/http';
 

@@ -990,6 +990,7 @@ export const hi = {
     createOne: 'बनाएं',
     invalidCredentials: 'अमान्य ईमेल या पासवर्ड',
     genericError: 'एक त्रुटि हुई। कृपया पुनः प्रयास करें।',
+    signIn: 'साइन इन करें'
   },
 
   // Register

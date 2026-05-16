@@ -21,6 +21,8 @@ import {
 } from 'lucide-react';
 import Alert from '@/components/ui/Alert';
 import { PageSkeleton } from '@/components/ui/Skeleton';
+import StatCard from '@/components/ui/StatCard';
+import QuickActionCard from '@/components/ui/QuickActionCard';
 
 // Types are now imported from hooks
 interface Course {
@@ -198,118 +200,43 @@ export default function TeacherDashboardPage() {
 
       {/* Stats Cards - Modern Design */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-        {/* Courses with Progress */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="group relative overflow-hidden rounded-2xl bg-[var(--card-solid)] p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-        >
-          <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-[var(--teacher-soft)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
-          <div className="relative">
-            <div className="p-2 sm:p-3 rounded-xl bg-[var(--teacher-soft)] text-[var(--teacher-primary)] w-fit mb-4">
-              <BookOpen className="w-5 h-5 sm:w-6 sm:h-6" />
-            </div>
-            <div className="text-2xl sm:text-3xl font-bold text-[var(--color-foreground)] mb-1">
-              {stats.totalCourses} / {getLimit('courses')}
-            </div>
-            <div className="text-sm text-[var(--color-muted-foreground)] mb-2">{t('dashboard.myCourses')}</div>
-            <div className="w-full bg-[var(--border)] rounded-full h-2">
-              <div
-                className={`h-2 rounded-full transition-all ${
-                  isAtLimit('courses') ? 'bg-[var(--error)]' : isNearLimit('courses') ? 'bg-[var(--warning)]' : 'bg-[var(--success)]'
-                }`}
-                style={{ width: `${Math.min(getUsagePercentage('courses'), 100)}%` }}
-              />
-            </div>
-            {isNearLimit('courses') && !isAtLimit('courses') && (
-              <div className="mt-2 text-xs text-[var(--warning)] font-medium">
-                ⚠️ {Math.round(getUsagePercentage('courses'))}% used
-              </div>
-            )}
-          </div>
-        </motion.div>
-
-        {/* Total Students */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="group relative overflow-hidden rounded-2xl bg-[var(--card-solid)] p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-        >
-          <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-[var(--info-light)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
-          <div className="relative">
-            <div className="p-2 sm:p-3 rounded-xl bg-[var(--info-light)] text-[var(--info)] w-fit mb-4">
-              <Users className="w-5 h-5 sm:w-6 sm:h-6" />
-            </div>
-            <div className="text-2xl sm:text-3xl font-bold text-[var(--color-foreground)] mb-1">{stats.totalStudents}</div>
-            <div className="text-sm text-[var(--color-muted-foreground)]">{t('dashboard.students')}</div>
-          </div>
-        </motion.div>
-
-        {/* Quizzes with Progress */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="group relative overflow-hidden rounded-2xl bg-[var(--card-solid)] p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-        >
-          <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-[var(--student-soft)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
-          <div className="relative">
-            <div className="p-2 sm:p-3 rounded-xl bg-[var(--student-soft)] text-[var(--student-primary)] w-fit mb-4">
-              <HelpCircle className="w-5 h-5 sm:w-6 sm:h-6" />
-            </div>
-            <div className="text-2xl sm:text-3xl font-bold text-[var(--color-foreground)] mb-1">
-              {filteredStats.totalQuizzes} / {getLimit('quizzes')}
-            </div>
-            <div className="text-sm text-[var(--color-muted-foreground)] mb-2">{t('dashboard.myQuizzes')}</div>
-            <div className="w-full bg-[var(--border)] rounded-full h-2">
-              <div
-                className={`h-2 rounded-full transition-all ${
-                  isAtLimit('quizzes') ? 'bg-[var(--error)]' : isNearLimit('quizzes') ? 'bg-[var(--warning)]' : 'bg-[var(--student-primary)]'
-                }`}
-                style={{ width: `${Math.min(getUsagePercentage('quizzes'), 100)}%` }}
-              />
-            </div>
-            {isNearLimit('quizzes') && !isAtLimit('quizzes') && (
-              <div className="mt-2 text-xs text-[var(--warning)] font-medium">
-                ⚠️ {Math.round(getUsagePercentage('quizzes'))}% used
-              </div>
-            )}
-          </div>
-        </motion.div>
-
-        {/* Blogs with Progress */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="group relative overflow-hidden rounded-2xl bg-[var(--card-solid)] p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-        >
-          <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-[var(--admin-soft)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
-          <div className="relative">
-            <div className="p-2 sm:p-3 rounded-xl bg-[var(--admin-soft)] text-[var(--admin-primary)] w-fit mb-4">
-              <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6" />
-            </div>
-            <div className="text-2xl sm:text-3xl font-bold text-[var(--color-foreground)] mb-1">
-              {filteredStats.totalBlogs} / {getLimit('blogs')}
-            </div>
-            <div className="text-sm text-[var(--color-muted-foreground)] mb-2">{t('dashboard.myBlogs')}</div>
-            <div className="w-full bg-[var(--border)] rounded-full h-2">
-              <div
-                className={`h-2 rounded-full transition-all ${
-                  isAtLimit('blogs') ? 'bg-[var(--error)]' : isNearLimit('blogs') ? 'bg-[var(--warning)]' : 'bg-[var(--admin-primary)]'
-                }`}
-                style={{ width: `${Math.min(getUsagePercentage('blogs'), 100)}%` }}
-              />
-            </div>
-            {isNearLimit('blogs') && !isAtLimit('blogs') && (
-              <div className="mt-2 text-xs text-[var(--warning)] font-medium">
-                ⚠️ {Math.round(getUsagePercentage('blogs'))}% used
-              </div>
-            )}
-          </div>
-        </motion.div>
+        <StatCard
+          icon={BookOpen}
+          value={`${stats.totalCourses} / ${getLimit('courses')}`}
+          label={t('dashboard.myCourses')}
+          color="teacher"
+          delay={0.1}
+          showProgress={true}
+          progress={getUsagePercentage('courses')}
+          description={isNearLimit('courses') && !isAtLimit('courses') ? `⚠️ ${Math.round(getUsagePercentage('courses'))}% used` : undefined}
+        />
+        <StatCard
+          icon={Users}
+          value={stats.totalStudents}
+          label={t('dashboard.students')}
+          color="info"
+          delay={0.2}
+        />
+        <StatCard
+          icon={HelpCircle}
+          value={`${filteredStats.totalQuizzes} / ${getLimit('quizzes')}`}
+          label={t('dashboard.myQuizzes')}
+          color="student"
+          delay={0.3}
+          showProgress={true}
+          progress={getUsagePercentage('quizzes')}
+          description={isNearLimit('quizzes') && !isAtLimit('quizzes') ? `⚠️ ${Math.round(getUsagePercentage('quizzes'))}% used` : undefined}
+        />
+        <StatCard
+          icon={BarChart3}
+          value={`${filteredStats.totalBlogs} / ${getLimit('blogs')}`}
+          label={t('dashboard.myBlogs')}
+          color="admin"
+          delay={0.4}
+          showProgress={true}
+          progress={getUsagePercentage('blogs')}
+          description={isNearLimit('blogs') && !isAtLimit('blogs') ? `⚠️ ${Math.round(getUsagePercentage('blogs'))}% used` : undefined}
+        />
       </div>
 
       {/* Recent Courses - Modern Design */}
@@ -366,112 +293,48 @@ export default function TeacherDashboardPage() {
       >
         <h2 className="text-lg sm:text-xl font-semibold text-[var(--color-foreground)] mb-4">{t('dashboard.quickActions')}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-          <motion.a
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+          <QuickActionCard
+            icon={BookOpen}
+            title={t('dashboard.manageCourses')}
+            description={t('dashboard.viewAndEdit')}
             href="/dashboard/teacher/courses"
-            className="flex items-center justify-center sm:justify-start w-full min-h-[44px] p-3 sm:p-4 rounded-xl bg-[var(--teacher-soft)] hover:bg-[var(--teacher-border)] transition-colors group"
-          >
-            <div className="p-2 sm:p-3 rounded-lg bg-[var(--teacher-primary)]/20 text-[var(--teacher-primary)] group-hover:bg-[var(--teacher-primary)]/30 transition-colors">
-              <BookOpen className="w-5 h-5" />
-            </div>
-            <div className="ml-3 text-left">
-              <div className="font-semibold text-sm sm:text-base text-[var(--color-foreground)]">{t('dashboard.manageCourses')}</div>
-              <div className="text-xs text-[var(--color-muted-foreground)]">{t('dashboard.viewAndEdit')}</div>
-            </div>
-          </motion.a>
-
-          <motion.a
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            color="teacher"
+            delay={0.1}
+          />
+          <QuickActionCard
+            icon={HelpCircle}
+            title={t('dashboard.manageQuizzes')}
+            description={t('dashboard.createAndReview')}
             href="/dashboard/teacher/quizzes"
-            className="flex items-center justify-center sm:justify-start w-full min-h-[44px] p-3 sm:p-4 rounded-xl bg-[var(--student-soft)] hover:bg-[var(--student-border)] transition-colors group"
-          >
-            <div className="p-2 sm:p-3 rounded-lg bg-[var(--student-primary)]/20 text-[var(--student-primary)] group-hover:bg-[var(--student-primary)]/30 transition-colors">
-              <HelpCircle className="w-5 h-5" />
-            </div>
-            <div className="ml-3 text-left">
-              <div className="font-semibold text-sm sm:text-base text-[var(--color-foreground)]">{t('dashboard.manageQuizzes')}</div>
-              <div className="text-xs text-[var(--color-muted-foreground)]">{t('dashboard.createAndReview')}</div>
-            </div>
-          </motion.a>
-
-          <motion.a
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            color="student"
+            delay={0.15}
+          />
+          <QuickActionCard
+            icon={BarChart3}
+            title={t('dashboard.analytics')}
+            description={t('dashboard.viewInsights')}
             href="/dashboard/teacher/analytics"
-            className="flex items-center justify-center sm:justify-start w-full min-h-[44px] p-3 sm:p-4 rounded-xl bg-[var(--info-light)] hover:bg-[var(--info-light)]/80 transition-colors group"
-          >
-            <div className="p-2 sm:p-3 rounded-lg bg-[var(--info)]/20 text-[var(--info)] group-hover:bg-[var(--info)]/30 transition-colors">
-              <BarChart3 className="w-5 h-5" />
-            </div>
-            <div className="ml-3 text-left">
-              <div className="font-semibold text-sm sm:text-base text-[var(--color-foreground)]">{t('dashboard.analytics')}</div>
-              <div className="text-xs text-[var(--color-muted-foreground)]">{t('dashboard.viewInsights')}</div>
-            </div>
-          </motion.a>
-
-          <motion.a
-            whileHover={{ scale: filteredStats.totalCourses < limits.courses ? 1.02 : 1 }}
-            whileTap={{ scale: filteredStats.totalCourses < limits.courses ? 0.98 : 1 }}
+            color="info"
+            delay={0.2}
+          />
+          <QuickActionCard
+            icon={Plus}
+            title={t('dashboard.createCourse')}
+            description={t('dashboard.addNewContent')}
             href={filteredStats.totalCourses < limits.courses ? '/dashboard/teacher/courses/create' : '#'}
-            onClick={(e) => {
-              if (filteredStats.totalCourses >= limits.courses) {
-                e.preventDefault();
-                setLimitAlert({ type: 'courses' });
-              }
-            }}
-            className={`flex items-center justify-center sm:justify-start w-full min-h-[44px] p-3 sm:p-4 rounded-xl transition-colors group ${
-              filteredStats.totalCourses >= limits.courses
-                ? 'bg-[var(--color-surface-muted)] cursor-not-allowed'
-                : 'bg-[var(--warning-light)] hover:bg-[var(--warning-light)]/80'
-            }`}
-          >
-            <div className={`p-2 sm:p-3 rounded-lg transition-colors ${
-              filteredStats.totalCourses >= limits.courses
-                ? 'bg-[var(--color-muted-foreground)] text-[var(--color-muted-foreground)]'
-                : 'bg-[var(--warning)]/20 text-[var(--warning)] group-hover:bg-[var(--warning)]/30'
-            }`}>
-              <Plus className="w-5 h-5" />
-            </div>
-            <div className="ml-3 text-left">
-              <div className={`font-semibold text-sm sm:text-base ${
-                filteredStats.totalCourses >= limits.courses ? 'text-[var(--color-muted-foreground)]' : 'text-[var(--color-foreground)]'
-              }`}>{t('dashboard.createCourse')}</div>
-              <div className="text-xs text-[var(--color-muted-foreground)]">{t('dashboard.addNewContent')}</div>
-            </div>
-          </motion.a>
-
-          <motion.a
-            whileHover={{ scale: filteredStats.totalBlogs < limits.blogs ? 1.02 : 1 }}
-            whileTap={{ scale: filteredStats.totalBlogs < limits.blogs ? 0.98 : 1 }}
+            color="warning"
+            disabled={filteredStats.totalCourses >= limits.courses}
+            delay={0.25}
+          />
+          <QuickActionCard
+            icon={Plus}
+            title={t('dashboard.createBlog')}
+            description={t('dashboard.writeNewContent')}
             href={filteredStats.totalBlogs < limits.blogs ? '/dashboard/teacher/blogs/create' : '#'}
-            onClick={(e) => {
-              if (filteredStats.totalBlogs >= limits.blogs) {
-                e.preventDefault();
-                setLimitAlert({ type: 'blogs' });
-              }
-            }}
-            className={`flex items-center justify-center sm:justify-start w-full min-h-[44px] p-3 sm:p-4 rounded-xl transition-colors group ${
-              filteredStats.totalBlogs >= limits.blogs
-                ? 'bg-[var(--color-surface-muted)] cursor-not-allowed'
-                : 'bg-[var(--admin-soft)] hover:bg-[var(--admin-border)]'
-            }`}
-          >
-            <div className={`p-2 sm:p-3 rounded-lg transition-colors ${
-              filteredStats.totalBlogs >= limits.blogs
-                ? 'bg-[var(--color-muted-foreground)] text-[var(--color-muted-foreground)]'
-                : 'bg-[var(--admin-primary)]/20 text-[var(--admin-primary)] group-hover:bg-[var(--admin-primary)]/30'
-            }`}>
-              <Plus className="w-5 h-5" />
-            </div>
-            <div className="ml-3 text-left">
-              <div className={`font-semibold text-sm sm:text-base ${
-                filteredStats.totalBlogs >= limits.blogs ? 'text-[var(--color-muted-foreground)]' : 'text-[var(--color-foreground)]'
-              }`}>{t('dashboard.createBlog')}</div>
-              <div className="text-xs text-[var(--color-muted-foreground)]">{t('dashboard.writeNewContent')}</div>
-            </div>
-          </motion.a>
+            color="admin"
+            disabled={filteredStats.totalBlogs >= limits.blogs}
+            delay={0.3}
+          />
         </div>
       </motion.div>
     </div>

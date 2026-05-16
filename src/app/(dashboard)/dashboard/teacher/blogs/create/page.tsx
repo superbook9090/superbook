@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, lazy, Suspense } from 'react';
+import { useState, Suspense } from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -14,7 +15,10 @@ import { ApiClientError } from '@/lib/api/http';
 import { useTranslation } from '@/hooks/useTranslation';
 import { blogTopicKeys, blogTopicValues, supportedLanguages, type BlogTopicKey } from '@/i18n/config';
 
-const RichTextEditor = lazy(() => import('@/components/ui/RichTextEditor'));
+const RichTextEditor = dynamic(() => import('@/components/ui/RichTextEditor'), {
+  ssr: false,
+  loading: () => <PageSkeleton variant="embed" />
+});
 
 export default function CreateBlogPage() {
   const { status } = useSessionStore();

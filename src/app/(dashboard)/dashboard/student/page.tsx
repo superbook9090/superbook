@@ -17,6 +17,8 @@ import {
 import Alert from '@/components/ui/Alert';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { useSessionStore } from '@/store/useSessionStore';
+import StatCard from '@/components/ui/StatCard';
+import ActivityCard from '@/components/ui/ActivityCard';
 
 interface Enrollment {
   _id: string;
@@ -153,71 +155,30 @@ export default function StudentDashboardPage() {
 
       {/* Stats Cards - Modern Design */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-        {/* Enrolled Courses */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="group relative overflow-hidden rounded-2xl bg-[var(--card-solid)] p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-        >
-          <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-[var(--student-soft)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
-          <div className="relative">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-2 sm:p-3 rounded-xl bg-[var(--student-soft)] text-[var(--student-primary)]">
-                <BookOpen className="w-5 h-5 sm:w-6 sm:h-6" />
-              </div>
-              <span className="text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider">{t('common.courses')}</span>
-            </div>
-            <div className="text-2xl sm:text-3xl font-bold text-[var(--color-foreground)] mb-1">{stats.enrolledCount}</div>
-            <div className="text-sm text-[var(--color-muted-foreground)]">{t('dashboard.enrolledCourses')}</div>
-          </div>
-        </motion.div>
-
-        {/* Completed Quizzes */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="group relative overflow-hidden rounded-2xl bg-[var(--card-solid)] p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-        >
-          <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-[var(--success-light)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
-          <div className="relative">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-2 sm:p-3 rounded-xl bg-[var(--success-light)] text-[var(--success)]">
-                <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6" />
-              </div>
-              <span className="text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider">{t('common.quizzes')}</span>
-            </div>
-            <div className="text-2xl sm:text-3xl font-bold text-[var(--color-foreground)] mb-1">{stats.completedQuizzes}</div>
-            <div className="text-sm text-[var(--color-muted-foreground)]">{t('dashboard.completedQuizzes')}</div>
-          </div>
-        </motion.div>
-
-        {/* Average Score */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="group relative overflow-hidden rounded-2xl bg-[var(--card-solid)] p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-        >
-          <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-[var(--warning-light)] rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
-          <div className="relative">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-2 sm:p-3 rounded-xl bg-[var(--warning-light)] text-[var(--warning)]">
-                <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6" />
-              </div>
-              <span className="text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider">{t('common.performance')}</span>
-            </div>
-            <div className="text-2xl sm:text-3xl font-bold text-[var(--color-foreground)] mb-1">{stats.averageScore}%</div>
-            <div className="text-sm text-[var(--color-muted-foreground)]">{t('dashboard.averageScore')}</div>
-            <div className="mt-3 h-2 bg-[var(--border)] rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-gradient-to-r from-[var(--warning)] to-[var(--warning)] rounded-full transition-all duration-500"
-                style={{ width: `${stats.averageScore}%` }}
-              />
-            </div>
-          </div>
-        </motion.div>
+        <StatCard
+          icon={BookOpen}
+          value={stats.enrolledCount}
+          label={t('dashboard.enrolledCourses')}
+          color="student"
+          delay={0.1}
+        />
+        <StatCard
+          icon={CheckCircle}
+          value={stats.completedQuizzes}
+          label={t('dashboard.completedQuizzes')}
+          color="success"
+          delay={0.2}
+        />
+        <StatCard
+          icon={TrendingUp}
+          value={stats.averageScore}
+          label={t('dashboard.averageScore')}
+          color="warning"
+          delay={0.3}
+          suffix="%"
+          showProgress={true}
+          progress={stats.averageScore}
+        />
       </div>
 
       {/* Recent Activity - Modern Design */}
@@ -245,45 +206,27 @@ export default function StudentDashboardPage() {
             </div>
           ) : (
             recentActivity.map((item, index) => (
-              <motion.div
+              <ActivityCard
                 key={index}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 + index * 0.05 }}
-                className="px-4 py-3 sm:px-6 sm:py-4 flex items-center space-x-3 sm:space-x-4 hover:bg-[var(--background)]/50 transition-colors"
-              >
-                {/* Icon */}
-                <div className={`flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center ${
-                  item.type === 'enrollment' 
-                    ? 'bg-[var(--student-soft)] text-[var(--student-primary)]' 
-                    : 'bg-[var(--success-light)] text-[var(--success)]'
-                }`}>
-                  {item.type === 'enrollment' ? (
-                    <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
-                  ) : (
-                    <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
-                  )}
-                </div>
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs sm:text-sm font-semibold text-[var(--color-foreground)]">
-                    {item.type === 'enrollment'
-                      ? t('dashboard.enrolledIn').replace('{title}', item.course?.title || t('common.aCourse'))
-                      : t('dashboard.completed').replace('{title}', item.quiz?.title || t('common.quiz'))}
-                  </p>
-                  <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] mt-0.5">
-                    {item.type === 'enrollment'
-                      ? `${t('dashboard.progress')}: ${item.progress}%`
-                      : `${t('dashboard.score')}: ${item.score}%`}
-                  </p>
-                </div>
-                {/* Date */}
-                <div className="flex-shrink-0 text-xs sm:text-sm text-[var(--color-muted-foreground)]">
-                  {item.type === 'enrollment'
+                icon={item.type === 'enrollment' ? BookOpen : CheckCircle}
+                title={
+                  item.type === 'enrollment'
+                    ? t('dashboard.enrolledIn').replace('{title}', item.course?.title || t('common.aCourse'))
+                    : t('dashboard.completed').replace('{title}', item.quiz?.title || t('common.quiz'))
+                }
+                description={
+                  item.type === 'enrollment'
+                    ? `${t('dashboard.progress')}: ${item.progress}%`
+                    : `${t('dashboard.score')}: ${item.score}%`
+                }
+                date={
+                  item.type === 'enrollment'
                     ? formatDate(item.enrolledAt)
-                    : formatDate(item.submittedAt || item.startedAt)}
-                </div>
-              </motion.div>
+                    : formatDate(item.submittedAt || item.startedAt)
+                }
+                color={item.type === 'enrollment' ? 'student' : 'success'}
+                delay={0.5 + index * 0.05}
+              />
             ))
           )}
         </div>
