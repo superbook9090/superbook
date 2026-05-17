@@ -1136,7 +1136,7 @@ export const en = {
       email: 'Support Email',
       phone: 'Phone Number',
       office: 'Office Address',
-      officeValue: '123 Learning Lane, Tech Park, Sector 62, Noida, Uttar Pradesh, 201301',
+      officeValue: 'Saket Nagar, Chirgaon, Jhansi, Uttar Pradesh, 2843011',
       socials: 'Follow Us',
       mapMock: 'Interactive Map Mock',
     },

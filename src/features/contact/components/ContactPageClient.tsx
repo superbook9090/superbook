@@ -86,6 +86,24 @@ const Facebook = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
+const Instagram = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 24 24"
+    width="24"
+    height="24"
+    stroke="currentColor"
+    strokeWidth="2"
+    fill="none"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+  </svg>
+);
+
 interface FormState {
   name: string;
   email: string;
@@ -501,8 +519,8 @@ export default function ContactPageClient() {
                     <h4 className="text-xs font-black uppercase tracking-wider text-[var(--color-muted)] mb-1">
                       {t('contact.info.email')}
                     </h4>
-                    <a href="mailto:support@quiz-do.com" className="text-sm font-bold text-[var(--primary)] hover:text-[var(--primary-hover)] hover:underline transition-all">
-                      support@quiz-do.com
+                    <a href="mailto:quizdo9090@gmail.com" className="text-sm font-bold text-[var(--primary)] hover:text-[var(--primary-hover)] hover:underline transition-all">
+                      quizdo9090@gmail.com
                     </a>
                   </div>
                 </div>
@@ -517,7 +535,7 @@ export default function ContactPageClient() {
                       {t('contact.info.phone')}
                     </h4>
                     <a href="tel:+15551234567" className="text-sm font-bold text-[var(--color-foreground)] hover:text-[var(--primary)] transition-colors">
-                      +1 (555) 123-4567
+                      7052836069
                     </a>
                   </div>
                 </div>
@@ -545,6 +563,7 @@ export default function ContactPageClient() {
                 </h4>
                 <div className="flex items-center gap-3">
                   {[
+                    { icon: Instagram, href: 'https://www.instagram.com/quiz_do__/?hl=en', name: 'Instagram' },
                     { icon: Github, href: 'https://github.', name: 'GitHub' },
                     { icon: Twitter, href: 'https://twitter.', name: 'Twitter' },
                     { icon: Linkedin, href: 'https://linkedin.', name: 'LinkedIn' },
