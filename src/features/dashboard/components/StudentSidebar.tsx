@@ -17,7 +17,8 @@ import {
   LogOut,
   Newspaper,
   Heart,
-  Folder
+  Folder,
+  Mail
 } from 'lucide-react';
 import { useFeature } from '@/contexts/AppSettingsContext';
 import { useQuiz } from '@/contexts/QuizContext';
@@ -32,6 +33,7 @@ const studentNavigation = [
   { name: 'common.quizzes', href: '/dashboard/student/quizzes', icon: HelpCircle },
   { name: 'common.progress', href: '/dashboard/student/progress', icon: TrendingUp },
   { name: 'common.profile', href: '/dashboard/student/profile', icon: User },
+  { name: 'contact.title', href: '/contact', icon: Mail },
 ];
 
 interface User {

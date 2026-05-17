@@ -18,7 +18,8 @@ import {
   Library,
   Newspaper,
   Building2,
-  Folder
+  Folder,
+  Mail
 } from 'lucide-react';
 import { useFeature } from '@/contexts/AppSettingsContext';
 import { useQuiz } from '@/contexts/QuizContext';
@@ -31,6 +32,7 @@ const teacherNavigation = [
   { name: 'common.blogs', href: '/dashboard/teacher/blogs', icon: Newspaper, feature: 'enableBlogs' },
   { name: 'common.analytics', href: '/dashboard/teacher/analytics', icon: BarChart3 },
   { name: 'common.profile', href: '/dashboard/teacher/profile', icon: User },
+  { name: 'contact.title', href: '/contact', icon: Mail },
 ];
 
 const adminNavigation = [

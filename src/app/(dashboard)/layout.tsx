@@ -21,6 +21,7 @@ const studentNavigation = [
   { name: 'Quizzes', href: '/dashboard/student/quizzes', icon: 'HelpCircle' },
   { name: 'Progress', href: '/dashboard/student/progress', icon: 'TrendingUp' },
   { name: 'Profile', href: '/dashboard/student/profile', icon: 'User' },
+  { name: 'Contact Us', href: '/contact', icon: 'Mail' },
 ];
 
 const teacherNavigation = [
@@ -30,6 +31,7 @@ const teacherNavigation = [
   { name: 'Blogs', href: '/dashboard/teacher/blogs', icon: 'Library' },
   { name: 'Analytics', href: '/dashboard/teacher/analytics', icon: 'BarChart3' },
   { name: 'Profile', href: '/dashboard/teacher/profile', icon: 'User' },
+  { name: 'Contact Us', href: '/contact', icon: 'Mail' },
 ];
 
 const adminNavigation = [

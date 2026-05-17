@@ -64,10 +64,12 @@ class RateLimiter {
 export const authRateLimiter = new RateLimiter(60 * 1000, 5); // 5 requests per minute
 export const generalRateLimiter = new RateLimiter(60 * 1000, 60); // 60 requests per minute
 export const adminRateLimiter = new RateLimiter(60 * 1000, 30); // 30 requests per minute
+export const contactRateLimiter = new RateLimiter(60 * 1000, 3); // 3 requests per minute
 
 // Cleanup expired entries every minute
 setInterval(() => {
   authRateLimiter.cleanup();
   generalRateLimiter.cleanup();
   adminRateLimiter.cleanup();
+  contactRateLimiter.cleanup();
 }, 60 * 1000);

@@ -30,24 +30,24 @@
   --radius-2xl: 1.5rem;
 
   /* Role: student */
-  --student-primary: #6366f1;
-  --student-hover: #4f46e5;
-  --student-soft: #eef2ff;
-  --student-border: #e0e7ff;
-  --student-accent: #a78bfa;
-  --student-primary-dark: #4f46e5;
-  --student-gradient: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7);
-  --student-shadow: 0 10px 40px rgba(99, 102, 241, 0.25);
+  --student-primary: #0d9488;
+  --student-hover: #0f766e;
+  --student-soft: #f0fdfa;
+  --student-border: #ccfbf1;
+  --student-accent: #2dd4bf;
+  --student-primary-dark: #115e59;
+  --student-gradient: linear-gradient(135deg, #14b8a6, #0d9488, #2dd4bf);
+  --student-shadow: 0 10px 40px rgba(13, 148, 136, 0.15);
 
   /* Role: teacher / staff */
-  --teacher-primary: #10b981;
-  --teacher-hover: #059669;
-  --teacher-soft: #ecfdf5;
-  --teacher-border: #d1fae5;
+  --teacher-primary: #0891b2;
+  --teacher-hover: #0e7490;
+  --teacher-soft: #ecfeff;
+  --teacher-border: #cffafe;
   --teacher-accent: #22d3ee;
-  --teacher-primary-dark: #047857;
-  --teacher-gradient: linear-gradient(135deg, #10b981, #14b8a6, #06b6d4);
-  --teacher-shadow: 0 10px 40px rgba(16, 185, 129, 0.25);
+  --teacher-primary-dark: #155e75;
+  --teacher-gradient: linear-gradient(135deg, #0891b2, #06b6d4, #22d3ee);
+  --teacher-shadow: 0 10px 40px rgba(8, 145, 178, 0.15);
 
   --primary: var(--student-primary);
   --primary-hover: var(--student-hover);

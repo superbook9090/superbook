@@ -137,6 +137,8 @@ export const en = {
       multiLanguageDesc: 'Full support for English and Hindi with more languages coming.',
       optimizedPerformance: 'Optimized Performance',
       optimizedPerformanceDesc: 'Built with Redis caching and Zustand for lightning-fast experience.',
+      fast: "Fast & Easy To Use",
+      responseTime: "10-20ms Average Response Time"
     },
     footer: {
       tagline: 'Modern Learning Management System for the next generation of education. Learn smarter, grow faster.',
@@ -1084,5 +1086,80 @@ export const en = {
     deleteChapterMessage: 'Are you sure you want to delete this module and all its lessons? This action cannot be undone.',
     deleteLessonTitle: 'Delete Lesson',
     deleteLessonMessage: 'Are you sure you want to delete this lesson?',
+  },
+
+  // Contact Us
+  contact: {
+    title: 'Contact Us',
+    subtitle: "Have questions or feedback? We're here to help! Reach out to us and we'll get back to you shortly.",
+    heroTitle: 'Get in Touch',
+    heroSubtitle: 'Contact the quiz-do Team',
+    responseTime: 'We generally respond to enquiries within 24 business hours.',
+    toast: {
+      success: 'Success',
+      attention: 'Attention',
+    },
+
+    // Form fields
+    form: {
+      name: 'Full Name',
+      namePlaceholder: 'Enter your full name',
+      email: 'Email Address',
+      emailPlaceholder: 'Enter your email address',
+      subject: 'Subject',
+      subjectPlaceholder: 'What is this regarding?',
+      message: 'Message',
+      messagePlaceholder: 'Write your message here...',
+      submit: 'Send Message',
+      sending: 'Sending...',
+      success: 'Thank you! Your message has been sent successfully.',
+      error: 'Failed to send message. Please try again later.',
+
+      // Validation messages
+      validation: {
+        nameRequired: 'Name is required',
+        nameLimit: 'Name must be less than 100 characters',
+        emailRequired: 'Email is required',
+        emailInvalid: 'Please enter a valid email address',
+        emailLimit: 'Email must be less than 100 characters',
+        subjectRequired: 'Subject is required',
+        subjectLimit: 'Subject must be less than 150 characters',
+        messageRequired: 'Message is required',
+        messageLimit: 'Message must be less than 2000 characters',
+      }
+    },
+
+    // Info
+    info: {
+      title: 'Contact Information',
+      subtitle: 'Find us through our channels',
+      email: 'Support Email',
+      phone: 'Phone Number',
+      office: 'Office Address',
+      officeValue: '123 Learning Lane, Tech Park, Sector 62, Noida, Uttar Pradesh, 201301',
+      socials: 'Follow Us',
+      mapMock: 'Interactive Map Mock',
+    },
+
+    // FAQ Mini
+    faq: {
+      title: 'Frequently Asked Questions',
+      subtitle: 'Quick answers to common questions',
+      q1: 'How do I enroll in a course?',
+      a1: 'Go to the Browse section in your Student Dashboard, select any course, and click "Enroll Now". It\'s completely free!',
+      q2: 'How can I reset my password?',
+      a2: 'You can update your profile information in the Profile settings tab, or use the password reset link on the login page.',
+      q3: 'Is quiz-do available in multiple languages?',
+      a3: 'Yes! We fully support both English and Hindi. You can switch languages at any time using the selector in the header.',
+      q4: 'Can I create my own quizzes?',
+      a4: 'If you are registered as a Teacher, you can create courses and quizzes. Students can take quizzes for the courses they are enrolled in.',
+    },
+
+    // CTA
+    cta: {
+      title: 'Ready to start learning?',
+      subtitle: 'Join thousands of students and teachers on the most advanced LMS platform.',
+      button: 'Get Started Now',
+    }
   },
 };

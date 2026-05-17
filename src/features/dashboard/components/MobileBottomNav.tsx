@@ -14,6 +14,7 @@ import {
   BarChart3,
   Library,
   Folder,
+  Mail,
   LucideIcon
 } from 'lucide-react';
 
@@ -28,6 +29,7 @@ const iconMap: Record<string, LucideIcon> = {
   BarChart3,
   Library,
   Folder,
+  Mail,
 };
 
 interface NavItem {
