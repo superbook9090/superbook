@@ -441,7 +441,7 @@ export default function CreateQuizForm({ quizId }: Props) {
           required
           value={formData.title}
           onChange={handleChange}
-          className="mt-1 px-3 py-2 block w-full rounded-md border-[var(--color-border)] shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-[var(--color-foreground)] placeholder-[var(--color-muted-foreground)]"
+          className="mt-1 px-3 py-2 block w-full rounded-md border-[var(--color-border)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] sm:text-sm text-[var(--color-foreground)] placeholder-[var(--color-muted-foreground)]"
           placeholder={t('createQuizForm.enterQuizTitle')}
         />
       </div>
@@ -456,7 +456,7 @@ export default function CreateQuizForm({ quizId }: Props) {
           rows={2}
           value={formData.description}
           onChange={handleChange}
-          className="mt-1 px-3 py-2 block w-full rounded-md border-[var(--color-border)] shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-[var(--color-foreground)] placeholder-[var(--color-muted-foreground)]"
+          className="mt-1 px-3 py-2 block w-full rounded-md border-[var(--color-border)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] sm:text-sm text-[var(--color-foreground)] placeholder-[var(--color-muted-foreground)]"
           placeholder={t('createQuizForm.enterQuizDescription')}
         />
       </div>
@@ -472,7 +472,7 @@ export default function CreateQuizForm({ quizId }: Props) {
           disabled={!!quizId}
           value={formData.course}
           onChange={handleChange}
-          className="mt-1 px-3 py-2 block w-full rounded-md border-[var(--color-border)] shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-[var(--color-foreground)] disabled:opacity-60 disabled:cursor-not-allowed"
+          className="mt-1 px-3 py-2 block w-full rounded-md border-[var(--color-border)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] sm:text-sm text-[var(--color-foreground)] disabled:opacity-60 disabled:cursor-not-allowed"
         >
           <option value="">{t('createQuizForm.selectCourse')}</option>
           {courses.map(course => (
@@ -505,7 +505,7 @@ export default function CreateQuizForm({ quizId }: Props) {
           max="180"
           value={formData.timeLimit}
           onChange={handleChange}
-          className="mt-1 px-3 py-2 block w-full rounded-md border-[var(--color-border)] shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-[var(--color-foreground)]"
+          className="mt-1 px-3 py-2 block w-full rounded-md border-[var(--color-border)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] sm:text-sm text-[var(--color-foreground)]"
         />
       </div>
 
@@ -516,7 +516,7 @@ export default function CreateQuizForm({ quizId }: Props) {
           <button
             type="button"
             onClick={() => setShowUpload(!showUpload)}
-            className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
+            className="text-sm text-[var(--color-primary)] hover:opacity-80 font-medium"
           >
             {showUpload ? t('createQuizForm.hideImport') : t('createQuizForm.importFromExcel')}
           </button>
@@ -526,15 +526,15 @@ export default function CreateQuizForm({ quizId }: Props) {
           <div className={`${theme.activeBg} rounded-lg p-4 mb-6`}>
             <div className="flex justify-between items-start mb-3">
               <div>
-                <h4 className="font-medium text-indigo-900">{t('createQuizForm.importQuestionsFromExcel')}</h4>
-                <p className="text-sm text-indigo-700 mt-1">
+                <h4 className="font-medium text-[var(--color-foreground)]">{t('createQuizForm.importQuestionsFromExcel')}</h4>
+                <p className="text-sm text-[var(--color-muted-foreground)] mt-1">
                   {t('createQuizForm.importInstructions')}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={downloadTemplate}
-                className="text-sm text-indigo-600 hover:text-indigo-800 underline"
+                className="text-sm text-[var(--color-primary)] hover:opacity-80 underline"
               >
                 {t('createQuizForm.downloadTemplate')}
               </button>
@@ -551,7 +551,7 @@ export default function CreateQuizForm({ quizId }: Props) {
             </div>
 
             {isParsing && (
-              <p className="mt-2 text-sm text-indigo-600">{t('createQuizForm.parsingFile')}</p>
+              <p className="mt-2 text-sm text-[var(--color-primary)]">{t('createQuizForm.parsingFile')}</p>
             )}
 
             {uploadError && (
@@ -649,7 +649,7 @@ export default function CreateQuizForm({ quizId }: Props) {
                 type="text"
                 value={question.question}
                 onChange={(e) => handleQuestionChange(qIndex, 'question', e.target.value)}
-                className="px-3 py-2 block w-full rounded-md border-[var(--color-border)] shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-[var(--color-foreground)]"
+                className="px-3 py-2 block w-full rounded-md border-[var(--color-border)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] sm:text-sm text-[var(--color-foreground)]"
                 placeholder={t('createQuizForm.enterQuestion')}
                 required
               />
@@ -663,13 +663,13 @@ export default function CreateQuizForm({ quizId }: Props) {
                     name={`correct-${qIndex}`}
                     checked={question.correctAnswer === oIndex}
                     onChange={() => handleQuestionChange(qIndex, 'correctAnswer', oIndex.toString())}
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-[var(--color-border)]"
+                    className="h-4 w-4 text-[var(--color-primary)] focus:ring-[var(--color-primary)] border-[var(--color-border)]"
                   />
                   <input
                     type="text"
                     value={option}
                     onChange={(e) => handleQuestionChange(qIndex, `option${oIndex}`, e.target.value)}
-                    className="flex-1 px-3 py-2 rounded-md border-[var(--color-border)] shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-[var(--color-foreground)]"
+                    className="flex-1 px-3 py-2 rounded-md border-[var(--color-border)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] sm:text-sm text-[var(--color-foreground)]"
                     placeholder={`${t('createQuizForm.option')} ${oIndex + 1}`}
                     required
                   />
@@ -689,7 +689,7 @@ export default function CreateQuizForm({ quizId }: Props) {
             <button
               type="button"
               onClick={() => addOption(qIndex)}
-              className="mt-3 text-sm text-indigo-600 hover:text-indigo-800"
+              className="mt-3 text-sm text-[var(--color-primary)] hover:opacity-80"
             >
               {t('createQuizForm.addOption')}
             </button>
@@ -699,7 +699,7 @@ export default function CreateQuizForm({ quizId }: Props) {
         <button
           type="button"
           onClick={addQuestion}
-          className="w-full py-2 border-2 border-dashed border-[var(--color-border)] rounded-md text-[var(--color-muted)] hover:border-indigo-500 hover:text-indigo-600 transition-colors"
+          className="w-full py-2 border-2 border-dashed border-[var(--color-border)] rounded-md text-[var(--color-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors"
         >
           {t('createQuizForm.addQuestion')}
         </button>
@@ -712,7 +712,7 @@ export default function CreateQuizForm({ quizId }: Props) {
           id="isPublished"
           checked={formData.isPublished}
           onChange={handleChange}
-          className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-[var(--color-border)] rounded"
+          className="h-4 w-4 text-[var(--color-primary)] focus:ring-[var(--color-primary)] border-[var(--color-border)] rounded"
         />
         <label htmlFor="isPublished" className="ml-2 block text-sm text-[var(--color-foreground)]">
           {t('createQuizForm.publishImmediately')}
@@ -723,7 +723,7 @@ export default function CreateQuizForm({ quizId }: Props) {
         <button
           type="button"
           onClick={() => router.push('/dashboard/teacher/quizzes')}
-          className="px-4 py-2 border border-[var(--color-border)] rounded-md shadow-sm text-sm font-medium text-[var(--color-foreground)] bg-[var(--color-card)] hover:bg-[var(--color-accent)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          className="px-4 py-2 border border-[var(--color-border)] rounded-md shadow-sm text-sm font-medium text-[var(--color-foreground)] bg-[var(--color-card)] hover:bg-[var(--color-accent)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)]"
         >
           {t('createQuizForm.cancel')}
         </button>

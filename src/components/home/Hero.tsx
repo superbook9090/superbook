@@ -30,7 +30,7 @@ export default function Hero() {
         }}
       />
       <motion.div
-        className="absolute bottom-20 right-10 w-96 h-96 bg-indigo-400/20 rounded-full blur-3xl"
+        className="absolute bottom-20 right-10 w-96 h-96 bg-[var(--student-accent)]/20 rounded-full blur-3xl"
         animate={{
           scale: [1.2, 1, 1.2],
           opacity: [0.2, 0.4, 0.2],
@@ -111,7 +111,7 @@ export default function Hero() {
         >
           <Link
             href="/login"
-            className="group flex items-center gap-2 px-8 py-4 bg-white text-indigo-600 font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+            className="group flex items-center gap-2 px-8 py-4 bg-white text-[var(--student-primary)] font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
           >
             {t('home.login')}
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

@@ -94,7 +94,7 @@ export default function Header() {
                     className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
                       isScrolled
                         ? `bg-gradient-to-r ${theme.gradient} text-white hover:shadow-lg`
-                        : 'bg-white text-indigo-600 hover:bg-white/90'
+                        : 'bg-white text-[var(--student-primary)] hover:bg-white/90'
                     }`}
                   >
                     {t('home.register')}

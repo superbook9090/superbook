@@ -169,7 +169,7 @@ export default function BlogDetailPage() {
         {/* Content */}
         <div className="p-4 sm:p-6 lg:p-8">
           <div
-            className="prose prose-sm sm:prose-base prose-indigo max-w-none text-[var(--color-foreground)] prose-headings:font-semibold prose-headings:text-[var(--color-foreground)] prose-p:text-[var(--color-muted-foreground)] prose-p:leading-relaxed prose-a:text-[var(--student-primary)] prose-a:no-underline hover:prose-a:underline prose-blockquote:border-l-4 prose-blockquote:border-[var(--border)] prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-[var(--color-muted-foreground)] prose-ul:list-disc prose-ol:list-decimal prose-li:text-[var(--color-muted-foreground)] prose-img:rounded-lg prose-img:shadow-sm"
+            className="prose prose-sm sm:prose-base prose-teal max-w-none text-[var(--color-foreground)] prose-headings:font-semibold prose-headings:text-[var(--color-foreground)] prose-p:text-[var(--color-muted-foreground)] prose-p:leading-relaxed prose-a:text-[var(--student-primary)] prose-a:no-underline hover:prose-a:underline prose-blockquote:border-l-4 prose-blockquote:border-[var(--border)] prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-[var(--color-muted-foreground)] prose-ul:list-disc prose-ol:list-decimal prose-li:text-[var(--color-muted-foreground)] prose-img:rounded-lg prose-img:shadow-sm"
             dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(blog.content) }}
           />
         </div>

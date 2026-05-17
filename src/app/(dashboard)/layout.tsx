@@ -75,7 +75,10 @@ export default async function DashboardLayout({
 
   return (
     <QuizProvider>
-      <div className="min-h-screen bg-[var(--color-background)] flex flex-col md:flex-row overflow-x-hidden">
+      <div 
+        className="min-h-screen bg-[var(--color-background)] flex flex-col md:flex-row overflow-x-hidden"
+        data-role={(role || 'student').toLowerCase()}
+      >
         {/* Mobile Navigation Header - Fixed */}
         <MobileNav
           user={session.user}
@@ -109,7 +112,6 @@ export default async function DashboardLayout({
           {/* Mobile Bottom Navigation */}
           <MobileBottomNav
             navigation={mainNavigation}
-            colorScheme={isStaff ? 'emerald' : 'indigo'}
           />
         </div>
       </div>

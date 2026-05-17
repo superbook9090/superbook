@@ -9,7 +9,7 @@ interface LinkInputProps {
   onSave: (url: string) => void;
   onCancel: () => void;
   onRemove?: () => void;
-  theme?: 'indigo' | 'emerald';
+  theme?: 'student' | 'teacher';
 }
 
 export const LinkInput = ({
@@ -17,7 +17,7 @@ export const LinkInput = ({
   onSave,
   onCancel,
   onRemove,
-  theme = 'emerald',
+  theme = 'teacher',
 }: LinkInputProps) => {
   const [url, setUrl] = useState(initialUrl);
 
@@ -31,8 +31,8 @@ export const LinkInput = ({
   };
 
   const themeColors = {
-    indigo: 'focus:ring-[var(--student-primary)] border-[var(--student-border)] bg-[var(--student-soft)]/50',
-    emerald: 'focus:ring-[var(--teacher-primary)] border-[var(--teacher-border)] bg-[var(--teacher-soft)]/50',
+    student: 'focus:ring-[var(--student-primary)] border-[var(--student-border)] bg-[var(--student-soft)]/50',
+    teacher: 'focus:ring-[var(--teacher-primary)] border-[var(--teacher-border)] bg-[var(--teacher-soft)]/50',
   };
 
   return (

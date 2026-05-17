@@ -13,10 +13,10 @@ import { ToolbarButton } from './ToolbarButton';
 
 interface MenuFloatingProps {
   editor: Editor | null;
-  theme?: 'indigo' | 'emerald';
+  theme?: 'student' | 'teacher';
 }
 
-export const MenuFloating = ({ editor, theme = 'emerald' }: MenuFloatingProps) => {
+export const MenuFloating = ({ editor, theme = 'teacher' }: MenuFloatingProps) => {
   if (!editor) return null;
 
   return (

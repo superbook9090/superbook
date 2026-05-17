@@ -306,16 +306,16 @@ The platform features a comprehensive role-based theming system that provides co
 ### Theme Implementation
 
 **CSS Variables (globals.css):**
-- Role-specific primary colors: `--student-primary`, `--teacher-primary`, `--admin-primary`, `--superadmin-primary`
+- Role-specific primary colors: `--student-primary` (Teal), `--teacher-primary` (Teal/Mint), `--admin-primary` (Rose/Pink), `--superadmin-primary` (Slate)
 - Dark variants for gradients: `--student-primary-dark`, `--teacher-primary-dark`, etc.
 - Accent colors, soft backgrounds, borders, and shadows for each role
 - Gradient definitions for smooth visual transitions
 
 **Theme Colors:**
-- **Student**: Indigo/Violet gradient (#6366f1 → #8b5cf6 → #a855f7)
-- **Teacher**: Emerald/Teal gradient (#10b981 → #14b8a6 → #06b6d4)
-- **Admin**: Rose/Pink gradient (#f43f5e → #ec4899 → #d946ef)
-- **Super Admin**: Slate dark gradient (#1e293b → #111827 → #020617)
+- **Student**: Eucalyptus Teal & Ocean Cyan gradient (#0ea5e9 → #14b8a6)
+- **Teacher**: Mint & Emerald gradient (#10b981 → #06b6d4)
+- **Admin**: Rose & Pink gradient (#f43f5e → #d946ef)
+- **Super Admin**: Slate dark gradient (#1e293b → #020617)
 
 **Usage Pattern:**
 ```css
@@ -323,16 +323,19 @@ background: linear-gradient(135deg, var(--teacher-primary), var(--teacher-primar
 color: var(--teacher-primary);
 ```
 
+**Cascading Data-Role Injection:**
+- The outermost shell inside `layout.tsx` is decorated with `data-role="[active-role]"`. This propagates design tokens (`--primary`, `--primary-soft`, `--color-primary`, `--border`) dynamically down the DOM tree. Standard elements, dashboard cards, sidebars, and custom forms dynamically adapt at runtime without role duplication.
+
 **Components with Role-Based Theming:**
 - Desktop sidebars (TeacherSidebar, StudentSidebar, AdminSidebar)
-- Mobile navigation header (MobileNav)
-- Dashboard cards and buttons
-- Active navigation states
+- Mobile navigation header (MobileNav) & Bottom Navigation Panel (MobileBottomNav)
+- Dashboard cards, forms (e.g., CreateQuizForm), and interactive actions
+- TipTap RichTextEditor: Theme prop upgraded to a semantic `'student' | 'teacher'` role definition, linking bubble menus, float menus, toolbars, and active links perfectly to active role variables.
+- Session-Aware Navigation Header: Desktop and mobile public page header integrates `useSessionStore` to dynamically display "Dashboard" in place of "Login / Sign up" links when a session is active.
 
 **Mobile Consistency:**
-- Mobile header gradient matches desktop sidebar for each role
-- Dynamic CSS variable construction based on user role
-- No breakpoint-based color changes - colors are role-based, not device-based
+- Mobile header and bottom panels dynamically inherit active-theme HSL bracket custom properties based on user role.
+- No breakpoint-based color changes - colors are role-based, not device-based.
 
 ### Accessibility Enhancements
 
@@ -451,6 +454,11 @@ t('common.english') // "English" or "अंग्रेज़ी"
 - **Organization Isolation**: Multi-tenant data separation
 - **Session Management**: Secure session storage and automatic refresh
 - **Password Security**: Hashing with bcrypt and strength requirements
+
+### SMTP Mail Transmission (Contact Forms)
+- **Serverless-Ready Delivery**: Replaced MongoDB write locks/database storage for contact forms with production-ready SMTP transmission via `nodemailer`.
+- **Anti-Abuse Client Verification**: Every email generated generates a unique Ticket ID, capturing client submission timestamp, IP metadata, and direct reply-to inboxes for admin convenience.
+- **Client-IP Rate Limiting**: Employs an automated rate limiter enforcing a strict maximum of **3 submissions per minute** per client IP, blocking spam and denial-of-service attempts.
 
 ### Data Protection
 - **Input Validation**: Comprehensive validation on all user inputs

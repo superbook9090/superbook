@@ -27,10 +27,10 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 interface ToolbarProps {
   editor: Editor | null;
-  theme?: 'indigo' | 'emerald';
+  theme?: 'student' | 'teacher';
 }
 
-export const Toolbar = ({ editor, theme = 'emerald' }: ToolbarProps) => {
+export const Toolbar = ({ editor, theme = 'teacher' }: ToolbarProps) => {
   const [showLinkInput, setShowLinkInput] = useState(false);
 
   if (!editor) return null;

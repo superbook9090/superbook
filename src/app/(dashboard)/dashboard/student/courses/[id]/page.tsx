@@ -272,9 +272,9 @@ export default function CourseDetailPage() {
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-5 rounded-2xl bg-indigo-50/50 border border-indigo-100/50">
-                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 mb-1">{t('courses.category')}</h4>
-                  <p className="text-base font-bold text-indigo-900">{course.category || 'General'}</p>
+                <div className="p-5 rounded-2xl bg-[var(--primary-soft)]/50 border border-[var(--primary-border)]/50">
+                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-[var(--primary)] mb-1">{t('courses.category')}</h4>
+                  <p className="text-base font-bold text-[var(--primary-dark)]">{course.category || 'General'}</p>
                 </div>
                 <div className="p-5 rounded-2xl bg-emerald-50/50 border border-emerald-100/50">
                   <h4 className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 mb-1">{t('dashboard.progress')}</h4>

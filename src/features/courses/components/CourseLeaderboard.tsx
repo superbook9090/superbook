@@ -92,7 +92,7 @@ export default function CourseLeaderboard({
         <p className="text-red-500 font-medium">{error}</p>
         <button
           onClick={fetchLeaderboard}
-          className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+          className="mt-4 px-4 py-2 bg-[var(--student-primary)] text-white rounded-lg hover:brightness-110 active:brightness-95 transition-all"
         >
           {t('quiz.leaderboard.tryAgain')}
         </button>

@@ -183,7 +183,7 @@ export default function CreateBlogPage() {
                 content={formData.content}
                 onChange={(content) => setFormData({ ...formData, content })}
                 placeholder={t('createBlogPage.contentPlaceholder')}
-                theme="emerald"
+                theme="teacher"
               />
             </Suspense>
           </div>

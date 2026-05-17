@@ -17,10 +17,10 @@ import { LinkInput } from './LinkInput';
 
 interface MenuBubbleProps {
   editor: Editor | null;
-  theme?: 'indigo' | 'emerald';
+  theme?: 'student' | 'teacher';
 }
 
-export const MenuBubble = ({ editor, theme = 'emerald' }: MenuBubbleProps) => {
+export const MenuBubble = ({ editor, theme = 'teacher' }: MenuBubbleProps) => {
   const [isEditingLink, setIsEditingLink] = useState(false);
 
   const setLink = useCallback((url: string) => {

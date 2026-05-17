@@ -27,7 +27,7 @@ interface RichTextEditorProps {
   onChange: (content: string) => void;
   placeholder?: string;
   className?: string;
-  theme?: 'indigo' | 'emerald';
+  theme?: 'student' | 'teacher';
 }
 
 export default function RichTextEditor({
@@ -35,7 +35,7 @@ export default function RichTextEditor({
   onChange,
   placeholder,
   className,
-  theme = 'emerald',
+  theme = 'teacher',
 }: RichTextEditorProps) {
   const { t } = useTranslation();
   const resolvedPlaceholder = placeholder ?? t('richTextEditor.placeholder');

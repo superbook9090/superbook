@@ -11,7 +11,7 @@ interface ToolbarButtonProps {
   children: React.ReactNode;
   title: string;
   className?: string;
-  theme?: 'indigo' | 'emerald';
+  theme?: 'student' | 'teacher';
 }
 
 export const ToolbarButton = ({
@@ -21,15 +21,15 @@ export const ToolbarButton = ({
   children,
   title,
   className,
-  theme = 'emerald',
+  theme = 'teacher',
 }: ToolbarButtonProps) => {
   const themeStyles = {
-    indigo: {
+    student: {
       active: 'bg-[var(--student-soft)] text-[var(--student-primary)] dark:bg-[var(--student-primary)]/10 dark:text-[var(--student-primary)]',
       hover: 'hover:bg-[var(--student-soft)]/50 dark:hover:bg-[var(--student-primary)]/5',
       ring: 'focus-visible:ring-[var(--student-primary)]',
     },
-    emerald: {
+    teacher: {
       active: 'bg-[var(--teacher-soft)] text-[var(--teacher-primary)] dark:bg-[var(--teacher-primary)]/10 dark:text-[var(--teacher-primary)]',
       hover: 'hover:bg-[var(--teacher-soft)]/50 dark:hover:bg-[var(--teacher-primary)]/5',
       ring: 'focus-visible:ring-[var(--teacher-primary)]',

@@ -40,21 +40,19 @@ interface NavItem {
 
 interface MobileBottomNavProps {
   navigation: NavItem[];
-  colorScheme: 'indigo' | 'green' | 'emerald';
 }
 
-function MobileBottomNav({ navigation, colorScheme }: MobileBottomNavProps) {
+function MobileBottomNav({ navigation }: MobileBottomNavProps) {
   const pathname = usePathname();
   const { t } = useTranslation();
 
-  // Memoize theme classes
+  // Memoize theme classes using dynamic CSS variables
   const themeClasses = useMemo(() => {
-    const isGreen = colorScheme === 'green' || colorScheme === 'emerald';
     return {
-      activeColor: isGreen ? 'text-emerald-600' : 'text-indigo-600',
-      activeBg: isGreen ? 'bg-emerald-50' : 'bg-indigo-50',
+      activeColor: 'text-[var(--primary)]',
+      activeBg: 'bg-[var(--primary-soft)]',
     };
-  }, [colorScheme]);
+  }, []);
 
   // Memoize nav items to prevent unnecessary slice operations
   const bottomNavItems = useMemo(() => navigation.slice(0, 5), [navigation]);
