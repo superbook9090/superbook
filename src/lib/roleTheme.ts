@@ -33,7 +33,7 @@ export interface RoleTheme {
 
 export const roleThemes: Record<UserRole, RoleTheme> = {
   student: {
-    gradient: 'from-teal-500 via-teal-600 to-cyan-400',
+    gradient: 'from-[var(--student-primary)] via-[var(--student-primary)] to-[var(--student-accent)]',
     primary: 'bg-teal-600',
     hover: 'hover:bg-teal-700',
     text: 'text-teal-600',
@@ -53,7 +53,7 @@ export const roleThemes: Record<UserRole, RoleTheme> = {
   },
 
   teacher: {
-    gradient: 'from-cyan-500 via-cyan-600 to-teal-400',
+    gradient: 'from-[var(--teacher-primary)] via-[var(--teacher-primary)] to-[var(--teacher-accent)]',
     primary: 'bg-cyan-600',
     hover: 'hover:bg-cyan-700',
     text: 'text-cyan-600',
@@ -73,7 +73,7 @@ export const roleThemes: Record<UserRole, RoleTheme> = {
   },
 
   admin: {
-    gradient: 'from-emerald-600 to-teal-600',
+    gradient: 'from-[var(--teacher-primary)] via-[var(--teacher-primary)] to-[var(--teacher-accent)]',
     primary: 'bg-emerald-600',
     hover: 'hover:bg-emerald-700',
     text: 'text-emerald-600',
@@ -93,7 +93,7 @@ export const roleThemes: Record<UserRole, RoleTheme> = {
   },
 
   superadmin: {
-    gradient: 'from-emerald-600 to-teal-600',
+    gradient: 'from-[var(--teacher-primary)] via-[var(--teacher-primary)] to-[var(--teacher-accent)]',
     primary: 'bg-emerald-600',
     hover: 'hover:bg-emerald-700',
     text: 'text-emerald-600',

@@ -8,11 +8,13 @@ import PremiumLogo from '@/components/ui/PremiumLogo';
 import { roleThemes } from '@/lib/roleTheme';
 import { Menu, X } from 'lucide-react';
 import { supportedLanguages } from '@/i18n/config';
+import { useSessionStore } from '@/store/useSessionStore';
 
 export default function Header() {
   const { t, lang, setLang } = useTranslation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { session } = useSessionStore();
   const theme = roleThemes.student;
 
   useEffect(() => {
@@ -65,29 +67,40 @@ export default function Header() {
                 {lang === 'en' ? 'EN' : 'HI'}
               </button>
 
-              {/* Login */}
-              <Link
-                href="/login"
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  isScrolled
-                    ? 'text-gray-600 hover:text-gray-900'
-                    : 'text-white hover:text-white'
-                }`}
-              >
-                {t('home.login')}
-              </Link>
+              {session ? (
+                <Link
+                  href="/dashboard"
+                  className={`px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r ${theme.gradient} hover:shadow-lg transition-all`}
+                >
+                  {t('common.dashboard')}
+                </Link>
+              ) : (
+                <>
+                  {/* Login */}
+                  <Link
+                    href="/login"
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      isScrolled
+                        ? 'text-gray-600 hover:text-gray-900'
+                        : 'text-white hover:text-white'
+                    }`}
+                  >
+                    {t('home.login')}
+                  </Link>
 
-              {/* Register */}
-              <Link
-                href="/register"
-                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                  isScrolled
-                    ? `bg-gradient-to-r ${theme.gradient} text-white hover:shadow-lg`
-                    : 'bg-white text-indigo-600 hover:bg-white/90'
-                }`}
-              >
-                {t('home.register')}
-              </Link>
+                  {/* Register */}
+                  <Link
+                    href="/register"
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                      isScrolled
+                        ? `bg-gradient-to-r ${theme.gradient} text-white hover:shadow-lg`
+                        : 'bg-white text-indigo-600 hover:bg-white/90'
+                    }`}
+                  >
+                    {t('home.register')}
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Mobile Menu Button */}
@@ -120,20 +133,32 @@ export default function Header() {
             className="fixed inset-x-0 top-16 z-40 md:hidden bg-white shadow-lg"
           >
             <div className="px-4 py-6 space-y-4">
-              <Link
-                href="/login"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block w-full py-3 text-center text-gray-700 font-medium border border-gray-200 rounded-xl hover:bg-gray-50"
-              >
-                {t('home.login')}
-              </Link>
-              <Link
-                href="/register"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`block w-full py-3 text-center text-white font-semibold bg-gradient-to-r ${theme.gradient} rounded-xl`}
-              >
-                {t('home.register')}
-              </Link>
+              {session ? (
+                <Link
+                  href="/dashboard"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`block w-full py-3 text-center text-white font-semibold bg-gradient-to-r ${theme.gradient} rounded-xl`}
+                >
+                  {t('common.dashboard')}
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block w-full py-3 text-center text-gray-700 font-medium border border-gray-200 rounded-xl hover:bg-gray-50"
+                  >
+                    {t('home.login')}
+                  </Link>
+                  <Link
+                    href="/register"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={`block w-full py-3 text-center text-white font-semibold bg-gradient-to-r ${theme.gradient} rounded-xl`}
+                  >
+                    {t('home.register')}
+                  </Link>
+                </>
+              )}
               <button
                 onClick={() => {
                   toggleLanguage();
