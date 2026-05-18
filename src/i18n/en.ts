@@ -69,6 +69,23 @@ export const en = {
     overview: 'Overview',
   },
 
+  privacy: {
+    title: 'Privacy Policy',
+    lastUpdated: 'Last Updated: May 18, 2026',
+    intro: 'Your privacy is important to us. This Privacy Policy explains how we collect, use, and protect your personal information when you use our services.',
+    dataCollection: 'Information We Collect',
+    dataCollectionText: 'We collect information you provide directly to us when you create an account, update your profile, use the interactive features of our services, participate in quizzes or courses, request customer support, or otherwise communicate with us.',
+    dataUse: 'How We Use Your Information',
+    dataUseText: 'We use the information we collect to provide, maintain, and improve our services, to develop new features, and to protect quiz-do and our users.',
+    dataSharing: 'Information Sharing',
+    dataSharingText: 'We do not share your personal information with third parties except as described in this privacy policy or as required by law.',
+    security: 'Security',
+    securityText: 'We take reasonable measures to help protect information about you from loss, theft, misuse, unauthorized access, disclosure, alteration, and destruction.',
+    contactUs: 'Contact Us',
+    contactUsText: 'If you have any questions about this Privacy Policy, please contact us.',
+    backToHome: 'Back to Home'
+  },
+
   files: {
     folder: 'Folder',
     view: 'View',
