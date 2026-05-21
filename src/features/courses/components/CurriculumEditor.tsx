@@ -14,8 +14,7 @@ import {
   PlusCircle,
   Save,
   X,
-  UploadCloud,
-  FileText as FileIcon
+  UploadCloud
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -332,8 +331,8 @@ function LessonForm({ lesson, onClose, onSave, isSaving }: LessonFormProps) {
       setYoutubeVideoId(result.youtubeVideoId);
       setVideoEmbedUrl(result.videoEmbedUrl);
       setThumbnail(result.thumbnail);
-    } catch (err: any) {
-      if (err.name === 'AbortError' || err.message === 'Upload cancelled') {
+    } catch (err: unknown) {
+      if (err instanceof Error && (err.name === 'AbortError' || err.message === 'Upload cancelled')) {
         setUploadError(null);
       } else {
         setUploadError(err instanceof Error ? err.message : t('curriculum.uploadFailed'));
@@ -419,6 +418,7 @@ function LessonForm({ lesson, onClose, onSave, isSaving }: LessonFormProps) {
                 <div className="space-y-3">
                   <div className="relative aspect-video rounded-xl overflow-hidden bg-black flex items-center justify-center border border-[var(--color-border)] max-w-md">
                     {thumbnail ? (
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img src={thumbnail} alt="Video thumbnail" className="w-full h-full object-cover" />
                     ) : (
                       <span className="text-xs text-[var(--color-muted-foreground)]">YouTube Video Connected</span>

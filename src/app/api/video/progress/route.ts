@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
       student: session.user.id,
       lesson: lessonId,
       course: courseId,
-    }).lean() as any;
+    }).lean() as { watchTime: number; duration: number; completed: boolean } | null;
 
     if (!progress) {
       return NextResponse.json({ watchTime: 0, duration: 0, completed: false });

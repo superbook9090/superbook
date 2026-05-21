@@ -2,9 +2,7 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-
-// @ts-ignore
-const ReactPlayer = dynamic(() => import('react-player'), { ssr: false }) as any;
+const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
 import { AlertCircle } from 'lucide-react';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -25,7 +23,8 @@ export default function SecurePlayer({
   const { session } = useSessionStore();
   const { t } = useLanguage();
 
-  const playerRef = useRef<any>(null);
+  const playerRef = useRef<HTMLVideoElement | null>(null);
+  const lastSavedTimeRef = useRef<number>(0);
   const [duration, setDuration] = useState(0);
   const [playedSeconds, setPlayedSeconds] = useState(0);
   const [hasError, setHasError] = useState(false);
@@ -73,6 +72,7 @@ export default function SecurePlayer({
           const data = await res.json();
           if (data?.progress?.watchTime) {
             setPlayedSeconds(data.progress.watchTime);
+            lastSavedTimeRef.current = data.progress.watchTime;
           }
         }
       } catch (err) {
@@ -80,46 +80,55 @@ export default function SecurePlayer({
       }
     }
     loadProgress();
-  }, [lessonId]);
+  }, [lessonId, courseId]);
 
   // Heartbeat is now handled purely by onProgress intervals
 
   const handleReady = () => {
     // Seek to the previously saved location once the video is ready
     if (!initialSeekDone && playedSeconds > 0 && playerRef.current) {
-      playerRef.current.seekTo(playedSeconds, 'seconds');
+      playerRef.current.currentTime = playedSeconds;
       setInitialSeekDone(true);
     }
   };
 
-  const handleProgress = async (state: { playedSeconds: number }) => {
-    setPlayedSeconds(state.playedSeconds);
+  const handleDurationChange = (e: React.SyntheticEvent<HTMLVideoElement>) => {
+    setDuration(e.currentTarget.duration);
+  };
+
+  const handleTimeUpdate = async (e: React.SyntheticEvent<HTMLVideoElement>) => {
+    const currentTime = e.currentTarget.currentTime;
+    setPlayedSeconds(currentTime);
     
-    const currentDuration = duration;
+    const currentDuration = e.currentTarget.duration || duration;
 
     // Fire heartbeat to server
     if (currentDuration > 0) {
-      try {
-        const watchPercentage = state.playedSeconds / currentDuration;
-        const isFinished = watchPercentage >= 0.9;
+      const timeDiff = Math.abs(currentTime - lastSavedTimeRef.current);
+      const watchPercentage = currentTime / currentDuration;
+      const isFinished = watchPercentage >= 0.9;
 
-        await fetch('/api/video/progress', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            lessonId,
-            courseId,
-            watchTime: Math.round(state.playedSeconds),
-            duration: Math.round(currentDuration),
-            completed: isFinished,
-          }),
-        });
+      if (timeDiff >= 5 || (isFinished && !lastSavedTimeRef.current)) {
+        lastSavedTimeRef.current = currentTime;
+        try {
+          await fetch('/api/video/progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              lessonId,
+              courseId,
+              watchTime: Math.round(currentTime),
+              duration: Math.round(currentDuration),
+              completed: isFinished,
+            }),
+          });
 
-        if (isFinished && onCompleted) {
-          onCompleted();
+          if (isFinished && onCompleted) {
+            onCompleted();
+          }
+        } catch (err) {
+          console.error('Progress sync failed:', err);
         }
-      } catch (err) {
-        console.error('Progress sync failed:', err);
       }
     }
   };
@@ -173,9 +182,8 @@ export default function SecurePlayer({
         width="100%"
         height="100%"
         onReady={handleReady}
-        onDuration={(d: number) => setDuration(d)}
-        onProgress={handleProgress}
-        progressInterval={5000}
+        onDurationChange={handleDurationChange}
+        onTimeUpdate={handleTimeUpdate}
         onEnded={handleEnded}
         onError={() => setHasError(true)}
         config={{
@@ -189,7 +197,7 @@ export default function SecurePlayer({
               iv_load_policy: 3,
               disablekb: 1, // Disable keyboard controls to prevent shortcut inspection
             },
-          } as any,
+          } as Record<string, unknown>,
         }}
       />
 

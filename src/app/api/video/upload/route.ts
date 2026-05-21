@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     }
 
     await dbConnect();
-    const user = await User.findById(session.user.id).lean() as any;
+    const user = await User.findById(session.user.id).lean() as { role: string; canUploadVideos?: boolean } | null;
     if (!user) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
@@ -67,8 +67,8 @@ export async function POST(request: NextRequest) {
     let ext;
     try {
       ext = validateVideoContentType(contentType);
-    } catch (err: any) {
-      return NextResponse.json({ message: err.message }, { status: 400 });
+    } catch (err: unknown) {
+      return NextResponse.json({ message: (err as Error).message }, { status: 400 });
     }
 
     // Validate size via Content-Length header (initial check)
@@ -99,17 +99,7 @@ export async function POST(request: NextRequest) {
 
     let totalBytesWritten = 0;
     
-    // Custom transform to track size during stream
-    const sizeTracker = new TransformStream({
-      transform(chunk, controller) {
-        totalBytesWritten += chunk.length;
-        if (totalBytesWritten > MAX_VIDEO_SIZE_BYTES) {
-          controller.error(new Error('Payload size exceeded 2GB limit'));
-        } else {
-          controller.enqueue(chunk);
-        }
-      }
-    });
+
 
     // Instead of doing standard node pipeline with sizeTracker which is a Web stream,
     // we just use a pass-through node stream.
@@ -133,7 +123,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(result, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logApiError(error as Error, 'POST', '/api/video/upload');
     // Clean up local temp file in case of failure
     if (tempFilePath && fs.existsSync(tempFilePath)) {
@@ -144,7 +134,7 @@ export async function POST(request: NextRequest) {
       }
     }
     
-    if (error.message && error.message.includes('Payload size exceeded')) {
+    if (error instanceof Error && error.message && error.message.includes('Payload size exceeded')) {
       return NextResponse.json({ message: 'File too large (max 2GB)' }, { status: 413 });
     }
     

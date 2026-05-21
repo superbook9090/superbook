@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
-import { useRoleTheme } from '@/contexts/RoleThemeContext';
+
 import { motion } from 'framer-motion';
-import { Video, Search, User, BookOpen, Calendar, ExternalLink, Play } from 'lucide-react';
+import { Video, Search, User, BookOpen, Calendar, ExternalLink } from 'lucide-react';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import Alert from '@/components/ui/Alert';
 
@@ -23,7 +23,7 @@ interface VideoLecture {
 
 export default function AdminVideosPage() {
   const { t } = useTranslation();
-  const { theme } = useRoleTheme();
+
   const [videos, setVideos] = useState<VideoLecture[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -126,6 +126,7 @@ export default function AdminVideosPage() {
             >
               {/* Thumbnail preview */}
               <div className="relative aspect-video bg-black flex items-center justify-center group overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={vid.thumbnail}
                   alt={vid.title}
