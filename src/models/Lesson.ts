@@ -7,9 +7,17 @@ export interface ILesson extends Document {
   chapter: mongoose.Types.ObjectId;
   content: string;
   videoUrl?: string;
+  youtubeVideoId?: string;
+  videoEmbedUrl?: string;
+  thumbnail?: string;
   order: number;
   duration: number;
   isPublished: boolean;
+  isPreview?: boolean;
+  notesPdf?: string;
+  attachments?: string[];
+  uploadedBy?: mongoose.Types.ObjectId;
+  uploadedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -22,9 +30,17 @@ const lessonSchema = new Schema<ILesson>(
     chapter: { type: Schema.Types.ObjectId, ref: 'Chapter', required: true, index: true },
     content: String,
     videoUrl: String,
+    youtubeVideoId: String,
+    videoEmbedUrl: String,
+    thumbnail: String,
     order: { type: Number, default: 0 },
     duration: { type: Number, default: 0 },
     isPublished: { type: Boolean, default: false },
+    isPreview: { type: Boolean, default: false },
+    notesPdf: String,
+    attachments: [String],
+    uploadedBy: { type: Schema.Types.ObjectId, ref: 'User' },
+    uploadedAt: Date,
   },
   { timestamps: true }
 );

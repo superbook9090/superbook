@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   Plus, 
   Trash2, 
@@ -13,7 +13,9 @@ import {
   Clock,
   PlusCircle,
   Save,
-  X
+  X,
+  UploadCloud,
+  FileText as FileIcon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -31,6 +33,7 @@ import {
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import Button from '@/components/ui/Button';
+import { useSessionStore } from '@/store/useSessionStore';
 
 interface CurriculumEditorProps {
   courseId: string;
@@ -249,10 +252,106 @@ export default function CurriculumEditor({ courseId }: CurriculumEditorProps) {
 
 function LessonForm({ lesson, onClose, onSave, isSaving }: LessonFormProps) {
   const { t } = useTranslation();
+  const { session } = useSessionStore();
+
+  const canUpload =
+    session?.user?.canUploadVideos ||
+    session?.user?.role === 'superadmin' ||
+    session?.user?.role === 'admin';
+
   const [title, setTitle] = useState(lesson?.title || '');
   const [videoUrl, setVideoUrl] = useState(lesson?.videoUrl || '');
+  const [youtubeVideoId, setYoutubeVideoId] = useState(lesson?.youtubeVideoId || '');
+  const [videoEmbedUrl, setVideoEmbedUrl] = useState(lesson?.videoEmbedUrl || '');
+  const [thumbnail, setThumbnail] = useState(lesson?.thumbnail || '');
   const [duration, setDuration] = useState(lesson?.duration || 0);
   const [content, setContent] = useState(lesson?.content || '');
+  const [notesPdf, setNotesPdf] = useState(lesson?.notesPdf || '');
+  const [isPreview, setIsPreview] = useState(lesson?.isPreview || false);
+  const [attachments, setAttachments] = useState<string[]>(lesson?.attachments || []);
+  const [attachmentInput, setAttachmentInput] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const xhrRef = useRef<XMLHttpRequest | null>(null);
+
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Client-side size validation (2GB)
+    if (file.size > 2 * 1024 * 1024 * 1024) {
+      setUploadError(t('curriculum.formatSizeHint') || 'File too large (max 2GB)');
+      return;
+    }
+
+    setUploading(true);
+    setUploadProgress(0);
+    setUploadError(null);
+
+    // Bypass Next.js buggy multipart/form-data parser by sending raw binary data
+    const queryTitle = encodeURIComponent(title || 'Lecture Video');
+
+    try {
+      const xhr = new XMLHttpRequest();
+      xhrRef.current = xhr;
+      
+      xhr.upload.addEventListener('progress', (event) => {
+        if (event.lengthComputable) {
+          const percent = Math.round((event.loaded / event.total) * 100);
+          setUploadProgress(percent);
+        }
+      });
+
+      const promise = new Promise<{ youtubeVideoId: string; videoEmbedUrl: string; thumbnail: string }>((resolve, reject) => {
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const res = JSON.parse(xhr.responseText);
+              resolve(res);
+            } catch {
+              reject(new Error('Invalid upload response'));
+            }
+          } else {
+            try {
+              const res = JSON.parse(xhr.responseText);
+              reject(new Error(res.message || 'Upload failed'));
+            } catch {
+              reject(new Error(`Upload failed with status ${xhr.status}`));
+            }
+          }
+        };
+        xhr.onerror = () => reject(new Error('Network error during upload'));
+      });
+
+      xhr.open('POST', `/api/video/upload?title=${queryTitle}`);
+      xhr.setRequestHeader('Content-Type', file.type);
+      xhr.send(file);
+
+      const result = await promise;
+      setYoutubeVideoId(result.youtubeVideoId);
+      setVideoEmbedUrl(result.videoEmbedUrl);
+      setThumbnail(result.thumbnail);
+    } catch (err: any) {
+      if (err.name === 'AbortError' || err.message === 'Upload cancelled') {
+        setUploadError(null);
+      } else {
+        setUploadError(err instanceof Error ? err.message : t('curriculum.uploadFailed'));
+      }
+    } finally {
+      setUploading(false);
+      xhrRef.current = null;
+    }
+  };
+
+  const handleCancelUpload = () => {
+    if (xhrRef.current) {
+      xhrRef.current.abort();
+      setUploadError(null);
+      setUploading(false);
+      setUploadProgress(0);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-end bg-black/40 backdrop-blur-sm">
@@ -265,7 +364,7 @@ function LessonForm({ lesson, onClose, onSave, isSaving }: LessonFormProps) {
           <h3 className="text-xl font-bold text-[var(--color-foreground)]">
             {lesson ? t('curriculum.editLesson') : t('curriculum.addNewLesson')}
           </h3>
-          <button onClick={onClose} className="p-2 hover:bg-[var(--color-surface-muted)] rounded-full transition-colors">
+          <button onClick={onClose} className="p-2 hover:bg-[var(--color-surface-muted)] rounded-full transition-colors text-[var(--color-foreground)]">
             <X className="w-6 h-6" />
           </button>
         </div>
@@ -276,20 +375,20 @@ function LessonForm({ lesson, onClose, onSave, isSaving }: LessonFormProps) {
             <input 
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl px-4 py-3 focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+              className="w-full bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl px-4 py-3 focus:ring-2 focus:ring-[var(--color-primary)] text-[var(--color-foreground)] outline-none"
               placeholder="e.g. Introduction to React"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-[var(--color-foreground)]">{t('curriculum.videoUrl')} (Optional)</label>
+              <label className="text-sm font-semibold text-[var(--color-foreground)]">{t('curriculum.videoUrl')} (External link)</label>
               <div className="relative">
                 <Video className="absolute left-3 top-3.5 w-5 h-5 text-[var(--color-muted)]" />
                 <input 
                   value={videoUrl}
                   onChange={(e) => setVideoUrl(e.target.value)}
-                  className="w-full bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl pl-11 pr-4 py-3 focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                  className="w-full bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl pl-11 pr-4 py-3 focus:ring-2 focus:ring-[var(--color-primary)] text-[var(--color-foreground)] outline-none"
                   placeholder="YouTube/Vimeo link"
                 />
               </div>
@@ -302,10 +401,168 @@ function LessonForm({ lesson, onClose, onSave, isSaving }: LessonFormProps) {
                   type="number"
                   value={duration}
                   onChange={(e) => setDuration(Number(e.target.value))}
-                  className="w-full bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl pl-11 pr-4 py-3 focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                  className="w-full bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl pl-11 pr-4 py-3 focus:ring-2 focus:ring-[var(--color-primary)] text-[var(--color-foreground)] outline-none"
                 />
               </div>
             </div>
+          </div>
+
+          {/* Centralized YouTube Upload Dropzone */}
+          {canUpload && (
+            <div className="space-y-3 p-4 bg-[var(--color-surface-muted)]/30 rounded-2xl border border-[var(--color-border)]">
+              <label className="text-sm font-semibold text-[var(--color-foreground)] flex items-center gap-1.5">
+                <Video className="w-4 h-4 text-[var(--color-primary)]" />
+                Centralized YouTube Video Lecture (Unlisted)
+              </label>
+              
+              {youtubeVideoId ? (
+                <div className="space-y-3">
+                  <div className="relative aspect-video rounded-xl overflow-hidden bg-black flex items-center justify-center border border-[var(--color-border)] max-w-md">
+                    {thumbnail ? (
+                      <img src={thumbnail} alt="Video thumbnail" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-xs text-[var(--color-muted-foreground)]">YouTube Video Connected</span>
+                    )}
+                    <div className="absolute top-2 right-2 bg-black/75 text-white text-xs px-2 py-0.5 rounded font-mono">
+                      ID: {youtubeVideoId}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setYoutubeVideoId('');
+                      setVideoEmbedUrl('');
+                      setThumbnail('');
+                    }}
+                    className="text-xs text-[var(--color-error)] hover:underline font-medium flex items-center gap-1"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" /> Remove Video Lecture
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="border-2 border-dashed border-[var(--color-border)] rounded-xl p-6 text-center hover:border-[var(--color-primary)]/50 hover:bg-[var(--color-primary)]/5 transition-all relative">
+                    {!uploading && (
+                      <input
+                        type="file"
+                        accept="video/mp4,video/webm,video/quicktime"
+                        onChange={handleVideoUpload}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      />
+                    )}
+                    <div className="flex flex-col items-center justify-center">
+                      <UploadCloud className="w-10 h-10 text-[var(--color-muted)] mb-2" />
+                      <p className="text-sm font-medium text-[var(--color-foreground)]">
+                        {uploading ? t('curriculum.uploadingFile') : t('curriculum.dragDropVideo')}
+                      </p>
+                      <p className="text-xs text-[var(--color-muted-foreground)] mt-1">
+                        {t('curriculum.formatSizeHint')}
+                      </p>
+                    </div>
+                  </div>
+
+                  {uploading && (
+                    <div className="space-y-2">
+                      <div className="w-full bg-[var(--color-surface-muted)] rounded-full h-2 overflow-hidden">
+                        <div
+                          className="bg-[var(--color-primary)] h-full transition-all duration-150"
+                          style={{ width: `${uploadProgress}%` }}
+                        ></div>
+                      </div>
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-[var(--color-muted-foreground)]">
+                          {uploadProgress === 100 ? t('curriculum.processingVideo') : t('curriculum.uploadProgress')}
+                        </span>
+                        <span className="font-medium text-[var(--color-foreground)]">{uploadProgress}%</span>
+                      </div>
+                      <div className="flex justify-end">
+                        <button
+                          type="button"
+                          onClick={handleCancelUpload}
+                          className="text-xs font-semibold text-[var(--color-error)] hover:underline"
+                        >
+                          {t('curriculum.cancelUpload')}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {uploadError && (
+                    <div className="flex flex-col items-center gap-2">
+                      <p className="text-xs text-[var(--color-error)] font-medium text-center">
+                        {uploadError}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Lesson PDF Notes */}
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-[var(--color-foreground)]">Lesson Notes (PDF URL)</label>
+            <input 
+              value={notesPdf}
+              onChange={(e) => setNotesPdf(e.target.value)}
+              className="w-full bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl px-4 py-3 focus:ring-2 focus:ring-[var(--color-primary)] text-[var(--color-foreground)] outline-none"
+              placeholder="e.g. https://example.com/notes.pdf"
+            />
+          </div>
+
+          {/* Attachments Array */}
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-[var(--color-foreground)]">Lesson Attachments</label>
+            <div className="flex gap-2">
+              <input 
+                value={attachmentInput}
+                onChange={(e) => setAttachmentInput(e.target.value)}
+                className="flex-1 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl px-4 py-3 focus:ring-2 focus:ring-[var(--color-primary)] text-[var(--color-foreground)] outline-none"
+                placeholder="Attachment URL (e.g. source code, spreadsheet)"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (attachmentInput.trim()) {
+                    setAttachments([...attachments, attachmentInput.trim()]);
+                    setAttachmentInput('');
+                  }
+                }}
+                className="px-4 py-3 bg-[var(--color-primary)] text-white font-semibold rounded-xl hover:opacity-90 transition-opacity"
+              >
+                Add
+              </button>
+            </div>
+            {attachments.length > 0 && (
+              <div className="space-y-2 mt-2">
+                {attachments.map((url, idx) => (
+                  <div key={idx} className="flex justify-between items-center bg-[var(--color-surface-muted)]/30 border border-[var(--color-border)] p-2.5 rounded-xl text-xs">
+                    <span className="truncate flex-1 pr-4 text-[var(--color-foreground)]">{url}</span>
+                    <button
+                      type="button"
+                      onClick={() => setAttachments(attachments.filter((_, i) => i !== idx))}
+                      className="text-[var(--color-error)] hover:underline font-semibold"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Lesson Preview Toggle */}
+          <div className="flex items-center gap-2.5 p-4 bg-[var(--color-surface-muted)]/30 rounded-xl">
+            <input
+              type="checkbox"
+              id="isPreview"
+              checked={isPreview}
+              onChange={(e) => setIsPreview(e.target.checked)}
+              className="w-4 h-4 rounded text-[var(--color-primary)] focus:ring-[var(--color-primary)] border-[var(--color-border)] bg-[var(--color-background)]"
+            />
+            <label htmlFor="isPreview" className="text-sm font-semibold text-[var(--color-foreground)] select-none">
+              Allow Free Preview (Students can view this lecture without course enrollment)
+            </label>
           </div>
 
           <div className="space-y-2">
@@ -322,8 +579,19 @@ function LessonForm({ lesson, onClose, onSave, isSaving }: LessonFormProps) {
         <div className="p-6 border-t border-[var(--color-border)] bg-[var(--color-surface-muted)] flex justify-end gap-3">
           <Button variant="ghost" onClick={onClose}>{t('common.cancel')}</Button>
           <Button 
-            onClick={() => onSave({ title, videoUrl, duration, content })}
-            disabled={!title || isSaving}
+            onClick={() => onSave({ 
+              title, 
+              videoUrl, 
+              duration, 
+              content, 
+              youtubeVideoId, 
+              videoEmbedUrl, 
+              thumbnail, 
+              notesPdf, 
+              attachments, 
+              isPreview 
+            })}
+            disabled={!title || isSaving || uploading}
             className="px-8"
           >
             {isSaving ? <X className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}

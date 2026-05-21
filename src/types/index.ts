@@ -338,6 +338,7 @@ export interface SessionUser {
   image?: string;
   role?: string;
   organizationId?: string;
+  canUploadVideos?: boolean;
 }
 
 export interface Session {

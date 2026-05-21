@@ -133,9 +133,15 @@ export interface Lesson {
   description?: string;
   content?: string;
   videoUrl?: string;
+  youtubeVideoId?: string;
+  videoEmbedUrl?: string;
+  thumbnail?: string;
   duration: number;
   order: number;
   isPublished: boolean;
+  isPreview?: boolean;
+  notesPdf?: string;
+  attachments?: string[];
   course: string;
   chapter: string;
   createdAt: string;

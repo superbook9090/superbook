@@ -12,6 +12,7 @@ declare module 'next-auth' {
       role: string;
       email: string;
       organizationId?: string | null;
+      canUploadVideos?: boolean;
     } & DefaultSession['user'];
   }
 
@@ -19,6 +20,7 @@ declare module 'next-auth' {
     id: string;
     role: string;
     organizationId?: string | null;
+    canUploadVideos?: boolean;
   }
 }
 
@@ -28,6 +30,7 @@ declare module 'next-auth/jwt' {
     role: string;
     email: string;
     organizationId?: string | null;
+    canUploadVideos?: boolean;
   }
 }
 
@@ -73,6 +76,7 @@ export const authOptions: AuthOptions = {
           name: user.name,
           role: user.role,
           organizationId: user.organizationId?.toString() || null,
+          canUploadVideos: user.canUploadVideos || false,
         };
       }
     })
@@ -101,6 +105,7 @@ export const authOptions: AuthOptions = {
         user.id = dbUser._id.toString();
         user.role = dbUser.role;
         user.organizationId = dbUser.organizationId?.toString() || null;
+        user.canUploadVideos = dbUser.canUploadVideos || false;
 
         return true;
       }
@@ -113,6 +118,7 @@ export const authOptions: AuthOptions = {
         token.role = user.role;
         token.email = user.email || '';
         token.organizationId = user.organizationId || null;
+        token.canUploadVideos = user.canUploadVideos || false;
       }
       return token;
     },
@@ -122,6 +128,7 @@ export const authOptions: AuthOptions = {
         session.user.role = token.role;
         session.user.email = token.email;
         session.user.organizationId = token.organizationId || null;
+        session.user.canUploadVideos = token.canUploadVideos || false;
       }
       return session;
     }

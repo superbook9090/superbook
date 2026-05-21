@@ -51,6 +51,7 @@ interface User {
     quizzes: number;
     blogs: number;
   };
+  canUploadVideos?: boolean;
 }
 
 export default function AdminUsersPage() {
@@ -151,6 +152,26 @@ export default function AdminUsersPage() {
           err instanceof ApiClientError
             ? err.message
             : t('adminSettings.errorUpdatingUser'),
+      });
+    }
+  };
+
+  const handleToggleVideoUpload = async (userId: string, currentVal: boolean) => {
+    try {
+      const newVal = !currentVal;
+      await patchAdminUser({ userId, updates: { canUploadVideos: newVal } });
+      setUsers(users.map((u) => (u._id === userId ? { ...u, canUploadVideos: newVal } : u)));
+      if (selectedUser && selectedUser._id === userId) {
+        setSelectedUser({ ...selectedUser, canUploadVideos: newVal });
+      }
+      setMessage({ type: 'success', text: t('adminUsers.videoPermissionUpdated') });
+    } catch (err) {
+      setMessage({
+        type: 'error',
+        text:
+          err instanceof ApiClientError
+            ? err.message
+            : t('adminUsers.errorUpdatingVideoPermission'),
       });
     }
   };
@@ -765,6 +786,29 @@ export default function AdminUsersPage() {
                     </button>
                   </div>
                 </div>
+
+                {/* Video Upload Permission */}
+                {selectedUser.role === 'teacher' && (
+                  <div className="flex items-center justify-between p-4 bg-[var(--color-surface-muted)]/30 rounded-xl">
+                    <div>
+                      <p className="text-sm font-medium text-[var(--color-foreground)]">
+                        {t('adminUsers.videoUploadPermission') || 'Video Upload Permission'}
+                      </p>
+                      <p className="text-xs text-[var(--color-muted-foreground)] mt-0.5">
+                        {t('adminUsers.videoUploadPermissionDesc') || 'Allow teacher to upload unlisted YouTube video lectures.'}
+                      </p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedUser.canUploadVideos || false}
+                        onChange={() => handleToggleVideoUpload(selectedUser._id, selectedUser.canUploadVideos || false)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--primary)]"></div>
+                    </label>
+                  </div>
+                )}
 
                 {/* Teacher Limits */}
                 {selectedUser.role === 'teacher' && (

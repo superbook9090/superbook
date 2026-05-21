@@ -18,7 +18,9 @@ const nextConfig = {
     ],
   },
   experimental: {
-    serverActions: {},
+    serverActions: {
+      bodySizeLimit: '2000mb',
+    },
   },
   // Enable compression
   compress: true,

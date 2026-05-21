@@ -16,6 +16,7 @@ import './QuizAttempt';
 import './Favorite';
 import './AppSettings';
 import './FileNode';
+import './VideoProgress';
 
 export { default as User } from './User';
 export { default as Organization } from './Organization';
@@ -32,3 +33,4 @@ export { default as QuizAttempt } from './QuizAttempt';
 export { default as Favorite } from './Favorite';
 export { default as AppSettings } from './AppSettings';
 export { default as FileNode } from './FileNode';
+export { default as VideoProgress } from './VideoProgress';

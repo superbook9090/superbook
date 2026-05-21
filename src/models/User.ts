@@ -17,6 +17,7 @@ export interface IUser extends Document {
     quizzes: number;
     blogs: number;
   };
+  canUploadVideos: boolean;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -37,6 +38,7 @@ const userSchema = new Schema<IUser>(
       quizzes: { type: Number, default: undefined },
       blogs: { type: Number, default: undefined },
     },
+    canUploadVideos: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
@@ -70,5 +72,6 @@ userSchema.index({ role: 1 });
 userSchema.index({ createdAt: -1 });
 userSchema.index({ isVerified: 1 });
 userSchema.index({ isSuspended: 1 });
+userSchema.index({ canUploadVideos: 1 });
 
 export default mongoose.models.User || mongoose.model<IUser>('User', userSchema);

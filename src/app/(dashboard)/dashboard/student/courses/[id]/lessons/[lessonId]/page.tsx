@@ -7,6 +7,7 @@ import { useSessionStore } from '@/store/useSessionStore';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { useLesson, useCourseCurriculum, type Chapter as ChapterType, type Lesson as LessonType } from '@/lib/react-query/hooks';
 import { ChevronLeft, ChevronRight, BookOpen, PlayCircle, Clock, Layout, ArrowLeft } from 'lucide-react';
+import SecurePlayer from '@/components/video/SecurePlayer';
 
 export default function LessonViewerPage() {
   const { status } = useSessionStore();
@@ -118,18 +119,31 @@ export default function LessonViewerPage() {
       </div>
 
       {/* Video Content */}
-      {lesson.videoUrl && (
-        <div className="relative aspect-video w-full bg-black rounded-3xl overflow-hidden shadow-2xl border-4 border-[var(--card-solid)]">
-          {videoId ? (
-            <iframe
-              src={`https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`}
-              title={lesson.title}
-              className="absolute inset-0 w-full h-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
+      {(lesson.youtubeVideoId || lesson.videoUrl) && (
+        <div className="relative w-full rounded-3xl overflow-hidden shadow-2xl border-4 border-[var(--card-solid)] bg-black">
+          {lesson.youtubeVideoId ? (
+            <SecurePlayer
+              youtubeVideoId={lesson.youtubeVideoId}
+              lessonId={lessonId}
+              courseId={courseId}
+              onCompleted={() => {
+                if (navigation.next) {
+                  router.push(`/dashboard/student/courses/${courseId}/lessons/${navigation.next.id}`);
+                }
+              }}
             />
+          ) : videoId ? (
+            <div className="aspect-video relative">
+              <iframe
+                src={`https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`}
+                title={lesson.title}
+                className="absolute inset-0 w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
           ) : (
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-white bg-gradient-to-br from-gray-900 to-black p-8">
+            <div className="aspect-video relative flex flex-col items-center justify-center text-white bg-gradient-to-br from-gray-900 to-black p-8">
               <PlayCircle className="w-16 h-16 text-[var(--student-primary)] mb-4 animate-pulse" />
               <p className="text-lg font-bold mb-2">{t('courses.educationalContent')}</p>
               <a 
@@ -142,6 +156,58 @@ export default function LessonViewerPage() {
               </a>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Resources & Notes PDF Downloads */}
+      {(lesson.notesPdf || (lesson.attachments && lesson.attachments.length > 0)) && (
+        <div className="bg-[var(--card-solid)] p-6 rounded-3xl border border-[var(--border)] space-y-4">
+          <h3 className="text-base font-bold text-[var(--color-foreground)] flex items-center gap-2">
+            <BookOpen className="w-5 h-5 text-[var(--student-primary)]" />
+            Lesson Resources & Attachments
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {lesson.notesPdf && (
+              <a
+                href={lesson.notesPdf}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center justify-between p-4 bg-[var(--color-surface-muted)]/40 hover:bg-[var(--student-soft)]/20 border border-[var(--border)] rounded-2xl group transition-all"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-950/30 text-orange-500 flex items-center justify-center font-bold">
+                    PDF
+                  </div>
+                  <div className="text-left">
+                    <span className="block text-sm font-semibold text-[var(--color-foreground)] group-hover:text-[var(--student-primary)] transition-colors">Lecture Notes</span>
+                    <span className="block text-xs text-[var(--color-muted-foreground)]">Download reference notes</span>
+                  </div>
+                </div>
+                <ChevronRight className="w-5 h-5 text-[var(--color-muted)] group-hover:text-[var(--student-primary)] transition-colors" />
+              </a>
+            )}
+
+            {lesson.attachments && lesson.attachments.map((attach, idx) => (
+              <a
+                key={idx}
+                href={attach}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center justify-between p-4 bg-[var(--color-surface-muted)]/40 hover:bg-[var(--student-soft)]/20 border border-[var(--border)] rounded-2xl group transition-all"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950/30 text-blue-500 flex items-center justify-center font-bold">
+                    ZIP
+                  </div>
+                  <div className="text-left">
+                    <span className="block text-sm font-semibold text-[var(--color-foreground)] group-hover:text-[var(--student-primary)] transition-colors">Attachment #{idx + 1}</span>
+                    <span className="block text-xs text-[var(--color-muted-foreground)] truncate max-w-[150px]">{attach}</span>
+                  </div>
+                </div>
+                <ChevronRight className="w-5 h-5 text-[var(--color-muted)] group-hover:text-[var(--student-primary)] transition-colors" />
+              </a>
+            ))}
+          </div>
         </div>
       )}
 
