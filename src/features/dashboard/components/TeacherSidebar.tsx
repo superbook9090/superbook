@@ -19,7 +19,8 @@ import {
   Newspaper,
   Building2,
   Folder,
-  Mail
+  Mail,
+  Bell
 } from 'lucide-react';
 import { useFeature } from '@/contexts/AppSettingsContext';
 import { useQuiz } from '@/contexts/QuizContext';
@@ -36,6 +37,7 @@ const teacherNavigation = [
 ];
 
 const adminNavigation = [
+  { name: 'common.notifications', href: '/dashboard/admin/notifications', icon: Bell, superadminOnly: true },
   { name: 'common.users', href: '/dashboard/admin/users', icon: Users },
   { name: 'common.organizations', href: '/dashboard/admin/organizations', icon: Building2, superadminOnly: true },
   { name: 'common.allCourses', href: '/dashboard/admin/courses', icon: Library },
@@ -111,7 +113,7 @@ export default function TeacherSidebar({ user }: { user: User | null }) {
         {/* Logo */}
         <div className="flex items-center flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4">
           <Link href="/dashboard/teacher" className="flex items-center gap-2 sm:gap-3 group">
-            <PremiumLogo 
+            <PremiumLogo
               variant="green"
               size="xl"
               theme="teacher"
@@ -121,11 +123,10 @@ export default function TeacherSidebar({ user }: { user: User | null }) {
 
         {/* Role Badge */}
         <div className="mt-4 sm:mt-6 px-4 sm:px-6">
-          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-sm border ${
-            isAdminUser
-              ? 'bg-[var(--color-error)]/30 text-white border-[var(--color-error)]/30'
-              : 'bg-white/20 text-white border-white/10'
-          }`}>
+          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-sm border ${isAdminUser
+            ? 'bg-[var(--color-error)]/30 text-white border-[var(--color-error)]/30'
+            : 'bg-white/20 text-white border-white/10'
+            }`}>
             <span className={`w-1.5 h-1.5 rounded-full mr-2 animate-pulse ${isAdminUser ? 'bg-[var(--color-error)]' : 'bg-[var(--teacher-primary-light)]'}`} />
             {isAdminUser ? t('common.administrator') : t('common.teacher')}
           </span>
@@ -146,15 +147,13 @@ export default function TeacherSidebar({ user }: { user: User | null }) {
               >
                 <Link
                   href={item.href}
-                  className={`group flex items-center px-3 sm:px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
-                    isActive
-                      ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm'
-                      : 'text-[var(--teacher-primary-light)] hover:bg-white/10 hover:text-white'
-                  }`}
+                  className={`group flex items-center px-3 sm:px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${isActive
+                    ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm'
+                    : 'text-[var(--teacher-primary-light)] hover:bg-white/10 hover:text-white'
+                    }`}
                 >
-                  <div className={`mr-2 sm:mr-3 p-1.5 rounded-lg transition-colors ${
-                    isActive ? 'bg-white/20' : 'bg-transparent group-hover:bg-white/10'
-                  }`}>
+                  <div className={`mr-2 sm:mr-3 p-1.5 rounded-lg transition-colors ${isActive ? 'bg-white/20' : 'bg-transparent group-hover:bg-white/10'
+                    }`}>
                     <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
                   <span className="truncate">{t(item.name)}</span>
@@ -188,15 +187,13 @@ export default function TeacherSidebar({ user }: { user: User | null }) {
                     >
                       <Link
                         href={item.href}
-                        className={`group flex items-center px-3 sm:px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
-                          isActive
-                            ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm'
-                            : 'text-[var(--teacher-primary-light)] hover:bg-white/10 hover:text-white'
-                        }`}
+                        className={`group flex items-center px-3 sm:px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${isActive
+                          ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm'
+                          : 'text-[var(--teacher-primary-light)] hover:bg-white/10 hover:text-white'
+                          }`}
                       >
-                        <div className={`mr-2 sm:mr-3 p-1.5 rounded-lg transition-colors ${
-                          isActive ? 'bg-white/20' : 'bg-transparent group-hover:bg-white/10'
-                        }`}>
+                        <div className={`mr-2 sm:mr-3 p-1.5 rounded-lg transition-colors ${isActive ? 'bg-white/20' : 'bg-transparent group-hover:bg-white/10'
+                          }`}>
                           <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                         </div>
                         <span className="truncate">{t(item.name)}</span>

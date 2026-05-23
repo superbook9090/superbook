@@ -9,6 +9,7 @@ import DashboardHeader from '@/features/dashboard/components/DashboardHeader';
 import { RoleThemeProvider } from '@/contexts/RoleThemeContext';
 import { QuizProvider } from '@/contexts/QuizContext';
 import { isAdmin, isSuperAdmin } from '@/lib/roles';
+import PushNotificationManager from '@/components/providers/PushNotificationManager';
 
 // TODO: Add translation keys for navigation items
 // Currently using hardcoded strings - should use i18n system
@@ -35,6 +36,7 @@ const teacherNavigation = [
 ];
 
 const adminNavigation = [
+  { name: 'Notifications', href: '/dashboard/admin/notifications', icon: 'Bell', superadminOnly: true },
   { name: 'Users', href: '/dashboard/admin/users', icon: 'Users' },
   { name: 'Organizations', href: '/dashboard/admin/organizations', icon: 'Building2', superadminOnly: true },
   { name: 'Courses', href: '/dashboard/admin/courses', icon: 'BookOpen' },
@@ -75,7 +77,7 @@ export default async function DashboardLayout({
 
   return (
     <QuizProvider>
-      <div 
+      <div
         className="min-h-screen bg-[var(--color-background)] flex flex-col md:flex-row overflow-x-hidden"
         data-role={(role || 'student').toLowerCase()}
       >
@@ -98,12 +100,13 @@ export default async function DashboardLayout({
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-h-screen md:min-h-0 md:h-screen overflow-hidden">
           {/* Desktop Header - Sticky */}
-          <DashboardHeader isTeacherOrAdmin={isStaff} />
+          <DashboardHeader isTeacherOrAdmin={isStaff} showNotifications={role === 'student'} />
 
           {/* Main Content - Scrollable */}
           <main className="flex-1 overflow-x-hidden overflow-y-auto bg-[var(--color-background)] p-4 sm:p-6 lg:p-8 pb-24 md:pb-8">
             <RoleThemeProvider role={role || 'student'}>
               <div className="max-w-7xl mx-auto w-full" data-role={(role || 'student').toLowerCase()}>
+                <PushNotificationManager />
                 {children}
               </div>
             </RoleThemeProvider>

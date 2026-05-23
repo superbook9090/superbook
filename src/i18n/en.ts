@@ -67,6 +67,7 @@ export const en = {
     draft: 'Draft',
     published: 'Published',
     overview: 'Overview',
+    notifications: 'Notifications',
   },
 
   privacy: {
@@ -426,6 +427,46 @@ export const en = {
     deleteQuizConfirm: 'Are you sure you want to delete this quiz? This action cannot be undone.',
     questions: '{count} questions',
     course: 'Course',
+    notifications: {
+      title: 'Send Notification',
+      description: 'Broadcast a push notification to students and teachers in your organization.',
+      titleEn: 'Title (English)',
+      titleHi: 'Title (Hindi)',
+      bodyEn: 'Message (English)',
+      bodyHi: 'Message (Hindi)',
+      category: 'Category',
+      selectCategory: 'Select a category',
+      organizationId: 'Organization ID',
+      organizationPlaceholder: 'Enter organization ID (optional, superadmin only)',
+      send: 'Send',
+      sending: 'Sending…',
+      validationRequired: 'Please fill in the English title, message, and category.',
+      sendSuccess: 'Notification sent to {count} recipients.',
+      noRecipients: 'No recipients found for this organization.',
+      sendFailed: 'Failed to send notification.',
+      unexpectedError: 'An unexpected error occurred.',
+    },
+  },
+
+  notifications: {
+    categories: {
+      lessons: 'Lessons',
+      quizzes: 'Quizzes',
+      assignments: 'Assignments',
+      liveClasses: 'Live classes',
+      announcements: 'Announcements',
+      system: 'System',
+    },
+    push: {
+      viewDetails: 'View details',
+    },
+    inbox: {
+      title: 'Notifications',
+      description: 'Your recent announcements and updates.',
+      empty: 'No notifications yet.',
+      loadFailed: 'Failed to load notifications.',
+      markReadFailed: 'Could not mark notification as read.',
+    },
   },
 
   // Roles

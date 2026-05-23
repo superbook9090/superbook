@@ -37,6 +37,8 @@
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.10.0",
     "clsx": "^2.1.1",
+    "firebase": "^12.13.0",
+    "firebase-admin": "^13.10.0",
     "framer-motion": "^12.38.0",
     "googleapis": "^171.4.0",
     "isomorphic-dompurify": "^3.9.0",

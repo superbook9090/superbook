@@ -15,6 +15,7 @@ import {
   Library,
   Folder,
   Mail,
+  Bell,
   LucideIcon
 } from 'lucide-react';
 
@@ -30,6 +31,7 @@ const iconMap: Record<string, LucideIcon> = {
   Library,
   Folder,
   Mail,
+  Bell,
 };
 
 interface NavItem {

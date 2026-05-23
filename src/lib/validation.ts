@@ -63,6 +63,38 @@ export const createFavoriteSchema = z.object({
   blogId: objectIdSchema,
 });
 
+const notificationCategorySchema = z.enum([
+  'lessons',
+  'quizzes',
+  'assignments',
+  'liveClasses',
+  'announcements',
+  'system',
+]);
+
+export const sendNotificationSchema = z.object({
+  title: z.object({
+    en: z.string().min(1, 'English title is required').max(200),
+    hi: z.string().max(200).optional(),
+  }),
+  body: z.object({
+    en: z.string().min(1, 'English message is required').max(1000),
+    hi: z.string().max(1000).optional(),
+  }),
+  data: z.record(z.string(), z.string()).optional(),
+  category: notificationCategorySchema,
+  organizationId: objectIdSchema.optional(),
+});
+
+export const registerDeviceSchema = z.object({
+  deviceToken: z.string().min(1, 'Device token is required'),
+  platform: z.enum(['android', 'ios', 'web']),
+});
+
+export const unregisterDeviceSchema = z.object({
+  deviceToken: z.string().min(1, 'Device token is required'),
+});
+
 // Admin settings validation schemas
 export const updateSettingsSchema = z.object({
   teacherLimits: z.object({

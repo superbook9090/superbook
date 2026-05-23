@@ -5,12 +5,14 @@ import Link from 'next/link';
 import { useTranslation } from '@/hooks/useTranslation';
 import PremiumLogo from '@/components/ui/PremiumLogo';
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher';
+import { Bell } from 'lucide-react';
 
 interface DashboardHeaderProps {
   isTeacherOrAdmin: boolean;
+  showNotifications?: boolean;
 }
 
-export default function DashboardHeader({ isTeacherOrAdmin }: DashboardHeaderProps) {
+export default function DashboardHeader({ isTeacherOrAdmin, showNotifications = false }: DashboardHeaderProps) {
   const { t } = useTranslation();
 
   return (
@@ -21,7 +23,7 @@ export default function DashboardHeader({ isTeacherOrAdmin }: DashboardHeaderPro
             href={isTeacherOrAdmin ? '/dashboard/teacher' : '/dashboard/student'}
             className="group flex-shrink-0"
           >
-            <PremiumLogo 
+            <PremiumLogo
               variant="default"
               size="md"
               theme="white"
@@ -31,7 +33,16 @@ export default function DashboardHeader({ isTeacherOrAdmin }: DashboardHeaderPro
             {isTeacherOrAdmin ? t('dashboard.teacherDashboard') : t('dashboard.studentDashboard')}
           </h1>
         </div>
-        <div className="flex-shrink-0">
+        <div className="flex items-center gap-3 flex-shrink-0">
+          {showNotifications && (
+            <Link
+              href="/dashboard/student/notifications"
+              className="p-2 rounded-lg text-gray-600 hover:text-[var(--primary)] hover:bg-[var(--primary-soft)] transition-colors"
+              aria-label={t('common.notifications')}
+            >
+              <Bell className="w-5 h-5" />
+            </Link>
+          )}
           <LanguageSwitcher />
         </div>
       </div>

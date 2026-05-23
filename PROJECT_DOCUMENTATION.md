@@ -528,7 +528,57 @@ t('common.english') // "English" or "अंग्रेज़ी"
 - **Manual Mapping**: Frontend processes and combines data from multiple sources
 - **Error Handling**: Graceful fallbacks for missing API responses
 
-## 19. Future Improvements
+## 19. Push Notifications (Firebase Cloud Messaging)
+
+### Overview
+
+Push notifications use **Firebase Cloud Messaging (FCM)** for web and native WebView shells. Foreground messages show an in-app toast; background delivery uses `public/firebase-messaging-sw.js`.
+
+### Collections
+
+- **`notificationtokens`**: `{ userId, deviceToken, platform, isActive }` — TTL index on `updatedAt` (30 days).
+- **`notificationpreferences`**: per-user category toggles, `muteAll`, `disablePush`, `mutedCourses[]`.
+
+### API routes (standard `{ success, data, error }` envelope)
+
+| Route | Method | Auth | Purpose |
+|-------|--------|------|---------|
+| `/api/notifications/device` | POST | Session | Register FCM device token |
+| `/api/notifications/device` | DELETE | Session | Deactivate token |
+| `/api/notifications/preferences` | GET/PUT | Session | Read/update preferences |
+| `/api/notifications/send` | POST | Admin / superadmin | Broadcast to org students + teachers |
+
+Service layer: `src/lib/server/services/notifications-service.ts`  
+Client API: `src/lib/api/notifications.ts` (uses `apiJsonData`)
+
+### Admin UI
+
+- **Page**: `/dashboard/admin/notifications`
+- **i18n**: `admin.notifications.*`, `notifications.categories.*`, `notifications.push.viewDetails`
+- Uses shared `Alert`, role theme gradients, and CSS variables (`--primary`, `--card-solid`, etc.)
+
+### Client registration
+
+- **Web**: `PushNotificationManager` → `initMobileNotifications()` → `registerDeviceToken()`
+- **Native WebView**: bridge message `REQUEST_NATIVE_TOKEN` / `NATIVE_TOKEN_RECEIVED`
+- **Deep links**: `src/lib/mobile/deepLink.ts` (`quizdo://` URLs in payload `data.url`)
+
+### Environment variables
+
+**Client (`.env`):**
+- `NEXT_PUBLIC_FIREBASE_API_KEY`, `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`, `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+- `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`, `NEXT_PUBLIC_FIREBASE_APP_ID`, `NEXT_PUBLIC_FIREBASE_VAPID_KEY`
+
+**Server:**
+- `FIREBASE_ADMIN_PROJECT_ID`, `FIREBASE_ADMIN_CLIENT_EMAIL`, `FIREBASE_ADMIN_PRIVATE_KEY`
+
+### Payload helpers
+
+`src/lib/notifications/push/notificationPayload.ts` — bilingual `title`/`body` + category for lessons, quizzes, announcements.
+
+---
+
+## 20. Future Improvements
 
 ### Performance
 - Add advanced request deduplication (TanStack Query)
@@ -541,7 +591,7 @@ t('common.english') // "English" or "अंग्रेज़ी"
 - Email verification system
 - Video lessons support
 - Course completion certificates
-- Real-time notifications (WebSocket)
+- Real-time in-app notifications (WebSocket) — push via FCM is implemented (see §19)
 - Payment gateway integration (Stripe)
 - Advanced analytics with charts (Recharts)
 - Bulk user import (Excel)
@@ -560,7 +610,7 @@ t('common.english') // "English" or "अंग्रेज़ी"
 - Add comprehensive request logging with logger utility
 - Add file upload security and validation
 
-## 20. Database Schemas
+## 21. Database Schemas
 
 ### User Schema
 
@@ -906,14 +956,14 @@ interface IAppSettings {
 
 ---
 
-## 21. Future Roadmap
+## 22. Future Roadmap
 
 ### Short Term (1-3 months)
 - **Real-time Features**: WebSocket integration for live updates
 - **Advanced Analytics**: Charts and detailed reporting
 - **Mobile App**: React Native companion app
 - **Payment Integration**: Stripe/PayPal for course purchases
-- **Email System**: Transactional emails and notifications
+- **Email System**: Transactional emails (push notifications via FCM are implemented)
 
 ### Medium Term (3-6 months)
 - **Video Platform**: Video lessons with streaming

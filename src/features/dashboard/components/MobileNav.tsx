@@ -22,7 +22,8 @@ import {
   LucideIcon,
   Building2,
   Folder,
-  Mail
+  Mail,
+  Bell
 } from 'lucide-react';
 
 // Icon mapping for navigation items
@@ -39,6 +40,7 @@ const iconMap: Record<string, LucideIcon> = {
   Building2,
   Folder,
   Mail,
+  Bell,
 };
 
 interface NavItem {
@@ -114,6 +116,15 @@ function MobileNav({ user, navigation, adminNavigation = [] }: MobileNavProps) {
             />
           </Link>
           <div className="flex items-center gap-2">
+            {!isStaff && (
+              <Link
+                href="/dashboard/student/notifications"
+                className="text-white p-2 rounded-lg hover:bg-white/10 transition-colors"
+                aria-label={t('common.notifications')}
+              >
+                <Bell className="h-5 w-5" />
+              </Link>
+            )}
             <select
               value={lang}
               onChange={(e) => setLang(e.target.value as 'en' | 'hi')}

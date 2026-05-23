@@ -120,8 +120,8 @@ export default function StudentProgressPage() {
   const scoreTrendData = useMemo(() => {
     if (!progressData.length) return [];
     
-    const allAttempts = progressData.flatMap(course => course.attempts);
-    return allAttempts.map(attempt => ({
+    const allAttempts = progressData.flatMap(course => course.attempts || []);
+    return allAttempts.filter(Boolean).map(attempt => ({
       date: attempt.submittedAt,
       score: attempt.score,
       quizTitle: attempt.quizTitle
@@ -173,7 +173,7 @@ export default function StudentProgressPage() {
   const averageScoreData = useMemo(() => {
     if (!progressData.length) return [];
     
-    const allAttempts = progressData.flatMap(course => course.attempts);
+    const allAttempts = progressData.flatMap(course => course.attempts || []).filter(Boolean);
     const groupedByDate = allAttempts.reduce((acc, attempt) => {
       const date = new Date(attempt.submittedAt).toDateString();
       if (!acc[date]) {
@@ -408,11 +408,11 @@ export default function StudentProgressPage() {
                 </div>
 
                 {/* Quiz History */}
-                {selectedCourse === item.enrollment._id && item.attempts.length > 0 && (
+                {selectedCourse === item.enrollment._id && item.attempts?.length > 0 && (
                   <div className="border-t border-[var(--border)] bg-[var(--color-surface-muted)] px-6 py-4">
                     <h4 className="text-sm font-semibold text-[var(--color-foreground)] mb-3">{t('progress.quizAttempts')}</h4>
                     <div className="space-y-2">
-                      {item.attempts.map((attempt) => (
+                      {item.attempts?.map((attempt) => (
                         <div
                           key={attempt._id}
                           className="bg-[var(--card-solid)] rounded-lg p-3 flex items-center justify-between"

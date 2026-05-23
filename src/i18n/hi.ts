@@ -67,6 +67,7 @@ export const hi = {
     draft: 'ड्राफ्ट',
     published: 'प्रकाशित',
     overview: 'अवलोकन',
+    notifications: 'सूचनाएं',
   },
 
   privacy: {
@@ -426,6 +427,46 @@ export const hi = {
     deleteQuizConfirm: 'क्या आप वाकई इस क्विज़ को हटाना चाहते हैं? यह कार्य पूर्ववत नहीं किया जा सकता।',
     questions: '{count} प्रश्न',
     course: 'पाठ्यक्रम',
+    notifications: {
+      title: 'सूचना भेजें',
+      description: 'अपने संगठन के छात्रों और शिक्षकों को पुश सूचना भेजें।',
+      titleEn: 'शीर्षक (अंग्रेज़ी)',
+      titleHi: 'शीर्षक (हिंदी)',
+      bodyEn: 'संदेश (अंग्रेज़ी)',
+      bodyHi: 'संदेश (हिंदी)',
+      category: 'श्रेणी',
+      selectCategory: 'एक श्रेणी चुनें',
+      organizationId: 'संगठन पहचान',
+      organizationPlaceholder: 'संगठन पहचान दर्ज करें (वैकल्पिक, केवल सुपर एडमिन)',
+      send: 'भेजें',
+      sending: 'भेजा जा रहा है…',
+      validationRequired: 'कृपया अंग्रेज़ी शीर्षक, संदेश और श्रेणी भरें।',
+      sendSuccess: 'सूचना {count} प्राप्तकर्ताओं को भेजी गई।',
+      noRecipients: 'इस संगठन के लिए कोई प्राप्तकर्ता नहीं मिला।',
+      sendFailed: 'सूचना भेजने में विफल।',
+      unexpectedError: 'एक अप्रत्याशित त्रुटि हुई।',
+    },
+  },
+
+  notifications: {
+    categories: {
+      lessons: 'पाठ',
+      quizzes: 'क्विज़',
+      assignments: 'असाइनमेंट',
+      liveClasses: 'लाइव कक्षाएं',
+      announcements: 'घोषणाएं',
+      system: 'सिस्टम',
+    },
+    push: {
+      viewDetails: 'विवरण देखें',
+    },
+    inbox: {
+      title: 'सूचनाएं',
+      description: 'आपकी हाल की घोषणाएं और अपडेट।',
+      empty: 'अभी कोई सूचना नहीं है।',
+      loadFailed: 'सूचनाएं लोड करने में विफल।',
+      markReadFailed: 'सूचना को पढ़ा हुआ चिह्नित नहीं किया जा सका।',
+    },
   },
 
   // Roles
