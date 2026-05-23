@@ -1,31 +1,16 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import dynamic from 'next/dynamic';
+import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import {
-  ArrowLeft,
-  Eye,
-  EyeOff,
-  Hash,
-  FileText,
-  Type,
-} from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import Alert from '@/components/ui/Alert';
-import Button from '@/components/ui/Button';
-import { PageSkeleton } from '@/components/ui/Skeleton';
 import { useSessionStore } from '@/store/useSessionStore';
 import { getBlogById, updateBlog, type BlogDocument } from '@/lib/api/blogs';
 import { ApiClientError } from '@/lib/api/http';
 import { useTranslation } from '@/hooks/useTranslation';
-import { blogTopicKeys, blogTopicValues, type BlogTopicKey } from '@/i18n/config';
-
-const RichTextEditor = dynamic(() => import('@/components/ui/RichTextEditor'), {
-  ssr: false,
-  loading: () => <PageSkeleton variant="embed" />
-});
+import BlogEditorForm, { isBlogContentEmpty, type BlogFormData } from '@/features/blogs/components/BlogEditorForm';
 
 export default function EditBlogPage() {
   const { status } = useSessionStore();
@@ -36,12 +21,13 @@ export default function EditBlogPage() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<BlogFormData>({
     title: '',
     topic: '',
     content: '',
-    isPublished: true,
+    language: 'en',
   });
+  const [isPublished, setIsPublished] = useState(true);
   const [error, setError] = useState('');
   const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
 
@@ -64,8 +50,9 @@ export default function EditBlogPage() {
         title: blog.title,
         topic: blog.topic,
         content: blog.content,
-        isPublished: blog.isPublished,
+        language: blog.language || 'en',
       });
+      setIsPublished(blog.isPublished);
     } catch (err) {
       const errorMsg = err instanceof ApiClientError ? err.message : t('blog.failedToLoadBlog');
       setError(errorMsg);
@@ -74,18 +61,11 @@ export default function EditBlogPage() {
     }
   };
 
-  // Helper to check if content is empty (handles HTML tags)
-  const isContentEmpty = (html: string) => {
-    const text = html.replace(/<[^>]*>/g, '').trim();
-    return text.length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent, saveAsDraft: boolean = false) => {
-    e.preventDefault();
+  const submit = async (saveAsDraft: boolean) => {
     setError('');
     setIsSaving(true);
 
-    if (!formData.title.trim() || !formData.topic || isContentEmpty(formData.content)) {
+    if (!formData.title.trim() || !formData.topic || isBlogContentEmpty(formData.content)) {
       const errorMsg = t('blog.fillAllFields');
       setError(errorMsg);
       setAlertState({ type: 'error', message: errorMsg });
@@ -95,15 +75,15 @@ export default function EditBlogPage() {
 
     try {
       await updateBlog(blogId, {
-        ...formData,
+        title: formData.title,
+        topic: formData.topic,
+        content: formData.content,
+        language: formData.language,
         isPublished: !saveAsDraft,
       });
       router.push('/dashboard/teacher/blogs');
     } catch (err) {
-      const errorMsg =
-        err instanceof ApiClientError
-          ? err.message
-          : t('blog.saveErrorGeneric');
+      const errorMsg = err instanceof ApiClientError ? err.message : t('blog.saveErrorGeneric');
       setError(errorMsg);
       setAlertState({ type: 'error', message: errorMsg });
     } finally {
@@ -113,8 +93,8 @@ export default function EditBlogPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-12 h-12 border-4 border-[var(--color-surface-muted)] border-t-[var(--teacher-primary)] rounded-full animate-spin" />
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="w-10 h-10 border-4 border-[var(--color-surface-muted)] border-t-[var(--teacher-primary)] rounded-full animate-spin" />
       </div>
     );
   }
@@ -122,126 +102,34 @@ export default function EditBlogPage() {
   return (
     <div className="max-w-4xl mx-auto">
       {alertState && (
-        <Alert
-          type={alertState.type}
-          message={alertState.message}
-          onClose={() => setAlertState(null)}
-        />
+        <Alert type={alertState.type} message={alertState.message} onClose={() => setAlertState(null)} />
       )}
 
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-6"
-      >
+      <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
         <Link
           href="/dashboard/teacher/blogs"
-          className="inline-flex items-center text-[var(--teacher-primary)] hover:text-[var(--teacher-primary)]/80 mb-4"
+          className="inline-flex items-center text-sm text-[var(--teacher-primary)] hover:text-[var(--teacher-primary)]/80 mb-3"
         >
-          <ArrowLeft className="w-4 h-4 mr-2" />
+          <ArrowLeft className="w-4 h-4 mr-1.5" />
           {t('blog.backToBlogs')}
         </Link>
-        <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">{t('editBlogPage.title')}</h1>
-        <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">{t('editBlogPage.description')}</p>
+        <h1 className="text-lg sm:text-xl font-bold text-[var(--color-foreground)]">{t('editBlogPage.title')}</h1>
+        <p className="text-sm text-[var(--color-muted-foreground)] mt-0.5">{t('editBlogPage.description')}</p>
       </motion.div>
 
-      {/* Form */}
-      <motion.form
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 sm:p-8"
-      >
-        {error && (
-          <div className="mb-6 p-4 bg-[var(--error-light)] border border-[var(--error)]/20 rounded-xl text-[var(--error)]">
-            {error}
-          </div>
-        )}
-
-        <div className="space-y-6">
-          {/* Title */}
-          <div>
-            <label className="block text-sm font-semibold text-[var(--color-foreground)] mb-2">
-              <Type className="w-4 h-4 inline mr-2" />
-              {t('createBlogPage.blogTitle')}
-            </label>
-            <input
-              type="text"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              placeholder={t('createBlogPage.titlePlaceholder')}
-              className="w-full min-h-[44px] px-4 py-3 bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--teacher-primary)]/20 focus:border-[var(--teacher-primary)]"
-              maxLength={200}
-            />
-            <p className="text-xs text-[var(--color-muted-foreground)] mt-1">
-              {t('createBlogPage.charactersCount', { count: formData.title.length, max: 200 })}
-            </p>
-          </div>
-
-          {/* Topic */}
-          <div>
-            <label className="block text-sm font-semibold text-[var(--color-foreground)] mb-2">
-              <Hash className="w-4 h-4 inline mr-2" />
-              {t('createBlogPage.topic')}
-            </label>
-            <select
-              value={formData.topic}
-              onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
-              className="w-full min-h-[44px] px-4 py-3 bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--teacher-primary)]/20 focus:border-[var(--teacher-primary)]"
-            >
-              <option value="">{t('createBlogPage.selectTopic')}</option>
-              {blogTopicKeys.map((topic) => (
-                <option key={topic} value={blogTopicValues[topic]}>
-                  {t(`topics.${topic}` as `topics.${BlogTopicKey}`)}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Content */}
-          <div>
-            <label className="block text-sm font-semibold text-[var(--color-foreground)] mb-2">
-              <FileText className="w-4 h-4 inline mr-2" />
-              {t('createBlogPage.content')}
-            </label>
-            <Suspense fallback={<PageSkeleton variant="embed" />}>
-              <RichTextEditor
-                content={formData.content}
-                onChange={(content) => setFormData({ ...formData, content })}
-                placeholder={t('createBlogPage.contentPlaceholder')}
-                theme="teacher"
-              />
-            </Suspense>
-          </div>
-
-          {/* Actions */}
-          <div className="flex flex-col sm:flex-row gap-4 pt-4">
-            <Button
-              type="button"
-              disabled={isSaving}
-              onClick={(e) => handleSubmit(e, false)}
-              isLoading={isSaving && formData.isPublished}
-              className="flex-1"
-            >
-              <Eye className="w-5 h-5 mr-2" />
-              {formData.isPublished ? t('editBlogPage.updateAndPublish') : t('editBlogPage.publish')}
-            </Button>
-
-            <Button
-              type="button"
-              disabled={isSaving}
-              onClick={(e) => handleSubmit(e, true)}
-              isLoading={isSaving && !formData.isPublished}
-              variant="secondary"
-              className="flex-1 sm:flex-none"
-            >
-              <EyeOff className="w-5 h-5 mr-2" />
-              {t('createBlogPage.saveDraft')}
-            </Button>
-          </div>
-        </div>
-      </motion.form>
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+        <BlogEditorForm
+          formData={formData}
+          onChange={setFormData}
+          error={error}
+          isSaving={isSaving}
+          onPublish={() => submit(false)}
+          onSaveDraft={() => submit(true)}
+          publishLabel={
+            isPublished ? t('editBlogPage.updateAndPublish') : t('editBlogPage.publish')
+          }
+        />
+      </motion.div>
     </div>
   );
 }

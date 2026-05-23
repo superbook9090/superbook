@@ -20,17 +20,23 @@ import {
   Redo2,
   Link as LinkIcon,
   Image as ImageIcon,
+  RemoveFormatting,
+  Pilcrow,
 } from 'lucide-react';
 import { ToolbarButton } from './ToolbarButton';
 import { LinkInput } from './LinkInput';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useTranslation } from '@/hooks/useTranslation';
+import { cn } from '@/lib/utils';
 
 interface ToolbarProps {
   editor: Editor | null;
   theme?: 'student' | 'teacher';
+  compact?: boolean;
 }
 
-export const Toolbar = ({ editor, theme = 'teacher' }: ToolbarProps) => {
+export const Toolbar = ({ editor, theme = 'teacher', compact = false }: ToolbarProps) => {
+  const { t } = useTranslation();
   const [showLinkInput, setShowLinkInput] = useState(false);
 
   if (!editor) return null;
@@ -45,14 +51,19 @@ export const Toolbar = ({ editor, theme = 'teacher' }: ToolbarProps) => {
   };
 
   const addImage = () => {
-    const url = window.prompt('Enter image URL'); // Keep prompt for image for now or simplify
+    const url = window.prompt(t('richTextEditor.enterImageUrl'));
     if (url) {
       editor.chain().focus().setImage({ src: url }).run();
     }
   };
 
   return (
-    <div className="sticky top-0 z-10 flex flex-wrap items-center gap-1 p-2 bg-[var(--card-solid)]/80 backdrop-blur-md border-b border-[var(--color-border)] transition-all min-h-[52px]">
+    <div
+      className={cn(
+        'sticky top-0 z-10 flex flex-wrap items-center gap-0.5 bg-[var(--card-solid)]/90 backdrop-blur-md border-b border-[var(--color-border)] transition-all',
+        compact ? 'p-1 min-h-[40px]' : 'p-1.5 min-h-[44px]'
+      )}
+    >
       <AnimatePresence mode="wait">
         {showLinkInput ? (
           <motion.div
@@ -85,7 +96,7 @@ export const Toolbar = ({ editor, theme = 'teacher' }: ToolbarProps) => {
               <ToolbarButton
                 onClick={() => editor.chain().focus().undo().run()}
                 disabled={!editor.can().undo()}
-                title="Undo"
+                title={t('richTextEditor.undo')}
                 theme={theme}
               >
                 <Undo2 className="w-4 h-4" />
@@ -93,7 +104,7 @@ export const Toolbar = ({ editor, theme = 'teacher' }: ToolbarProps) => {
               <ToolbarButton
                 onClick={() => editor.chain().focus().redo().run()}
                 disabled={!editor.can().redo()}
-                title="Redo"
+                title={t('richTextEditor.redo')}
                 theme={theme}
               >
                 <Redo2 className="w-4 h-4" />
@@ -107,7 +118,7 @@ export const Toolbar = ({ editor, theme = 'teacher' }: ToolbarProps) => {
               <ToolbarButton
                 onClick={() => editor.chain().focus().toggleBold().run()}
                 isActive={editor.isActive('bold')}
-                title="Bold"
+                title={t('richTextEditor.bold')}
                 theme={theme}
               >
                 <Bold className="w-4 h-4" />
@@ -169,10 +180,25 @@ export const Toolbar = ({ editor, theme = 'teacher' }: ToolbarProps) => {
               <ToolbarButton
                 onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
                 isActive={editor.isActive('heading', { level: 3 })}
-                title="Heading 3"
+                title={t('richTextEditor.heading3')}
                 theme={theme}
               >
                 <Heading3 className="w-4 h-4" />
+              </ToolbarButton>
+              <ToolbarButton
+                onClick={() => editor.chain().focus().setParagraph().run()}
+                isActive={editor.isActive('paragraph')}
+                title={t('richTextEditor.paragraph')}
+                theme={theme}
+              >
+                <Pilcrow className="w-4 h-4" />
+              </ToolbarButton>
+              <ToolbarButton
+                onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()}
+                title={t('richTextEditor.clearFormatting')}
+                theme={theme}
+              >
+                <RemoveFormatting className="w-4 h-4" />
               </ToolbarButton>
             </div>
 

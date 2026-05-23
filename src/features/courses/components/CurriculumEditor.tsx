@@ -34,7 +34,10 @@ import {
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import Button from '@/components/ui/Button';
+import { EditorField, editorInputClass } from '@/components/ui/editor/EditorField';
+import { EditorSection } from '@/components/ui/editor/EditorSection';
 import { useSessionStore } from '@/store/useSessionStore';
+import { cn } from '@/lib/utils';
 
 interface CurriculumEditorProps {
   courseId: string;
@@ -359,6 +362,7 @@ function LessonForm({ lesson, onClose, onSave, isSaving }: LessonFormProps) {
     session?.user?.role === 'admin';
 
   const [title, setTitle] = useState(lesson?.title || '');
+  const [description, setDescription] = useState(lesson?.description || '');
   const [videoUrl, setVideoUrl] = useState(lesson?.videoUrl || '');
   const [youtubeVideoId, setYoutubeVideoId] = useState(lesson?.youtubeVideoId || '');
   const [videoEmbedUrl, setVideoEmbedUrl] = useState(lesson?.videoEmbedUrl || '');
@@ -459,25 +463,33 @@ function LessonForm({ lesson, onClose, onSave, isSaving }: LessonFormProps) {
         animate={{ x: 0 }}
         className="w-full max-w-3xl h-screen bg-[var(--card-solid)] shadow-2xl flex flex-col"
       >
-        <div className="p-6 border-b border-[var(--color-border)] flex justify-between items-center">
-          <h3 className="text-xl font-bold text-[var(--color-foreground)]">
+        <div className="px-4 py-3 border-b border-[var(--color-border)] flex justify-between items-center shrink-0">
+          <h3 className="text-base sm:text-lg font-bold text-[var(--color-foreground)]">
             {lesson ? t('curriculum.editLesson') : t('curriculum.addNewLesson')}
           </h3>
-          <button onClick={onClose} className="p-2 hover:bg-[var(--color-surface-muted)] rounded-full transition-colors text-[var(--color-foreground)]">
-            <X className="w-6 h-6" />
+          <button type="button" onClick={onClose} className="p-1.5 hover:bg-[var(--color-surface-muted)] rounded-full transition-colors text-[var(--color-foreground)]">
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-hide">
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-[var(--color-foreground)]">{t('curriculum.lessonTitle')}</label>
-            <input 
+        <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-hide">
+          <EditorField label={t('curriculum.lessonTitle')}>
+            <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl px-4 py-3 focus:ring-2 focus:ring-[var(--color-primary)] text-[var(--color-foreground)] outline-none"
-              placeholder="e.g. Introduction to React"
+              className={editorInputClass}
+              placeholder={t('curriculum.lessonTitlePlaceholder')}
             />
-          </div>
+          </EditorField>
+          <EditorField label={t('curriculum.lessonDescription')}>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={2}
+              className={cn(editorInputClass, 'min-h-[72px] resize-y')}
+              placeholder={t('curriculum.lessonDescriptionPlaceholder')}
+            />
+          </EditorField>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -492,18 +504,23 @@ function LessonForm({ lesson, onClose, onSave, isSaving }: LessonFormProps) {
                 />
               </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-[var(--color-foreground)]">{t('curriculum.duration')} (Minutes)</label>
+            <EditorField label={`${t('curriculum.duration')} (${t('curriculum.minutes')})`}>
               <div className="relative">
-                <Clock className="absolute left-3 top-3.5 w-5 h-5 text-[var(--color-muted)]" />
-                <input 
-                  type="number"
-                  value={duration}
-                  onChange={(e) => setDuration(Number(e.target.value))}
-                  className="w-full bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl pl-11 pr-4 py-3 focus:ring-2 focus:ring-[var(--color-primary)] text-[var(--color-foreground)] outline-none"
+                <Clock className="absolute left-2.5 top-2.5 w-4 h-4 text-[var(--color-muted)]" />
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  value={duration > 0 ? String(duration) : ''}
+                  onChange={(e) => {
+                    const digits = e.target.value.replace(/\D/g, '');
+                    setDuration(digits === '' ? 0 : parseInt(digits, 10));
+                  }}
+                  className={cn(editorInputClass, 'pl-9')}
+                  placeholder="0"
                 />
               </div>
-            </div>
+            </EditorField>
           </div>
 
           {/* Centralized YouTube Upload Dropzone */}
@@ -599,88 +616,84 @@ function LessonForm({ lesson, onClose, onSave, isSaving }: LessonFormProps) {
             </div>
           )}
 
-          {/* Lesson PDF Notes */}
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-[var(--color-foreground)]">Lesson Notes (PDF URL)</label>
-            <input 
-              value={notesPdf}
-              onChange={(e) => setNotesPdf(e.target.value)}
-              className="w-full bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl px-4 py-3 focus:ring-2 focus:ring-[var(--color-primary)] text-[var(--color-foreground)] outline-none"
-              placeholder="e.g. https://example.com/notes.pdf"
-            />
-          </div>
-
-          {/* Attachments Array */}
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-[var(--color-foreground)]">Lesson Attachments</label>
-            <div className="flex gap-2">
-              <input 
-                value={attachmentInput}
-                onChange={(e) => setAttachmentInput(e.target.value)}
-                className="flex-1 bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl px-4 py-3 focus:ring-2 focus:ring-[var(--color-primary)] text-[var(--color-foreground)] outline-none"
-                placeholder="Attachment URL (e.g. source code, spreadsheet)"
+          <EditorSection title={t('curriculum.sectionResources')} defaultOpen={false}>
+            <EditorField label={t('curriculum.notesPdf')}>
+              <input
+                value={notesPdf}
+                onChange={(e) => setNotesPdf(e.target.value)}
+                className={editorInputClass}
+                placeholder="https://example.com/notes.pdf"
               />
-              <button
-                type="button"
-                onClick={() => {
-                  if (attachmentInput.trim()) {
-                    setAttachments([...attachments, attachmentInput.trim()]);
-                    setAttachmentInput('');
-                  }
-                }}
-                className="px-4 py-3 bg-[var(--color-primary)] text-white font-semibold rounded-xl hover:opacity-90 transition-opacity"
-              >
-                Add
-              </button>
-            </div>
-            {attachments.length > 0 && (
-              <div className="space-y-2 mt-2">
-                {attachments.map((url, idx) => (
-                  <div key={idx} className="flex justify-between items-center bg-[var(--color-surface-muted)]/30 border border-[var(--color-border)] p-2.5 rounded-xl text-xs">
-                    <span className="truncate flex-1 pr-4 text-[var(--color-foreground)]">{url}</span>
-                    <button
-                      type="button"
-                      onClick={() => setAttachments(attachments.filter((_, i) => i !== idx))}
-                      className="text-[var(--color-error)] hover:underline font-semibold"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ))}
+            </EditorField>
+            <EditorField label={t('curriculum.attachments')}>
+              <div className="flex gap-2">
+                <input
+                  value={attachmentInput}
+                  onChange={(e) => setAttachmentInput(e.target.value)}
+                  className={cn(editorInputClass, 'flex-1')}
+                  placeholder={t('curriculum.attachmentPlaceholder')}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (attachmentInput.trim()) {
+                      setAttachments([...attachments, attachmentInput.trim()]);
+                      setAttachmentInput('');
+                    }
+                  }}
+                  className="px-3 py-2 text-sm bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:opacity-90 transition-opacity shrink-0"
+                >
+                  {t('common.add')}
+                </button>
               </div>
-            )}
-          </div>
+              {attachments.length > 0 && (
+                <div className="space-y-1.5 mt-2">
+                  {attachments.map((url, idx) => (
+                    <div key={idx} className="flex justify-between items-center bg-[var(--color-surface-muted)]/30 border border-[var(--color-border)] p-2 rounded-lg text-xs">
+                      <span className="truncate flex-1 pr-3 text-[var(--color-foreground)]">{url}</span>
+                      <button
+                        type="button"
+                        onClick={() => setAttachments(attachments.filter((_, i) => i !== idx))}
+                        className="text-[var(--color-error)] hover:underline font-semibold shrink-0"
+                      >
+                        {t('common.delete')}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </EditorField>
+          </EditorSection>
 
-          {/* Lesson Preview Toggle */}
-          <div className="flex items-center gap-2.5 p-4 bg-[var(--color-surface-muted)]/30 rounded-xl">
+          <label className="flex items-center gap-2 px-1 cursor-pointer">
             <input
               type="checkbox"
               id="isPreview"
               checked={isPreview}
               onChange={(e) => setIsPreview(e.target.checked)}
-              className="w-4 h-4 rounded text-[var(--color-primary)] focus:ring-[var(--color-primary)] border-[var(--color-border)] bg-[var(--color-background)]"
+              className="w-4 h-4 rounded text-[var(--color-primary)] focus:ring-[var(--color-primary)] border-[var(--color-border)]"
             />
-            <label htmlFor="isPreview" className="text-sm font-semibold text-[var(--color-foreground)] select-none">
-              Allow Free Preview (Students can view this lecture without course enrollment)
-            </label>
-          </div>
+            <span className="text-xs sm:text-sm font-medium text-[var(--color-foreground)]">
+              {t('curriculum.freePreview')}
+            </span>
+          </label>
 
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-[var(--color-foreground)]">{t('curriculum.lessonContent')}</label>
-            <div className="min-h-[400px] border border-[var(--color-border)] rounded-2xl overflow-hidden shadow-inner">
-              <RichTextEditor 
-                content={content} 
-                onChange={setContent} 
-              />
-            </div>
-          </div>
+          <EditorSection title={t('curriculum.lessonContent')} defaultOpen>
+            <RichTextEditor
+              content={content}
+              onChange={setContent}
+              variant="compact"
+              minHeight={180}
+            />
+          </EditorSection>
         </div>
 
-        <div className="p-6 border-t border-[var(--color-border)] bg-[var(--color-surface-muted)] flex justify-end gap-3">
+        <div className="px-4 py-3 border-t border-[var(--color-border)] bg-[var(--color-surface-muted)] flex justify-end gap-2 shrink-0">
           <Button variant="ghost" onClick={onClose}>{t('common.cancel')}</Button>
           <Button 
             onClick={() => onSave({ 
-              title, 
+              title,
+              description,
               videoUrl, 
               duration, 
               content, 

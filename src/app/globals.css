@@ -585,6 +585,8 @@ body.quiz-fullscreen nav {
   color: #e2e8f0;
   background-color: #1e293b;
   overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: normal;
   font-size: 0.875em;
   line-height: 1.71;
   margin-top: 1.71em;
@@ -617,6 +619,7 @@ body.quiz-fullscreen nav {
   font-size: inherit;
   font-family: inherit;
   line-height: inherit;
+  white-space: inherit;
 }
 
 .prose pre code::before {
