@@ -32,6 +32,7 @@ const AverageScoreChart = dynamic(() => import('@/components/charts/AverageScore
 });
 import { fetchStudentProgress } from '@/lib/api/progress';
 import { ApiClientError } from '@/lib/api/http';
+import { PageWrapper, PageHeader, ResponsiveGrid } from '@/components/layout';
 
 interface CourseProgress {
   enrollment: {
@@ -207,11 +208,11 @@ export default function StudentProgressPage() {
   }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8">
-      <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">{t('progress.myProgress')}</h1>
-      <p className="mt-2 text-sm sm:text-base text-[var(--color-muted-foreground)]">
-        {t('progress.progressDesc')}
-      </p>
+    <PageWrapper>
+      <PageHeader
+        title={t('progress.myProgress')}
+        description={t('progress.progressDesc')}
+      />
 
       {alertState && (
         <Alert
@@ -229,39 +230,39 @@ export default function StudentProgressPage() {
 
       {/* Overall Stats */}
       {overallStats && (
-        <div className="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          <div className="bg-[var(--card-solid)] rounded-lg shadow p-4 text-center">
+        <ResponsiveGrid variant="statsWide">
+          <div className="stat-tile">
             <p className="text-2xl font-bold text-[var(--student-primary)]">{overallStats.totalCourses}</p>
             <p className="text-sm text-[var(--color-muted-foreground)]">{t('progress.coursesEnrolled')}</p>
           </div>
-          <div className="bg-[var(--card-solid)] rounded-lg shadow p-4 text-center">
+          <div className="stat-tile">
             <p className="text-2xl font-bold text-[var(--success)]">{overallStats.completedCourses}</p>
             <p className="text-sm text-[var(--color-muted-foreground)]">{t('progress.completed')}</p>
           </div>
-          <div className="bg-[var(--card-solid)] rounded-lg shadow p-4 text-center">
+          <div className="stat-tile">
             <p className="text-2xl font-bold text-[var(--warning)]">{overallStats.inProgressCourses}</p>
             <p className="text-sm text-[var(--color-muted-foreground)]">{t('progress.inProgress')}</p>
           </div>
-          <div className="bg-[var(--card-solid)] rounded-lg shadow p-4 text-center">
+          <div className="stat-tile">
             <p className="text-2xl font-bold text-[var(--student-primary)]">{overallStats.averageProgress}%</p>
             <p className="text-sm text-[var(--color-muted-foreground)]">{t('progress.avgProgress')}</p>
           </div>
-          <div className="bg-[var(--card-solid)] rounded-lg shadow p-4 text-center">
+          <div className="stat-tile">
             <p className="text-2xl font-bold text-[var(--info)]">{overallStats.totalQuizzesTaken}</p>
             <p className="text-sm text-[var(--color-muted-foreground)]">{t('progress.quizzesTaken')}</p>
           </div>
-          <div className="bg-[var(--card-solid)] rounded-lg shadow p-4 text-center">
+          <div className="stat-tile">
             <p className="text-2xl font-bold text-[var(--student-accent)]">{overallStats.overallAverageScore}%</p>
             <p className="text-sm text-[var(--color-muted-foreground)]">{t('progress.avgQuizScore')}</p>
           </div>
-        </div>
+        </ResponsiveGrid>
       )}
 
       {/* Charts Section */}
-      <div className="mt-8">
+      <section>
         <h2 className="text-lg sm:text-xl font-semibold text-[var(--color-foreground)] mb-6">{t('progress.insights')}</h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <ResponsiveGrid variant="charts">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -293,32 +294,32 @@ export default function StudentProgressPage() {
           >
             <AverageScoreChart data={averageScoreData} title={t('progress.averageScore')} />
           </motion.div>
-        </div>
-      </div>
+        </ResponsiveGrid>
+      </section>
 
       {/* Course Progress */}
-      <div className="mt-8">
+      <section>
         <h2 className="text-lg sm:text-xl font-semibold text-[var(--color-foreground)] mb-4">{t('progress.courseProgress')}</h2>
 
         {progressData.length === 0 ? (
-          <div className="bg-[var(--card-solid)] rounded-lg shadow p-8 text-center">
+          <div className="card-surface card-body text-center">
             <p className="text-[var(--color-muted-foreground)] mb-4">{t('progress.noProgressData')}</p>
             <a
               href="/dashboard/student/browse"
-              className={`inline-flex items-center min-h-[44px] px-4 py-3 sm:px-4 sm:py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90`}
+              className={`btn-action text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90`}
             >
               {t('progress.browseCourses')}
             </a>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="card-list">
             {progressData.map((item) => (
               <div
                 key={item.enrollment._id}
-                className="bg-[var(--card-solid)] rounded-lg shadow overflow-hidden"
+                className="card-surface overflow-hidden"
               >
                 {/* Course Header */}
-                <div className="p-6">
+                <div className="card-body">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start space-x-4">
                       {item.course.thumbnail ? (
@@ -442,7 +443,7 @@ export default function StudentProgressPage() {
             ))}
           </div>
         )}
-      </div>
-    </div>
+      </section>
+    </PageWrapper>
   );
 }

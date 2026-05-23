@@ -16,8 +16,8 @@ export default function DashboardHeader({ isTeacherOrAdmin, showNotifications = 
   const { t } = useTranslation();
 
   return (
-    <header className="hidden md:block flex-shrink-0 bg-white shadow-sm border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-4 flex justify-between items-center">
+    <header className="hidden md:block flex-shrink-0 bg-[var(--card-solid)] shadow-[var(--shadow-sm)] border-b border-[var(--border)]">
+      <div className="max-w-[var(--page-max-width)] mx-auto px-[var(--gutter-x)] py-[var(--space-3)] sm:py-[var(--space-4)] flex justify-between items-center">
         <div className="flex items-center gap-2 sm:gap-4">
           <Link
             href={isTeacherOrAdmin ? '/dashboard/teacher' : '/dashboard/student'}
@@ -29,7 +29,7 @@ export default function DashboardHeader({ isTeacherOrAdmin, showNotifications = 
               theme="white"
             />
           </Link>
-          <h1 className="text-base sm:text-lg lg:text-xl xl:text-2xl font-semibold text-gray-900 truncate">
+          <h1 className="text-base sm:text-lg lg:text-xl font-semibold text-[var(--foreground)] truncate">
             {isTeacherOrAdmin ? t('dashboard.teacherDashboard') : t('dashboard.studentDashboard')}
           </h1>
         </div>
@@ -37,7 +37,7 @@ export default function DashboardHeader({ isTeacherOrAdmin, showNotifications = 
           {showNotifications && (
             <Link
               href="/dashboard/student/notifications"
-              className="p-2 rounded-lg text-gray-600 hover:text-[var(--primary)] hover:bg-[var(--primary-soft)] transition-colors"
+              className="touch-target focus-ring p-2 rounded-lg text-[var(--muted)] hover:text-[var(--primary)] hover:bg-[var(--primary-soft)] transition-colors"
               aria-label={t('common.notifications')}
             >
               <Bell className="w-5 h-5" />

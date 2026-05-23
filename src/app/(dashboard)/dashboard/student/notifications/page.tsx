@@ -8,6 +8,7 @@ import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
 import Alert from '@/components/ui/Alert';
 import { PageSkeleton } from '@/components/ui/Skeleton';
+import { PageWrapper, PageHeader, EmptyState } from '@/components/layout';
 import {
   fetchUserNotifications,
   markNotificationRead,
@@ -86,38 +87,33 @@ export default function StudentNotificationsPage() {
   }
 
   return (
-    <div>
-      <div className="mb-6 sm:mb-8">
-        <h1
-          className={`text-2xl sm:text-3xl font-bold bg-gradient-to-r ${theme.gradient} bg-clip-text text-transparent flex items-center gap-2`}
-        >
-          <Bell className={`w-7 h-7 ${theme.text}`} />
-          {t('notifications.inbox.title')}
-        </h1>
-        <p className="mt-2 text-[var(--color-muted-foreground)]">{t('notifications.inbox.description')}</p>
-      </div>
+    <PageWrapper>
+      <PageHeader
+        title={
+          <span className="flex items-center gap-2">
+            <Bell className={`w-7 h-7 ${theme.text}`} aria-hidden />
+            {t('notifications.inbox.title')}
+          </span>
+        }
+        description={t('notifications.inbox.description')}
+      />
 
       {alertState ? (
-        <div className="mb-6">
-          <Alert type={alertState.type} message={alertState.message} onClose={() => setAlertState(null)} />
-        </div>
+        <Alert type={alertState.type} message={alertState.message} onClose={() => setAlertState(null)} />
       ) : null}
 
       {notifications.length === 0 ? (
-        <div className="text-center py-20 bg-[var(--card-solid)] rounded-2xl border border-dashed border-[var(--border)]">
-          <Bell className="w-12 h-12 text-[var(--color-muted-foreground)] mx-auto mb-4 opacity-30" />
-          <p className="text-[var(--color-muted-foreground)]">{t('notifications.inbox.empty')}</p>
-        </div>
+        <EmptyState icon={Bell} title={t('notifications.inbox.empty')} />
       ) : (
-        <div className="space-y-3">
+        <div className="card-list">
           {notifications.map((item) => (
             <button
               key={item._id}
               type="button"
               onClick={() => void handleNotificationClick(item)}
-              className={`w-full text-left p-4 rounded-2xl border transition-colors ${
+              className={`card-list-item focus-ring ${
                 item.read
-                  ? 'bg-[var(--card-solid)] border-[var(--border)]'
+                  ? 'bg-[var(--card-solid)]'
                   : 'bg-[var(--primary-soft)] border-[var(--primary)]/20'
               }`}
             >
@@ -143,6 +139,6 @@ export default function StudentNotificationsPage() {
           ))}
         </div>
       )}
-    </div>
+    </PageWrapper>
   );
 }

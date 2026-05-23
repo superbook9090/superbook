@@ -7,14 +7,14 @@ interface SkeletonProps {
   className?: string;
 }
 
-/** Single-line / block placeholder (shimmer from `src/styles/globals.css`) */
+/** Single-line / block placeholder (shimmer from `src/app/globals.css`) */
 export function Skeleton({ className = '' }: SkeletonProps) {
   return <div className={`skeleton-surface min-h-[0.5rem] ${className}`} />;
 }
 
 function CardSkeletonBlock() {
   return (
-    <div className="rounded-2xl border border-[var(--border)] bg-[var(--card-solid)] p-6 shadow-sm space-y-3">
+    <div className="card-surface card-body space-y-3">
       <Skeleton className="h-40 w-full rounded-lg" />
       <Skeleton className="h-5 w-3/4 rounded-md" />
       <Skeleton className="h-4 w-1/2 rounded-md" />
@@ -24,7 +24,7 @@ function CardSkeletonBlock() {
 
 function CompactRowSkeletonGrid() {
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid-responsive-dense">
       {Array.from({ length: 6 }).map((_, i) => (
         <Skeleton key={i} className="h-16 w-full rounded-xl" />
       ))}
@@ -36,15 +36,15 @@ export type PageSkeletonVariant = 'full' | 'content' | 'embed';
 
 /**
  * Unified loading UI for dashboard routes and embedded panels.
- * - `full` — page chrome + toolbar + stat strip + card grid (default for `isLoading` pages)
- * - `content` — compact row grid (folder contents, dense lists)
- * - `embed` — single large block (`<Suspense>` fallbacks)
+ * Does not add page-shell padding — parent dashboard-main already provides gutters.
  */
 export function PageSkeleton({ variant = 'full' }: { variant?: PageSkeletonVariant }) {
   const { t } = useTranslation();
+  const aria = { 'aria-busy': true as const, 'aria-label': t('common.loading') };
+
   if (variant === 'embed') {
     return (
-      <div className="page-shell" aria-busy="true" aria-label={t('common.loading')}>
+      <div className="stack-page w-full" {...aria}>
         <Skeleton className="h-64 w-full rounded-2xl" />
       </div>
     );
@@ -52,14 +52,14 @@ export function PageSkeleton({ variant = 'full' }: { variant?: PageSkeletonVaria
 
   if (variant === 'content') {
     return (
-      <div className="w-full" aria-busy="true" aria-label={t('common.loading')}>
+      <div className="w-full" {...aria}>
         <CompactRowSkeletonGrid />
       </div>
     );
   }
 
   return (
-    <div className="page-shell stack-page" aria-busy="true" aria-label={t('common.loading')}>
+    <div className="stack-page w-full" {...aria}>
       <div className="page-skeleton-header">
         <div className="min-w-0 flex-1 space-y-2">
           <Skeleton className="h-8 w-48 max-w-full rounded-lg" />

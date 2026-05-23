@@ -12,8 +12,9 @@ import Alert from '@/components/ui/Alert';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import { useEnrollments, useDropEnrollment } from '@/lib/react-query/hooks';
 import { BookOpen, CheckCircle, Clock, TrendingUp, Sparkles } from 'lucide-react';
-import CourseFilters, { type CourseStatusFilter } from '@/features/courses/components/CourseFilters';
 import StatCard from '@/components/ui/StatCard';
+import CourseFilters, { type CourseStatusFilter } from '@/features/courses/components/CourseFilters';
+import { PageWrapper, ResponsiveGrid } from '@/components/layout';
 
 export default function StudentCoursesPage() {
   const { session, status } = useSessionStore();
@@ -113,12 +114,12 @@ export default function StudentCoursesPage() {
     : 0;
 
   return (
-    <div className="space-y-6 lg:space-y-8 pb-12">
+    <PageWrapper>
       {/* Page Header */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)] p-6 sm:p-8 text-white shadow-xl"
+        className="hero-banner bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)] text-white"
       >
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -139,7 +140,7 @@ export default function StudentCoursesPage() {
       </motion.div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+      <ResponsiveGrid variant="cards">
         <StatCard
           icon={Clock}
           value={inProgressCount}
@@ -164,10 +165,10 @@ export default function StudentCoursesPage() {
           showProgress={true}
           progress={avgProgress}
         />
-      </div>
+      </ResponsiveGrid>
 
       {/* Filters Section */}
-      <div className="bg-[var(--card-solid)] border border-[var(--border)] rounded-2xl p-4 lg:p-6 shadow-sm">
+      <div className="card-surface card-body">
         <CourseFilters
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
@@ -201,7 +202,7 @@ export default function StudentCoursesPage() {
       )}
 
       {/* Course Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <ResponsiveGrid variant="dense">
         {filteredEnrollments.length === 0 ? (
           <div className="col-span-full text-center py-20 bg-gray-50/50 border border-dashed border-[var(--border)] rounded-2xl">
             <BookOpen className="w-12 h-12 text-[var(--muted)] mx-auto mb-4 opacity-20" />
@@ -230,7 +231,7 @@ export default function StudentCoursesPage() {
             </motion.div>
           ))
         )}
-      </div>
+      </ResponsiveGrid>
 
       <ConfirmModal
         isOpen={isDropModalOpen}
@@ -244,6 +245,6 @@ export default function StudentCoursesPage() {
         type="warning"
         isLoading={dropEnrollment.isPending}
       />
-    </div>
+    </PageWrapper>
   );
 }

@@ -5,8 +5,21 @@ import { useState } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { ChevronDown, Globe } from 'lucide-react';
 import { languageLabelKeys, supportedLanguages } from '@/i18n/config';
+import { cn } from '@/lib/utils';
 
-export default function LanguageSwitcher() {
+interface LanguageSwitcherProps {
+  /** Tighter padding for mobile headers */
+  compact?: boolean;
+  /** Show full language name on all screen sizes (desktop-style) */
+  alwaysShowLabel?: boolean;
+  className?: string;
+}
+
+export default function LanguageSwitcher({
+  compact = false,
+  alwaysShowLabel = false,
+  className,
+}: LanguageSwitcherProps = {}) {
   const { lang, setLang, t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -20,13 +33,33 @@ export default function LanguageSwitcher() {
   return (
     <div className="relative">
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 bg-[var(--card-solid)] border border-[var(--color-border)] rounded-lg text-sm font-medium text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted)] hover:border-[var(--color-muted)] transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent shadow-sm"
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        aria-label={t('language.selectLanguage')}
+        className={cn(
+          'flex items-center gap-2 bg-[var(--card-solid)] border border-[var(--color-border)] rounded-lg font-medium text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted)] hover:border-[var(--color-muted)] transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent shadow-sm',
+          compact ? 'px-2.5 py-1.5 text-xs' : 'px-3 py-2 text-sm',
+          className
+        )}
       >
-        <Globe className="w-4 h-4 text-[var(--color-muted)]" />
-        <span className="hidden sm:inline">{selectedLanguage.name}</span>
-        <span className="sm:hidden uppercase">{selectedLanguage.code}</span>
-        <ChevronDown className={`w-4 h-4 text-[var(--color-muted-foreground)] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <Globe className={cn('text-[var(--color-muted)]', compact ? 'w-3.5 h-3.5' : 'w-4 h-4')} />
+        {alwaysShowLabel ? (
+          <span>{selectedLanguage.name}</span>
+        ) : (
+          <>
+            <span className="hidden sm:inline">{selectedLanguage.name}</span>
+            <span className="sm:hidden uppercase">{selectedLanguage.code}</span>
+          </>
+        )}
+        <ChevronDown
+          className={cn(
+            'text-[var(--color-muted-foreground)] transition-transform',
+            compact ? 'w-3.5 h-3.5' : 'w-4 h-4',
+            isOpen && 'rotate-180'
+          )}
+        />
       </button>
 
       {isOpen && (

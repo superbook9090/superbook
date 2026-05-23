@@ -14,7 +14,7 @@ export interface IUserNotification extends Document {
 
 const userNotificationSchema = new Schema<IUserNotification>(
   {
-    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     title: {
       en: { type: String, required: true },
       hi: { type: String },

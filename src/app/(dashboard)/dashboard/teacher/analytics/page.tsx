@@ -102,42 +102,42 @@ export default function TeacherAnalyticsPage() {
       <div className="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <StatCard
           icon={BookOpen}
-          value={stats.overview.totalCourses}
+          value={stats.overview?.totalCourses}
           label={t('analytics.totalCourses')}
           color="success"
           delay={0.1}
         />
         <StatCard
           icon={BookOpen}
-          value={stats.overview.publishedCourses}
+          value={stats.overview?.publishedCourses}
           label={t('analytics.published')}
           color="info"
           delay={0.15}
         />
         <StatCard
           icon={Users}
-          value={stats.overview.totalStudents}
+          value={stats.overview?.totalStudents}
           label={t('analytics.totalStudents')}
           color="student"
           delay={0.2}
         />
         <StatCard
           icon={HelpCircle}
-          value={stats.overview.totalQuizzes}
+          value={stats.overview?.totalQuizzes}
           label={t('analytics.quizzes')}
           color="student"
           delay={0.25}
         />
         <StatCard
           icon={HelpCircle}
-          value={stats.overview.totalAttempts}
+          value={stats.overview?.totalAttempts}
           label={t('analytics.quizAttempts')}
           color="admin"
           delay={0.3}
         />
         <StatCard
           icon={Award}
-          value={stats.overview.averageScore}
+          value={stats.overview?.averageScore}
           label={t('analytics.avgScore')}
           color="warning"
           delay={0.35}
@@ -148,7 +148,7 @@ export default function TeacherAnalyticsPage() {
       {/* Course Breakdown */}
       <div className="mt-8">
         <h2 className="text-lg sm:text-xl font-semibold text-[var(--color-foreground)] mb-4">{t('analytics.coursePerformance')}</h2>
-        {stats.courses.length === 0 ? (
+        {stats.courses?.length === 0 ? (
           <div className="bg-[var(--card-solid)] rounded-lg shadow p-8 text-center">
             <p className="text-[var(--color-muted-foreground)] mb-4">{t('analytics.noCoursesYet')}</p>
             <a
@@ -185,7 +185,7 @@ export default function TeacherAnalyticsPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-[var(--card-solid)] divide-y divide-[var(--border)]">
-                  {stats.courses.map((course) => (
+                  {stats.courses?.map((course) => (
                     <tr key={course._id}>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <p className="text-sm font-medium text-[var(--color-foreground)]">{course.title}</p>
@@ -231,7 +231,7 @@ export default function TeacherAnalyticsPage() {
       {/* Top Students */}
       <div className="mt-8">
         <h2 className="text-lg sm:text-xl font-semibold text-[var(--color-foreground)] mb-4">{t('analytics.topPerformingStudents')}</h2>
-        {stats.topStudents.length === 0 ? (
+        {stats.topStudents?.length === 0 ? (
           <div className="bg-[var(--card-solid)] rounded-lg shadow p-6 text-center">
             <p className="text-[var(--color-muted-foreground)]">{t('analytics.noQuizAttempts')}</p>
           </div>
@@ -252,7 +252,7 @@ export default function TeacherAnalyticsPage() {
                 </tr>
               </thead>
               <tbody className="bg-[var(--card-solid)] divide-y divide-[var(--border)]">
-                {stats.topStudents.map((student, index) => (
+                {stats.topStudents?.map((student, index) => (
                   <tr key={index}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">

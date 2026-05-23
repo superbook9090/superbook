@@ -9,6 +9,7 @@ import { useSessionStore } from '@/store/useSessionStore';
 import CourseCard from '@/features/courses/components/CourseCard';
 import Alert from '@/components/ui/Alert';
 import { PageSkeleton } from '@/components/ui/Skeleton';
+import { PageWrapper, ResponsiveGrid } from '@/components/layout';
 import { useAvailableCourses, useEnrollCourse } from '@/lib/react-query/hooks';
 import { BookOpen, ArrowLeft, Sparkles } from 'lucide-react';
 import CourseFilters from '@/features/courses/components/CourseFilters';
@@ -88,12 +89,12 @@ export default function BrowseCoursesPage() {
   }
 
   return (
-    <div className="space-y-6 lg:space-y-8 pb-12">
+    <PageWrapper>
       {/* Header Area */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)] p-6 sm:p-8 text-white shadow-xl"
+        className="hero-banner bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)] text-white"
       >
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
         <div className="relative z-10 space-y-4">
@@ -127,7 +128,7 @@ export default function BrowseCoursesPage() {
       </motion.div>
 
       {/* Filters Section */}
-      <div className="bg-[var(--card-solid)] border border-[var(--border)] rounded-2xl p-4 lg:p-6 shadow-sm">
+      <div className="card-surface card-body">
         <CourseFilters
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
@@ -159,7 +160,7 @@ export default function BrowseCoursesPage() {
       )}
 
       {/* Grid Content */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <ResponsiveGrid variant="cards">
         {filteredCourses.length === 0 ? (
           <div className="col-span-full text-center py-20 bg-gray-50/50 border border-dashed border-[var(--border)] rounded-2xl">
             <BookOpen className="w-12 h-12 text-[var(--muted)] mx-auto mb-4 opacity-20" />
@@ -188,7 +189,7 @@ export default function BrowseCoursesPage() {
             </motion.div>
           ))
         )}
-      </div>
-    </div>
+      </ResponsiveGrid>
+    </PageWrapper>
   );
 }

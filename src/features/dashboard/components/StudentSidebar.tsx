@@ -7,34 +7,11 @@ import { signOut } from 'next-auth/react';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
 import PremiumLogo from '@/components/ui/PremiumLogo';
-import {
-  LayoutDashboard,
-  BookOpen,
-  Search,
-  HelpCircle,
-  TrendingUp,
-  User,
-  LogOut,
-  Newspaper,
-  Heart,
-  Folder,
-  Mail
-} from 'lucide-react';
-import { useFeature } from '@/contexts/AppSettingsContext';
+import { LogOut } from 'lucide-react';
 import { useQuiz } from '@/contexts/QuizContext';
-
-const studentNavigation = [
-  { name: 'common.dashboard', href: '/dashboard/student', icon: LayoutDashboard },
-  { name: 'common.myCourses', href: '/dashboard/student/courses', icon: BookOpen },
-  { name: 'common.browse', href: '/dashboard/student/browse', icon: Search },
-  { name: 'common.files', href: '/dashboard/student/files', icon: Folder },
-  { name: 'common.blogs', href: '/dashboard/student/blogs', icon: Newspaper, feature: 'enableBlogs' },
-  { name: 'common.favorites', href: '/dashboard/student/favorites', icon: Heart, feature: 'enableBlogs' },
-  { name: 'common.quizzes', href: '/dashboard/student/quizzes', icon: HelpCircle },
-  { name: 'common.progress', href: '/dashboard/student/progress', icon: TrendingUp },
-  { name: 'common.profile', href: '/dashboard/student/profile', icon: User },
-  { name: 'contact.title', href: '/contact', icon: Mail },
-];
+import { STUDENT_NAV } from '@/constants/navigation';
+import { getNavIcon } from '@/lib/navigation/icons';
+import { useDashboardNav } from '@/hooks/useDashboardNav';
 
 interface User {
   id?: string;
@@ -48,25 +25,9 @@ export default function StudentSidebar({ user }: { user: User | null }) {
   const { t } = useTranslation();
   const { isQuizActive } = useQuiz();
 
-  const enableBlogs = useFeature('enableBlogs');
-  const enableQuizzes = useFeature('enableQuizzes');
-  const enableCourses = useFeature('enableCourses');
+  const filteredNavigation = useDashboardNav(STUDENT_NAV);
 
-  // Hide sidebar when quiz is active
   if (isQuizActive) return null;
-
-  const filteredNavigation = studentNavigation.filter(item => {
-    if (item.feature === 'enableBlogs') {
-      return enableBlogs;
-    }
-    if (item.feature === 'enableQuizzes') {
-      return enableQuizzes;
-    }
-    if (item.feature === 'enableCourses') {
-      return enableCourses;
-    }
-    return true;
-  });
 
   return (
     <div className="hidden md:flex flex-col w-72 h-screen bg-gradient-to-br from-[var(--student-primary)] via-[var(--student-primary)] to-[var(--student-primary-dark)] relative overflow-hidden">
@@ -102,11 +63,11 @@ export default function StudentSidebar({ user }: { user: User | null }) {
         <nav className="mt-6 sm:mt-8 flex-1 px-3 sm:px-4 space-y-1 min-h-0 overflow-y-auto">
           {filteredNavigation.map((item, index) => {
             const isActive = pathname === item.href;
-            const Icon = item.icon;
+            const Icon = getNavIcon(item.icon);
 
             return (
               <motion.div
-                key={item.name}
+                key={item.nameKey}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.05 }}
@@ -124,7 +85,7 @@ export default function StudentSidebar({ user }: { user: User | null }) {
                   }`}>
                     <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
-                  <span className="truncate">{t(item.name)}</span>
+                  <span className="truncate">{t(item.nameKey)}</span>
                   {isActive && (
                     <motion.div
                       layoutId="activeIndicator"

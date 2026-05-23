@@ -19,6 +19,7 @@ import { PageSkeleton } from '@/components/ui/Skeleton';
 import { useSessionStore } from '@/store/useSessionStore';
 import StatCard from '@/components/ui/StatCard';
 import ActivityCard from '@/components/ui/ActivityCard';
+import { PageWrapper, ResponsiveGrid } from '@/components/layout';
 
 interface Enrollment {
   _id: string;
@@ -121,12 +122,12 @@ export default function StudentDashboardPage() {
   // Error state
   if (error) {
     return (
-      <div className="px-4 sm:px-6 lg:px-8 space-y-6">
+      <PageWrapper>
         <Alert
           type="error"
           message={error.message || t('errors.failedLoadDashboardData')}
         />
-      </div>
+      </PageWrapper>
     );
   }
 
@@ -135,12 +136,12 @@ export default function StudentDashboardPage() {
   }
 
   return (
-    <div className="space-y-6 lg:space-y-8">
+    <PageWrapper>
       {/* Welcome Header */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)] p-4 sm:p-6 lg:p-8 text-white shadow-xl"
+        className="hero-banner bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)] text-white"
       >
         <div className="absolute top-0 right-0 w-32 h-32 sm:w-48 sm:h-48 lg:w-64 lg:h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
         <div className="relative z-10">
@@ -154,7 +155,7 @@ export default function StudentDashboardPage() {
       </motion.div>
 
       {/* Stats Cards - Modern Design */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+      <ResponsiveGrid variant="cards">
         <StatCard
           icon={BookOpen}
           value={stats.enrolledCount}
@@ -179,16 +180,16 @@ export default function StudentDashboardPage() {
           showProgress={true}
           progress={stats.averageScore}
         />
-      </div>
+      </ResponsiveGrid>
 
       {/* Recent Activity - Modern Design */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className="rounded-2xl bg-[var(--card-solid)] shadow-md overflow-hidden"
+        className="card-panel"
       >
-        <div className="px-4 py-4 sm:px-6 sm:py-5 border-b border-[var(--border)] flex items-center justify-between">
+        <div className="card-panel-header flex items-center justify-between">
           <div>
             <h3 className="text-base sm:text-lg font-semibold text-[var(--color-foreground)]">{t('dashboard.recentActivity')}</h3>
             <p className="text-sm text-[var(--color-muted-foreground)] mt-1">{t('dashboard.recentActivityDesc')}</p>
@@ -197,7 +198,7 @@ export default function StudentDashboardPage() {
         </div>
         <div className="divide-y divide-[var(--border)]">
           {recentActivity.length === 0 ? (
-            <div className="px-4 py-8 sm:px-6 sm:py-12 text-center">
+            <div className="card-panel-body text-center py-[var(--space-10)]">
               <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 rounded-full bg-[var(--border)] flex items-center justify-center">
                 <Clock className="w-6 h-6 sm:w-8 sm:h-8 text-[var(--muted)]" />
               </div>
@@ -231,6 +232,6 @@ export default function StudentDashboardPage() {
           )}
         </div>
       </motion.div>
-    </div>
+    </PageWrapper>
   );
 }

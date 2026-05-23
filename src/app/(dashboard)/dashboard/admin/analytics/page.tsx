@@ -22,6 +22,7 @@ import { fetchAnalytics } from '@/lib/api/analytics';
 import { ApiClientError } from '@/lib/api/http';
 import StatCard from '@/components/ui/StatCard';
 import ActivityCard from '@/components/ui/ActivityCard';
+import { PageWrapper, PageHeader } from '@/components/layout';
 
 interface AdminStats {
   users: {
@@ -101,30 +102,29 @@ export default function AdminAnalyticsPage() {
   }
 
   return (
-    <div className="space-y-6 overflow-x-hidden">
+    <PageWrapper className="overflow-x-hidden">
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between"
-      >
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-[var(--info-light)] rounded-xl">
-            <BarChart3 className="w-6 h-6 text-[var(--info)]" />
-          </div>
-          <div>
-            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">{t('progress.systemAnalytics')}</h1>
-            <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">{t('progress.overviewDescription')}</p>
-          </div>
-        </div>
-        <button
-          onClick={fetchStats}
-          className="inline-flex items-center justify-center min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base bg-[var(--card-solid)] text-[var(--color-foreground)] rounded-xl shadow-sm hover:shadow-md transition-all"
-        >
-          <RefreshCw className="w-4 h-4 mr-2" />
-          {t('progress.refresh')}
-        </button>
-      </motion.div>
+      <PageHeader
+        title={
+          <span className="flex items-center gap-3">
+            <span className="p-3 bg-[var(--info-light)] rounded-xl">
+              <BarChart3 className="w-6 h-6 text-[var(--info)]" />
+            </span>
+            {t('progress.systemAnalytics')}
+          </span>
+        }
+        description={t('progress.overviewDescription')}
+        actions={
+          <button
+            type="button"
+            onClick={fetchStats}
+            className="btn-action bg-[var(--card-solid)] text-[var(--color-foreground)] shadow-sm hover:shadow-md"
+          >
+            <RefreshCw className="w-4 h-4" />
+            {t('progress.refresh')}
+          </button>
+        }
+      />
 
       {/* Alert */}
       {message && (
@@ -358,6 +358,6 @@ export default function AdminAnalyticsPage() {
           </motion.div>
         </>
       )}
-    </div>
+    </PageWrapper>
   );
 }

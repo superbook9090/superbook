@@ -7,46 +7,12 @@ import { signOut } from 'next-auth/react';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
 import PremiumLogo from '@/components/ui/PremiumLogo';
-import {
-  LayoutDashboard,
-  BookOpen,
-  HelpCircle,
-  BarChart3,
-  User,
-  LogOut,
-  Users,
-  Library,
-  Newspaper,
-  Building2,
-  Folder,
-  Mail,
-  Bell
-} from 'lucide-react';
-import { useFeature } from '@/contexts/AppSettingsContext';
+import { LogOut } from 'lucide-react';
 import { useQuiz } from '@/contexts/QuizContext';
 import { isAdmin, isSuperAdmin } from '@/lib/roles';
-
-const teacherNavigation = [
-  { name: 'common.dashboard', href: '/dashboard/teacher', icon: LayoutDashboard },
-  { name: 'common.myCourses', href: '/dashboard/teacher/courses', icon: BookOpen },
-  { name: 'common.quizzes', href: '/dashboard/teacher/quizzes', icon: HelpCircle },
-  { name: 'common.blogs', href: '/dashboard/teacher/blogs', icon: Newspaper, feature: 'enableBlogs' },
-  { name: 'common.analytics', href: '/dashboard/teacher/analytics', icon: BarChart3 },
-  { name: 'common.profile', href: '/dashboard/teacher/profile', icon: User },
-  { name: 'contact.title', href: '/contact', icon: Mail },
-];
-
-const adminNavigation = [
-  { name: 'common.notifications', href: '/dashboard/admin/notifications', icon: Bell, superadminOnly: true },
-  { name: 'common.users', href: '/dashboard/admin/users', icon: Users },
-  { name: 'common.organizations', href: '/dashboard/admin/organizations', icon: Building2, superadminOnly: true },
-  { name: 'common.allCourses', href: '/dashboard/admin/courses', icon: Library },
-  { name: 'common.allQuizzes', href: '/dashboard/admin/quizzes', icon: HelpCircle },
-  { name: 'common.allBlogs', href: '/dashboard/admin/blogs', icon: Newspaper, feature: 'enableBlogs' },
-  { name: 'common.files', href: '/dashboard/admin/files', icon: Folder, superadminOnly: true },
-  { name: 'common.analytics', href: '/dashboard/admin/analytics', icon: BarChart3 },
-  { name: 'common.settings', href: '/dashboard/admin/settings', icon: User },
-];
+import { ADMIN_NAV, TEACHER_NAV } from '@/constants/navigation';
+import { getNavIcon } from '@/lib/navigation/icons';
+import { useDashboardNav } from '@/hooks/useDashboardNav';
 
 interface User {
   id?: string;
@@ -62,42 +28,10 @@ export default function TeacherSidebar({ user }: { user: User | null }) {
   const isAdminUser = isAdmin(user?.role);
   const isSuperAdminUser = isSuperAdmin(user?.role);
 
-  const enableBlogs = useFeature('enableBlogs');
-  const enableQuizzes = useFeature('enableQuizzes');
-  const enableCourses = useFeature('enableCourses');
+  const filteredTeacherNavigation = useDashboardNav(TEACHER_NAV);
+  const filteredAdminNavigation = useDashboardNav(ADMIN_NAV, { isSuperAdmin: isSuperAdminUser });
 
-  // Hide sidebar when quiz is active
   if (isQuizActive) return null;
-
-  const filteredTeacherNavigation = teacherNavigation.filter(item => {
-    if (item.feature === 'enableBlogs') {
-      return enableBlogs;
-    }
-    if (item.feature === 'enableQuizzes') {
-      return enableQuizzes;
-    }
-    if (item.feature === 'enableCourses') {
-      return enableCourses;
-    }
-    return true;
-  });
-
-  const filteredAdminNavigation = adminNavigation.filter(item => {
-    // Filter out superadminOnly items for non-superadmin users
-    if (item.superadminOnly && !isSuperAdminUser) {
-      return false;
-    }
-    if (item.feature === 'enableBlogs') {
-      return enableBlogs;
-    }
-    if (item.feature === 'enableQuizzes') {
-      return enableQuizzes;
-    }
-    if (item.feature === 'enableCourses') {
-      return enableCourses;
-    }
-    return true;
-  });
 
   return (
     <div className="hidden md:flex flex-col w-72 h-screen bg-gradient-to-br from-[var(--teacher-primary)] via-[var(--teacher-primary)] to-[var(--teacher-primary-dark)] relative overflow-hidden">
@@ -136,11 +70,11 @@ export default function TeacherSidebar({ user }: { user: User | null }) {
         <nav className="mt-6 sm:mt-8 flex-1 px-3 sm:px-4 space-y-1 min-h-0 overflow-y-auto">
           {filteredTeacherNavigation.map((item, index) => {
             const isActive = pathname === item.href;
-            const Icon = item.icon;
+            const Icon = getNavIcon(item.icon);
 
             return (
               <motion.div
-                key={item.name}
+                key={item.nameKey}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.05 }}
@@ -156,7 +90,7 @@ export default function TeacherSidebar({ user }: { user: User | null }) {
                     }`}>
                     <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
-                  <span className="truncate">{t(item.name)}</span>
+                  <span className="truncate">{t(item.nameKey)}</span>
                   {isActive && (
                     <motion.div
                       layoutId="activeIndicator"
@@ -176,11 +110,11 @@ export default function TeacherSidebar({ user }: { user: User | null }) {
               <div className="space-y-1">
                 {filteredAdminNavigation.map((item, index) => {
                   const isActive = pathname === item.href;
-                  const Icon = item.icon;
+                  const Icon = getNavIcon(item.icon);
 
                   return (
                     <motion.div
-                      key={item.name}
+                      key={item.nameKey}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: (filteredTeacherNavigation.length + index) * 0.05 }}
@@ -196,7 +130,7 @@ export default function TeacherSidebar({ user }: { user: User | null }) {
                           }`}>
                           <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                         </div>
-                        <span className="truncate">{t(item.name)}</span>
+                        <span className="truncate">{t(item.nameKey)}</span>
                         {isActive && (
                           <motion.div
                             layoutId="activeIndicatorAdmin"

@@ -23,6 +23,7 @@ import Alert from '@/components/ui/Alert';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import StatCard from '@/components/ui/StatCard';
 import QuickActionCard from '@/components/ui/QuickActionCard';
+import { PageWrapper, ResponsiveGrid } from '@/components/layout';
 
 // Types are now imported from hooks
 interface Course {
@@ -129,12 +130,12 @@ export default function TeacherDashboardPage() {
   // Error state
   if (error) {
     return (
-      <div className="px-4 sm:px-6 lg:px-8 space-y-6">
+      <PageWrapper>
         <Alert
           type="error"
           message={error.message || t('errors.failedLoadDashboardData')}
         />
-      </div>
+      </PageWrapper>
     );
   }
 
@@ -143,12 +144,12 @@ export default function TeacherDashboardPage() {
   }
 
   return (
-    <div className="space-y-6 lg:space-y-8">
+    <PageWrapper>
       {/* Welcome Header */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[var(--teacher-primary)] to-[var(--teacher-accent)] p-4 sm:p-6 lg:p-8 text-white shadow-xl"
+        className="hero-banner bg-gradient-to-r from-[var(--teacher-primary)] to-[var(--teacher-accent)] text-white"
       >
         <div className="absolute top-0 right-0 w-32 h-32 sm:w-48 sm:h-48 lg:w-64 lg:h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
         <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -199,7 +200,7 @@ export default function TeacherDashboardPage() {
       )}
 
       {/* Stats Cards - Modern Design */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+      <ResponsiveGrid variant="stats">
         <StatCard
           icon={BookOpen}
           value={`${stats.totalCourses} / ${getLimit('courses')}`}
@@ -237,7 +238,7 @@ export default function TeacherDashboardPage() {
           progress={getUsagePercentage('blogs')}
           description={isNearLimit('blogs') && !isAtLimit('blogs') ? `⚠️ ${Math.round(getUsagePercentage('blogs'))}% used` : undefined}
         />
-      </div>
+      </ResponsiveGrid>
 
       {/* Recent Courses - Modern Design */}
       {recentCourses.length > 0 && (
@@ -255,14 +256,14 @@ export default function TeacherDashboardPage() {
               {t('dashboard.viewAll')} <ArrowRight className="w-4 h-4 ml-1" />
             </a>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+          <ResponsiveGrid variant="cards">
             {recentCourses.map((course: Course, index: number) => (
               <motion.div
                 key={course._id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 + index * 0.1 }}
-                className="group bg-[var(--card-solid)] rounded-2xl p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                className="group card-surface card-body hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="p-2 sm:p-3 rounded-xl bg-gradient-to-r from-[var(--teacher-primary)] to-[var(--teacher-accent)] text-white">
@@ -280,7 +281,7 @@ export default function TeacherDashboardPage() {
                 </p>
               </motion.div>
             ))}
-          </div>
+          </ResponsiveGrid>
         </motion.div>
       )}
 
@@ -289,10 +290,10 @@ export default function TeacherDashboardPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.7 }}
-        className="rounded-2xl bg-[var(--card-solid)] p-4 sm:p-6 shadow-md"
+        className="card-surface card-body"
       >
         <h2 className="text-lg sm:text-xl font-semibold text-[var(--color-foreground)] mb-4">{t('dashboard.quickActions')}</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+        <ResponsiveGrid variant="stats">
           <QuickActionCard
             icon={BookOpen}
             title={t('dashboard.manageCourses')}
@@ -335,8 +336,8 @@ export default function TeacherDashboardPage() {
             disabled={filteredStats.totalBlogs >= limits.blogs}
             delay={0.3}
           />
-        </div>
+        </ResponsiveGrid>
       </motion.div>
-    </div>
+    </PageWrapper>
   );
 }

@@ -19,9 +19,7 @@ const notificationTokenSchema = new Schema<INotificationToken>(
   { timestamps: true }
 );
 
-// Indexes
-notificationTokenSchema.index({ userId: 1 });
-notificationTokenSchema.index({ deviceToken: 1 });
+// Indexes (deviceToken unique index is created by `unique: true` on the field)
 notificationTokenSchema.index({ userId: 1, isActive: 1 });
 
 // Auto-delete token after 30 days of inactivity (1 month)
