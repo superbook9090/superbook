@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
 
 import { motion } from 'framer-motion';
-import { Video, Search, User, BookOpen, Calendar, ExternalLink } from 'lucide-react';
+import { Video, User, BookOpen, Calendar, ExternalLink } from 'lucide-react';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import Alert from '@/components/ui/Alert';
+import DashboardListFilters, { FilterPanel } from '@/components/filters/DashboardListFilters';
 
 interface VideoLecture {
   _id: string;
@@ -28,6 +29,8 @@ export default function AdminVideosPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const clearFilters = () => setSearchQuery('');
 
   useEffect(() => {
     async function fetchVideos() {
@@ -89,23 +92,20 @@ export default function AdminVideosPage() {
       {/* Alert */}
       {error && <Alert type="error" message={error} onClose={() => setError(null)} />}
 
-      {/* Search Input */}
+      {/* Filters */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="bg-[var(--card-solid)] rounded-2xl p-4 shadow-sm"
       >
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-muted-foreground)]" />
-          <input
-            type="text"
-            placeholder={t('admin.searchVideos') || 'Search lectures by title, course, or instructor...'}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
+        <FilterPanel>
+          <DashboardListFilters
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            onClear={clearFilters}
+            searchPlaceholder={t('admin.searchVideos') || 'Search lectures by title, course, or instructor...'}
           />
-        </div>
+        </FilterPanel>
       </motion.div>
 
       {/* Video Inventory Grid */}

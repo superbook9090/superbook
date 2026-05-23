@@ -110,7 +110,7 @@ export default function BlogDetailPage() {
   }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto">
       {/* Navigation */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}

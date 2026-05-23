@@ -157,7 +157,7 @@ export default function OrganizationsPage() {
 
   if (isLoading) {
     return (
-      <div className="px-4 sm:px-6 lg:px-8 space-y-6">
+      <div className="space-y-6">
         <div className="w-32 h-8 bg-[var(--color-surface-muted)] rounded-lg animate-pulse mb-4" />
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
@@ -169,7 +169,7 @@ export default function OrganizationsPage() {
   }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 space-y-6 overflow-x-hidden">
+    <div className="space-y-6 overflow-x-hidden">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>

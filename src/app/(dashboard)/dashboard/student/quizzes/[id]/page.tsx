@@ -85,7 +85,7 @@ export default function QuizDetailPage() {
 
   if (error) {
     return (
-      <div className="px-4 sm:px-6 lg:px-8">
+      <div>
         <Alert type="error" message={error} />
         <button
           onClick={() => router.push('/dashboard/student/quizzes')}
@@ -100,14 +100,14 @@ export default function QuizDetailPage() {
 
   if (!quiz) {
     return (
-      <div className="px-4 sm:px-6 lg:px-8">
+      <div>
         <p className="text-[var(--error)]">{t('errors.quizNotFound')}</p>
       </div>
     );
   }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 space-y-6">
+    <div className="space-y-6">
       {/* Back Button */}
       <button
         onClick={() => router.push('/dashboard/student/quizzes')}

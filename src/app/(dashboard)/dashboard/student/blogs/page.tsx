@@ -13,8 +13,6 @@ import { useFeature } from '@/contexts/AppSettingsContext';
 import {
   BookOpen,
   Heart,
-  Search,
-  Filter,
   Calendar,
   User,
   ArrowRight,
@@ -23,7 +21,9 @@ import {
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
 import { useBlogs, useAddFavorite, useRemoveFavorite, type Blog } from '@/lib/react-query/hooks';
-import { blogTopicKeys, supportedLanguages, type BlogTopicKey } from '@/i18n/config';
+import { blogTopicKeys, type BlogTopicKey } from '@/i18n/config';
+import BlogFilters from '@/features/blogs/components/BlogFilters';
+import { FilterPanel } from '@/components/filters/DashboardListFilters';
 
 const topics = ['all', ...blogTopicKeys] as const;
 
@@ -45,9 +45,16 @@ export default function StudentBlogsPage() {
   const [languageFilter, setLanguageFilter] = useState<'all' | 'en' | 'hi'>('all');
   const [hasRedirected, setHasRedirected] = useState(false);
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchInput(e.target.value);
+  const clearFilters = () => {
+    setSearchInput('');
+    setSelectedTopic('all');
+    setLanguageFilter('all');
   };
+
+  const topicOptions = topics.map((topic) => ({
+    id: topic,
+    label: topic === 'all' ? t('topics.all') : t(`topics.${topic}` as `topics.${BlogTopicKey}`),
+  }));
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -94,7 +101,7 @@ export default function StudentBlogsPage() {
   }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -121,54 +128,20 @@ export default function StudentBlogsPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="bg-[var(--background)] rounded-2xl p-4 shadow-sm"
       >
-        {/* Search */}
-        <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-muted-foreground)]" />
-          <input
-            type="text"
-            placeholder={t('blog.searchBlogs')}
-            value={searchInput}
-            onChange={handleSearchChange}
-            className="w-full pl-10 pr-4 py-3 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
+        <FilterPanel>
+          <BlogFilters
+            searchQuery={searchInput}
+            onSearchChange={setSearchInput}
+            languageFilter={languageFilter}
+            onLanguageChange={setLanguageFilter}
+            selectedTopic={selectedTopic}
+            onTopicChange={setSelectedTopic}
+            topicOptions={topicOptions}
+            onClear={clearFilters}
+            searchPlaceholder={t('blog.searchBlogs')}
           />
-        </div>
-
-        {/* Topic Filter */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-2 px-2">
-          <Filter className="w-5 h-5 text-[var(--color-muted-foreground)] flex-shrink-0" />
-          {topics.map((topic) => (
-            <button
-              key={topic}
-              onClick={() => setSelectedTopic(topic)}
-              className={`px-4 py-2.5 min-h-[44px] rounded-full text-sm font-medium whitespace-nowrap transition-all touch-manipulation ${
-                selectedTopic === topic
-                  ? `${theme.primary} text-white`
-                  : 'bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)] hover:bg-[var(--color-surface-muted)]/80'
-              }`}
-            >
-              {topic === 'all' ? t('topics.all') : t(`topics.${topic}` as `topics.${BlogTopicKey}`)}
-            </button>
-          ))}
-        </div>
-
-        {/* Language Filter */}
-        <div className="flex items-center gap-2 mt-3">
-          <BookOpen className="w-5 h-5 text-[var(--color-muted-foreground)] flex-shrink-0" />
-          <select
-            value={languageFilter}
-            onChange={(e) => setLanguageFilter(e.target.value as 'all' | 'en' | 'hi')}
-            className="flex-1 sm:flex-none px-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
-          >
-            <option value="all">{t('blog.allLanguages')}</option>
-            {supportedLanguages.map((language) => (
-              <option key={language} value={language}>
-                {t(language === 'en' ? 'common.english' : 'common.hindi')}
-              </option>
-            ))}
-          </select>
-        </div>
+        </FilterPanel>
       </motion.div>
 
       {/* Stats */}

@@ -13,6 +13,7 @@ import { PageWrapper, ResponsiveGrid } from '@/components/layout';
 import { useAvailableCourses, useEnrollCourse } from '@/lib/react-query/hooks';
 import { BookOpen, ArrowLeft, Sparkles } from 'lucide-react';
 import CourseFilters from '@/features/courses/components/CourseFilters';
+import { FilterPanel } from '@/components/filters/DashboardListFilters';
 
 export default function BrowseCoursesPage() {
   const { session, status } = useSessionStore();
@@ -128,7 +129,7 @@ export default function BrowseCoursesPage() {
       </motion.div>
 
       {/* Filters Section */}
-      <div className="card-surface card-body">
+      <FilterPanel>
         <CourseFilters
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
@@ -142,7 +143,7 @@ export default function BrowseCoursesPage() {
           showStatusFilter={false}
           searchPlaceholder={t('common.search')}
         />
-      </div>
+      </FilterPanel>
 
       {alertState && (
         <Alert

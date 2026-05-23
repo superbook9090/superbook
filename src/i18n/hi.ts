@@ -316,6 +316,9 @@ export const hi = {
     checkBackLater: 'नई सामग्री के लिए बाद में जांचें',
     teacher: 'शिक्षक',
     allLanguages: 'सभी भाषाएं',
+    status: 'स्थिति',
+    language: 'भाषा',
+    topic: 'विषय',
     // Blog Detail
     blogNotFound: 'ब्लॉग नहीं मिला',
     blogNotFoundDesc: 'आप जिस ब्लॉग को खोज रहे हैं वह मौजूद नहीं है या हटा दिया गया है।',

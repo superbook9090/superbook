@@ -112,8 +112,7 @@ export default function QuizResultPage() {
   }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto">
         {/* Result Card */}
         <div className="bg-[var(--card-solid)] rounded-lg shadow-md p-8 mb-6">
           <div className="text-center mb-6">
@@ -258,7 +257,6 @@ export default function QuizResultPage() {
             </div>
           </div>
         )}
-      </div>
     </div>
   );
 }

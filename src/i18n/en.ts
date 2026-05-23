@@ -316,6 +316,9 @@ export const en = {
     checkBackLater: 'Check back later for new content',
     teacher: 'Teacher',
     allLanguages: 'All Languages',
+    status: 'Status',
+    language: 'Language',
+    topic: 'Topic',
     // Blog Detail
     blogNotFound: 'Blog not found',
     blogNotFoundDesc: "The blog you're looking for doesn't exist or has been removed.",

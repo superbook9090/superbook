@@ -1,13 +1,11 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { motion } from 'framer-motion';
 import {
   HelpCircle,
-  Search,
-  Filter,
   Trash2,
   Eye,
   EyeOff,
@@ -22,6 +20,8 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { formatDate } from '@/lib/dateUtils';
 import { listQuizzesAll, patchQuiz, deleteQuiz } from '@/lib/api/quizzes';
 import { ApiClientError } from '@/lib/api/http';
+import DashboardListFilters, { FilterPanel } from '@/components/filters/DashboardListFilters';
+import { buildPublishStatusOptions, type PublishStatusFilter } from '@/components/filters/publishStatusOptions';
 
 interface Quiz {
   _id: string;
@@ -43,24 +43,13 @@ export default function AdminQuizzesPage() {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchInput, setSearchInput] = useState('');
-  const [filter, setFilter] = useState<'all' | 'published' | 'draft'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filter, setFilter] = useState<PublishStatusFilter>('all');
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  // Debounced search handler
-  const debouncedSearchHandler = useCallback(
-    (value: string) => {
-      const timer = setTimeout(() => setSearchTerm(value), 300);
-      return () => clearTimeout(timer);
-    },
-    []
-  );
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchInput(value);
-    debouncedSearchHandler(value);
+  const clearFilters = () => {
+    setSearchQuery('');
+    setFilter('all');
   };
 
   useEffect(() => {
@@ -114,8 +103,8 @@ export default function AdminQuizzesPage() {
   };
 
   const filteredQuizzes = quizzes.filter(quiz => {
-    const matchesSearch = quiz.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         quiz.instructor.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = quiz.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         quiz.instructor.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = filter === 'all' ||
                          (filter === 'published' && quiz.isPublished) ||
                          (filter === 'draft' && !quiz.isPublished);
@@ -127,7 +116,7 @@ export default function AdminQuizzesPage() {
   }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 space-y-6 overflow-x-hidden">
+    <div className="space-y-6 overflow-x-hidden">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -162,30 +151,25 @@ export default function AdminQuizzesPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="bg-[var(--card-solid)] rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row gap-4"
       >
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-muted-foreground)]" />
-          <input
-            type="text"
-            placeholder={t('admin.searchQuizzes')}
-            value={searchInput}
-            onChange={handleSearchChange}
-            className="w-full pl-10 pr-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
+        <FilterPanel>
+          <DashboardListFilters
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            onClear={clearFilters}
+            searchPlaceholder={t('admin.searchQuizzes')}
+            segmentedFilter={{
+              value: filter,
+              onChange: (id) => setFilter(id as PublishStatusFilter),
+              neutralValue: 'all',
+              options: buildPublishStatusOptions({
+                all: t('admin.allQuizzes'),
+                published: t('common.published'),
+                draft: t('common.draft'),
+              }),
+            }}
           />
-        </div>
-        <div className="flex items-center gap-2">
-          <Filter className="w-5 h-5 text-[var(--color-muted-foreground)]" />
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value as 'all' | 'published' | 'draft')}
-            className="px-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
-          >
-            <option value="all">{t('admin.allQuizzes')}</option>
-            <option value="published">{t('common.published')}</option>
-            <option value="draft">{t('common.draft')}</option>
-          </select>
-        </div>
+        </FilterPanel>
       </motion.div>
 
       {/* Stats */}

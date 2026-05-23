@@ -14,6 +14,7 @@ import { useEnrollments, useDropEnrollment } from '@/lib/react-query/hooks';
 import { BookOpen, CheckCircle, Clock, TrendingUp, Sparkles } from 'lucide-react';
 import StatCard from '@/components/ui/StatCard';
 import CourseFilters, { type CourseStatusFilter } from '@/features/courses/components/CourseFilters';
+import { FilterPanel } from '@/components/filters/DashboardListFilters';
 import { PageWrapper, ResponsiveGrid } from '@/components/layout';
 
 export default function StudentCoursesPage() {
@@ -168,7 +169,7 @@ export default function StudentCoursesPage() {
       </ResponsiveGrid>
 
       {/* Filters Section */}
-      <div className="card-surface card-body">
+      <FilterPanel>
         <CourseFilters
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
@@ -184,7 +185,7 @@ export default function StudentCoursesPage() {
           showStatusFilter={true}
           searchPlaceholder={t('common.search')}
         />
-      </div>
+      </FilterPanel>
 
       {alertState && (
         <Alert

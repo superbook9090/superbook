@@ -17,6 +17,7 @@ import {
   ToggleLeft,
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import ToggleSwitch from '@/components/ui/ToggleSwitch';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import Alert from '@/components/ui/Alert';
 import { useSessionStore } from '@/store/useSessionStore';
@@ -272,127 +273,87 @@ export default function AdminSettingsPage() {
 
         <div className="space-y-4">
           {/* Enable Blogs */}
-          <div className="flex items-center justify-between p-4 bg-[var(--color-surface-muted)] rounded-xl">
-            <div className="flex items-center gap-3">
-              <BookOpen className={`w-5 h-5 ${theme.text}`} />
-              <div>
+          <div className="flex items-center justify-between gap-4 p-4 bg-[var(--color-surface-muted)] rounded-xl">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <BookOpen className={`w-5 h-5 shrink-0 ${theme.text}`} />
+              <div className="min-w-0">
                 <p className="font-medium text-[var(--color-foreground)]">{t('adminSettings.enableBlogs')}</p>
                 <p className="text-sm text-[var(--color-muted-foreground)]">{t('adminSettings.enableBlogsDesc')}</p>
               </div>
             </div>
-            <button
-              onClick={() =>
+            <ToggleSwitch
+              checked={settings.featureToggles.enableBlogs}
+              onChange={(enableBlogs) =>
                 setSettings({
                   ...settings,
-                  featureToggles: {
-                    ...settings.featureToggles,
-                    enableBlogs: !settings.featureToggles.enableBlogs,
-                  },
+                  featureToggles: { ...settings.featureToggles, enableBlogs },
                 })
               }
-              className={`relative inline-flex h-6 w-11 min-h-[44px] sm:min-h-0 items-center rounded-full transition-colors ${
-                settings.featureToggles.enableBlogs ? `bg-gradient-to-r ${theme.gradient}` : 'bg-[var(--color-surface-muted)]'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  settings.featureToggles.enableBlogs ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
+              label={t('adminSettings.enableBlogs')}
+            />
           </div>
 
           {/* Enable Quizzes */}
-          <div className="flex items-center justify-between p-4 bg-[var(--color-surface-muted)] rounded-xl">
-            <div className="flex items-center gap-3">
-              <FileText className={`w-5 h-5 ${theme.text}`} />
-              <div>
+          <div className="flex items-center justify-between gap-4 p-4 bg-[var(--color-surface-muted)] rounded-xl">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <FileText className={`w-5 h-5 shrink-0 ${theme.text}`} />
+              <div className="min-w-0">
                 <p className="font-medium text-[var(--color-foreground)]">{t('adminSettings.enableQuizzes')}</p>
                 <p className="text-sm text-[var(--color-muted-foreground)]">{t('adminSettings.enableQuizzesDesc')}</p>
               </div>
             </div>
-            <button
-              onClick={() =>
+            <ToggleSwitch
+              checked={settings.featureToggles.enableQuizzes}
+              onChange={(enableQuizzes) =>
                 setSettings({
                   ...settings,
-                  featureToggles: {
-                    ...settings.featureToggles,
-                    enableQuizzes: !settings.featureToggles.enableQuizzes,
-                  },
+                  featureToggles: { ...settings.featureToggles, enableQuizzes },
                 })
               }
-              className={`relative inline-flex h-6 w-11 min-h-[44px] sm:min-h-0 items-center rounded-full transition-colors ${
-                settings.featureToggles.enableQuizzes ? `bg-gradient-to-r ${theme.gradient}` : 'bg-[var(--color-surface-muted)]'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  settings.featureToggles.enableQuizzes ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
+              label={t('adminSettings.enableQuizzes')}
+            />
           </div>
 
           {/* Enable Courses */}
-          <div className="flex items-center justify-between p-4 bg-[var(--color-surface-muted)] rounded-xl">
-            <div className="flex items-center gap-3">
-              <GraduationCap className={`w-5 h-5 ${theme.text}`} />
-              <div>
+          <div className="flex items-center justify-between gap-4 p-4 bg-[var(--color-surface-muted)] rounded-xl">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <GraduationCap className={`w-5 h-5 shrink-0 ${theme.text}`} />
+              <div className="min-w-0">
                 <p className="font-medium text-[var(--color-foreground)]">{t('adminSettings.enableCourses')}</p>
                 <p className="text-sm text-[var(--color-muted-foreground)]">{t('adminSettings.enableCoursesDesc')}</p>
               </div>
             </div>
-            <button
-              onClick={() =>
+            <ToggleSwitch
+              checked={settings.featureToggles.enableCourses}
+              onChange={(enableCourses) =>
                 setSettings({
                   ...settings,
-                  featureToggles: {
-                    ...settings.featureToggles,
-                    enableCourses: !settings.featureToggles.enableCourses,
-                  },
+                  featureToggles: { ...settings.featureToggles, enableCourses },
                 })
               }
-              className={`relative inline-flex h-6 w-11 min-h-[44px] sm:min-h-0 items-center rounded-full transition-colors ${
-                settings.featureToggles.enableCourses ? `bg-gradient-to-r ${theme.gradient}` : 'bg-[var(--color-surface-muted)]'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  settings.featureToggles.enableCourses ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
+              label={t('adminSettings.enableCourses')}
+            />
           </div>
 
           {/* Enable Analytics */}
-          <div className="flex items-center justify-between p-4 bg-[var(--color-surface-muted)] rounded-xl">
-            <div className="flex items-center gap-3">
-              <Settings className={`w-5 h-5 ${theme.text}`} />
-              <div>
+          <div className="flex items-center justify-between gap-4 p-4 bg-[var(--color-surface-muted)] rounded-xl">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <Settings className={`w-5 h-5 shrink-0 ${theme.text}`} />
+              <div className="min-w-0">
                 <p className="font-medium text-[var(--color-foreground)]">{t('adminSettings.enableAnalytics')}</p>
                 <p className="text-sm text-[var(--color-muted-foreground)]">{t('adminSettings.enableAnalyticsDesc')}</p>
               </div>
             </div>
-            <button
-              onClick={() =>
+            <ToggleSwitch
+              checked={settings.featureToggles.enableAnalytics}
+              onChange={(enableAnalytics) =>
                 setSettings({
                   ...settings,
-                  featureToggles: {
-                    ...settings.featureToggles,
-                    enableAnalytics: !settings.featureToggles.enableAnalytics,
-                  },
+                  featureToggles: { ...settings.featureToggles, enableAnalytics },
                 })
               }
-              className={`relative inline-flex h-6 w-11 min-h-[44px] sm:min-h-0 items-center rounded-full transition-colors ${
-                settings.featureToggles.enableAnalytics ? `bg-gradient-to-r ${theme.gradient}` : 'bg-[var(--color-surface-muted)]'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  settings.featureToggles.enableAnalytics ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
+              label={t('adminSettings.enableAnalytics')}
+            />
           </div>
         </div>
       </motion.div>
@@ -411,65 +372,45 @@ export default function AdminSettingsPage() {
 
         <div className="space-y-6">
           {/* Maintenance Mode */}
-          <div className="flex items-center justify-between p-4 bg-[var(--color-surface-muted)] rounded-xl">
-            <div className="flex items-center gap-3">
-              <Power className={`w-5 h-5 ${theme.text}`} />
-              <div>
+          <div className="flex items-center justify-between gap-4 p-4 bg-[var(--color-surface-muted)] rounded-xl">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <Power className={`w-5 h-5 shrink-0 ${theme.text}`} />
+              <div className="min-w-0">
                 <p className="font-medium text-[var(--color-foreground)]">{t('adminSettings.maintenanceMode')}</p>
                 <p className="text-sm text-[var(--color-muted-foreground)]">{t('adminSettings.maintenanceModeDesc')}</p>
               </div>
             </div>
-            <button
-              onClick={() =>
+            <ToggleSwitch
+              checked={settings.platformConfig.maintenanceMode}
+              onChange={(maintenanceMode) =>
                 setSettings({
                   ...settings,
-                  platformConfig: {
-                    ...settings.platformConfig,
-                    maintenanceMode: !settings.platformConfig.maintenanceMode,
-                  },
+                  platformConfig: { ...settings.platformConfig, maintenanceMode },
                 })
               }
-              className={`relative inline-flex h-6 w-11 min-h-[44px] sm:min-h-0 items-center rounded-full transition-colors ${
-                settings.platformConfig.maintenanceMode ? `bg-gradient-to-r ${theme.gradient}` : 'bg-[var(--color-surface-muted)]'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  settings.platformConfig.maintenanceMode ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
+              label={t('adminSettings.maintenanceMode')}
+            />
           </div>
 
           {/* Allow Registration */}
-          <div className="flex items-center justify-between p-4 bg-[var(--color-surface-muted)] rounded-xl">
-            <div className="flex items-center gap-3">
-              <UserPlus className={`w-5 h-5 ${theme.text}`} />
-              <div>
+          <div className="flex items-center justify-between gap-4 p-4 bg-[var(--color-surface-muted)] rounded-xl">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <UserPlus className={`w-5 h-5 shrink-0 ${theme.text}`} />
+              <div className="min-w-0">
                 <p className="font-medium text-[var(--color-foreground)]">{t('adminSettings.allowRegistration')}</p>
                 <p className="text-sm text-[var(--color-muted-foreground)]">{t('adminSettings.allowRegistrationDesc')}</p>
               </div>
             </div>
-            <button
-              onClick={() =>
+            <ToggleSwitch
+              checked={settings.platformConfig.allowRegistration}
+              onChange={(allowRegistration) =>
                 setSettings({
                   ...settings,
-                  platformConfig: {
-                    ...settings.platformConfig,
-                    allowRegistration: !settings.platformConfig.allowRegistration,
-                  },
+                  platformConfig: { ...settings.platformConfig, allowRegistration },
                 })
               }
-              className={`relative inline-flex h-6 w-11 min-h-[44px] sm:min-h-0 items-center rounded-full transition-colors ${
-                settings.platformConfig.allowRegistration ? `bg-gradient-to-r ${theme.gradient}` : 'bg-[var(--color-surface-muted)]'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  settings.platformConfig.allowRegistration ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
+              label={t('adminSettings.allowRegistration')}
+            />
           </div>
         </div>
       </motion.div>

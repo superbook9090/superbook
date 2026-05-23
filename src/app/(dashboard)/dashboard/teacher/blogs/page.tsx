@@ -1,14 +1,12 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import {
   BookOpen,
-  Search,
-  Filter,
   Trash2,
   Eye,
   EyeOff,
@@ -23,6 +21,9 @@ import ConfirmModal from '@/components/ui/ConfirmModal';
 import { useTranslation } from '@/hooks/useTranslation';
 import { formatDate } from '@/lib/dateUtils';
 import { useSessionStore } from '@/store/useSessionStore';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import BlogFilters, { type BlogLanguageFilter, type BlogStatusFilter } from '@/features/blogs/components/BlogFilters';
+import { FilterPanel } from '@/components/filters/DashboardListFilters';
 import { useBlogs, useDeleteBlog, useUpdateBlog, type Blog } from '@/lib/react-query/hooks';
 
 export default function TeacherBlogsPage() {
@@ -38,21 +39,19 @@ export default function TeacherBlogsPage() {
       return;
     }
   }, [status, router]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState<'all' | 'published' | 'draft'>('all');
-  const [languageFilter, setLanguageFilter] = useState<'all' | 'en' | 'hi'>('all');
+  const [searchInput, setSearchInput] = useState('');
+  const searchTerm = useDebouncedValue(searchInput, 300);
+  const [filter, setFilter] = useState<BlogStatusFilter>('all');
+  const [languageFilter, setLanguageFilter] = useState<BlogLanguageFilter>('all');
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
 
-  // Debounced search handler
-  const debouncedSearchHandler = useCallback(
-    (value: string) => {
-      const timer = setTimeout(() => setSearchTerm(value), 300);
-      return () => clearTimeout(timer);
-    },
-    []
-  );
+  const clearFilters = () => {
+    setSearchInput('');
+    setFilter('all');
+    setLanguageFilter('all');
+  };
 
   // Get orgId from session
   const orgId = (session?.user as { organizationId?: string })?.organizationId || 'public';
@@ -108,7 +107,7 @@ export default function TeacherBlogsPage() {
   }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -141,49 +140,19 @@ export default function TeacherBlogsPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="bg-[var(--card-solid)] rounded-2xl p-4 shadow-sm"
       >
-        <div className="flex flex-col sm:flex-row gap-4">
-          {/* Search */}
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-muted-foreground)]" />
-            <input
-              type="text"
-              placeholder={t('blog.searchBlogs')}
-              defaultValue={searchTerm}
-              onChange={(e) => debouncedSearchHandler(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--teacher-primary)]/20 focus:border-[var(--teacher-primary)]"
-            />
-          </div>
-
-          {/* Filter */}
-          <div className="flex items-center gap-2">
-            <Filter className="w-5 h-5 text-[var(--color-muted-foreground)] flex-shrink-0" />
-            <select
-              value={filter}
-              onChange={(e) => setFilter(e.target.value as 'all' | 'published' | 'draft')}
-              className="flex-1 sm:flex-none px-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--teacher-primary)]/20 focus:border-[var(--teacher-primary)]"
-            >
-              <option value="all">{t('blog.allBlogs')}</option>
-              <option value="published">{t('blog.published')}</option>
-              <option value="draft">{t('blog.draft')}</option>
-            </select>
-          </div>
-
-          {/* Language Filter */}
-          <div className="flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-[var(--color-muted-foreground)] flex-shrink-0" />
-            <select
-              value={languageFilter}
-              onChange={(e) => setLanguageFilter(e.target.value as 'all' | 'en' | 'hi')}
-              className="flex-1 sm:flex-none px-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--teacher-primary)]/20 focus:border-[var(--teacher-primary)]"
-            >
-              <option value="all">{t('blog.allLanguages')}</option>
-              <option value="en">{t('common.english')}</option>
-              <option value="hi">{t('common.hindi')}</option>
-            </select>
-          </div>
-        </div>
+        <FilterPanel>
+          <BlogFilters
+            searchQuery={searchInput}
+            onSearchChange={setSearchInput}
+            statusFilter={filter}
+            onStatusChange={setFilter}
+            languageFilter={languageFilter}
+            onLanguageChange={setLanguageFilter}
+            onClear={clearFilters}
+            searchPlaceholder={t('blog.searchBlogs')}
+          />
+        </FilterPanel>
       </motion.div>
 
       {/* Stats */}
