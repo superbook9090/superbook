@@ -4,6 +4,7 @@ import dbConnect from '@/lib/db';
 import User from '@/models/User';
 import Organization from '@/models/Organization';
 import { isRegistrationAllowed } from '@/lib/settingsHelpers';
+import { findUserByEmail } from '@/lib/user/findByEmail';
 import { logApiError, type LogContext } from '@/lib/logger';
 
 export async function POST(request: Request) {
@@ -24,10 +25,11 @@ export async function POST(request: Request) {
       );
     }
 
-    const { name, email, password, role = 'student', inviteCode } = await request.json();
+    const { name, email: rawEmail, password, role = 'student', inviteCode } = await request.json();
+    const email = typeof rawEmail === 'string' ? rawEmail.trim().toLowerCase() : '';
 
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await findUserByEmail(email);
     if (existingUser) {
       return NextResponse.json(
         { message: 'User already exists' },

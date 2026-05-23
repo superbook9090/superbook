@@ -1,7 +1,7 @@
 'use client';
 
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -18,8 +18,11 @@ import {
   Sparkles
 } from 'lucide-react';
 import { Loader } from '@/components/ui/Loader';
+import { Suspense } from 'react';
 
-export default function LoginForm() {
+function LoginFormInner() {
+  const searchParams = useSearchParams();
+  const resetSuccess = searchParams.get('reset') === 'success';
   const { status, fetchSession } = useSessionStore();
   const router = useRouter();
   const { t } = useTranslation();
@@ -196,6 +199,13 @@ export default function LoginForm() {
               </p>
             </div>
 
+            {/* Success after password reset */}
+            {resetSuccess && (
+              <div className="mb-6 p-4 bg-[var(--success-light)] border border-[var(--success)]/20 rounded-xl text-sm text-[var(--success)]">
+                {t('login.resetSuccess')}
+              </div>
+            )}
+
             {/* Error Message */}
             {error && (
               <motion.div
@@ -282,7 +292,7 @@ export default function LoginForm() {
                   <span className="ml-2 text-sm text-[var(--color-muted-foreground)]">{t('login.rememberMe')}</span>
                 </label>
                 <Link
-                  href="#"
+                  href="/forgot-password"
                   className={`text-sm font-medium ${theme.text} ${theme.hover.replace('hover:', 'hover:').replace('bg-', 'text-')} transition-colors`}
                 >
                   {t('login.forgotPassword')}
@@ -355,5 +365,13 @@ export default function LoginForm() {
         </motion.div>
       </div>
     </div>
+  );
+}
+
+export default function LoginForm() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader /></div>}>
+      <LoginFormInner />
+    </Suspense>
   );
 }

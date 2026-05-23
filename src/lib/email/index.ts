@@ -472,3 +472,60 @@ export async function sendUserAutoReply(params: ContactEmailParams, ticketId: st
     return false;
   }
 }
+
+function passwordResetHtml(name: string, resetUrl: string): string {
+  const safeName = name.replace(/[<>]/g, '');
+  return `
+  <!DOCTYPE html>
+  <html>
+  <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+  <body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f8fafc;">
+    <div style="max-width:560px;margin:40px auto;background:#fff;border-radius:16px;border:1px solid #e2e8f0;overflow:hidden;">
+      <div style="background:linear-gradient(135deg,#4f46e5,#3730a3);padding:28px 24px;text-align:center;">
+        <h1 style="margin:0;color:#fff;font-size:22px;font-weight:800;">quiz-do</h1>
+        <p style="margin:8px 0 0;color:#e0e7ff;font-size:13px;">Password Reset</p>
+      </div>
+      <div style="padding:28px 24px;">
+        <p style="margin:0 0 16px;color:#334155;font-size:15px;">Hello ${safeName},</p>
+        <p style="margin:0 0 20px;color:#64748b;font-size:14px;line-height:1.6;">
+          We received a request to reset your password. Click the button below to choose a new password.
+          This link expires in 1 hour.
+        </p>
+        <a href="${resetUrl}" style="display:inline-block;background:#4f46e5;color:#fff;text-decoration:none;font-weight:600;padding:12px 24px;border-radius:10px;font-size:14px;">
+          Reset Password
+        </a>
+        <p style="margin:20px 0 0;color:#64748b;font-size:12px;line-height:1.6;word-break:break-all;">
+          Or copy this link into your browser:<br>
+          <a href="${resetUrl}" style="color:#4f46e5;">${resetUrl}</a>
+        </p>
+        <p style="margin:24px 0 0;color:#94a3b8;font-size:12px;line-height:1.5;">
+          If you did not request this, you can safely ignore this email.
+        </p>
+      </div>
+    </div>
+  </body>
+  </html>`;
+}
+
+export async function sendPasswordResetEmail(params: {
+  to: string;
+  name: string;
+  resetUrl: string;
+}): Promise<void> {
+  try {
+    const transporter = getTransporter();
+    const safeName = params.name.replace(/[<>]/g, '');
+
+    await transporter.sendMail({
+      from: `"${smtpFromName}" <${smtpFromEmail}>`,
+      to: params.to,
+      replyTo: smtpFromEmail,
+      subject: 'Reset your quiz-do password',
+      text: `Hello ${safeName},\n\nReset your password using this link (expires in 1 hour):\n${params.resetUrl}\n\nIf you did not request this, ignore this email.\n\n— quiz-do Team`,
+      html: passwordResetHtml(safeName, params.resetUrl),
+    });
+  } catch (error) {
+    logApiError(error as Error, 'sendMail', '/lib/email/index.ts', { method: 'SMTP_PASSWORD_RESET' });
+    throw error;
+  }
+}

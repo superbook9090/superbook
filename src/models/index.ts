@@ -20,6 +20,7 @@ import './VideoProgress';
 import './NotificationToken';
 import './NotificationPreference';
 import './UserNotification';
+import './PasswordResetToken';
 
 export { default as User } from './User';
 export { default as Organization } from './Organization';
@@ -40,3 +41,4 @@ export { default as VideoProgress } from './VideoProgress';
 export { default as NotificationToken } from './NotificationToken';
 export { default as NotificationPreference } from './NotificationPreference';
 export { default as UserNotification } from './UserNotification';
+export { default as PasswordResetToken } from './PasswordResetToken';

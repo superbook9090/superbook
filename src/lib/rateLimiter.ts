@@ -66,10 +66,38 @@ export const generalRateLimiter = new RateLimiter(60 * 1000, 60); // 60 requests
 export const adminRateLimiter = new RateLimiter(60 * 1000, 30); // 30 requests per minute
 export const contactRateLimiter = new RateLimiter(60 * 1000, 3); // 3 requests per minute
 
+/** Forgot-password: 3 requests per 15 minutes per IP */
+export const forgotPasswordIpLimiter = new RateLimiter(15 * 60 * 1000, 3);
+
+/** Forgot-password: 3 requests per hour per email address */
+export const forgotPasswordEmailLimiter = new RateLimiter(60 * 60 * 1000, 3);
+
+/** Reset-password (token submit): 10 attempts per 15 minutes per IP */
+export const resetPasswordIpLimiter = new RateLimiter(15 * 60 * 1000, 10);
+
+/** Change-password while logged in: 5 attempts per hour per user */
+export const changePasswordLimiter = new RateLimiter(60 * 60 * 1000, 5);
+
 // Cleanup expired entries every minute
 setInterval(() => {
   authRateLimiter.cleanup();
   generalRateLimiter.cleanup();
   adminRateLimiter.cleanup();
   contactRateLimiter.cleanup();
+  forgotPasswordIpLimiter.cleanup();
+  forgotPasswordEmailLimiter.cleanup();
+  resetPasswordIpLimiter.cleanup();
+  changePasswordLimiter.cleanup();
 }, 60 * 1000);
+
+export function getRequestIp(req: Request): string {
+  const forwarded = req.headers.get('x-forwarded-for');
+  if (forwarded) {
+    return forwarded.split(',')[0]?.trim() || 'unknown';
+  }
+  return req.headers.get('x-real-ip') || 'unknown';
+}
+
+export function rateLimitExceededMessage(): string {
+  return 'Too many requests. Please try again later.';
+}

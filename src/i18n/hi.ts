@@ -1119,7 +1119,30 @@ export const hi = {
     createOne: 'बनाएं',
     invalidCredentials: 'अमान्य ईमेल या पासवर्ड',
     genericError: 'एक त्रुटि हुई। कृपया पुनः प्रयास करें।',
-    signIn: 'साइन इन करें'
+    signIn: 'साइन इन करें',
+    resetSuccess: 'पासवर्ड अपडेट हो गया। कृपया नए पासवर्ड से साइन इन करें।',
+  },
+
+  password: {
+    forgotTitle: 'पासवर्ड भूल गए?',
+    forgotDescription: 'अपना ईमेल दर्ज करें, हम आपको पासवर्ड रीसेट लिंक भेजेंगे।',
+    forgotSuccess: 'यदि उस ईमेल पर खाता है, तो जल्द ही रीसेट लिंक मिलेगा। अपना इनबॉक्स देखें।',
+    sendResetLink: 'रीसेट लिंक भेजें',
+    backToLogin: 'साइन इन पर वापस जाएं',
+    resetTitle: 'नया पासवर्ड सेट करें',
+    resetDescription: 'अपने खाते के लिए नया पासवर्ड चुनें।',
+    newPassword: 'नया पासवर्ड',
+    currentPassword: 'वर्तमान पासवर्ड',
+    updatePassword: 'पासवर्ड अपडेट करें',
+    changePasswordTitle: 'पासवर्ड बदलें',
+    changePasswordDesc: 'साइन इन रहते हुए पासवर्ड अपडेट करें। वर्तमान पासवर्ड आवश्यक है।',
+    changeSuccess: 'आपका पासवर्ड अपडेट हो गया है।',
+    invalidResetLink: 'यह रीसेट लिंक अमान्य या समाप्त है। कृपया नया लिंक मांगें।',
+    requestNewLink: 'नया रीसेट लिंक मांगें',
+    googleNoPassword: 'आप Google से साइन इन करते हैं। ईमेल लॉगिन के लिए पासवर्ड सेट करने हेतु लॉगिन पर Forgot Password का उपयोग करें।',
+    noPasswordSet: 'इस खाते पर पासवर्ड सेट नहीं है। ईमेल से सेट करने के लिए लॉगिन पर Forgot Password का उपयोग करें।',
+    genericError: 'कुछ गलत हो गया। कृपया पुनः प्रयास करें।',
+    rateLimited: 'बहुत अधिक प्रयास। कृपया प्रतीक्षा करें और बाद में पुनः प्रयास करें।',
   },
 
   // Register

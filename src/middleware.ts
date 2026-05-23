@@ -56,7 +56,7 @@ export async function middleware(request: NextRequest) {
   // =========================
   // ✅ 2. BLOCK AUTHENTICATED USERS FROM LOGIN/REGISTER
   // =========================
-  if (pathname.startsWith('/login') || pathname.startsWith('/register')) {
+  if (pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/forgot-password')) {
     if (token?.id) {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
@@ -101,5 +101,7 @@ export const config = {
     '/dashboard/:path*',
     '/login',
     '/register',
+    '/forgot-password',
+    '/reset-password',
   ],
 };

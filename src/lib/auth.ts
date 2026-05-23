@@ -4,6 +4,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
 import User from '@/models/User';
 import dbConnect from './db';
+import { findUserByEmail } from '@/lib/user/findByEmail';
 
 declare module 'next-auth' {
   interface Session extends DefaultSession {
@@ -58,7 +59,7 @@ export const authOptions: AuthOptions = {
 
         await dbConnect();
 
-        const user = await User.findOne({ email: credentials.email }).select('+password');
+        const user = await findUserByEmail(credentials.email).select('+password');
 
         if (!user) {
           throw new Error('User not found');
@@ -89,12 +90,13 @@ export const authOptions: AuthOptions = {
 
         await dbConnect();
 
-        let dbUser = await User.findOne({ email: user.email });
+        let dbUser = await findUserByEmail(user.email);
 
         if (!dbUser) {
+          const normalizedEmail = user.email.trim().toLowerCase();
           dbUser = await User.create({
             name: user.name || 'Google User',
-            email: user.email,
+            email: normalizedEmail,
             role: 'student',
             avatar: user.image,
             isVerified: true,
