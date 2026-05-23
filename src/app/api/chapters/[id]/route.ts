@@ -23,7 +23,13 @@ export async function PATCH(
     if (!chapter) return NextResponse.json({ message: 'Chapter not found' }, { status: 404 });
 
     const course = await Course.findById(chapter.course);
-    if (course.instructor.toString() !== session.user.id && session.user.role !== 'admin') {
+    if (!course) {
+      return NextResponse.json({ message: 'Course not found' }, { status: 404 });
+    }
+
+    const isOwner = course.instructor.toString() === session.user.id;
+    const isStaff = ['admin', 'superadmin'].includes(session.user.role || '');
+    if (!isOwner && !isStaff) {
       return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
     }
 
@@ -57,7 +63,13 @@ export async function DELETE(
     if (!chapter) return NextResponse.json({ message: 'Chapter not found' }, { status: 404 });
 
     const course = await Course.findById(chapter.course);
-    if (course.instructor.toString() !== session.user.id && session.user.role !== 'admin') {
+    if (!course) {
+      return NextResponse.json({ message: 'Course not found' }, { status: 404 });
+    }
+
+    const isOwner = course.instructor.toString() === session.user.id;
+    const isStaff = ['admin', 'superadmin'].includes(session.user.role || '');
+    if (!isOwner && !isStaff) {
       return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
     }
 

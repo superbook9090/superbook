@@ -522,10 +522,10 @@ export function useAddChapter() {
 export function useUpdateChapter() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ chapterId, data }: { chapterId: string; data: Partial<Chapter> }) => 
+    mutationFn: ({ chapterId, data }: { chapterId: string; data: Partial<Chapter>; courseId: string }) =>
       updateChapter(chapterId, data) as Promise<Chapter>,
-    onSuccess: (data: Chapter) => {
-      queryClient.invalidateQueries({ queryKey: ['courses', data.course, 'curriculum'] });
+    onSuccess: (_, { courseId }) => {
+      queryClient.invalidateQueries({ queryKey: ['courses', courseId, 'curriculum'] });
     },
   });
 }
