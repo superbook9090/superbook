@@ -6,13 +6,15 @@ quiz-do is a modern Learning Management System (LMS) built with Next.js 15, feat
 
 ## 2. Tech Stack
 
-- **Framework**: Next.js 15 (App Router, Server Components, API Routes, Turbopack)
+- **Framework**: Next.js 15 (App Router, Server Components, API Routes)
+- **Dev bundler**: Turbopack (`npm run dev --turbopack`)
+- **Production build**: `next build` (standard webpack; not Turbopack)
 - **Language**: TypeScript
 - **Database**: MongoDB + Mongoose
 - **Authentication**: NextAuth (JWT-based session handling)
 - **State Management**: Zustand (client-side caching)
 - **Caching**: Upstash Redis (server-side, optional/fallback-safe)
-- **Styling**: Tailwind CSS
+- **Styling**: Tailwind CSS 4 with centralized design tokens in `src/app/globals.css`
 - **Animations**: Framer Motion
 - **Rich Text**: TipTap editor
 - **File Processing**: xlsx (Excel parsing), BullMQ (job queue)
@@ -76,8 +78,21 @@ All authorization checks are enforced at **API level** (backend), not frontend.
 ### Route Protection
 
 - Middleware protects `/dashboard/admin/*` routes (admin and superadmin only)
+- `/dashboard` redirects server-side to the role home via `getDashboardHomePath()` in `src/lib/roles.ts`
 - Frontend role guards as secondary security layer
 - API-level authorization checks for all endpoints
+
+### Role-based dashboard home
+
+| Role | Default route |
+|------|----------------|
+| `student` | `/dashboard/student` |
+| `teacher` | `/dashboard/teacher` |
+| `admin`, `superadmin` | `/dashboard/admin` |
+
+Helpers in `src/lib/roles.ts`: `normalizeRole`, `isAdmin`, `isSuperAdmin`, `isStaffRole`, `getDashboardHomePath`, `withDashboardHome`.
+
+Profile routes: `/dashboard/student/profile`, `/dashboard/teacher/profile`, `/dashboard/admin/profile`.
 
 ## 4. State Management (Zustand)
 
@@ -263,8 +278,11 @@ src/
 │       ├── organizations/   # Organization management
 │       └── analytics/       # Analytics data
 ├── components/
-│   ├── dashboard/           # Dashboard-specific components
+│   ├── layout/              # PageWrapper, PageHeader, ResponsiveGrid, DashboardContent
 │   └── ui/                  # Reusable UI components
+├── constants/
+│   ├── navigation.ts        # STUDENT_NAV, TEACHER_NAV, ADMIN_NAV
+│   └── spacing.ts           # CSS token name reference for layout
 ├── contexts/                # React contexts (AppSettings, RoleTheme)
 ├── features/                # Feature-specific components
 │   ├── courses/
@@ -276,6 +294,7 @@ src/
 │   ├── db.ts                # Database connection
 │   ├── redis.ts             # Upstash Redis client
 │   ├── auth.ts              # NextAuth configuration
+│   ├── roles.ts             # Role helpers + dashboard home routing
 │   ├── logger.ts            # Logging utilities with request tracing
 │   ├── accessControl.ts     # Authorization helpers
 │   ├── apiMiddleware.ts     # API middleware for rate limiting
@@ -290,6 +309,9 @@ src/
 │   ├── Enrollment.ts
 │   ├── Blog.ts
 │   ├── Favorite.ts
+│   ├── NotificationToken.ts
+│   ├── NotificationPreference.ts
+│   ├── UserNotification.ts
 │   ├── AppSettings.ts
 │   ├── File.ts
 │   └── Progress.ts
@@ -363,7 +385,18 @@ const { t, lang, setLang } = useTranslation();
 t('common.english') // "English" or "अंग्रेज़ी"
 ```
 
-## 12. Recent Build Fixes
+## 12. Recent Updates
+
+### Layout, routing & notifications (2025)
+
+- **Mobile-first spacing system**: CSS tokens in `globals.css`, layout components in `src/components/layout/`, reference in `src/constants/spacing.ts`
+- **Role-based dashboard routing**: `getDashboardHomePath`, `withDashboardHome` in `src/lib/roles.ts`; `/dashboard` redirect; admin profile at `/dashboard/admin/profile`
+- **Centralized navigation**: `src/constants/navigation.ts` for all role nav arrays; mobile bottom nav keys
+- **Push + in-app notifications**: FCM via Firebase; lazy Admin init (`getAdminMessaging`); inbox API + student notifications page; admin broadcast UI
+- **Mongoose index cleanup**: removed duplicate indexes on `NotificationToken`, `NotificationPreference`, `UserNotification`
+- **Mobile UX**: language switcher in mobile header; header/content spacing via `--mobile-header-gap`
+
+### Earlier build fixes
 
 ### ESLint/TypeScript Errors Resolved
 - Fixed all `any` type errors by using proper type assertions
@@ -420,7 +453,28 @@ t('common.english') // "English" or "अंग्रेज़ी"
 - **User Management**: UserTable, UserForm, UserProfile with role-based access
 
 ### Layout System
-- **Responsive Design**: Mobile-first approach with breakpoints (sm, md, lg, xl)
+
+Centralized layout primitives live in `src/components/layout/`:
+
+| Component | Purpose |
+|-----------|---------|
+| `PageWrapper` | Page shell with consistent horizontal gutters and vertical rhythm |
+| `PageHeader` | Title, description, and optional actions |
+| `DashboardContent` | Dashboard main content area with role-aware spacing |
+| `ResponsiveGrid` | Responsive stat/card grids (`grid-stats`, `grid-cards`) |
+| `EmptyState` | Consistent empty-list placeholder |
+
+**CSS tokens** (`src/app/globals.css`): `--gutter-x`, `--section-gap`, `--card-padding`, `--mobile-header-height`, `--mobile-header-gap`, `--page-max-width`.
+
+**Utility classes**: `.stack-page`, `.card-body`, `.card-surface`, `.card-list`, `.form-stack`, `.hero-banner`, `.stat-tile`, `.form-field`, `.btn-action`, `.mobile-header-bar`, `.mobile-header-spacer`.
+
+**TypeScript reference**: `src/constants/spacing.ts` exports `SPACING` (token names) and `SPACING_CLASSES` (class names) for use in TSX.
+
+**Navigation config**: `src/constants/navigation.ts` defines `STUDENT_NAV`, `TEACHER_NAV`, `ADMIN_NAV`. Use `withDashboardHome()` from `src/lib/roles.ts` so the dashboard nav item resolves to the correct role home. Mobile shell: `MobileNav` (header + language switcher), `MobileBottomNav`, desktop sidebars per role.
+
+**Migration status**: High-traffic student/teacher/admin pages use the shared layout; older pages may still use ad-hoc `space-y-*` / `p-4 sm:p-6` — prefer the shared primitives for new work.
+
+- **Responsive Design**: Mobile-first with shared gutters (not breakpoint-specific padding per page)
 - **Role-Based Theming**: Dynamic CSS variables for student/teacher/admin themes
 - **Navigation**: Structured routing with role-based access control
 - **State Management**: Zustand stores for session, caching, and global state
@@ -494,7 +548,7 @@ t('common.english') // "English" or "अंग्रेज़ी"
 
 ### Deployment Configuration
 - **Next.js 15**: App Router with server components
-- **Build Optimization**: Turbopack for faster builds
+- **Build Optimization**: `next build` for production; Turbopack only for local dev (`npm run dev`)
 - **Static Generation**: ISR for improved performance
 - **Environment Variables**: Secure configuration management
 - **Monitoring**: Error tracking and performance monitoring
@@ -528,7 +582,48 @@ t('common.english') // "English" or "अंग्रेज़ी"
 - **Manual Mapping**: Frontend processes and combines data from multiple sources
 - **Error Handling**: Graceful fallbacks for missing API responses
 
-## 19. Push Notifications (Firebase Cloud Messaging)
+## 19. Mobile-First Layout & Spacing
+
+### Design tokens
+
+Responsive spacing is defined once in `src/app/globals.css` and referenced from components via CSS variables or utility classes:
+
+```css
+/* Examples — see globals.css for full set */
+--gutter-x: clamp(1rem, 4vw, 1.5rem);
+--section-gap: clamp(1.25rem, 3vw, 2rem);
+--card-padding: clamp(1rem, 2.5vw, 1.5rem);
+--mobile-header-height: 3.5rem;
+--mobile-header-gap: 0.75rem;
+```
+
+### Recommended page pattern
+
+```tsx
+import { PageWrapper, PageHeader, DashboardContent } from '@/components/layout';
+
+<PageWrapper>
+  <PageHeader title={t('…')} description={t('…')} />
+  <DashboardContent>
+    {/* page body */}
+  </DashboardContent>
+</PageWrapper>
+```
+
+Use `ResponsiveGrid` for stat rows and card grids. Prefer `.card-body` / `.card-surface` over inline padding on individual cards.
+
+### Mobile dashboard shell
+
+- **Header**: `MobileNav` — logo, language switcher (`LanguageSwitcher` with `compact` / `alwaysShowLabel`), role-themed styling
+- **Spacer**: `.mobile-header-spacer` accounts for fixed header height + gap below header
+- **Bottom nav**: `MobileBottomNav` uses `MOBILE_BOTTOM_NAV_KEYS` from `navigation.ts`
+- **Home link**: Pass `homePath={getDashboardHomePath(role)}` so admin users are not sent to `/dashboard/student`
+
+### Session role refresh
+
+JWT role is refreshed from the database approximately every 5 minutes (`roleRefreshedAt` in `src/lib/auth.ts`) so role changes propagate without forcing a full re-login.
+
+## 20. Push Notifications (Firebase Cloud Messaging)
 
 ### Overview
 
@@ -536,13 +631,16 @@ Push notifications use **Firebase Cloud Messaging (FCM)** for web and native Web
 
 ### Collections
 
-- **`notificationtokens`**: `{ userId, deviceToken, platform, isActive }` — TTL index on `updatedAt` (30 days).
-- **`notificationpreferences`**: per-user category toggles, `muteAll`, `disablePush`, `mutedCourses[]`.
+- **`notificationtokens`**: `{ userId, deviceToken, platform, isActive }` — unique `deviceToken`; compound index on `{ userId, isActive }`; TTL on `updatedAt` (30 days). Avoid duplicate single-field indexes when `unique: true` is already set on a field.
+- **`notificationpreferences`**: per-user category toggles, `muteAll`, `disablePush`, `mutedCourses[]` — `userId` is unique (no redundant index).
+- **`usernotifications`**: in-app notification inbox records (title, body, category, read state, deep-link metadata).
 
 ### API routes (standard `{ success, data, error }` envelope)
 
 | Route | Method | Auth | Purpose |
 |-------|--------|------|---------|
+| `/api/notifications` | GET | Session | Paginated in-app inbox |
+| `/api/notifications/[id]` | PATCH/DELETE | Session | Mark read / dismiss |
 | `/api/notifications/device` | POST | Session | Register FCM device token |
 | `/api/notifications/device` | DELETE | Session | Deactivate token |
 | `/api/notifications/preferences` | GET/PUT | Session | Read/update preferences |
@@ -553,9 +651,17 @@ Client API: `src/lib/api/notifications.ts` (uses `apiJsonData`)
 
 ### Admin UI
 
-- **Page**: `/dashboard/admin/notifications`
+- **Broadcast page**: `/dashboard/admin/notifications` (superadmin nav item)
 - **i18n**: `admin.notifications.*`, `notifications.categories.*`, `notifications.push.viewDetails`
-- Uses shared `Alert`, role theme gradients, and CSS variables (`--primary`, `--card-solid`, etc.)
+
+### Student in-app inbox
+
+- **Page**: `/dashboard/student/notifications`
+- **Nav icon**: Bell (not Settings) in student sidebar / mobile nav
+
+### Firebase Admin (server)
+
+Initialize lazily via `getAdminMessaging()` in `src/lib/notifications/push/firebase-admin.ts` — no top-level init during build. Call sites (e.g. `sendPushNotification.ts`) invoke `getAdminMessaging()` at runtime only when sending.
 
 ### Client registration
 
@@ -578,7 +684,7 @@ Client API: `src/lib/api/notifications.ts` (uses `apiJsonData`)
 
 ---
 
-## 20. Future Improvements
+## 21. Future Improvements
 
 ### Performance
 - Add advanced request deduplication (TanStack Query)
@@ -591,7 +697,7 @@ Client API: `src/lib/api/notifications.ts` (uses `apiJsonData`)
 - Email verification system
 - Video lessons support
 - Course completion certificates
-- Real-time in-app notifications (WebSocket) — push via FCM is implemented (see §19)
+- Real-time in-app notifications (WebSocket) — push via FCM and in-app inbox via `UserNotification` are implemented (see §20)
 - Payment gateway integration (Stripe)
 - Advanced analytics with charts (Recharts)
 - Bulk user import (Excel)
@@ -610,7 +716,7 @@ Client API: `src/lib/api/notifications.ts` (uses `apiJsonData`)
 - Add comprehensive request logging with logger utility
 - Add file upload security and validation
 
-## 21. Database Schemas
+## 22. Database Schemas
 
 ### User Schema
 
@@ -956,7 +1062,7 @@ interface IAppSettings {
 
 ---
 
-## 22. Future Roadmap
+## 23. Future Roadmap
 
 ### Short Term (1-3 months)
 - **Real-time Features**: WebSocket integration for live updates

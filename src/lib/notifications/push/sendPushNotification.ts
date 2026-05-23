@@ -1,4 +1,4 @@
-import { adminMessaging } from './firebase-admin';
+import { getAdminMessaging } from './firebase-admin';
 import NotificationToken from '@/models/NotificationToken';
 import NotificationPreference from '@/models/NotificationPreference';
 import dbConnect from '@/lib/db';
@@ -10,6 +10,7 @@ export const sendPushNotification = async (
   payload: PushNotificationPayload,
   language: 'en' | 'hi' = 'en'
 ) => {
+  const adminMessaging = getAdminMessaging();
   if (!adminMessaging) {
     console.warn('FCM Admin not initialized. Skipping push notification.');
     return;
