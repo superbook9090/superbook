@@ -45,19 +45,60 @@ export const authOptions: AuthOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
-    // Email/Password Credentials Provider
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
         email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        password: { label: "Password", type: "password" },
+        googleIdToken: { label: "Google ID Token", type: "text" }
       },
       async authorize(credentials) {
+        await dbConnect();
+
+        // Native Google Sign-In flow (from React Native app)
+        if (credentials?.googleIdToken) {
+          const { OAuth2Client } = await import('google-auth-library');
+          const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+          
+          try {
+            const ticket = await client.verifyIdToken({
+              idToken: credentials.googleIdToken,
+              // audience: process.env.GOOGLE_CLIENT_ID, // Use backend's client ID, or omit to allow multi-audience
+            });
+            const payload = ticket.getPayload();
+            if (!payload?.email) throw new Error('Invalid Google Token payload');
+            
+            const normalizedEmail = payload.email.trim().toLowerCase();
+            let dbUser = await findUserByEmail(normalizedEmail);
+            
+            if (!dbUser) {
+              dbUser = await User.create({
+                name: payload.name || 'Google User',
+                email: normalizedEmail,
+                role: 'student',
+                avatar: payload.picture,
+                isVerified: true,
+                provider: 'google',
+              });
+            }
+            
+            return {
+              id: dbUser._id.toString(),
+              email: dbUser.email,
+              name: dbUser.name,
+              role: dbUser.role,
+              organizationId: dbUser.organizationId?.toString() || null,
+              canUploadVideos: dbUser.canUploadVideos || false,
+            };
+          } catch (e) {
+            console.error('Native Google token verification failed', e);
+            throw new Error('Invalid Google login');
+          }
+        }
+
         if (!credentials?.email || !credentials?.password) {
           throw new Error('Missing email or password');
         }
-
-        await dbConnect();
 
         const user = await findUserByEmail(credentials.email).select('+password');
 

@@ -20,6 +20,14 @@ import {
 import { Loader } from '@/components/ui/Loader';
 import { Suspense } from 'react';
 
+declare global {
+  interface Window {
+    ReactNativeWebView?: {
+      postMessage: (message: string) => void;
+    };
+  }
+}
+
 function LoginFormInner() {
   const searchParams = useSearchParams();
   const resetSuccess = searchParams.get('reset') === 'success';
@@ -71,6 +79,50 @@ function LoginFormInner() {
       setError(t('login.genericError'));
       console.error('Login error:', error);
       setIsLoading(false);
+    }
+  };
+
+  // Listen for Native Google Sign-In tokens
+  useEffect(() => {
+    const handleMessage = async (event: MessageEvent) => {
+      // Handle injected messages from React Native
+      if (event.data && event.data.action === 'GOOGLE_NATIVE_TOKEN' && event.data.token) {
+        setIsLoading(true);
+        setError('');
+        try {
+          const result = await signIn('credentials', {
+            redirect: false,
+            googleIdToken: event.data.token,
+          });
+
+          if (result?.error) {
+            setError(t('login.genericError'));
+            setIsLoading(false);
+            return;
+          }
+
+          await fetchSession(true);
+          await new Promise(resolve => setTimeout(resolve, 500));
+          router.push('/dashboard');
+        } catch (error) {
+          setError(t('login.genericError'));
+          console.error('Native Google Login error:', error);
+          setIsLoading(false);
+        }
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [router, fetchSession, t]);
+
+  const handleGoogleSignIn = () => {
+    // Check if we are running inside the React Native WebView
+    if (typeof window !== 'undefined' && window.ReactNativeWebView) {
+      window.ReactNativeWebView.postMessage(JSON.stringify({ action: 'REQUEST_GOOGLE_SIGN_IN' }));
+    } else {
+      // Standard web flow
+      signIn('google', { callbackUrl: '/dashboard' });
     }
   };
 
@@ -337,7 +389,7 @@ function LoginFormInner() {
             {/* Google Login */}
             <motion.button
               type="button"
-              onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
+              onClick={handleGoogleSignIn}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className="w-full flex items-center justify-center py-3.5 px-4 bg-[var(--card-solid)] border-2 border-[var(--color-border)] rounded-xl hover:border-[var(--color-muted)] hover:bg-[var(--color-surface-muted)] transition-all"
