@@ -133,10 +133,32 @@ export const createFolderSchema = z.object({
 export const createChapterSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Title must be less than 200 characters'),
   summary: z.string().max(2000, 'Summary must be less than 2000 characters').optional(),
+  parentChapter: objectIdSchema.nullable().optional(),
   order: z.number().int().min(0).optional(),
 });
 
 export const updateChapterSchema = createChapterSchema.partial();
+
+export const reorderCurriculumSchema = z.object({
+  chapters: z
+    .array(
+      z.object({
+        id: objectIdSchema,
+        order: z.number().int().min(0),
+        parentChapter: objectIdSchema.nullable().optional(),
+      })
+    )
+    .optional(),
+  lessons: z
+    .array(
+      z.object({
+        id: objectIdSchema,
+        order: z.number().int().min(0),
+        chapterId: objectIdSchema,
+      })
+    )
+    .optional(),
+});
 
 // Lesson validation schemas
 export const createLessonSchema = z.object({
@@ -155,7 +177,9 @@ export const createLessonSchema = z.object({
   order: z.number().int().min(0).optional(),
 });
 
-export const updateLessonSchema = createLessonSchema.partial();
+export const updateLessonSchema = createLessonSchema.partial().extend({
+  chapter: objectIdSchema.optional(),
+});
 
 // Contact form validation schema
 export const contactFormSchema = z.object({

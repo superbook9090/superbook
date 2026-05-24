@@ -4,8 +4,36 @@ import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import { Course, Chapter, Lesson } from '@/models';
 import { updateChapterSchema } from '@/lib/validation';
+import { authorizeCourseEditorByChapter } from '@/lib/curriculum/authorize';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
+
+async function validateParentChapterUpdate(
+  courseId: string,
+  chapterId: string,
+  parentChapterId: string | null | undefined
+): Promise<{ ok: true } | { ok: false; message: string }> {
+  if (parentChapterId === undefined) return { ok: true };
+  if (parentChapterId === chapterId) {
+    return { ok: false, message: 'A topic cannot be its own parent' };
+  }
+  if (!parentChapterId) return { ok: true };
+
+  const parent = await Chapter.findById(parentChapterId);
+  if (!parent || parent.course.toString() !== courseId) {
+    return { ok: false, message: 'Parent topic not found' };
+  }
+  if (parent.parentChapter) {
+    return { ok: false, message: 'Maximum nesting depth is 2 levels (topic → sub-topic)' };
+  }
+
+  const hasSubTopics = await Chapter.exists({ parentChapter: chapterId });
+  if (hasSubTopics) {
+    return { ok: false, message: 'Topics with sub-topics cannot be nested under another topic' };
+  }
+
+  return { ok: true };
+}
 
 // PATCH /api/chapters/[id] - Update chapter
 export async function PATCH(
@@ -15,27 +43,36 @@ export async function PATCH(
   const logContext: LogContext = { method: 'PATCH', path: '/api/chapters/[id]' };
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-
     await dbConnect();
     const { id } = await params;
+
+    const auth = await authorizeCourseEditorByChapter(session, id);
+    if (!auth.ok) {
+      return NextResponse.json({ message: auth.message }, { status: auth.status });
+    }
+
     const chapter = await Chapter.findById(id);
     if (!chapter) return NextResponse.json({ message: 'Chapter not found' }, { status: 404 });
 
-    const course = await Course.findById(chapter.course);
-    if (!course) {
-      return NextResponse.json({ message: 'Course not found' }, { status: 404 });
-    }
-
-    const isOwner = course.instructor.toString() === session.user.id;
-    const isStaff = ['admin', 'superadmin'].includes(session.user.role || '');
-    if (!isOwner && !isStaff) {
-      return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
-    }
-
     const body = await req.json();
     const validation = updateChapterSchema.safeParse(body);
-    if (!validation.success) return NextResponse.json({ message: 'Invalid input', errors: validation.error.issues }, { status: 400 });
+    if (!validation.success) {
+      return NextResponse.json(
+        { message: 'Invalid input', errors: validation.error.issues },
+        { status: 400 }
+      );
+    }
+
+    if (validation.data.parentChapter !== undefined) {
+      const parentCheck = await validateParentChapterUpdate(
+        chapter.course.toString(),
+        id,
+        validation.data.parentChapter ?? null
+      );
+      if (!parentCheck.ok) {
+        return NextResponse.json({ message: parentCheck.message }, { status: 400 });
+      }
+    }
 
     Object.assign(chapter, validation.data);
     await chapter.save();
@@ -47,7 +84,7 @@ export async function PATCH(
   }
 }
 
-// DELETE /api/chapters/[id] - Delete chapter and its lessons
+// DELETE /api/chapters/[id] - Delete chapter, sub-topics, and lessons
 export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -55,33 +92,35 @@ export async function DELETE(
   const logContext: LogContext = { method: 'DELETE', path: '/api/chapters/[id]' };
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-
     await dbConnect();
     const { id } = await params;
+
+    const auth = await authorizeCourseEditorByChapter(session, id);
+    if (!auth.ok) {
+      return NextResponse.json({ message: auth.message }, { status: auth.status });
+    }
+
     const chapter = await Chapter.findById(id);
     if (!chapter) return NextResponse.json({ message: 'Chapter not found' }, { status: 404 });
 
-    const course = await Course.findById(chapter.course);
-    if (!course) {
-      return NextResponse.json({ message: 'Course not found' }, { status: 404 });
-    }
+    const courseId = chapter.course;
+    const subChapters = await Chapter.find({ parentChapter: id }).select('_id');
+    const subChapterIds = subChapters.map((c) => c._id);
 
-    const isOwner = course.instructor.toString() === session.user.id;
-    const isStaff = ['admin', 'superadmin'].includes(session.user.role || '');
-    if (!isOwner && !isStaff) {
-      return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
-    }
+    const allChapterIds = [id, ...subChapterIds];
+    const lessonCount = await Lesson.countDocuments({ chapter: { $in: allChapterIds } });
 
-    const lessonCount = await Lesson.countDocuments({ chapter: id });
-    
-    // Delete all lessons in this chapter
-    await Lesson.deleteMany({ chapter: id });
+    await Lesson.deleteMany({ chapter: { $in: allChapterIds } });
+    if (subChapterIds.length) {
+      await Chapter.deleteMany({ _id: { $in: subChapterIds } });
+    }
     await Chapter.findByIdAndDelete(id);
 
-    // Update course counts
-    await Course.findByIdAndUpdate(course._id, {
-      $inc: { chapterCount: -1, lessonCount: -lessonCount }
+    await Course.findByIdAndUpdate(courseId, {
+      $inc: {
+        chapterCount: -(1 + subChapterIds.length),
+        lessonCount: -lessonCount,
+      },
     });
 
     return NextResponse.json({ message: 'Chapter deleted' });

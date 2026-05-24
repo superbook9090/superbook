@@ -80,6 +80,10 @@ export function deleteLesson(lessonId: string): Promise<unknown> {
   return apiJson(`/api/lessons/${encodeURIComponent(lessonId)}`, { method: 'DELETE' });
 }
 
+export function reorderCurriculum(courseId: string, body: unknown): Promise<unknown> {
+  return apiJson(`${BASE}/${encodeURIComponent(courseId)}/curriculum/reorder`, { method: 'POST', body });
+}
+
 export function getLesson(lessonId: string): Promise<unknown> {
   return apiJson(`/api/lessons/${encodeURIComponent(lessonId)}`, { method: 'GET' });
 }

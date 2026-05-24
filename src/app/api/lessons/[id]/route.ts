@@ -42,7 +42,11 @@ export async function PATCH(
     if (!lesson) return NextResponse.json({ message: 'Lesson not found' }, { status: 404 });
 
     const course = await Course.findById(lesson.course);
-    if (course.instructor.toString() !== session.user.id && session.user.role !== 'admin') {
+    if (!course) return NextResponse.json({ message: 'Course not found' }, { status: 404 });
+
+    const isOwner = course.instructor.toString() === session.user.id;
+    const isStaff = ['admin', 'superadmin'].includes(session.user.role || '');
+    if (!isOwner && !isStaff) {
       return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
     }
 
@@ -50,8 +54,32 @@ export async function PATCH(
     const validation = updateLessonSchema.safeParse(body);
     if (!validation.success) return NextResponse.json({ message: 'Invalid input', errors: validation.error.issues }, { status: 400 });
 
-    Object.assign(lesson, validation.data);
+    const previousChapterId = lesson.chapter.toString();
+    const nextChapterId = validation.data.chapter;
+
+    if (nextChapterId && nextChapterId !== previousChapterId) {
+      const targetChapter = await Chapter.findOne({ _id: nextChapterId, course: lesson.course });
+      if (!targetChapter) {
+        return NextResponse.json({ message: 'Target topic not found' }, { status: 400 });
+      }
+      lesson.chapter = targetChapter._id;
+    }
+
+    const { chapter: _, ...rest } = validation.data;
+    void _;
+    Object.assign(lesson, rest);
     await lesson.save();
+
+    if (nextChapterId && nextChapterId !== previousChapterId) {
+      const [prevCount, nextCount] = await Promise.all([
+        Lesson.countDocuments({ chapter: previousChapterId }),
+        Lesson.countDocuments({ chapter: nextChapterId }),
+      ]);
+      await Promise.all([
+        Chapter.findByIdAndUpdate(previousChapterId, { lessonCount: prevCount }),
+        Chapter.findByIdAndUpdate(nextChapterId, { lessonCount: nextCount }),
+      ]);
+    }
 
     return NextResponse.json(serialize(lesson));
   } catch (error) {
@@ -76,7 +104,11 @@ export async function DELETE(
     if (!lesson) return NextResponse.json({ message: 'Lesson not found' }, { status: 404 });
 
     const course = await Course.findById(lesson.course);
-    if (course.instructor.toString() !== session.user.id && session.user.role !== 'admin') {
+    if (!course) return NextResponse.json({ message: 'Course not found' }, { status: 404 });
+
+    const isOwner = course.instructor.toString() === session.user.id;
+    const isStaff = ['admin', 'superadmin'].includes(session.user.role || '');
+    if (!isOwner && !isStaff) {
       return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
     }
 

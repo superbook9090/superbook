@@ -28,6 +28,8 @@ import {
   Info,
 } from 'lucide-react';
 import CourseLeaderboard from '@/features/courses/components/CourseLeaderboard';
+import { flattenCurriculumLessons } from '@/lib/curriculum/tree';
+import type { Lesson } from '@/lib/react-query/hooks';
 
 type TabType = 'curriculum' | 'overview' | 'quizzes' | 'leaderboard';
 
@@ -44,6 +46,7 @@ export default function CourseDetailPage() {
   const { data: enrollments = [], isLoading: enrollmentsLoading } = useEnrollments();
   const { data: allQuizzes = [], isLoading: quizzesLoading } = useQuizzes('public');
   const { data: curriculum = [], isLoading: curriculumLoading } = useCourseCurriculum(courseId);
+  const allLessons = useMemo(() => flattenCurriculumLessons(curriculum), [curriculum]);
   const { data: attempts = [], isLoading: attemptsLoading } = useQuizAttempts();
   const startQuizMutation = useStartQuizAttempt();
 
@@ -86,6 +89,29 @@ export default function CourseDetailPage() {
   const handleStartLesson = (lessonId: string) => {
     router.push(`/dashboard/student/courses/${courseId}/lessons/${lessonId}`);
   };
+
+  const renderLessonRow = (lesson: Lesson) => (
+    <div
+      key={lesson._id}
+      onClick={() => handleStartLesson(lesson._id)}
+      className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors cursor-pointer group/lesson"
+    >
+      <div className="flex items-center gap-4">
+        <div
+          className={cn(
+            'w-8 h-8 rounded-lg flex items-center justify-center transition-all',
+            lesson.videoUrl ? 'bg-blue-50 text-blue-500' : 'bg-orange-50 text-orange-500'
+          )}
+        >
+          {lesson.videoUrl ? <PlayCircle className="w-4 h-4" /> : <BookOpen className="w-4 h-4" />}
+        </div>
+        <p className="text-sm font-medium text-[var(--color-foreground)] group-hover/lesson:text-[var(--student-primary)] transition-colors">
+          {lesson.title}
+        </p>
+      </div>
+      <ChevronRight className="w-4 h-4 text-[var(--color-muted-foreground)] group-hover/lesson:translate-x-1 transition-all" />
+    </div>
+  );
 
   const getQuizStatus = (quizId: string) => {
     const quizAttempts = attempts.filter(a => a.quiz._id === quizId);
@@ -147,7 +173,7 @@ export default function CourseDetailPage() {
               </h1>
               <div className="flex flex-wrap items-center gap-4 text-sm text-white/80">
                 <span className="px-2.5 py-0.5 bg-white/20 rounded-lg backdrop-blur-sm text-xs font-medium">{course.category || t('courses.course')}</span>
-                <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> {curriculum.reduce((acc, c) => acc + (c.lessons?.length || 0), 0)} {t('dashboard.lessons')}</span>
+                <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> {allLessons.length} {t('dashboard.lessons')}</span>
                 <span className="flex items-center gap-1.5"><Target className="w-4 h-4" /> {courseQuizzes.length} {t('nav.quizzes')}</span>
               </div>
             </div>
@@ -201,7 +227,7 @@ export default function CourseDetailPage() {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-bold text-[var(--color-foreground)]">{t('courses.courseContent')}</h2>
                 <button 
-                  onClick={() => curriculum[0]?.lessons?.[0] && handleStartLesson(curriculum[0].lessons[0]._id)}
+                  onClick={() => allLessons[0] && handleStartLesson(allLessons[0]._id)}
                   className="flex items-center gap-2 px-5 py-2 bg-[var(--student-primary)] text-white rounded-lg text-sm font-bold shadow-md hover:opacity-90 transition-opacity"
                 >
                   <Play className="w-3.5 h-3.5 fill-current" />
@@ -234,22 +260,27 @@ export default function CourseDetailPage() {
 
                       {expandedChapters[chapter._id] && (
                         <div className="border-t border-[var(--border)] divide-y divide-[var(--border)] bg-white rounded-b-xl overflow-hidden">
-                          {chapter.lessons?.map((lesson) => (
-                            <div 
-                              key={lesson._id}
-                              onClick={() => handleStartLesson(lesson._id)}
-                              className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors cursor-pointer group/lesson"
-                            >
-                              <div className="flex items-center gap-4">
-                                <div className={cn(
-                                  "w-8 h-8 rounded-lg flex items-center justify-center transition-all",
-                                  lesson.videoUrl ? "bg-blue-50 text-blue-500" : "bg-orange-50 text-orange-500"
-                                )}>
-                                  {lesson.videoUrl ? <PlayCircle className="w-4 h-4" /> : <BookOpen className="w-4 h-4" />}
+                          {chapter.lessons?.map(renderLessonRow)}
+                          {chapter.subChapters?.map((sub) => (
+                            <div key={sub._id} className="bg-gray-50/40">
+                              <button
+                                type="button"
+                                onClick={() => toggleChapter(sub._id)}
+                                className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-gray-50 transition-colors"
+                              >
+                                <p className="text-sm font-semibold text-[var(--color-foreground)] pl-12">{sub.title}</p>
+                                <ChevronDown
+                                  className={cn(
+                                    'w-4 h-4 transition-transform',
+                                    expandedChapters[sub._id] && 'rotate-180'
+                                  )}
+                                />
+                              </button>
+                              {expandedChapters[sub._id] && (
+                                <div className="divide-y divide-[var(--border)] border-t border-[var(--border)]">
+                                  {sub.lessons?.map(renderLessonRow)}
                                 </div>
-                                <p className="text-sm font-medium text-[var(--color-foreground)] group-hover/lesson:text-[var(--student-primary)] transition-colors">{lesson.title}</p>
-                              </div>
-                              <ChevronRight className="w-4 h-4 text-[var(--color-muted-foreground)] group-hover/lesson:translate-x-1 transition-all" />
+                              )}
                             </div>
                           ))}
                         </div>

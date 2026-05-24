@@ -17,6 +17,7 @@ import {
   addLesson,
   updateLesson,
   deleteLesson,
+  reorderCurriculum,
   getLesson
 } from '@/lib/api/courses';
 import { listQuizzesByOrg } from '@/lib/api/quizzes';
@@ -154,7 +155,9 @@ export interface Chapter {
   order: number;
   lessonCount: number;
   lessons?: Lesson[];
+  subChapters?: Chapter[];
   course: string;
+  parentChapter?: string | null;
 }
 
 // ============ QUERIES ============
@@ -569,6 +572,17 @@ export function useDeleteLesson() {
     mutationFn: (lessonId: string) => deleteLesson(lessonId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['courses'] });
+    },
+  });
+}
+
+export function useReorderCurriculum() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ courseId, data }: { courseId: string; data: unknown }) =>
+      reorderCurriculum(courseId, data),
+    onSuccess: (_, { courseId }) => {
+      queryClient.invalidateQueries({ queryKey: ['courses', courseId, 'curriculum'] });
     },
   });
 }

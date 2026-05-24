@@ -5,7 +5,8 @@ import { useRouter, useParams } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSessionStore } from '@/store/useSessionStore';
 import { PageSkeleton } from '@/components/ui/Skeleton';
-import { useLesson, useCourseCurriculum, type Chapter as ChapterType, type Lesson as LessonType } from '@/lib/react-query/hooks';
+import { flattenCurriculumLessons } from '@/lib/curriculum/tree';
+import { useLesson, useCourseCurriculum } from '@/lib/react-query/hooks';
 import { ChevronLeft, ChevronRight, BookOpen, PlayCircle, Clock, Layout, ArrowLeft } from 'lucide-react';
 import SecurePlayer from '@/components/video/SecurePlayer';
 
@@ -24,17 +25,13 @@ export default function LessonViewerPage() {
   // Find current position in curriculum
   const navigation = (() => {
     if (!curriculum.length || !lesson) return { prev: null, next: null };
-    
-    const allLessons: { id: string; title: string }[] = [];
-    curriculum.forEach((chapter: ChapterType) => {
-      if (chapter.lessons) {
-        chapter.lessons.forEach((l: LessonType) => {
-          allLessons.push({ id: l._id, title: l.title });
-        });
-      }
-    });
 
-    const currentIndex = allLessons.findIndex(l => l.id === lessonId);
+    const allLessons = flattenCurriculumLessons(curriculum).map((l) => ({
+      id: l._id,
+      title: l.title,
+    }));
+
+    const currentIndex = allLessons.findIndex((l) => l.id === lessonId);
     return {
       prev: currentIndex > 0 ? allLessons[currentIndex - 1] : null,
       next: currentIndex < allLessons.length - 1 ? allLessons[currentIndex + 1] : null,
