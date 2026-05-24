@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import User from '@/models/User';
+import bcrypt from 'bcryptjs';
 import { changePasswordSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { changePasswordLimiter, getRequestIp, rateLimitExceededMessage } from '@/lib/rateLimiter';
@@ -61,8 +62,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'Current password is incorrect' }, { status: 400 });
     }
 
-    user.password = newPassword;
-    await user.save();
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    await User.updateOne({ _id: user._id }, { $set: { password: hashedPassword } });
 
     return NextResponse.json({ message: 'Password updated successfully.' });
   } catch (error) {

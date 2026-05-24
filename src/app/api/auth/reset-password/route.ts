@@ -4,6 +4,7 @@ import User from '@/models/User';
 import PasswordResetToken from '@/models/PasswordResetToken';
 import { resetPasswordSchema } from '@/lib/validation';
 import { hashResetToken } from '@/lib/passwordReset';
+import bcrypt from 'bcryptjs';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { getRequestIp, rateLimitExceededMessage, resetPasswordIpLimiter } from '@/lib/rateLimiter';
 
@@ -51,11 +52,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    user.password = password;
-    if (!user.provider) {
-      user.provider = 'credentials';
-    }
-    await user.save();
+    const hashedPassword = await bcrypt.hash(password, 12);
+    await User.updateOne(
+      { _id: user._id },
+      { 
+        $set: { 
+          password: hashedPassword,
+          ...( !user.provider && { provider: 'credentials' } )
+        } 
+      }
+    );
     await PasswordResetToken.deleteMany({ userId: user._id });
 
     return NextResponse.json({ message: 'Password updated successfully. You can sign in now.' });
