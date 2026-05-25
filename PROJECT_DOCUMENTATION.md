@@ -2,7 +2,7 @@
 
 ## 1. Project Overview
 
-quiz-do is a modern Learning Management System (LMS) built with Next.js 15, featuring role-based access control, course management, quizzes, blogs, analytics, and comprehensive admin controls. The platform supports both English and Hindi languages with instant switching capabilities.
+quiz-do is a modern Learning Management System (LMS) built with Next.js 15, featuring role-based access control, course management (including optional private courses via teacher-generated codes), quizzes, blogs, analytics, push notifications, and comprehensive admin controls. The platform supports both English and Hindi languages with instant switching capabilities.
 
 ## 2. Tech Stack
 
@@ -104,6 +104,7 @@ Global stores used to cache frequently accessed data and prevent redundant API c
 - Caches user session data
 - Prevents repeated `/api/auth/session` calls
 - Persists session state across components
+- Fetches blog favorites (`/api/favorites?idsOnly=true`) **only for students** — teachers/admins do not use favorites
 
 **useCachedStore:**
 - Caches enrollments by userId
@@ -272,13 +273,15 @@ src/
 │       ├── courses/         # Course management
 │       ├── quizzes/         # Quiz management
 │       ├── blogs/           # Blog management
-│       ├── enrollments/     # Enrollment tracking
+│       ├── enrollments/     # Enrollment tracking (+ join-by-code)
+│       ├── notifications/   # Push + in-app notification APIs
 │       ├── quiz-attempts/   # Quiz results
 │       ├── favorites/       # Blog favorites
 │       ├── organizations/   # Organization management
 │       └── analytics/       # Analytics data
 ├── components/
 │   ├── layout/              # PageWrapper, PageHeader, ResponsiveGrid, DashboardContent
+│   ├── providers/           # SessionProvider, PushNotificationManager
 │   └── ui/                  # Reusable UI components
 ├── constants/
 │   ├── navigation.ts        # STUDENT_NAV, TEACHER_NAV, ADMIN_NAV
@@ -297,8 +300,12 @@ src/
 │   ├── roles.ts             # Role helpers + dashboard home routing
 │   ├── logger.ts            # Logging utilities with request tracing
 │   ├── accessControl.ts     # Authorization helpers
+│   ├── courseAccess.ts      # Private course codes, browse filters, response sanitization
+│   ├── enrollmentService.ts # Shared enroll / join-by-code logic
 │   ├── apiMiddleware.ts     # API middleware for rate limiting
 │   ├── serialize.ts         # MongoDB serialization
+│   ├── mobile/              # WebView bridge, deep links, mobile detection
+│   ├── notifications/       # FCM client + admin push helpers
 │   └── files/               # File management utilities
 ├── models/                  # Mongoose schemas
 │   ├── User.ts
@@ -387,6 +394,36 @@ t('common.english') // "English" or "अंग्रेज़ी"
 
 ## 12. Recent Updates
 
+### Private course access via course codes (2026)
+
+Teachers can optionally restrict a course with a unique **course code**. Courses without a code remain **public** (unchanged behavior).
+
+**Rules:**
+- **Public course** (`courseCode` null/empty): visible in student browse; one-click enroll
+- **Private course** (non-empty `courseCode`): hidden from browse; students join via code; access retained after enrollment
+- Course codes are **4–12** alphanumeric characters (hyphens allowed); stored uppercase; sparse unique index on `courses.courseCode`
+- Private courses must be **published** before students can join by code
+- Course codes are stripped from API responses for unauthorized clients; owners/admins see `courseCode` + `isPrivate` flag
+
+**Teacher UI:** `CreateCourseForm` — “Private course access” toggle, generate/copy code (`/dashboard/teacher/courses/create`, edit flow)
+
+**Student UI:** `JoinCourseByCode` on browse page (`/dashboard/student/browse`)
+
+**API routes:**
+
+| Route | Method | Auth | Purpose |
+|-------|--------|------|---------|
+| `/api/enrollments/join-by-code` | POST | Student | Enroll by course code only |
+| `/api/enrollments` | POST | Student | Enroll by `courseId`; requires `courseCode` for private courses |
+| `/api/courses` | GET | Session | `?available=true` excludes private courses from browse |
+| `/api/courses` | POST/PATCH | Teacher/Admin | Set or clear `courseCode` |
+
+**Shared logic:** `src/lib/enrollmentService.ts` (`enrollStudentInCourse`, `enrollStudentByCourseCode`), `src/lib/courseAccess.ts` (`isPrivateCourse`, `publicCourseFilter`, `validateCourseCodeMatch`, `sanitizeCourseResponse`)
+
+**Rate limiting:** `courseCodeAttemptLimiter` — 10 attempts per 15 minutes per user+IP (`src/lib/rateLimiter.ts`)
+
+**i18n:** `courses.joinWithCode`, `courses.invalidCourseCode`, `createCourseForm.privateAccess`, etc. (en + hi)
+
 ### Layout, routing & notifications (2025)
 
 - **Mobile-first spacing system**: CSS tokens in `globals.css`, layout components in `src/components/layout/`, reference in `src/constants/spacing.ts`
@@ -446,7 +483,7 @@ t('common.english') // "English" or "अंग्रेज़ी"
 - **Sidebars**: StudentSidebar, TeacherSidebar, AdminSidebar with role-specific navigation
 
 ### Feature Components
-- **Course Management**: CourseCard, CourseList, CourseForm with CRUD operations
+- **Course Management**: CourseCard, CourseList, CreateCourseForm (private access + course code), JoinCourseByCode, CourseLeaderboard
 - **Quiz System**: QuizCard, QuizList, QuizTaker with timer and scoring
 - **Blog System**: BlogCard, BlogList, BlogEditor with rich text support
 - **Analytics**: Charts, stats cards, user metrics visualization
@@ -515,7 +552,8 @@ Centralized layout primitives live in `src/components/layout/`:
 - **Client-IP Rate Limiting**: Employs an automated rate limiter enforcing a strict maximum of **3 submissions per minute** per client IP, blocking spam and denial-of-service attempts.
 
 ### Data Protection
-- **Input Validation**: Comprehensive validation on all user inputs
+- **Input Validation**: Comprehensive validation on all user inputs (Zod schemas in `src/lib/validation.ts`)
+- **Course code brute-force protection**: `courseCodeAttemptLimiter` (10 attempts / 15 min per user+IP)
 - **SQL Injection Prevention**: MongoDB query sanitization
 - **XSS Protection**: Content sanitization and CSP headers
 - **CSRF Protection**: Token-based request validation
@@ -682,9 +720,69 @@ Initialize lazily via `getAdminMessaging()` in `src/lib/notifications/push/fireb
 
 `src/lib/notifications/push/notificationPayload.ts` — bilingual `title`/`body` + category for lessons, quizzes, announcements.
 
+`src/lib/notifications/push/notificationPayload.ts` — bilingual `title`/`body` + category for lessons, quizzes, announcements.
+
 ---
 
-## 21. Future Improvements
+## 21. Private Course Access (Course Codes)
+
+### Overview
+
+Optional teacher-controlled access restriction. A course is **private** when it has a non-empty `courseCode` field on the `Course` document. Existing courses without a code continue to work as public courses.
+
+### Access model
+
+```
+Public course (no courseCode)
+  → Listed in GET /api/courses?available=true
+  → Student enrolls via POST /api/enrollments { courseId }
+
+Private course (courseCode set)
+  → Hidden from browse list and direct GET for non-enrolled students
+  → Student joins via POST /api/enrollments/join-by-code { courseCode }
+     or POST /api/enrollments { courseId, courseCode }
+  → After enrollment, full course access (same as public)
+```
+
+### Teacher workflow
+
+1. Create or edit a course in `CreateCourseForm`
+2. Enable **Private course access**
+3. Generate or set a unique code (auto-generated 8-char code available)
+4. **Publish** the course — unpublished private courses cannot be joined
+5. Share the code with students (code is only returned to course owner/admin in API responses)
+
+Disabling private access sends `courseCode: null` on save, making the course public again.
+
+### Student workflow
+
+1. Open **Browse courses** (`/dashboard/student/browse`)
+2. Use **Join with course code** form (`JoinCourseByCode`)
+3. On success, redirect to **My courses**
+
+Invalid code → `404`/`403` with `{ message: "Invalid course code" }`. Rate limited after repeated failures.
+
+### Implementation notes
+
+- **Org access:** Enrollment still checks organization access via `validateContentAccess` unless the student is in the same org / public course rules apply
+- **Enrollment upsert:** `enrollStudentInCourse` uses `findOneAndUpdate` with `$setOnInsert` for new fields and `$set: { status: 'active' }` for reactivation (dropped → active). Do not put the same field in both `$set` and `$setOnInsert` (MongoDB conflict)
+- **Mongoose dev cache:** `Course` model re-registers if a hot-reloaded schema lacks `courseCode` (`src/models/Course.ts`)
+- **Validation:** `courseCodeSchema` in `src/lib/validation.ts`; `joinCourseByCodeSchema` for join endpoint
+
+### Key files
+
+| Path | Role |
+|------|------|
+| `src/models/Course.ts` | `courseCode` field + sparse unique index |
+| `src/lib/courseAccess.ts` | Private detection, browse filter, code match, API sanitization |
+| `src/lib/enrollmentService.ts` | Central enrollment + join-by-code |
+| `src/app/api/enrollments/join-by-code/route.ts` | Join-by-code endpoint |
+| `src/features/courses/components/CreateCourseForm.tsx` | Teacher private toggle + code UI |
+| `src/features/courses/components/JoinCourseByCode.tsx` | Student join form |
+
+---
+
+## 22. Future Improvements
 
 ### Performance
 - Add advanced request deduplication (TanStack Query)
@@ -698,6 +796,7 @@ Initialize lazily via `getAdminMessaging()` in `src/lib/notifications/push/fireb
 - Video lessons support
 - Course completion certificates
 - Real-time in-app notifications (WebSocket) — push via FCM and in-app inbox via `UserNotification` are implemented (see §20)
+- **Private courses via course codes** — implemented (see §21)
 - Payment gateway integration (Stripe)
 - Advanced analytics with charts (Recharts)
 - Bulk user import (Excel)
@@ -716,7 +815,7 @@ Initialize lazily via `getAdminMessaging()` in `src/lib/notifications/push/fireb
 - Add comprehensive request logging with logger utility
 - Add file upload security and validation
 
-## 22. Database Schemas
+## 23. Database Schemas
 
 ### User Schema
 
@@ -797,19 +896,28 @@ interface ICourse {
   price: number;                   // Course price (0 = free)
   thumbnail?: string;              // Course thumbnail URL
   category?: string;               // Course category
+  locale: 'en' | 'hi';            // UI locale for course content
   isPublished: boolean;            // Publication status
-  lessons: ObjectId[];             // Array of Lesson references
-  enrolledCount?: number;          // Cached enrollment count
+  chapterCount: number;            // Denormalized chapter count
+  lessonCount: number;             // Denormalized lesson count
+  enrolledCount: number;           // Denormalized enrollment count
+  courseCode?: string | null;      // When set, course is private (join-by-code required)
+  lastPublishedLesson?: ObjectId | null; // For continue-learning tiles
   createdAt: Date;
   updatedAt: Date;
 }
 ```
 
+**Curriculum:** Lessons live in separate `chapters` / `lessons` collections (not embedded on the course document).
+
 **Indexes**:
 - `instructor: 1`
-- `isPublished: 1`
+- `organizationId: 1, isPublished: 1, lessonCount: -1`
+- `organizationId: 1, isPublished: 1, createdAt: -1`
+- `instructor: 1, organizationId: 1`
+- `isPublished: 1, category: 1`
 - `createdAt: -1`
-- `category: 1`
+- `courseCode: 1` (unique, sparse — private courses only)
 
 ---
 
@@ -929,7 +1037,7 @@ interface IEnrollment {
   course: ObjectId;               // Reference to Course
   enrolledAt: Date;               // Enrollment date
   progress: number;               // Progress percentage (0-100)
-  completedLessons: ObjectId[];    // Array of completed Lesson references
+  lessonCompletedCount: number;   // Denormalized count from LessonCompletion
   status: 'active' | 'completed' | 'dropped';
   completedAt?: Date;             // Course completion date
   createdAt: Date;
@@ -1062,7 +1170,7 @@ interface IAppSettings {
 
 ---
 
-## 23. Future Roadmap
+## 24. Future Roadmap
 
 ### Short Term (1-3 months)
 - **Real-time Features**: WebSocket integration for live updates
