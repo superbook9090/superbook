@@ -8,6 +8,8 @@ import Quiz from '@/models/Quiz';
 import QuizQuestion from '@/models/QuizQuestion';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
+import { buildQuizComparison } from '@/lib/quiz/quizComparison';
+import { safeNumber, DEFAULT_TIME_LIMIT_MINUTES } from '@/lib/quiz/resultDefaults';
 import type { Types } from 'mongoose';
 
 export async function GET(
@@ -61,6 +63,27 @@ export async function GET(
       return NextResponse.json({ message: 'Quiz not found' }, { status: 404 });
     }
 
+    const peerAttempts = await QuizAttempt.find({
+      quiz: quizId,
+      status: { $in: ['completed', 'force_submitted'] },
+      attemptNumber: 1,
+    })
+      .select('score correctCount totalQuestions timeTaken answers')
+      .lean();
+
+    const comparison = buildQuizComparison(
+      {
+        score: safeNumber(att.score),
+        correctCount: safeNumber(att.correctCount),
+        totalQuestions: safeNumber(att.totalQuestions, qDocs.length),
+        timeTaken: safeNumber(att.timeTaken),
+        answers: (att.answers ?? []) as StoredAnswer[],
+      },
+      peerAttempts as unknown as StoredAttempt[],
+      qDocs as { _id: Types.ObjectId; points?: number }[],
+      safeNumber(quizMeta.timeLimit, DEFAULT_TIME_LIMIT_MINUTES)
+    );
+
     const questions = qDocs.map((q) => {
       const row = q as unknown as {
         _id: Types.ObjectId;
@@ -90,21 +113,22 @@ export async function GET(
     const reviewData = {
       attempt: {
         _id: att._id,
-        score: att.score,
-        correctCount: att.correctCount,
-        totalQuestions: att.totalQuestions,
-        timeTaken: att.timeTaken,
-        attemptNumber: att.attemptNumber,
-        submittedAt: att.submittedAt,
+        score: safeNumber(att.score),
+        correctCount: safeNumber(att.correctCount),
+        totalQuestions: safeNumber(att.totalQuestions, questions.length),
+        timeTaken: safeNumber(att.timeTaken),
+        attemptNumber: Math.max(1, safeNumber(att.attemptNumber, 1)),
+        submittedAt: att.submittedAt ?? null,
       },
       quiz: {
         _id: quizMeta._id,
-        title: quizMeta.title,
-        description: quizMeta.description,
-        timeLimit: quizMeta.timeLimit,
+        title: quizMeta.title ?? '',
+        description: quizMeta.description ?? '',
+        timeLimit: safeNumber(quizMeta.timeLimit, DEFAULT_TIME_LIMIT_MINUTES),
         questions,
       },
       answers,
+      comparison,
     };
 
     return NextResponse.json(serialize(reviewData), { status: 200 });
@@ -113,3 +137,17 @@ export async function GET(
     return NextResponse.json({ message: 'Something went wrong. Please try again later.' }, { status: 500 });
   }
 }
+
+type StoredAnswer = {
+  question: Types.ObjectId;
+  selectedOption: number;
+  isCorrect: boolean;
+};
+
+type StoredAttempt = {
+  score: number;
+  correctCount: number;
+  totalQuestions: number;
+  timeTaken: number;
+  answers: StoredAnswer[];
+};

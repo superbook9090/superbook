@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { formatDateTime, formatDuration } from '@/lib/dateUtils';
+import { cn } from '@/lib/utils';
 import {
   HelpCircle,
   Clock,
@@ -17,6 +18,10 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Loader } from '@/components/ui/Loader';
+import {
+  QuizStartConfirmModal,
+  type QuizStartInfo,
+} from '@/features/quizzes/components/QuizStartConfirmModal';
 
 interface Quiz {
   _id: string;
@@ -44,21 +49,43 @@ interface Attempt {
 interface QuizCardProps {
   quiz: Quiz;
   attempt?: Attempt;
-  type: 'available' | 'attempted';
+  type: 'available' | 'attempted' | 'in_progress';
   onStart?: (quizId: string) => Promise<void>;
+  onContinue?: (attemptId: string) => void;
+  hideCourseBadge?: boolean;
+  className?: string;
 }
 
-function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps) {
+function QuizCard({
+  quiz,
+  attempt,
+  type,
+  onStart,
+  onContinue,
+  hideCourseBadge = false,
+  className,
+}: QuizCardProps) {
   const router = useRouter();
   const { t } = useTranslation();
   const { theme } = useRoleTheme();
   const [isLoading, setIsLoading] = useState(false);
+  const [confirmQuiz, setConfirmQuiz] = useState<QuizStartInfo | null>(null);
 
-  const handleStart = async () => {
-    if (!onStart) return;
+  const openStartConfirm = (mode: 'start' | 'retake') => {
+    setConfirmQuiz({
+      title: quiz.title,
+      questionCount: quiz.questionCount,
+      timeLimit: quiz.timeLimit,
+      mode,
+    });
+  };
+
+  const handleConfirmStart = async () => {
+    if (!onStart || !confirmQuiz) return;
     setIsLoading(true);
     try {
       await onStart(quiz._id);
+      setConfirmQuiz(null);
     } finally {
       setIsLoading(false);
     }
@@ -74,16 +101,13 @@ function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps) {
     router.push(`/dashboard/student/quizzes/${quiz._id}`);
   };
 
-  const handleRetake = async () => {
-    if (!onStart) return;
-    setIsLoading(true);
-    try {
-      await onStart(quiz._id);
-    } finally {
-      setIsLoading(false);
+  const handleRetake = () => openStartConfirm('retake');
+
+  const handleContinue = () => {
+    if (attempt && onContinue) {
+      onContinue(attempt._id);
     }
   };
-
 
   const getScoreVariant = (score: number) => {
     if (score >= 70) return 'success';
@@ -91,123 +115,200 @@ function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps) {
     return 'error';
   };
 
+  const isCompact = type === 'available';
+
   return (
     <motion.div
       whileHover={{ y: -4 }}
       transition={{ duration: 0.3 }}
-      className="group relative bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden"
+      className={cn(
+        'group relative flex flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--card-solid)] shadow-md transition-all duration-300 hover:shadow-xl',
+        isCompact ? 'h-auto' : 'h-full min-h-[420px]',
+        className
+      )}
     >
-      {/* Header Gradient */}
-      <div className={`relative h-32 bg-gradient-to-br ${theme.gradient}`}>
+      <div className={cn('relative h-28 shrink-0 bg-gradient-to-br sm:h-32', theme.gradient)}>
         <div className="absolute inset-0 bg-black/10" />
-        <div className="absolute bottom-4 left-6 right-6">
-          <Badge variant="success" size="sm" icon={<BookOpen className="w-3 h-3" />}>
-            {quiz.course?.title || t('quiz.course')}
-          </Badge>
-        </div>
-        <div className="absolute top-4 right-4">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full text-sm font-medium text-gray-700">
-            <HelpCircle className="w-4 h-4" />
-            {quiz.questionCount ?? 0} {t('quiz.questions')}
+        {!hideCourseBadge && (
+          <div className="absolute bottom-3 left-4 right-16 sm:bottom-4 sm:left-6 sm:right-20">
+            <Badge
+              variant="success"
+              size="sm"
+              icon={<BookOpen className="w-3 h-3 shrink-0" />}
+              className="max-w-full truncate"
+            >
+              <span className="truncate">{quiz.course?.title || t('quiz.course')}</span>
+            </Badge>
+          </div>
+        )}
+        <div className="absolute top-3 right-3 sm:top-4 sm:right-4">
+          <div className="flex max-w-[calc(100%-1.5rem)] items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-xs font-medium text-gray-700 backdrop-blur-sm sm:gap-1.5 sm:px-3 sm:py-1.5 sm:text-sm">
+            <HelpCircle className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
+            <span className="truncate">
+              {quiz.questionCount ?? 0} {t('quiz.questions')}
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="p-6">
-        <h3 className={`text-lg font-bold text-gray-900 mb-2 group-hover:${theme.text} transition-colors`}>
+      <div className={cn('flex flex-col p-4 sm:p-6', !isCompact && 'flex-1')}>
+        <h3
+          className={cn(
+            'mb-2 line-clamp-2 text-base font-bold text-[var(--color-foreground)] transition-colors sm:text-lg',
+            !isCompact && 'min-h-[2.75rem] sm:min-h-[3.25rem]',
+            `group-hover:${theme.text}`
+          )}
+        >
           {quiz.title}
         </h3>
-        <p className="text-sm text-gray-500 mb-4 line-clamp-2">
+        <p
+          className={cn(
+            'mb-3 line-clamp-2 text-sm text-[var(--color-muted-foreground)] sm:mb-4',
+            !isCompact && 'min-h-[2.5rem]'
+          )}
+        >
           {quiz.description || t('quiz.noDescription')}
         </p>
 
-        {/* Time Limit */}
-        <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
-          <Clock className="w-4 h-4" />
-          <span>{t('quiz.timeLimit')}: <span className="font-medium text-gray-700">{quiz.timeLimit} {t('quiz.min')}</span></span>
+        <div className="mb-4 flex items-center gap-2 text-sm text-[var(--color-muted-foreground)]">
+          <Clock className="h-4 w-4 shrink-0" />
+          <span className="truncate">
+            {t('quiz.timeLimit')}:{' '}
+            <span className="font-medium text-[var(--color-foreground)]">
+              {quiz.timeLimit} {t('quiz.min')}
+            </span>
+          </span>
         </div>
 
-        {/* Attempt Results */}
-        {attempt && (
-          <div className="mb-4 p-4 bg-gray-50 rounded-xl">
-            <div className="flex items-center justify-between mb-3">
-              <Badge variant={getScoreVariant(attempt.score)} size="sm">
-                {attempt.score}% {t('quiz.quizScore')}
+        {!isCompact && (
+          <div className="mb-4 min-h-[7.5rem]">
+            {type === 'attempted' && attempt && (
+              <div className="rounded-xl bg-[var(--color-surface-muted)]/60 p-3 sm:p-4">
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <Badge variant={getScoreVariant(attempt.score)} size="sm">
+                  {attempt.score}% {t('quiz.quizScore')}
+                </Badge>
+                <span className="shrink-0 text-xs text-[var(--color-muted-foreground)]">
+                  {t('quiz.attempt')}
+                  {attempt.attemptNumber}
+                </span>
+              </div>
+              <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2 sm:gap-4">
+                <div className="flex min-w-0 items-center gap-2">
+                  <CheckCircle className="h-4 w-4 shrink-0 text-emerald-500" />
+                  <span className="truncate text-[var(--color-muted-foreground)]">
+                    {attempt.correctCount}/{attempt.totalQuestions} {t('quiz.correct')}
+                  </span>
+                </div>
+                <div className="flex min-w-0 items-center gap-2">
+                  <Clock className="h-4 w-4 shrink-0 text-blue-500" />
+                  <span className="truncate text-[var(--color-muted-foreground)]">
+                    {formatDuration(attempt.timeTaken)}
+                  </span>
+                </div>
+              </div>
+              {attempt.submittedAt && (
+                <p className="mt-2 truncate text-xs text-[var(--color-muted-foreground)]">
+                  {t('quiz.completed')} {formatDateTime(attempt.submittedAt)}
+                </p>
+              )}
+            </div>
+          )}
+
+          {type === 'in_progress' && attempt && (
+            <div className="rounded-xl border border-amber-200/80 bg-amber-50/80 p-3 sm:p-4">
+              <Badge variant="warning" size="sm">
+                {t('courses.inProgress')}
               </Badge>
-              <span className="text-xs text-gray-400">{t('quiz.attempt')}{attempt.attemptNumber}</span>
-            </div>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-emerald-500" />
-                <span className="text-gray-600">{attempt.correctCount}/{attempt.totalQuestions} {t('quiz.correct')}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-blue-500" />
-                <span className="text-gray-600">{formatDuration(attempt.timeTaken)}</span>
-              </div>
-            </div>
-            {attempt.submittedAt && (
-              <p className="text-xs text-gray-400 mt-2">
-                {t('quiz.completed')} {formatDateTime(attempt.submittedAt)}
+              <p className="mt-2 truncate text-xs text-[var(--color-muted-foreground)] sm:text-sm">
+                {t('quiz.started')} {formatDateTime(attempt.startedAt)}
               </p>
-            )}
-          </div>
+            </div>
+          )}
+        </div>
         )}
 
-        {/* Actions */}
-        <div className="flex flex-col gap-2">
+        <div
+          className={cn(
+            'flex flex-col gap-2',
+            isCompact ? '' : 'mt-auto min-h-[7.25rem] justify-end'
+          )}
+        >
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleViewLeaderboard}
-            className="w-full flex items-center justify-center gap-2 bg-[var(--color-surface-muted)] text-[var(--color-foreground)] py-2.5 px-4 rounded-xl font-medium hover:bg-[var(--color-surface-muted)]/80 transition-all"
+            className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-surface-muted)] px-4 py-2.5 text-sm font-medium text-[var(--color-foreground)] transition-all hover:bg-[var(--color-surface-muted)]/80 sm:text-base"
           >
-            <Trophy className="w-4 h-4" />
-            {t('quiz.viewLeaderboard')}
+            <Trophy className="h-4 w-4 shrink-0" />
+            <span className="truncate">{t('quiz.viewLeaderboard')}</span>
           </motion.button>
 
           {type === 'available' ? (
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={handleStart}
+              onClick={() => openStartConfirm('start')}
               disabled={isLoading}
-              className={`flex-1 flex items-center justify-center gap-2 bg-gradient-to-r ${theme.gradient} text-white py-3 px-4 rounded-xl font-semibold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
+              className={cn(
+                'flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r px-4 py-3 text-sm font-semibold text-white transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:text-base',
+                theme.gradient
+              )}
             >
               {isLoading ? (
                 <Loader size="sm" />
               ) : (
                 <>
-                  <Play className="w-4 h-4" />
-                  {t('quiz.startQuiz')}
+                  <Play className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{t('quiz.startQuiz')}</span>
                 </>
               )}
             </motion.button>
+          ) : type === 'in_progress' ? (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleContinue}
+              className={cn(
+                'flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r px-4 py-3 text-sm font-semibold text-white transition-all hover:opacity-90 sm:text-base',
+                theme.gradient
+              )}
+            >
+              <Play className="h-4 w-4 shrink-0" />
+              <span className="truncate">{t('courses.continue')}</span>
+            </motion.button>
           ) : (
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row">
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleReview}
-                className={`flex-1 flex items-center justify-center gap-2 bg-gradient-to-r ${theme.gradient} text-white py-3 px-4 rounded-xl font-semibold hover:opacity-90 transition-all`}
+                className={cn(
+                  'flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r px-4 py-3 text-sm font-semibold text-white transition-all hover:opacity-90 sm:text-base',
+                  theme.gradient
+                )}
               >
-                <CheckCircle className="w-4 h-4" />
-                {t('quiz.review')}
+                <CheckCircle className="h-4 w-4 shrink-0" />
+                <span className="truncate">{t('quiz.review')}</span>
               </motion.button>
               <motion.button
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleRetake}
                 disabled={isLoading}
-                className={`flex items-center justify-center gap-2 px-4 py-3 border-2 ${theme.border} ${theme.text} rounded-xl font-semibold ${theme.activeBg} hover:opacity-80 transition-all disabled:opacity-50`}
+                className={cn(
+                  'flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl border-2 px-4 py-3 text-sm font-semibold transition-all hover:opacity-80 disabled:opacity-50 sm:flex-none sm:text-base',
+                  theme.border,
+                  theme.text,
+                  theme.activeBg
+                )}
               >
                 {isLoading ? (
                   <Loader size="sm" />
                 ) : (
                   <>
-                    <RotateCcw className="w-4 h-4" />
-                    {t('quiz.retake')}
+                    <RotateCcw className="h-4 w-4 shrink-0" />
+                    <span className="truncate">{t('quiz.retake')}</span>
                   </>
                 )}
               </motion.button>
@@ -215,6 +316,14 @@ function QuizCard({ quiz, attempt, type, onStart }: QuizCardProps) {
           )}
         </div>
       </div>
+
+      <QuizStartConfirmModal
+        quiz={confirmQuiz}
+        isOpen={!!confirmQuiz}
+        isLoading={isLoading}
+        onConfirm={handleConfirmStart}
+        onCancel={() => setConfirmQuiz(null)}
+      />
     </motion.div>
   );
 }

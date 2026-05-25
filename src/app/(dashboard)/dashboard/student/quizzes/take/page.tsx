@@ -13,6 +13,7 @@ import { useQuizSecurity } from '@/hooks/useQuizSecurity';
 import Alert from '@/components/ui/Alert';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import { useSessionStore } from '@/store/useSessionStore';
+import { QuizQuestionProgress } from '@/features/quizzes/components/QuizQuestionProgress';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 
 interface Question {
@@ -394,11 +395,11 @@ export default function TakeQuizPage() {
   const questions = attempt.questions || [];
   const currentQ = questions[currentQuestion];
   const currentQid = currentQ?._id;
-  const progress = questions.length > 0 ? ((currentQuestion + 1) / questions.length) * 100 : 0;
-  const answeredCount = questions.filter((q) => answers[q._id] !== undefined).length;
+  const questionIds = questions.map((q) => q._id);
+  const answeredIds = new Set(questionIds.filter((id) => answers[id] !== undefined));
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto pb-24 sm:pb-8">
       {/* Security Warning */}
       {securityWarning && (
         <div className="bg-[var(--error-light)] border-l-4 border-[var(--error)] p-4 mb-6 rounded-r-lg">
@@ -417,40 +418,46 @@ export default function TakeQuizPage() {
 
 
       {/* Header */}
-      <div className="bg-[var(--card-solid)] rounded-lg shadow-md p-6 mb-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">{attempt.quiz.title}</h1>
-            <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">
-              {t('quiz.question')} {currentQuestion + 1} {t('quiz.of')} {questions.length}
-            </p>
+      <div className="bg-[var(--card-solid)] rounded-2xl border border-[var(--color-border)] shadow-sm p-4 sm:p-6 mb-4 sm:mb-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
+          <div className="min-w-0">
+            <h1 className="text-base sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)] line-clamp-2">
+              {attempt.quiz.title}
+            </h1>
           </div>
-          <div className={`text-right ${timeRemaining < 60 ? 'text-[var(--error)]' : 'text-[var(--color-foreground)]'}`}>
-            <p className="text-sm text-[var(--color-muted-foreground)]">{t('quiz.timeRemaining')}</p>
-            <p className="text-2xl font-bold font-mono">{formatTime(timeRemaining)}</p>
+          <div
+            className={`shrink-0 rounded-xl border px-4 py-2 text-right ${
+              timeRemaining < 60
+                ? 'border-[var(--error)]/30 bg-[var(--error-light)] text-[var(--error)]'
+                : 'border-[var(--color-border)] bg-[var(--color-surface-muted)]/50 text-[var(--color-foreground)]'
+            }`}
+          >
+            <p className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--color-muted-foreground)]">
+              {t('quiz.timeRemaining')}
+            </p>
+            <p className="text-xl sm:text-2xl font-bold font-mono tabular-nums">{formatTime(timeRemaining)}</p>
           </div>
         </div>
 
-        {/* Progress bar */}
-        <div className="mt-4">
-          <div className="w-full bg-[var(--color-surface-muted)] rounded-full h-2">
-            <div
-              className={`bg-gradient-to-r ${theme.gradient} h-2 rounded-full transition-all`}
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-          <div className="flex justify-between text-sm text-[var(--color-muted-foreground)] mt-1">
-            <span>{answeredCount} {t('quiz.answered')}</span>
-            <span>{questions.length - answeredCount} {t('quiz.remaining')}</span>
-          </div>
-        </div>
+        <QuizQuestionProgress
+          total={questions.length}
+          currentIndex={currentQuestion}
+          answeredIds={answeredIds}
+          questionIds={questionIds}
+          onSelect={setCurrentQuestion}
+        />
       </div>
 
       {/* Question */}
-      <div className="bg-[var(--card-solid)] rounded-lg shadow-md p-6 mb-6">
-        <h3 className="text-lg font-medium text-[var(--color-foreground)] mb-4">
-          {currentQ?.question}
-        </h3>
+      <div className="bg-[var(--card-solid)] rounded-2xl border border-[var(--color-border)] shadow-sm p-4 sm:p-6 mb-4 sm:mb-6">
+        <div className="flex items-start gap-3 mb-4">
+          <span className="shrink-0 inline-flex items-center justify-center min-w-[2rem] h-8 px-2 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-sm font-bold">
+            {currentQuestion + 1}
+          </span>
+          <h3 className="text-base sm:text-lg font-medium text-[var(--color-foreground)]">
+            {currentQ?.question}
+          </h3>
+        </div>
 
         <div className="space-y-3">
           {(currentQ?.options || []).map((option, index) => (
@@ -481,7 +488,8 @@ export default function TakeQuizPage() {
       </div>
 
       {/* Navigation */}
-      <div className="flex justify-between items-center">
+      <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-[var(--color-border)] bg-[var(--card-solid)]/95 backdrop-blur-sm p-3 sm:p-0 sm:static sm:bg-transparent sm:border-0 sm:backdrop-blur-none">
+        <div className="max-w-4xl mx-auto flex justify-between items-center gap-2">
         <button
           onClick={() => setCurrentQuestion((prev) => Math.max(0, prev - 1))}
           disabled={currentQuestion === 0}
@@ -489,23 +497,6 @@ export default function TakeQuizPage() {
         >
           {t('common.previous')}
         </button>
-
-        {/* Question dots */}
-        <div className="flex space-x-2">
-          {questions.map((q, index) => (
-            <button
-              key={q._id}
-              onClick={() => setCurrentQuestion(index)}
-              className={`w-3 h-3 rounded-full ${
-                index === currentQuestion
-                  ? `bg-gradient-to-r ${theme.gradient}`
-                  : answers[q._id] !== undefined
-                  ? 'bg-[var(--success)]'
-                  : 'bg-[var(--color-surface-muted)]'
-              }`}
-            />
-          ))}
-        </div>
 
         {currentQuestion < questions.length - 1 ? (
           <button
@@ -523,6 +514,7 @@ export default function TakeQuizPage() {
             {submitQuizMutation.isPending ? t('quiz.submitting') : t('quiz.submit')}
           </button>
         )}
+        </div>
       </div>
 
       {alertState && (

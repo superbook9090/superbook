@@ -28,6 +28,7 @@ import {
   Info,
 } from 'lucide-react';
 import CourseLeaderboard from '@/features/courses/components/CourseLeaderboard';
+import QuizCard from '@/features/quizzes/components/QuizCard';
 import { flattenCurriculumLessons } from '@/lib/curriculum/tree';
 import type { Lesson } from '@/lib/react-query/hooks';
 
@@ -80,10 +81,6 @@ export default function CourseDetailPage() {
 
   const handleContinueQuiz = (attemptId: string) => {
     router.push(`/dashboard/student/quizzes/take?attemptId=${attemptId}`);
-  };
-
-  const handleReviewQuiz = (attemptId: string) => {
-    router.push(`/dashboard/student/quizzes/${attemptId}/result`);
   };
 
   const handleStartLesson = (lessonId: string) => {
@@ -317,47 +314,58 @@ export default function CourseDetailPage() {
 
           {/* 3. QUIZZES TAB */}
           {activeTab === 'quizzes' && (
-            <div className="max-w-3xl mx-auto space-y-6">
+            <div className="mx-auto w-full max-w-6xl space-y-6">
               <h2 className="text-lg font-bold text-[var(--color-foreground)]">{t('nav.quizzes')}</h2>
-              <div className="grid gap-4">
-                {courseQuizzes.length === 0 ? (
-                  <div className="text-center py-16 opacity-60 text-sm">{t('courses.noQuizzes')}</div>
-                ) : (
-                  courseQuizzes.map(quiz => {
+              {courseQuizzes.length === 0 ? (
+                <div className="py-16 text-center text-sm opacity-60">{t('courses.noQuizzes')}</div>
+              ) : (
+                <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6">
+                  {courseQuizzes.map((quiz) => {
                     const statusInfo = getQuizStatus(quiz._id);
-                    return (
-                      <div key={quiz._id} className="bg-white border border-[var(--border)] p-4 sm:p-5 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:shadow-sm transition-all">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center">
-                            {statusInfo.status === 'completed' ? <CheckCircle className="w-5 h-5 text-emerald-500" /> : <Target className="w-5 h-5 text-gray-400" />}
-                          </div>
-                          <div>
-                            <h4 className="font-semibold text-[var(--color-foreground)]">{quiz.title}</h4>
-                            <p className="text-[10px] font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider">
-                              {quiz.questionCount} {t('dashboard.questions')} • {quiz.timeLimit} {t('dashboard.mins')}
-                            </p>
-                          </div>
+
+                    if (statusInfo.status === 'completed' && statusInfo.attempt) {
+                      return (
+                        <div key={quiz._id} className="h-full min-w-0">
+                          <QuizCard
+                            quiz={quiz}
+                            attempt={statusInfo.attempt}
+                            type="attempted"
+                            onStart={handleStartQuiz}
+                            onContinue={handleContinueQuiz}
+                            hideCourseBadge
+                          />
                         </div>
-                        <button
-                          onClick={() => {
-                            if (statusInfo.status === 'available') handleStartQuiz(quiz._id);
-                            else if (statusInfo.status === 'in_progress' && statusInfo.attempt) handleContinueQuiz(statusInfo.attempt._id);
-                            else if (statusInfo.status === 'completed' && statusInfo.attempt) handleReviewQuiz(statusInfo.attempt._id);
-                          }}
-                          className={cn(
-                            "px-6 py-2 rounded-lg text-sm font-bold transition-all",
-                            statusInfo.status === 'completed' 
-                              ? "bg-gray-100 text-gray-600" 
-                              : "bg-[var(--student-primary)] text-white hover:opacity-90"
-                          )}
-                        >
-                          {statusInfo.status === 'completed' ? t('courses.review') : statusInfo.status === 'in_progress' ? t('courses.continue') : t('courses.start')}
-                        </button>
+                      );
+                    }
+
+                    if (statusInfo.status === 'in_progress' && statusInfo.attempt) {
+                      return (
+                        <div key={quiz._id} className="h-full min-w-0">
+                          <QuizCard
+                            quiz={quiz}
+                            attempt={statusInfo.attempt}
+                            type="in_progress"
+                            onStart={handleStartQuiz}
+                            onContinue={handleContinueQuiz}
+                            hideCourseBadge
+                          />
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div key={quiz._id} className="min-w-0">
+                        <QuizCard
+                          quiz={quiz}
+                          type="available"
+                          onStart={handleStartQuiz}
+                          hideCourseBadge
+                        />
                       </div>
                     );
-                  })
-                )}
-              </div>
+                  })}
+                </div>
+              )}
             </div>
           )}
 

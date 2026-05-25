@@ -148,14 +148,15 @@ export default function StudentQuizzesPage() {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6">
               {availableQuizzes.map((quiz: Quiz) => (
-                <QuizCard
-                  key={quiz._id}
-                  quiz={quiz}
-                  type="available"
-                  onStart={handleStartQuiz}
-                />
+                <div key={quiz._id} className="min-w-0">
+                  <QuizCard
+                    quiz={quiz}
+                    type="available"
+                    onStart={handleStartQuiz}
+                  />
+                </div>
               ))}
             </div>
           )
@@ -166,15 +167,16 @@ export default function StudentQuizzesPage() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6">
             {completedAttempts.map((attempt: QuizAttempt) => (
-              <QuizCard
-                key={`${attempt._id}-${attempt.attemptNumber}`}
-                quiz={attempt.quiz}
-                attempt={attempt}
-                type="attempted"
-                onStart={handleStartQuiz}
-              />
+              <div key={`${attempt._id}-${attempt.attemptNumber}`} className="h-full min-w-0">
+                <QuizCard
+                  quiz={attempt.quiz}
+                  attempt={attempt}
+                  type="attempted"
+                  onStart={handleStartQuiz}
+                />
+              </div>
             ))}
           </div>
         )}

@@ -1,14 +1,24 @@
-// src/app/(dashboard)/dashboard/student/quizzes/[id]/result/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { ArrowLeft, Check, X, Minus } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
-import { formatDateTime, formatDuration } from '@/lib/dateUtils';
+import { formatDateTime } from '@/lib/dateUtils';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { getQuizAttemptReview } from '@/lib/api/quizAttempts';
+import type { QuizComparison } from '@/lib/quiz/quizComparison';
+import { resolveQuizComparison, safeNumber, DEFAULT_TIME_LIMIT_MINUTES } from '@/lib/quiz/resultDefaults';
+import { QuizComparisonTable } from '@/features/quizzes/components/QuizComparisonTable';
+import { QuizRankPredictor } from '@/features/quizzes/components/QuizRankPredictor';
+import { QuizResultOverview } from '@/features/quizzes/components/QuizResultOverview';
+import {
+  QuizSolutionsFilter,
+  type SolutionFilter,
+} from '@/features/quizzes/components/QuizSolutionsFilter';
+import { cn } from '@/lib/utils';
 
 interface Question {
   _id: string;
@@ -43,6 +53,12 @@ interface Attempt {
     questions: Question[];
   };
   answers: Answer[];
+  comparison?: Partial<QuizComparison> | null;
+}
+
+function getAnswerStatus(answer: Answer | undefined): 'correct' | 'incorrect' | 'unattempted' {
+  if (!answer || answer.selectedOption === -1) return 'unattempted';
+  return answer.isCorrect ? 'correct' : 'incorrect';
 }
 
 export default function QuizResultPage() {
@@ -56,7 +72,7 @@ export default function QuizResultPage() {
 
   const [attempt, setAttempt] = useState<Attempt | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [showAnswers, setShowAnswers] = useState(false);
+  const [solutionFilter, setSolutionFilter] = useState<SolutionFilter>('all');
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -80,11 +96,54 @@ export default function QuizResultPage() {
     }
   };
 
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-[var(--success)]';
-    if (score >= 60) return 'text-[var(--warning)]';
-    return 'text-[var(--error)]';
-  };
+  const solutionCounts = useMemo(() => {
+    if (!attempt) return { all: 0, correct: 0, incorrect: 0, unattempted: 0 };
+    let correct = 0;
+    let incorrect = 0;
+    let unattempted = 0;
+    for (const question of attempt.quiz.questions ?? []) {
+      const answerStatus = getAnswerStatus(
+        (attempt.answers ?? []).find((a) => a.questionId === question._id)
+      );
+      if (answerStatus === 'correct') correct += 1;
+      else if (answerStatus === 'incorrect') incorrect += 1;
+      else unattempted += 1;
+    }
+    return {
+      all: attempt.quiz.questions?.length ?? safeNumber(attempt.attempt.totalQuestions),
+      correct,
+      incorrect,
+      unattempted,
+    };
+  }, [attempt]);
+
+  const filteredQuestions = useMemo(() => {
+    if (!attempt) return [];
+    return (attempt.quiz.questions ?? []).filter((question) => {
+      if (solutionFilter === 'all') return true;
+      const answer = (attempt.answers ?? []).find((a) => a.questionId === question._id);
+      return getAnswerStatus(answer) === solutionFilter;
+    });
+  }, [attempt, solutionFilter]);
+
+  const comparison = useMemo(() => {
+    if (!attempt) return null;
+    return resolveQuizComparison({
+      comparison: attempt.comparison,
+      score: safeNumber(attempt.attempt.score),
+      totalQuestions: safeNumber(
+        attempt.attempt.totalQuestions,
+        attempt.quiz.questions?.length ?? 0
+      ),
+      timeTaken: safeNumber(attempt.attempt.timeTaken),
+      timeLimitMinutes: safeNumber(attempt.quiz.timeLimit, DEFAULT_TIME_LIMIT_MINUTES),
+      answers: (attempt.answers ?? []).map((a) => ({
+        questionId: a.questionId,
+        selectedOption: safeNumber(a.selectedOption, -1),
+        isCorrect: Boolean(a.isCorrect),
+      })),
+    });
+  }, [attempt]);
 
   const getScoreMessage = (score: number) => {
     if (score >= 80) return t('quizResult.excellentWork');
@@ -111,152 +170,146 @@ export default function QuizResultPage() {
     );
   }
 
+  const score = safeNumber(attempt.attempt.score);
+  const quizTitle = attempt.quiz.title?.trim() || t('quizResult.quizCompleted');
+
   return (
-    <div className="max-w-4xl mx-auto">
-        {/* Result Card */}
-        <div className="bg-[var(--card-solid)] rounded-lg shadow-md p-8 mb-6">
-          <div className="text-center mb-6">
-            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)] mb-2">{t('quizResult.quizCompleted')}</h1>
-            <p className="text-base sm:text-lg text-[var(--color-muted-foreground)]">{attempt.quiz.title}</p>
-          </div>
-
-          {/* Score Circle */}
-          <div className="flex justify-center mb-6">
-            <div className="relative w-40 h-40">
-              <svg className="w-full h-full transform -rotate-90">
-                <circle
-                  cx="80"
-                  cy="80"
-                  r="70"
-                  stroke="var(--border)"
-                  strokeWidth="12"
-                  fill="none"
-                />
-                <circle
-                  cx="80"
-                  cy="80"
-                  r="70"
-                  stroke={attempt.attempt.score >= 60 ? 'var(--success)' : attempt.attempt.score >= 40 ? 'var(--warning)' : 'var(--error)'}
-                  strokeWidth="12"
-                  fill="none"
-                  strokeDasharray={`${attempt.attempt.score * 4.4} 440`}
-                  strokeLinecap="round"
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className={`text-4xl font-bold ${getScoreColor(attempt.attempt.score)}`}>
-                  {attempt.attempt.score}%
-                </span>
-                <span className="text-sm text-[var(--color-muted-foreground)] mt-1">
-                  {attempt.attempt.correctCount}/{attempt.attempt.totalQuestions}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <p className={`text-center text-lg font-medium mb-6 ${getScoreColor(attempt.attempt.score)}`}>
-          {getScoreMessage(attempt.attempt.score)}
-        </p>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="bg-[var(--color-surface-muted)] rounded-lg p-4 text-center">
-            <p className="text-2xl font-bold text-[var(--color-foreground)]">{attempt.attempt.correctCount}</p>
-            <p className="text-sm text-[var(--color-muted-foreground)]">{t('quizResult.correct')}</p>
-          </div>
-          <div className="bg-[var(--color-surface-muted)] rounded-lg p-4 text-center">
-            <p className="text-2xl font-bold text-[var(--color-foreground)]">
-              {attempt.attempt.totalQuestions - attempt.attempt.correctCount}
-            </p>
-            <p className="text-sm text-[var(--color-muted-foreground)]">{t('quizResult.incorrect')}</p>
-          </div>
-          <div className="bg-[var(--color-surface-muted)] rounded-lg p-4 text-center">
-            <p className="text-2xl font-bold text-[var(--color-foreground)]">{formatDuration(attempt.attempt.timeTaken)}</p>
-            <p className="text-sm text-[var(--color-muted-foreground)]">{t('quizResult.timeTaken')}</p>
-          </div>
-        </div>
-
-        <div className="text-center text-sm text-[var(--color-muted-foreground)] mb-6">
-          {t('quizResult.attempt')} #{attempt.attempt.attemptNumber}
-          {attempt.attempt.submittedAt && (
-            <>
-              {' '}{'•'} {t('quizResult.submittedOn')}{' '}
-              {formatDateTime(attempt.attempt.submittedAt)}
-            </>
-          )}
-        </div>
-
-        {/* Actions */}
-        <div className="flex flex-col sm:flex-row justify-center gap-4">
+    <div className="max-w-2xl lg:max-w-4xl mx-auto px-2 sm:px-4 pb-8">
+      <div className="sticky top-0 z-10 -mx-2 sm:-mx-4 px-2 sm:px-4 py-3 mb-2 bg-[var(--color-background)]/95 backdrop-blur-sm border-b border-[var(--color-border)] lg:static lg:bg-transparent lg:backdrop-blur-none lg:border-b-0 lg:mb-4 lg:px-0 lg:py-0">
+        <div className="flex items-center gap-3">
           <button
-            onClick={() => setShowAnswers(!showAnswers)}
-            className={`min-h-[44px] sm:min-h-0 px-4 py-3 sm:px-4 sm:py-2 bg-gradient-to-r ${theme.gradient} text-white rounded-md hover:opacity-90`}
-          >
-            {showAnswers ? t('quizResult.hideAnswers') : t('quizResult.showAnswers')}
-          </button>
-          <button
+            type="button"
             onClick={() => router.push('/dashboard/student/quizzes')}
-            className="min-h-[44px] sm:min-h-0 px-4 py-3 sm:px-4 sm:py-2 border border-[var(--border)] text-[var(--color-foreground)] rounded-md hover:bg-[var(--color-surface-muted)]"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--card-solid)] text-[var(--color-foreground)] shrink-0"
+            aria-label={t('quizResult.backToQuizzes')}
           >
-            {t('quizResult.backToQuizzes')}
+            <ArrowLeft className="w-5 h-5" />
           </button>
+          <h1 className="text-sm sm:text-base lg:text-lg font-bold text-[var(--color-foreground)] line-clamp-2 flex-1 min-w-0">
+            {quizTitle}
+          </h1>
         </div>
       </div>
 
-      {/* Detailed Answers */}
-      {showAnswers && (
-        <div className="bg-[var(--card-solid)] rounded-lg shadow-md p-6">
-            <h2 className="text-lg sm:text-xl font-bold text-[var(--color-foreground)] mb-4">{t('quizResult.answerReview')}</h2>
-            <div className="space-y-4">
-              {attempt.quiz.questions.map((question, index) => {
-                const answer = attempt.answers.find((a) => a.questionId === question._id);
-                const isCorrect = answer?.isCorrect || false;
-                const selectedOption = answer?.selectedOption ?? -1;
+      {comparison && (
+        <>
+          <QuizResultOverview
+            metrics={comparison.you}
+            rank={comparison.rank}
+            totalParticipants={comparison.totalParticipants}
+            percentile={comparison.percentile}
+          />
 
-                return (
-                  <div
-                    key={question._id}
-                    className={`p-4 rounded-lg border-l-4 ${
-                      isCorrect ? 'bg-[var(--success-light)] border-[var(--success)]' : 'bg-[var(--error-light)] border-[var(--error)]'
-                    }`}
-                  >
-                    <p className="font-medium text-[var(--color-foreground)] mb-3">
-                      {index + 1}. {question.question}
+          <p className="text-xs sm:text-sm text-center text-[var(--color-muted-foreground)] mb-4 px-1">
+            {getScoreMessage(score)}
+            {' · '}
+            {t('quizResult.attempt')} #{Math.max(1, safeNumber(attempt.attempt.attemptNumber, 1))}
+            {attempt.attempt.submittedAt && (
+              <>
+                {' · '}
+                {formatDateTime(attempt.attempt.submittedAt)}
+              </>
+            )}
+          </p>
+
+          <QuizRankPredictor
+            rank={comparison.rank}
+            totalParticipants={comparison.totalParticipants}
+            scoreScale={comparison.scoreScale}
+          />
+          <QuizComparisonTable
+            you={comparison.you}
+            topper={comparison.topper}
+            average={comparison.average}
+          />
+        </>
+      )}
+
+      <div className="bg-[var(--card-solid)] rounded-2xl border border-[var(--color-border)] p-4 sm:p-5">
+        <h2 className="text-base sm:text-lg font-semibold text-[var(--color-foreground)] mb-3">
+          {t('quizResult.solutions')}
+        </h2>
+
+        <QuizSolutionsFilter
+          value={solutionFilter}
+          onChange={setSolutionFilter}
+          counts={solutionCounts}
+        />
+
+        <div className="mt-4 space-y-3">
+          {filteredQuestions.length === 0 ? (
+            <p className="text-sm text-[var(--color-muted-foreground)] text-center py-6">
+              {t('quizResult.noFilteredQuestions')}
+            </p>
+          ) : (
+            filteredQuestions.map((question, index) => {
+              const answer = (attempt.answers ?? []).find((a) => a.questionId === question._id);
+              const answerStatus = getAnswerStatus(answer);
+              const selectedOption = answer?.selectedOption ?? -1;
+
+              return (
+                <div
+                  key={question._id}
+                  className="rounded-xl border border-[var(--color-border)] overflow-hidden"
+                >
+                  <div className="flex items-center gap-2 p-3 bg-[var(--color-surface-muted)]/50 border-b border-[var(--color-border)]">
+                    <span className="text-sm font-semibold text-[var(--color-foreground)] w-6 shrink-0">
+                      {question.order ?? index + 1}
+                    </span>
+                    {answerStatus === 'correct' && (
+                      <Check className="w-4 h-4 text-[var(--success)] shrink-0" />
+                    )}
+                    {answerStatus === 'incorrect' && (
+                      <X className="w-4 h-4 text-[var(--error)] shrink-0" />
+                    )}
+                    {answerStatus === 'unattempted' && (
+                      <Minus className="w-4 h-4 text-[var(--color-muted-foreground)] shrink-0" />
+                    )}
+                    <p className="text-sm font-medium text-[var(--color-foreground)] line-clamp-2 flex-1 min-w-0">
+                      {question.question}
                     </p>
-                    <div className="space-y-2">
-                      {question.options.map((option, optIndex) => {
-                        const isSelected = selectedOption === optIndex;
-                        const isCorrectOption = question.correctAnswer === optIndex;
-
-                        return (
-                          <div
-                            key={optIndex}
-                            className={`p-2 rounded text-sm ${
-                              isCorrectOption
-                                ? 'bg-[var(--success)]/20 text-[var(--success)]'
-                                : isSelected
-                                ? 'bg-[var(--error)]/20 text-[var(--error)]'
-                                : 'bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)]'
-                            }`}
-                          >
-                            <span className="font-medium mr-2">{String.fromCharCode(65 + optIndex)}.</span>
-                            {option}
-                            {isCorrectOption && (
-                              <span className="ml-2 text-[var(--success)] font-medium">{t('quizResult.correctMark')}</span>
-                            )}
-                            {isSelected && !isCorrect && (
-                              <span className="ml-2 text-[var(--error)] font-medium">{t('quizResult.incorrectMark')}</span>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
                   </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
+
+                  <div className="p-3 space-y-2">
+                    {question.options?.map((option, optIndex) => {
+                      const isSelected = selectedOption === optIndex;
+                      const isCorrectOption = safeNumber(question.correctAnswer, -1) === optIndex;
+
+                      return (
+                        <div
+                          key={optIndex}
+                          className={cn(
+                            'p-2 rounded-lg text-sm',
+                            isCorrectOption
+                              ? 'bg-[var(--success)]/15 text-[var(--success)]'
+                              : isSelected
+                                ? 'bg-[var(--error)]/15 text-[var(--error)]'
+                                : 'bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)]'
+                          )}
+                        >
+                          <span className="font-medium mr-2">{String.fromCharCode(65 + optIndex)}.</span>
+                          {option}
+                          {isCorrectOption && (
+                            <span className="ml-2 font-medium">{t('quizResult.correctMark')}</span>
+                          )}
+                          {isSelected && !isCorrectOption && (
+                            <span className="ml-2 font-medium">{t('quizResult.incorrectMark')}</span>
+                          )}
+                        </div>
+                      );
+                    })}
+                    {answerStatus === 'unattempted' && (
+                      <p className="text-xs text-[var(--color-muted-foreground)] italic">
+                        {t('quizResult.unattempted')}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
     </div>
   );
 }

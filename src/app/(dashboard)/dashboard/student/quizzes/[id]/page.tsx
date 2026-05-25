@@ -16,6 +16,10 @@ import Alert from '@/components/ui/Alert';
 import { motion } from 'framer-motion';
 import { HelpCircle, Clock, BookOpen, ArrowLeft, Play } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
+import {
+  QuizStartConfirmModal,
+  type QuizStartInfo,
+} from '@/features/quizzes/components/QuizStartConfirmModal';
 
 interface Quiz {
   _id: string;
@@ -40,6 +44,7 @@ export default function QuizDetailPage() {
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showStartConfirm, setShowStartConfirm] = useState(false);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -71,6 +76,7 @@ export default function QuizDetailPage() {
   const handleStartQuiz = async () => {
     try {
       const data = await startQuiz.mutateAsync(quizId);
+      setShowStartConfirm(false);
       router.push(`/dashboard/student/quizzes/take?attemptId=${data.attempt._id}`);
     } catch (e) {
       setError(
@@ -78,6 +84,15 @@ export default function QuizDetailPage() {
       );
     }
   };
+
+  const startConfirmQuiz: QuizStartInfo | null = quiz
+    ? {
+        title: quiz.title,
+        questionCount: quiz.questionCount,
+        timeLimit: quiz.timeLimit,
+        mode: 'start',
+      }
+    : null;
 
   if (status === 'loading' || isLoading) {
     return <PageSkeleton />;
@@ -149,7 +164,7 @@ export default function QuizDetailPage() {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={handleStartQuiz}
+              onClick={() => setShowStartConfirm(true)}
               disabled={startQuiz.isPending}
               className="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-[var(--card-solid)] text-[var(--primary)] rounded-xl font-semibold hover:bg-[var(--card-solid)]/90 transition-all disabled:opacity-50"
             >
@@ -165,6 +180,14 @@ export default function QuizDetailPage() {
           )}
         </div>
       </motion.div>
+
+      <QuizStartConfirmModal
+        quiz={startConfirmQuiz}
+        isOpen={showStartConfirm}
+        isLoading={startQuiz.isPending}
+        onConfirm={handleStartQuiz}
+        onCancel={() => setShowStartConfirm(false)}
+      />
 
       {/* Leaderboard */}
       <motion.div
