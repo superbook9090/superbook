@@ -13,6 +13,8 @@ export type CourseDetail = {
   locale?: 'en' | 'hi';
   /** Legacy field before `locale` rename; treat as UI language when `locale` is absent. */
   language?: 'en' | 'hi';
+  courseCode?: string | null;
+  isPrivate?: boolean;
 };
 
 export type CoursesListPayload = { courses: unknown[]; organizationId?: string };

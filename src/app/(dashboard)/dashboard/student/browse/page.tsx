@@ -13,6 +13,7 @@ import { PageWrapper, ResponsiveGrid } from '@/components/layout';
 import { useAvailableCourses, useEnrollCourse } from '@/lib/react-query/hooks';
 import { BookOpen, ArrowLeft, Sparkles } from 'lucide-react';
 import CourseFilters from '@/features/courses/components/CourseFilters';
+import JoinCourseByCode from '@/features/courses/components/JoinCourseByCode';
 import { FilterPanel } from '@/components/filters/DashboardListFilters';
 
 export default function BrowseCoursesPage() {
@@ -72,7 +73,7 @@ export default function BrowseCoursesPage() {
 
   const handleEnroll = async (courseId: string) => {
     try {
-      await enrollCourse.mutateAsync(courseId);
+      await enrollCourse.mutateAsync({ courseId });
       router.push('/dashboard/student/courses');
     } catch {
       setAlertState({ type: 'error', message: t('courses.errorEnrolling') });
@@ -127,6 +128,9 @@ export default function BrowseCoursesPage() {
           </div>
         </div>
       </motion.div>
+
+      {/* Join private course */}
+      <JoinCourseByCode />
 
       {/* Filters Section */}
       <FilterPanel>

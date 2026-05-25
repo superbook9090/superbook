@@ -21,7 +21,7 @@ import {
   getLesson
 } from '@/lib/api/courses';
 import { listQuizzesByOrg } from '@/lib/api/quizzes';
-import { listEnrollments, enrollInCourse, dropEnrollment } from '@/lib/api/enrollments';
+import { listEnrollments, enrollInCourse, joinCourseByCode, dropEnrollment } from '@/lib/api/enrollments';
 import { listQuizAttempts, startQuizAttempt, submitQuizAttempt, type SubmitQuizAttemptInput } from '@/lib/api/quizAttempts';
 import { queryKeys, favoritesListDefaults } from '@/lib/react-query/query-keys';
 import { useSessionStore } from '@/store/useSessionStore';
@@ -397,9 +397,22 @@ export function useEnrollCourse() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (courseId: string) => enrollInCourse(courseId),
+    mutationFn: ({ courseId, courseCode }: { courseId: string; courseCode?: string }) =>
+      enrollInCourse(courseId, courseCode),
     onSettled: () => {
-      // Invalidate all related queries to refresh UI
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ENROLLMENTS });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.DASHBOARD });
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
+    },
+  });
+}
+
+export function useJoinCourseByCode() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (courseCode: string) => joinCourseByCode(courseCode),
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ENROLLMENTS });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.DASHBOARD });
       queryClient.invalidateQueries({ queryKey: ['courses'] });

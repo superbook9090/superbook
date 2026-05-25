@@ -11,6 +11,12 @@ import mongoose from 'mongoose';
 import { validateContentAccess } from '@/lib/accessControl';
 import { invalidatePattern } from '@/lib/redis';
 import { revalidateTag } from 'next/cache';
+import {
+  isPrivateCourse,
+  isStudentEnrolled,
+  resolveCourseCodeForSave,
+  sanitizeCourseResponse,
+} from '@/lib/courseAccess';
 
 // GET /api/courses/[id] - Get a single course
 export async function GET(
@@ -65,8 +71,25 @@ export async function GET(
       }
     }
 
+    const isOwner = session?.user?.id === course.instructor._id.toString();
+    const isAdmin = session?.user?.role === 'admin' || session?.user?.role === 'superadmin';
+
+    if (
+      session?.user?.role === 'student' &&
+      isPrivateCourse(course) &&
+      !isOwner &&
+      !isAdmin
+    ) {
+      const enrolled = await isStudentEnrolled(session.user.id, id);
+      if (!enrolled) {
+        return NextResponse.json({ message: 'Course not found' }, { status: 404 });
+      }
+    }
+
     // Apply serialization to convert ObjectIds to strings
-    const serializedCourse = serialize(course);
+    const serializedCourse = sanitizeCourseResponse(serialize(course) as Record<string, unknown>, {
+      includeCourseCode: isOwner || isAdmin,
+    });
 
     return NextResponse.json(serializedCourse);
   } catch (error) {
@@ -131,7 +154,8 @@ export async function PATCH(
       );
     }
 
-    const { title, description, price, category, thumbnail, isPublished, locale } = validationResult.data;
+    const { title, description, price, category, thumbnail, isPublished, locale, courseCode } =
+      validationResult.data;
 
     if (title) course.title = title;
     if (description) course.description = description;
@@ -140,6 +164,9 @@ export async function PATCH(
     if (thumbnail) course.thumbnail = thumbnail;
     if (typeof isPublished === 'boolean') course.isPublished = isPublished;
     if (locale) course.locale = locale;
+    if (courseCode !== undefined) {
+      course.courseCode = resolveCourseCodeForSave(courseCode, course.courseCode);
+    }
 
     await course.save();
     await course.populate('instructor', 'name email');
@@ -154,6 +181,12 @@ export async function PATCH(
     return NextResponse.json(course);
   } catch (error) {
     logApiError(error as Error, 'PATCH', '/api/courses/[id]', logContext);
+    if ((error as { code?: number }).code === 11000) {
+      return NextResponse.json(
+        { message: 'This course code is already in use' },
+        { status: 409 }
+      );
+    }
     return NextResponse.json(
       { message: 'Something went wrong. Please try again later.' },
       { status: 500 }

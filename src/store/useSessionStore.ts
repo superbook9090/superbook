@@ -89,6 +89,10 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     const state = get();
     const now = Date.now();
 
+    if (state.session?.user?.role !== 'student') {
+      return;
+    }
+
     if (state.favoritesLoading) return;
 
     if (state.favoritesLastFetched && now - state.favoritesLastFetched < CACHE_TIME) {

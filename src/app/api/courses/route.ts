@@ -13,6 +13,11 @@ import { getAccessFilter } from '@/lib/accessControl';
 import { getCachedData, setCachedData, invalidatePattern } from '@/lib/redis';
 import { createDefaultChapter } from '@/domain/learning/courseBootstrap';
 import { revalidateTag } from 'next/cache';
+import {
+  publicCourseFilter,
+  resolveCourseCodeForSave,
+  sanitizeCourseResponse,
+} from '@/lib/courseAccess';
 
 // Configure Next.js caching for this route
 export const dynamic = 'force-dynamic';
@@ -63,6 +68,8 @@ export async function GET(request: NextRequest) {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const query: Record<string, any> = {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const andConditions: Record<string, any>[] = [];
 
     // Apply organization-based access control
     if (session.user) {
@@ -73,12 +80,15 @@ export async function GET(request: NextRequest) {
         organizationId: user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null,
         role: user.role as 'student' | 'teacher' | 'admin',
       });
-      Object.assign(query, accessFilter);
+      if (Object.keys(accessFilter).length > 0) {
+        andConditions.push(accessFilter);
+      }
     }
 
-    // If 'available' is set, return published courses student can enroll in
+    // If 'available' is set, return published public courses student can enroll in
     if (available === 'true' && session.user?.role === 'student') {
       query.isPublished = true;
+      andConditions.push(publicCourseFilter());
       // Exclude courses student is already enrolled in
       const Enrollment = (await import('@/models/Enrollment')).default;
       const enrollments = await Enrollment.find({ student: session.user.id }).select('course').lean();
@@ -96,6 +106,10 @@ export async function GET(request: NextRequest) {
       if (isPublished !== null) query.isPublished = isPublished === 'true';
     }
 
+    if (andConditions.length > 0) {
+      query.$and = andConditions;
+    }
+
     // Build select object for field selection
     let selectFields: Record<string, number> = {};
     if (fields) {
@@ -103,7 +117,7 @@ export async function GET(request: NextRequest) {
       fieldList.forEach(f => selectFields[f] = 1);
     } else {
       // Default fields to avoid over-fetching
-      selectFields = { title: 1, description: 1, price: 1, category: 1, thumbnail: 1, instructor: 1, isPublished: 1, locale: 1, createdAt: 1, enrolledCount: 1, chapterCount: 1, lessonCount: 1 };
+      selectFields = { title: 1, description: 1, price: 1, category: 1, thumbnail: 1, instructor: 1, isPublished: 1, locale: 1, createdAt: 1, enrolledCount: 1, chapterCount: 1, lessonCount: 1, courseCode: 1 };
     }
 
     const courses = await Course.find(query, selectFields)
@@ -114,7 +128,18 @@ export async function GET(request: NextRequest) {
       .lean();
 
     // Apply serialization to convert ObjectIds to strings
-    const serializedCourses = serialize(courses);
+    const serializedCourses = serialize(courses).map((course: Record<string, unknown>) => {
+      const instructorId =
+        typeof course.instructor === 'object' && course.instructor !== null
+          ? (course.instructor as { _id?: string })._id?.toString()
+          : course.instructor?.toString();
+      const isOwner = instructorId === session.user?.id;
+      const includeCourseCode =
+        session.user?.role === 'admin' ||
+        session.user?.role === 'superadmin' ||
+        (instructor === 'self' && isOwner);
+      return sanitizeCourseResponse(course, { includeCourseCode });
+    });
 
     const total = await Course.countDocuments(query);
 
@@ -194,7 +219,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { title, description, price, category, thumbnail, isPublished, locale } = validationResult.data;
+    const { title, description, price, category, thumbnail, isPublished, locale, courseCode } =
+      validationResult.data;
 
     // Check teacher limits (skip for admins)
     if (session.user?.role === 'teacher') {
@@ -223,6 +249,7 @@ export async function POST(request: NextRequest) {
       thumbnail,
       locale: locale || 'en',
       isPublished: isPublished || false,
+      courseCode: resolveCourseCodeForSave(courseCode),
     });
 
     await course.save();
@@ -240,6 +267,12 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     logApiError(error as Error, 'POST', '/api/courses', logContext);
+    if ((error as { code?: number }).code === 11000) {
+      return NextResponse.json(
+        { message: 'This course code is already in use' },
+        { status: 409 }
+      );
+    }
     return NextResponse.json(
       { message: 'Something went wrong. Please try again later.' },
       { status: 500 }

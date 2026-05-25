@@ -2,6 +2,18 @@ import { z } from 'zod';
 
 const objectIdSchema = z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid ObjectId');
 
+const courseCodeSchema = z.preprocess(
+  (val) => (val === '' ? null : val),
+  z.union([
+    z.null(),
+    z
+      .string()
+      .trim()
+      .regex(/^[A-Za-z0-9-]{4,12}$/, 'Course code must be 4–12 letters, numbers, or hyphens')
+      .transform((s) => s.toUpperCase()),
+  ]).optional()
+);
+
 // Course validation schemas
 export const createCourseSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Title must be less than 200 characters'),
@@ -11,6 +23,7 @@ export const createCourseSchema = z.object({
   thumbnail: z.preprocess((val) => val === '' ? undefined : val, z.string().url('Invalid thumbnail URL').optional()),
   isPublished: z.boolean().optional(),
   locale: z.enum(['en', 'hi']).optional(),
+  courseCode: courseCodeSchema,
 });
 
 export const updateCourseSchema = createCourseSchema.partial();
@@ -45,6 +58,11 @@ export const updateQuizSchema = createQuizSchema.partial();
 // Enrollment validation schemas
 export const createEnrollmentSchema = z.object({
   courseId: objectIdSchema,
+  courseCode: z.string().trim().min(1).max(12).optional(),
+});
+
+export const joinCourseByCodeSchema = z.object({
+  courseCode: z.string().trim().min(1, 'Course code is required').max(12),
 });
 
 // Quiz attempt validation schemas

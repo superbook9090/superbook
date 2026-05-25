@@ -4,8 +4,9 @@ import { useEffect, useRef } from 'react';
 import { useSessionStore } from '@/store/useSessionStore';
 
 export function SessionProvider({ children }: { children: React.ReactNode }) {
-  const { fetchSession, fetchFavorites, status } = useSessionStore();
+  const { fetchSession, fetchFavorites, status, session } = useSessionStore();
   const hasFetchedFavorites = useRef(false);
+  const role = session?.user?.role;
 
   useEffect(() => {
     // Fetch session on mount
@@ -24,11 +25,15 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       hasFetchedFavorites.current = false;
       return;
     }
-    if (status === 'authenticated' && !hasFetchedFavorites.current) {
+    if (
+      status === 'authenticated' &&
+      role === 'student' &&
+      !hasFetchedFavorites.current
+    ) {
       hasFetchedFavorites.current = true;
       fetchFavorites();
     }
-  }, [status, fetchFavorites]);
+  }, [status, role, fetchFavorites]);
 
   // Show loading state while session is being fetched
   if (status === 'loading') {

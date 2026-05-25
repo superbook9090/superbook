@@ -138,7 +138,8 @@ export default function TeacherCoursesPage() {
                   </div>
                 )}
                 <div className="p-6">
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
+                    <div className="flex items-center gap-2">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                       course.isPublished
                         ? 'bg-[var(--success-light)] text-[var(--success)]'
@@ -146,6 +147,12 @@ export default function TeacherCoursesPage() {
                     }`}>
                       {course.isPublished ? t('teacherCourses.published') : t('teacherCourses.draft')}
                     </span>
+                    {(course as { isPrivate?: boolean }).isPrivate && (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                        {t('courses.privateCourse')}
+                      </span>
+                    )}
+                    </div>
                     {course.category && (
                       <span className="text-xs text-[var(--color-muted-foreground)]">{course.category}</span>
                     )}

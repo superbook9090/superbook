@@ -7,9 +7,14 @@ import { Enrollment, Course } from '@/models';
 import { createEnrollmentSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
-import { getCachedData, setCachedData, invalidatePattern } from '@/lib/redis';
-import { revalidateTag } from 'next/cache';
-import mongoose from 'mongoose';
+import { getCachedData, setCachedData } from '@/lib/redis';
+import { isPrivateCourse } from '@/lib/courseAccess';
+import { enrollStudentInCourse } from '@/lib/enrollmentService';
+import {
+  courseCodeAttemptLimiter,
+  getRequestIp,
+  rateLimitExceededMessage,
+} from '@/lib/rateLimiter';
 
 // Configure Next.js caching for this route
 export const dynamic = 'force-dynamic';
@@ -167,9 +172,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { courseId } = validationResult.data;
+    const { courseId, courseCode } = validationResult.data;
 
-    // Verify course exists and is published
     const course = await Course.findOne({ _id: courseId, isPublished: true }).lean();
     if (!course) {
       return NextResponse.json(
@@ -178,63 +182,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Safety check: ensure only one enrollment exists per (student + course)
-    // Using findOneAndUpdate with upsert to prevent race conditions
-    const enrollment = await Enrollment.findOneAndUpdate(
-      {
-        student: session.user.id,
-        course: courseId,
-      },
-      {
-        $setOnInsert: {
-          student: session.user.id,
-          course: courseId,
-          status: 'active',
-          progress: 0,
-          lessonCompletedCount: 0,
-          enrolledAt: new Date(),
-        },
-      },
-      {
-        upsert: true,
-        new: true, // Return the new document if created
-        runValidators: true, // Ensure schema validation
+    if (isPrivateCourse(course)) {
+      const ip = getRequestIp(request);
+      const limitKey = `course-code:${session.user.id}:${ip}`;
+      const rateCheck = courseCodeAttemptLimiter.check(limitKey);
+      if (!rateCheck.allowed) {
+        return NextResponse.json({ message: rateLimitExceededMessage() }, { status: 429 });
       }
-    );
 
-    // Check if this was an existing enrollment (not newly created)
-    const wasExisting = enrollment && enrollment.enrolledAt && 
-      new Date(enrollment.enrolledAt).getTime() < Date.now() - 5000; // 5 second buffer
-
-    if (wasExisting) {
-      return NextResponse.json(
-        { message: 'You are already enrolled in this course', enrollment },
-        { status: 400 }
-      );
+      if (!courseCode) {
+        return NextResponse.json(
+          { message: 'Course code is required for this course' },
+          { status: 400 }
+        );
+      }
     }
 
-    // Update course enrolledCount for performance
-    await Course.findByIdAndUpdate(courseId, {
-      $inc: { enrolledCount: 1 }
-    });
-
-    // Get organizationId for cache invalidation
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const user = session.user as any;
-    const orgId = user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null;
-    const orgIdStr = orgId?.toString() || 'public';
+    const result = await enrollStudentInCourse({
+      studentId: session.user.id,
+      organizationId: user.organizationId ?? null,
+      courseId,
+      courseCode,
+    });
 
-    // Invalidate Redis cache for courses, enrollments, and dashboard
-    await invalidatePattern(`courses:${orgIdStr}:*`);
-    await invalidatePattern(`enrollments:*`);
-    await invalidatePattern(`dashboard:${session.user.id}:*`);
-
-    // Revalidate Next.js cache tags
-    revalidateTag(`courses:${orgIdStr}`);
-    revalidateTag('enrollments');
+    if (!result.ok) {
+      return NextResponse.json({ message: result.message }, { status: result.status });
+    }
 
     return NextResponse.json(
-      { message: 'Enrolled successfully', enrollment },
+      { message: 'Enrolled successfully', enrollment: result.enrollment },
       { status: 201 }
     );
   } catch (error) {

@@ -10,6 +10,8 @@ import { ApiClientError } from '@/lib/api/http';
 import { supportedLanguages } from '@/i18n/config';
 import { useSessionStore } from '@/store/useSessionStore';
 import { ImageUpload } from '@/components/ui/ImageUpload';
+import { generateInviteCode } from '@/lib/inviteCode';
+import { Copy, RefreshCw, Lock } from 'lucide-react';
 
 type Props = {
   /** When set, form loads this course and PATCHes on submit. */
@@ -35,7 +37,10 @@ export default function CreateCourseForm({ courseId }: Props) {
     locale: 'en' as 'en' | 'hi',
     thumbnail: '',
     isPublished: false,
+    isPrivateAccess: false,
+    courseCode: '',
   });
+  const [copied, setCopied] = useState(false);
 
   const loadCourse = useCallback(async () => {
     if (!courseId) return;
@@ -52,6 +57,8 @@ export default function CreateCourseForm({ courseId }: Props) {
         locale: loc === 'hi' ? 'hi' : 'en',
         thumbnail: data.thumbnail ?? '',
         isPublished: !!data.isPublished,
+        isPrivateAccess: !!data.courseCode,
+        courseCode: data.courseCode ?? '',
       });
     } catch (err) {
       const message =
@@ -89,9 +96,23 @@ export default function CreateCourseForm({ courseId }: Props) {
     setError('');
     setIsLoading(true);
 
+    if (formData.isPrivateAccess && formData.courseCode.trim().length < 4) {
+      setError(t('createCourseForm.courseCodePlaceholder'));
+      setIsLoading(false);
+      return;
+    }
+
     const body = {
-      ...formData,
+      title: formData.title,
+      description: formData.description,
       price: Number(formData.price) || 0,
+      category: formData.category,
+      locale: formData.locale,
+      thumbnail: formData.thumbnail,
+      isPublished: formData.isPublished,
+      courseCode: formData.isPrivateAccess
+        ? formData.courseCode.trim().toUpperCase() || null
+        : null,
     };
 
     try {
@@ -116,6 +137,25 @@ export default function CreateCourseForm({ courseId }: Props) {
       setError(message);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleGenerateCode = () => {
+    setFormData((prev) => ({
+      ...prev,
+      isPrivateAccess: true,
+      courseCode: generateInviteCode(8),
+    }));
+  };
+
+  const handleCopyCode = async () => {
+    if (!formData.courseCode) return;
+    try {
+      await navigator.clipboard.writeText(formData.courseCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // ignore clipboard errors
     }
   };
 
@@ -234,6 +274,83 @@ export default function CreateCourseForm({ courseId }: Props) {
         onChange={(url) => setFormData(prev => ({ ...prev, thumbnail: url }))}
         aspectRatio="video"
       />
+
+      <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)]/30 p-4 sm:p-5 space-y-4">
+        <div className="flex items-start gap-3">
+          <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)]">
+            <Lock className="h-4 w-4" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center py-1">
+              <input
+                type="checkbox"
+                id="isPrivateAccess"
+                checked={formData.isPrivateAccess}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  setFormData((prev) => ({
+                    ...prev,
+                    isPrivateAccess: checked,
+                    courseCode: checked && !prev.courseCode ? generateInviteCode(8) : prev.courseCode,
+                  }));
+                }}
+                className="h-5 w-5 rounded border-[var(--color-border)] text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
+              />
+              <label htmlFor="isPrivateAccess" className="ml-3 text-sm font-medium text-[var(--color-foreground)]">
+                {t('createCourseForm.privateAccess')}
+              </label>
+            </div>
+            <p className="mt-1 text-xs text-[var(--color-muted-foreground)]">
+              {t('createCourseForm.privateAccessDesc')}
+            </p>
+          </div>
+        </div>
+
+        {formData.isPrivateAccess && (
+          <div>
+            <label htmlFor="courseCode" className="block text-sm font-medium text-[var(--color-foreground)] mb-1.5">
+              {t('createCourseForm.courseCode')}
+            </label>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <input
+                type="text"
+                name="courseCode"
+                id="courseCode"
+                value={formData.courseCode}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    courseCode: e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, ''),
+                  }))
+                }
+                maxLength={12}
+                required={formData.isPrivateAccess}
+                className="flex-1 rounded-lg border border-[var(--color-border)] bg-[var(--card-solid)] px-3 py-2.5 font-mono text-sm uppercase tracking-widest text-[var(--color-foreground)] focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)]"
+                placeholder={t('createCourseForm.courseCodePlaceholder')}
+              />
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={handleGenerateCode}
+                  className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--card-solid)] px-3 text-sm font-medium text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted)]"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  {t('createCourseForm.generateCode')}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCopyCode}
+                  disabled={!formData.courseCode}
+                  className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--card-solid)] px-3 text-sm font-medium text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted)] disabled:opacity-50"
+                >
+                  <Copy className="h-4 w-4" />
+                  {copied ? t('createCourseForm.codeCopied') : t('createCourseForm.copyCode')}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
 
       <div className="flex items-center py-2">
         <input
