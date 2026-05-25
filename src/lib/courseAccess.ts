@@ -55,7 +55,7 @@ export function sanitizeCourseResponse<T extends Record<string, unknown>>(
   return {
     ...rest,
     isPrivate: isPrivateCourse(course as { courseCode?: string | null }),
-  } as T;
+  } as unknown as T;
 }
 
 export function validateCourseCodeMatch(

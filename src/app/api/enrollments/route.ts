@@ -174,7 +174,9 @@ export async function POST(request: NextRequest) {
 
     const { courseId, courseCode } = validationResult.data;
 
-    const course = await Course.findOne({ _id: courseId, isPublished: true }).lean();
+    const course = await Course.findOne({ _id: courseId, isPublished: true })
+      .select('courseCode')
+      .lean<{ courseCode?: string | null }>();
     if (!course) {
       return NextResponse.json(
         { message: 'Course not found or not published' },

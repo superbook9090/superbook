@@ -128,7 +128,7 @@ export async function GET(request: NextRequest) {
       .lean();
 
     // Apply serialization to convert ObjectIds to strings
-    const serializedCourses = serialize(courses).map((course: Record<string, unknown>) => {
+    const serializedCourses = (serialize(courses) as Record<string, unknown>[]).map((course) => {
       const instructorId =
         typeof course.instructor === 'object' && course.instructor !== null
           ? (course.instructor as { _id?: string })._id?.toString()
