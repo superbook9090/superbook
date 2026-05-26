@@ -11,6 +11,7 @@ import { logApiError, type LogContext } from '@/lib/logger';
 import mongoose from 'mongoose';
 import { validateContentAccess } from '@/lib/accessControl';
 import { listQuestionsForQuiz, setQuizQuestions } from '@/domain/learning/quizContent';
+import { resolveQuizPlacement } from '@/lib/quiz/quizPlacement';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const logContext: LogContext = { method: 'GET', path: '/api/quizzes/[id]' };
@@ -25,7 +26,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     await dbConnect();
 
-    const quiz = (await Quiz.findById(id).populate('course', 'title description').lean()) as {
+    const quiz = (await Quiz.findById(id)
+      .populate('course', 'title description')
+      .populate('chapter', 'title')
+      .populate('lesson', 'title')
+      .lean()) as {
       _id: mongoose.Types.ObjectId;
       isPublished: boolean;
       [key: string]: unknown;
@@ -85,7 +90,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       return NextResponse.json({ message: 'Invalid input', errors: validationResult.error.issues }, { status: 400 });
     }
 
-    const { title, description, questions, timeLimit, isPublished } = validationResult.data;
+    const { title, description, chapter, lesson, questions, timeLimit, isPublished } =
+      validationResult.data;
 
     const quiz = await Quiz.findById(id);
     if (!quiz) {
@@ -115,6 +121,31 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (description !== undefined) quiz.description = description;
     if (timeLimit !== undefined) quiz.timeLimit = timeLimit;
     if (isPublished !== undefined) quiz.isPublished = isPublished;
+
+    if (chapter !== undefined || lesson !== undefined) {
+      const nextChapter =
+        chapter !== undefined
+          ? chapter
+          : lesson !== undefined
+            ? null
+            : quiz.chapter?.toString() ?? null;
+      const nextLesson =
+        lesson !== undefined
+          ? lesson
+          : chapter !== undefined
+            ? null
+            : quiz.lesson?.toString() ?? null;
+
+      const placementResult = await resolveQuizPlacement(quiz.course.toString(), {
+        chapter: nextChapter,
+        lesson: nextLesson,
+      });
+      if (!placementResult.ok) {
+        return NextResponse.json({ message: placementResult.message }, { status: 400 });
+      }
+      quiz.chapter = placementResult.chapterId;
+      quiz.lesson = placementResult.lessonId;
+    }
 
     if (questions !== undefined) {
       if (!questions.length) {

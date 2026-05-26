@@ -5,6 +5,8 @@ import { CSS } from '@dnd-kit/utilities';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { Chapter, Lesson } from '@/lib/react-query/hooks';
 import { sortableId } from '@/lib/curriculum/sortable';
+import type { CurriculumChapterNode } from '@/lib/curriculum/tree';
+import { CurriculumQuizBlock } from './CurriculumQuizBlock';
 import { cn } from '@/lib/utils';
 import { ChapterRowHeader } from './ChapterRowHeader';
 import { LessonList } from './LessonList';
@@ -21,7 +23,7 @@ export function SortableSubTopic({
   onDeleteLesson,
   onAddLesson,
 }: {
-  sub: Chapter;
+  sub: Chapter & Pick<CurriculumChapterNode, 'quizzes' | 'lessons'>;
   courseId: string;
   expanded: boolean;
   onToggle: () => void;
@@ -68,10 +70,17 @@ export function SortableSubTopic({
         <div className="overflow-hidden mb-3">
           <LessonList
             chapterId={sub._id}
+            courseId={courseId}
             lessons={sub.lessons ?? []}
             onEditLesson={onEditLesson}
             onDeleteLesson={onDeleteLesson}
             onAddLesson={onAddLesson}
+          />
+          <CurriculumQuizBlock
+            courseId={courseId}
+            quizzes={sub.quizzes ?? []}
+            placement="chapter"
+            chapterId={sub._id}
           />
         </div>
       )}

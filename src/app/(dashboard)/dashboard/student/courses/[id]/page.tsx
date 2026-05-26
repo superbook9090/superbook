@@ -8,11 +8,11 @@ import { useSessionStore } from '@/store/useSessionStore';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { cn } from '@/lib/utils';
 import { 
-  useEnrollments, 
-  useQuizzes, 
-  useQuizAttempts, 
-  useStartQuizAttempt, 
-  useCourseCurriculum, 
+  useEnrollments,
+  useCourseQuizzes,
+  useQuizAttempts,
+  useStartQuizAttempt,
+  useCourseCurriculum,
 } from '@/lib/react-query/hooks';
 import { 
   Play,
@@ -29,10 +29,23 @@ import {
 } from 'lucide-react';
 import CourseLeaderboard from '@/features/courses/components/CourseLeaderboard';
 import QuizCard from '@/features/quizzes/components/QuizCard';
-import { flattenCurriculumLessons } from '@/lib/curriculum/tree';
-import type { Lesson } from '@/lib/react-query/hooks';
+import CurriculumQuizRow from '@/features/quizzes/components/CurriculumQuizRow';
+import {
+  QuizStartConfirmModal,
+  type QuizStartInfo,
+} from '@/features/quizzes/components/QuizStartConfirmModal';
+import {
+  attachQuizzesToCurriculumTree,
+  flattenCurriculumLessons,
+  type CurriculumChapterNode,
+} from '@/lib/curriculum/tree';
+import { splitQuizzesByScope } from '@/lib/quiz/quizCourse';
+import type { CurriculumLesson } from '@/lib/curriculum/tree';
+import type { Quiz } from '@/lib/react-query/hooks';
 
 type TabType = 'curriculum' | 'overview' | 'quizzes' | 'leaderboard';
+
+type PendingQuizStart = QuizStartInfo & { quizId: string; attemptId?: string };
 
 export default function CourseDetailPage() {
   const { status, session } = useSessionStore();
@@ -41,11 +54,15 @@ export default function CourseDetailPage() {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<TabType>('curriculum');
   const [expandedChapters, setExpandedChapters] = useState<Record<string, boolean>>({});
+  const [startingQuizId, setStartingQuizId] = useState<string | null>(null);
+  const [confirmQuiz, setConfirmQuiz] = useState<PendingQuizStart | null>(null);
 
   const courseId = params.id as string;
 
   const { data: enrollments = [], isLoading: enrollmentsLoading } = useEnrollments();
-  const { data: allQuizzes = [], isLoading: quizzesLoading } = useQuizzes('public');
+  const { quizzes: courseQuizzes, isLoading: quizzesLoading } = useCourseQuizzes(courseId, {
+    publishedOnly: true,
+  });
   const { data: curriculum = [], isLoading: curriculumLoading } = useCourseCurriculum(courseId);
   const allLessons = useMemo(() => flattenCurriculumLessons(curriculum), [curriculum]);
   const { data: attempts = [], isLoading: attemptsLoading } = useQuizAttempts();
@@ -53,9 +70,17 @@ export default function CourseDetailPage() {
 
   const enrollment = useMemo(() => enrollments.find(e => e.course._id === courseId), [enrollments, courseId]);
   
-  const courseQuizzes = useMemo(() => {
-    return allQuizzes.filter(q => q.course?._id === courseId && q.isPublished);
-  }, [allQuizzes, courseId]);
+  const { courseLevel: courseLevelQuizzes, chapterScoped: chapterScopedQuizzes, lessonScoped: lessonScopedQuizzes } =
+    useMemo(() => splitQuizzesByScope(courseQuizzes), [courseQuizzes]);
+
+  const curriculumWithQuizzes = useMemo(
+    () =>
+      attachQuizzesToCurriculumTree(
+        curriculum as unknown as CurriculumChapterNode[],
+        courseQuizzes
+      ),
+    [curriculum, courseQuizzes]
+  );
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -71,11 +96,52 @@ export default function CourseDetailPage() {
   };
 
   const handleStartQuiz = async (quizId: string) => {
+    setStartingQuizId(quizId);
     try {
       const data = await startQuizMutation.mutateAsync(quizId);
       router.push(`/dashboard/student/quizzes/take?attemptId=${data.attempt._id}`);
     } catch (error) {
       console.error('Error starting quiz:', error);
+    } finally {
+      setStartingQuizId(null);
+    }
+  };
+
+  const openQuizConfirm = (
+    quiz: { _id: string; title: string; timeLimit: number; questionCount?: number },
+    mode: 'start' | 'retake' | 'continue' = 'start',
+    attemptId?: string
+  ) => {
+    setConfirmQuiz({
+      quizId: quiz._id,
+      title: quiz.title,
+      questionCount: quiz.questionCount,
+      timeLimit: quiz.timeLimit,
+      mode,
+      attemptId,
+    });
+  };
+
+  const handleConfirmQuizAction = async () => {
+    if (!confirmQuiz) return;
+
+    if (confirmQuiz.mode === 'continue' && confirmQuiz.attemptId) {
+      const attemptId = confirmQuiz.attemptId;
+      setConfirmQuiz(null);
+      router.push(`/dashboard/student/quizzes/take?attemptId=${attemptId}`);
+      return;
+    }
+
+    const quizId = confirmQuiz.quizId;
+    setStartingQuizId(quizId);
+    try {
+      const data = await startQuizMutation.mutateAsync(quizId);
+      setConfirmQuiz(null);
+      router.push(`/dashboard/student/quizzes/take?attemptId=${data.attempt._id}`);
+    } catch (error) {
+      console.error('Error starting quiz:', error);
+    } finally {
+      setStartingQuizId(null);
     }
   };
 
@@ -87,40 +153,133 @@ export default function CourseDetailPage() {
     router.push(`/dashboard/student/courses/${courseId}/lessons/${lessonId}`);
   };
 
-  const renderLessonRow = (lesson: Lesson) => (
-    <div
-      key={lesson._id}
-      onClick={() => handleStartLesson(lesson._id)}
-      className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors cursor-pointer group/lesson"
-    >
-      <div className="flex items-center gap-4">
-        <div
-          className={cn(
-            'w-8 h-8 rounded-lg flex items-center justify-center transition-all',
-            lesson.videoUrl ? 'bg-blue-50 text-blue-500' : 'bg-orange-50 text-orange-500'
-          )}
-        >
-          {lesson.videoUrl ? <PlayCircle className="w-4 h-4" /> : <BookOpen className="w-4 h-4" />}
+  const renderLessonRow = (lesson: CurriculumLesson) => (
+    <div key={lesson._id} className="divide-y divide-[var(--border)]">
+      <div
+        onClick={() => handleStartLesson(lesson._id)}
+        className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors cursor-pointer group/lesson"
+      >
+        <div className="flex items-center gap-4">
+          <div
+            className={cn(
+              'w-8 h-8 rounded-lg flex items-center justify-center transition-all',
+              lesson.videoUrl ? 'bg-blue-50 text-blue-500' : 'bg-orange-50 text-orange-500'
+            )}
+          >
+            {lesson.videoUrl ? <PlayCircle className="w-4 h-4" /> : <BookOpen className="w-4 h-4" />}
+          </div>
+          <p className="text-sm font-medium text-[var(--color-foreground)] group-hover/lesson:text-[var(--student-primary)] transition-colors">
+            {lesson.title}
+          </p>
         </div>
-        <p className="text-sm font-medium text-[var(--color-foreground)] group-hover/lesson:text-[var(--student-primary)] transition-colors">
-          {lesson.title}
-        </p>
+        <ChevronRight className="w-4 h-4 text-[var(--color-muted-foreground)] group-hover/lesson:translate-x-1 transition-all" />
       </div>
-      <ChevronRight className="w-4 h-4 text-[var(--color-muted-foreground)] group-hover/lesson:translate-x-1 transition-all" />
+      {lesson.quizzes?.map((quiz) => {
+        const statusInfo = getQuizStatus(quiz._id);
+        return (
+          <CurriculumQuizRow
+            key={quiz._id}
+            title={quiz.title}
+            timeLimit={quiz.timeLimit}
+            questionCount={quiz.questionCount}
+            status={statusInfo.status}
+            score={statusInfo.attempt?.score}
+            isLoading={startingQuizId === quiz._id || confirmQuiz?.quizId === quiz._id}
+            onAction={() => handleCurriculumQuizAction(quiz)}
+          />
+        );
+      })}
     </div>
   );
 
   const getQuizStatus = (quizId: string) => {
-    const quizAttempts = attempts.filter(a => a.quiz._id === quizId);
+    const quizAttempts = attempts.filter((a) => a.quiz._id === quizId);
     if (quizAttempts.length === 0) return { status: 'available' as const };
-    
-    const completed = quizAttempts.find(a => a.status === 'completed');
+
+    const completed = quizAttempts.find((a) => a.status === 'completed');
     if (completed) return { status: 'completed' as const, attempt: completed };
-    
-    const inProgress = quizAttempts.find(a => a.status === 'in_progress');
+
+    const inProgress = quizAttempts.find((a) => a.status === 'in_progress');
     if (inProgress) return { status: 'in_progress' as const, attempt: inProgress };
-    
+
     return { status: 'available' as const };
+  };
+
+  const handleCurriculumQuizAction = (quiz: {
+    _id: string;
+    title: string;
+    timeLimit: number;
+    questionCount?: number;
+  }) => {
+    const statusInfo = getQuizStatus(quiz._id);
+    if (statusInfo.status === 'completed' && statusInfo.attempt) {
+      router.push(`/dashboard/student/quizzes/${statusInfo.attempt._id}/result`);
+      return;
+    }
+    if (statusInfo.status === 'in_progress' && statusInfo.attempt) {
+      openQuizConfirm(quiz, 'continue', statusInfo.attempt._id);
+      return;
+    }
+    openQuizConfirm(quiz, 'start');
+  };
+
+  const renderChapterQuizzes = (quizzes: Array<{ _id: string; title: string; timeLimit: number; questionCount?: number }>) => {
+    if (!quizzes?.length) return null;
+    return quizzes.map((quiz) => {
+      const statusInfo = getQuizStatus(quiz._id);
+      return (
+        <CurriculumQuizRow
+          key={quiz._id}
+          title={quiz.title}
+          timeLimit={quiz.timeLimit}
+          questionCount={quiz.questionCount}
+          status={statusInfo.status}
+          score={statusInfo.attempt?.score}
+          isLoading={startingQuizId === quiz._id || confirmQuiz?.quizId === quiz._id}
+          onAction={() => handleCurriculumQuizAction(quiz)}
+        />
+      );
+    });
+  };
+
+  const renderQuizCard = (quiz: Quiz) => {
+    const statusInfo = getQuizStatus(quiz._id);
+
+    if (statusInfo.status === 'completed' && statusInfo.attempt) {
+      return (
+        <div key={quiz._id} className="h-full min-w-0">
+          <QuizCard
+            quiz={quiz}
+            attempt={statusInfo.attempt}
+            type="attempted"
+            onStart={handleStartQuiz}
+            onContinue={handleContinueQuiz}
+            hideCourseBadge
+          />
+        </div>
+      );
+    }
+
+    if (statusInfo.status === 'in_progress' && statusInfo.attempt) {
+      return (
+        <div key={quiz._id} className="h-full min-w-0">
+          <QuizCard
+            quiz={quiz}
+            attempt={statusInfo.attempt}
+            type="in_progress"
+            onStart={handleStartQuiz}
+            onContinue={handleContinueQuiz}
+            hideCourseBadge
+          />
+        </div>
+      );
+    }
+
+    return (
+      <div key={quiz._id} className="min-w-0">
+        <QuizCard quiz={quiz} type="available" onStart={handleStartQuiz} hideCourseBadge />
+      </div>
+    );
   };
 
   if (status === 'loading' || enrollmentsLoading || quizzesLoading || curriculumLoading || attemptsLoading) {
@@ -233,7 +392,7 @@ export default function CourseDetailPage() {
               </div>
 
               <div className="space-y-4">
-                {curriculum.map((chapter, idx) => (
+                {curriculumWithQuizzes.map((chapter, idx) => (
                   <div key={chapter._id} className="group/chapter">
                     <div className={cn(
                       "rounded-xl border transition-all duration-200",
@@ -258,6 +417,7 @@ export default function CourseDetailPage() {
                       {expandedChapters[chapter._id] && (
                         <div className="border-t border-[var(--border)] divide-y divide-[var(--border)] bg-white rounded-b-xl overflow-hidden">
                           {chapter.lessons?.map(renderLessonRow)}
+                          {renderChapterQuizzes(chapter.quizzes)}
                           {chapter.subChapters?.map((sub) => (
                             <div key={sub._id} className="bg-gray-50/40">
                               <button
@@ -276,6 +436,7 @@ export default function CourseDetailPage() {
                               {expandedChapters[sub._id] && (
                                 <div className="divide-y divide-[var(--border)] border-t border-[var(--border)]">
                                   {sub.lessons?.map(renderLessonRow)}
+                                  {renderChapterQuizzes(sub.quizzes)}
                                 </div>
                               )}
                             </div>
@@ -285,6 +446,33 @@ export default function CourseDetailPage() {
                     </div>
                   </div>
                 ))}
+
+                {courseLevelQuizzes.length > 0 && (
+                  <div className="rounded-xl border border-[var(--border)] bg-white overflow-hidden">
+                    <div className="border-b border-[var(--border)] px-4 py-3 sm:px-5">
+                      <h3 className="font-semibold text-[var(--color-foreground)]">
+                        {t('courses.courseLevelQuizzes')}
+                      </h3>
+                    </div>
+                    <div className="divide-y divide-[var(--border)]">
+                      {courseLevelQuizzes.map((quiz) => {
+                        const statusInfo = getQuizStatus(quiz._id);
+                        return (
+                          <CurriculumQuizRow
+                            key={quiz._id}
+                            title={quiz.title}
+                            timeLimit={quiz.timeLimit}
+                            questionCount={quiz.questionCount}
+                            status={statusInfo.status}
+                            score={statusInfo.attempt?.score}
+                            isLoading={startingQuizId === quiz._id || confirmQuiz?.quizId === quiz._id}
+                            onAction={() => handleCurriculumQuizAction(quiz)}
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -319,51 +507,37 @@ export default function CourseDetailPage() {
               {courseQuizzes.length === 0 ? (
                 <div className="py-16 text-center text-sm opacity-60">{t('courses.noQuizzes')}</div>
               ) : (
-                <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6">
-                  {courseQuizzes.map((quiz) => {
-                    const statusInfo = getQuizStatus(quiz._id);
-
-                    if (statusInfo.status === 'completed' && statusInfo.attempt) {
-                      return (
-                        <div key={quiz._id} className="h-full min-w-0">
-                          <QuizCard
-                            quiz={quiz}
-                            attempt={statusInfo.attempt}
-                            type="attempted"
-                            onStart={handleStartQuiz}
-                            onContinue={handleContinueQuiz}
-                            hideCourseBadge
-                          />
-                        </div>
-                      );
-                    }
-
-                    if (statusInfo.status === 'in_progress' && statusInfo.attempt) {
-                      return (
-                        <div key={quiz._id} className="h-full min-w-0">
-                          <QuizCard
-                            quiz={quiz}
-                            attempt={statusInfo.attempt}
-                            type="in_progress"
-                            onStart={handleStartQuiz}
-                            onContinue={handleContinueQuiz}
-                            hideCourseBadge
-                          />
-                        </div>
-                      );
-                    }
-
-                    return (
-                      <div key={quiz._id} className="min-w-0">
-                        <QuizCard
-                          quiz={quiz}
-                          type="available"
-                          onStart={handleStartQuiz}
-                          hideCourseBadge
-                        />
+                <div className="space-y-8">
+                  {courseLevelQuizzes.length > 0 && (
+                    <div>
+                      <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-[var(--color-muted-foreground)]">
+                        {t('courses.courseLevelQuizzes')}
+                      </h3>
+                      <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6">
+                        {courseLevelQuizzes.map(renderQuizCard)}
                       </div>
-                    );
-                  })}
+                    </div>
+                  )}
+                  {chapterScopedQuizzes.length > 0 && (
+                    <div>
+                      <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-[var(--color-muted-foreground)]">
+                        {t('courses.chapterQuizzes')}
+                      </h3>
+                      <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6">
+                        {chapterScopedQuizzes.map(renderQuizCard)}
+                      </div>
+                    </div>
+                  )}
+                  {lessonScopedQuizzes.length > 0 && (
+                    <div>
+                      <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-[var(--color-muted-foreground)]">
+                        {t('courses.lessonQuizzes')}
+                      </h3>
+                      <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6">
+                        {lessonScopedQuizzes.map(renderQuizCard)}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -389,6 +563,14 @@ export default function CourseDetailPage() {
 
         </div>
       </div>
+
+      <QuizStartConfirmModal
+        quiz={confirmQuiz}
+        isOpen={!!confirmQuiz}
+        isLoading={!!confirmQuiz && startingQuizId === confirmQuiz.quizId}
+        onConfirm={handleConfirmQuizAction}
+        onCancel={() => setConfirmQuiz(null)}
+      />
     </div>
   );
 }

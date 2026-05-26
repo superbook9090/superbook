@@ -12,6 +12,20 @@ export interface CurriculumLesson {
   isPreview?: boolean;
   course: string;
   chapter: string;
+  quizzes: CurriculumQuiz[];
+}
+
+/** Quiz metadata attached to curriculum nodes (full attempt flow unchanged). */
+export interface CurriculumQuiz {
+  _id: string;
+  title: string;
+  description?: string;
+  timeLimit: number;
+  questionCount?: number;
+  isPublished: boolean;
+  course: string;
+  chapter: string | null;
+  lesson: string | null;
 }
 
 export interface CurriculumChapterNode {
@@ -23,6 +37,7 @@ export interface CurriculumChapterNode {
   course: string;
   parentChapter?: string | null;
   lessons: CurriculumLesson[];
+  quizzes: CurriculumQuiz[];
   subChapters: CurriculumChapterNode[];
 }
 
@@ -62,6 +77,7 @@ export function buildCurriculumTree(
       _id: toId(lesson._id),
       course: toId(lesson.course),
       chapter: chapterId,
+      quizzes: [],
     };
     const bucket = lessonsByChapter.get(chapterId) ?? [];
     bucket.push(normalized);
@@ -81,6 +97,7 @@ export function buildCurriculumTree(
       course: toId(chapter.course),
       parentChapter: chapter.parentChapter ? toId(chapter.parentChapter) : null,
       lessons: sortByOrder(lessonsByChapter.get(id) ?? []),
+      quizzes: [],
       subChapters: [],
     });
   }
@@ -136,4 +153,143 @@ export function countTopicLessons(topic: {
     0
   );
   return (topic.lessons?.length ?? 0) + subTotal;
+}
+
+type RawQuiz = {
+  _id: Types.ObjectId | string;
+  title: string;
+  description?: string;
+  timeLimit: number;
+  questionCount?: number;
+  isPublished: boolean;
+  course: Types.ObjectId | string | { _id: Types.ObjectId | string };
+  chapter?: Types.ObjectId | string | { _id: Types.ObjectId | string } | null;
+  lesson?: Types.ObjectId | string | { _id: Types.ObjectId | string } | null;
+};
+
+function normalizeRawQuiz(quiz: RawQuiz): CurriculumQuiz {
+  const chapterId = quiz.chapter
+    ? toId(
+        typeof quiz.chapter === 'object' && quiz.chapter !== null && '_id' in quiz.chapter
+          ? quiz.chapter._id
+          : quiz.chapter
+      )
+    : null;
+  const lessonId = quiz.lesson
+    ? toId(
+        typeof quiz.lesson === 'object' && quiz.lesson !== null && '_id' in quiz.lesson
+          ? quiz.lesson._id
+          : quiz.lesson
+      )
+    : null;
+
+  return {
+    _id: toId(quiz._id),
+    title: quiz.title,
+    description: quiz.description,
+    timeLimit: quiz.timeLimit,
+    questionCount: quiz.questionCount,
+    isPublished: quiz.isPublished,
+    course: toId(
+      typeof quiz.course === 'object' && quiz.course !== null && '_id' in quiz.course
+        ? quiz.course._id
+        : quiz.course
+    ),
+    chapter: chapterId,
+    lesson: lessonId,
+  };
+}
+
+/** Attach quizzes to chapter/subtopic nodes and to lessons (course-level excluded). */
+export function attachQuizzesToCurriculumTree(
+  tree: CurriculumChapterNode[],
+  quizzes: RawQuiz[]
+): CurriculumChapterNode[] {
+  const quizzesByChapter = new Map<string, CurriculumQuiz[]>();
+  const quizzesByLesson = new Map<string, CurriculumQuiz[]>();
+
+  for (const quiz of quizzes) {
+    const normalized = normalizeRawQuiz(quiz);
+    if (normalized.lesson) {
+      const bucket = quizzesByLesson.get(normalized.lesson) ?? [];
+      bucket.push(normalized);
+      quizzesByLesson.set(normalized.lesson, bucket);
+      continue;
+    }
+    if (!normalized.chapter) continue;
+    const bucket = quizzesByChapter.get(normalized.chapter) ?? [];
+    bucket.push(normalized);
+    quizzesByChapter.set(normalized.chapter, bucket);
+  }
+
+  const attachLessons = (lessons: CurriculumLesson[]): CurriculumLesson[] =>
+    lessons.map((lesson) => ({
+      ...lesson,
+      quizzes: quizzesByLesson.get(lesson._id) ?? [],
+    }));
+
+  const attachToNode = (node: CurriculumChapterNode): CurriculumChapterNode => ({
+    ...node,
+    quizzes: quizzesByChapter.get(node._id) ?? [],
+    lessons: attachLessons(node.lessons),
+    subChapters: node.subChapters.map(attachToNode),
+  });
+
+  return tree.map(attachToNode);
+}
+
+export type ChapterSelectOption = { id: string; label: string };
+export type LessonSelectOption = { id: string; label: string };
+
+/** Flatten topic + sub-topic rows for chapter dropdowns in teacher forms. */
+export function flattenChapterSelectOptions(
+  tree: Array<{
+    _id: string;
+    title: string;
+    subChapters?: Array<{ _id: string; title: string }>;
+  }>
+): ChapterSelectOption[] {
+  const options: ChapterSelectOption[] = [];
+  for (const topic of tree) {
+    options.push({ id: topic._id, label: topic.title });
+    for (const sub of topic.subChapters ?? []) {
+      options.push({ id: sub._id, label: `↳ ${sub.title}` });
+    }
+  }
+  return options;
+}
+
+/** Flatten lessons under topics and subtopics for lesson-scoped quiz assignment. */
+export function flattenLessonSelectOptions(
+  tree: Array<{
+    _id: string;
+    title: string;
+    lessons?: Array<{ _id: string; title: string }>;
+    subChapters?: Array<{
+      _id: string;
+      title: string;
+      lessons?: Array<{ _id: string; title: string }>;
+    }>;
+  }>
+): LessonSelectOption[] {
+  const options: LessonSelectOption[] = [];
+
+  for (const topic of tree) {
+    for (const lesson of topic.lessons ?? []) {
+      options.push({
+        id: lesson._id,
+        label: `${topic.title} › ${lesson.title}`,
+      });
+    }
+    for (const sub of topic.subChapters ?? []) {
+      for (const lesson of sub.lessons ?? []) {
+        options.push({
+          id: lesson._id,
+          label: `${topic.title} › ${sub.title} › ${lesson.title}`,
+        });
+      }
+    }
+  }
+
+  return options;
 }

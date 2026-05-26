@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useSessionStore } from '@/store/useSessionStore';
 import {
   DndContext,
   DragOverlay,
@@ -12,7 +13,9 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { Plus } from 'lucide-react';
+import Link from 'next/link';
+import { Plus, Target } from 'lucide-react';
+import { buildTeacherCreateQuizUrl } from '@/lib/quiz/buildCreateQuizUrl';
 import { useTranslation } from '@/hooks/useTranslation';
 import {
   useCourseCurriculum,
@@ -20,9 +23,16 @@ import {
   useDeleteChapter,
   useDeleteLesson,
   useReorderCurriculum,
+  useCourseQuizzes,
   type Chapter,
   type Lesson,
 } from '@/lib/react-query/hooks';
+import {
+  attachQuizzesToCurriculumTree,
+  type CurriculumChapterNode,
+} from '@/lib/curriculum/tree';
+import { splitQuizzesByScope, toCurriculumQuiz } from '@/lib/quiz/quizCourse';
+import { CurriculumQuizBlock } from './CurriculumQuizBlock';
 import { findDragLabel } from '@/lib/curriculum/dndTree';
 import { sortableId } from '@/lib/curriculum/sortable';
 import ConfirmModal from '@/components/ui/ConfirmModal';
@@ -50,6 +60,9 @@ export default function CurriculumTreeEditor({
   onAddLesson,
 }: CurriculumTreeEditorProps) {
   const { t } = useTranslation();
+  const session = useSessionStore((s) => s.session);
+  const orgId = (session?.user as { organizationId?: string })?.organizationId || 'public';
+  const { quizzes: courseQuizzes } = useCourseQuizzes(courseId, { orgId });
   const { data: serverTree, isLoading, dataUpdatedAt } = useCourseCurriculum(courseId);
   const resolvedServerTree = serverTree ?? EMPTY_CURRICULUM;
   const addChapter = useAddChapter();
@@ -63,11 +76,25 @@ export default function CurriculumTreeEditor({
   const [activeId, setActiveId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<DeleteTarget | null>(null);
 
-  const tree = localTree ?? resolvedServerTree;
+  const baseTree = localTree ?? resolvedServerTree;
+
+  const { courseLevel: courseLevelQuizzes } = useMemo(
+    () => splitQuizzesByScope(courseQuizzes),
+    [courseQuizzes]
+  );
+
+  const displayTree = useMemo(
+    () =>
+      attachQuizzesToCurriculumTree(
+        baseTree as unknown as CurriculumChapterNode[],
+        courseQuizzes
+      ) as unknown as Chapter[],
+    [baseTree, courseQuizzes]
+  );
 
   const { isDraggingRef, handleDragStart, handleDragOver, handleDragEnd } = useCurriculumDnd({
     courseId,
-    tree,
+    tree: baseTree,
     serverTree: resolvedServerTree,
     setLocalTree,
     setActiveId,
@@ -86,8 +113,11 @@ export default function CurriculumTreeEditor({
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  const topicIds = useMemo(() => tree.map((topic) => sortableId('topic', topic._id)), [tree]);
-  const activeLabel = activeId ? findDragLabel(tree, activeId) : null;
+  const topicIds = useMemo(
+    () => displayTree.map((topic) => sortableId('topic', topic._id)),
+    [displayTree]
+  );
+  const activeLabel = activeId ? findDragLabel(baseTree, activeId) : null;
 
   const handleAddTopic = () => {
     addChapter.mutate({
@@ -119,10 +149,19 @@ export default function CurriculumTreeEditor({
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
         <h2 className="text-xl font-bold text-[var(--color-foreground)]">{t('curriculum.title')}</h2>
-        <Button onClick={handleAddTopic} disabled={addChapter.isPending} size="sm" className="min-h-[44px]">
-          <Plus className="w-4 h-4 mr-2" />
-          {t('curriculum.addTopic')}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href={buildTeacherCreateQuizUrl({ courseId, placement: 'course' })}
+            className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2 rounded-xl text-sm font-semibold border border-violet-200 text-violet-700 hover:bg-violet-50 transition-colors"
+          >
+            <Target className="w-4 h-4" />
+            {t('curriculum.addQuiz')}
+          </Link>
+          <Button onClick={handleAddTopic} disabled={addChapter.isPending} size="sm" className="min-h-[44px]">
+            <Plus className="w-4 h-4 mr-2" />
+            {t('curriculum.addTopic')}
+          </Button>
+        </div>
       </div>
 
       <DndContext
@@ -134,10 +173,10 @@ export default function CurriculumTreeEditor({
       >
         <SortableContext items={topicIds} strategy={verticalListSortingStrategy}>
           <div className="space-y-4">
-            {tree.map((topic) => (
+            {displayTree.map((topic) => (
               <SortableTopic
                 key={topic._id}
-                topic={topic}
+                topic={topic as Chapter & CurriculumChapterNode}
                 courseId={courseId}
                 expanded={!!expanded[topic._id]}
                 onToggle={() => toggleExpanded(setExpanded, topic._id)}
@@ -153,6 +192,18 @@ export default function CurriculumTreeEditor({
                 onAddLesson={onAddLesson}
               />
             ))}
+
+            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+              <h3 className="text-sm font-semibold text-[var(--color-foreground)] mb-3">
+                {t('curriculum.courseLevelQuizzes')}
+              </h3>
+              <CurriculumQuizBlock
+                courseId={courseId}
+                quizzes={courseLevelQuizzes.map((q) => toCurriculumQuiz(q, courseId))}
+                placement="course"
+                compact
+              />
+            </div>
           </div>
         </SortableContext>
 

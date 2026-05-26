@@ -6,7 +6,8 @@ import { CSS } from '@dnd-kit/utilities';
 import { FolderPlus } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { Chapter, Lesson } from '@/lib/react-query/hooks';
-import { countTopicLessons } from '@/lib/curriculum/tree';
+import { countTopicLessons, type CurriculumChapterNode } from '@/lib/curriculum/tree';
+import { CurriculumQuizBlock } from './CurriculumQuizBlock';
 import { sortableId } from '@/lib/curriculum/sortable';
 import { cn } from '@/lib/utils';
 import { ChapterRowHeader } from './ChapterRowHeader';
@@ -29,7 +30,7 @@ export function SortableTopic({
   onDeleteLesson,
   onAddLesson,
 }: {
-  topic: Chapter;
+  topic: Chapter & Pick<CurriculumChapterNode, 'quizzes'>;
   courseId: string;
   expanded: boolean;
   onToggle: () => void;
@@ -85,10 +86,18 @@ export function SortableTopic({
           <div className="p-3 sm:p-4 space-y-4">
             <LessonList
               chapterId={topic._id}
+              courseId={courseId}
               lessons={topic.lessons ?? []}
               onEditLesson={onEditLesson}
               onDeleteLesson={onDeleteLesson}
               onAddLesson={onAddLesson}
+            />
+
+            <CurriculumQuizBlock
+              courseId={courseId}
+              quizzes={topic.quizzes ?? []}
+              placement="chapter"
+              chapterId={topic._id}
             />
 
             <SortableContext items={subIds} strategy={verticalListSortingStrategy}>
@@ -96,7 +105,7 @@ export function SortableTopic({
                 {(topic.subChapters ?? []).map((sub) => (
                   <SortableSubTopic
                     key={sub._id}
-                    sub={sub}
+                    sub={sub as Chapter & Pick<CurriculumChapterNode, 'quizzes' | 'lessons'>}
                     courseId={courseId}
                     expanded={isExpanded(sub._id)}
                     onToggle={() => toggleExpanded(sub._id)}

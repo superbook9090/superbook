@@ -1,13 +1,22 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import * as XLSX from 'xlsx';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
-import { listTeacherCoursesSelf } from '@/lib/api/courses';
+import { getCourseCurriculum, listTeacherCoursesSelf } from '@/lib/api/courses';
 import { createQuiz, getQuizForEdit, patchQuiz } from '@/lib/api/quizzes';
 import { ApiClientError } from '@/lib/api/http';
+import {
+  flattenChapterSelectOptions,
+  flattenLessonSelectOptions,
+  type ChapterSelectOption,
+  type LessonSelectOption,
+} from '@/lib/curriculum/tree';
+import { getQuizLessonId } from '@/lib/quiz/quizLesson';
+import { getQuizChapterId } from '@/lib/quiz/quizChapter';
+import type { Chapter } from '@/lib/react-query/hooks';
 
 interface Course {
   _id: string;
@@ -37,6 +46,7 @@ type Props = {
 export default function CreateQuizForm({ quizId }: Props) {
   const { t } = useTranslation();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { theme } = useRoleTheme();
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
@@ -46,9 +56,15 @@ export default function CreateQuizForm({ quizId }: Props) {
     title: '',
     description: '',
     course: '',
+    placement: 'course' as 'course' | 'chapter' | 'lesson',
+    chapter: '',
+    lesson: '',
     timeLimit: '30',
     isPublished: false,
   });
+  const [chapterOptions, setChapterOptions] = useState<ChapterSelectOption[]>([]);
+  const [lessonOptions, setLessonOptions] = useState<LessonSelectOption[]>([]);
+  const [chaptersLoading, setChaptersLoading] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([
     { question: '', options: ['', ''], correctAnswer: 0 },
   ]);
@@ -94,10 +110,21 @@ export default function CreateQuizForm({ quizId }: Props) {
             return [...prev, { _id: courseRef, title: courseTitle || t('teacherQuizzes.unknownCourse') }];
           });
 
+          const chapterRef = getQuizChapterId(
+            quiz.chapter as string | { _id?: string } | null | undefined
+          );
+          const lessonRef = getQuizLessonId(
+            (quiz as { lesson?: string | { _id?: string } | null }).lesson
+          );
+          const placement = lessonRef ? 'lesson' : chapterRef ? 'chapter' : 'course';
+
           setFormData({
             title: quiz.title ?? '',
             description: quiz.description ?? '',
             course: courseRef,
+            placement,
+            chapter: chapterRef ?? '',
+            lesson: lessonRef ?? '',
             timeLimit: String(quiz.timeLimit ?? 30),
             isPublished: !!quiz.isPublished,
           });
@@ -140,12 +167,93 @@ export default function CreateQuizForm({ quizId }: Props) {
     };
   }, [quizId, t]);
 
+  useEffect(() => {
+    if (quizId) return;
+    const courseFromUrl = searchParams.get('course');
+    if (!courseFromUrl) return;
+
+    const placementParam = searchParams.get('placement');
+    const chapterParam = searchParams.get('chapter') ?? '';
+    const lessonParam = searchParams.get('lesson') ?? '';
+    const placement =
+      placementParam === 'lesson' || placementParam === 'chapter' || placementParam === 'course'
+        ? placementParam
+        : lessonParam
+          ? 'lesson'
+          : chapterParam
+            ? 'chapter'
+            : 'course';
+
+    setFormData((prev) => {
+      if (prev.course && prev.course !== courseFromUrl) return prev;
+      return {
+        ...prev,
+        course: courseFromUrl,
+        placement,
+        chapter: placement === 'chapter' ? chapterParam : '',
+        lesson: placement === 'lesson' ? lessonParam : '',
+      };
+    });
+  }, [quizId, searchParams]);
+
+  useEffect(() => {
+    if (!formData.course) {
+      setChapterOptions([]);
+      setLessonOptions([]);
+      return;
+    }
+
+    let cancelled = false;
+    const loadChapters = async () => {
+      setChaptersLoading(true);
+      try {
+        const tree = (await getCourseCurriculum(formData.course)) as Chapter[];
+        if (!cancelled) {
+          setChapterOptions(flattenChapterSelectOptions(tree));
+          setLessonOptions(flattenLessonSelectOptions(tree));
+        }
+      } catch {
+        if (!cancelled) {
+          setChapterOptions([]);
+          setLessonOptions([]);
+        }
+      } finally {
+        if (!cancelled) setChaptersLoading(false);
+      }
+    };
+
+    void loadChapters();
+    return () => {
+      cancelled = true;
+    };
+  }, [formData.course]);
+
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
-    }));
+    setFormData((prev) => {
+      if (name === 'course') {
+        return {
+          ...prev,
+          course: value,
+          placement: 'course',
+          chapter: '',
+          lesson: '',
+        };
+      }
+      if (name === 'placement') {
+        const placement = value as 'course' | 'chapter' | 'lesson';
+        return {
+          ...prev,
+          placement,
+          chapter: placement === 'chapter' ? prev.chapter : '',
+          lesson: placement === 'lesson' ? prev.lesson : '',
+        };
+      }
+      return {
+        ...prev,
+        [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
+      };
+    });
   }, []);
 
   const handleQuestionChange = useCallback((index: number, field: string, value: string) => {
@@ -386,18 +494,32 @@ export default function CreateQuizForm({ quizId }: Props) {
     }
 
     try {
+      const chapterPayload =
+        formData.placement === 'chapter' && formData.chapter.trim()
+          ? formData.chapter.trim()
+          : null;
+      const lessonPayload =
+        formData.placement === 'lesson' && formData.lesson.trim() ? formData.lesson.trim() : null;
+
       if (quizId) {
         await patchQuiz(quizId, {
           title: formData.title,
           description: formData.description,
+          chapter: chapterPayload,
+          lesson: lessonPayload,
           timeLimit: Number(formData.timeLimit),
           isPublished: formData.isPublished,
           questions,
         });
       } else {
         await createQuiz({
-          ...formData,
+          title: formData.title,
+          description: formData.description,
+          course: formData.course,
+          chapter: chapterPayload,
+          lesson: lessonPayload,
           timeLimit: Number(formData.timeLimit),
+          isPublished: formData.isPublished,
           questions,
         });
       }
@@ -492,6 +614,85 @@ export default function CreateQuizForm({ quizId }: Props) {
           </p>
         )}
       </div>
+
+      {formData.course && (
+        <>
+          <div>
+            <label htmlFor="placement" className="block text-sm font-medium text-[var(--color-foreground)]">
+              {t('createQuizForm.placement')}
+            </label>
+            <select
+              name="placement"
+              id="placement"
+              value={formData.placement}
+              onChange={handleChange}
+              disabled={chaptersLoading}
+              className="mt-1 px-3 py-2 block w-full rounded-md border-[var(--color-border)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] sm:text-sm text-[var(--color-foreground)] disabled:opacity-60"
+            >
+              <option value="course">{t('createQuizForm.placementCourse')}</option>
+              <option value="chapter">{t('createQuizForm.placementChapter')}</option>
+              <option value="lesson">{t('createQuizForm.placementLesson')}</option>
+            </select>
+          </div>
+
+          {formData.placement === 'chapter' && (
+            <div>
+              <label htmlFor="chapter" className="block text-sm font-medium text-[var(--color-foreground)]">
+                {t('createQuizForm.chapter')}
+              </label>
+              <select
+                name="chapter"
+                id="chapter"
+                required
+                value={formData.chapter}
+                onChange={handleChange}
+                disabled={chaptersLoading}
+                className="mt-1 px-3 py-2 block w-full rounded-md border-[var(--color-border)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] sm:text-sm text-[var(--color-foreground)] disabled:opacity-60"
+              >
+                <option value="">{t('createQuizForm.selectChapterRequired')}</option>
+                {chapterOptions.map((ch) => (
+                  <option key={ch.id} value={ch.id}>
+                    {ch.label}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
+                {t('createQuizForm.selectChapterHint')}
+              </p>
+            </div>
+          )}
+
+          {formData.placement === 'lesson' && (
+            <div>
+              <label htmlFor="lesson" className="block text-sm font-medium text-[var(--color-foreground)]">
+                {t('createQuizForm.lesson')}
+              </label>
+              <select
+                name="lesson"
+                id="lesson"
+                required
+                value={formData.lesson}
+                onChange={handleChange}
+                disabled={chaptersLoading || lessonOptions.length === 0}
+                className="mt-1 px-3 py-2 block w-full rounded-md border-[var(--color-border)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] sm:text-sm text-[var(--color-foreground)] disabled:opacity-60"
+              >
+                <option value="">{t('createQuizForm.selectLessonRequired')}</option>
+                {lessonOptions.map((ls) => (
+                  <option key={ls.id} value={ls.id}>
+                    {ls.label}
+                  </option>
+                ))}
+              </select>
+              {lessonOptions.length === 0 && (
+                <p className="mt-2 text-sm text-amber-600">{t('createQuizForm.noLessonsInCourse')}</p>
+              )}
+              <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
+                {t('createQuizForm.selectLessonHint')}
+              </p>
+            </div>
+          )}
+        </>
+      )}
 
       <div>
         <label htmlFor="timeLimit" className="block text-sm font-medium text-[var(--color-foreground)]">

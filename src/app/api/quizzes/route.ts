@@ -13,6 +13,7 @@ import mongoose from 'mongoose';
 import { getAccessFilter } from '@/lib/accessControl';
 import { getCachedData, setCachedData, invalidatePattern } from '@/lib/redis';
 import { setQuizQuestions } from '@/domain/learning/quizContent';
+import { resolveQuizPlacement } from '@/lib/quiz/quizPlacement';
 
 // GET /api/quizzes - Get all quizzes (with optional filtering)
 export async function GET(request: NextRequest) {
@@ -37,6 +38,8 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const course = searchParams.get('course');
+    const chapter = searchParams.get('chapter');
+    const lesson = searchParams.get('lesson');
     const instructor = searchParams.get('instructor');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
@@ -60,8 +63,8 @@ export async function GET(request: NextRequest) {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const query: Record<string, any> = {};
+    const andFilters: Record<string, unknown>[] = [];
 
-    // Apply organization-based access control
     if (session.user) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const user = session.user as any;
@@ -70,11 +73,29 @@ export async function GET(request: NextRequest) {
         organizationId: user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null,
         role: user.role as 'student' | 'teacher' | 'admin' | 'superadmin',
       });
-      Object.assign(query, accessFilter);
+      if (Object.keys(accessFilter).length > 0) {
+        andFilters.push(accessFilter);
+      }
     }
 
-    if (course) query.course = course;
-    if (instructor) query.instructor = instructor;
+    if (course) andFilters.push({ course });
+    if (instructor) andFilters.push({ instructor });
+    if (chapter === 'none' || chapter === 'null') {
+      andFilters.push({ $or: [{ chapter: null }, { chapter: { $exists: false } }] });
+    } else if (chapter) {
+      andFilters.push({ chapter });
+    }
+    if (lesson === 'none' || lesson === 'null') {
+      andFilters.push({ $or: [{ lesson: null }, { lesson: { $exists: false } }] });
+    } else if (lesson) {
+      andFilters.push({ lesson });
+    }
+
+    if (andFilters.length === 1) {
+      Object.assign(query, andFilters[0]);
+    } else if (andFilters.length > 1) {
+      query.$and = andFilters;
+    }
 
     // Build select object for field selection
     let selectFields: Record<string, number> = {};
@@ -83,11 +104,24 @@ export async function GET(request: NextRequest) {
       fieldList.forEach(f => selectFields[f] = 1);
     } else {
       // Default fields to avoid over-fetching
-      selectFields = { title: 1, description: 1, timeLimit: 1, isPublished: 1, createdAt: 1, questionCount: 1, version: 1 };
+      selectFields = {
+        title: 1,
+        description: 1,
+        timeLimit: 1,
+        isPublished: 1,
+        createdAt: 1,
+        questionCount: 1,
+        version: 1,
+        chapter: 1,
+        lesson: 1,
+        course: 1,
+      };
     }
 
     const quizzes = await Quiz.find(query, selectFields)
       .populate('course', 'title description')
+      .populate('chapter', 'title')
+      .populate('lesson', 'title')
       .populate('instructor', 'name email')
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -172,7 +206,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { title, description, course, questions, timeLimit, isPublished } = validationResult.data;
+    const { title, description, course, chapter, lesson, questions, timeLimit, isPublished } =
+      validationResult.data;
 
     // Check teacher limits (skip for admins)
     if (session.user?.role === 'teacher') {
@@ -195,6 +230,11 @@ export async function POST(request: NextRequest) {
         { message: 'Course not found or you are not the instructor' },
         { status: 404 }
       );
+    }
+
+    const placementResult = await resolveQuizPlacement(course, { chapter, lesson });
+    if (!placementResult.ok) {
+      return NextResponse.json({ message: placementResult.message }, { status: 400 });
     }
 
     // Validate questions
@@ -224,6 +264,8 @@ export async function POST(request: NextRequest) {
       title,
       description,
       course,
+      chapter: placementResult.chapterId,
+      lesson: placementResult.lessonId,
       instructor: session.user.id,
       organizationId,
       timeLimit: timeLimit || 30,

@@ -40,10 +40,23 @@ export const createBlogSchema = z.object({
 export const updateBlogSchema = createBlogSchema.partial();
 
 // Quiz validation schemas
-export const createQuizSchema = z.object({
+const optionalChapterSchema = z.preprocess(
+  (val) => (val === '' ? null : val),
+  z.union([z.null(), objectIdSchema]).optional()
+);
+
+const optionalLessonSchema = z.preprocess(
+  (val) => (val === '' ? null : val),
+  z.union([z.null(), objectIdSchema]).optional()
+);
+
+export const createQuizSchema = z
+  .object({
   title: z.string().min(1, 'Title is required').max(200, 'Title must be less than 200 characters'),
   description: z.string().max(1000, 'Description must be less than 1000 characters').optional(),
   course: objectIdSchema,
+  chapter: optionalChapterSchema,
+  lesson: optionalLessonSchema,
   questions: z.array(z.object({
     question: z.string().min(1, 'Question is required').max(500, 'Question must be less than 500 characters'),
     options: z.array(z.string().min(1, 'Option cannot be empty')).min(2, 'At least 2 options required').max(6, 'Maximum 6 options allowed'),
@@ -51,7 +64,11 @@ export const createQuizSchema = z.object({
   })).min(1, 'At least 1 question is required'),
   timeLimit: z.number().int().min(1, 'Time limit must be at least 1 minute').max(180, 'Time limit must be at most 180 minutes').optional(),
   isPublished: z.boolean().optional(),
-});
+})
+  .refine((data) => !(data.chapter && data.lesson), {
+    message: 'Assign quiz to either a chapter or a lesson, not both',
+    path: ['lesson'],
+  });
 
 export const updateQuizSchema = createQuizSchema.partial();
 

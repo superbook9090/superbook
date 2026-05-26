@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 
 export default function EditCoursePageContent({ courseId }: { courseId: string }) {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<'basic' | 'curriculum'>('basic');
+  const [activeTab, setActiveTab] = useState<'basic' | 'curriculum'>('curriculum');
 
   return (
     <div>

@@ -35,6 +35,7 @@ export type QuizEditResponse = {
     timeLimit: number;
     isPublished: boolean;
     course?: string | { _id: string; title?: string };
+    chapter?: string | { _id: string; title?: string } | null;
   };
   questions?: QuizEditQuestion[];
 };

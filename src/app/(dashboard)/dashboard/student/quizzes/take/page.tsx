@@ -15,6 +15,10 @@ import ConfirmModal from '@/components/ui/ConfirmModal';
 import { useSessionStore } from '@/store/useSessionStore';
 import { QuizQuestionProgress } from '@/features/quizzes/components/QuizQuestionProgress';
 import { PageSkeleton } from '@/components/ui/Skeleton';
+import {
+  computeQuizTimeRemainingSeconds,
+  computeQuizTimeTakenSeconds,
+} from '@/lib/quiz/attemptTime';
 
 interface Question {
   _id: string;
@@ -60,6 +64,7 @@ export default function TakeQuizPage() {
   const [securityWarning, setSecurityWarning] = useState<string | null>(null);
   const [violationRetryCount, setViolationRetryCount] = useState(0);
   const [showViolationModal, setShowViolationModal] = useState(false);
+  const [isAutoSubmitting, setIsAutoSubmitting] = useState(false);
   const isSubmittingRef = useRef(false);
   const forceSubmitQuizRef = useRef<(() => Promise<void>) | null>(null);
   const { setQuizActive } = useQuiz();
@@ -94,44 +99,57 @@ export default function TakeQuizPage() {
     enabled: true,
   });
 
-  // Force submit quiz on security violation
-  const forceSubmitQuiz = useCallback(async () => {
-    if (!attempt || isSubmittingRef.current) return;
+  const submitAttempt = useCallback(
+    async (
+      attemptData: Attempt,
+      answerMap: Record<string, number>,
+      options: { forceSubmit?: boolean; timeTakenOverride?: number } = {}
+    ) => {
+      if (isSubmittingRef.current) return;
+      isSubmittingRef.current = true;
+      setIsAutoSubmitting(true);
 
-    isSubmittingRef.current = true;
-
-    try {
-      // Format answers for API
-      const formattedAnswers = Object.entries(answers).map(([questionId, selectedOption]) => ({
-        questionId,
-        selectedOption,
+      const formattedAnswers = attemptData.questions.map((q) => ({
+        questionId: q._id,
+        selectedOption: answerMap[q._id] ?? -1,
       }));
 
-      attempt.questions.forEach((q) => {
-        if (!(q._id in answers)) {
-          formattedAnswers.push({ questionId: q._id, selectedOption: -1 });
-        }
-      });
+      const timeTaken =
+        options.timeTakenOverride ??
+        computeQuizTimeTakenSeconds(attemptData.startedAt, attemptData.quiz.timeLimit);
 
-      const timeTaken = attempt.quiz.timeLimit * 60 - timeRemaining;
+      try {
+        const data = await submitQuizMutation.mutateAsync({
+          quizId: attemptData.quiz._id,
+          action: 'submit',
+          answers: formattedAnswers,
+          timeTaken,
+          forceSubmit: options.forceSubmit,
+        });
 
-      await submitQuizMutation.mutateAsync({
-        quizId: attempt.quiz._id,
-        action: 'submit',
-        answers: formattedAnswers,
-        timeTaken,
-      });
+        quizSecurity.stopQuiz();
+        setQuizActive(false);
+        router.push(`/dashboard/student/quizzes/${data.attempt._id}/result`);
+      } catch (err) {
+        console.error('Error submitting quiz:', err);
+        const errorMsg = options.forceSubmit
+          ? t('errors.securityForceSubmitFailed')
+          : t('errors.errorSubmittingQuiz');
+        setError(errorMsg);
+        setAlertState({ type: 'error', message: errorMsg });
+        isSubmittingRef.current = false;
+        setIsAutoSubmitting(false);
+      }
+    },
+    [router, submitQuizMutation, quizSecurity, setQuizActive, t]
+  );
 
-      // Exit fullscreen, restore sidebar, and set quiz inactive after submission
-      quizSecurity.stopQuiz();
-      setQuizActive(false);
-
-      router.push(`/dashboard/student/quizzes/${attempt._id}/result`);
-    } catch (err) {
-      console.error('Error force-submitting quiz:', err);
-      setError(t('errors.securityForceSubmitFailed'));
-    }
-  }, [attempt, answers, timeRemaining, router, submitQuizMutation, setQuizActive, quizSecurity, t]);
+  // Force submit quiz on security violation
+  const forceSubmitQuiz = useCallback(async () => {
+    if (!attempt) return;
+    const timeTaken = Math.max(0, attempt.quiz.timeLimit * 60 - timeRemaining);
+    await submitAttempt(attempt, answers, { forceSubmit: true, timeTakenOverride: timeTaken });
+  }, [attempt, answers, timeRemaining, submitAttempt]);
 
   // Update ref when forceSubmitQuiz changes
   useEffect(() => {
@@ -178,6 +196,8 @@ export default function TakeQuizPage() {
     setShowViolationModal(false);
     setError('');
     setIsLoading(true);
+    setIsAutoSubmitting(false);
+    isSubmittingRef.current = false;
   }, [attemptId]);
 
   // Store stopQuiz in a ref to avoid dependency issues
@@ -208,15 +228,13 @@ export default function TakeQuizPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, status]);
 
-  // Timer
+  // Timer — only runs while time remains
   useEffect(() => {
-    if (timeRemaining <= 0 || !attempt) return;
+    if (!attempt || attempt.status !== 'in_progress' || timeRemaining <= 0) return;
 
     const timer = setInterval(() => {
       setTimeRemaining((prev) => {
         if (prev <= 1) {
-          // Auto-submit when time runs out
-          handleSubmit(true);
           return 0;
         }
         return prev - 1;
@@ -224,8 +242,14 @@ export default function TakeQuizPage() {
     }, 1000);
 
     return () => clearInterval(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [attempt]);
+  }, [attempt, timeRemaining]);
+
+  // Auto-submit when timer hits zero (including on load if already expired)
+  useEffect(() => {
+    if (!attempt || attempt.status !== 'in_progress' || timeRemaining > 0) return;
+    if (isSubmittingRef.current) return;
+    void submitAttempt(attempt, answers, { forceSubmit: true });
+  }, [attempt, timeRemaining, answers, submitAttempt]);
 
   const fetchAttempt = async () => {
     if (!attemptId) {
@@ -242,26 +266,28 @@ export default function TakeQuizPage() {
           ...foundAttempt,
           questions: extraQuestions?.length ? extraQuestions : (foundAttempt as { questions?: Question[] }).questions || [],
         };
-        setAttempt(merged);
 
-        // Calculate remaining time
-        const elapsedSeconds = Math.floor(
-          (Date.now() - new Date(foundAttempt.startedAt).getTime()) / 1000
+        const remaining = computeQuizTimeRemainingSeconds(
+          foundAttempt.startedAt,
+          foundAttempt.quiz.timeLimit
         );
-        const totalSeconds = foundAttempt.quiz.timeLimit * 60;
-        const remaining = Math.max(0, totalSeconds - elapsedSeconds);
+        setAttempt(merged);
         setTimeRemaining(remaining);
 
-        // Start fullscreen mode and set quiz active
+        if (remaining <= 0) {
+          setIsLoading(false);
+          await submitAttempt(merged, {}, { forceSubmit: true });
+          return;
+        }
+
         await quizSecurity.startQuiz();
         setQuizActive(true);
       } else if (
         foundAttempt &&
         (foundAttempt.status === 'completed' || foundAttempt.status === 'force_submitted')
       ) {
-        // Attempt is completed, allow retry
-        setAttempt({ ...foundAttempt, questions: [] });
-        setError('quiz_completed');
+        router.push(`/dashboard/student/quizzes/${foundAttempt._id}/result`);
+        return;
       } else {
         setError(t('errors.quizAttemptNotFound'));
       }
@@ -298,46 +324,20 @@ export default function TakeQuizPage() {
     setAnswers((prev) => ({ ...prev, [questionId]: optionIndex }));
   };
 
-  const handleSubmit = useCallback(async (autoSubmit = false) => {
-    if (!attempt) return;
+  const handleSubmit = useCallback(
+    async (autoSubmit = false) => {
+      if (!attempt) return;
 
-    if (!autoSubmit) {
-      setShowSubmitModal(true);
-      return;
-    }
-
-    const formattedAnswers = Object.entries(answers).map(([questionId, selectedOption]) => ({
-      questionId,
-      selectedOption,
-    }));
-
-    attempt.questions.forEach((q) => {
-      if (!(q._id in answers)) {
-        formattedAnswers.push({ questionId: q._id, selectedOption: -1 });
+      if (!autoSubmit) {
+        setShowSubmitModal(true);
+        return;
       }
-    });
 
-    const timeTaken = attempt.quiz.timeLimit * 60 - timeRemaining;
-
-    try {
-      const data = await submitQuizMutation.mutateAsync({
-        quizId: attempt.quiz._id,
-        action: 'submit',
-        answers: formattedAnswers,
-        timeTaken,
-      });
-
-      // Exit fullscreen, restore sidebar, and set quiz inactive
-      quizSecurity.stopQuiz();
-      setQuizActive(false);
-
-      router.push(`/dashboard/student/quizzes/${data.attempt._id}/result`);
-    } catch {
-      const errorMsg = t('errors.errorSubmittingQuiz');
-      setError(errorMsg);
-      setAlertState({ type: 'error', message: errorMsg });
-    }
-  }, [attempt, answers, timeRemaining, router, submitQuizMutation, quizSecurity, setQuizActive, t]);
+      const timeTaken = Math.max(0, attempt.quiz.timeLimit * 60 - timeRemaining);
+      await submitAttempt(attempt, answers, { timeTakenOverride: timeTaken });
+    },
+    [attempt, answers, timeRemaining, submitAttempt]
+  );
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -345,7 +345,7 @@ export default function TakeQuizPage() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  if (status === 'loading' || isLoading) {
+  if (status === 'loading' || isLoading || isAutoSubmitting) {
     return <PageSkeleton />;
   }
 

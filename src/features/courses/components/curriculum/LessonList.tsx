@@ -6,6 +6,8 @@ import { CSS } from '@dnd-kit/utilities';
 import { Video, FileText, Clock, PlusCircle } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { Lesson } from '@/lib/react-query/hooks';
+import type { CurriculumLesson } from '@/lib/curriculum/tree';
+import { CurriculumQuizBlock } from './CurriculumQuizBlock';
 import { sortableId } from '@/lib/curriculum/sortable';
 import { cn } from '@/lib/utils';
 import { DragHandleButton, RowEditDeleteActions } from './shared';
@@ -53,13 +55,15 @@ function SortableLessonRow({
 
 export function LessonList({
   chapterId,
+  courseId,
   lessons,
   onEditLesson,
   onDeleteLesson,
   onAddLesson,
 }: {
   chapterId: string;
-  lessons: Lesson[];
+  courseId: string;
+  lessons: Array<Lesson & Partial<Pick<CurriculumLesson, 'quizzes'>>>;
   onEditLesson: (lesson: Lesson) => void;
   onDeleteLesson: (id: string) => void;
   onAddLesson: (chapterId: string) => void;
@@ -71,12 +75,22 @@ export function LessonList({
     <SortableContext items={ids} strategy={verticalListSortingStrategy}>
       <div className="space-y-2 min-h-[8px]">
         {lessons.map((lesson) => (
-          <SortableLessonRow
-            key={lesson._id}
-            lesson={lesson}
-            onEdit={() => onEditLesson(lesson)}
-            onDelete={() => onDeleteLesson(lesson._id)}
-          />
+          <div key={lesson._id} className="space-y-2">
+            <SortableLessonRow
+              lesson={lesson}
+              onEdit={() => onEditLesson(lesson)}
+              onDelete={() => onDeleteLesson(lesson._id)}
+            />
+            <div className="ml-6 sm:ml-8">
+              <CurriculumQuizBlock
+                courseId={courseId}
+                quizzes={lesson.quizzes ?? []}
+                placement="lesson"
+                lessonId={lesson._id}
+                compact
+              />
+            </div>
+          </div>
         ))}
         <button
           type="button"

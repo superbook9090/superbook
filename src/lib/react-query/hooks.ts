@@ -1,6 +1,8 @@
 'use client';
 
+import { useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { filterQuizzesByCourse } from '@/lib/quiz/quizCourse';
 import type { DashboardData, TeacherDashboardData } from '@/app/api/dashboard/route';
 import { listBlogs, createBlog, deleteBlog, updateBlog, type CreateBlogInput } from '@/lib/api/blogs';
 import { addFavorite, listFavorites, removeFavorite, type FavoritesListResult } from '@/lib/api/favorites';
@@ -71,6 +73,8 @@ export interface Quiz {
   title: string;
   description: string;
   course: { _id: string; title: string };
+  chapter?: { _id: string; title: string } | string | null;
+  lesson?: { _id: string; title: string } | string | null;
   instructor: { _id: string; name: string; email: string };
   isPublished: boolean;
   timeLimit: number;
@@ -155,6 +159,16 @@ export interface Chapter {
   order: number;
   lessonCount: number;
   lessons?: Lesson[];
+  quizzes?: Array<{
+    _id: string;
+    title: string;
+    timeLimit: number;
+    questionCount?: number;
+    isPublished: boolean;
+    course: string;
+    chapter: string | null;
+    lesson: string | null;
+  }>;
   subChapters?: Chapter[];
   course: string;
   parentChapter?: string | null;
@@ -204,6 +218,22 @@ export function useQuizzes(orgId?: string) {
     },
     enabled: !!orgId || orgId === 'public',
   });
+}
+
+/** Quizzes for one course, optionally published-only (student views). */
+export function useCourseQuizzes(
+  courseId: string,
+  options?: { orgId?: string; publishedOnly?: boolean }
+) {
+  const orgId = options?.orgId ?? 'public';
+  const query = useQuizzes(orgId);
+
+  const quizzes = useMemo(() => {
+    const filtered = filterQuizzesByCourse(query.data ?? [], courseId);
+    return options?.publishedOnly ? filtered.filter((q) => q.isPublished) : filtered;
+  }, [query.data, courseId, options?.publishedOnly]);
+
+  return { ...query, quizzes };
 }
 
 export function useEnrollments() {

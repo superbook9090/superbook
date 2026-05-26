@@ -11,7 +11,7 @@ export type QuizStartInfo = {
   title: string;
   questionCount?: number;
   timeLimit?: number;
-  mode?: 'start' | 'retake';
+  mode?: 'start' | 'retake' | 'continue';
 };
 
 export function QuizStartConfirmModal({
@@ -46,6 +46,23 @@ export function QuizStartConfirmModal({
   if (!mounted || !quiz) return null;
 
   const isRetake = quiz.mode === 'retake';
+  const isContinue = quiz.mode === 'continue';
+
+  const titleKey = isContinue
+    ? 'quiz.confirmContinueTitle'
+    : isRetake
+      ? 'quiz.confirmRetakeTitle'
+      : 'quiz.confirmStartTitle';
+  const messageKey = isContinue
+    ? 'quiz.confirmContinueMessage'
+    : isRetake
+      ? 'quiz.confirmRetakeMessage'
+      : 'quiz.confirmStartMessage';
+  const confirmKey = isContinue
+    ? 'courses.continue'
+    : isRetake
+      ? 'quiz.retake'
+      : 'quiz.startQuiz';
 
   return createPortal(
     <AnimatePresence>
@@ -79,13 +96,11 @@ export function QuizStartConfirmModal({
               </div>
 
               <h2 className="text-xl sm:text-2xl font-bold text-[var(--color-foreground)] text-center mb-2">
-                {isRetake ? t('quiz.confirmRetakeTitle') : t('quiz.confirmStartTitle')}
+                {t(titleKey)}
               </h2>
 
               <p className="text-sm text-[var(--color-muted-foreground)] text-center mb-4">
-                {isRetake
-                  ? t('quiz.confirmRetakeMessage', { title: quiz.title })
-                  : t('quiz.confirmStartMessage', { title: quiz.title })}
+                {t(messageKey, { title: quiz.title })}
               </p>
 
               <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)]/50 p-4 space-y-3 mb-4">
@@ -126,10 +141,8 @@ export function QuizStartConfirmModal({
                       <Loader size="sm" />
                       {t('common.loading')}
                     </>
-                  ) : isRetake ? (
-                    t('quiz.retake')
                   ) : (
-                    t('quiz.startQuiz')
+                    t(confirmKey)
                   )}
                 </button>
               </div>

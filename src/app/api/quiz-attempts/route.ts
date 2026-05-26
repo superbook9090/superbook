@@ -12,6 +12,7 @@ import { logInfo, logError, logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
 import { getCachedData, setCachedData, invalidatePattern } from '@/lib/redis';
 import { listQuestionsForQuiz } from '@/domain/learning/quizContent';
+import { finalizeExpiredQuizAttemptIfNeeded } from '@/domain/learning/finalizeExpiredQuizAttempt';
 import type { Types } from 'mongoose';
 
 function toClientQuestions(rows: { _id: Types.ObjectId; order: number; prompt: string; options: string[] }[]) {
@@ -80,7 +81,7 @@ export async function GET(request: NextRequest) {
         }
       : undefined;
 
-    const attempts = await QuizAttempt.find(query, selectFields)
+    let attempts = await QuizAttempt.find(query, selectFields)
       .populate('quiz', 'title description timeLimit questionCount version course')
       .populate('course', 'title description')
       .populate('student', 'name email')
@@ -88,6 +89,47 @@ export async function GET(request: NextRequest) {
       .skip(skip)
       .limit(limit)
       .lean();
+
+    if (attemptId && attempts[0]) {
+      const raw = attempts[0] as unknown as {
+        _id: Types.ObjectId;
+        status: string;
+        startedAt: Date;
+        quiz: Types.ObjectId | { _id: Types.ObjectId };
+        course: Types.ObjectId;
+        quizVersion: number;
+        totalQuestions: number;
+        violationCount?: number;
+      };
+      const quizRef = raw.quiz;
+      const quizId =
+        typeof quizRef === 'object' && quizRef !== null && '_id' in quizRef
+          ? quizRef._id
+          : (quizRef as Types.ObjectId);
+
+      const finalized = await finalizeExpiredQuizAttemptIfNeeded({
+        _id: raw._id,
+        status: raw.status,
+        startedAt: raw.startedAt,
+        quiz: quizId,
+        course: raw.course,
+        quizVersion: raw.quizVersion,
+        totalQuestions: raw.totalQuestions,
+        violationCount: raw.violationCount,
+      });
+
+      if (finalized) {
+        await invalidatePattern(`quiz-attempts:${session.user.id}:*`);
+        attempts = await QuizAttempt.find(query, selectFields)
+          .populate('quiz', 'title description timeLimit questionCount version course')
+          .populate('course', 'title description')
+          .populate('student', 'name email')
+          .sort({ startedAt: -1 })
+          .skip(skip)
+          .limit(limit)
+          .lean();
+      }
+    }
 
     const sanitizedAttempts = attempts.map((attempt) => {
       const a = { ...attempt } as Record<string, unknown>;

@@ -80,8 +80,27 @@ function QuizCard({
     });
   };
 
-  const handleConfirmStart = async () => {
-    if (!onStart || !confirmQuiz) return;
+  const openContinueConfirm = () => {
+    setConfirmQuiz({
+      title: quiz.title,
+      questionCount: quiz.questionCount,
+      timeLimit: quiz.timeLimit,
+      mode: 'continue',
+    });
+  };
+
+  const handleConfirm = async () => {
+    if (!confirmQuiz) return;
+
+    if (confirmQuiz.mode === 'continue') {
+      if (attempt && onContinue) {
+        onContinue(attempt._id);
+        setConfirmQuiz(null);
+      }
+      return;
+    }
+
+    if (!onStart) return;
     setIsLoading(true);
     try {
       await onStart(quiz._id);
@@ -102,12 +121,6 @@ function QuizCard({
   };
 
   const handleRetake = () => openStartConfirm('retake');
-
-  const handleContinue = () => {
-    if (attempt && onContinue) {
-      onContinue(attempt._id);
-    }
-  };
 
   const getScoreVariant = (score: number) => {
     if (score >= 70) return 'success';
@@ -268,7 +281,7 @@ function QuizCard({
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={handleContinue}
+              onClick={openContinueConfirm}
               className={cn(
                 'flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r px-4 py-3 text-sm font-semibold text-white transition-all hover:opacity-90 sm:text-base',
                 theme.gradient
@@ -321,7 +334,7 @@ function QuizCard({
         quiz={confirmQuiz}
         isOpen={!!confirmQuiz}
         isLoading={isLoading}
-        onConfirm={handleConfirmStart}
+        onConfirm={handleConfirm}
         onCancel={() => setConfirmQuiz(null)}
       />
     </motion.div>
