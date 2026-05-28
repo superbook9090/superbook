@@ -4,6 +4,8 @@ import { ROUTES } from '@/constants/routes';
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
+import { useSessionStore } from '@/store/useSessionStore';
+import { invalidateAfterQuizChange } from '@/lib/react-query/hooks';
 import * as XLSX from 'xlsx';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
@@ -50,6 +52,8 @@ export default function CreateQuizForm({ quizId }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
+  const session = useSessionStore((s) => s.session);
+  const orgId = (session?.user as { organizationId?: string })?.organizationId || 'public';
   const { theme } = useRoleTheme();
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
@@ -527,7 +531,7 @@ export default function CreateQuizForm({ quizId }: Props) {
         });
       }
 
-      await queryClient.invalidateQueries({ queryKey: ['quizzes'] });
+      await invalidateAfterQuizChange(queryClient, formData.course, orgId);
       router.push(ROUTES.teacher.quizzes);
     } catch (err) {
       const message =

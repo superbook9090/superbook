@@ -12,6 +12,7 @@ import mongoose from 'mongoose';
 import { validateContentAccess } from '@/lib/accessControl';
 import { listQuestionsForQuiz, setQuizQuestions } from '@/domain/learning/quizContent';
 import { resolveQuizPlacement } from '@/lib/quiz/quizPlacement';
+import { invalidatePattern } from '@/lib/redis';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const logContext: LogContext = { method: 'GET', path: '/api/quizzes/[id]' };
@@ -168,6 +169,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     await quiz.save();
 
+    const orgId = user.organizationId?.toString() || 'public';
+    await invalidatePattern(`quizzes:${orgId}:*`);
+
     return NextResponse.json({ message: 'Quiz updated successfully', quiz }, { status: 200 });
   } catch (error) {
     logApiError(error as Error, 'PATCH', '/api/quizzes/[id]', logContext);
@@ -217,6 +221,9 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
 
     await QuizQuestion.deleteMany({ quiz: quiz._id });
     await Quiz.findByIdAndDelete(id);
+
+    const orgId = user.organizationId?.toString() || 'public';
+    await invalidatePattern(`quizzes:${orgId}:*`);
 
     return NextResponse.json({ message: 'Quiz deleted successfully' }, { status: 200 });
   } catch (error) {

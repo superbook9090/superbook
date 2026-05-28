@@ -10,7 +10,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
 import { patchQuiz, deleteQuiz } from '@/lib/api/quizzes';
-import { useTeacherQuizzesList, type Quiz } from '@/lib/react-query/hooks';
+import { invalidateAfterQuizChange, useTeacherQuizzesList, type Quiz } from '@/lib/react-query/hooks';
 import { ApiClientError } from '@/lib/api/http';
 import Alert from '@/components/ui/Alert';
 import { PageSkeleton } from '@/components/ui/Skeleton';
@@ -21,6 +21,7 @@ export default function TeacherQuizzesPage() {
   const router = useRouter();
   const { theme } = useRoleTheme();
   const queryClient = useQueryClient();
+  const orgId = (session?.user as { organizationId?: string })?.organizationId || 'public';
   const enabled = status === 'authenticated' && !!session;
   const { data, isLoading, error: fetchError } = useTeacherQuizzesList(enabled);
   const courses = useMemo(() => data?.courses ?? [], [data?.courses]);
@@ -28,6 +29,13 @@ export default function TeacherQuizzesPage() {
   const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
 
   // Memoized helper to safely get course title
+  const getCourseId = useCallback((course: Quiz['course'] | string): string => {
+    if (typeof course === 'object' && course !== null && '_id' in course) {
+      return course._id;
+    }
+    return typeof course === 'string' ? course : '';
+  }, []);
+
   const getCourseTitle = useCallback(
     (course: Quiz['course'] | string): string => {
       if (typeof course === 'object' && course !== null && 'title' in course) {
@@ -55,9 +63,10 @@ export default function TeacherQuizzesPage() {
         : '';
 
   const handleTogglePublish = useCallback(async (quizId: string, currentStatus: boolean) => {
+    const quiz = quizzes.find((q) => q._id === quizId);
     try {
       await patchQuiz(quizId, { isPublished: !currentStatus });
-      await queryClient.invalidateQueries({ queryKey: ['quizzes'] });
+      await invalidateAfterQuizChange(queryClient, quiz ? getCourseId(quiz.course) : '', orgId);
     } catch (err) {
       setAlertState({
         type: 'error',
@@ -65,14 +74,15 @@ export default function TeacherQuizzesPage() {
           err instanceof ApiClientError ? err.message : t('teacherQuizzes.errorUpdateQuiz'),
       });
     }
-  }, [queryClient, t]);
+  }, [queryClient, quizzes, getCourseId, orgId, t]);
 
   const handleDelete = useCallback(async (quizId: string) => {
     if (!confirm(t('teacherQuizzes.confirmDeleteQuiz'))) return;
 
+    const quiz = quizzes.find((q) => q._id === quizId);
     try {
       await deleteQuiz(quizId);
-      await queryClient.invalidateQueries({ queryKey: ['quizzes'] });
+      await invalidateAfterQuizChange(queryClient, quiz ? getCourseId(quiz.course) : '', orgId);
     } catch (err) {
       setAlertState({
         type: 'error',
@@ -80,7 +90,7 @@ export default function TeacherQuizzesPage() {
           err instanceof ApiClientError ? err.message : t('teacherQuizzes.errorDeleteQuiz'),
       });
     }
-  }, [queryClient, t]);
+  }, [queryClient, quizzes, getCourseId, orgId, t]);
 
   if (status === 'loading' || isLoading) {
     return <PageSkeleton />;

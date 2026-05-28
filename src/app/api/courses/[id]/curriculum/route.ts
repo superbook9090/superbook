@@ -3,24 +3,39 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import { Course, Chapter, Lesson } from '@/models';
+import Quiz from '@/models/Quiz';
 import { ensureChapterIndexes } from '@/models/Chapter';
 import { createChapterSchema } from '@/lib/validation';
-import { buildCurriculumTree } from '@/lib/curriculum/tree';
+import { attachQuizzesToCurriculumTree, buildCurriculumTree } from '@/lib/curriculum/tree';
 import { authorizeCourseEditor } from '@/lib/curriculum/authorize';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
 
-async function fetchCurriculumTree(courseId: string) {
+async function fetchCurriculumTree(courseId: string, publishedQuizzesOnly: boolean) {
   const chapters = await Chapter.find({ course: courseId }).sort({ order: 1 }).lean();
   const lessons = await Lesson.find({ course: courseId })
     .sort({ order: 1 })
     .select('-content')
     .lean();
 
-    return buildCurriculumTree(
-      chapters as unknown as Parameters<typeof buildCurriculumTree>[0],
-      lessons as unknown as Parameters<typeof buildCurriculumTree>[1]
-    );
+  const tree = buildCurriculumTree(
+    chapters as unknown as Parameters<typeof buildCurriculumTree>[0],
+    lessons as unknown as Parameters<typeof buildCurriculumTree>[1]
+  );
+
+  const quizFilter: { course: string; isPublished?: boolean } = { course: courseId };
+  if (publishedQuizzesOnly) {
+    quizFilter.isPublished = true;
+  }
+
+  const quizzes = await Quiz.find(quizFilter)
+    .select('title description timeLimit questionCount isPublished course chapter lesson')
+    .lean();
+
+  return attachQuizzesToCurriculumTree(
+    tree,
+    quizzes as unknown as Parameters<typeof attachQuizzesToCurriculumTree>[1]
+  );
 }
 
 async function validateParentChapter(
@@ -49,8 +64,11 @@ export async function GET(
     await dbConnect();
     await ensureChapterIndexes();
     const { id } = await params;
+    const session = await getServerSession(authOptions);
+    const publishedQuizzesOnly =
+      !session?.user?.role || session.user.role === 'student';
 
-    const tree = await fetchCurriculumTree(id);
+    const tree = await fetchCurriculumTree(id, publishedQuizzesOnly);
     return NextResponse.json(serialize(tree));
   } catch (error) {
     logApiError(error as Error, 'GET', '/api/courses/[id]/curriculum', logContext);

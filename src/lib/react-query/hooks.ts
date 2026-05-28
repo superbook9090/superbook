@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { filterQuizzesByCourse } from '@/lib/quiz/quizCourse';
 import type { DashboardData, TeacherDashboardData } from '@/app/api/dashboard/route';
 import { listBlogs, createBlog, deleteBlog, updateBlog, type CreateBlogInput } from '@/lib/api/blogs';
@@ -656,4 +656,18 @@ export function useReorderCurriculum() {
       queryClient.invalidateQueries({ queryKey: ['courses', courseId, 'curriculum'] });
     },
   });
+}
+
+/** Keep quiz lists and course curriculum in sync after create/update/delete. */
+export function invalidateAfterQuizChange(
+  queryClient: QueryClient,
+  courseId: string,
+  orgId = 'public'
+) {
+  if (!courseId) return;
+  queryClient.invalidateQueries({ queryKey: ['quizzes'] });
+  queryClient.invalidateQueries({ queryKey: QUERY_KEYS.QUIZZES(orgId) });
+  queryClient.invalidateQueries({ queryKey: ['quizzes', 'teacher-list'] });
+  queryClient.invalidateQueries({ queryKey: ['courses', courseId, 'curriculum'] });
+  queryClient.invalidateQueries({ queryKey: QUERY_KEYS.DASHBOARD });
 }
