@@ -9,6 +9,15 @@ export function listQuizzesByOrg(orgId: string): Promise<QuizzesListPayload> {
   return apiJson(`${BASE}?orgId=${encodeURIComponent(o)}`, { method: 'GET' });
 }
 
+/** All quizzes for one course (avoids org-wide pagination missing lesson-scoped quizzes). */
+export function listQuizzesByCourse(courseId: string): Promise<QuizzesListPayload> {
+  const params = new URLSearchParams({
+    course: courseId,
+    limit: '200',
+  });
+  return apiJson(`${BASE}?${params.toString()}`, { method: 'GET' });
+}
+
 /** GET `/api/quizzes` without org filter (admin all quizzes, teacher client-side filter). */
 export function listQuizzesAll(): Promise<QuizzesListPayload> {
   return apiJson(BASE, { method: 'GET' });

@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Trash2, X, Video, Clock, Save, UploadCloud } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
-import { useAddLesson, useUpdateLesson, type Lesson } from '@/lib/react-query/hooks';
+import { useAddLesson, useUpdateLesson, useLesson, type Lesson } from '@/lib/react-query/hooks';
 import dynamic from 'next/dynamic';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 
@@ -49,6 +49,7 @@ export default function CurriculumEditor({ courseId }: CurriculumEditorProps) {
 
       {(editingLesson || isAddingLesson) && (
         <LessonForm
+          key={editingLesson?._id ?? isAddingLesson?.chapterId ?? 'new'}
           lesson={editingLesson}
           chapterId={isAddingLesson?.chapterId}
           onClose={() => {
@@ -74,6 +75,7 @@ export default function CurriculumEditor({ courseId }: CurriculumEditorProps) {
 function LessonForm({ lesson, onClose, onSave, isSaving }: LessonFormProps) {
   const { t } = useTranslation();
   const { session } = useSessionStore();
+  const { data: fullLesson, isLoading: loadingLesson } = useLesson(lesson?._id ?? '');
 
   const canUpload =
     session?.user?.canUploadVideos ||
@@ -96,6 +98,21 @@ function LessonForm({ lesson, onClose, onSave, isSaving }: LessonFormProps) {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const xhrRef = useRef<XMLHttpRequest | null>(null);
+
+  useEffect(() => {
+    if (!fullLesson) return;
+    setTitle(fullLesson.title || '');
+    setDescription(fullLesson.description || '');
+    setVideoUrl(fullLesson.videoUrl || '');
+    setYoutubeVideoId(fullLesson.youtubeVideoId || '');
+    setVideoEmbedUrl(fullLesson.videoEmbedUrl || '');
+    setThumbnail(fullLesson.thumbnail || '');
+    setDuration(fullLesson.duration || 0);
+    setContent(fullLesson.content || '');
+    setNotesPdf(fullLesson.notesPdf || '');
+    setIsPreview(fullLesson.isPreview || false);
+    setAttachments(fullLesson.attachments || []);
+  }, [fullLesson]);
 
   const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -192,6 +209,10 @@ function LessonForm({ lesson, onClose, onSave, isSaving }: LessonFormProps) {
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-hide">
+          {loadingLesson && lesson ? (
+            <PageSkeleton variant="embed" />
+          ) : (
+          <>
           <EditorField label={t('curriculum.lessonTitle')}>
             <input
               value={title}
@@ -405,6 +426,8 @@ function LessonForm({ lesson, onClose, onSave, isSaving }: LessonFormProps) {
               minHeight={180}
             />
           </EditorSection>
+          </>
+          )}
         </div>
 
         <div className="px-4 py-3 border-t border-[var(--color-border)] bg-[var(--color-surface-muted)] flex justify-end gap-2 shrink-0">

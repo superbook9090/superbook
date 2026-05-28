@@ -1,8 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
-import { filterQuizzesByCourse } from '@/lib/quiz/quizCourse';
 import type { DashboardData, TeacherDashboardData } from '@/app/api/dashboard/route';
 import { listBlogs, createBlog, deleteBlog, updateBlog, type CreateBlogInput } from '@/lib/api/blogs';
 import { addFavorite, listFavorites, removeFavorite, type FavoritesListResult } from '@/lib/api/favorites';
@@ -22,7 +20,7 @@ import {
   reorderCurriculum,
   getLesson
 } from '@/lib/api/courses';
-import { listQuizzesByOrg, listQuizzesAll } from '@/lib/api/quizzes';
+import { listQuizzesByOrg, listQuizzesAll, listQuizzesByCourse } from '@/lib/api/quizzes';
 import { listTeacherCoursesSelf } from '@/lib/api/courses';
 import { listEnrollments, enrollInCourse, joinCourseByCode, dropEnrollment } from '@/lib/api/enrollments';
 import { listQuizAttempts, startQuizAttempt, submitQuizAttempt, type SubmitQuizAttemptInput } from '@/lib/api/quizAttempts';
@@ -253,15 +251,22 @@ export function useCourseQuizzes(
   courseId: string,
   options?: { orgId?: string; publishedOnly?: boolean }
 ) {
-  const orgId = options?.orgId ?? 'public';
-  const query = useQuizzes(orgId);
+  const publishedOnly = options?.publishedOnly ?? false;
 
-  const quizzes = useMemo(() => {
-    const filtered = filterQuizzesByCourse(query.data ?? [], courseId);
-    return options?.publishedOnly ? filtered.filter((q) => q.isPublished) : filtered;
-  }, [query.data, courseId, options?.publishedOnly]);
+  const query = useQuery({
+    queryKey: ['quizzes', 'course', courseId, publishedOnly],
+    queryFn: async () => {
+      const data = await listQuizzesByCourse(courseId);
+      let quizzes = (data.quizzes || []) as Quiz[];
+      if (publishedOnly) {
+        quizzes = quizzes.filter((q) => q.isPublished);
+      }
+      return quizzes;
+    },
+    enabled: !!courseId,
+  });
 
-  return { ...query, quizzes };
+  return { ...query, quizzes: query.data ?? [] };
 }
 
 export function useEnrollments() {
@@ -667,6 +672,7 @@ export function invalidateAfterQuizChange(
   if (!courseId) return;
   queryClient.invalidateQueries({ queryKey: ['quizzes'] });
   queryClient.invalidateQueries({ queryKey: QUERY_KEYS.QUIZZES(orgId) });
+  queryClient.invalidateQueries({ queryKey: ['quizzes', 'course', courseId] });
   queryClient.invalidateQueries({ queryKey: ['quizzes', 'teacher-list'] });
   queryClient.invalidateQueries({ queryKey: ['courses', courseId, 'curriculum'] });
   queryClient.invalidateQueries({ queryKey: QUERY_KEYS.DASHBOARD });

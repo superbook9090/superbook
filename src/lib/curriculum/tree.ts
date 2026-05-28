@@ -200,6 +200,16 @@ function normalizeRawQuiz(quiz: RawQuiz): CurriculumQuiz {
   };
 }
 
+function mergeCurriculumQuizzes(
+  existing: CurriculumQuiz[] = [],
+  incoming: CurriculumQuiz[] = []
+): CurriculumQuiz[] {
+  if (!incoming.length) return existing;
+  const byId = new Map(existing.map((q) => [q._id, q]));
+  for (const q of incoming) byId.set(q._id, q);
+  return Array.from(byId.values());
+}
+
 /** Attach quizzes to chapter/subtopic nodes and to lessons (course-level excluded). */
 export function attachQuizzesToCurriculumTree(
   tree: CurriculumChapterNode[],
@@ -225,12 +235,15 @@ export function attachQuizzesToCurriculumTree(
   const attachLessons = (lessons: CurriculumLesson[]): CurriculumLesson[] =>
     lessons.map((lesson) => ({
       ...lesson,
-      quizzes: quizzesByLesson.get(lesson._id) ?? [],
+      quizzes: mergeCurriculumQuizzes(
+        lesson.quizzes,
+        quizzesByLesson.get(lesson._id) ?? []
+      ),
     }));
 
   const attachToNode = (node: CurriculumChapterNode): CurriculumChapterNode => ({
     ...node,
-    quizzes: quizzesByChapter.get(node._id) ?? [],
+    quizzes: mergeCurriculumQuizzes(node.quizzes, quizzesByChapter.get(node._id) ?? []),
     lessons: attachLessons(node.lessons),
     subChapters: node.subChapters.map(attachToNode),
   });
