@@ -9,6 +9,7 @@ import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
 import mongoose from 'mongoose';
 import { validateContentAccess } from '@/lib/accessControl';
+import { deleteCourseRelatedData } from '@/lib/cascade/deleteRelated';
 import { invalidatePattern } from '@/lib/redis';
 import { revalidateTag } from 'next/cache';
 import {
@@ -236,11 +237,13 @@ export async function DELETE(
       );
     }
 
+    await deleteCourseRelatedData(id);
     await Course.findByIdAndDelete(id);
 
     // Invalidate cache for this organization
     const orgId = course.organizationId?.toString() || 'public';
     await invalidatePattern(`courses:${orgId}:*`);
+    await invalidatePattern(`quizzes:${orgId}:*`);
     
     // Revalidate Next.js cache tag
     revalidateTag(`courses:${orgId}`);

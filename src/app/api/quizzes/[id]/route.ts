@@ -4,13 +4,13 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import Quiz from '@/models/Quiz';
-import QuizQuestion from '@/models/QuizQuestion';
 import { Course } from '@/models';
 import { updateQuizSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
 import mongoose from 'mongoose';
 import { validateContentAccess } from '@/lib/accessControl';
 import { listQuestionsForQuiz, setQuizQuestions } from '@/domain/learning/quizContent';
+import { deleteQuizzesAndQuestions } from '@/lib/cascade/deleteRelated';
 import { resolveQuizPlacement } from '@/lib/quiz/quizPlacement';
 import { invalidatePattern } from '@/lib/redis';
 
@@ -219,8 +219,7 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
       return NextResponse.json({ message: 'Not authorized to delete this quiz' }, { status: 403 });
     }
 
-    await QuizQuestion.deleteMany({ quiz: quiz._id });
-    await Quiz.findByIdAndDelete(id);
+    await deleteQuizzesAndQuestions([quiz._id]);
 
     const orgId = user.organizationId?.toString() || 'public';
     await invalidatePattern(`quizzes:${orgId}:*`);

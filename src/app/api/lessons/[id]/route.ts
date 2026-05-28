@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import { Course, Lesson, Chapter } from '@/models';
 import { updateLessonSchema } from '@/lib/validation';
+import { deleteLessonRelatedData } from '@/lib/cascade/deleteRelated';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
 
@@ -113,6 +114,7 @@ export async function DELETE(
     }
 
     const chapterId = lesson.chapter;
+    await deleteLessonRelatedData([id]);
     await Lesson.findByIdAndDelete(id);
 
     // Update counts

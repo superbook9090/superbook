@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import { Course, Chapter, Lesson } from '@/models';
 import { updateChapterSchema } from '@/lib/validation';
+import { deleteChapterRelatedData } from '@/lib/cascade/deleteRelated';
 import { authorizeCourseEditorByChapter } from '@/lib/curriculum/authorize';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
@@ -105,12 +106,12 @@ export async function DELETE(
 
     const courseId = chapter.course;
     const subChapters = await Chapter.find({ parentChapter: id }).select('_id');
-    const subChapterIds = subChapters.map((c) => c._id);
+    const subChapterIds = subChapters.map((c) => String(c._id));
 
     const allChapterIds = [id, ...subChapterIds];
     const lessonCount = await Lesson.countDocuments({ chapter: { $in: allChapterIds } });
 
-    await Lesson.deleteMany({ chapter: { $in: allChapterIds } });
+    await deleteChapterRelatedData(allChapterIds);
     if (subChapterIds.length) {
       await Chapter.deleteMany({ _id: { $in: subChapterIds } });
     }
