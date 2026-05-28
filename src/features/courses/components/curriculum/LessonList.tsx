@@ -60,6 +60,8 @@ export function LessonList({
   onEditLesson,
   onDeleteLesson,
   onAddLesson,
+  onDeleteQuiz,
+  isDeletePending,
 }: {
   chapterId: string;
   courseId: string;
@@ -67,6 +69,8 @@ export function LessonList({
   onEditLesson: (lesson: Lesson) => void;
   onDeleteLesson: (id: string) => void;
   onAddLesson: (chapterId: string) => void;
+  onDeleteQuiz: (quizId: string) => void;
+  isDeletePending?: boolean;
 }) {
   const { t } = useTranslation();
   const ids = useMemo(() => lessons.map((l) => sortableId('lesson', l._id)), [lessons]);
@@ -88,6 +92,8 @@ export function LessonList({
                 placement="lesson"
                 lessonId={lesson._id}
                 compact
+                onDeleteQuiz={onDeleteQuiz}
+                isDeletePending={isDeletePending}
               />
             </div>
           </div>

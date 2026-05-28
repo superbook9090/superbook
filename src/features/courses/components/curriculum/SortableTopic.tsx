@@ -29,6 +29,8 @@ export function SortableTopic({
   onEditLesson,
   onDeleteLesson,
   onAddLesson,
+  onDeleteQuiz,
+  isDeletePending,
 }: {
   topic: Chapter & Pick<CurriculumChapterNode, 'quizzes'>;
   courseId: string;
@@ -44,6 +46,8 @@ export function SortableTopic({
   onEditLesson: (lesson: Lesson) => void;
   onDeleteLesson: (id: string) => void;
   onAddLesson: (chapterId: string) => void;
+  onDeleteQuiz: (quizId: string) => void;
+  isDeletePending?: boolean;
 }) {
   const { t } = useTranslation();
   const id = sortableId('topic', topic._id);
@@ -91,6 +95,8 @@ export function SortableTopic({
               onEditLesson={onEditLesson}
               onDeleteLesson={onDeleteLesson}
               onAddLesson={onAddLesson}
+              onDeleteQuiz={onDeleteQuiz}
+              isDeletePending={isDeletePending}
             />
 
             <CurriculumQuizBlock
@@ -98,6 +104,8 @@ export function SortableTopic({
               quizzes={topic.quizzes ?? []}
               placement="chapter"
               chapterId={topic._id}
+              onDeleteQuiz={onDeleteQuiz}
+              isDeletePending={isDeletePending}
             />
 
             <SortableContext items={subIds} strategy={verticalListSortingStrategy}>
@@ -115,6 +123,8 @@ export function SortableTopic({
                     onEditLesson={onEditLesson}
                     onDeleteLesson={onDeleteLesson}
                     onAddLesson={onAddLesson}
+                    onDeleteQuiz={onDeleteQuiz}
+                    isDeletePending={isDeletePending}
                   />
                 ))}
               </div>

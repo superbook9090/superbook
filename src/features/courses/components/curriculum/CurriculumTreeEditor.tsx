@@ -22,6 +22,7 @@ import {
   useAddChapter,
   useDeleteChapter,
   useDeleteLesson,
+  useDeleteQuiz,
   useReorderCurriculum,
   useCourseQuizzes,
   type Chapter,
@@ -68,6 +69,7 @@ export default function CurriculumTreeEditor({
   const addChapter = useAddChapter();
   const deleteChapter = useDeleteChapter();
   const deleteLesson = useDeleteLesson();
+  const deleteQuiz = useDeleteQuiz();
   const reorderCurriculum = useReorderCurriculum();
 
   const [localTree, setLocalTree] = useState<Chapter[] | null>(null);
@@ -143,6 +145,10 @@ export default function CurriculumTreeEditor({
     }
   };
 
+  const handleDeleteQuiz = (quizId: string) => {
+    deleteQuiz.mutate({ quizId, courseId, orgId });
+  };
+
   if (isLoading) return <div className="p-8 text-center">{t('common.loading')}</div>;
 
   return (
@@ -190,6 +196,8 @@ export default function CurriculumTreeEditor({
                 onEditLesson={onEditLesson}
                 onDeleteLesson={(id) => setConfirmDelete({ type: 'lesson', id })}
                 onAddLesson={onAddLesson}
+                onDeleteQuiz={handleDeleteQuiz}
+                isDeletePending={deleteQuiz.isPending}
               />
             ))}
 
@@ -202,6 +210,8 @@ export default function CurriculumTreeEditor({
                 quizzes={courseLevelQuizzes.map((q) => toCurriculumQuiz(q, courseId))}
                 placement="course"
                 compact
+                onDeleteQuiz={handleDeleteQuiz}
+                isDeletePending={deleteQuiz.isPending}
               />
             </div>
           </div>
@@ -235,6 +245,7 @@ export default function CurriculumTreeEditor({
         onConfirm={handleDelete}
         onCancel={() => setConfirmDelete(null)}
         confirmText={t('common.delete')}
+        cancelText={t('common.cancel')}
         type="danger"
         isLoading={deleteChapter.isPending || deleteLesson.isPending}
       />

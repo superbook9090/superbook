@@ -22,6 +22,8 @@ export function SortableSubTopic({
   onEditLesson,
   onDeleteLesson,
   onAddLesson,
+  onDeleteQuiz,
+  isDeletePending,
 }: {
   sub: Chapter & Pick<CurriculumChapterNode, 'quizzes' | 'lessons'>;
   courseId: string;
@@ -33,6 +35,8 @@ export function SortableSubTopic({
   onEditLesson: (lesson: Lesson) => void;
   onDeleteLesson: (id: string) => void;
   onAddLesson: (chapterId: string) => void;
+  onDeleteQuiz: (quizId: string) => void;
+  isDeletePending?: boolean;
 }) {
   const { t } = useTranslation();
   const id = sortableId('subtopic', sub._id);
@@ -75,12 +79,16 @@ export function SortableSubTopic({
             onEditLesson={onEditLesson}
             onDeleteLesson={onDeleteLesson}
             onAddLesson={onAddLesson}
+            onDeleteQuiz={onDeleteQuiz}
+            isDeletePending={isDeletePending}
           />
           <CurriculumQuizBlock
             courseId={courseId}
             quizzes={sub.quizzes ?? []}
             placement="chapter"
             chapterId={sub._id}
+            onDeleteQuiz={onDeleteQuiz}
+            isDeletePending={isDeletePending}
           />
         </div>
       )}

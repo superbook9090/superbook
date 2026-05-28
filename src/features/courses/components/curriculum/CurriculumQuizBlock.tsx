@@ -1,12 +1,15 @@
 'use client';
 import { ROUTES } from '@/constants/routes';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Clock, HelpCircle, Pencil, PlusCircle, Target } from 'lucide-react';
+import { Clock, HelpCircle, Pencil, PlusCircle, Target, Trash2 } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { buildTeacherCreateQuizUrl, type QuizPlacementParam } from '@/lib/quiz/buildCreateQuizUrl';
 import type { CurriculumQuiz } from '@/lib/curriculum/tree';
 import { cn } from '@/lib/utils';
+import ConfirmModal from '@/components/ui/ConfirmModal';
+import { RowIconButton } from './shared';
 
 type Props = {
   courseId: string;
@@ -15,6 +18,8 @@ type Props = {
   chapterId?: string;
   lessonId?: string;
   compact?: boolean;
+  onDeleteQuiz?: (quizId: string) => void;
+  isDeletePending?: boolean;
 };
 
 export function CurriculumQuizBlock({
@@ -24,8 +29,18 @@ export function CurriculumQuizBlock({
   chapterId,
   lessonId,
   compact = false,
+  onDeleteQuiz,
+  isDeletePending = false,
 }: Props) {
   const { t } = useTranslation();
+  const [pendingDelete, setPendingDelete] = useState<CurriculumQuiz | null>(null);
+
+  useEffect(() => {
+    if (!isDeletePending && pendingDelete) {
+      setPendingDelete(null);
+    }
+  }, [isDeletePending, pendingDelete]);
+
   const createHref = buildTeacherCreateQuizUrl({
     courseId,
     placement,
@@ -71,13 +86,24 @@ export function CurriculumQuizBlock({
               </span>
             </p>
           </div>
-          <Link
-            href={ROUTES.teacher.quizEdit(quiz._id)}
-            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-[var(--color-muted)] hover:text-[var(--color-primary)]"
-            aria-label={t('curriculum.editQuiz')}
-          >
-            <Pencil className="w-4 h-4" />
-          </Link>
+          <div className="flex items-center shrink-0">
+            <Link
+              href={ROUTES.teacher.quizEdit(quiz._id)}
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-[var(--color-muted)] hover:text-[var(--color-primary)]"
+              aria-label={t('curriculum.editQuiz')}
+            >
+              <Pencil className="w-4 h-4" />
+            </Link>
+            {onDeleteQuiz && (
+              <RowIconButton
+                onClick={() => setPendingDelete(quiz)}
+                label={t('curriculum.deleteQuiz')}
+                variant="danger"
+              >
+                <Trash2 className="w-4 h-4" />
+              </RowIconButton>
+            )}
+          </div>
         </div>
       ))}
       <Link
@@ -87,6 +113,28 @@ export function CurriculumQuizBlock({
         <PlusCircle className="w-4 h-4" />
         {t('curriculum.addQuiz')}
       </Link>
+
+      {onDeleteQuiz && (
+        <ConfirmModal
+          isOpen={!!pendingDelete}
+          title={t('curriculum.deleteQuizTitle')}
+          message={
+            pendingDelete
+              ? `${t('curriculum.deleteQuizMessage')} "${pendingDelete.title}"`
+              : t('curriculum.deleteQuizMessage')
+          }
+          onConfirm={() => {
+            if (pendingDelete) onDeleteQuiz(pendingDelete._id);
+          }}
+          onCancel={() => {
+            if (!isDeletePending) setPendingDelete(null);
+          }}
+          confirmText={t('common.delete')}
+          cancelText={t('common.cancel')}
+          type="danger"
+          isLoading={isDeletePending}
+        />
+      )}
     </div>
   );
 }

@@ -20,7 +20,7 @@ import {
   reorderCurriculum,
   getLesson
 } from '@/lib/api/courses';
-import { listQuizzesByOrg, listQuizzesAll, listQuizzesByCourse } from '@/lib/api/quizzes';
+import { listQuizzesByOrg, listQuizzesAll, listQuizzesByCourse, deleteQuiz } from '@/lib/api/quizzes';
 import { listTeacherCoursesSelf } from '@/lib/api/courses';
 import { listEnrollments, enrollInCourse, joinCourseByCode, dropEnrollment } from '@/lib/api/enrollments';
 import { listQuizAttempts, startQuizAttempt, submitQuizAttempt, type SubmitQuizAttemptInput } from '@/lib/api/quizAttempts';
@@ -676,4 +676,22 @@ export function invalidateAfterQuizChange(
   queryClient.invalidateQueries({ queryKey: ['quizzes', 'teacher-list'] });
   queryClient.invalidateQueries({ queryKey: ['courses', courseId, 'curriculum'] });
   queryClient.invalidateQueries({ queryKey: QUERY_KEYS.DASHBOARD });
+}
+
+export function useDeleteQuiz() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      quizId,
+      courseId,
+      orgId = 'public',
+    }: {
+      quizId: string;
+      courseId: string;
+      orgId?: string;
+    }) => deleteQuiz(quizId).then(() => ({ courseId, orgId })),
+    onSuccess: (_, { courseId, orgId }) => {
+      invalidateAfterQuizChange(queryClient, courseId, orgId);
+    },
+  });
 }
