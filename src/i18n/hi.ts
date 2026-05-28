@@ -196,6 +196,7 @@ export const hi = {
         'Quiz-Do — छात्र, शिक्षक और व्यवस्थापकों के लिए ऑनलाइन कोर्स, क्विज़ और प्रगति ट्रैकिंग।',
       product: 'एक्सप्लोर',
       getStarted: 'खाता',
+      copyright: '© {year} {siteName}.',
       madeWith: 'के साथ बनाया गया',
       inIndia: 'भारत में',
       rights: 'सर्वाधिकार सुरक्षित।',

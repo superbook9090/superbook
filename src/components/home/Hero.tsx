@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useTranslation } from '@/hooks/useTranslation';
 import PremiumLogo from '@/components/ui/PremiumLogo';
 import { roleThemes } from '@/lib/roleTheme';
-import { LANDING_CLASSES } from '@/constants/spacing';
+import { landing } from '@/components/home/landingStyles';
 import { HomeHighlightIcon, type HomeHighlightKey } from '@/components/home/homeIcons';
 import { ArrowRight, Sparkles } from 'lucide-react';
 
@@ -28,7 +28,7 @@ export default function Hero() {
         aria-hidden
       />
 
-      <div className={`relative z-10 ${LANDING_CLASSES.container} py-20 text-center`}>
+      <div className={`relative z-10 ${landing.container} py-20 text-center`}>
         <div className="hero-fade-in inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 mb-8">
           <Sparkles className="w-4 h-4 text-white" aria-hidden />
           <span className="text-sm font-medium text-white">{t('home.badge')}</span>
@@ -68,20 +68,12 @@ export default function Hero() {
 
         <div className="hero-fade-in hero-fade-in-delay-6 grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mt-16 max-w-3xl mx-auto">
           {highlightKeys.map((key) => (
-            <div key={key} className={LANDING_CLASSES.highlightCard}>
-              <div className={LANDING_CLASSES.highlightCardIconWrap}>
-                <HomeHighlightIcon
-                  highlightKey={key}
-                  className={LANDING_CLASSES.highlightCardIcon}
-                  aria-hidden
-                />
+            <div key={key} className={landing.highlightCard}>
+              <div className={landing.highlightIconWrap}>
+                <HomeHighlightIcon highlightKey={key} className={landing.highlightIcon} aria-hidden />
               </div>
-              <div className={LANDING_CLASSES.highlightCardTitle}>
-                {t(`home.highlights.${key}`)}
-              </div>
-              <div className={LANDING_CLASSES.highlightCardHint}>
-                {t(`home.highlights.${key}Hint`)}
-              </div>
+              <div className="text-sm font-semibold text-white">{t(`home.highlights.${key}`)}</div>
+              <div className="text-xs text-white/60">{t(`home.highlights.${key}Hint`)}</div>
             </div>
           ))}
         </div>

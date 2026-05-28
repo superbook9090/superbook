@@ -2,10 +2,11 @@
 
 import Header from '@/components/home/Header';
 import Hero from '@/components/home/Hero';
-import Features from '@/components/home/Features';
 import HowItWorks from '@/components/home/HowItWorks';
+import Features from '@/components/home/Features';
 import Roles from '@/components/home/Roles';
-import { LazyAbout, LazyFooter } from '@/lib/lazy/marketing';
+import About from '@/components/home/About';
+import Footer from '@/components/home/Footer';
 
 export default function HomePageClient() {
   return (
@@ -15,8 +16,8 @@ export default function HomePageClient() {
       <HowItWorks />
       <Features />
       <Roles />
-      <LazyAbout />
-      <LazyFooter />
+      <About />
+      <Footer />
     </>
   );
 }

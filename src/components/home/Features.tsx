@@ -1,25 +1,9 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import {
-  BookOpen,
-  ClipboardList,
-  Compass,
-  KeyRound,
-  Newspaper,
-  TrendingUp,
-} from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
-import { LANDING_CLASSES } from '@/constants/spacing';
-import type { SVGProps } from 'react';
-
-type HomeFeatureKey =
-  | 'structuredCourses'
-  | 'curriculumQuizzes'
-  | 'progressInsights'
-  | 'browseEnroll'
-  | 'privateCourses'
-  | 'blogsResources';
+import { landing } from '@/components/home/landingStyles';
+import { HomeFeatureGlyph, type HomeFeatureKey } from '@/components/home/marketingGlyphs';
 
 const featureKeys: HomeFeatureKey[] = [
   'structuredCourses',
@@ -30,28 +14,6 @@ const featureKeys: HomeFeatureKey[] = [
   'blogsResources',
 ];
 
-function FeatureIcon({
-  featureKey,
-  ...props
-}: SVGProps<SVGSVGElement> & { featureKey: HomeFeatureKey }) {
-  switch (featureKey) {
-    case 'structuredCourses':
-      return <BookOpen {...props} />;
-    case 'curriculumQuizzes':
-      return <ClipboardList {...props} />;
-    case 'progressInsights':
-      return <TrendingUp {...props} />;
-    case 'browseEnroll':
-      return <Compass {...props} />;
-    case 'privateCourses':
-      return <KeyRound {...props} />;
-    case 'blogsResources':
-      return <Newspaper {...props} />;
-    default:
-      return <BookOpen {...props} />;
-  }
-}
-
 export default function Features() {
   const { t } = useTranslation();
 
@@ -59,23 +21,23 @@ export default function Features() {
     <section
       id="features"
       aria-labelledby="features-heading"
-      className={`${LANDING_CLASSES.sectionDefer} ${LANDING_CLASSES.section} ${LANDING_CLASSES.surface}`}
+      className={`${landing.section} bg-[var(--card-solid)]`}
     >
-      <div className={LANDING_CLASSES.container}>
+      <div className={landing.container}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className={LANDING_CLASSES.sectionHeader}
+          className={landing.sectionHeader}
         >
-          <h2 id="features-heading" className={LANDING_CLASSES.title}>
+          <h2 id="features-heading" className={landing.title}>
             {t('home.features.title')}
           </h2>
-          <p className={LANDING_CLASSES.subtitle}>{t('home.features.subtitle')}</p>
+          <p className={landing.subtitle}>{t('home.features.subtitle')}</p>
         </motion.div>
 
-        <div className={LANDING_CLASSES.featureGrid}>
+        <div className={landing.featureGrid}>
           {featureKeys.map((featureKey, index) => (
             <motion.div
               key={featureKey}
@@ -83,20 +45,16 @@ export default function Features() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.08 }}
-              className={LANDING_CLASSES.featureCard}
+              className={landing.featureCard}
             >
-              <div className={LANDING_CLASSES.featureCardIconWrap}>
-                <FeatureIcon
-                  featureKey={featureKey}
-                  className={LANDING_CLASSES.featureCardIcon}
-                  aria-hidden
-                />
+              <div className={landing.featureIconWrap}>
+                <HomeFeatureGlyph featureKey={featureKey} className={landing.featureIcon} />
               </div>
 
-              <h3 className={LANDING_CLASSES.featureCardTitle}>
+              <h3 className="text-lg font-semibold text-[var(--color-foreground)] mb-2">
                 {t(`home.features.${featureKey}`)}
               </h3>
-              <p className={LANDING_CLASSES.featureCardDesc}>
+              <p className="text-sm text-[var(--color-muted-foreground)] leading-relaxed">
                 {t(`home.features.${featureKey}Desc`)}
               </p>
             </motion.div>

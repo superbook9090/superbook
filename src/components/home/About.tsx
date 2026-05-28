@@ -3,12 +3,13 @@
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
 import { roleThemes } from '@/lib/roleTheme';
-import { LANDING_CLASSES } from '@/constants/spacing';
+import { landing } from '@/components/home/landingStyles';
 import {
   HomeAboutCapabilityIcon,
   type HomeAboutCapabilityKey,
 } from '@/components/home/homeIcons';
-import { LayoutDashboard } from 'lucide-react';
+import { DashboardGlyph } from '@/components/home/marketingGlyphs';
+import { SITE_NAME } from '@/lib/seo/config';
 
 const capabilityKeys: HomeAboutCapabilityKey[] = [
   'roleBasedAccess',
@@ -18,9 +19,9 @@ const capabilityKeys: HomeAboutCapabilityKey[] = [
 ];
 
 const previewItems = [
-  { key: 'previewCourses' as const, fillClass: 'landing-preview-bar-fill--40' },
-  { key: 'previewQuizzes' as const, fillClass: 'landing-preview-bar-fill--55' },
-  { key: 'previewProgress' as const, fillClass: 'landing-preview-bar-fill--72' },
+  { key: 'previewCourses' as const, fillClass: 'w-[40%]' },
+  { key: 'previewQuizzes' as const, fillClass: 'w-[55%]' },
+  { key: 'previewProgress' as const, fillClass: 'w-[72%]' },
 ];
 
 export default function About() {
@@ -31,9 +32,9 @@ export default function About() {
     <section
       id="about"
       aria-labelledby="about-heading"
-      className={`${LANDING_CLASSES.sectionDefer} ${LANDING_CLASSES.section} relative overflow-hidden`}
+      className={`${landing.section} relative overflow-hidden`}
     >
-      <div className={`absolute inset-0 ${LANDING_CLASSES.aboutBg}`} />
+      <div className="absolute inset-0 bg-gradient-to-br from-[var(--student-primary-dark)] to-[var(--student-primary)]" />
 
       <motion.div
         className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl"
@@ -49,7 +50,7 @@ export default function About() {
         aria-hidden
       />
 
-      <div className={`relative z-10 ${LANDING_CLASSES.container}`}>
+      <div className={`relative z-10 ${landing.container}`}>
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <motion.div
             initial={{ opacity: 0, x: -30 }}
@@ -107,11 +108,11 @@ export default function About() {
               <div className="space-y-4">
                 <div className="flex items-center gap-3 border-b border-white/10 pb-4">
                   <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                    <LayoutDashboard className="w-5 h-5 text-white" aria-hidden />
+                    <DashboardGlyph className="w-5 h-5 text-white" />
                   </div>
                   <div>
                     <div className="text-sm font-semibold text-white">{t('common.dashboard')}</div>
-                    <div className="text-xs text-white/50">Quiz-Do</div>
+                    <div className="text-xs text-white/50">{SITE_NAME}</div>
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-3">
@@ -124,7 +125,7 @@ export default function About() {
                         {t(`home.about.${key}`)}
                       </span>
                       <div className="h-1.5 w-full rounded-full bg-white/20 overflow-hidden">
-                        <div className={`${LANDING_CLASSES.previewBar} ${fillClass}`} />
+                        <div className={`h-full rounded-full bg-white/50 ${fillClass}`} />
                       </div>
                     </div>
                   ))}
@@ -143,7 +144,7 @@ export default function About() {
               >
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 bg-[var(--student-soft)] rounded-lg flex items-center justify-center">
-                    <LayoutDashboard className="w-4 h-4 text-[var(--student-primary)]" />
+                    <DashboardGlyph className="w-4 h-4 text-[var(--student-primary)]" />
                   </div>
                   <div className="text-sm font-semibold text-[var(--color-foreground)]">
                     {t('home.about.previewBadge')}

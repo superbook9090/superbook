@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
-import { LANDING_CLASSES } from '@/constants/spacing';
+import { landing } from '@/components/home/landingStyles';
 import { HomeHowItWorksIcon, type HomeHowItWorksStep } from '@/components/home/homeIcons';
 
 const steps: { key: HomeHowItWorksStep; number: string }[] = [
@@ -18,20 +18,20 @@ export default function HowItWorks() {
     <section
       id="how-it-works"
       aria-labelledby="how-it-works-heading"
-      className={`${LANDING_CLASSES.sectionDefer} ${LANDING_CLASSES.section} bg-[var(--background)] border-y border-[var(--border)]`}
+      className={`${landing.section} bg-[var(--background)] border-y border-[var(--border)]`}
     >
-      <div className={LANDING_CLASSES.container}>
+      <div className={landing.container}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className={LANDING_CLASSES.sectionHeader}
+          className={landing.sectionHeader}
         >
-          <h2 id="how-it-works-heading" className={LANDING_CLASSES.title}>
+          <h2 id="how-it-works-heading" className={landing.title}>
             {t('home.howItWorks.title')}
           </h2>
-          <p className={LANDING_CLASSES.subtitle}>{t('home.howItWorks.subtitle')}</p>
+          <p className={landing.subtitle}>{t('home.howItWorks.subtitle')}</p>
         </motion.div>
 
         <div className="grid md:grid-cols-3 gap-8 lg:gap-10">
@@ -45,15 +45,15 @@ export default function HowItWorks() {
               className="relative text-center md:text-left"
             >
               <div className="flex flex-col md:flex-row md:items-start gap-4">
-                <div className={`mx-auto md:mx-0 ${LANDING_CLASSES.stepIconWrap}`}>
+                <div className="mx-auto md:mx-0 flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[var(--student-soft)] border border-[var(--student-border)]">
                   <HomeHowItWorksIcon
                     step={step.key}
-                    className={LANDING_CLASSES.stepIcon}
+                    className="h-7 w-7 text-[var(--student-primary)]"
                     aria-hidden
                   />
                 </div>
                 <div>
-                  <span className={LANDING_CLASSES.stepLabel}>
+                  <span className="inline-block text-xs font-bold uppercase tracking-wider text-[var(--student-primary)] mb-2">
                     {t('home.howItWorks.stepLabel')} {step.number}
                   </span>
                   <h3 className="text-xl font-semibold text-[var(--color-foreground)] mb-2">

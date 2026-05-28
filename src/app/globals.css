@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+@source "../components/**/*.{js,ts,jsx,tsx}";
+@source "../features/**/*.{js,ts,jsx,tsx}";
+@source "../constants/**/*.{js,ts,jsx,tsx}";
+
 /* =========================
    DESIGN TOKENS (centralized)
 ========================= */

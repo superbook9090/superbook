@@ -196,6 +196,7 @@ export const en = {
         'Quiz-Do — online courses, quizzes, and progress tracking for students, teachers, and administrators.',
       product: 'Explore',
       getStarted: 'Account',
+      copyright: '© {year} {siteName}.',
       madeWith: 'Made with',
       inIndia: 'in India',
       rights: 'All rights reserved.',

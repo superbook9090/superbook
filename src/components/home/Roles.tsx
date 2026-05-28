@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
 import { roleThemes } from '@/lib/roleTheme';
-import { LANDING_CLASSES } from '@/constants/spacing';
+import { landing } from '@/components/home/landingStyles';
 import { HomeRoleIcon, type HomeRoleKey } from '@/components/home/homeIcons';
 
 const roleKeys: HomeRoleKey[] = ['student', 'teacher', 'admin'];
@@ -15,20 +15,20 @@ export default function Roles() {
     <section
       id="roles"
       aria-labelledby="roles-heading"
-      className={`${LANDING_CLASSES.sectionDefer} ${LANDING_CLASSES.section} ${LANDING_CLASSES.surfaceMuted}`}
+      className={`${landing.section} bg-[var(--color-surface-muted)]`}
     >
-      <div className={LANDING_CLASSES.container}>
+      <div className={landing.container}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className={LANDING_CLASSES.sectionHeader}
+          className={landing.sectionHeader}
         >
-          <h2 id="roles-heading" className={LANDING_CLASSES.title}>
+          <h2 id="roles-heading" className={landing.title}>
             {t('home.roles.title')}
           </h2>
-          <p className={LANDING_CLASSES.subtitle}>{t('home.roles.subtitle')}</p>
+          <p className={landing.subtitle}>{t('home.roles.subtitle')}</p>
         </motion.div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
