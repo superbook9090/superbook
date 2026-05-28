@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
-import QuizCard from '@/features/quizzes/components/QuizCard';
+import { LazyQuizCard } from '@/lib/lazy';
 import Alert from '@/components/ui/Alert';
 import { useSessionStore } from '@/store/useSessionStore';
 import { PageSkeleton } from '@/components/ui/Skeleton';
@@ -153,7 +153,7 @@ export default function StudentQuizzesPage() {
             <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6">
               {availableQuizzes.map((quiz: Quiz) => (
                 <div key={quiz._id} className="min-w-0">
-                  <QuizCard
+                  <LazyQuizCard
                     quiz={quiz}
                     type="available"
                     onStart={handleStartQuiz}
@@ -172,7 +172,7 @@ export default function StudentQuizzesPage() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6">
             {completedAttempts.map((attempt: QuizAttempt) => (
               <div key={`${attempt._id}-${attempt.attemptNumber}`} className="h-full min-w-0">
-                <QuizCard
+                <LazyQuizCard
                   quiz={attempt.quiz}
                   attempt={attempt}
                   type="attempted"

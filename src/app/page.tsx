@@ -1,41 +1,36 @@
-'use client';
+import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { ROUTES } from '@/constants/routes';
+import JsonLd from '@/components/seo/JsonLd';
+import HomePageClient from '@/components/home/HomePageClient';
+import { createPageMetadata } from '@/lib/seo/metadata';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Header from '@/components/home/Header';
-import Hero from '@/components/home/Hero';
-import Features from '@/components/home/Features';
-import Roles from '@/components/home/Roles';
-import About from '@/components/home/About';
-import Footer from '@/components/home/Footer';
-import { useSessionStore } from '@/store/useSessionStore';
+export const metadata: Metadata = createPageMetadata({
+  title: 'Online LMS for Courses, Quizzes & Learning Progress',
+  description:
+    'Learn smarter with Quiz-Do — an education platform and learning management system (LMS) for online courses, interactive quizzes, student progress tracking, and teacher-led classrooms. Free to start.',
+  path: '/',
+  keywords: [
+    'learn online',
+    'take quizzes online',
+    'student dashboard',
+    'create online courses',
+    'education app India',
+  ],
+});
 
-export default function HomePage() {
-  const { status } = useSessionStore();
-  const router = useRouter();
-
-  // Redirect authenticated users to dashboard
-  useEffect(() => {
-    if (status === 'authenticated') {
-      router.push(ROUTES.dashboard);
-    }
-  }, [status, router]);
+export default async function HomePage() {
+  const session = await getServerSession(authOptions);
+  if (session) {
+    redirect(ROUTES.dashboard);
+  }
 
   return (
     <main className="min-h-screen">
-      <Header />
-      <Hero />
-      <section id="features">
-        <Features />
-      </section>
-      <section id="roles">
-        <Roles />
-      </section>
-      <section id="about">
-        <About />
-      </section>
-      <Footer />
+      <JsonLd includeWebSite />
+      <HomePageClient />
     </main>
   );
 }

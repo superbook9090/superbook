@@ -16,7 +16,7 @@ const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
 const smtpUser = process.env.SMTP_USER;
 const smtpPass = process.env.SMTP_PASSWORD;
 const smtpSecure = process.env.SMTP_SECURE === 'true';
-const smtpFromName = process.env.SMTP_FROM_NAME || 'quiz-do Team';
+const smtpFromName = process.env.SMTP_FROM_NAME || 'Quiz-Do Team';
 const smtpFromEmail = process.env.SMTP_FROM_EMAIL || 'quizdo9090@gmail.com';
 const adminReceiverEmail = process.env.ADMIN_RECEIVER_EMAIL || 'quizdo9090@gmail.com';
 
@@ -201,7 +201,7 @@ function getAdminHtmlTemplate(params: ContactEmailParams, ticketId: string): str
     <div class="wrapper">
       <div class="container">
         <div class="header">
-          <div class="logo">quiz-do</div>
+          <div class="logo">Quiz-Do</div>
           <div class="header-title">Contact Us Submission</div>
         </div>
         <div class="content">
@@ -244,7 +244,7 @@ function getAdminHtmlTemplate(params: ContactEmailParams, ticketId: string): str
         </div>
         <div class="footer">
           <p class="footer-text">
-            This inquiry was submitted dynamically via the public quiz-do contact form page.<br>
+            This inquiry was submitted dynamically via the public Quiz-Do contact form page.<br>
             Please respond directly to the submitter by replying to their email address.
           </p>
         </div>
@@ -390,13 +390,13 @@ function getUserHtmlTemplate(params: ContactEmailParams, ticketId: string): stri
     <div class="wrapper">
       <div class="container">
         <div class="header">
-          <div class="logo">quiz-do</div>
+          <div class="logo">Quiz-Do</div>
           <div class="header-title">Message Received Confirmation</div>
         </div>
         <div class="content">
           <h3 class="greeting">Hello ${name},</h3>
           <p class="body-text">
-            Thank you for reaching out to quiz-do! We have received your inquiry and created a support ticket.
+            Thank you for reaching out to Quiz-Do! We have received your inquiry and created a support ticket.
             Our team is currently reviewing your message, and one of our members will reach out to you within 24 business hours.
           </p>
 
@@ -412,12 +412,12 @@ function getUserHtmlTemplate(params: ContactEmailParams, ticketId: string): stri
 
           <p class="body-text" style="margin-bottom: 0;">
             Best regards,<br>
-            <strong>The quiz-do Support Team</strong>
+            <strong>The Quiz-Do Support Team</strong>
           </p>
         </div>
         <div class="footer">
           <p class="footer-text">
-            © ${new Date().getFullYear()} <span class="footer-logo">quiz-do</span>. All rights reserved.<br>
+            © ${new Date().getFullYear()} <span class="footer-logo">Quiz-Do</span>. All rights reserved.<br>
             Please do not reply to this email, as it is an automated receipt confirmation sent by our platform.
           </p>
         </div>
@@ -461,7 +461,7 @@ export async function sendUserAutoReply(params: ContactEmailParams, ticketId: st
       from: `"${smtpFromName}" <${smtpFromEmail}>`,
       to: params.email,
       subject: `We've received your query [Ticket ID: ${ticketId}]`,
-      text: `Hello ${params.name},\n\nThank you for reaching out! We've received your inquiry (Ticket ID: ${ticketId}). A support member will contact you within 24 business hours.\n\nSubject: ${params.subject}\nMessage:\n${params.message}\n\nBest regards,\nquiz-do Support Team`,
+      text: `Hello ${params.name},\n\nThank you for reaching out! We've received your inquiry (Ticket ID: ${ticketId}). A support member will contact you within 24 business hours.\n\nSubject: ${params.subject}\nMessage:\n${params.message}\n\nBest regards,\nQuiz-Do Support Team`,
       html: getUserHtmlTemplate(params, ticketId),
     });
 
@@ -482,7 +482,7 @@ function passwordResetHtml(name: string, resetUrl: string): string {
   <body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f8fafc;">
     <div style="max-width:560px;margin:40px auto;background:#fff;border-radius:16px;border:1px solid #e2e8f0;overflow:hidden;">
       <div style="background:linear-gradient(135deg,#4f46e5,#3730a3);padding:28px 24px;text-align:center;">
-        <h1 style="margin:0;color:#fff;font-size:22px;font-weight:800;">quiz-do</h1>
+        <h1 style="margin:0;color:#fff;font-size:22px;font-weight:800;">Quiz-Do</h1>
         <p style="margin:8px 0 0;color:#e0e7ff;font-size:13px;">Password Reset</p>
       </div>
       <div style="padding:28px 24px;">
@@ -520,8 +520,8 @@ export async function sendPasswordResetEmail(params: {
       from: `"${smtpFromName}" <${smtpFromEmail}>`,
       to: params.to,
       replyTo: smtpFromEmail,
-      subject: 'Reset your quiz-do password',
-      text: `Hello ${safeName},\n\nReset your password using this link (expires in 1 hour):\n${params.resetUrl}\n\nIf you did not request this, ignore this email.\n\n— quiz-do Team`,
+      subject: 'Reset your Quiz-Do password',
+      text: `Hello ${safeName},\n\nReset your password using this link (expires in 1 hour):\n${params.resetUrl}\n\nIf you did not request this, ignore this email.\n\n— Quiz-Do Team`,
       html: passwordResetHtml(safeName, params.resetUrl),
     });
   } catch (error) {

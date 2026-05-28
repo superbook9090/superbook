@@ -14,24 +14,12 @@ import { PageSkeleton } from '@/components/ui/Skeleton';
 import Alert from '@/components/ui/Alert';
 import { motion } from 'framer-motion';
 import { CheckCircle, Clock, Circle } from 'lucide-react';
-import dynamic from 'next/dynamic';
-
-const ScoreTrendChart = dynamic(() => import('@/components/charts/ScoreTrendChart'), {
-  loading: () => <div className="h-[300px] bg-white rounded-2xl p-5 shadow-sm flex items-center justify-center text-[var(--color-muted-foreground)]">Loading chart...</div>,
-  ssr: false
-});
-const CourseProgressChart = dynamic(() => import('@/components/charts/CourseProgressChart'), {
-  loading: () => <div className="h-[300px] bg-white rounded-2xl p-5 shadow-sm flex items-center justify-center text-[var(--color-muted-foreground)]">Loading chart...</div>,
-  ssr: false
-});
-const QuizStatusChart = dynamic(() => import('@/components/charts/QuizStatusChart'), {
-  loading: () => <div className="h-[300px] bg-white rounded-2xl p-5 shadow-sm flex items-center justify-center text-[var(--color-muted-foreground)]">Loading chart...</div>,
-  ssr: false
-});
-const AverageScoreChart = dynamic(() => import('@/components/charts/AverageScoreChart'), {
-  loading: () => <div className="h-[300px] bg-white rounded-2xl p-5 shadow-sm flex items-center justify-center text-[var(--color-muted-foreground)]">Loading chart...</div>,
-  ssr: false
-});
+import {
+  LazyAverageScoreChart,
+  LazyCourseProgressChart,
+  LazyQuizStatusChart,
+  LazyScoreTrendChart,
+} from '@/lib/lazy';
 import { fetchStudentProgress } from '@/lib/api/progress';
 import { ApiClientError } from '@/lib/api/http';
 import { PageWrapper, PageHeader, ResponsiveGrid } from '@/components/layout';
@@ -270,7 +258,7 @@ export default function StudentProgressPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            <ScoreTrendChart data={scoreTrendData} title={t('progress.scoreTrend')} />
+            <LazyScoreTrendChart data={scoreTrendData} title={t('progress.scoreTrend')} />
           </motion.div>
           
           <motion.div
@@ -278,7 +266,7 @@ export default function StudentProgressPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <CourseProgressChart data={courseProgressData} title={t('progress.courseProgress')} />
+            <LazyCourseProgressChart data={courseProgressData} title={t('progress.courseProgress')} />
           </motion.div>
           
           <motion.div
@@ -286,7 +274,7 @@ export default function StudentProgressPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <QuizStatusChart data={quizStatusData} title={t('progress.quizDistribution')} />
+            <LazyQuizStatusChart data={quizStatusData} title={t('progress.quizDistribution')} />
           </motion.div>
           
           <motion.div
@@ -294,7 +282,7 @@ export default function StudentProgressPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
           >
-            <AverageScoreChart data={averageScoreData} title={t('progress.averageScore')} />
+            <LazyAverageScoreChart data={averageScoreData} title={t('progress.averageScore')} />
           </motion.div>
         </ResponsiveGrid>
       </section>

@@ -24,6 +24,28 @@ const nextConfig = {
   },
   // Enable compression
   compress: true,
+  async headers() {
+    return [
+      {
+        source: '/:path*\\.(svg|png|jpg|jpeg|webp|avif|ico|woff2)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;

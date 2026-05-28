@@ -5,9 +5,9 @@ importScripts('https://www.gstatic.com/firebasejs/10.9.0/firebase-messaging-comp
 // The SW doesn't have access to process.env unless bundled.
 const firebaseConfig = {
   apiKey: "AIzaSyBbDdQ6l-T98rsDSx8HFpTXTs4vR55Ce-I", // Need to be injected or hardcoded here since it's a static file
-  authDomain: "quiz-do-84762.firebaseapp.com",
-  projectId: "quiz-do-84762",
-  storageBucket: "quiz-do-84762.firebasestorage.app",
+  authDomain: "Quiz-Do-84762.firebaseapp.com",
+  projectId: "Quiz-Do-84762",
+  storageBucket: "Quiz-Do-84762.firebasestorage.app",
   messagingSenderId: "311992119719",
   appId: "1:311992119719:web:e4ac19a743a5a57e23c682"
 };

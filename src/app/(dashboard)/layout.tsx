@@ -1,17 +1,17 @@
 // src/app/(dashboard)/layout.tsx
+import type { Metadata } from 'next';
+import { DASHBOARD_ROBOTS } from '@/lib/seo/metadata';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import StudentSidebar from '@/features/dashboard/components/StudentSidebar';
-import TeacherSidebar from '@/features/dashboard/components/TeacherSidebar';
-import MobileNav from '@/features/dashboard/components/MobileNav';
-import MobileBottomNav from '@/features/dashboard/components/MobileBottomNav';
-import DashboardHeader from '@/features/dashboard/components/DashboardHeader';
-import { RoleThemeProvider } from '@/contexts/RoleThemeContext';
-import { QuizProvider } from '@/contexts/QuizContext';
+import DashboardChrome from '@/components/dashboard/DashboardChrome';
+import DashboardProviders from '@/components/providers/DashboardProviders';
 import { isAdmin, isSuperAdmin } from '@/lib/roles';
-import PushNotificationManager from '@/components/providers/PushNotificationManager';
-import { DashboardContent } from '@/components/layout';
-import { ADMIN_NAV, STUDENT_NAV, TEACHER_NAV } from '@/constants/navigation';
+import { STUDENT_NAV, TEACHER_NAV } from '@/constants/navigation';
+
+export const metadata: Metadata = {
+  robots: DASHBOARD_ROBOTS,
+  title: 'Dashboard',
+};
 
 export default async function DashboardLayout({
   children,
@@ -31,39 +31,16 @@ export default async function DashboardLayout({
   const mainNav = isStaff ? TEACHER_NAV : STUDENT_NAV;
 
   return (
-    <QuizProvider>
-      <div
-        className="dashboard-shell"
-        data-role={(role || 'student').toLowerCase()}
+    <DashboardProviders>
+      <DashboardChrome
+        session={session}
+        isStaff={isStaff}
+        isAdminUser={isAdminUser}
+        isSuperAdminUser={isSuperAdminUser}
+        mainNav={mainNav}
       >
-        <MobileNav
-          user={session.user}
-          navigation={mainNav}
-          adminNavigation={isAdminUser ? ADMIN_NAV : []}
-          isSuperAdmin={isSuperAdminUser}
-        />
-
-        <aside className="hidden md:block flex-shrink-0" aria-label="Sidebar">
-          {isStaff ? (
-            <TeacherSidebar user={session.user} />
-          ) : (
-            <StudentSidebar user={session.user} />
-          )}
-        </aside>
-
-        <div className="flex flex-1 flex-col min-h-0 md:h-screen overflow-hidden">
-          <DashboardHeader isTeacherOrAdmin={isStaff} showNotifications={role === 'student'} />
-
-          <RoleThemeProvider role={role || 'student'}>
-            <DashboardContent>
-              <PushNotificationManager />
-              {children}
-            </DashboardContent>
-          </RoleThemeProvider>
-
-          <MobileBottomNav items={mainNav} />
-        </div>
-      </div>
-    </QuizProvider>
+        {children}
+      </DashboardChrome>
+    </DashboardProviders>
   );
 }

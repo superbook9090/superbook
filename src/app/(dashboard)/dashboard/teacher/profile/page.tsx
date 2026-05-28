@@ -3,7 +3,7 @@ import { ROUTES } from '@/constants/routes';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
-import Profile from '@/features/dashboard/components/Profile';
+import { LazyProfile } from '@/lib/lazy';
 
 import { getDashboardHomePath, isAdmin, normalizeRole } from '@/lib/roles';
 
@@ -24,5 +24,5 @@ export default async function TeacherProfilePage() {
     redirect(getDashboardHomePath(role));
   }
 
-  return <Profile session={session} descriptionKey="teacherProfileDesc" />;
+  return <LazyProfile session={session} descriptionKey="teacherProfileDesc" />;
 }

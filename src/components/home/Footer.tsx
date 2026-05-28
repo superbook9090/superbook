@@ -9,6 +9,7 @@ import { ROUTES } from '@/constants/routes';
 
 const getFooterLinks = (t: (key: string) => string) => ({
   product: [
+    { label: t('home.howItWorks.title'), href: '#how-it-works' },
     { label: t('home.features.title'), href: '#features' },
     { label: t('home.roles.title'), href: '#roles' },
     { label: t('home.about.title'), href: '#about' },
@@ -96,7 +97,7 @@ export default function Footer() {
         {/* Bottom */}
         <div className="pt-8 border-t border-[var(--color-surface-muted-strong)] flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-[var(--color-muted)] text-sm">
-            © {currentYear} quiz-do. {t('home.footer.rights')}
+            © {currentYear} Quiz-Do. {t('home.footer.rights')}
           </p>
           <p className="text-[var(--color-muted)] text-sm flex items-center gap-1">
             {t('home.footer.madeWith')} <Heart className="w-4 h-4 text-red-500 fill-red-500" /> {t('home.footer.inIndia')}

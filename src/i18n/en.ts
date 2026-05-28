@@ -2,8 +2,9 @@
 
 export const en = {
   metadata: {
-    siteTitle: 'quiz-do - The Future of Learning',
-    siteDescription: 'Learning Management System',
+    siteTitle: 'Quiz-Do | Online LMS for Courses, Quizzes & Learning Progress',
+    siteDescription:
+      'Quiz-Do is a learning management system (LMS) for online courses, quizzes, student progress tracking, and teacher-led education.',
   },
 
   // Common
@@ -78,7 +79,7 @@ export const en = {
     dataCollection: 'Information We Collect',
     dataCollectionText: 'We collect information you provide directly to us when you create an account, update your profile, use the interactive features of our services, participate in quizzes or courses, request customer support, or otherwise communicate with us.',
     dataUse: 'How We Use Your Information',
-    dataUseText: 'We use the information we collect to provide, maintain, and improve our services, to develop new features, and to protect quiz-do and our users.',
+    dataUseText: 'We use the information we collect to provide, maintain, and improve our services, to develop new features, and to protect Quiz-Do and our users.',
     dataSharing: 'Information Sharing',
     dataSharingText: 'We do not share your personal information with third parties except as described in this privacy policy or as required by law.',
     security: 'Security',
@@ -112,57 +113,89 @@ export const en = {
 
   // Home / Landing Page
   home: {
-    title: 'Learn Smarter, Grow Faster',
-    subtitle: 'The modern Learning Management System for everyone',
-    description: 'Join thousands of learners and educators on quiz-do. Access courses, take quizzes, track progress, and achieve your goals.',
-    badge: '#1 Learning Platform in India',
+    title: 'Your courses, quizzes, and progress — in one place',
+    subtitle: 'Quiz-Do is a learning management system for schools, coaches, and self-paced learners',
+    description:
+      'Browse and enroll in courses, follow structured lessons with videos and notes, take timed quizzes at course or lesson level, and see how you improve over time. Teachers publish content; students learn with clarity.',
+    badge: 'Courses · Quizzes · Progress tracking',
     login: 'Login',
-    register: 'Register',
-    stats: {
-      learners: 'Active Learners',
-      courses: 'Expert Courses',
-      teachers: 'Expert Teachers',
+    register: 'Create free account',
+    highlights: {
+      courses: 'Structured courses',
+      coursesHint: 'Chapters, lessons & files',
+      quizzes: 'Flexible quizzes',
+      quizzesHint: 'Timed attempts & review',
+      languages: 'English & Hindi',
+      languagesHint: 'Switch anytime',
+    },
+    howItWorks: {
+      title: 'How Quiz-Do works',
+      subtitle: 'From sign-up to results in three straightforward steps',
+      stepLabel: 'Step',
+      step1Title: 'Create your account',
+      step1Desc: 'Register as a student or teacher. Students can browse the catalog; teachers get tools to build courses and quizzes.',
+      step2Title: 'Learn with structure',
+      step2Desc: 'Enroll in public courses or join private ones with a course code. Open lessons, watch videos, download notes, and move through the curriculum at your pace.',
+      step3Title: 'Practice and improve',
+      step3Desc: 'Take quizzes linked to the course, chapter, or lesson. View scores, compare attempts, and follow progress charts on your dashboard.',
     },
     features: {
-      title: 'Powerful Features',
-      subtitle: 'Everything you need to manage, learn, and grow in one powerful platform',
-      coursesManagement: 'Courses Management',
-      coursesDesc: 'Access hundreds of expertly crafted courses across multiple subjects. Learn at your own pace with structured content.',
-      quizSystem: 'Quiz System',
-      quizDesc: 'Test your knowledge with AI-powered quizzes. Get instant feedback and track your progress over time.',
-      blogPlatform: 'Blog Platform',
-      blogDesc: 'Stay updated with educational blogs, tips, and insights from industry experts and educators.',
-      analyticsDashboard: 'Analytics Dashboard',
-      analyticsDesc: 'Visualize your learning journey with detailed analytics. Track scores, completion rates, and improvement areas.',
+      title: 'What you can do on Quiz-Do',
+      subtitle: 'Real tools from our platform — not generic placeholders',
+      structuredCourses: 'Structured courses',
+      structuredCoursesDesc:
+        'Teachers build courses with topics, subtopics, and lessons. Add video links, PDF notes, and attachments so learners always know what to study next.',
+      curriculumQuizzes: 'Quizzes where they belong',
+      curriculumQuizzesDesc:
+        'Attach quizzes at course, chapter (topic), or lesson level. Set time limits, publish when ready, and let students resume or review completed attempts.',
+      progressInsights: 'Progress & analytics',
+      progressInsightsDesc:
+        'Students see enrollment progress, quiz scores, and trends. Teachers get course-level analytics to understand how learners are performing.',
+      browseEnroll: 'Browse & enroll',
+      browseEnrollDesc:
+        'Discover published courses, enroll in one click, and access everything from your dashboard. Keep learning organized in one place.',
+      privateCourses: 'Private course access',
+      privateCoursesDesc:
+        'Run invite-only classes: teachers mark a course private and share a course code so only enrolled learners can access content.',
+      blogsResources: 'Blogs & reading',
+      blogsResourcesDesc:
+        'Read educational blogs, save favorites, and stay engaged beyond video lessons — useful for tips, announcements, and extra reading.',
     },
     roles: {
-      title: 'Built for Everyone',
-      subtitle: 'Designed for everyone in the learning ecosystem',
+      title: 'One platform, three roles',
+      subtitle: 'Each role sees a focused dashboard with the right permissions',
       student: 'Student',
-      studentDesc: 'Learn, enroll in courses, attempt quizzes, and track your progress.',
+      studentDesc:
+        'Browse and enroll in courses, open lessons and resources, take quizzes with timers, review results, track progress charts, read blogs, and manage favorites.',
       teacher: 'Teacher',
-      teacherDesc: 'Create courses, design quizzes, write blogs, and manage students.',
+      teacherDesc:
+        'Create and edit courses with a curriculum builder, attach quizzes to topics or lessons, publish blogs, view class analytics, and manage your teaching content within platform limits.',
       admin: 'Admin',
-      adminDesc: 'Manage users, moderate content, and oversee platform operations.',
+      adminDesc:
+        'Oversee users and organizations, manage all courses and quizzes, configure platform settings and feature toggles, and keep the learning environment running smoothly.',
     },
     about: {
-      title: 'Why Choose quiz-do?',
-      description: 'quiz-do is a modern Learning Management System designed to revolutionize education. Whether you\'re a student eager to learn, a teacher passionate about sharing knowledge, or an administrator managing an institution—we\'ve got you covered.',
-      roleBasedAccess: 'Role-based Access',
-      roleBasedAccessDesc: 'Secure, granular permissions tailored to each user type.',
-      realtimeAnalytics: 'Real-time Analytics',
-      realtimeAnalyticsDesc: 'Live data visualization with Redis caching for speed.',
-      multiLanguage: 'Multi-language Support',
-      multiLanguageDesc: 'Full support for English and Hindi with more languages coming.',
-      optimizedPerformance: 'Optimized Performance',
-      optimizedPerformanceDesc: 'Built with Redis caching and Zustand for lightning-fast experience.',
-      fast: "Fast & Easy To Use",
-      responseTime: "10-20ms Average Response Time"
+      title: 'Built for teaching and learning online',
+      description:
+        'Quiz-Do brings together course delivery, assessments, and reporting so you do not need separate tools for content, tests, and progress. It is designed for Indian learners and educators with English and Hindi support throughout the app.',
+      roleBasedAccess: 'Secure role-based access',
+      roleBasedAccessDesc: 'Students, teachers, and admins each get their own dashboard and permissions.',
+      realtimeAnalytics: 'Teacher & student insights',
+      realtimeAnalyticsDesc: 'Quiz results, progress pages, and teacher analytics help everyone see what is working.',
+      multiLanguage: 'English & Hindi',
+      multiLanguageDesc: 'Use the platform in the language you prefer — switch from the header anytime.',
+      organizedContent: 'Organized curriculum',
+      organizedContentDesc: 'Drag-and-drop topics, lessons, and quiz links keep large courses easy to navigate.',
+      previewBadge: 'All-in-one LMS',
+      previewCourses: 'My courses',
+      previewQuizzes: 'Quizzes due',
+      previewProgress: 'Progress',
     },
     footer: {
-      tagline: 'Modern Learning Management System for the next generation of education. Learn smarter, grow faster.',
-      product: 'Product',
-      getStarted: 'Get Started',
+      tagline:
+        'Quiz-Do — online courses, quizzes, and progress tracking for students, teachers, and administrators.',
+      product: 'Explore',
+      getStarted: 'Account',
       madeWith: 'Made with',
       inIndia: 'in India',
       rights: 'All rights reserved.',
@@ -1319,7 +1352,7 @@ export const en = {
     title: 'Contact Us',
     subtitle: "Have questions or feedback? We're here to help! Reach out to us and we'll get back to you shortly.",
     heroTitle: 'Get in Touch',
-    heroSubtitle: 'Contact the quiz-do Team',
+    heroSubtitle: 'Contact the Quiz-Do Team',
     responseTime: 'We generally respond to enquiries within 24 business hours.',
     toast: {
       success: 'Success',
@@ -1375,7 +1408,7 @@ export const en = {
       a1: 'Go to the Browse section in your Student Dashboard, select any course, and click "Enroll Now". It\'s completely free!',
       q2: 'How can I reset my password?',
       a2: 'You can update your profile information in the Profile settings tab, or use the password reset link on the login page.',
-      q3: 'Is quiz-do available in multiple languages?',
+      q3: 'Is Quiz-Do available in multiple languages?',
       a3: 'Yes! We fully support both English and Hindi. You can switch languages at any time using the selector in the header.',
       q4: 'Can I create my own quizzes?',
       a4: 'If you are registered as a Teacher, you can create courses and quizzes. Students can take quizzes for the courses they are enrolled in.',

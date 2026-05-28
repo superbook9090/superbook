@@ -1,6 +1,6 @@
 'use client';
 
-import CreateQuizForm from '@/features/quizzes/components/CreateQuizForm';
+import { LazyCreateQuizForm } from '@/lib/lazy';
 import { useTranslation } from '@/hooks/useTranslation';
 
 export default function CreateQuizPageContent({ quizId }: { quizId?: string }) {
@@ -20,7 +20,7 @@ export default function CreateQuizPageContent({ quizId }: { quizId?: string }) {
 
       <div className="bg-[var(--card-solid)] shadow rounded-lg">
         <div className="px-4 py-5 sm:p-6">
-          <CreateQuizForm quizId={quizId} />
+          <LazyCreateQuizForm quizId={quizId} />
         </div>
       </div>
     </div>

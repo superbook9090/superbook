@@ -9,7 +9,7 @@ import { PageSkeleton } from '@/components/ui/Skeleton';
 import { flattenCurriculumLessons } from '@/lib/curriculum/tree';
 import { useLesson, useCourseCurriculum } from '@/lib/react-query/hooks';
 import { ChevronLeft, ChevronRight, BookOpen, PlayCircle, Clock, Layout, ArrowLeft } from 'lucide-react';
-import SecurePlayer from '@/components/video/SecurePlayer';
+import { LazySecurePlayer } from '@/lib/lazy';
 
 export default function LessonViewerPage() {
   const { status } = useSessionStore();
@@ -120,7 +120,7 @@ export default function LessonViewerPage() {
       {(lesson.youtubeVideoId || lesson.videoUrl) && (
         <div className="relative w-full rounded-3xl overflow-hidden shadow-2xl border-4 border-[var(--card-solid)] bg-black">
           {lesson.youtubeVideoId ? (
-            <SecurePlayer
+            <LazySecurePlayer
               youtubeVideoId={lesson.youtubeVideoId}
               lessonId={lessonId}
               courseId={courseId}

@@ -35,14 +35,6 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     }
   }, [status, role, fetchFavorites]);
 
-  // Show loading state while session is being fetched
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--student-primary)]"></div>
-      </div>
-    );
-  }
-
+  // Never block first paint — session resolves in the background (improves LCP / INP).
   return <>{children}</>;
 }

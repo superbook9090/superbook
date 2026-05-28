@@ -3,29 +3,24 @@
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
 import { roleThemes } from '@/lib/roleTheme';
-import { Zap, Globe, Shield, Clock } from 'lucide-react';
+import { LANDING_CLASSES } from '@/constants/spacing';
+import {
+  HomeAboutCapabilityIcon,
+  type HomeAboutCapabilityKey,
+} from '@/components/home/homeIcons';
+import { LayoutDashboard } from 'lucide-react';
 
-const getCapabilities = (t: (key: string) => string) => [
-  {
-    icon: Shield,
-    title: t('home.about.roleBasedAccess'),
-    description: t('home.about.roleBasedAccessDesc'),
-  },
-  {
-    icon: Zap,
-    title: t('home.about.realtimeAnalytics'),
-    description: t('home.about.realtimeAnalyticsDesc'),
-  },
-  {
-    icon: Globe,
-    title: t('home.about.multiLanguage'),
-    description: t('home.about.multiLanguageDesc'),
-  },
-  {
-    icon: Clock,
-    title: t('home.about.optimizedPerformance'),
-    description: t('home.about.optimizedPerformanceDesc'),
-  },
+const capabilityKeys: HomeAboutCapabilityKey[] = [
+  'roleBasedAccess',
+  'realtimeAnalytics',
+  'multiLanguage',
+  'organizedContent',
+];
+
+const previewItems = [
+  { key: 'previewCourses' as const, fillClass: 'landing-preview-bar-fill--40' },
+  { key: 'previewQuizzes' as const, fillClass: 'landing-preview-bar-fill--55' },
+  { key: 'previewProgress' as const, fillClass: 'landing-preview-bar-fill--72' },
 ];
 
 export default function About() {
@@ -33,11 +28,13 @@ export default function About() {
   const theme = roleThemes.student;
 
   return (
-    <section className="py-20 sm:py-32 relative overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[var(--student-primary-dark)] to-[var(--student-primary)]" />
+    <section
+      id="about"
+      aria-labelledby="about-heading"
+      className={`${LANDING_CLASSES.sectionDefer} ${LANDING_CLASSES.section} relative overflow-hidden`}
+    >
+      <div className={`absolute inset-0 ${LANDING_CLASSES.aboutBg}`} />
 
-      {/* Animated Shapes */}
       <motion.div
         className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl"
         animate={{
@@ -49,47 +46,56 @@ export default function About() {
           repeat: Infinity,
           ease: 'easeInOut',
         }}
+        aria-hidden
       />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className={`relative z-10 ${LANDING_CLASSES.container}`}>
         <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left Content */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
+            <h2 id="about-heading" className="text-3xl sm:text-4xl font-bold text-white mb-6">
               {t('home.about.title')}
             </h2>
-            <p className="text-lg text-white/70 mb-8">
+            <p className="text-lg text-white/70 mb-8 leading-relaxed">
               {t('home.about.description')}
             </p>
 
             <div className="grid sm:grid-cols-2 gap-4">
-              {getCapabilities(t).map((cap, index) => (
+              {capabilityKeys.map((capabilityKey, index) => (
                 <motion.div
-                  key={cap.title}
+                  key={capabilityKey}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   className="flex items-start gap-3"
                 >
-                  <div className={`w-10 h-10 ${theme.activeBg} rounded-lg flex items-center justify-center flex-shrink-0`}>
-                    <cap.icon className={`w-5 h-5 ${theme.text}`} />
+                  <div
+                    className={`w-10 h-10 ${theme.activeBg} rounded-lg flex items-center justify-center flex-shrink-0`}
+                  >
+                    <HomeAboutCapabilityIcon
+                      capabilityKey={capabilityKey}
+                      className={`w-5 h-5 ${theme.text}`}
+                      aria-hidden
+                    />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-white mb-1">{cap.title}</h4>
-                    <p className="text-sm text-white/60">{cap.description}</p>
+                    <h4 className="font-semibold text-white mb-1">
+                      {t(`home.about.${capabilityKey}`)}
+                    </h4>
+                    <p className="text-sm text-white/60">
+                      {t(`home.about.${capabilityKey}Desc`)}
+                    </p>
                   </div>
                 </motion.div>
               ))}
             </div>
           </motion.div>
 
-          {/* Right Visual */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -98,36 +104,49 @@ export default function About() {
             className="relative"
           >
             <div className="relative bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20">
-              {/* Mock Dashboard Preview */}
               <div className="space-y-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-white/20 rounded-xl" />
-                  <div className="flex-1 space-y-2">
-                    <div className="h-3 bg-white/30 rounded-full w-3/4" />
-                    <div className="h-2 bg-white/20 rounded-full w-1/2" />
+                <div className="flex items-center gap-3 border-b border-white/10 pb-4">
+                  <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                    <LayoutDashboard className="w-5 h-5 text-white" aria-hidden />
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold text-white">{t('common.dashboard')}</div>
+                    <div className="text-xs text-white/50">Quiz-Do</div>
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-3">
-                  <div className="h-20 bg-white/10 rounded-xl" />
-                  <div className="h-20 bg-white/10 rounded-xl" />
-                  <div className="h-20 bg-white/10 rounded-xl" />
+                  {previewItems.map(({ key, fillClass }) => (
+                    <div
+                      key={key}
+                      className="flex flex-col justify-end rounded-xl bg-white/10 p-3 min-h-[5rem]"
+                    >
+                      <span className="text-[10px] uppercase tracking-wide text-white/50 mb-1">
+                        {t(`home.about.${key}`)}
+                      </span>
+                      <div className="h-1.5 w-full rounded-full bg-white/20 overflow-hidden">
+                        <div className={`${LANDING_CLASSES.previewBar} ${fillClass}`} />
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="h-32 bg-white/10 rounded-xl" />
+                <div className="rounded-xl bg-white/10 p-4 space-y-2">
+                  <div className="h-2 bg-white/25 rounded-full w-4/5" />
+                  <div className="h-2 bg-white/15 rounded-full w-3/5" />
+                  <div className="h-2 bg-white/15 rounded-full w-2/3" />
+                </div>
               </div>
 
-              {/* Floating Badge */}
               <motion.div
                 animate={{ y: [0, -10, 0] }}
                 transition={{ duration: 3, repeat: Infinity }}
-                className="absolute -top-4 -right-4 bg-white rounded-xl p-3 shadow-xl"
+                className="absolute -top-4 -right-4 bg-white rounded-xl px-3 py-2 shadow-xl"
               >
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-[var(--success-light)] rounded-lg flex items-center justify-center">
-                    <Zap className="w-4 h-4 text-[var(--success)]" />
+                  <div className="w-8 h-8 bg-[var(--student-soft)] rounded-lg flex items-center justify-center">
+                    <LayoutDashboard className="w-4 h-4 text-[var(--student-primary)]" />
                   </div>
-                  <div>
-                    <div className="text-sm font-semibold text-[var(--color-foreground)]">{t('home.about.fast')}</div>
-                    <div className="text-xs text-[var(--color-muted-foreground)]">{t('home.about.responseTime')}</div>
+                  <div className="text-sm font-semibold text-[var(--color-foreground)]">
+                    {t('home.about.previewBadge')}
                   </div>
                 </div>
               </motion.div>

@@ -11,7 +11,8 @@ import { useSessionStore } from '@/store/useSessionStore';
 import { useCreateBlog } from '@/lib/react-query/hooks';
 import { ApiClientError } from '@/lib/api/http';
 import { useTranslation } from '@/hooks/useTranslation';
-import BlogEditorForm, { isBlogContentEmpty, type BlogFormData } from '@/features/blogs/components/BlogEditorForm';
+import { isBlogContentEmpty, type BlogFormData } from '@/features/blogs/components/BlogEditorForm';
+import { LazyBlogEditorForm } from '@/lib/lazy';
 
 export default function CreateBlogPage() {
   const { status } = useSessionStore();
@@ -74,7 +75,7 @@ export default function CreateBlogPage() {
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
-        <BlogEditorForm
+        <LazyBlogEditorForm
           formData={formData}
           onChange={setFormData}
           error={error}

@@ -40,7 +40,7 @@ export default function Logo({
   return (
     <Image
       src={logoSrc}
-      alt="quiz-do logo"
+      alt="Quiz-Do logo"
       priority={priority}
       {...dimensions}
       className={`${sizeClass} w-auto object-contain ${className}`}

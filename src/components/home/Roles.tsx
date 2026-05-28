@@ -3,82 +3,65 @@
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
 import { roleThemes } from '@/lib/roleTheme';
-import { GraduationCap, Users, Shield } from 'lucide-react';
+import { LANDING_CLASSES } from '@/constants/spacing';
+import { HomeRoleIcon, type HomeRoleKey } from '@/components/home/homeIcons';
 
-const getRoles = (t: (key: string) => string) => [
-  {
-    id: 'student',
-    icon: GraduationCap,
-    title: t('home.roles.student'),
-    description: t('home.roles.studentDesc'),
-    theme: roleThemes.student,
-  },
-  {
-    id: 'teacher',
-    icon: Users,
-    title: t('home.roles.teacher'),
-    description: t('home.roles.teacherDesc'),
-    theme: roleThemes.teacher,
-  },
-  {
-    id: 'admin',
-    icon: Shield,
-    title: t('home.roles.admin'),
-    description: t('home.roles.adminDesc'),
-    theme: roleThemes.admin,
-  },
-];
+const roleKeys: HomeRoleKey[] = ['student', 'teacher', 'admin'];
 
 export default function Roles() {
   const { t } = useTranslation();
 
   return (
-    <section className="py-20 sm:py-32 bg-[var(--color-surface-muted)]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
+    <section
+      id="roles"
+      aria-labelledby="roles-heading"
+      className={`${LANDING_CLASSES.sectionDefer} ${LANDING_CLASSES.section} ${LANDING_CLASSES.surfaceMuted}`}
+    >
+      <div className={LANDING_CLASSES.container}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className={LANDING_CLASSES.sectionHeader}
         >
-          <h2 className="text-3xl sm:text-4xl font-bold text-[var(--color-foreground)] mb-4">
+          <h2 id="roles-heading" className={LANDING_CLASSES.title}>
             {t('home.roles.title')}
           </h2>
-          <p className="text-lg text-[var(--color-muted-foreground)] max-w-2xl mx-auto">
-            {t('home.roles.subtitle')}
-          </p>
+          <p className={LANDING_CLASSES.subtitle}>{t('home.roles.subtitle')}</p>
         </motion.div>
 
-        {/* Roles Grid */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {getRoles(t).map((role, index) => (
-            <motion.div
-              key={role.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="group relative p-6 bg-[var(--card-solid)] rounded-2xl hover:shadow-xl transition-all duration-300 border border-[var(--color-border)]"
-            >
-              {/* Gradient Top Border */}
-              <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${role.theme.gradient} rounded-t-2xl`} />
+          {roleKeys.map((roleKey, index) => {
+            const theme = roleThemes[roleKey];
+            return (
+              <motion.div
+                key={roleKey}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="group relative p-6 bg-[var(--card-solid)] rounded-2xl hover:shadow-xl transition-all duration-300 border border-[var(--color-border)]"
+              >
+                <div
+                  className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${theme.gradient} rounded-t-2xl`}
+                />
 
-              {/* Icon */}
-              <div className={`w-14 h-14 ${role.theme.activeBg} rounded-xl flex items-center justify-center mb-4`}>
-                <role.icon className={`w-7 h-7 ${role.theme.text}`} />
-              </div>
+                <div
+                  className={`w-14 h-14 ${theme.activeBg} rounded-xl flex items-center justify-center mb-4`}
+                >
+                  <HomeRoleIcon roleKey={roleKey} className={`w-7 h-7 ${theme.text}`} />
+                </div>
 
-              {/* Content */}
-              <h3 className="text-lg font-semibold text-[var(--color-foreground)] mb-2">
-                {role.title}
-              </h3>
-              <p className="text-sm text-[var(--color-muted-foreground)] leading-relaxed">
-                {role.description}
-              </p>
-            </motion.div>
-          ))}
+                <h3 className="text-lg font-semibold text-[var(--color-foreground)] mb-2">
+                  {t(`home.roles.${roleKey}`)}
+                </h3>
+                <p className="text-sm text-[var(--color-muted-foreground)] leading-relaxed">
+                  {t(`home.roles.${roleKey}Desc`)}
+                </p>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>

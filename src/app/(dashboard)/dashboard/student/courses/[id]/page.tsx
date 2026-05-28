@@ -28,13 +28,13 @@ import {
   Target,
   Info,
 } from 'lucide-react';
-import CourseLeaderboard from '@/features/courses/components/CourseLeaderboard';
-import QuizCard from '@/features/quizzes/components/QuizCard';
-import CurriculumQuizRow from '@/features/quizzes/components/CurriculumQuizRow';
 import {
-  QuizStartConfirmModal,
-  type QuizStartInfo,
-} from '@/features/quizzes/components/QuizStartConfirmModal';
+  LazyCourseLeaderboard,
+  LazyCurriculumQuizRow,
+  LazyQuizCard,
+  LazyQuizStartConfirmModal,
+} from '@/lib/lazy';
+import type { QuizStartInfo } from '@/features/quizzes/components/QuizStartConfirmModal';
 import {
   attachQuizzesToCurriculumTree,
   flattenCurriculumLessons,
@@ -178,7 +178,7 @@ export default function CourseDetailPage() {
       {lesson.quizzes?.map((quiz) => {
         const statusInfo = getQuizStatus(quiz._id);
         return (
-          <CurriculumQuizRow
+          <LazyCurriculumQuizRow
             key={quiz._id}
             title={quiz.title}
             timeLimit={quiz.timeLimit}
@@ -229,7 +229,7 @@ export default function CourseDetailPage() {
     return quizzes.map((quiz) => {
       const statusInfo = getQuizStatus(quiz._id);
       return (
-        <CurriculumQuizRow
+        <LazyCurriculumQuizRow
           key={quiz._id}
           title={quiz.title}
           timeLimit={quiz.timeLimit}
@@ -249,7 +249,7 @@ export default function CourseDetailPage() {
     if (statusInfo.status === 'completed' && statusInfo.attempt) {
       return (
         <div key={quiz._id} className="h-full min-w-0">
-          <QuizCard
+          <LazyQuizCard
             quiz={quiz}
             attempt={statusInfo.attempt}
             type="attempted"
@@ -264,7 +264,7 @@ export default function CourseDetailPage() {
     if (statusInfo.status === 'in_progress' && statusInfo.attempt) {
       return (
         <div key={quiz._id} className="h-full min-w-0">
-          <QuizCard
+          <LazyQuizCard
             quiz={quiz}
             attempt={statusInfo.attempt}
             type="in_progress"
@@ -278,7 +278,7 @@ export default function CourseDetailPage() {
 
     return (
       <div key={quiz._id} className="min-w-0">
-        <QuizCard quiz={quiz} type="available" onStart={handleStartQuiz} hideCourseBadge />
+        <LazyQuizCard quiz={quiz} type="available" onStart={handleStartQuiz} hideCourseBadge />
       </div>
     );
   };
@@ -459,7 +459,7 @@ export default function CourseDetailPage() {
                       {courseLevelQuizzes.map((quiz) => {
                         const statusInfo = getQuizStatus(quiz._id);
                         return (
-                          <CurriculumQuizRow
+                          <LazyCurriculumQuizRow
                             key={quiz._id}
                             title={quiz.title}
                             timeLimit={quiz.timeLimit}
@@ -552,7 +552,7 @@ export default function CourseDetailPage() {
                 <Trophy className="w-6 h-6 text-amber-500" />
               </div>
               <div className="bg-gray-50/50 rounded-2xl border border-[var(--border)] overflow-hidden">
-                <CourseLeaderboard
+                <LazyCourseLeaderboard
                   courseId={courseId}
                   courseTitle={enrollment.course.title}
                   showUserRank={true}
@@ -565,7 +565,7 @@ export default function CourseDetailPage() {
         </div>
       </div>
 
-      <QuizStartConfirmModal
+      <LazyQuizStartConfirmModal
         quiz={confirmQuiz}
         isOpen={!!confirmQuiz}
         isLoading={!!confirmQuiz && startingQuizId === confirmQuiz.quizId}

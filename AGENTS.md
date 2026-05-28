@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This repository is a Next.js 15 learning platform application (`super-book` / `quiz-do`) built with the App Router, TypeScript, MongoDB, NextAuth, and optional Redis caching.
+This repository is a Next.js 15 learning platform application (`super-book` / `Quiz-Do`) built with the App Router, TypeScript, MongoDB, NextAuth, and optional Redis caching.
 
 Use this file as the default orientation for agents working in this repo. For full product/architecture detail, see `PROJECT_DOCUMENTATION.md`.
 
@@ -85,6 +85,7 @@ Expected environment variables include:
 - `MONGODB_URI`
 - `NEXTAUTH_SECRET`
 - `NEXTAUTH_URL`
+- `NEXT_PUBLIC_SITE_URL` (optional; canonical URL for SEO metadata, sitemap, and Open Graph — defaults to `NEXTAUTH_URL`)
 - `REDIS_URL` (optional)
 - Firebase client: `NEXT_PUBLIC_FIREBASE_*`, `NEXT_PUBLIC_FIREBASE_VAPID_KEY`
 - Firebase Admin: `FIREBASE_ADMIN_PROJECT_ID`, `FIREBASE_ADMIN_CLIENT_EMAIL`, `FIREBASE_ADMIN_PRIVATE_KEY`

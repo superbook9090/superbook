@@ -1,8 +1,8 @@
-# quiz-do - Learning Management System
+# Quiz-Do - Learning Management System
 
 ## 1. Project Overview
 
-quiz-do is a modern Learning Management System (LMS) built with Next.js 15, featuring role-based access control, course management (including optional private courses via teacher-generated codes), quizzes, blogs, analytics, push notifications, and comprehensive admin controls. The platform supports both English and Hindi languages with instant switching capabilities.
+Quiz-Do is a modern Learning Management System (LMS) built with Next.js 15, featuring role-based access control, course management (including optional private courses via teacher-generated codes), quizzes, blogs, analytics, push notifications, and comprehensive admin controls. The platform supports both English and Hindi languages with instant switching capabilities.
 
 ## 2. Tech Stack
 
@@ -1151,7 +1151,7 @@ interface IAppSettings {
     enableAnalytics: boolean;      // Enable analytics feature
   };
   platformConfig: {
-    siteName: string;             // Site name (default: 'quiz-do')
+    siteName: string;             // Site name (default: 'Quiz-Do')
     siteDescription: string;       // Site description
     maintenanceMode: boolean;     // Maintenance mode status
     allowRegistration: boolean;    // Allow new user registration

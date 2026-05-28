@@ -1,12 +1,16 @@
-import { Metadata } from 'next';
-import PrivacyPageClient from '@/features/privacy/components/PrivacyPageClient';
+import type { Metadata } from 'next';
+import { LazyPrivacyPage } from '@/lib/lazy';
+import { ROUTES } from '@/constants/routes';
+import { createPageMetadata } from '@/lib/seo/metadata';
 
-export const metadata: Metadata = {
-  title: 'Privacy Policy | quiz-do',
-  description: 'Your privacy is important to us. Read the privacy policy of quiz-do and learn how we protect your data.',
-  keywords: ['privacy', 'policy', 'data protection', 'quiz-do', 'security'],
-};
+export const metadata: Metadata = createPageMetadata({
+  title: 'Privacy Policy — Student & Learning Data',
+  description:
+    'Read how Quiz-Do protects learner privacy on our education platform: account data, course progress, quiz results, and security practices for schools and students.',
+  path: ROUTES.privacy,
+  keywords: ['education privacy policy', 'student data protection', 'LMS security', 'FERPA-ready practices'],
+});
 
 export default function PrivacyPage() {
-  return <PrivacyPageClient />;
+  return <LazyPrivacyPage />;
 }

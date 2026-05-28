@@ -2,7 +2,7 @@ import { ROUTES } from '@/constants/routes';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
-import EditCoursePageContent from '@/features/courses/components/EditCoursePageContent';
+import { LazyEditCoursePageContent } from '@/lib/lazy';
 
 export default async function EditCoursePage({ params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
@@ -16,5 +16,5 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
   }
 
   const { id } = await params;
-  return <EditCoursePageContent courseId={id} />;
+  return <LazyEditCoursePageContent courseId={id} />;
 }

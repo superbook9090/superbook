@@ -46,7 +46,7 @@ export async function GET() {
           enableAnalytics: true,
         },
         platformConfig: {
-          siteName: 'quiz-do',
+          siteName: 'Quiz-Do',
           siteDescription: 'Learning Management System',
           maintenanceMode: false,
           allowRegistration: true,

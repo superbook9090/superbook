@@ -1,12 +1,16 @@
-import { Metadata } from 'next';
-import ContactPageClient from '@/features/contact/components/ContactPageClient';
+import type { Metadata } from 'next';
+import { LazyContactPage } from '@/lib/lazy';
+import { ROUTES } from '@/constants/routes';
+import { createPageMetadata } from '@/lib/seo/metadata';
 
-export const metadata: Metadata = {
-  title: 'Contact Us | quiz-do',
-  description: 'Get in touch with the quiz-do team. We are here to support your learning, answer your questions, and hear your feedback.',
-  keywords: ['contact', 'support', 'quiz-do', 'LMS', 'help', 'learning platform'],
-};
+export const metadata: Metadata = createPageMetadata({
+  title: 'Contact Us — Education Platform Support',
+  description:
+    'Contact the Quiz-Do team for LMS support, online course questions, partnership inquiries, and help with quizzes, student accounts, and teacher tools.',
+  path: ROUTES.contact,
+  keywords: ['LMS support', 'education platform contact', 'online learning help', 'teacher support'],
+});
 
 export default function ContactPage() {
-  return <ContactPageClient />;
+  return <LazyContactPage />;
 }

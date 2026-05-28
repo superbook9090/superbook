@@ -1,6 +1,6 @@
 'use client';
 
-import CreateCourseForm from '@/features/courses/components/CreateCourseForm';
+import { LazyCreateCourseForm } from '@/lib/lazy';
 import { useTranslation } from '@/hooks/useTranslation';
 
 export default function CreateCoursePageContent() {
@@ -19,7 +19,7 @@ export default function CreateCoursePageContent() {
 
       <div className="bg-[var(--card-solid)] shadow rounded-lg">
         <div className="px-4 py-5 sm:p-6">
-          <CreateCourseForm />
+          <LazyCreateCourseForm />
         </div>
       </div>
     </div>

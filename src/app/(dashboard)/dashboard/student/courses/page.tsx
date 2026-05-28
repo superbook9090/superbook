@@ -8,13 +8,14 @@ import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSessionStore } from '@/store/useSessionStore';
 import { PageSkeleton } from '@/components/ui/Skeleton';
-import CourseCard from '@/features/courses/components/CourseCard';
+import { LazyCourseCard } from '@/lib/lazy';
 import Alert from '@/components/ui/Alert';
-import ConfirmModal from '@/components/ui/ConfirmModal';
+import { LazyConfirmModal } from '@/lib/lazy';
 import { useEnrollments, useDropEnrollment } from '@/lib/react-query/hooks';
 import { BookOpen, CheckCircle, Clock, TrendingUp, Sparkles } from 'lucide-react';
 import StatCard from '@/components/ui/StatCard';
-import CourseFilters, { type CourseStatusFilter } from '@/features/courses/components/CourseFilters';
+import { LazyCourseFilters } from '@/lib/lazy';
+import type { CourseStatusFilter } from '@/features/courses/components/CourseFilters';
 import { FilterPanel } from '@/components/filters/DashboardListFilters';
 import { PageWrapper, ResponsiveGrid } from '@/components/layout';
 
@@ -171,7 +172,7 @@ export default function StudentCoursesPage() {
 
       {/* Filters Section */}
       <FilterPanel>
-        <CourseFilters
+        <LazyCourseFilters
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           selectedCategory={selectedCategory}
@@ -225,7 +226,7 @@ export default function StudentCoursesPage() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.2 }}
             >
-              <CourseCard
+              <LazyCourseCard
                 course={enrollment}
                 type="enrolled"
                 onDrop={handleDrop}
@@ -235,7 +236,7 @@ export default function StudentCoursesPage() {
         )}
       </ResponsiveGrid>
 
-      <ConfirmModal
+      <LazyConfirmModal
         isOpen={isDropModalOpen}
         title={t('courses.dropCourse')}
         message={t('courses.dropCourseConfirm')}

@@ -3,7 +3,7 @@ import { ROUTES } from '@/constants/routes';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
-import CreateCoursePageContent from '@/features/courses/components/CreateCoursePageContent';
+import { LazyCreateCoursePageContent } from '@/lib/lazy';
 
 export default async function CreateCoursePage() {
   const session = await getServerSession(authOptions);
@@ -16,5 +16,5 @@ export default async function CreateCoursePage() {
     redirect(ROUTES.student.root);
   }
 
-  return <CreateCoursePageContent />;
+  return <LazyCreateCoursePageContent />;
 }

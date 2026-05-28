@@ -6,6 +6,7 @@ export const ROUTES = {
   register: '/register',
   forgotPassword: '/forgot-password',
   contact: '/contact',
+  privacy: '/privacy',
   maintenance: '/maintenance',
   dashboard: '/dashboard',
   profile: '/dashboard/profile',

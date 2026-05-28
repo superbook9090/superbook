@@ -2,7 +2,7 @@ import { ROUTES } from '@/constants/routes';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
-import Profile from '@/features/dashboard/components/Profile';
+import { LazyProfile } from '@/lib/lazy';
 import { getDashboardHomePath, isAdmin } from '@/lib/roles';
 
 export default async function AdminProfilePage() {
@@ -16,5 +16,5 @@ export default async function AdminProfilePage() {
     redirect(getDashboardHomePath(session.user?.role));
   }
 
-  return <Profile session={session} descriptionKey="manageAccount" />;
+  return <LazyProfile session={session} descriptionKey="manageAccount" />;
 }

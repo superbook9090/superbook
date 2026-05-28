@@ -50,7 +50,7 @@ export default function PremiumLogo({
   };
 
   return (
-    <div className={`flex items-center ${getPaddingClass()} rounded-xl ${getBackgroundClass()} shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105 ${className}`}>
+    <div className={`flex items-center ${getPaddingClass()} rounded-xl ${getBackgroundClass()} shadow-sm ${className}`}>
       <Logo 
         variant={variant}
         size={size}

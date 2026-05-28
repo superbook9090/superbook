@@ -172,21 +172,17 @@ export default function RegisterForm() {
               {t('register.joinCommunity')}
             </p>
 
-            {/* Stats */}
-            <div className="flex gap-8">
-              {[
-                { value: '10K+', label: t('home.stats.learners') },
-                { value: '500+', label: t('home.stats.courses') },
-                { value: '50+', label: t('home.stats.teachers') },
-              ].map((stat, i) => (
+            <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
+              {(['courses', 'quizzes', 'languages'] as const).map((key, i) => (
                 <motion.div
-                  key={stat.label}
+                  key={key}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.6 + i * 0.1 }}
+                  className="rounded-xl border border-white/20 bg-white/10 px-4 py-3 backdrop-blur-sm"
                 >
-                  <div className="text-3xl font-bold text-white">{stat.value}</div>
-                  <div className="text-sm text-white/70">{stat.label}</div>
+                  <div className="text-sm font-semibold text-white">{t(`home.highlights.${key}`)}</div>
+                  <div className="text-xs text-white/60">{t(`home.highlights.${key}Hint`)}</div>
                 </motion.div>
               ))}
             </div>

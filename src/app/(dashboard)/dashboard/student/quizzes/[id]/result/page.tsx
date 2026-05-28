@@ -12,9 +12,11 @@ import { PageSkeleton } from '@/components/ui/Skeleton';
 import { getQuizAttemptReview } from '@/lib/api/quizAttempts';
 import type { QuizComparison } from '@/lib/quiz/quizComparison';
 import { resolveQuizComparison, safeNumber, DEFAULT_TIME_LIMIT_MINUTES } from '@/lib/quiz/resultDefaults';
-import { QuizComparisonTable } from '@/features/quizzes/components/QuizComparisonTable';
-import { QuizRankPredictor } from '@/features/quizzes/components/QuizRankPredictor';
-import { QuizResultOverview } from '@/features/quizzes/components/QuizResultOverview';
+import {
+  LazyQuizComparisonTable,
+  LazyQuizRankPredictor,
+  LazyQuizResultOverview,
+} from '@/lib/lazy';
 import {
   QuizSolutionsFilter,
   type SolutionFilter,
@@ -194,7 +196,7 @@ export default function QuizResultPage() {
 
       {comparison && (
         <>
-          <QuizResultOverview
+          <LazyQuizResultOverview
             metrics={comparison.you}
             rank={comparison.rank}
             totalParticipants={comparison.totalParticipants}
@@ -213,12 +215,12 @@ export default function QuizResultPage() {
             )}
           </p>
 
-          <QuizRankPredictor
+          <LazyQuizRankPredictor
             rank={comparison.rank}
             totalParticipants={comparison.totalParticipants}
             scoreScale={comparison.scoreScale}
           />
-          <QuizComparisonTable
+          <LazyQuizComparisonTable
             you={comparison.you}
             topper={comparison.topper}
             average={comparison.average}

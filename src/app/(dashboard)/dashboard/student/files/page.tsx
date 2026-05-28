@@ -1,7 +1,5 @@
-'use client';
-
-import FileExplorer from '@/features/files/components/FileExplorer';
+import { LazyFileExplorer } from '@/lib/lazy';
 
 export default function StudentFilesPage() {
-  return <FileExplorer />;
+  return <LazyFileExplorer />;
 }

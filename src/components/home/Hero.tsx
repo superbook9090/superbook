@@ -1,12 +1,15 @@
 'use client';
-import { ROUTES } from '@/constants/routes';
 
-import { motion } from 'framer-motion';
+import { ROUTES } from '@/constants/routes';
 import Link from 'next/link';
 import { useTranslation } from '@/hooks/useTranslation';
 import PremiumLogo from '@/components/ui/PremiumLogo';
 import { roleThemes } from '@/lib/roleTheme';
+import { LANDING_CLASSES } from '@/constants/spacing';
+import { HomeHighlightIcon, type HomeHighlightKey } from '@/components/home/homeIcons';
 import { ArrowRight, Sparkles } from 'lucide-react';
+
+const highlightKeys: HomeHighlightKey[] = ['courses', 'quizzes', 'languages'];
 
 export default function Hero() {
   const { t } = useTranslation();
@@ -14,154 +17,81 @@ export default function Hero() {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Gradient Background */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${theme.gradient}`} />
+      <div className={`absolute inset-0 bg-gradient-to-br ${theme.gradient}`} aria-hidden />
 
-      {/* Animated Shapes */}
-      <motion.div
-        className="absolute top-20 left-10 w-72 h-72 bg-white/10 rounded-full blur-3xl"
-        animate={{
-          scale: [1, 1.2, 1],
-          opacity: [0.3, 0.5, 0.3],
-        }}
-        transition={{
-          duration: 8,
-          repeat: Infinity,
-          ease: 'easeInOut',
-        }}
+      <div
+        className="hero-blob absolute top-20 left-10 w-72 h-72 bg-white/10 rounded-full blur-3xl"
+        aria-hidden
       />
-      <motion.div
-        className="absolute bottom-20 right-10 w-96 h-96 bg-[var(--student-accent)]/20 rounded-full blur-3xl"
-        animate={{
-          scale: [1.2, 1, 1.2],
-          opacity: [0.2, 0.4, 0.2],
-        }}
-        transition={{
-          duration: 10,
-          repeat: Infinity,
-          ease: 'easeInOut',
-        }}
+      <div
+        className="hero-blob hero-blob-delayed absolute bottom-20 right-10 w-96 h-96 bg-[var(--student-accent)]/20 rounded-full blur-3xl"
+        aria-hidden
       />
 
-      {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
-        {/* Badge */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 mb-8"
-        >
-          <Sparkles className="w-4 h-4 text-white" />
-          <span className="text-sm font-medium text-white">
-            {t('home.badge')}
-          </span>
-        </motion.div>
+      <div className={`relative z-10 ${LANDING_CLASSES.container} py-20 text-center`}>
+        <div className="hero-fade-in inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 mb-8">
+          <Sparkles className="w-4 h-4 text-white" aria-hidden />
+          <span className="text-sm font-medium text-white">{t('home.badge')}</span>
+        </div>
 
-        {/* Logo */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.1 }}
-          className="flex items-center justify-center gap-3 mb-6"
-        >
-          <PremiumLogo 
-            variant="default"
-            size="xl"
-            theme="student"
-            priority={true}
-          />
-        </motion.div>
+        <div className="hero-fade-in hero-fade-in-delay-1 flex items-center justify-center gap-3 mb-6">
+          <PremiumLogo variant="default" size="xl" theme="student" priority />
+        </div>
 
-        {/* Title */}
-        <motion.h1
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6"
-        >
+        <h1 className="hero-fade-in hero-fade-in-delay-2 text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6 max-w-4xl mx-auto">
           {t('home.title')}
-        </motion.h1>
+        </h1>
 
-        {/* Subtitle */}
-        <motion.p
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
-          className="text-xl sm:text-2xl text-white/80 mb-4"
-        >
+        <p className="hero-fade-in hero-fade-in-delay-3 text-xl sm:text-2xl text-white/85 mb-4 max-w-3xl mx-auto">
           {t('home.subtitle')}
-        </motion.p>
+        </p>
 
-        {/* Description */}
-        <motion.p
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="text-lg text-white/60 max-w-2xl mx-auto mb-12"
-        >
+        <p className="hero-fade-in hero-fade-in-delay-4 text-base sm:text-lg text-white/65 max-w-2xl mx-auto mb-12 leading-relaxed">
           {t('home.description')}
-        </motion.p>
+        </p>
 
-        {/* CTA Buttons */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4"
-        >
+        <div className="hero-fade-in hero-fade-in-delay-5 flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link
-            href={ROUTES.login}
-            className="group flex items-center gap-2 px-8 py-4 bg-white text-[var(--student-primary)] font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+            href={ROUTES.register}
+            className="group flex items-center gap-2 px-8 py-4 bg-white text-[var(--student-primary)] font-semibold rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300"
           >
-            {t('home.login')}
+            {t('home.register')}
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </Link>
           <Link
-            href={ROUTES.register}
-            className="flex items-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm text-white font-semibold rounded-xl border border-white/30 hover:bg-white/20 hover:scale-105 transition-all duration-300"
+            href={ROUTES.login}
+            className="flex items-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm text-white font-semibold rounded-xl border border-white/30 hover:bg-white/20 transition-colors duration-300"
           >
-            {t('home.register')}
+            {t('home.login')}
           </Link>
-        </motion.div>
+        </div>
 
-        {/* Stats */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
-          className="flex flex-wrap items-center justify-center gap-8 sm:gap-12 mt-16"
-        >
-          <div className="text-center">
-            <div className="text-3xl sm:text-4xl font-bold text-white">10K+</div>
-            <div className="text-sm text-white/60">{t('home.stats.learners')}</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl sm:text-4xl font-bold text-white">500+</div>
-            <div className="text-sm text-white/60">{t('home.stats.courses')}</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl sm:text-4xl font-bold text-white">50+</div>
-            <div className="text-sm text-white/60">{t('home.stats.teachers')}</div>
-          </div>
-        </motion.div>
+        <div className="hero-fade-in hero-fade-in-delay-6 grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mt-16 max-w-3xl mx-auto">
+          {highlightKeys.map((key) => (
+            <div key={key} className={LANDING_CLASSES.highlightCard}>
+              <div className={LANDING_CLASSES.highlightCardIconWrap}>
+                <HomeHighlightIcon
+                  highlightKey={key}
+                  className={LANDING_CLASSES.highlightCardIcon}
+                  aria-hidden
+                />
+              </div>
+              <div className={LANDING_CLASSES.highlightCardTitle}>
+                {t(`home.highlights.${key}`)}
+              </div>
+              <div className={LANDING_CLASSES.highlightCardHint}>
+                {t(`home.highlights.${key}Hint`)}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Scroll Indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
-      >
-        <motion.div
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center pt-2"
-        >
-          <motion.div className="w-1.5 h-1.5 bg-white rounded-full" />
-        </motion.div>
-      </motion.div>
+      <div className="hero-scroll-hint absolute bottom-8 left-1/2 -translate-x-1/2" aria-hidden>
+        <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center pt-2">
+          <div className="w-1.5 h-1.5 bg-white rounded-full" />
+        </div>
+      </div>
     </section>
   );
 }

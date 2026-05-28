@@ -1,76 +1,103 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import {
+  BookOpen,
+  ClipboardList,
+  Compass,
+  KeyRound,
+  Newspaper,
+  TrendingUp,
+} from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
-import { BookOpen, Brain, FileText, BarChart3 } from 'lucide-react';
+import { LANDING_CLASSES } from '@/constants/spacing';
+import type { SVGProps } from 'react';
 
-const getFeatures = (t: (key: string) => string) => [
-  {
-    icon: BookOpen,
-    title: t('home.features.coursesManagement'),
-    description: t('home.features.coursesDesc'),
-  },
-  {
-    icon: Brain,
-    title: t('home.features.quizSystem'),
-    description: t('home.features.quizDesc'),
-  },
-  {
-    icon: FileText,
-    title: t('home.features.blogPlatform'),
-    description: t('home.features.blogDesc'),
-  },
-  {
-    icon: BarChart3,
-    title: t('home.features.analyticsDashboard'),
-    description: t('home.features.analyticsDesc'),
-  },
+type HomeFeatureKey =
+  | 'structuredCourses'
+  | 'curriculumQuizzes'
+  | 'progressInsights'
+  | 'browseEnroll'
+  | 'privateCourses'
+  | 'blogsResources';
+
+const featureKeys: HomeFeatureKey[] = [
+  'structuredCourses',
+  'curriculumQuizzes',
+  'progressInsights',
+  'browseEnroll',
+  'privateCourses',
+  'blogsResources',
 ];
+
+function FeatureIcon({
+  featureKey,
+  ...props
+}: SVGProps<SVGSVGElement> & { featureKey: HomeFeatureKey }) {
+  switch (featureKey) {
+    case 'structuredCourses':
+      return <BookOpen {...props} />;
+    case 'curriculumQuizzes':
+      return <ClipboardList {...props} />;
+    case 'progressInsights':
+      return <TrendingUp {...props} />;
+    case 'browseEnroll':
+      return <Compass {...props} />;
+    case 'privateCourses':
+      return <KeyRound {...props} />;
+    case 'blogsResources':
+      return <Newspaper {...props} />;
+    default:
+      return <BookOpen {...props} />;
+  }
+}
 
 export default function Features() {
   const { t } = useTranslation();
 
   return (
-    <section className="py-20 sm:py-32 bg-[var(--card-solid)]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
+    <section
+      id="features"
+      aria-labelledby="features-heading"
+      className={`${LANDING_CLASSES.sectionDefer} ${LANDING_CLASSES.section} ${LANDING_CLASSES.surface}`}
+    >
+      <div className={LANDING_CLASSES.container}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className={LANDING_CLASSES.sectionHeader}
         >
-          <h2 className="text-3xl sm:text-4xl font-bold text-[var(--color-foreground)] mb-4">
+          <h2 id="features-heading" className={LANDING_CLASSES.title}>
             {t('home.features.title')}
           </h2>
-          <p className="text-lg text-[var(--color-muted-foreground)] max-w-2xl mx-auto">
-            {t('home.features.subtitle')}
-          </p>
+          <p className={LANDING_CLASSES.subtitle}>{t('home.features.subtitle')}</p>
         </motion.div>
 
-        {/* Features Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {getFeatures(t).map((feature, index) => (
+        <div className={LANDING_CLASSES.featureGrid}>
+          {featureKeys.map((featureKey, index) => (
             <motion.div
-              key={feature.title}
+              key={featureKey}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="group relative p-6 bg-[var(--color-surface-muted)] rounded-2xl hover:bg-[var(--card-solid)] hover:shadow-xl transition-all duration-300 border border-[var(--color-border)]"
+              transition={{ duration: 0.5, delay: index * 0.08 }}
+              className={LANDING_CLASSES.featureCard}
             >
-              {/* Icon */}
-              <div className="w-12 h-12 bg-[var(--color-accent)] rounded-xl flex items-center justify-center mb-4 group-hover:bg-[var(--color-primary)] transition-colors duration-300">
-                <feature.icon className="w-6 h-6 text-[var(--color-primary)] group-hover:text-white transition-colors duration-300" />
+              <div className={LANDING_CLASSES.featureCardIconWrap}>
+                <FeatureIcon
+                  featureKey={featureKey}
+                  className={LANDING_CLASSES.featureCardIcon}
+                  aria-hidden
+                />
               </div>
 
-              {/* Content */}
-              <h3 className="text-lg font-semibold text-[var(--color-foreground)] mb-2">
-                {feature.title}
+              <h3 className={LANDING_CLASSES.featureCardTitle}>
+                {t(`home.features.${featureKey}`)}
               </h3>
-              <p className="text-sm text-[var(--color-muted-foreground)] leading-relaxed">
-                {feature.description}
+              <p className={LANDING_CLASSES.featureCardDesc}>
+                {t(`home.features.${featureKey}Desc`)}
               </p>
             </motion.div>
           ))}

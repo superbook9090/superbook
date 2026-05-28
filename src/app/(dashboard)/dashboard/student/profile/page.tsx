@@ -3,7 +3,7 @@ import { ROUTES } from '@/constants/routes';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
-import Profile from '@/features/dashboard/components/Profile';
+import { LazyProfile } from '@/lib/lazy';
 
 import { isAdmin } from '@/lib/roles';
 
@@ -22,5 +22,5 @@ export default async function StudentProfilePage() {
     redirect(ROUTES.teacher.profile);
   }
 
-  return <Profile session={session} />;
+  return <LazyProfile session={session} />;
 }

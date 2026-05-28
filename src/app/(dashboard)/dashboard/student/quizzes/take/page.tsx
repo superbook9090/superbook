@@ -12,9 +12,9 @@ import { getQuizAttemptByAttemptId } from '@/lib/api/quizAttempts';
 import { ApiClientError } from '@/lib/api/http';
 import { useQuizSecurity } from '@/hooks/useQuizSecurity';
 import Alert from '@/components/ui/Alert';
-import ConfirmModal from '@/components/ui/ConfirmModal';
+import { LazyConfirmModal } from '@/lib/lazy';
 import { useSessionStore } from '@/store/useSessionStore';
-import { QuizQuestionProgress } from '@/features/quizzes/components/QuizQuestionProgress';
+import { LazyQuizQuestionProgress } from '@/lib/lazy';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import {
   computeQuizTimeRemainingSeconds,
@@ -440,7 +440,7 @@ export default function TakeQuizPage() {
           </div>
         </div>
 
-        <QuizQuestionProgress
+        <LazyQuizQuestionProgress
           total={questions.length}
           currentIndex={currentQuestion}
           answeredIds={answeredIds}
@@ -536,7 +536,7 @@ export default function TakeQuizPage() {
       )}
 
       {/* Submit Confirmation Modal */}
-      <ConfirmModal
+      <LazyConfirmModal
         isOpen={showSubmitModal}
         title={t('quiz.confirmSubmit')}
         message={t('quiz.confirmSubmit')}
@@ -552,7 +552,7 @@ export default function TakeQuizPage() {
       />
 
       {/* Violation Warning Modal */}
-      <ConfirmModal
+      <LazyConfirmModal
         isOpen={showViolationModal}
         title={t('quiz.securityViolationTitle')}
         message={t('quiz.violationModalMessage', {

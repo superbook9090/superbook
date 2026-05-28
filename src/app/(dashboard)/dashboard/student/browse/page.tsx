@@ -7,14 +7,13 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSessionStore } from '@/store/useSessionStore';
-import CourseCard from '@/features/courses/components/CourseCard';
+import { LazyCourseCard } from '@/lib/lazy';
 import Alert from '@/components/ui/Alert';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { PageWrapper, ResponsiveGrid } from '@/components/layout';
 import { useAvailableCourses, useEnrollCourse } from '@/lib/react-query/hooks';
 import { BookOpen, ArrowLeft, Sparkles } from 'lucide-react';
-import CourseFilters from '@/features/courses/components/CourseFilters';
-import JoinCourseByCode from '@/features/courses/components/JoinCourseByCode';
+import { LazyCourseFilters, LazyJoinCourseByCode } from '@/lib/lazy';
 import { FilterPanel } from '@/components/filters/DashboardListFilters';
 
 export default function BrowseCoursesPage() {
@@ -131,11 +130,11 @@ export default function BrowseCoursesPage() {
       </motion.div>
 
       {/* Join private course */}
-      <JoinCourseByCode />
+      <LazyJoinCourseByCode />
 
       {/* Filters Section */}
       <FilterPanel>
-        <CourseFilters
+        <LazyCourseFilters
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           selectedCategory={selectedCategory}
@@ -187,7 +186,7 @@ export default function BrowseCoursesPage() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.2 }}
             >
-              <CourseCard
+              <LazyCourseCard
                 course={course}
                 type="available"
                 onEnroll={handleEnroll}

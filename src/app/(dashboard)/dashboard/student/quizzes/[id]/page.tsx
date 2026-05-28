@@ -7,7 +7,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
-import QuizLeaderboard from '@/features/quizzes/components/QuizLeaderboard';
+import { LazyQuizLeaderboard, LazyQuizStartConfirmModal } from '@/lib/lazy';
 import { useStartQuizAttempt } from '@/lib/react-query/hooks';
 import { ApiClientError } from '@/lib/api/http';
 import { getQuizById } from '@/lib/api/quizzes';
@@ -17,10 +17,7 @@ import Alert from '@/components/ui/Alert';
 import { motion } from 'framer-motion';
 import { HelpCircle, Clock, BookOpen, ArrowLeft, Play } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
-import {
-  QuizStartConfirmModal,
-  type QuizStartInfo,
-} from '@/features/quizzes/components/QuizStartConfirmModal';
+import type { QuizStartInfo } from '@/features/quizzes/components/QuizStartConfirmModal';
 
 interface Quiz {
   _id: string;
@@ -182,7 +179,7 @@ export default function QuizDetailPage() {
         </div>
       </motion.div>
 
-      <QuizStartConfirmModal
+      <LazyQuizStartConfirmModal
         quiz={startConfirmQuiz}
         isOpen={showStartConfirm}
         isLoading={startQuiz.isPending}
@@ -196,7 +193,7 @@ export default function QuizDetailPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <QuizLeaderboard
+        <LazyQuizLeaderboard
           quizId={quizId}
           quizTitle={quiz.title}
           showUserRank={!!session?.user?.id}

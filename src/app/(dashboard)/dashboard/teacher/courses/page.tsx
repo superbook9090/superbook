@@ -13,7 +13,7 @@ import Alert from '@/components/ui/Alert';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { useTeacherCourses, usePublishCourse, useDeleteCourse, type Course } from '@/lib/react-query/hooks';
 import { Trash2 } from 'lucide-react';
-import ConfirmModal from '@/components/ui/ConfirmModal';
+import { LazyConfirmModal } from '@/lib/lazy';
 
 export default function TeacherCoursesPage() {
   const { session, status } = useSessionStore();
@@ -211,7 +211,7 @@ export default function TeacherCoursesPage() {
       </div>
     </div>
 
-    <ConfirmModal
+    <LazyConfirmModal
       isOpen={!!confirmDeleteCourse}
       title={t('teacherCourses.deleteConfirmTitle') || 'Delete Course'}
       message={t('teacherCourses.deleteConfirmMessage') || 'Are you sure you want to delete this course? This action cannot be undone.'}

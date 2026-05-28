@@ -3,7 +3,7 @@ import { ROUTES } from '@/constants/routes';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
-import CreateQuizPageContent from '@/features/quizzes/components/CreateQuizPageContent';
+import { LazyCreateQuizPageContent } from '@/lib/lazy';
 
 export default async function CreateQuizPage() {
   const session = await getServerSession(authOptions);
@@ -16,5 +16,5 @@ export default async function CreateQuizPage() {
     redirect(ROUTES.student.root);
   }
 
-  return <CreateQuizPageContent />;
+  return <LazyCreateQuizPageContent />;
 }

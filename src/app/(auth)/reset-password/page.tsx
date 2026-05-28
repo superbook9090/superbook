@@ -1,5 +1,5 @@
-import ResetPasswordForm from '@/features/auth/components/ResetPasswordForm';
+import { LazyResetPasswordForm } from '@/lib/lazy';
 
 export default function ResetPasswordPage() {
-  return <ResetPasswordForm />;
+  return <LazyResetPasswordForm />;
 }

@@ -24,7 +24,7 @@ export const getSettingsWithDefaults = cache(async (): Promise<IAppSettings> => 
       enableAnalytics: true,
     },
     platformConfig: {
-      siteName: 'quiz-do',
+      siteName: 'Quiz-Do',
       siteDescription: 'A comprehensive learning platform',
       maintenanceMode: false,
       allowRegistration: true,

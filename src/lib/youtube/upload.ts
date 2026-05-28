@@ -18,7 +18,7 @@ export async function uploadVideoToYouTube(
     requestBody: {
       snippet: {
         title: metadata.title.substring(0, 100),
-        description: metadata.description || 'Uploaded via quiz-do LMS platform.',
+        description: metadata.description || 'Uploaded via Quiz-Do LMS platform.',
         categoryId: '27', // Education
       },
       status: {

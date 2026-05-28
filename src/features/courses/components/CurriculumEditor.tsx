@@ -5,14 +5,22 @@ import { Trash2, X, Video, Clock, Save, UploadCloud } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useAddLesson, useUpdateLesson, type Lesson } from '@/lib/react-query/hooks';
-import RichTextEditor from '@/components/ui/RichTextEditor';
+import dynamic from 'next/dynamic';
+import { PageSkeleton } from '@/components/ui/Skeleton';
+
+const RichTextEditor = dynamic(() => import('@/components/ui/RichTextEditor'), {
+  ssr: false,
+  loading: () => <PageSkeleton variant="embed" />,
+});
+
+const CurriculumTreeEditor = dynamic(() => import('./curriculum/CurriculumTreeEditor'), {
+  loading: () => <PageSkeleton variant="embed" />,
+});
 import Button from '@/components/ui/Button';
 import { EditorField, editorInputClass } from '@/components/ui/editor/EditorField';
 import { EditorSection } from '@/components/ui/editor/EditorSection';
 import { useSessionStore } from '@/store/useSessionStore';
 import { cn } from '@/lib/utils';
-import CurriculumTreeEditor from './curriculum/CurriculumTreeEditor';
-
 interface CurriculumEditorProps {
   courseId: string;
 }
