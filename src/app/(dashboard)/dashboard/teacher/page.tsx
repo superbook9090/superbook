@@ -2,8 +2,12 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
+import { ROUTES } from '@/constants/routes';
 import { useSessionStore } from '@/store/useSessionStore';
 import { motion } from 'framer-motion';
+
+const MotionLink = motion(Link);
 import { useTranslation } from '@/hooks/useTranslation';
 import {
   useDashboard,
@@ -162,25 +166,28 @@ export default function TeacherDashboardPage() {
             </p>
           </div>
           <div className="w-full sm:w-auto">
-            <motion.a
-              whileHover={{ scale: !isAtLimit('courses') ? 1.02 : 1 }}
-              whileTap={{ scale: !isAtLimit('courses') ? 0.98 : 1 }}
-              href={!isAtLimit('courses') ? '/dashboard/teacher/courses/create' : '#'}
-              onClick={(e) => {
-                if (isAtLimit('courses')) {
-                  e.preventDefault();
-                  setLimitAlert({ type: 'courses' });
-                }
-              }}
-              className={`inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base text-[var(--teacher-primary)] rounded-xl font-semibold shadow-lg transition-all ${
-                isAtLimit('courses')
-                  ? 'bg-[var(--color-surface-muted)] cursor-not-allowed'
-                  : 'bg-[var(--card-solid)] hover:shadow-xl'
-              }`}
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              {t('dashboard.createCourse')}
-            </motion.a>
+            {isAtLimit('courses') ? (
+              <motion.button
+                type="button"
+                whileHover={{ scale: 1 }}
+                whileTap={{ scale: 1 }}
+                onClick={() => setLimitAlert({ type: 'courses' })}
+                className="inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base text-[var(--teacher-primary)] rounded-xl font-semibold shadow-lg transition-all bg-[var(--color-surface-muted)] cursor-not-allowed"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                {t('dashboard.createCourse')}
+              </motion.button>
+            ) : (
+              <MotionLink
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                href={ROUTES.teacher.courseCreate}
+                className="inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base text-[var(--teacher-primary)] rounded-xl font-semibold shadow-lg transition-all bg-[var(--card-solid)] hover:shadow-xl"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                {t('dashboard.createCourse')}
+              </MotionLink>
+            )}
           </div>
         </div>
       </motion.div>
@@ -249,12 +256,12 @@ export default function TeacherDashboardPage() {
         >
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg sm:text-xl font-semibold text-[var(--color-foreground)]">{t('dashboard.recentCourses')}</h2>
-            <a 
-              href="/dashboard/teacher/courses" 
+            <Link
+              href={ROUTES.teacher.courses}
               className="text-sm font-medium text-[var(--teacher-primary)] hover:text-[var(--teacher-hover)] flex items-center"
             >
               {t('dashboard.viewAll')} <ArrowRight className="w-4 h-4 ml-1" />
-            </a>
+            </Link>
           </div>
           <ResponsiveGrid variant="cards">
             {recentCourses.map((course: Course, index: number) => (
@@ -298,7 +305,7 @@ export default function TeacherDashboardPage() {
             icon={BookOpen}
             title={t('dashboard.manageCourses')}
             description={t('dashboard.viewAndEdit')}
-            href="/dashboard/teacher/courses"
+            href={ROUTES.teacher.courses}
             color="teacher"
             delay={0.1}
           />
@@ -306,7 +313,7 @@ export default function TeacherDashboardPage() {
             icon={HelpCircle}
             title={t('dashboard.manageQuizzes')}
             description={t('dashboard.createAndReview')}
-            href="/dashboard/teacher/quizzes"
+            href={ROUTES.teacher.quizzes}
             color="student"
             delay={0.15}
           />
@@ -314,7 +321,7 @@ export default function TeacherDashboardPage() {
             icon={BarChart3}
             title={t('dashboard.analytics')}
             description={t('dashboard.viewInsights')}
-            href="/dashboard/teacher/analytics"
+            href={ROUTES.teacher.analytics}
             color="info"
             delay={0.2}
           />
@@ -322,7 +329,7 @@ export default function TeacherDashboardPage() {
             icon={Plus}
             title={t('dashboard.createCourse')}
             description={t('dashboard.addNewContent')}
-            href={filteredStats.totalCourses < limits.courses ? '/dashboard/teacher/courses/create' : '#'}
+            href={ROUTES.teacher.courseCreate}
             color="warning"
             disabled={filteredStats.totalCourses >= limits.courses}
             delay={0.25}
@@ -331,7 +338,7 @@ export default function TeacherDashboardPage() {
             icon={Plus}
             title={t('dashboard.createBlog')}
             description={t('dashboard.writeNewContent')}
-            href={filteredStats.totalBlogs < limits.blogs ? '/dashboard/teacher/blogs/create' : '#'}
+            href={ROUTES.teacher.blogCreate}
             color="admin"
             disabled={filteredStats.totalBlogs >= limits.blogs}
             delay={0.3}

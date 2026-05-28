@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import { ROUTES } from '@/constants/routes';
+import { getDashboardHomePath } from '@/lib/roles';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
@@ -10,17 +12,8 @@ export default function NotFound() {
   const { t } = useTranslation();
   const { theme } = useRoleTheme();
 
-  // Determine dashboard link based on role
-  let dashboardLink = '/';
-  let dashboardText = t('notFound.goHome');
-
-  if (session?.user?.role === 'student') {
-    dashboardLink = '/dashboard/student';
-    dashboardText = t('notFound.goToDashboard');
-  } else if (session?.user?.role === 'teacher' || session?.user?.role === 'admin') {
-    dashboardLink = '/dashboard/teacher';
-    dashboardText = t('notFound.goToDashboard');
-  }
+  const dashboardLink = session ? getDashboardHomePath(session.user?.role) : ROUTES.home;
+  const dashboardText = session ? t('notFound.goToDashboard') : t('notFound.goHome');
 
   return (
     <div className="min-h-screen bg-[var(--color-background)] flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8">
@@ -79,7 +72,7 @@ export default function NotFound() {
 
           {!session && (
             <Link
-              href="/login"
+              href={ROUTES.login}
               className="inline-flex items-center justify-center px-6 py-3 border border-[var(--color-border)] text-base font-medium rounded-md text-[var(--color-foreground)] bg-[var(--color-card)] hover:bg-[var(--color-accent)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)] transition-colors"
             >
               <svg

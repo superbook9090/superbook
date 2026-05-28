@@ -1,7 +1,9 @@
 // src/app/(dashboard)/dashboard/teacher/courses/page.tsx
 'use client';
 
+import { ROUTES } from '@/constants/routes';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -30,7 +32,7 @@ export default function TeacherCoursesPage() {
   useEffect(() => {
     if (status === 'loading') return;
     if (!session) {
-      router.push('/login');
+      router.push(ROUTES.login);
     }
   }, [status, session, router]);
 
@@ -89,12 +91,12 @@ export default function TeacherCoursesPage() {
               {t('teacherCourses.coursesDesc')}
             </p>
           </div>
-          <a
-            href="/dashboard/teacher/courses/create"
+          <Link
+            href={ROUTES.teacher.courseCreate}
             className={`inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base font-medium rounded-xl text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 transition-opacity`}
           >
             {t('teacherCourses.createNewCourse')}
-          </a>
+          </Link>
         </div>
 
         {error && (
@@ -108,12 +110,12 @@ export default function TeacherCoursesPage() {
           <div className="bg-[var(--background)] overflow-hidden shadow rounded-lg">
             <div className="px-4 py-8 sm:p-6 text-center">
               <p className="text-[var(--color-muted-foreground)] mb-4">{t('teacherCourses.noCoursesYet')}</p>
-              <a
-                href="/dashboard/teacher/courses/create"
+              <Link
+                href={ROUTES.teacher.courseCreate}
                 className={`inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base font-medium rounded-xl text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 transition-opacity`}
               >
                 {t('teacherCourses.createFirstCourse')}
-              </a>
+              </Link>
             </div>
           </div>
         ) : (
@@ -167,7 +169,7 @@ export default function TeacherCoursesPage() {
                   {/* Action Buttons */}
                   <div className="flex gap-2 mt-4">
                     <button
-                      onClick={() => router.push(`/dashboard/teacher/courses/${course._id}/edit`)}
+                      onClick={() => router.push(ROUTES.teacher.courseEdit(course._id))}
                       className="flex-1 px-3 py-2 text-sm font-medium text-[var(--teacher-primary)] bg-[var(--teacher-soft)] rounded-lg hover:bg-[var(--teacher-border)] transition-colors"
                     >
                       {t('teacherCourses.edit')}

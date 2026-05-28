@@ -1,4 +1,5 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -17,12 +18,12 @@ export default function FavoritesPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/login');
+      router.push(ROUTES.login);
       return;
     }
 
     if (status === 'authenticated' && !featureEnabled) {
-      router.push('/dashboard/student');
+      router.push(ROUTES.student.root);
     }
   }, [status, router, featureEnabled]);
 

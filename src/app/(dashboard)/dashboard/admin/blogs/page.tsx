@@ -1,4 +1,5 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -44,7 +45,7 @@ export default function AdminBlogsPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/login');
+      router.push(ROUTES.login);
     }
   }, [status, router]);
 

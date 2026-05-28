@@ -5,17 +5,18 @@ import Link from 'next/link';
 import PremiumLogo from '@/components/ui/PremiumLogo';
 import { useTranslation } from '@/hooks/useTranslation';
 import { Heart } from 'lucide-react';
+import { ROUTES } from '@/constants/routes';
 
 const getFooterLinks = (t: (key: string) => string) => ({
   product: [
     { label: t('home.features.title'), href: '#features' },
     { label: t('home.roles.title'), href: '#roles' },
     { label: t('home.about.title'), href: '#about' },
-    { label: t('contact.title'), href: '/contact' },
+    { label: t('contact.title'), href: ROUTES.contact },
   ],
   auth: [
-    { label: t('home.login'), href: '/login' },
-    { label: t('home.register'), href: '/register' },
+    { label: t('home.login'), href: ROUTES.login },
+    { label: t('home.register'), href: ROUTES.register },
   ],
 });
 

@@ -1,4 +1,5 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
@@ -119,11 +120,11 @@ export default function CreateCourseForm({ courseId }: Props) {
       if (courseId) {
         await patchCourse(courseId, body);
         invalidateCourseLists();
-        router.push('/dashboard/teacher/courses');
+        router.push(ROUTES.teacher.courses);
       } else {
         await createCourse(body);
         invalidateCourseLists();
-        router.push('/dashboard/teacher/courses');
+        router.push(ROUTES.teacher.courses);
       }
     } catch (err) {
       const message =
@@ -175,7 +176,7 @@ export default function CreateCourseForm({ courseId }: Props) {
           {courseId && (
             <button
               type="button"
-              onClick={() => router.push('/dashboard/teacher/courses')}
+              onClick={() => router.push(ROUTES.teacher.courses)}
               className="mt-3 text-sm font-medium text-red-800 underline"
             >
               {t('createCourseForm.cancel')}
@@ -369,7 +370,7 @@ export default function CreateCourseForm({ courseId }: Props) {
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t border-[var(--color-border)]">
         <button
           type="button"
-          onClick={() => router.push('/dashboard/teacher/courses')}
+          onClick={() => router.push(ROUTES.teacher.courses)}
           className="px-4 py-3 sm:py-2 border border-[var(--color-border)] rounded-lg shadow-sm text-sm font-medium text-[var(--color-foreground)] bg-[var(--card-solid)] hover:bg-[var(--color-background)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)] touch-manipulation"
         >
           {t('createCourseForm.cancel')}

@@ -1,6 +1,7 @@
 // src/app/(dashboard)/dashboard/student/quizzes/[id]/page.tsx
 'use client';
 
+import { ROUTES } from '@/constants/routes';
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -49,7 +50,7 @@ export default function QuizDetailPage() {
   useEffect(() => {
     if (status === 'loading') return;
     if (!session) {
-      router.push('/login');
+      router.push(ROUTES.login);
       return;
     }
 
@@ -77,7 +78,7 @@ export default function QuizDetailPage() {
     try {
       const data = await startQuiz.mutateAsync(quizId);
       setShowStartConfirm(false);
-      router.push(`/dashboard/student/quizzes/take?attemptId=${data.attempt._id}`);
+      router.push(ROUTES.student.quizTake(data.attempt._id));
     } catch (e) {
       setError(
         e instanceof ApiClientError ? e.message : t('errors.errorStartingQuiz')
@@ -103,7 +104,7 @@ export default function QuizDetailPage() {
       <div>
         <Alert type="error" message={error} />
         <button
-          onClick={() => router.push('/dashboard/student/quizzes')}
+          onClick={() => router.push(ROUTES.student.quizzes)}
           className={`mt-4 inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r ${theme.gradient} text-white rounded-lg hover:opacity-90`}
         >
           <ArrowLeft className="w-4 h-4" />
@@ -125,7 +126,7 @@ export default function QuizDetailPage() {
     <div className="space-y-6">
       {/* Back Button */}
       <button
-        onClick={() => router.push('/dashboard/student/quizzes')}
+        onClick={() => router.push(ROUTES.student.quizzes)}
         className="inline-flex items-center gap-2 text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />

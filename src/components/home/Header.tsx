@@ -1,4 +1,5 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -45,7 +46,7 @@ export default function Header() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2">
+            <Link href={ROUTES.home} className="flex items-center gap-2">
               <PremiumLogo 
                 variant="default"
                 size="md"
@@ -69,7 +70,7 @@ export default function Header() {
 
               {session ? (
                 <Link
-                  href="/dashboard"
+                  href={ROUTES.dashboard}
                   className={`px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r ${theme.gradient} hover:shadow-lg transition-all`}
                 >
                   {t('common.dashboard')}
@@ -78,7 +79,7 @@ export default function Header() {
                 <>
                   {/* Login */}
                   <Link
-                    href="/login"
+                    href={ROUTES.login}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                       isScrolled
                         ? 'text-gray-600 hover:text-gray-900'
@@ -90,7 +91,7 @@ export default function Header() {
 
                   {/* Register */}
                   <Link
-                    href="/register"
+                    href={ROUTES.register}
                     className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
                       isScrolled
                         ? `bg-gradient-to-r ${theme.gradient} text-white hover:shadow-lg`
@@ -135,7 +136,7 @@ export default function Header() {
             <div className="px-4 py-6 space-y-4">
               {session ? (
                 <Link
-                  href="/dashboard"
+                  href={ROUTES.dashboard}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={`block w-full py-3 text-center text-white font-semibold bg-gradient-to-r ${theme.gradient} rounded-xl`}
                 >
@@ -144,14 +145,14 @@ export default function Header() {
               ) : (
                 <>
                   <Link
-                    href="/login"
+                    href={ROUTES.login}
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="block w-full py-3 text-center text-gray-700 font-medium border border-gray-200 rounded-xl hover:bg-gray-50"
                   >
                     {t('home.login')}
                   </Link>
                   <Link
-                    href="/register"
+                    href={ROUTES.register}
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={`block w-full py-3 text-center text-white font-semibold bg-gradient-to-r ${theme.gradient} rounded-xl`}
                   >

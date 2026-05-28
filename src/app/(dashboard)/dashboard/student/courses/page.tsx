@@ -1,6 +1,7 @@
 // src/app/(dashboard)/dashboard/student/courses/page.tsx
 'use client';
 
+import { ROUTES } from '@/constants/routes';
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -39,7 +40,7 @@ export default function StudentCoursesPage() {
   useEffect(() => {
     if (status === 'loading') return;
     if (!session) {
-      router.push('/login');
+      router.push(ROUTES.login);
     }
   }, [status, session, router]);
 
@@ -131,7 +132,7 @@ export default function StudentCoursesPage() {
             </p>
           </div>
           <button
-            onClick={() => router.push('/dashboard/student/browse')}
+            onClick={() => router.push(ROUTES.student.browse)}
             className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-[var(--student-primary)] rounded-xl text-sm font-bold shadow-lg hover:bg-gray-50 transition-all transform hover:-translate-y-1 active:translate-y-0"
           >
             <Sparkles className="w-4 h-4" />

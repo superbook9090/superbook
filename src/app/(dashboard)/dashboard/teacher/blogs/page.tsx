@@ -1,4 +1,5 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -35,7 +36,7 @@ export default function TeacherBlogsPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/login');
+      router.push(ROUTES.login);
       return;
     }
   }, [status, router]);
@@ -119,7 +120,7 @@ export default function TeacherBlogsPage() {
           <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">{t('blog.manageBlogsDesc')}</p>
         </div>
         <Link
-          href="/dashboard/teacher/blogs/create"
+          href={ROUTES.teacher.blogCreate}
           className={`inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base bg-gradient-to-r ${theme.gradient} text-white font-medium rounded-xl shadow-md hover:shadow-lg transition-all`}
         >
           <Plus className="w-5 h-5 mr-2" />
@@ -200,7 +201,7 @@ export default function TeacherBlogsPage() {
             </p>
             {!searchTerm && (
               <Link
-                href="/dashboard/teacher/blogs/create"
+                href={ROUTES.teacher.blogCreate}
                 className={`inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base bg-gradient-to-r ${theme.gradient} text-white font-medium rounded-xl shadow-md hover:shadow-lg transition-all touch-manipulation`}
               >
                 <Plus className="w-5 h-5 mr-2" />
@@ -250,7 +251,7 @@ export default function TeacherBlogsPage() {
                     {blog.isPublished ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
                   </button>
                   <Link
-                    href={`/dashboard/teacher/blogs/edit/${blog._id}`}
+                    href={ROUTES.teacher.blogEdit(blog._id)}
                     className="p-2.5 sm:p-2 bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)] rounded-lg hover:bg-[var(--color-surface-muted)]/80 transition-colors touch-manipulation min-h-[44px] sm:min-h-0"
                     title={t('blog.edit')}
                   >

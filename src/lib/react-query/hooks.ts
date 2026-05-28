@@ -22,7 +22,8 @@ import {
   reorderCurriculum,
   getLesson
 } from '@/lib/api/courses';
-import { listQuizzesByOrg } from '@/lib/api/quizzes';
+import { listQuizzesByOrg, listQuizzesAll } from '@/lib/api/quizzes';
+import { listTeacherCoursesSelf } from '@/lib/api/courses';
 import { listEnrollments, enrollInCourse, joinCourseByCode, dropEnrollment } from '@/lib/api/enrollments';
 import { listQuizAttempts, startQuizAttempt, submitQuizAttempt, type SubmitQuizAttemptInput } from '@/lib/api/quizAttempts';
 import { queryKeys, favoritesListDefaults } from '@/lib/react-query/query-keys';
@@ -221,6 +222,33 @@ export function useQuizzes(orgId?: string) {
 }
 
 /** Quizzes for one course, optionally published-only (student views). */
+/** Teacher quiz management list (all quizzes filtered to instructor's courses). */
+export function useTeacherQuizzesList(enabled = true) {
+  return useQuery({
+    queryKey: ['quizzes', 'teacher-list'],
+    queryFn: async () => {
+      const coursesData = await listTeacherCoursesSelf();
+      const courses = (coursesData.courses || []) as Course[];
+      if (courses.length === 0) {
+        return { courses, quizzes: [] as Quiz[] };
+      }
+      const courseIds = new Set(courses.map((c) => c._id));
+      const data = await listQuizzesAll();
+      const all = (data.quizzes || []) as Quiz[];
+      const quizzes = all.filter((q) => {
+        const id =
+          typeof q.course === 'object' && q.course !== null && '_id' in q.course
+            ? q.course._id
+            : String(q.course);
+        return id && courseIds.has(id);
+      });
+      return { courses, quizzes };
+    },
+    enabled,
+    refetchOnMount: 'always',
+  });
+}
+
 export function useCourseQuizzes(
   courseId: string,
   options?: { orgId?: string; publishedOnly?: boolean }

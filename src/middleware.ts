@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
+import { ROUTES } from '@/constants/routes';
 import { authRateLimiter, generalRateLimiter, adminRateLimiter } from '@/lib/rateLimiter';
 
 export async function middleware(request: NextRequest) {
@@ -58,7 +59,7 @@ export async function middleware(request: NextRequest) {
   // =========================
   if (pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/forgot-password')) {
     if (token?.id) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
+      return NextResponse.redirect(new URL(ROUTES.dashboard, request.url));
     }
     return NextResponse.next();
   }
@@ -68,12 +69,12 @@ export async function middleware(request: NextRequest) {
   // =========================
   if (pathname.startsWith('/dashboard/admin')) {
     if (!token) {
-      return NextResponse.redirect(new URL('/login', request.url));
+      return NextResponse.redirect(new URL(ROUTES.login, request.url));
     }
 
     // Only admin and superadmin can access admin routes
     if (token.role !== 'admin' && token.role !== 'superadmin') {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
+      return NextResponse.redirect(new URL(ROUTES.dashboard, request.url));
     }
 
     return NextResponse.next();
@@ -84,7 +85,7 @@ export async function middleware(request: NextRequest) {
   // =========================
   if (pathname.startsWith('/dashboard')) {
     if (!token) {
-      return NextResponse.redirect(new URL('/login', request.url));
+      return NextResponse.redirect(new URL(ROUTES.login, request.url));
     }
 
     // ❗ DO NOT redirect based on role here

@@ -1,6 +1,7 @@
 // src/app/(dashboard)/dashboard/student/browse/page.tsx
 'use client';
 
+import { ROUTES } from '@/constants/routes';
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -34,7 +35,7 @@ export default function BrowseCoursesPage() {
   useEffect(() => {
     if (status === 'loading') return;
     if (!session) {
-      router.push('/login');
+      router.push(ROUTES.login);
     }
   }, [status, session, router]);
 
@@ -74,7 +75,7 @@ export default function BrowseCoursesPage() {
   const handleEnroll = async (courseId: string) => {
     try {
       await enrollCourse.mutateAsync({ courseId });
-      router.push('/dashboard/student/courses');
+      router.push(ROUTES.student.courses);
     } catch {
       setAlertState({ type: 'error', message: t('courses.errorEnrolling') });
     }
@@ -101,7 +102,7 @@ export default function BrowseCoursesPage() {
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
         <div className="relative z-10 space-y-4">
           <button
-            onClick={() => router.push('/dashboard/student/courses')}
+            onClick={() => router.push(ROUTES.student.courses)}
             className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-white/70 hover:text-white transition-colors group"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />

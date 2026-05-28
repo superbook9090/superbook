@@ -1,4 +1,5 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -98,7 +99,7 @@ export default function ForgotPasswordForm() {
         ) : null}
 
         <Link
-          href="/login"
+          href={ROUTES.login}
           className="mt-6 flex items-center justify-center gap-2 text-sm font-medium text-[var(--student-primary)] hover:underline"
         >
           <ArrowLeft className="w-4 h-4" />

@@ -1,4 +1,5 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -64,12 +65,12 @@ export default function OrganizationsPage() {
     if (status === 'loading') return;
 
     if (!session) {
-      router.push('/login');
+      router.push(ROUTES.login);
       return;
     }
 
     if (!isSuperAdmin(session.user?.role)) {
-      router.push('/dashboard');
+      router.push(ROUTES.dashboard);
       return;
     }
   }, [session, status, router]);

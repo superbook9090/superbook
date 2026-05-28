@@ -1,4 +1,5 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
@@ -58,7 +59,7 @@ export default function AdminCoursesPage() {
   useEffect(() => {
     if (status === 'loading') return;
     if (!session) {
-      router.push('/login');
+      router.push(ROUTES.login);
       return;
     }
 

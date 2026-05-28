@@ -1,4 +1,5 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
 
 import { useState, memo } from 'react';
 import { useRouter } from 'next/navigation';
@@ -60,7 +61,7 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
   };
 
   const handleContinue = () => {
-    router.push(`/dashboard/student/courses/${courseData._id}`);
+    router.push(ROUTES.student.course(courseData._id));
   };
 
   return (

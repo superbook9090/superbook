@@ -1,4 +1,5 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
 
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -56,11 +57,11 @@ export default function StudentNotificationsPage() {
   useEffect(() => {
     if (status === 'loading') return;
     if (!session) {
-      router.push('/login');
+      router.push(ROUTES.login);
       return;
     }
     if (session.user?.role !== 'student') {
-      router.push('/dashboard');
+      router.push(ROUTES.dashboard);
       return;
     }
     void loadNotifications();

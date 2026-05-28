@@ -1,6 +1,7 @@
 // src/app/(dashboard)/dashboard/admin/users/page.tsx
 'use client';
 
+import { ROUTES } from '@/constants/routes';
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { formatDate } from '@/lib/dateUtils';
@@ -65,12 +66,12 @@ export default function AdminUsersPage() {
     if (status === 'loading') return;
 
     if (!session) {
-      router.push('/login');
+      router.push(ROUTES.login);
       return;
     }
 
     if (!isSuperAdmin(session.user?.role) && session.user?.role !== 'admin') {
-      router.push('/dashboard');
+      router.push(ROUTES.dashboard);
       return;
     }
   }, [session, status, router]);
@@ -135,7 +136,7 @@ export default function AdminUsersPage() {
   useEffect(() => {
     if (status === 'loading') return;
     if (!session) {
-      router.push('/login');
+      router.push(ROUTES.login);
       return;
     }
 

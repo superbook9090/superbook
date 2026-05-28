@@ -1,4 +1,5 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -17,7 +18,7 @@ export default function HomePage() {
   // Redirect authenticated users to dashboard
   useEffect(() => {
     if (status === 'authenticated') {
-      router.push('/dashboard');
+      router.push(ROUTES.dashboard);
     }
   }, [status, router]);
 

@@ -1,7 +1,9 @@
 // src/app/(dashboard)/dashboard/student/progress/page.tsx
 'use client';
 
+import { ROUTES } from '@/constants/routes';
 import { useState, useEffect, useMemo } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -91,7 +93,7 @@ export default function StudentProgressPage() {
   useEffect(() => {
     if (status === 'loading') return;
     if (!session) {
-      router.push('/login');
+      router.push(ROUTES.login);
       return;
     }
 
@@ -304,12 +306,12 @@ export default function StudentProgressPage() {
         {progressData.length === 0 ? (
           <div className="card-surface card-body text-center">
             <p className="text-[var(--color-muted-foreground)] mb-4">{t('progress.noProgressData')}</p>
-            <a
-              href="/dashboard/student/browse"
+            <Link
+              href={ROUTES.student.browse}
               className={`btn-action text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90`}
             >
               {t('progress.browseCourses')}
-            </a>
+            </Link>
           </div>
         ) : (
           <div className="card-list">

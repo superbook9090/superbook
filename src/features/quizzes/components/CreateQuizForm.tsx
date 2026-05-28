@@ -1,7 +1,9 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import * as XLSX from 'xlsx';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
@@ -47,6 +49,7 @@ export default function CreateQuizForm({ quizId }: Props) {
   const { t } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
   const { theme } = useRoleTheme();
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
@@ -524,7 +527,8 @@ export default function CreateQuizForm({ quizId }: Props) {
         });
       }
 
-      router.push('/dashboard/teacher/quizzes');
+      await queryClient.invalidateQueries({ queryKey: ['quizzes'] });
+      router.push(ROUTES.teacher.quizzes);
     } catch (err) {
       const message =
         err instanceof ApiClientError
@@ -923,7 +927,7 @@ export default function CreateQuizForm({ quizId }: Props) {
       <div className="flex justify-end space-x-3 pt-4 border-t border-[var(--color-border)]">
         <button
           type="button"
-          onClick={() => router.push('/dashboard/teacher/quizzes')}
+          onClick={() => router.push(ROUTES.teacher.quizzes)}
           className="px-4 py-2 border border-[var(--color-border)] rounded-md shadow-sm text-sm font-medium text-[var(--color-foreground)] bg-[var(--color-card)] hover:bg-[var(--color-accent)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)]"
         >
           {t('createQuizForm.cancel')}

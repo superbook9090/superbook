@@ -1,5 +1,7 @@
 /** Central dashboard navigation config (i18n keys + routes). */
 
+import { ROUTES } from '@/constants/routes';
+
 export type NavIconName =
   | 'LayoutDashboard'
   | 'BookOpen'
@@ -29,39 +31,39 @@ export interface DashboardNavItem {
 }
 
 export const STUDENT_NAV: DashboardNavItem[] = [
-  { nameKey: 'common.dashboard', href: '/dashboard/student', icon: 'LayoutDashboard' },
-  { nameKey: 'common.myCourses', href: '/dashboard/student/courses', icon: 'BookOpen', feature: 'enableCourses' },
-  { nameKey: 'common.browse', href: '/dashboard/student/browse', icon: 'Search', feature: 'enableCourses' },
-  { nameKey: 'common.files', href: '/dashboard/student/files', icon: 'Folder' },
-  { nameKey: 'common.blogs', href: '/dashboard/student/blogs', icon: 'Newspaper', feature: 'enableBlogs' },
-  { nameKey: 'common.favorites', href: '/dashboard/student/favorites', icon: 'Heart', feature: 'enableBlogs' },
-  { nameKey: 'common.quizzes', href: '/dashboard/student/quizzes', icon: 'HelpCircle', feature: 'enableQuizzes' },
-  { nameKey: 'common.progress', href: '/dashboard/student/progress', icon: 'TrendingUp' },
-  { nameKey: 'common.profile', href: '/dashboard/student/profile', icon: 'User' },
-  { nameKey: 'contact.title', href: '/contact', icon: 'Mail' },
+  { nameKey: 'common.dashboard', href: ROUTES.student.root, icon: 'LayoutDashboard' },
+  { nameKey: 'common.myCourses', href: ROUTES.student.courses, icon: 'BookOpen', feature: 'enableCourses' },
+  { nameKey: 'common.browse', href: ROUTES.student.browse, icon: 'Search', feature: 'enableCourses' },
+  { nameKey: 'common.files', href: ROUTES.student.files, icon: 'Folder' },
+  { nameKey: 'common.blogs', href: ROUTES.student.blogs, icon: 'Newspaper', feature: 'enableBlogs' },
+  { nameKey: 'common.favorites', href: ROUTES.student.favorites, icon: 'Heart', feature: 'enableBlogs' },
+  { nameKey: 'common.quizzes', href: ROUTES.student.quizzes, icon: 'HelpCircle', feature: 'enableQuizzes' },
+  { nameKey: 'common.progress', href: ROUTES.student.progress, icon: 'TrendingUp' },
+  { nameKey: 'common.profile', href: ROUTES.student.profile, icon: 'User' },
+  { nameKey: 'contact.title', href: ROUTES.contact, icon: 'Mail' },
 ];
 
 export const TEACHER_NAV: DashboardNavItem[] = [
-  { nameKey: 'common.dashboard', href: '/dashboard/teacher', icon: 'LayoutDashboard' },
-  { nameKey: 'common.myCourses', href: '/dashboard/teacher/courses', icon: 'BookOpen', feature: 'enableCourses' },
-  { nameKey: 'common.quizzes', href: '/dashboard/teacher/quizzes', icon: 'HelpCircle', feature: 'enableQuizzes' },
-  { nameKey: 'common.blogs', href: '/dashboard/teacher/blogs', icon: 'Newspaper', feature: 'enableBlogs' },
-  { nameKey: 'common.analytics', href: '/dashboard/teacher/analytics', icon: 'BarChart3' },
-  { nameKey: 'common.profile', href: '/dashboard/teacher/profile', icon: 'User' },
-  { nameKey: 'contact.title', href: '/contact', icon: 'Mail' },
+  { nameKey: 'common.dashboard', href: ROUTES.teacher.root, icon: 'LayoutDashboard' },
+  { nameKey: 'common.myCourses', href: ROUTES.teacher.courses, icon: 'BookOpen', feature: 'enableCourses' },
+  { nameKey: 'common.quizzes', href: ROUTES.teacher.quizzes, icon: 'HelpCircle', feature: 'enableQuizzes' },
+  { nameKey: 'common.blogs', href: ROUTES.teacher.blogs, icon: 'Newspaper', feature: 'enableBlogs' },
+  { nameKey: 'common.analytics', href: ROUTES.teacher.analytics, icon: 'BarChart3' },
+  { nameKey: 'common.profile', href: ROUTES.teacher.profile, icon: 'User' },
+  { nameKey: 'contact.title', href: ROUTES.contact, icon: 'Mail' },
 ];
 
 export const ADMIN_NAV: DashboardNavItem[] = [
-  { nameKey: 'common.users', href: '/dashboard/admin/users', icon: 'Users' },
-  { nameKey: 'common.organizations', href: '/dashboard/admin/organizations', icon: 'Building2', superadminOnly: true },
-  { nameKey: 'common.allCourses', href: '/dashboard/admin/courses', icon: 'Library', feature: 'enableCourses' },
-  { nameKey: 'common.allQuizzes', href: '/dashboard/admin/quizzes', icon: 'HelpCircle', feature: 'enableQuizzes' },
-  { nameKey: 'common.allBlogs', href: '/dashboard/admin/blogs', icon: 'Newspaper', feature: 'enableBlogs' },
-  { nameKey: 'common.files', href: '/dashboard/admin/files', icon: 'Folder', superadminOnly: true },
-  { nameKey: 'common.analytics', href: '/dashboard/admin/analytics', icon: 'BarChart3' },
-  { nameKey: 'common.notifications', href: '/dashboard/admin/notifications', icon: 'Bell', superadminOnly: true },
-  { nameKey: 'common.settings', href: '/dashboard/admin/settings', icon: 'User' },
-  { nameKey: 'common.profile', href: '/dashboard/admin/profile', icon: 'User' },
+  { nameKey: 'common.users', href: ROUTES.admin.users, icon: 'Users' },
+  { nameKey: 'common.organizations', href: ROUTES.admin.organizations, icon: 'Building2', superadminOnly: true },
+  { nameKey: 'common.allCourses', href: ROUTES.admin.courses, icon: 'Library', feature: 'enableCourses' },
+  { nameKey: 'common.allQuizzes', href: ROUTES.admin.quizzes, icon: 'HelpCircle', feature: 'enableQuizzes' },
+  { nameKey: 'common.allBlogs', href: ROUTES.admin.blogs, icon: 'Newspaper', feature: 'enableBlogs' },
+  { nameKey: 'common.files', href: ROUTES.admin.files, icon: 'Folder', superadminOnly: true },
+  { nameKey: 'common.analytics', href: ROUTES.admin.analytics, icon: 'BarChart3' },
+  { nameKey: 'common.notifications', href: ROUTES.admin.notifications, icon: 'Bell', superadminOnly: true },
+  { nameKey: 'common.settings', href: ROUTES.admin.settings, icon: 'User' },
+  { nameKey: 'common.profile', href: ROUTES.admin.profile, icon: 'User' },
 ];
 
 /** Primary items shown in mobile bottom bar (max 5). */

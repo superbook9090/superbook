@@ -1,99 +1,63 @@
 // src/app/(dashboard)/dashboard/teacher/quizzes/page.tsx
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { ROUTES } from '@/constants/routes';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
-import { listTeacherCoursesSelf } from '@/lib/api/courses';
-import { listQuizzesAll, patchQuiz, deleteQuiz } from '@/lib/api/quizzes';
+import { patchQuiz, deleteQuiz } from '@/lib/api/quizzes';
+import { useTeacherQuizzesList, type Quiz } from '@/lib/react-query/hooks';
 import { ApiClientError } from '@/lib/api/http';
 import Alert from '@/components/ui/Alert';
 import { PageSkeleton } from '@/components/ui/Skeleton';
-
-interface Course {
-  _id: string;
-  title: string;
-}
-
-interface Quiz {
-  _id: string;
-  title: string;
-  description?: string;
-  timeLimit: number;
-  questionCount?: number;
-  course: Course | { _id: string } | string;
-  isPublished: boolean;
-  createdAt: string;
-}
 
 export default function TeacherQuizzesPage() {
   const { session, status } = useSessionStore();
   const { t } = useTranslation();
   const router = useRouter();
   const { theme } = useRoleTheme();
-  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+  const queryClient = useQueryClient();
+  const enabled = status === 'authenticated' && !!session;
+  const { data, isLoading, error: fetchError } = useTeacherQuizzesList(enabled);
+  const courses = useMemo(() => data?.courses ?? [], [data?.courses]);
+  const quizzes = useMemo(() => data?.quizzes ?? [], [data?.quizzes]);
   const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
 
   // Memoized helper to safely get course title
-  const getCourseTitle = useCallback((course: Quiz['course']): string => {
-    if (typeof course === 'object' && course !== null && 'title' in course) {
-      return (course as Course).title;
-    }
-    return t('teacherQuizzes.unknownCourse');
-  }, [t]);
-
-  const fetchData = useCallback(async () => {
-    try {
-      const coursesData = await listTeacherCoursesSelf();
-      const teacherCourses: Course[] = (coursesData.courses || []) as Course[];
-      setCourses(teacherCourses);
-
-      if (teacherCourses.length === 0) {
-        setQuizzes([]);
-        return;
+  const getCourseTitle = useCallback(
+    (course: Quiz['course'] | string): string => {
+      if (typeof course === 'object' && course !== null && 'title' in course) {
+        return course.title;
       }
-
-      const quizzesData = await listQuizzesAll();
-      const allQuizzes: Quiz[] = (quizzesData.quizzes || []) as Quiz[];
-      const courseIds = new Set(teacherCourses.map((c) => c._id));
-
-      const teacherQuizzes = allQuizzes.filter((q) => {
-        const quizCourseId =
-          typeof q.course === 'object' && q.course !== null
-            ? q.course._id?.toString()
-            : q.course?.toString();
-        return quizCourseId && courseIds.has(quizCourseId);
-      });
-
-      setQuizzes(teacherQuizzes);
-    } catch (err) {
-      setError(err instanceof ApiClientError ? err.message : t('errors.errorLoadingQuizzes'));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [t]);
+      if (typeof course === 'string') {
+        return courses.find((c) => c._id === course)?.title ?? t('teacherQuizzes.unknownCourse');
+      }
+      return t('teacherQuizzes.unknownCourse');
+    },
+    [courses, t]
+  );
 
   useEffect(() => {
-    if (status === 'loading') return;
-    if (!session) {
-      router.push('/login');
-      return;
+    if (status === 'unauthenticated') {
+      router.push(ROUTES.login);
     }
+  }, [status, router]);
 
-    fetchData();
-  }, [session, status, router, fetchData]);
+  const error =
+    fetchError instanceof ApiClientError
+      ? fetchError.message
+      : fetchError
+        ? t('errors.errorLoadingQuizzes')
+        : '';
 
   const handleTogglePublish = useCallback(async (quizId: string, currentStatus: boolean) => {
     try {
       await patchQuiz(quizId, { isPublished: !currentStatus });
-      setQuizzes((prev) =>
-        prev.map((q) => (q._id === quizId ? { ...q, isPublished: !currentStatus } : q))
-      );
+      await queryClient.invalidateQueries({ queryKey: ['quizzes'] });
     } catch (err) {
       setAlertState({
         type: 'error',
@@ -101,14 +65,14 @@ export default function TeacherQuizzesPage() {
           err instanceof ApiClientError ? err.message : t('teacherQuizzes.errorUpdateQuiz'),
       });
     }
-  }, [t]);
+  }, [queryClient, t]);
 
   const handleDelete = useCallback(async (quizId: string) => {
     if (!confirm(t('teacherQuizzes.confirmDeleteQuiz'))) return;
 
     try {
       await deleteQuiz(quizId);
-      setQuizzes((prev) => prev.filter((q) => q._id !== quizId));
+      await queryClient.invalidateQueries({ queryKey: ['quizzes'] });
     } catch (err) {
       setAlertState({
         type: 'error',
@@ -116,7 +80,7 @@ export default function TeacherQuizzesPage() {
           err instanceof ApiClientError ? err.message : t('teacherQuizzes.errorDeleteQuiz'),
       });
     }
-  }, [t]);
+  }, [queryClient, t]);
 
   if (status === 'loading' || isLoading) {
     return <PageSkeleton />;
@@ -130,12 +94,12 @@ export default function TeacherQuizzesPage() {
           <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)] truncate">{t('teacherQuizzes.quizManagement')}</h1>
           <p className="mt-1 text-sm sm:text-base text-[var(--color-muted-foreground)]">{t('teacherQuizzes.quizManagementDesc')}</p>
         </div>
-        <a
-          href="/dashboard/teacher/quizzes/create"
+        <Link
+          href={ROUTES.teacher.quizCreate}
           className={`inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base font-medium rounded-xl text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 transition-opacity`}
         >
           {t('teacherQuizzes.createQuiz')}
-        </a>
+        </Link>
       </div>
 
       {alertState && (
@@ -146,35 +110,35 @@ export default function TeacherQuizzesPage() {
         />
       )}
 
-      {error && (
+      {error ? (
         <div className="bg-[var(--error-light)] border-l-4 border-[var(--error)] p-3 sm:p-4 rounded-r-lg">
           <p className="text-sm text-[var(--error)]">{error}</p>
         </div>
-      )}
+      ) : null}
 
       <div>
         {courses.length === 0 ? (
           <div className="bg-[var(--card-solid)] overflow-hidden shadow rounded-lg">
             <div className="px-4 py-8 sm:p-6 text-center">
               <p className="text-[var(--color-muted-foreground)] mb-4">{t('teacherQuizzes.createCourseFirst')}</p>
-              <a
-                href="/dashboard/teacher/courses/create"
+              <Link
+                href={ROUTES.teacher.courseCreate}
                 className={`inline-flex items-center justify-center min-h-[44px] px-4 py-3 sm:px-4 sm:py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 touch-manipulation`}
               >
                 {t('teacherQuizzes.createCourse')}
-              </a>
+              </Link>
             </div>
           </div>
         ) : quizzes.length === 0 ? (
           <div className="bg-[var(--card-solid)] overflow-hidden shadow rounded-lg">
             <div className="px-4 py-8 sm:p-6 text-center">
               <p className="text-[var(--color-muted-foreground)] mb-4">{t('teacherQuizzes.noQuizzesYet')}</p>
-              <a
-                href="/dashboard/teacher/quizzes/create"
+              <Link
+                href={ROUTES.teacher.quizCreate}
                 className={`inline-flex items-center justify-center min-h-[44px] px-4 py-3 sm:px-4 sm:py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 touch-manipulation`}
               >
                 {t('teacherQuizzes.createFirstQuiz')}
-              </a>
+              </Link>
             </div>
           </div>
         ) : (
@@ -211,7 +175,7 @@ export default function TeacherQuizzesPage() {
                   <div className="flex gap-2 pt-2 border-t border-[var(--border)]">
                     <button
                       type="button"
-                      onClick={() => router.push(`/dashboard/teacher/quizzes/${quiz._id}/edit`)}
+                      onClick={() => router.push(ROUTES.teacher.quizEdit(quiz._id))}
                       className="flex-1 min-h-[44px] sm:min-h-0 px-3 py-2 text-sm font-medium text-[var(--teacher-primary)] bg-[var(--teacher-soft)] rounded-lg hover:bg-[var(--teacher-border)] transition-colors touch-manipulation"
                     >
                       {t('teacherQuizzes.edit')}
@@ -278,7 +242,7 @@ export default function TeacherQuizzesPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button
                           type="button"
-                          onClick={() => router.push(`/dashboard/teacher/quizzes/${quiz._id}/edit`)}
+                          onClick={() => router.push(ROUTES.teacher.quizEdit(quiz._id))}
                           className="text-[var(--teacher-primary)] hover:text-[var(--teacher-primary)]/80 mr-4"
                         >
                           {t('teacherQuizzes.edit')}

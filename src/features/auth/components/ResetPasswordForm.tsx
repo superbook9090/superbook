@@ -1,4 +1,5 @@
 'use client';
+import { ROUTES, loginWithResetSuccess } from '@/constants/routes';
 
 import { useState, Suspense } from 'react';
 import Link from 'next/link';
@@ -42,7 +43,7 @@ function ResetPasswordFormInner() {
     setIsLoading(true);
     try {
       await resetPasswordWithToken({ token, password, confirmPassword });
-      router.push('/login?reset=success');
+      router.push(loginWithResetSuccess());
     } catch (err) {
       setError(
         err instanceof ApiClientError && err.status === 429
@@ -61,7 +62,7 @@ function ResetPasswordFormInner() {
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8 text-center">
           <p className="text-[var(--color-error)] mb-4">{t('password.invalidResetLink')}</p>
-          <Link href="/forgot-password" className="text-[var(--student-primary)] font-medium hover:underline">
+          <Link href={ROUTES.forgotPassword} className="text-[var(--student-primary)] font-medium hover:underline">
             {t('password.requestNewLink')}
           </Link>
         </div>

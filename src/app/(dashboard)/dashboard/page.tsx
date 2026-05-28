@@ -3,22 +3,17 @@ import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
 import { headers } from 'next/headers';
+import { ROUTES } from '@/constants/routes';
+import { getDashboardHomePath } from '@/lib/roles';
 
 export default async function DashboardRedirectPage() {
   const session = await getServerSession(authOptions);
 
   if (!session) {
-    redirect('/login');
+    redirect(ROUTES.login);
   }
 
-  const role = session.user?.role;
-
-  const targetPath =
-    role === 'teacher'
-      ? '/dashboard/teacher'
-      : role === 'admin'
-      ? '/dashboard/admin'
-      : '/dashboard/student';
+  const targetPath = getDashboardHomePath(session.user?.role);
 
   // 🛑 SAFETY CHECK (prevents infinite loop)
   const headersList = await headers();

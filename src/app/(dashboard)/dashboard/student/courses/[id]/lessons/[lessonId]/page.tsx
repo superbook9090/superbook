@@ -1,4 +1,5 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
 
 import { useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
@@ -40,7 +41,7 @@ export default function LessonViewerPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/login');
+      router.push(ROUTES.login);
     }
   }, [status, router]);
 
@@ -57,7 +58,7 @@ export default function LessonViewerPage() {
         <h2 className="text-2xl font-bold text-[var(--color-foreground)] mb-2">{t('courses.lessonNotFound')}</h2>
         <p className="text-[var(--color-muted-foreground)] mb-8">{t('courses.lessonNotFoundDesc')}</p>
         <button
-          onClick={() => router.push(`/dashboard/student/courses/${courseId}`)}
+          onClick={() => router.push(ROUTES.student.course(courseId))}
           className="flex items-center gap-2 px-6 py-3 bg-[var(--student-primary)] text-white rounded-xl font-bold hover:shadow-lg transition-all"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -81,7 +82,7 @@ export default function LessonViewerPage() {
       {/* Top Navigation */}
       <div className="flex items-center justify-between">
         <button
-          onClick={() => router.push(`/dashboard/student/courses/${courseId}`)}
+          onClick={() => router.push(ROUTES.student.course(courseId))}
           className="flex items-center gap-2 text-sm font-bold text-[var(--color-muted-foreground)] hover:text-[var(--student-primary)] transition-colors group"
         >
           <div className="w-8 h-8 rounded-lg bg-[var(--color-surface-muted)]/20 flex items-center justify-center group-hover:bg-[var(--student-soft)] transition-colors">
@@ -125,7 +126,7 @@ export default function LessonViewerPage() {
               courseId={courseId}
               onCompleted={() => {
                 if (navigation.next) {
-                  router.push(`/dashboard/student/courses/${courseId}/lessons/${navigation.next.id}`);
+                  router.push(ROUTES.student.lesson(courseId, navigation.next.id));
                 }
               }}
             />
@@ -229,7 +230,7 @@ export default function LessonViewerPage() {
       <div className="flex flex-col sm:flex-row items-center gap-4 pt-8 border-t border-[var(--border)]">
         {navigation.prev ? (
           <button
-            onClick={() => router.push(`/dashboard/student/courses/${courseId}/lessons/${navigation.prev!.id}`)}
+            onClick={() => router.push(ROUTES.student.lesson(courseId, navigation.prev!.id))}
             className="w-full sm:w-auto flex-1 flex items-center justify-between p-6 bg-[var(--card-solid)] border border-[var(--border)] rounded-2xl hover:border-[var(--student-primary)]/30 hover:shadow-lg transition-all group"
           >
             <div className="flex items-center gap-4">
@@ -246,7 +247,7 @@ export default function LessonViewerPage() {
 
         {navigation.next ? (
           <button
-            onClick={() => router.push(`/dashboard/student/courses/${courseId}/lessons/${navigation.next!.id}`)}
+            onClick={() => router.push(ROUTES.student.lesson(courseId, navigation.next!.id))}
             className="w-full sm:w-auto flex-1 flex items-center justify-between p-6 bg-[var(--card-solid)] border border-[var(--border)] rounded-2xl hover:border-[var(--student-primary)]/30 hover:shadow-lg transition-all group text-right"
           >
             <div className="flex-1 mr-4">
@@ -259,7 +260,7 @@ export default function LessonViewerPage() {
           </button>
         ) : (
           <button
-            onClick={() => router.push(`/dashboard/student/courses/${courseId}`)}
+            onClick={() => router.push(ROUTES.student.course(courseId))}
             className="w-full sm:w-auto flex-1 p-6 bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-primary-light)] text-white rounded-2xl shadow-lg hover:shadow-xl transition-all text-center font-bold"
           >
             {t('courses.finishCourse')}

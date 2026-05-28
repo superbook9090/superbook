@@ -1,4 +1,5 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
@@ -110,14 +111,14 @@ export default function Hero() {
           className="flex flex-col sm:flex-row items-center justify-center gap-4"
         >
           <Link
-            href="/login"
+            href={ROUTES.login}
             className="group flex items-center gap-2 px-8 py-4 bg-white text-[var(--student-primary)] font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
           >
             {t('home.login')}
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </Link>
           <Link
-            href="/register"
+            href={ROUTES.register}
             className="flex items-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm text-white font-semibold rounded-xl border border-white/30 hover:bg-white/20 hover:scale-105 transition-all duration-300"
           >
             {t('home.register')}

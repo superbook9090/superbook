@@ -1,4 +1,5 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -53,7 +54,7 @@ export default function BlogDetailPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/login');
+      router.push(ROUTES.login);
       return;
     }
 
@@ -99,7 +100,7 @@ export default function BlogDetailPage() {
           {t('blog.blogNotFoundDesc')}
         </p>
         <Link
-          href="/dashboard/student/blogs"
+          href={ROUTES.student.blogs}
           className={`inline-flex items-center justify-center min-h-[44px] px-4 py-3 sm:px-4 sm:py-2.5 bg-gradient-to-r ${theme.gradient} text-white rounded-xl hover:opacity-90 transition-colors touch-manipulation`}
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
@@ -118,7 +119,7 @@ export default function BlogDetailPage() {
         className="mb-6"
       >
         <Link
-          href="/dashboard/student/blogs"
+          href={ROUTES.student.blogs}
           className="inline-flex items-center text-[var(--student-primary)] hover:text-[var(--student-primary)]/80 touch-manipulation"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />

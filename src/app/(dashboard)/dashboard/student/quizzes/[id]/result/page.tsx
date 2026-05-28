@@ -1,4 +1,5 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
@@ -77,7 +78,7 @@ export default function QuizResultPage() {
   useEffect(() => {
     if (status === 'loading') return;
     if (!session) {
-      router.push('/login');
+      router.push(ROUTES.login);
       return;
     }
 
@@ -161,7 +162,7 @@ export default function QuizResultPage() {
       <div className="text-center py-8 px-4">
         <p className="text-[var(--error)] mb-4">{t('quizResult.resultNotFound')}</p>
         <button
-          onClick={() => router.push('/dashboard/student/quizzes')}
+          onClick={() => router.push(ROUTES.student.quizzes)}
           className={`inline-flex items-center justify-center min-h-[44px] px-4 py-3 sm:px-4 sm:py-2.5 sm:w-auto w-full bg-gradient-to-r ${theme.gradient} text-white rounded-xl transition-all`}
         >
           {t('quizResult.backToQuizzes')}
@@ -179,7 +180,7 @@ export default function QuizResultPage() {
         <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={() => router.push('/dashboard/student/quizzes')}
+            onClick={() => router.push(ROUTES.student.quizzes)}
             className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--card-solid)] text-[var(--color-foreground)] shrink-0"
             aria-label={t('quizResult.backToQuizzes')}
           >

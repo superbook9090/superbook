@@ -1,6 +1,7 @@
 // src/features/dashboard/components/TeacherSidebar.tsx
 'use client';
 
+import { ROUTES } from '@/constants/routes';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
@@ -46,7 +47,7 @@ export default function TeacherSidebar({ user }: { user: User | null }) {
       <div className="flex-1 flex flex-col min-h-0 overflow-y-auto pt-4 sm:pt-6 pb-4 relative z-10 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
         {/* Logo */}
         <div className="flex items-center flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4">
-          <Link href="/dashboard/teacher" className="flex items-center gap-2 sm:gap-3 group">
+          <Link href={ROUTES.teacher.root} className="flex items-center gap-2 sm:gap-3 group">
             <PremiumLogo
               variant="green"
               size="xl"
@@ -161,7 +162,7 @@ export default function TeacherSidebar({ user }: { user: User | null }) {
               </div>
             </div>
             <button
-              onClick={() => signOut({ callbackUrl: '/login' })}
+              onClick={() => signOut({ callbackUrl: ROUTES.login })}
               className="ml-2 p-2 rounded-xl text-[var(--teacher-primary-light)] hover:text-white hover:bg-white/10 transition-all"
               aria-label={t('common.signOut')}
             >

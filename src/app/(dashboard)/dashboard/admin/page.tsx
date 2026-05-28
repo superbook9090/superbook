@@ -1,9 +1,11 @@
 // src/app/(dashboard)/dashboard/admin/page.tsx
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
+import { ROUTES } from '@/constants/routes';
 import {
   Users,
   BookOpen,
@@ -11,6 +13,13 @@ import {
   Settings as SettingsIcon,
 } from 'lucide-react';
 import { useSessionStore } from '@/store/useSessionStore';
+
+const adminQuickLinks = [
+  { href: ROUTES.admin.users, icon: Users, labelKey: 'admin.userManagement' as const, titleKey: 'admin.manageUsers' as const, iconClass: 'bg-[var(--info-light)] text-[var(--info)] group-hover:bg-[var(--info-light)]/80' },
+  { href: ROUTES.admin.courses, icon: BookOpen, labelKey: 'admin.allCourses' as const, titleKey: 'admin.manageCourses' as const, iconClass: 'bg-[var(--success-light)] text-[var(--success)] group-hover:bg-[var(--success-light)]/80' },
+  { href: ROUTES.admin.analytics, icon: BarChart3, labelKey: 'admin.analytics' as const, titleKey: 'admin.systemStats' as const, iconClass: 'bg-[var(--student-soft)] text-[var(--student-primary)] group-hover:bg-[var(--student-border)]' },
+  { href: ROUTES.admin.settings, icon: SettingsIcon, labelKey: 'admin.settings' as const, titleKey: 'admin.manageSettings' as const, iconClass: 'bg-[var(--warning-light)] text-[var(--warning)] group-hover:bg-[var(--warning-light)]/80' },
+];
 
 export default function AdminDashboardPage() {
   const { session, status } = useSessionStore();
@@ -26,15 +35,12 @@ export default function AdminDashboardPage() {
   }
 
   if (!session) {
-    router.push('/login');
+    router.push(ROUTES.login);
     return null;
   }
 
-  // Role-based redirect handled in /dashboard/page.tsx - no redirect here
-
   return (
     <div className="space-y-6 overflow-x-hidden">
-      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -49,72 +55,29 @@ export default function AdminDashboardPage() {
         </div>
       </motion.div>
 
-      {/* Quick Links */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
       >
-        <a
-          href="/dashboard/admin/users"
-          className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-4 sm:p-6 hover:shadow-lg transition-all group w-full"
-        >
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-[var(--info-light)] text-[var(--info)] group-hover:bg-[var(--info-light)]/80 transition-colors">
-              <Users className="w-6 h-6" />
+        {adminQuickLinks.map(({ href, icon: Icon, labelKey, titleKey, iconClass }) => (
+          <Link
+            key={href}
+            href={href}
+            className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-4 sm:p-6 hover:shadow-lg transition-all group w-full"
+          >
+            <div className="flex items-center">
+              <div className={`p-3 rounded-full transition-colors ${iconClass}`}>
+                <Icon className="w-6 h-6" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-[var(--color-muted-foreground)]">{t(labelKey)}</p>
+                <p className="text-lg font-semibold text-[var(--color-foreground)]">{t(titleKey)}</p>
+              </div>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-[var(--color-muted-foreground)]">{t('admin.userManagement')}</p>
-              <p className="text-lg font-semibold text-[var(--color-foreground)]">{t('admin.manageUsers')}</p>
-            </div>
-          </div>
-        </a>
-
-        <a
-          href="/dashboard/admin/courses"
-          className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-4 sm:p-6 hover:shadow-lg transition-all group w-full"
-        >
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-[var(--success-light)] text-[var(--success)] group-hover:bg-[var(--success-light)]/80 transition-colors">
-              <BookOpen className="w-6 h-6" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-[var(--color-muted-foreground)]">{t('admin.allCourses')}</p>
-              <p className="text-lg font-semibold text-[var(--color-foreground)]">{t('admin.manageCourses')}</p>
-            </div>
-          </div>
-        </a>
-
-        <a
-          href="/dashboard/admin/analytics"
-          className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-4 sm:p-6 hover:shadow-lg transition-all group w-full"
-        >
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-[var(--student-soft)] text-[var(--student-primary)] group-hover:bg-[var(--student-border)] transition-colors">
-              <BarChart3 className="w-6 h-6" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-[var(--color-muted-foreground)]">{t('admin.analytics')}</p>
-              <p className="text-lg font-semibold text-[var(--color-foreground)]">{t('admin.systemStats')}</p>
-            </div>
-          </div>
-        </a>
-
-        <a
-          href="/dashboard/admin/settings"
-          className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-4 sm:p-6 hover:shadow-lg transition-all group w-full"
-        >
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-[var(--warning-light)] text-[var(--warning)] group-hover:bg-[var(--warning-light)]/80 transition-colors">
-              <SettingsIcon className="w-6 h-6" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-[var(--color-muted-foreground)]">{t('admin.settings')}</p>
-              <p className="text-lg font-semibold text-[var(--color-foreground)]">{t('admin.manageSettings')}</p>
-            </div>
-          </div>
-        </a>
+          </Link>
+        ))}
       </motion.div>
     </div>
   );

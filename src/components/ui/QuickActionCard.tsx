@@ -1,7 +1,10 @@
 'use client';
 
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { LucideIcon } from 'lucide-react';
+
+const MotionLink = motion(Link);
 
 interface QuickActionCardProps {
   icon: LucideIcon;
@@ -76,38 +79,55 @@ export default function QuickActionCard({
 }: QuickActionCardProps) {
   const config = colorConfig[color];
 
-  return (
-    <motion.a
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay }}
-      whileHover={{ scale: disabled ? 1 : 1.02 }}
-      whileTap={{ scale: disabled ? 1 : 0.98 }}
-      href={disabled ? '#' : href}
-      onClick={(e) => {
-        if (disabled) e.preventDefault();
-      }}
-      className={`flex items-center justify-center sm:justify-start w-full min-h-[44px] p-3 sm:p-4 rounded-xl transition-colors group ${
-        disabled
-          ? 'bg-[var(--color-surface-muted)] cursor-not-allowed'
-          : `${config.bg} ${config.hoverBg}`
-      }`}
-    >
-      <div className={`p-2 sm:p-3 rounded-lg transition-colors ${
-        disabled
-          ? 'bg-[var(--color-muted-foreground)] text-[var(--color-muted-foreground)]'
-          : `${config.iconBg} ${config.text} ${config.iconHoverBg}`
-      }`}>
+  const cardClassName = `flex items-center justify-center sm:justify-start w-full min-h-[44px] p-3 sm:p-4 rounded-xl transition-colors group ${
+    disabled
+      ? 'bg-[var(--color-surface-muted)] cursor-not-allowed'
+      : `${config.bg} ${config.hoverBg}`
+  }`;
+
+  const motionProps = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    transition: { delay },
+    whileHover: { scale: disabled ? 1 : 1.02 },
+    whileTap: { scale: disabled ? 1 : 0.98 },
+  };
+
+  const cardContent = (
+    <>
+      <div
+        className={`p-2 sm:p-3 rounded-lg transition-colors ${
+          disabled
+            ? 'bg-[var(--color-muted-foreground)] text-[var(--color-muted-foreground)]'
+            : `${config.iconBg} ${config.text} ${config.iconHoverBg}`
+        }`}
+      >
         <Icon className="w-5 h-5" />
       </div>
       <div className="ml-3 text-left">
-        <div className={`font-semibold text-sm sm:text-base ${
-          disabled ? 'text-[var(--color-muted-foreground)]' : 'text-[var(--color-foreground)]'
-        }`}>
+        <div
+          className={`font-semibold text-sm sm:text-base ${
+            disabled ? 'text-[var(--color-muted-foreground)]' : 'text-[var(--color-foreground)]'
+          }`}
+        >
           {title}
         </div>
         <div className="text-xs text-[var(--color-muted-foreground)]">{description}</div>
       </div>
-    </motion.a>
+    </>
+  );
+
+  if (disabled) {
+    return (
+      <motion.div {...motionProps} role="presentation" className={cardClassName}>
+        {cardContent}
+      </motion.div>
+    );
+  }
+
+  return (
+    <MotionLink {...motionProps} href={href} className={cardClassName}>
+      {cardContent}
+    </MotionLink>
   );
 }

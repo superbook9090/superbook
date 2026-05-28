@@ -1,6 +1,7 @@
 // src/app/(dashboard)/dashboard/student/quizzes/take/page.tsx
 'use client';
 
+import { ROUTES } from '@/constants/routes';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -129,7 +130,7 @@ export default function TakeQuizPage() {
 
         quizSecurity.stopQuiz();
         setQuizActive(false);
-        router.push(`/dashboard/student/quizzes/${data.attempt._id}/result`);
+        router.push(ROUTES.student.quizResult(data.attempt._id));
       } catch (err) {
         console.error('Error submitting quiz:', err);
         const errorMsg = options.forceSubmit
@@ -216,11 +217,11 @@ export default function TakeQuizPage() {
   useEffect(() => {
     if (status === 'loading') return;
     if (!session) {
-      router.push('/login');
+      router.push(ROUTES.login);
       return;
     }
     if (!attemptId) {
-      router.push('/dashboard/student/quizzes');
+      router.push(ROUTES.student.quizzes);
       return;
     }
 
@@ -286,7 +287,7 @@ export default function TakeQuizPage() {
         foundAttempt &&
         (foundAttempt.status === 'completed' || foundAttempt.status === 'force_submitted')
       ) {
-        router.push(`/dashboard/student/quizzes/${foundAttempt._id}/result`);
+        router.push(ROUTES.student.quizResult(foundAttempt._id));
         return;
       } else {
         setError(t('errors.quizAttemptNotFound'));
@@ -313,7 +314,7 @@ export default function TakeQuizPage() {
 
     try {
       const data = await startQuizMutation.mutateAsync(attempt.quiz._id);
-      router.push(`/dashboard/student/quizzes/take?attemptId=${data.attempt._id}`);
+      router.push(ROUTES.student.quizTake(data.attempt._id));
     } catch {
       setError(t('errors.errorStartingNewAttempt'));
       setIsLoading(false);
@@ -370,7 +371,7 @@ export default function TakeQuizPage() {
                 {t('quiz.takeRetryQuiz')}
               </button>
               <button
-                onClick={() => router.push('/dashboard/student/quizzes')}
+                onClick={() => router.push(ROUTES.student.quizzes)}
                 className="min-h-[44px] px-4 py-3 sm:px-4 sm:py-2 bg-[var(--color-surface-muted)] text-[var(--color-foreground)] rounded-md hover:bg-[var(--color-surface-muted)]/80"
               >
                 {t('quiz.takeBackToQuizzes')}
@@ -381,7 +382,7 @@ export default function TakeQuizPage() {
           <>
             <p className="text-[var(--error)] mb-4">{error || t('quiz.takeQuizNotFound')}</p>
             <button
-              onClick={() => router.push('/dashboard/student/quizzes')}
+              onClick={() => router.push(ROUTES.student.quizzes)}
               className={`min-h-[44px] px-4 py-3 sm:px-4 sm:py-2 bg-gradient-to-r ${theme.gradient} text-white rounded-md`}
             >
               {t('quiz.takeBackToQuizzes')}

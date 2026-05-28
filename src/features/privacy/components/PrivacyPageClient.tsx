@@ -1,4 +1,5 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
 
 import React from 'react';
 import { motion } from 'framer-motion';
@@ -22,7 +23,7 @@ export default function PrivacyPageClient() {
 
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <Link 
-            href="/" 
+            href={ROUTES.home} 
             className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-muted-foreground)] hover:text-[var(--primary)] transition-colors mb-8 group"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
@@ -118,7 +119,7 @@ export default function PrivacyPageClient() {
                 {t('privacy.contactUsText') || 'If you have any questions about this Privacy Policy, please contact us.'}
               </p>
               <Link 
-                href="/contact" 
+                href={ROUTES.contact} 
                 className="inline-flex items-center justify-center px-8 py-3.5 bg-[var(--primary)] text-white font-bold rounded-2xl shadow-lg shadow-[var(--primary)]/20 hover:scale-[1.02] active:scale-[0.98] hover:shadow-xl hover:shadow-[var(--primary)]/30 transition-all duration-200"
               >
                 {t('privacy.contactUs') || 'Contact Us'}

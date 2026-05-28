@@ -1,4 +1,5 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
 
 import Link from 'next/link';
 import { useState, useMemo, useCallback, memo } from 'react';
@@ -58,14 +59,14 @@ function MobileNavComponent({
 
   const toggleMenu = useCallback(() => setIsOpen((prev) => !prev), []);
   const closeMenu = useCallback(() => setIsOpen(false), []);
-  const handleSignOut = useCallback(() => signOut({ callbackUrl: '/login' }), []);
+  const handleSignOut = useCallback(() => signOut({ callbackUrl: ROUTES.login }), []);
 
   return (
     <>
       <div className={cn(headerBg, 'md:hidden fixed top-0 left-0 right-0 z-50 safe-area-pt shadow-[var(--shadow-sm)] border-b border-white/10')}>
         <div className="mobile-header-bar">
           <Link
-            href={isStaff ? '/dashboard/teacher' : '/dashboard/student'}
+            href={isStaff ? ROUTES.teacher.root : ROUTES.student.root}
             className="flex items-center gap-[var(--space-3)] touch-target shrink-0"
           >
             <PremiumLogo variant="default" size="md" theme={isStaff ? 'teacher' : 'student'} />
@@ -73,7 +74,7 @@ function MobileNavComponent({
           <div className="flex items-center gap-[var(--space-3)] shrink-0">
             {!isStaff && (
               <Link
-                href="/dashboard/student/notifications"
+                href={ROUTES.student.notifications}
                 className="touch-target text-white rounded-lg hover:bg-white/10 transition-colors focus-ring flex items-center justify-center"
                 aria-label={t('common.notifications')}
               >

@@ -1,4 +1,5 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -29,7 +30,7 @@ export default function JoinCourseByCode() {
 
     try {
       await joinCourse.mutateAsync(code.toUpperCase());
-      router.push('/dashboard/student/courses');
+      router.push(ROUTES.student.courses);
     } catch (err) {
       const message =
         err instanceof ApiClientError

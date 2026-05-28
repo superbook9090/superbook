@@ -1,4 +1,5 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -43,11 +44,11 @@ export default function AdminNotificationsPage() {
   useEffect(() => {
     if (status === 'loading') return;
     if (!session) {
-      router.push('/login');
+      router.push(ROUTES.login);
       return;
     }
     if (!canSend) {
-      router.push('/dashboard');
+      router.push(ROUTES.dashboard);
     }
   }, [status, session, router, canSend]);
 

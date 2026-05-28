@@ -1,4 +1,5 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -27,7 +28,7 @@ export default function CreateBlogPage() {
   const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
 
   if (status === 'unauthenticated') {
-    router.push('/login');
+    router.push(ROUTES.login);
     return null;
   }
 
@@ -46,7 +47,7 @@ export default function CreateBlogPage() {
         ...formData,
         isPublished: !asDraft,
       });
-      router.push('/dashboard/teacher/blogs');
+      router.push(ROUTES.teacher.blogs);
     } catch (err) {
       const errorMsg = err instanceof ApiClientError ? err.message : t('blog.saveErrorGeneric');
       setError(errorMsg);
@@ -62,7 +63,7 @@ export default function CreateBlogPage() {
 
       <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
         <Link
-          href="/dashboard/teacher/blogs"
+          href={ROUTES.teacher.blogs}
           className="inline-flex items-center text-sm text-[var(--teacher-primary)] hover:text-[var(--teacher-primary)]/80 mb-3"
         >
           <ArrowLeft className="w-4 h-4 mr-1.5" />

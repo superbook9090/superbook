@@ -1,7 +1,9 @@
 // src/app/(dashboard)/dashboard/teacher/analytics/page.tsx
 'use client';
 
+import { ROUTES } from '@/constants/routes';
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
@@ -64,7 +66,7 @@ export default function TeacherAnalyticsPage() {
   useEffect(() => {
     if (status === 'loading') return;
     if (!session) {
-      router.push('/login');
+      router.push(ROUTES.login);
       return;
     }
 
@@ -151,12 +153,12 @@ export default function TeacherAnalyticsPage() {
         {stats.courses?.length === 0 ? (
           <div className="bg-[var(--card-solid)] rounded-lg shadow p-8 text-center">
             <p className="text-[var(--color-muted-foreground)] mb-4">{t('analytics.noCoursesYet')}</p>
-            <a
-              href="/dashboard/teacher/courses/create"
+            <Link
+              href={ROUTES.teacher.courseCreate}
               className={`inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base font-medium rounded-xl text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 transition-opacity`}
             >
               {t('analytics.createCourse')}
-            </a>
+            </Link>
           </div>
         ) : (
           <div className="bg-[var(--card-solid)] rounded-lg shadow overflow-hidden">

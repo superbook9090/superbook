@@ -1,4 +1,6 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
+import { getDashboardHomePath } from '@/lib/roles';
 
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -45,7 +47,7 @@ export default function RegisterForm() {
   // Client-side guard for UX improvement
   useEffect(() => {
     if (status === 'authenticated') {
-      router.replace('/dashboard');
+      router.replace(ROUTES.dashboard);
     }
   }, [status, router]);
 
@@ -92,8 +94,7 @@ export default function RegisterForm() {
       await new Promise(resolve => setTimeout(resolve, 500));
 
       // Redirect to dashboard based on role
-      const dashboardPath = formData.role === 'teacher' ? '/dashboard/teacher' : '/dashboard/student';
-      router.push(dashboardPath);
+      router.push(getDashboardHomePath(formData.role));
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Registration failed. Please try again.';
       setError(message);
@@ -460,7 +461,7 @@ export default function RegisterForm() {
             {/* Google Sign Up */}
             <motion.button
               type="button"
-              onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
+              onClick={() => signIn('google', { callbackUrl: ROUTES.dashboard })}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className="w-full flex items-center justify-center py-3 px-4 bg-[var(--card-solid)] border-2 border-[var(--color-border)] rounded-xl hover:border-[var(--color-muted)] hover:bg-[var(--color-surface-muted)] transition-all"
@@ -478,7 +479,7 @@ export default function RegisterForm() {
             <p className="mt-6 text-center text-sm text-[var(--color-muted-foreground)]">
               {t('register.alreadyHaveAccount')}{' '}
               <Link
-                href="/login"
+                href={ROUTES.login}
                 className={`font-semibold ${theme.text} ${theme.hover.replace('hover:', 'hover:').replace('bg-', 'text-')} transition-colors`}
               >
                 {t('register.signIn')}

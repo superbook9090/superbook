@@ -1,4 +1,5 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
 
 import Link from 'next/link';
 import { Clock, HelpCircle, Pencil, PlusCircle, Target } from 'lucide-react';
@@ -71,7 +72,7 @@ export function CurriculumQuizBlock({
             </p>
           </div>
           <Link
-            href={`/dashboard/teacher/quizzes/${quiz._id}/edit`}
+            href={ROUTES.teacher.quizEdit(quiz._id)}
             className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-[var(--color-muted)] hover:text-[var(--color-primary)]"
             aria-label={t('curriculum.editQuiz')}
           >

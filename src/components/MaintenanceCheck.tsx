@@ -1,4 +1,5 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
 
 import { useAppSettings } from '@/contexts/AppSettingsContext';
 import { useRouter, usePathname } from 'next/navigation';
@@ -27,13 +28,13 @@ export default function MaintenanceCheck({ children }: MaintenanceCheckProps) {
     // If on maintenance page and maintenance mode is now OFF, redirect to dashboard
     if (pathname === '/maintenance' && !settings.platformConfig.maintenanceMode) {
       if (session?.user?.role === 'teacher') {
-        router.push('/dashboard/teacher');
+        router.push(ROUTES.teacher.root);
       } else if (session?.user?.role === 'student') {
-        router.push('/dashboard/student');
+        router.push(ROUTES.student.root);
       } else if (session?.user?.role === 'admin') {
-        router.push('/dashboard/admin/settings');
+        router.push(ROUTES.admin.settings);
       } else {
-        router.push('/login');
+        router.push(ROUTES.login);
       }
       return;
     }
@@ -43,7 +44,7 @@ export default function MaintenanceCheck({ children }: MaintenanceCheckProps) {
 
     // If maintenance mode is enabled, redirect to maintenance page
     if (settings.platformConfig.maintenanceMode) {
-      router.push('/maintenance');
+      router.push(ROUTES.maintenance);
     }
   }, [settings, isLoading, session, status, router, pathname]);
 

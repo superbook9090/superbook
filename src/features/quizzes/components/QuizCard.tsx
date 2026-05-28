@@ -1,4 +1,5 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
 
 import { useState, memo } from 'react';
 import { useRouter } from 'next/navigation';
@@ -112,12 +113,12 @@ function QuizCard({
 
   const handleReview = () => {
     if (attempt) {
-      router.push(`/dashboard/student/quizzes/${attempt._id}/result`);
+      router.push(ROUTES.student.quizResult(attempt._id));
     }
   };
 
   const handleViewLeaderboard = () => {
-    router.push(`/dashboard/student/quizzes/${quiz._id}`);
+    router.push(ROUTES.student.quiz(quiz._id));
   };
 
   const handleRetake = () => openStartConfirm('retake');

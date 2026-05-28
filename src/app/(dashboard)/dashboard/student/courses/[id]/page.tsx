@@ -1,4 +1,5 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
 
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
@@ -84,7 +85,7 @@ export default function CourseDetailPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/login');
+      router.push(ROUTES.login);
     }
   }, [status, router]);
 
@@ -99,7 +100,7 @@ export default function CourseDetailPage() {
     setStartingQuizId(quizId);
     try {
       const data = await startQuizMutation.mutateAsync(quizId);
-      router.push(`/dashboard/student/quizzes/take?attemptId=${data.attempt._id}`);
+      router.push(ROUTES.student.quizTake(data.attempt._id));
     } catch (error) {
       console.error('Error starting quiz:', error);
     } finally {
@@ -128,7 +129,7 @@ export default function CourseDetailPage() {
     if (confirmQuiz.mode === 'continue' && confirmQuiz.attemptId) {
       const attemptId = confirmQuiz.attemptId;
       setConfirmQuiz(null);
-      router.push(`/dashboard/student/quizzes/take?attemptId=${attemptId}`);
+      router.push(ROUTES.student.quizTake(attemptId));
       return;
     }
 
@@ -137,7 +138,7 @@ export default function CourseDetailPage() {
     try {
       const data = await startQuizMutation.mutateAsync(quizId);
       setConfirmQuiz(null);
-      router.push(`/dashboard/student/quizzes/take?attemptId=${data.attempt._id}`);
+      router.push(ROUTES.student.quizTake(data.attempt._id));
     } catch (error) {
       console.error('Error starting quiz:', error);
     } finally {
@@ -146,11 +147,11 @@ export default function CourseDetailPage() {
   };
 
   const handleContinueQuiz = (attemptId: string) => {
-    router.push(`/dashboard/student/quizzes/take?attemptId=${attemptId}`);
+    router.push(ROUTES.student.quizTake(attemptId));
   };
 
   const handleStartLesson = (lessonId: string) => {
-    router.push(`/dashboard/student/courses/${courseId}/lessons/${lessonId}`);
+    router.push(ROUTES.student.lesson(courseId, lessonId));
   };
 
   const renderLessonRow = (lesson: CurriculumLesson) => (
@@ -213,7 +214,7 @@ export default function CourseDetailPage() {
   }) => {
     const statusInfo = getQuizStatus(quiz._id);
     if (statusInfo.status === 'completed' && statusInfo.attempt) {
-      router.push(`/dashboard/student/quizzes/${statusInfo.attempt._id}/result`);
+      router.push(ROUTES.student.quizResult(statusInfo.attempt._id));
       return;
     }
     if (statusInfo.status === 'in_progress' && statusInfo.attempt) {
@@ -294,7 +295,7 @@ export default function CourseDetailPage() {
         </div>
         <h2 className="text-xl font-bold text-[var(--color-foreground)] mb-2">{t('courses.noEnrollmentFound')}</h2>
         <p className="text-[var(--color-muted-foreground)] mb-6">{t('courses.noEnrollmentDesc')}</p>
-        <button onClick={() => router.push('/dashboard/student/courses')} className="px-6 py-2 bg-[var(--student-primary)] text-white rounded-xl font-medium">
+        <button onClick={() => router.push(ROUTES.student.courses)} className="px-6 py-2 bg-[var(--student-primary)] text-white rounded-xl font-medium">
           {t('courses.backToCourses')}
         </button>
       </div>
@@ -315,7 +316,7 @@ export default function CourseDetailPage() {
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
         <div className="relative z-10 space-y-4">
           <button 
-            onClick={() => router.push('/dashboard/student/courses')}
+            onClick={() => router.push(ROUTES.student.courses)}
             className="flex items-center gap-2 text-xs font-medium text-white/80 hover:text-white transition-colors group"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />

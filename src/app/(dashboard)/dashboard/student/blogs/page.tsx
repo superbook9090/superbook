@@ -1,4 +1,5 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -62,12 +63,12 @@ export default function StudentBlogsPage() {
 
     if (status === 'unauthenticated') {
       setHasRedirected(true);
-      router.push('/login');
+      router.push(ROUTES.login);
       return;
     }
 
     if (status === 'authenticated' && !featureEnabled) {
-      router.push('/dashboard/student');
+      router.push(ROUTES.student.root);
     }
   }, [status, featureEnabled, hasRedirected, router]);
 
@@ -115,7 +116,7 @@ export default function StudentBlogsPage() {
           </p>
         </div>
         <Link
-          href="/dashboard/student/favorites"
+          href={ROUTES.student.favorites}
           className={`inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base bg-gradient-to-r ${theme.gradient} text-white font-medium rounded-xl shadow-md hover:shadow-lg transition-all`}
         >
           <Bookmark className="w-5 h-5 mr-2" />
@@ -243,7 +244,7 @@ export default function StudentBlogsPage() {
 
                   {/* Read More */}
                   <Link
-                    href={`/dashboard/student/blogs/${blog._id}`}
+                    href={ROUTES.student.blog(blog._id)}
                     className={`inline-flex items-center ${theme.text} font-medium hover:opacity-80 transition-colors touch-manipulation`}
                   >
                     {t('blog.readMore')}

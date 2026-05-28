@@ -1,3 +1,5 @@
+import { ROUTES } from '@/constants/routes';
+
 const ROLE_HIERARCHY: Record<string, number> = {
   student: 1,
   teacher: 2,
@@ -38,9 +40,9 @@ export function isSuperAdmin(userRole: string | null | undefined): boolean {
 /** Default dashboard landing route for a role. */
 export function getDashboardHomePath(role: string | null | undefined): string {
   const normalized = normalizeRole(role);
-  if (normalized === 'teacher') return '/dashboard/teacher';
-  if (isAdmin(normalized)) return '/dashboard/admin';
-  return '/dashboard/student';
+  if (normalized === 'teacher') return ROUTES.teacher.root;
+  if (isAdmin(normalized)) return ROUTES.admin.root;
+  return ROUTES.student.root;
 }
 
 /** Ensure the dashboard nav item points at the role-appropriate home route. */

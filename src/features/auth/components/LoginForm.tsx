@@ -1,4 +1,5 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
 
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -45,7 +46,7 @@ function LoginFormInner() {
   // Client-side guard for UX improvement
   useEffect(() => {
     if (status === 'authenticated') {
-      router.replace('/dashboard');
+      router.replace(ROUTES.dashboard);
     }
   }, [status, router]);
 
@@ -74,7 +75,7 @@ function LoginFormInner() {
       await new Promise(resolve => setTimeout(resolve, 500));
 
       // Redirect to /dashboard - server-side redirect will handle role-based routing
-      router.push('/dashboard');
+      router.push(ROUTES.dashboard);
     } catch (error) {
       setError(t('login.genericError'));
       console.error('Login error:', error);
@@ -103,7 +104,7 @@ function LoginFormInner() {
 
           await fetchSession(true);
           await new Promise(resolve => setTimeout(resolve, 500));
-          router.push('/dashboard');
+          router.push(ROUTES.dashboard);
         } catch (error) {
           setError(t('login.genericError'));
           console.error('Native Google Login error:', error);
@@ -122,7 +123,7 @@ function LoginFormInner() {
       window.ReactNativeWebView.postMessage(JSON.stringify({ action: 'REQUEST_GOOGLE_SIGN_IN' }));
     } else {
       // Standard web flow
-      signIn('google', { callbackUrl: '/dashboard' });
+      signIn('google', { callbackUrl: ROUTES.dashboard });
     }
   };
 
@@ -344,7 +345,7 @@ function LoginFormInner() {
                   <span className="ml-2 text-sm text-[var(--color-muted-foreground)]">{t('login.rememberMe')}</span>
                 </label>
                 <Link
-                  href="/forgot-password"
+                  href={ROUTES.forgotPassword}
                   className={`text-sm font-medium ${theme.text} ${theme.hover.replace('hover:', 'hover:').replace('bg-', 'text-')} transition-colors`}
                 >
                   {t('login.forgotPassword')}
@@ -407,7 +408,7 @@ function LoginFormInner() {
             <p className="mt-8 text-center text-sm text-[var(--color-muted-foreground)]">
               {t('login.dontHaveAccount')}{' '}
               <Link
-                href="/register"
+                href={ROUTES.register}
                 className={`font-semibold ${theme.text} ${theme.hover.replace('hover:', 'hover:').replace('bg-', 'text-')} transition-colors`}
               >
                 {t('login.createOne')}

@@ -1,4 +1,5 @@
 'use client';
+import { ROUTES } from '@/constants/routes';
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
@@ -49,7 +50,7 @@ export default function FavoritesList({ initialFavorites, totalCount }: Favorite
       >
         <div>
           <Link
-            href="/dashboard/student/blogs"
+            href={ROUTES.student.blogs}
             className="inline-flex items-center text-[var(--color-muted-foreground)] hover:text-[var(--student-primary)] mb-2"
           >
             <ArrowLeft className="w-4 h-4 mr-1" />
@@ -100,7 +101,7 @@ export default function FavoritesList({ initialFavorites, totalCount }: Favorite
               {t('favorites.startExploring')}
             </p>
             <Link
-              href="/dashboard/student/blogs"
+              href={ROUTES.student.blogs}
               className="inline-flex items-center min-h-[44px] px-5 py-3 sm:px-5 sm:py-2.5 bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)] text-white font-medium rounded-xl shadow-lg hover:shadow-xl hover:brightness-110 transition-all"
             >
               <BookOpen className="w-5 h-5 mr-2" />
@@ -157,7 +158,7 @@ export default function FavoritesList({ initialFavorites, totalCount }: Favorite
 
                   {/* Read More */}
                   <Link
-                    href={`/dashboard/student/blogs/${blog._id}`}
+                    href={ROUTES.student.blog(blog._id)}
                     className="mt-4 inline-flex items-center text-[var(--student-primary)] font-medium hover:text-[var(--student-primary)]/80 transition-colors"
                   >
                     {t('favorites.readArticle')}

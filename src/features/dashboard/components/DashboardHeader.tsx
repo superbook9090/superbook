@@ -1,6 +1,7 @@
 // src/features/dashboard/components/DashboardHeader.tsx
 'use client';
 
+import { ROUTES } from '@/constants/routes';
 import Link from 'next/link';
 import { useTranslation } from '@/hooks/useTranslation';
 import PremiumLogo from '@/components/ui/PremiumLogo';
@@ -20,7 +21,7 @@ export default function DashboardHeader({ isTeacherOrAdmin, showNotifications = 
       <div className="max-w-[var(--page-max-width)] mx-auto px-[var(--gutter-x)] py-[var(--space-3)] sm:py-[var(--space-4)] flex justify-between items-center">
         <div className="flex items-center gap-2 sm:gap-4">
           <Link
-            href={isTeacherOrAdmin ? '/dashboard/teacher' : '/dashboard/student'}
+            href={isTeacherOrAdmin ? ROUTES.teacher.root : ROUTES.student.root}
             className="group flex-shrink-0"
           >
             <PremiumLogo
@@ -36,7 +37,7 @@ export default function DashboardHeader({ isTeacherOrAdmin, showNotifications = 
         <div className="flex items-center gap-3 flex-shrink-0">
           {showNotifications && (
             <Link
-              href="/dashboard/student/notifications"
+              href={ROUTES.student.notifications}
               className="touch-target focus-ring p-2 rounded-lg text-[var(--muted)] hover:text-[var(--primary)] hover:bg-[var(--primary-soft)] transition-colors"
               aria-label={t('common.notifications')}
             >

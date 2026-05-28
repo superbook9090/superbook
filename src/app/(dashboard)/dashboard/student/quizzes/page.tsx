@@ -1,7 +1,9 @@
 // src/app/(dashboard)/dashboard/student/quizzes/page.tsx
 'use client';
 
+import { ROUTES } from '@/constants/routes';
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
@@ -32,7 +34,7 @@ export default function StudentQuizzesPage() {
   useEffect(() => {
     if (status === 'loading') return;
     if (!session) {
-      router.push('/login');
+      router.push(ROUTES.login);
     }
   }, [status, session, router]);
 
@@ -71,7 +73,7 @@ export default function StudentQuizzesPage() {
     async (quizId: string) => {
       try {
         const data = await startQuiz.mutateAsync(quizId);
-        router.push(`/dashboard/student/quizzes/take?attemptId=${data.attempt._id}`);
+        router.push(ROUTES.student.quizTake(data.attempt._id));
       } catch (e) {
         const message =
           e instanceof ApiClientError ? e.message : t('errors.errorStartingQuiz');
@@ -139,12 +141,12 @@ export default function StudentQuizzesPage() {
                 <p className="text-[var(--color-muted-foreground)] mb-4">
                   {t('quiz.enrollCourse')}
                 </p>
-                <a
-                  href="/dashboard/student/browse"
+                <Link
+                  href={ROUTES.student.browse}
                   className={`inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base font-medium rounded-xl text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 transition-opacity`}
                 >
                   {t('courses.browseMore')}
-                </a>
+                </Link>
               </div>
             </div>
           ) : (
