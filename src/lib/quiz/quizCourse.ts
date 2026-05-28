@@ -1,6 +1,7 @@
 import type { CurriculumQuiz } from '@/lib/curriculum/tree';
 import { getQuizChapterId, isCourseLevelQuiz } from '@/lib/quiz/quizChapter';
 import { getQuizLessonId, isLessonLevelQuiz } from '@/lib/quiz/quizLesson';
+import { toIdString } from '@/lib/id';
 
 type QuizCourseRef = string | { _id?: string } | null | undefined;
 
@@ -40,7 +41,7 @@ export function splitQuizzesByScope<T extends QuizWithCourse>(quizzes: T[]) {
 
 export function toCurriculumQuiz(quiz: QuizWithCourse, courseId: string): CurriculumQuiz {
   return {
-    _id: quiz._id,
+    _id: toIdString(quiz._id),
     title: quiz.title,
     timeLimit: quiz.timeLimit,
     questionCount: quiz.questionCount,

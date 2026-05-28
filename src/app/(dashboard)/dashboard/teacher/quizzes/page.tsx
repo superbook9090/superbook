@@ -14,6 +14,16 @@ import { invalidateAfterQuizChange, useTeacherQuizzesList, type Quiz } from '@/l
 import { ApiClientError } from '@/lib/api/http';
 import Alert from '@/components/ui/Alert';
 import { PageSkeleton } from '@/components/ui/Skeleton';
+import { FilterPanel } from '@/components/filters/DashboardListFilters';
+import QuizFilters from '@/features/quizzes/components/QuizFilters';
+import {
+  filterAndSortTeacherQuizzes,
+  type QuizSortOption,
+  type QuizStatusFilter,
+} from '@/features/quizzes/utils/quizListFilters';
+import { toIdString } from '@/lib/id';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 
 export default function TeacherQuizzesPage() {
   const { session, status } = useSessionStore();
@@ -27,13 +37,33 @@ export default function TeacherQuizzesPage() {
   const courses = useMemo(() => data?.courses ?? [], [data?.courses]);
   const quizzes = useMemo(() => data?.quizzes ?? [], [data?.quizzes]);
   const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+  const [searchInput, setSearchInput] = useState('');
+  const searchTerm = useDebouncedValue(searchInput, 300);
+  const [statusFilter, setStatusFilter] = useState<QuizStatusFilter>('all');
+  const [courseFilter, setCourseFilter] = useState('all');
+  const [sort, setSort] = useState<QuizSortOption>('newest');
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const clearFilters = useCallback(() => {
+    setSearchInput('');
+    setStatusFilter('all');
+    setCourseFilter('all');
+    setSort('newest');
+  }, []);
+
+  const hasActiveFilters =
+    Boolean(searchInput.trim()) ||
+    statusFilter !== 'all' ||
+    courseFilter !== 'all' ||
+    sort !== 'newest';
 
   // Memoized helper to safely get course title
   const getCourseId = useCallback((course: Quiz['course'] | string): string => {
     if (typeof course === 'object' && course !== null && '_id' in course) {
-      return course._id;
+      return toIdString(course._id);
     }
-    return typeof course === 'string' ? course : '';
+    return toIdString(course);
   }, []);
 
   const getCourseTitle = useCallback(
@@ -49,6 +79,18 @@ export default function TeacherQuizzesPage() {
     [courses, t]
   );
 
+  const filteredQuizzes = useMemo(
+    () =>
+      filterAndSortTeacherQuizzes(quizzes, {
+        search: searchTerm,
+        status: statusFilter,
+        courseId: courseFilter,
+        sort,
+        getCourseTitle,
+      }),
+    [quizzes, searchTerm, statusFilter, courseFilter, sort, getCourseTitle]
+  );
+
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push(ROUTES.login);
@@ -62,11 +104,11 @@ export default function TeacherQuizzesPage() {
         ? t('errors.errorLoadingQuizzes')
         : '';
 
-  const handleTogglePublish = useCallback(async (quizId: string, currentStatus: boolean) => {
-    const quiz = quizzes.find((q) => q._id === quizId);
+  const handleTogglePublish = useCallback(async (quiz: Quiz) => {
+    const quizId = toIdString(quiz._id);
     try {
-      await patchQuiz(quizId, { isPublished: !currentStatus });
-      await invalidateAfterQuizChange(queryClient, quiz ? getCourseId(quiz.course) : '', orgId);
+      await patchQuiz(quizId, { isPublished: !quiz.isPublished });
+      await invalidateAfterQuizChange(queryClient, getCourseId(quiz.course), orgId);
     } catch (err) {
       setAlertState({
         type: 'error',
@@ -74,23 +116,26 @@ export default function TeacherQuizzesPage() {
           err instanceof ApiClientError ? err.message : t('teacherQuizzes.errorUpdateQuiz'),
       });
     }
-  }, [queryClient, quizzes, getCourseId, orgId, t]);
+  }, [queryClient, getCourseId, orgId, t]);
 
-  const handleDelete = useCallback(async (quizId: string) => {
-    if (!confirm(t('teacherQuizzes.confirmDeleteQuiz'))) return;
-
-    const quiz = quizzes.find((q) => q._id === quizId);
+  const confirmDelete = useCallback(async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    const quiz = quizzes.find((q) => toIdString(q._id) === deleteTarget.id);
     try {
-      await deleteQuiz(quizId);
+      await deleteQuiz(deleteTarget.id);
       await invalidateAfterQuizChange(queryClient, quiz ? getCourseId(quiz.course) : '', orgId);
+      setDeleteTarget(null);
     } catch (err) {
       setAlertState({
         type: 'error',
         message:
           err instanceof ApiClientError ? err.message : t('teacherQuizzes.errorDeleteQuiz'),
       });
+    } finally {
+      setIsDeleting(false);
     }
-  }, [queryClient, quizzes, getCourseId, orgId, t]);
+  }, [deleteTarget, quizzes, queryClient, getCourseId, orgId, t]);
 
   if (status === 'loading' || isLoading) {
     return <PageSkeleton />;
@@ -126,6 +171,23 @@ export default function TeacherQuizzesPage() {
         </div>
       ) : null}
 
+      {courses.length > 0 && quizzes.length > 0 && (
+        <FilterPanel>
+          <QuizFilters
+            searchQuery={searchInput}
+            onSearchChange={setSearchInput}
+            statusFilter={statusFilter}
+            onStatusChange={setStatusFilter}
+            courseFilter={courseFilter}
+            onCourseChange={setCourseFilter}
+            courses={courses}
+            sort={sort}
+            onSortChange={setSort}
+            onClear={clearFilters}
+          />
+        </FilterPanel>
+      )}
+
       <div>
         {courses.length === 0 ? (
           <div className="bg-[var(--card-solid)] overflow-hidden shadow rounded-lg">
@@ -151,12 +213,30 @@ export default function TeacherQuizzesPage() {
               </Link>
             </div>
           </div>
+        ) : filteredQuizzes.length === 0 ? (
+          <div className="bg-[var(--card-solid)] overflow-hidden shadow rounded-lg">
+            <div className="px-4 py-8 sm:p-6 text-center">
+              <p className="text-[var(--color-muted-foreground)] mb-2">{t('teacherQuizzes.noQuizzesMatch')}</p>
+              <p className="text-sm text-[var(--color-muted-foreground)] mb-4">{t('teacherQuizzes.tryAdjustingFilters')}</p>
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className={`inline-flex items-center justify-center min-h-[44px] px-4 py-3 text-sm font-medium rounded-lg text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 touch-manipulation`}
+                >
+                  {t('common.reset')}
+                </button>
+              )}
+            </div>
+          </div>
         ) : (
           <>
             {/* Mobile Cards View */}
             <div className="md:hidden space-y-3">
-              {quizzes.map((quiz) => (
-                <div key={quiz._id} className="bg-[var(--card-solid)] shadow rounded-lg p-4 space-y-3">
+              {filteredQuizzes.map((quiz) => {
+                const quizId = toIdString(quiz._id);
+                return (
+                <div key={quizId} className="bg-[var(--card-solid)] shadow rounded-lg p-4 space-y-3">
                   <div className="flex justify-between items-start">
                     <div className="flex-1 min-w-0">
                       <h3 className="text-base font-semibold text-[var(--color-foreground)] truncate">{quiz.title}</h3>
@@ -185,26 +265,27 @@ export default function TeacherQuizzesPage() {
                   <div className="flex gap-2 pt-2 border-t border-[var(--border)]">
                     <button
                       type="button"
-                      onClick={() => router.push(ROUTES.teacher.quizEdit(quiz._id))}
+                      onClick={() => router.push(ROUTES.teacher.quizEdit(quizId))}
                       className="flex-1 min-h-[44px] sm:min-h-0 px-3 py-2 text-sm font-medium text-[var(--teacher-primary)] bg-[var(--teacher-soft)] rounded-lg hover:bg-[var(--teacher-border)] transition-colors touch-manipulation"
                     >
                       {t('teacherQuizzes.edit')}
                     </button>
                     <button
-                      onClick={() => handleTogglePublish(quiz._id, quiz.isPublished)}
+                      onClick={() => handleTogglePublish(quiz)}
                       className={`flex-1 min-h-[44px] sm:min-h-0 px-3 py-2 text-sm font-medium ${theme.text} ${theme.activeBg} rounded-lg hover:opacity-80 touch-manipulation`}
                     >
                       {quiz.isPublished ? t('teacherQuizzes.unpublish') : t('teacherQuizzes.publish')}
                     </button>
                     <button
-                      onClick={() => handleDelete(quiz._id)}
+                      onClick={() => setDeleteTarget({ id: quizId, title: quiz.title })}
                       className="min-h-[44px] sm:min-h-0 px-3 py-2 text-sm font-medium text-[var(--error)] bg-[var(--error-light)] rounded-lg hover:bg-[var(--error)]/20 touch-manipulation"
                     >
                       {t('teacherQuizzes.delete')}
                     </button>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Desktop Table View */}
@@ -221,8 +302,10 @@ export default function TeacherQuizzesPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-[var(--card-solid)] divide-y divide-[var(--border)]">
-                  {quizzes.map((quiz) => (
-                    <tr key={quiz._id}>
+                  {filteredQuizzes.map((quiz) => {
+                    const quizId = toIdString(quiz._id);
+                    return (
+                    <tr key={quizId}>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-[var(--color-foreground)]">{quiz.title}</div>
                         {quiz.description && (
@@ -252,32 +335,53 @@ export default function TeacherQuizzesPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button
                           type="button"
-                          onClick={() => router.push(ROUTES.teacher.quizEdit(quiz._id))}
+                          onClick={() => router.push(ROUTES.teacher.quizEdit(quizId))}
                           className="text-[var(--teacher-primary)] hover:text-[var(--teacher-primary)]/80 mr-4"
                         >
                           {t('teacherQuizzes.edit')}
                         </button>
                         <button
-                          onClick={() => handleTogglePublish(quiz._id, quiz.isPublished)}
+                          type="button"
+                          onClick={() => handleTogglePublish(quiz)}
                           className="text-[var(--teacher-primary)] hover:text-[var(--teacher-primary)]/80 mr-4"
                         >
                           {quiz.isPublished ? t('teacherQuizzes.unpublish') : t('teacherQuizzes.publish')}
                         </button>
                         <button
-                          onClick={() => handleDelete(quiz._id)}
+                          type="button"
+                          onClick={() => setDeleteTarget({ id: quizId, title: quiz.title })}
                           className="text-[var(--error)] hover:text-[var(--error)]/80"
                         >
                           {t('teacherQuizzes.delete')}
                         </button>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
           </>
         )}
       </div>
+
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        title={t('teacherQuizzes.deleteQuizTitle')}
+        message={
+          deleteTarget
+            ? `${t('teacherQuizzes.confirmDeleteQuiz')} "${deleteTarget.title}"`
+            : t('teacherQuizzes.confirmDeleteQuiz')
+        }
+        onConfirm={confirmDelete}
+        onCancel={() => {
+          if (!isDeleting) setDeleteTarget(null);
+        }}
+        confirmText={t('common.delete')}
+        cancelText={t('common.cancel')}
+        type="danger"
+        isLoading={isDeleting}
+      />
     </div>
   );
 }

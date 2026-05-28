@@ -6,7 +6,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { Video, FileText, Clock, PlusCircle } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { Lesson } from '@/lib/react-query/hooks';
-import type { CurriculumLesson } from '@/lib/curriculum/tree';
+import type { CurriculumLesson, CurriculumQuiz } from '@/lib/curriculum/tree';
 import { CurriculumQuizBlock } from './CurriculumQuizBlock';
 import { sortableId } from '@/lib/curriculum/sortable';
 import { cn } from '@/lib/utils';
@@ -61,7 +61,6 @@ export function LessonList({
   onDeleteLesson,
   onAddLesson,
   onDeleteQuiz,
-  isDeletePending,
 }: {
   chapterId: string;
   courseId: string;
@@ -69,8 +68,7 @@ export function LessonList({
   onEditLesson: (lesson: Lesson) => void;
   onDeleteLesson: (id: string) => void;
   onAddLesson: (chapterId: string) => void;
-  onDeleteQuiz: (quizId: string) => void;
-  isDeletePending?: boolean;
+  onDeleteQuiz: (quiz: CurriculumQuiz) => void;
 }) {
   const { t } = useTranslation();
   const ids = useMemo(() => lessons.map((l) => sortableId('lesson', l._id)), [lessons]);
@@ -93,7 +91,6 @@ export function LessonList({
                 lessonId={lesson._id}
                 compact
                 onDeleteQuiz={onDeleteQuiz}
-                isDeletePending={isDeletePending}
               />
             </div>
           </div>

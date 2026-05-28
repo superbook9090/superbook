@@ -5,7 +5,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { Chapter, Lesson } from '@/lib/react-query/hooks';
 import { sortableId } from '@/lib/curriculum/sortable';
-import type { CurriculumChapterNode } from '@/lib/curriculum/tree';
+import type { CurriculumChapterNode, CurriculumQuiz } from '@/lib/curriculum/tree';
 import { CurriculumQuizBlock } from './CurriculumQuizBlock';
 import { cn } from '@/lib/utils';
 import { ChapterRowHeader } from './ChapterRowHeader';
@@ -23,7 +23,6 @@ export function SortableSubTopic({
   onDeleteLesson,
   onAddLesson,
   onDeleteQuiz,
-  isDeletePending,
 }: {
   sub: Chapter & Pick<CurriculumChapterNode, 'quizzes' | 'lessons'>;
   courseId: string;
@@ -35,8 +34,7 @@ export function SortableSubTopic({
   onEditLesson: (lesson: Lesson) => void;
   onDeleteLesson: (id: string) => void;
   onAddLesson: (chapterId: string) => void;
-  onDeleteQuiz: (quizId: string) => void;
-  isDeletePending?: boolean;
+  onDeleteQuiz: (quiz: CurriculumQuiz) => void;
 }) {
   const { t } = useTranslation();
   const id = sortableId('subtopic', sub._id);
@@ -80,7 +78,6 @@ export function SortableSubTopic({
             onDeleteLesson={onDeleteLesson}
             onAddLesson={onAddLesson}
             onDeleteQuiz={onDeleteQuiz}
-            isDeletePending={isDeletePending}
           />
           <CurriculumQuizBlock
             courseId={courseId}
@@ -88,7 +85,6 @@ export function SortableSubTopic({
             placement="chapter"
             chapterId={sub._id}
             onDeleteQuiz={onDeleteQuiz}
-            isDeletePending={isDeletePending}
           />
         </div>
       )}

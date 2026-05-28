@@ -21,6 +21,7 @@ import {
   getLesson
 } from '@/lib/api/courses';
 import { listQuizzesByOrg, listQuizzesAll, listQuizzesByCourse, deleteQuiz } from '@/lib/api/quizzes';
+import { toIdString } from '@/lib/id';
 import { listTeacherCoursesSelf } from '@/lib/api/courses';
 import { listEnrollments, enrollInCourse, joinCourseByCode, dropEnrollment } from '@/lib/api/enrollments';
 import { listQuizAttempts, startQuizAttempt, submitQuizAttempt, type SubmitQuizAttemptInput } from '@/lib/api/quizAttempts';
@@ -689,7 +690,7 @@ export function useDeleteQuiz() {
       quizId: string;
       courseId: string;
       orgId?: string;
-    }) => deleteQuiz(quizId).then(() => ({ courseId, orgId })),
+    }) => deleteQuiz(toIdString(quizId)).then(() => ({ courseId, orgId })),
     onSuccess: (_, { courseId, orgId }) => {
       invalidateAfterQuizChange(queryClient, courseId, orgId);
     },

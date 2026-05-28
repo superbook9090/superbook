@@ -1,4 +1,5 @@
 import { apiJson } from '@/lib/api/http';
+import { toIdString } from '@/lib/id';
 
 const BASE = '/api/quizzes';
 
@@ -65,6 +66,7 @@ export function patchQuiz(quizId: string, body: unknown): Promise<unknown> {
   return apiJson(`${BASE}/${encodeURIComponent(quizId)}`, { method: 'PATCH', body });
 }
 
-export function deleteQuiz(quizId: string): Promise<unknown> {
-  return apiJson(`${BASE}/${encodeURIComponent(quizId)}`, { method: 'DELETE' });
+export function deleteQuiz(quizId: unknown): Promise<unknown> {
+  const id = toIdString(quizId);
+  return apiJson(`${BASE}/${encodeURIComponent(id)}`, { method: 'DELETE' });
 }

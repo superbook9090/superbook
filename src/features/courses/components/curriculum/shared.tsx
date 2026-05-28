@@ -40,7 +40,7 @@ export function RowIconButton({
   variant = 'default',
   children,
 }: {
-  onClick: () => void;
+  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
   label?: string;
   variant?: 'default' | 'danger';
   children: React.ReactNode;

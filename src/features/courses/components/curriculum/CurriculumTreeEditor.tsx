@@ -31,8 +31,10 @@ import {
 import {
   attachQuizzesToCurriculumTree,
   type CurriculumChapterNode,
+  type CurriculumQuiz,
 } from '@/lib/curriculum/tree';
 import { splitQuizzesByScope, toCurriculumQuiz } from '@/lib/quiz/quizCourse';
+import { toIdString } from '@/lib/id';
 import { CurriculumQuizBlock } from './CurriculumQuizBlock';
 import { findDragLabel } from '@/lib/curriculum/dndTree';
 import { sortableId } from '@/lib/curriculum/sortable';
@@ -53,7 +55,8 @@ interface CurriculumTreeEditorProps {
 type DeleteTarget =
   | { type: 'topic'; id: string }
   | { type: 'subtopic'; id: string }
-  | { type: 'lesson'; id: string };
+  | { type: 'lesson'; id: string }
+  | { type: 'quiz'; id: string; title: string };
 
 export default function CurriculumTreeEditor({
   courseId,
@@ -140,13 +143,22 @@ export default function CurriculumTreeEditor({
     if (!confirmDelete) return;
     if (confirmDelete.type === 'lesson') {
       deleteLesson.mutate(confirmDelete.id, { onSuccess: () => setConfirmDelete(null) });
+    } else if (confirmDelete.type === 'quiz') {
+      deleteQuiz.mutate(
+        { quizId: confirmDelete.id, courseId, orgId },
+        { onSuccess: () => setConfirmDelete(null) }
+      );
     } else {
       deleteChapter.mutate(confirmDelete.id, { onSuccess: () => setConfirmDelete(null) });
     }
   };
 
-  const handleDeleteQuiz = (quizId: string) => {
-    deleteQuiz.mutate({ quizId, courseId, orgId });
+  const handleRequestDeleteQuiz = (quiz: CurriculumQuiz) => {
+    setConfirmDelete({
+      type: 'quiz',
+      id: toIdString(quiz._id),
+      title: quiz.title,
+    });
   };
 
   if (isLoading) return <div className="p-8 text-center">{t('common.loading')}</div>;
@@ -196,8 +208,7 @@ export default function CurriculumTreeEditor({
                 onEditLesson={onEditLesson}
                 onDeleteLesson={(id) => setConfirmDelete({ type: 'lesson', id })}
                 onAddLesson={onAddLesson}
-                onDeleteQuiz={handleDeleteQuiz}
-                isDeletePending={deleteQuiz.isPending}
+                onDeleteQuiz={handleRequestDeleteQuiz}
               />
             ))}
 
@@ -210,8 +221,7 @@ export default function CurriculumTreeEditor({
                 quizzes={courseLevelQuizzes.map((q) => toCurriculumQuiz(q, courseId))}
                 placement="course"
                 compact
-                onDeleteQuiz={handleDeleteQuiz}
-                isDeletePending={deleteQuiz.isPending}
+                onDeleteQuiz={handleRequestDeleteQuiz}
               />
             </div>
           </div>
@@ -231,23 +241,27 @@ export default function CurriculumTreeEditor({
         title={
           confirmDelete?.type === 'lesson'
             ? t('curriculum.deleteLessonTitle')
-            : confirmDelete?.type === 'subtopic'
-              ? t('curriculum.deleteSubTopicTitle')
-              : t('curriculum.deleteChapterTitle')
+            : confirmDelete?.type === 'quiz'
+              ? t('curriculum.deleteQuizTitle')
+              : confirmDelete?.type === 'subtopic'
+                ? t('curriculum.deleteSubTopicTitle')
+                : t('curriculum.deleteChapterTitle')
         }
         message={
           confirmDelete?.type === 'lesson'
             ? t('curriculum.deleteLessonMessage')
-            : confirmDelete?.type === 'subtopic'
-              ? t('curriculum.deleteSubTopicMessage')
-              : t('curriculum.deleteChapterMessage')
+            : confirmDelete?.type === 'quiz'
+              ? `${t('curriculum.deleteQuizMessage')} "${confirmDelete.title}"`
+              : confirmDelete?.type === 'subtopic'
+                ? t('curriculum.deleteSubTopicMessage')
+                : t('curriculum.deleteChapterMessage')
         }
         onConfirm={handleDelete}
         onCancel={() => setConfirmDelete(null)}
         confirmText={t('common.delete')}
         cancelText={t('common.cancel')}
         type="danger"
-        isLoading={deleteChapter.isPending || deleteLesson.isPending}
+        isLoading={deleteChapter.isPending || deleteLesson.isPending || deleteQuiz.isPending}
       />
     </div>
   );

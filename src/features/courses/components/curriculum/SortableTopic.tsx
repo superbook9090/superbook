@@ -6,7 +6,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { FolderPlus } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { Chapter, Lesson } from '@/lib/react-query/hooks';
-import { countTopicLessons, type CurriculumChapterNode } from '@/lib/curriculum/tree';
+import { countTopicLessons, type CurriculumChapterNode, type CurriculumQuiz } from '@/lib/curriculum/tree';
 import { CurriculumQuizBlock } from './CurriculumQuizBlock';
 import { sortableId } from '@/lib/curriculum/sortable';
 import { cn } from '@/lib/utils';
@@ -30,7 +30,6 @@ export function SortableTopic({
   onDeleteLesson,
   onAddLesson,
   onDeleteQuiz,
-  isDeletePending,
 }: {
   topic: Chapter & Pick<CurriculumChapterNode, 'quizzes'>;
   courseId: string;
@@ -46,8 +45,7 @@ export function SortableTopic({
   onEditLesson: (lesson: Lesson) => void;
   onDeleteLesson: (id: string) => void;
   onAddLesson: (chapterId: string) => void;
-  onDeleteQuiz: (quizId: string) => void;
-  isDeletePending?: boolean;
+  onDeleteQuiz: (quiz: CurriculumQuiz) => void;
 }) {
   const { t } = useTranslation();
   const id = sortableId('topic', topic._id);
@@ -96,7 +94,6 @@ export function SortableTopic({
               onDeleteLesson={onDeleteLesson}
               onAddLesson={onAddLesson}
               onDeleteQuiz={onDeleteQuiz}
-              isDeletePending={isDeletePending}
             />
 
             <CurriculumQuizBlock
@@ -105,7 +102,6 @@ export function SortableTopic({
               placement="chapter"
               chapterId={topic._id}
               onDeleteQuiz={onDeleteQuiz}
-              isDeletePending={isDeletePending}
             />
 
             <SortableContext items={subIds} strategy={verticalListSortingStrategy}>
@@ -124,7 +120,6 @@ export function SortableTopic({
                     onDeleteLesson={onDeleteLesson}
                     onAddLesson={onAddLesson}
                     onDeleteQuiz={onDeleteQuiz}
-                    isDeletePending={isDeletePending}
                   />
                 ))}
               </div>
