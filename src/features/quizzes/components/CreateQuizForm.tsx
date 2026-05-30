@@ -1,7 +1,7 @@
 'use client';
 import { ROUTES } from '@/constants/routes';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSessionStore } from '@/store/useSessionStore';
@@ -77,7 +77,8 @@ export default function CreateQuizForm({ quizId }: Props) {
   ]);
 
   // Excel upload states
-  const [showUpload, setShowUpload] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showImportHelp, setShowImportHelp] = useState(false);
   const [previewData, setPreviewData] = useState<ExcelRow[]>([]);
   const [uploadError, setUploadError] = useState('');
   const [isParsing, setIsParsing] = useState(false);
@@ -327,6 +328,10 @@ export default function CreateQuizForm({ quizId }: Props) {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const resetFileInput = () => {
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
     // Validate file type
     const validTypes = [
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -335,6 +340,7 @@ export default function CreateQuizForm({ quizId }: Props) {
     ];
     if (!validTypes.includes(file.type) && !file.name.endsWith('.xlsx') && !file.name.endsWith('.csv') && !file.name.endsWith('.xls')) {
       setUploadError(t('createQuizForm.validFileRequired'));
+      resetFileInput();
       return;
     }
 
@@ -450,6 +456,7 @@ export default function CreateQuizForm({ quizId }: Props) {
       setUploadError(t('createQuizForm.parsingError'));
     } finally {
       setIsParsing(false);
+      resetFileInput();
     }
   }, [t]);
 
@@ -462,9 +469,21 @@ export default function CreateQuizForm({ quizId }: Props) {
 
     setQuestions(importedQuestions);
     setPreviewData([]);
-    setShowUpload(false);
+    setUploadError('');
     setError('');
   }, [previewData]);
+
+  const handleCancelImport = useCallback(() => {
+    setPreviewData([]);
+    setUploadError('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  }, []);
+
+  const triggerFileImport = useCallback(() => {
+    if (isParsing) return;
+    setUploadError('');
+    fileInputRef.current?.click();
+  }, [isParsing]);
 
   const downloadTemplate = useCallback(() => {
     const template = [
@@ -718,125 +737,137 @@ export default function CreateQuizForm({ quizId }: Props) {
         />
       </div>
 
-      {/* Excel Upload Section */}
+      {/* Questions Section */}
       <div className="border-t border-[var(--color-border)] pt-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-medium text-[var(--color-foreground)]">{t('createQuizForm.questions')}</h3>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".xlsx,.xls,.csv"
+          onChange={handleFileUpload}
+          className="sr-only"
+          tabIndex={-1}
+        />
+
+        <div className="flex flex-col sm:flex-row gap-3 mb-4">
           <button
             type="button"
-            onClick={() => setShowUpload(!showUpload)}
-            className="text-sm text-[var(--color-primary)] hover:opacity-80 font-medium"
+            onClick={triggerFileImport}
+            disabled={isParsing}
+            className="inline-flex flex-1 sm:flex-none items-center justify-center min-h-[44px] px-5 py-2.5 text-sm font-semibold rounded-lg border-2 border-[var(--color-primary)] text-[var(--color-primary)] bg-[var(--color-card)] hover:bg-[var(--color-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {showUpload ? t('createQuizForm.hideImport') : t('createQuizForm.importFromExcel')}
+            {isParsing ? t('createQuizForm.parsingFile') : t('createQuizForm.importFile')}
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowImportHelp((open) => !open)}
+            aria-expanded={showImportHelp}
+            className="inline-flex flex-1 sm:flex-none items-center justify-center min-h-[44px] px-5 py-2.5 text-sm font-semibold rounded-lg border-2 border-[var(--color-border)] text-[var(--color-foreground)] bg-[var(--color-surface-muted)] hover:bg-[var(--color-accent)] transition-colors"
+          >
+            {t('createQuizForm.howToUseImport')}
           </button>
         </div>
 
-        {showUpload && (
-          <div className={`${theme.activeBg} rounded-lg p-4 mb-6`}>
-            <div className="flex justify-between items-start mb-3">
+        <h3 className="text-lg font-medium text-[var(--color-foreground)] mb-4">{t('createQuizForm.questions')}</h3>
+
+        {showImportHelp && (
+          <div className="mb-6 rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] overflow-hidden">
+            <div className="flex items-start justify-between gap-3 px-4 py-3 border-b border-[var(--color-border)] bg-[var(--color-accent)]">
+              <h4 className="font-medium text-[var(--color-foreground)]">{t('createQuizForm.howToUseImport')}</h4>
+              <button
+                type="button"
+                onClick={() => setShowImportHelp(false)}
+                className="text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] text-lg leading-none px-1"
+                aria-label={t('createQuizForm.closeHelp')}
+              >
+                ×
+              </button>
+            </div>
+            <div className="p-4 space-y-4">
               <div>
-                <h4 className="font-medium text-[var(--color-foreground)]">{t('createQuizForm.importQuestionsFromExcel')}</h4>
+                <p className="text-sm font-medium text-[var(--color-foreground)]">
+                  {t('createQuizForm.importQuestionsFromExcel')}
+                </p>
                 <p className="text-sm text-[var(--color-muted-foreground)] mt-1">
                   {t('createQuizForm.importInstructions')}
                 </p>
               </div>
+              <p className="text-sm text-[var(--color-muted-foreground)]">{t('createQuizForm.importHelpFormats')}</p>
+              <p className="text-sm text-[var(--color-muted-foreground)]">{t('createQuizForm.importHelpCorrectAnswer')}</p>
               <button
                 type="button"
                 onClick={downloadTemplate}
-                className="text-sm text-[var(--color-primary)] hover:opacity-80 underline"
+                className="inline-flex items-center justify-center min-h-[36px] px-4 py-2 text-sm font-medium rounded-lg border border-[var(--color-border)] text-[var(--color-primary)] bg-[var(--color-card)] hover:bg-[var(--color-accent)] transition-colors"
               >
                 {t('createQuizForm.downloadTemplate')}
               </button>
             </div>
-
-            <div className="mt-3">
-              <input
-                type="file"
-                accept=".xlsx,.xls,.csv"
-                onChange={handleFileUpload}
-                disabled={isParsing}
-                className={`block w-full text-sm text-[var(--color-muted-foreground)] file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium ${theme.activeBg} ${theme.text} hover:opacity-80 disabled:opacity-50`}
-              />
-            </div>
-
-            {isParsing && (
-              <p className="mt-2 text-sm text-[var(--color-primary)]">{t('createQuizForm.parsingFile')}</p>
-            )}
-
-            {uploadError && (
-              <div className="mt-3 bg-red-50 border border-red-200 rounded-md p-3">
-                <p className="text-sm text-red-700 whitespace-pre-line">{uploadError}</p>
-              </div>
-            )}
-
-            {previewData.length > 0 && (
-              <div className="mt-4 bg-[var(--color-card)] rounded-md border border-[var(--color-border)] overflow-hidden">
-                <div className={`px-4 py-3 ${theme.activeBg} border-b border-[var(--color-border)]`}>
-                  <div className="flex justify-between items-center">
-                    <h5 className={`font-medium ${theme.activeText}`}>
-                      {t('createQuizForm.preview')}: {previewData.length} {t('createQuizForm.questionsFound')}
-                    </h5>
-                    <div className="space-x-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setPreviewData([]);
-                          setUploadError('');
-                        }}
-                        className="text-sm text-[var(--color-muted)] hover:text-gray-800 px-3 py-1 rounded border border-[var(--color-border)] hover:bg-[var(--color-accent)]"
-                      >
-                        {t('createQuizForm.cancel')}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleConfirmImport}
-                        className={`text-sm text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 px-3 py-1 rounded`}
-                      >
-                        {t('createQuizForm.confirmImport')}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                <div className="max-h-60 overflow-y-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-[var(--color-accent)] sticky top-0">
-                      <tr>
-                        <th className="px-3 py-2 text-left text-xs font-medium text-[var(--color-muted-foreground)] uppercase">#</th>
-                        <th className="px-3 py-2 text-left text-xs font-medium text-[var(--color-muted-foreground)] uppercase">{t('createQuizForm.question')}</th>
-                        <th className="px-3 py-2 text-left text-xs font-medium text-[var(--color-muted-foreground)] uppercase">{t('createQuizForm.options')}</th>
-                        <th className="px-3 py-2 text-left text-xs font-medium text-[var(--color-muted-foreground)] uppercase">{t('createQuizForm.answer')}</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {previewData.slice(0, 5).map((row, idx) => (
-                        <tr key={idx}>
-                          <td className="px-3 py-2 text-sm text-[var(--color-foreground)]">{idx + 1}</td>
-                          <td className="px-3 py-2 text-sm text-[var(--color-foreground)] max-w-xs truncate">{row.question}</td>
-                          <td className="px-3 py-2 text-sm text-[var(--color-muted-foreground)]">A, B, C, D</td>
-                          <td className="px-3 py-2 text-sm font-medium text-green-600">
-                            {['A', 'B', 'C', 'D'][typeof row.correctAnswer === 'number' ? row.correctAnswer : 0]}
-                          </td>
-                        </tr>
-                      ))}
-                      {previewData.length > 5 && (
-                        <tr>
-                          <td colSpan={4} className="px-3 py-2 text-sm text-[var(--color-muted-foreground)] text-center italic">
-                            ... {t('createQuizForm.moreQuestions').replace('{count}', (previewData.length - 5).toString())}
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
           </div>
         )}
-      </div>
 
-      {/* Questions Section */}
-      <div className="border-t border-[var(--color-border)] pt-6">
-        <h3 className="text-lg font-medium text-[var(--color-foreground)] mb-4">{t('createQuizForm.questions')}</h3>
+        {uploadError && (
+          <div className="mb-4 bg-red-50 border border-red-200 rounded-md p-3">
+            <p className="text-sm text-red-700 whitespace-pre-line">{uploadError}</p>
+          </div>
+        )}
+
+        {previewData.length > 0 && (
+          <div className="mb-6 bg-[var(--color-card)] rounded-lg border border-[var(--color-border)] overflow-hidden">
+            <div className={`px-4 py-3 ${theme.activeBg} border-b border-[var(--color-border)]`}>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <h4 className={`font-medium ${theme.activeText}`}>
+                  {t('createQuizForm.preview')}: {previewData.length} {t('createQuizForm.questionsFound')}
+                </h4>
+                <div className="flex shrink-0 gap-2">
+                  <button
+                    type="button"
+                    onClick={handleCancelImport}
+                    className="text-sm text-[var(--color-muted)] hover:text-gray-800 px-3 py-1.5 rounded border border-[var(--color-border)] hover:bg-[var(--color-accent)]"
+                  >
+                    {t('createQuizForm.cancel')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleConfirmImport}
+                    className={`text-sm text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 px-3 py-1.5 rounded`}
+                  >
+                    {t('createQuizForm.confirmImport')}
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="max-h-60 overflow-y-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-[var(--color-accent)] sticky top-0">
+                  <tr>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-[var(--color-muted-foreground)] uppercase">#</th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-[var(--color-muted-foreground)] uppercase">{t('createQuizForm.question')}</th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-[var(--color-muted-foreground)] uppercase">{t('createQuizForm.options')}</th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-[var(--color-muted-foreground)] uppercase">{t('createQuizForm.answer')}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {previewData.slice(0, 5).map((row, idx) => (
+                    <tr key={idx}>
+                      <td className="px-3 py-2 text-sm text-[var(--color-foreground)]">{idx + 1}</td>
+                      <td className="px-3 py-2 text-sm text-[var(--color-foreground)] max-w-xs truncate">{row.question}</td>
+                      <td className="px-3 py-2 text-sm text-[var(--color-muted-foreground)]">A, B, C, D</td>
+                      <td className="px-3 py-2 text-sm font-medium text-green-600">
+                        {['A', 'B', 'C', 'D'][typeof row.correctAnswer === 'number' ? row.correctAnswer : 0]}
+                      </td>
+                    </tr>
+                  ))}
+                  {previewData.length > 5 && (
+                    <tr>
+                      <td colSpan={4} className="px-3 py-2 text-sm text-[var(--color-muted-foreground)] text-center italic">
+                        ... {t('createQuizForm.moreQuestions').replace('{count}', (previewData.length - 5).toString())}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
         {questions.map((question, qIndex) => (
           <div key={qIndex} className="bg-[var(--color-accent)] rounded-lg p-4 mb-4">

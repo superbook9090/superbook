@@ -32,6 +32,21 @@ export function listQuizzesAll(): Promise<QuizzesListPayload> {
   return apiJson(BASE, { method: 'GET' });
 }
 
+/** Map UI sort values to `/api/quizzes` query param values. */
+function mapQuizSortParam(sort?: string): string | undefined {
+  switch (sort) {
+    case 'oldest':
+      return 'oldest';
+    case 'titleAsc':
+      return 'a-z';
+    case 'titleDesc':
+      return 'z-a';
+    case 'newest':
+    default:
+      return undefined;
+  }
+}
+
 export function listQuizzesPaginated(params: {
   page?: number;
   limit?: number;
@@ -46,7 +61,8 @@ export function listQuizzesPaginated(params: {
   if (params.search) searchParams.set('search', params.search);
   if (params.course && params.course !== 'all') searchParams.set('course', params.course);
   if (params.status && params.status !== 'all') searchParams.set('status', params.status);
-  if (params.sort) searchParams.set('sort', params.sort);
+  const sort = mapQuizSortParam(params.sort);
+  if (sort) searchParams.set('sort', sort);
 
   return apiJson(`${BASE}?${searchParams.toString()}`, { method: 'GET' });
 }

@@ -287,8 +287,19 @@ export function usePaginatedQuizzes(params: {
         pagination: data.pagination,
       };
     },
-    // Keep previous data while fetching the next page for smoother UI transitions
-    placeholderData: (previousData) => previousData,
+    // Keep previous page data while paginating; clear when filters change
+    placeholderData: (previousData, previousQuery) => {
+      if (!previousData || !previousQuery) return undefined;
+      const prev = previousQuery.queryKey[2] as typeof params;
+      const filtersChanged =
+        prev.search !== params.search ||
+        prev.status !== params.status ||
+        prev.course !== params.course ||
+        prev.sort !== params.sort ||
+        prev.limit !== params.limit;
+      if (filtersChanged) return undefined;
+      return previousData;
+    },
   });
 }
 

@@ -57,7 +57,7 @@ export default function TeacherAnalyticsPage() {
       const data = (await fetchAnalytics('teacher')) as { stats?: TeacherStats };
       setStats(data.stats || null);
     } catch (err) {
-      setError(err instanceof ApiClientError ? err.message : t('analytics.errorLoading'));
+      setError(err instanceof ApiClientError ? err.message : t('teacherAnalytics.errorLoading'));
     } finally {
       setIsLoading(false);
     }
@@ -87,7 +87,7 @@ export default function TeacherAnalyticsPage() {
           onClick={fetchStats}
           className={`px-4 py-2 bg-gradient-to-r ${theme.gradient} text-white rounded-md hover:opacity-90`}
         >
-          {t('analytics.retry')}
+          {t('teacherAnalytics.retry')}
         </button>
       </div>
     );
@@ -95,9 +95,9 @@ export default function TeacherAnalyticsPage() {
 
   return (
     <div>
-      <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">{t('analytics.myAnalytics')}</h1>
+      <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">{t('teacherAnalytics.title')}</h1>
       <p className="mt-2 text-sm sm:text-base text-[var(--color-muted-foreground)]">
-        {t('analytics.analyticsDesc')}
+        {t('teacherAnalytics.description')}
       </p>
 
       {/* Overview Stats */}
@@ -105,42 +105,42 @@ export default function TeacherAnalyticsPage() {
         <StatCard
           icon={BookOpen}
           value={stats.overview?.totalCourses}
-          label={t('analytics.totalCourses')}
+          label={t('teacherAnalytics.statCourses')}
           color="success"
           delay={0.1}
         />
         <StatCard
           icon={BookOpen}
           value={stats.overview?.publishedCourses}
-          label={t('analytics.published')}
+          label={t('teacherAnalytics.statLiveCourses')}
           color="info"
           delay={0.15}
         />
         <StatCard
           icon={Users}
           value={stats.overview?.totalStudents}
-          label={t('analytics.totalStudents')}
+          label={t('teacherAnalytics.statEnrolledStudents')}
           color="student"
           delay={0.2}
         />
         <StatCard
           icon={HelpCircle}
           value={stats.overview?.totalQuizzes}
-          label={t('analytics.quizzes')}
+          label={t('teacherAnalytics.statQuizzes')}
           color="student"
           delay={0.25}
         />
         <StatCard
           icon={HelpCircle}
           value={stats.overview?.totalAttempts}
-          label={t('analytics.quizAttempts')}
+          label={t('teacherAnalytics.statQuizAttempts')}
           color="admin"
           delay={0.3}
         />
         <StatCard
           icon={Award}
           value={stats.overview?.averageScore}
-          label={t('analytics.avgScore')}
+          label={t('teacherAnalytics.statAvgScore')}
           color="warning"
           delay={0.35}
           suffix="%"
@@ -149,15 +149,16 @@ export default function TeacherAnalyticsPage() {
 
       {/* Course Breakdown */}
       <div className="mt-8">
-        <h2 className="text-lg sm:text-xl font-semibold text-[var(--color-foreground)] mb-4">{t('analytics.coursePerformance')}</h2>
+        <h2 className="text-lg sm:text-xl font-semibold text-[var(--color-foreground)]">{t('teacherAnalytics.coursesTitle')}</h2>
+        <p className="mt-1 mb-4 text-sm text-[var(--color-muted-foreground)]">{t('teacherAnalytics.coursesDescription')}</p>
         {stats.courses?.length === 0 ? (
           <div className="bg-[var(--card-solid)] rounded-lg shadow p-8 text-center">
-            <p className="text-[var(--color-muted-foreground)] mb-4">{t('analytics.noCoursesYet')}</p>
+            <p className="text-[var(--color-muted-foreground)] mb-4">{t('teacherAnalytics.noCoursesYet')}</p>
             <Link
               href={ROUTES.teacher.courseCreate}
               className={`inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base font-medium rounded-xl text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 transition-opacity`}
             >
-              {t('analytics.createCourse')}
+              {t('teacherAnalytics.createCourse')}
             </Link>
           </div>
         ) : (
@@ -167,22 +168,22 @@ export default function TeacherAnalyticsPage() {
                 <thead className="bg-[var(--color-surface-muted)]">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider">
-                      {t('analytics.course')}
+                      {t('teacherAnalytics.tableCourse')}
                     </th>
                     <th className="px-6 py-3 text-center text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider">
-                      {t('analytics.students')}
+                      {t('teacherAnalytics.tableEnrolled')}
                     </th>
                     <th className="px-6 py-3 text-center text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider">
-                      {t('analytics.quizzes')}
+                      {t('teacherAnalytics.tableQuizzes')}
                     </th>
                     <th className="px-6 py-3 text-center text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider">
-                      {t('analytics.attempts')}
+                      {t('teacherAnalytics.tableAttempts')}
                     </th>
                     <th className="px-6 py-3 text-center text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider">
-                      {t('analytics.avgScore')}
+                      {t('teacherAnalytics.tableAvgScore')}
                     </th>
                     <th className="px-6 py-3 text-center text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider">
-                      {t('analytics.status')}
+                      {t('teacherAnalytics.tableVisibility')}
                     </th>
                   </tr>
                 </thead>
@@ -218,7 +219,7 @@ export default function TeacherAnalyticsPage() {
                             ? 'bg-[var(--success-light)] text-[var(--success)]'
                             : 'bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)]'
                         }`}>
-                          {course.isPublished ? t('analytics.published') : t('analytics.draft')}
+                          {course.isPublished ? t('teacherAnalytics.live') : t('teacherAnalytics.draft')}
                         </span>
                       </td>
                     </tr>
@@ -232,10 +233,11 @@ export default function TeacherAnalyticsPage() {
 
       {/* Top Students */}
       <div className="mt-8">
-        <h2 className="text-lg sm:text-xl font-semibold text-[var(--color-foreground)] mb-4">{t('analytics.topPerformingStudents')}</h2>
+        <h2 className="text-lg sm:text-xl font-semibold text-[var(--color-foreground)]">{t('teacherAnalytics.studentsTitle')}</h2>
+        <p className="mt-1 mb-4 text-sm text-[var(--color-muted-foreground)]">{t('teacherAnalytics.studentsDescription')}</p>
         {stats.topStudents?.length === 0 ? (
           <div className="bg-[var(--card-solid)] rounded-lg shadow p-6 text-center">
-            <p className="text-[var(--color-muted-foreground)]">{t('analytics.noQuizAttempts')}</p>
+            <p className="text-[var(--color-muted-foreground)]">{t('teacherAnalytics.noQuizAttempts')}</p>
           </div>
         ) : (
           <div className="bg-[var(--card-solid)] rounded-lg shadow overflow-hidden">
@@ -243,13 +245,13 @@ export default function TeacherAnalyticsPage() {
               <thead className="bg-[var(--color-surface-muted)]">
                 <tr>
                   <th className="px-6 py-3 text-center text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider">
-                    {t('analytics.student')}
+                    {t('teacherAnalytics.tableStudent')}
                   </th>
                   <th className="px-6 py-3 text-center text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider">
-                    {t('analytics.attempts')}
+                    {t('teacherAnalytics.tableStudentAttempts')}
                   </th>
                   <th className="px-6 py-3 text-center text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider">
-                    {t('analytics.averageScore')}
+                    {t('teacherAnalytics.tableStudentScore')}
                   </th>
                 </tr>
               </thead>

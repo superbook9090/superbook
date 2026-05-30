@@ -57,11 +57,36 @@ export default function TeacherQuizzesPage() {
 
   const quizzes = useMemo(() => paginatedData?.quizzes ?? [], [paginatedData?.quizzes]);
   const pagination = paginatedData?.pagination;
+  const isInitialLoading = isLoading && !paginatedData;
+  const totalQuizzes = pagination?.total ?? 0;
 
-  // Reset page when filters change
+  // Reset page when debounced search changes
   useEffect(() => {
     setPage(1);
-  }, [searchTerm, statusFilter, courseFilter, sort]);
+  }, [searchTerm]);
+
+  // Clamp page when results shrink (delete, filter, etc.)
+  useEffect(() => {
+    if (!pagination) return;
+    if (pagination.totalPages > 0 && page > pagination.totalPages) {
+      setPage(pagination.totalPages);
+    }
+  }, [pagination, page]);
+
+  const handleStatusChange = useCallback((value: QuizStatusFilter) => {
+    setStatusFilter(value);
+    setPage(1);
+  }, []);
+
+  const handleCourseChange = useCallback((value: string) => {
+    setCourseFilter(value);
+    setPage(1);
+  }, []);
+
+  const handleSortChange = useCallback((value: QuizSortOption) => {
+    setSort(value);
+    setPage(1);
+  }, []);
 
   const clearFilters = useCallback(() => {
     setSearchInput('');
@@ -146,7 +171,7 @@ export default function TeacherQuizzesPage() {
     }
   }, [deleteTarget, quizzes, queryClient, getCourseId, orgId, t]);
 
-  if (status === 'loading' || isLoading) {
+  if (status === 'loading' || isInitialLoading) {
     return <PageSkeleton />;
   }
 
@@ -180,18 +205,18 @@ export default function TeacherQuizzesPage() {
         </div>
       ) : null}
 
-      {courses.length > 0 && quizzes.length > 0 && (
+      {courses.length > 0 && (
         <FilterPanel>
           <QuizFilters
             searchQuery={searchInput}
             onSearchChange={setSearchInput}
             statusFilter={statusFilter}
-            onStatusChange={setStatusFilter}
+            onStatusChange={handleStatusChange}
             courseFilter={courseFilter}
-            onCourseChange={setCourseFilter}
+            onCourseChange={handleCourseChange}
             courses={courses}
             sort={sort}
-            onSortChange={setSort}
+            onSortChange={handleSortChange}
             onClear={clearFilters}
           />
         </FilterPanel>
@@ -210,7 +235,7 @@ export default function TeacherQuizzesPage() {
               </Link>
             </div>
           </div>
-        ) : quizzes.length === 0 ? (
+        ) : totalQuizzes === 0 && !hasActiveFilters ? (
           <div className="bg-[var(--card-solid)] overflow-hidden shadow rounded-lg">
             <div className="px-4 py-8 sm:p-6 text-center">
               <p className="text-[var(--color-muted-foreground)] mb-4">{t('teacherQuizzes.noQuizzesYet')}</p>

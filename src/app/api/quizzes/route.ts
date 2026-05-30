@@ -141,9 +141,9 @@ export async function GET(request: NextRequest) {
     let sortQuery: Record<string, 1 | -1> = { createdAt: -1 };
     if (sortParam === 'oldest') {
       sortQuery = { createdAt: 1 };
-    } else if (sortParam === 'a-z') {
+    } else if (sortParam === 'a-z' || sortParam === 'titleAsc') {
       sortQuery = { title: 1 };
-    } else if (sortParam === 'z-a') {
+    } else if (sortParam === 'z-a' || sortParam === 'titleDesc') {
       sortQuery = { title: -1 };
     }
 
