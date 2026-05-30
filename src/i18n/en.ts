@@ -139,6 +139,89 @@ export const en = {
       step3Title: 'Practice and improve',
       step3Desc: 'Take quizzes linked to the course, chapter, or lesson. View scores, compare attempts, and follow progress charts on your dashboard.',
     },
+    cta: {
+      title: 'Ready to get started?',
+      subtitle: 'Create your free account to join courses and track your progress',
+      button: 'Create free account',
+    },
+    howItWorksPage: {
+      title: 'How Quiz-Do Works',
+      subtitle: 'Understanding the complete platform workflow for all user types',
+      platformOverview: {
+        title: '1. Platform Overview',
+        intro: 'Quiz-Do is a comprehensive Learning Management System (LMS) designed for schools, coaches, and self-paced learners. It bridges the gap between structured course delivery and interactive assessments.',
+        benefits: 'Students get a clear learning path with instant feedback on quizzes. Teachers get powerful tools to build curriculum, manage enrollments, and track analytics. Organizations can manage multiple teachers and students with data isolation.',
+      },
+      studentJourney: {
+        title: '2. Student Journey',
+        desc: 'The complete lifecycle for a learner on Quiz-Do.',
+        steps: {
+          register: 'Register/Login: Create a free student account to access the platform.',
+          joinOrg: 'Join Organization (Optional): Enter an organization code if you belong to a specific school or coaching center.',
+          browse: 'Browse Courses: Explore the catalog of available public courses.',
+          joinPrivate: 'Join Private Courses: Enter a secure course code provided by your teacher to access invite-only classes.',
+          enroll: 'Enroll: Click to enroll in a course and add it to your personal dashboard.',
+          learn: 'Read Lessons: Navigate through chapters, watch video lectures, and read PDF notes.',
+          quiz: 'Take Quizzes: Test your knowledge with timed quizzes at the course, chapter, or lesson level.',
+          track: 'Track Progress: View your completion percentage and active enrollments on your dashboard.',
+          results: 'View Results: Instantly see your quiz scores, correct answers, and leaderboard rank.',
+          blogs: 'Read Blogs: Explore educational articles and resources written by teachers.',
+          notify: 'Receive Notifications: Get updates on new courses, assignments, and system announcements via in-app and push notifications.',
+        }
+      },
+      teacherJourney: {
+        title: '3. Teacher Journey',
+        desc: 'How educators create and manage content.',
+        steps: {
+          createCourse: 'Create Courses: Build a structured curriculum with chapters and lessons.',
+          addContent: 'Add Content: Upload notes, link video lectures, and write lesson descriptions.',
+          createQuizzes: 'Create Quizzes: Build timed assessments with multiple-choice questions.',
+          publish: 'Publish: Make your courses and quizzes available to students.',
+          manageStudents: 'Manage Students: View who is enrolled in your courses.',
+          analytics: 'Monitor Analytics: Track student performance, average scores, and engagement metrics.',
+          blogs: 'Create Blogs: Write articles to share knowledge beyond the curriculum.',
+          privateAccess: 'Manage Private Access: Restrict courses and generate course codes for exclusive access.',
+        }
+      },
+      orgWorkflow: {
+        title: '4. Organization Workflow',
+        desc: 'Organizations group users and content for schools and coaching centers.',
+        adminRoles: 'Admins oversee the organization, managing teachers and students.',
+        teacherRoles: 'Teachers create content specifically for their organization.',
+        studentRoles: 'Students join using invite codes to access org-specific courses.',
+        isolation: 'Data Isolation: Content and user data are kept secure and isolated within the organization.',
+      },
+      courseSystem: {
+        title: '5. Course System',
+        public: 'Public Courses: Available in the browse catalog for anyone to enroll.',
+        private: 'Private Courses: Hidden from the catalog, requiring a specific course code to join.',
+        path: 'Learning Path: Courses are structured sequentially into Chapters and Lessons.',
+      },
+      quizSystem: {
+        title: '6. Quiz System',
+        placement: 'Flexible Placement: Quizzes can be attached to an entire course, a specific chapter, or an individual lesson.',
+        attempts: 'Attempts & Scoring: Students can retake quizzes (if allowed). Scores and time taken are recorded.',
+        analytics: 'Results & Analytics: Detailed breakdowns of correct answers and class leaderboards.',
+      },
+      blogSystem: {
+        title: '7. Blog System',
+        desc: 'A built-in platform for educational blogs and learning resources. Teachers can publish topic-based content, and students can save their favorites.',
+      },
+      progressTracking: {
+        title: '8. Progress Tracking',
+        desc: 'Comprehensive analytics for everyone.',
+        studentInsights: 'Student Insights: Track lesson completion, course progress, and quiz performance trends.',
+        teacherInsights: 'Teacher Insights: View class-wide engagement, top performers, and average scores.',
+      },
+      notifications: {
+        title: '9. Notifications',
+        desc: 'Stay updated with course changes, quiz alerts, and important announcements through in-app and push notifications.',
+      },
+      securityPrivacy: {
+        title: '10. Security & Privacy',
+        desc: 'Quiz-Do ensures secure authentication, role-based access control, strict organization isolation, and private course protection to keep your data safe.',
+      }
+    },
     features: {
       title: 'What you can do on Quiz-Do',
       subtitle: 'Real tools from our platform — not generic placeholders',

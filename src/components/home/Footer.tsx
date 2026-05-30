@@ -10,7 +10,7 @@ import { SITE_NAME } from '@/lib/seo/config';
 
 const getFooterLinks = (t: (key: string) => string) => ({
   product: [
-    { label: t('home.howItWorks.title'), href: '#how-it-works' },
+    { label: t('home.howItWorksPage.title'), href: ROUTES.howItWorks },
     { label: t('home.features.title'), href: '#features' },
     { label: t('home.roles.title'), href: '#roles' },
     { label: t('home.about.title'), href: '#about' },
