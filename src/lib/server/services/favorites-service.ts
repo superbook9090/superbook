@@ -1,6 +1,7 @@
 import dbConnect from '@/lib/db';
 import Favorite from '@/models/Favorite';
 import Blog from '@/models/Blog';
+import { deleteCachedData } from '@/lib/redis';
 import type { Types } from 'mongoose';
 
 type FavoriteIdsLean = { blogs?: Types.ObjectId[] };
@@ -43,9 +44,17 @@ export interface FavoriteListRow {
 
 export async function getFavoriteBlogIds(userId: string): Promise<string[]> {
   await dbConnect();
-  const doc = (await Favorite.findOne({ user: userId }).select('blogs').lean()) as FavoriteIdsLean | null;
+  const doc = (await Favorite.findOne({ user: userId }).select('blogs -_id').lean()) as FavoriteIdsLean | null;
   if (!doc?.blogs?.length) return [];
   return doc.blogs.map((id) => id.toString());
+}
+
+export function favoriteIdsCacheKey(userId: string) {
+  return `favorites:ids:${userId}`;
+}
+
+export async function invalidateFavoriteIdsCache(userId: string): Promise<void> {
+  await deleteCachedData(favoriteIdsCacheKey(userId));
 }
 
 export async function listFavoritesPage(

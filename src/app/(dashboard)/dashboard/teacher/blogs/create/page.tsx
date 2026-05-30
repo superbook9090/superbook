@@ -8,7 +8,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, BookOpen } from 'lucide-react';
 import Alert from '@/components/ui/Alert';
 import { useSessionStore } from '@/store/useSessionStore';
-import { useCreateBlog } from '@/lib/react-query/hooks';
+import { useCreateBlog } from '@/lib/react-query/useBlogQueries';
 import { ApiClientError } from '@/lib/api/http';
 import { useTranslation } from '@/hooks/useTranslation';
 import { isBlogContentEmpty, type BlogFormData } from '@/features/blogs/components/BlogEditorForm';

@@ -25,7 +25,7 @@ import { useSessionStore } from '@/store/useSessionStore';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import BlogFilters, { type BlogLanguageFilter, type BlogStatusFilter } from '@/features/blogs/components/BlogFilters';
 import { FilterPanel } from '@/components/filters/DashboardListFilters';
-import { useDeleteBlog, useUpdateBlog, usePaginatedBlogs, type Blog } from '@/lib/react-query/hooks';
+import { useDeleteBlog, useUpdateBlog, usePaginatedBlogs, type Blog } from '@/lib/react-query/useBlogQueries';
 import BlogListPagination from '@/features/blogs/components/BlogListPagination';
 
 const PAGE_SIZE = 10;

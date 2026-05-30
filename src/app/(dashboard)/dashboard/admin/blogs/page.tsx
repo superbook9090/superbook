@@ -18,7 +18,7 @@ import { PageSkeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
 import { useSessionStore } from '@/store/useSessionStore';
-import { useDeleteBlog, useUpdateBlog, usePaginatedBlogs, type Blog } from '@/lib/react-query/hooks';
+import { useDeleteBlog, useUpdateBlog, usePaginatedBlogs, type Blog } from '@/lib/react-query/useBlogQueries';
 import BlogListPagination from '@/features/blogs/components/BlogListPagination';
 
 const PAGE_SIZE = 10;

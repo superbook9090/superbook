@@ -2,7 +2,6 @@
 
 import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import type { DashboardData, TeacherDashboardData } from '@/app/api/dashboard/route';
-import { listBlogsPaginated, createBlog, deleteBlog, updateBlog, type CreateBlogInput, type ListBlogsParams } from '@/lib/api/blogs';
 import { addFavorite, listFavorites, removeFavorite, type FavoritesListResult } from '@/lib/api/favorites';
 import { fetchDashboard } from '@/lib/api/dashboard';
 import { 
@@ -28,6 +27,14 @@ import { listQuizAttempts, startQuizAttempt, submitQuizAttempt, type SubmitQuizA
 import { queryKeys, favoritesListDefaults } from '@/lib/react-query/query-keys';
 import { useSessionStore } from '@/store/useSessionStore';
 export type { DashboardData, TeacherDashboardData };
+export type { Blog } from './useBlogQueries';
+export {
+  useBlogs,
+  usePaginatedBlogs,
+  useCreateBlog,
+  useDeleteBlog,
+  useUpdateBlog,
+} from './useBlogQueries';
 
 // Centralized query keys for cache management
 const QUERY_KEYS = {
@@ -54,18 +61,6 @@ export interface Course {
   isPublished: boolean;
   enrolledCount?: number;
   createdAt: string;
-}
-
-export interface Blog {
-  _id: string;
-  title: string;
-  topic: string;
-  content: string;
-  language: string;
-  isPublished: boolean;
-  author: { _id: string; name: string };
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface Quiz {
@@ -195,57 +190,6 @@ export function useAvailableCourses(orgId?: string) {
       return (data.courses || []) as Course[];
     },
     enabled: !!orgId || orgId === 'public',
-  });
-}
-
-export function useBlogs(orgId?: string, includeDrafts = false) {
-  return useQuery({
-    queryKey: ['blogs', orgId || 'public', includeDrafts],
-    queryFn: async () => {
-      const data = await listBlogsPaginated({
-        orgId: orgId || 'public',
-        includeDrafts,
-        limit: 200,
-        page: 1,
-      });
-      return (data.blogs || []) as Blog[];
-    },
-    enabled: !!orgId || orgId === 'public',
-  });
-}
-
-export function usePaginatedBlogs(params: ListBlogsParams, enabled = true) {
-  return useQuery({
-    queryKey: ['blogs', 'paginated', params],
-    queryFn: async () => {
-      const data = await listBlogsPaginated(params);
-      return {
-        blogs: (data.blogs || []) as Blog[],
-        pagination: data.pagination ?? {
-          page: params.page ?? 1,
-          limit: params.limit ?? 10,
-          total: 0,
-          totalPages: 1,
-        },
-        stats: data.stats,
-      };
-    },
-    enabled,
-    placeholderData: (previousData, previousQuery) => {
-      if (!previousData || !previousQuery) return undefined;
-      const prev = previousQuery.queryKey[2] as ListBlogsParams;
-      const filtersChanged =
-        prev.search !== params.search ||
-        prev.status !== params.status ||
-        prev.topic !== params.topic ||
-        prev.language !== params.language ||
-        prev.limit !== params.limit ||
-        prev.includeDrafts !== params.includeDrafts ||
-        prev.author !== params.author ||
-        prev.orgId !== params.orgId;
-      if (filtersChanged) return undefined;
-      return previousData;
-    },
   });
 }
 
@@ -435,71 +379,6 @@ export function useFavorites() {
       favorites: (res.favorites || []) as Favorite[],
       meta: res.meta,
     }),
-  });
-}
-
-// ============ BLOG MUTATIONS ============
-
-export function useCreateBlog() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (input: CreateBlogInput) => createBlog(input),
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['blogs'] });
-    },
-  });
-}
-
-export function useDeleteBlog() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (blogId: string) => {
-      return deleteBlog(blogId);
-    },
-    onMutate: async (blogId) => {
-      await queryClient.cancelQueries({ queryKey: ['blogs'] });
-      const previousBlogs = queryClient.getQueryData<Blog[]>(['blogs']);
-      queryClient.setQueryData<Blog[]>(['blogs'], (old) =>
-        (old || []).filter((b) => b._id !== blogId)
-      );
-      return { previousBlogs };
-    },
-    onError: (err, blogId, context) => {
-      if (context?.previousBlogs) {
-        queryClient.setQueryData(['blogs'], context.previousBlogs);
-      }
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['blogs'] });
-    },
-  });
-}
-
-export function useUpdateBlog() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({ blogId, data }: { blogId: string; data: Partial<Blog> }) => {
-      return updateBlog(blogId, data);
-    },
-    onMutate: async ({ blogId, data }) => {
-      await queryClient.cancelQueries({ queryKey: ['blogs'] });
-      const previousBlogs = queryClient.getQueryData<Blog[]>(['blogs']);
-      queryClient.setQueryData<Blog[]>(['blogs'], (old) =>
-        (old || []).map((b) => (b._id === blogId ? { ...b, ...data } : b))
-      );
-      return { previousBlogs };
-    },
-    onError: (err, variables, context) => {
-      if (context?.previousBlogs) {
-        queryClient.setQueryData(['blogs'], context.previousBlogs);
-      }
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['blogs'] });
-    },
   });
 }
 

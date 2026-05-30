@@ -21,9 +21,10 @@ import {
 } from 'lucide-react';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
-import { useAddFavorite, useRemoveFavorite, usePaginatedBlogs, type Blog } from '@/lib/react-query/hooks';
+import { useAddFavorite, useRemoveFavorite } from '@/lib/react-query/hooks';
+import { usePaginatedBlogs, type Blog } from '@/lib/react-query/useBlogQueries';
 import { blogTopicKeys, type BlogTopicKey } from '@/i18n/config';
-import BlogFilters from '@/features/blogs/components/BlogFilters';
+import BlogFilters, { type BlogSortOption } from '@/features/blogs/components/BlogFilters';
 import BlogListPagination from '@/features/blogs/components/BlogListPagination';
 import { FilterPanel } from '@/components/filters/DashboardListFilters';
 
@@ -40,9 +41,10 @@ export default function StudentBlogsPage() {
   const orgId = (session?.user as { organizationId?: string })?.organizationId || 'public';
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState('');
-  const debouncedSearch = useDebouncedValue(searchInput, 300);
+  const debouncedSearch = useDebouncedValue(searchInput, 1200);
   const [selectedTopic, setSelectedTopic] = useState('all');
   const [languageFilter, setLanguageFilter] = useState<'all' | 'en' | 'hi'>('all');
+  const [sort, setSort] = useState<BlogSortOption>('newest');
   const [hasRedirected, setHasRedirected] = useState(false);
 
   const { data, isLoading, isFetching } = usePaginatedBlogs(
@@ -53,6 +55,7 @@ export default function StudentBlogsPage() {
       search: debouncedSearch || undefined,
       topic: selectedTopic !== 'all' ? selectedTopic : undefined,
       language: languageFilter !== 'all' ? languageFilter : undefined,
+      sort,
     },
     status === 'authenticated' && featureEnabled
   );
@@ -66,12 +69,13 @@ export default function StudentBlogsPage() {
     setSearchInput('');
     setSelectedTopic('all');
     setLanguageFilter('all');
+    setSort('newest');
     setPage(1);
   };
 
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearch, selectedTopic, languageFilter]);
+  }, [debouncedSearch, selectedTopic, languageFilter, sort]);
 
   const topicOptions = topics.map((topic) => ({
     id: topic,
@@ -154,8 +158,13 @@ export default function StudentBlogsPage() {
               setPage(1);
             }}
             topicOptions={topicOptions}
+            sort={sort}
+            onSortChange={(value) => {
+              setSort(value);
+              setPage(1);
+            }}
             onClear={clearFilters}
-            searchPlaceholder={t('blog.searchBlogs')}
+            searchPlaceholder={t('blog.searchBlogsStudent')}
           />
         </FilterPanel>
       </motion.div>

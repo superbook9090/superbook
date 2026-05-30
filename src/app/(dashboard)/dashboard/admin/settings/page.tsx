@@ -81,10 +81,12 @@ export default function AdminSettingsPage() {
       setSettings({
         ...data,
         platformConfig: {
-          maintenanceMode: false,
-          allowRegistration: true,
-          allowTeacherRegistration: true,
-          defaultLanguage: 'en',
+          ...{
+            maintenanceMode: false,
+            allowRegistration: true,
+            allowTeacherRegistration: true,
+            defaultLanguage: 'en' as const,
+          },
           ...data.platformConfig,
         },
       });

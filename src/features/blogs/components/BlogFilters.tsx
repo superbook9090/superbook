@@ -1,6 +1,6 @@
 'use client';
 
-import { Globe } from 'lucide-react';
+import { Globe, ArrowUpDown } from 'lucide-react';
 import DashboardListFilters from '@/components/filters/DashboardListFilters';
 import { buildPublishStatusOptions } from '@/components/filters/publishStatusOptions';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -8,6 +8,7 @@ import { supportedLanguages } from '@/i18n/config';
 
 export type BlogStatusFilter = 'all' | 'published' | 'draft';
 export type BlogLanguageFilter = 'all' | 'en' | 'hi';
+export type BlogSortOption = 'newest' | 'oldest';
 
 interface BlogFiltersProps {
   searchQuery: string;
@@ -16,6 +17,8 @@ interface BlogFiltersProps {
   onStatusChange?: (value: BlogStatusFilter) => void;
   languageFilter: BlogLanguageFilter;
   onLanguageChange: (value: BlogLanguageFilter) => void;
+  sort?: BlogSortOption;
+  onSortChange?: (value: BlogSortOption) => void;
   /** Topic chips for student blog browse */
   selectedTopic?: string;
   onTopicChange?: (value: string) => void;
@@ -36,6 +39,8 @@ export default function BlogFilters({
   selectedTopic,
   onTopicChange,
   topicOptions = [],
+  sort,
+  onSortChange,
   onClear,
   searchPlaceholder,
   statusLabels,
@@ -71,6 +76,21 @@ export default function BlogFilters({
       options: languageOptions,
       neutralValue: 'all',
     },
+    ...(sort != null && onSortChange
+      ? [
+          {
+            label: t('blog.sort'),
+            icon: <ArrowUpDown className="w-3.5 h-3.5" aria-hidden />,
+            value: sort,
+            onChange: (id: string) => onSortChange(id as BlogSortOption),
+            options: [
+              { id: 'newest', label: t('blog.sortNewest') },
+              { id: 'oldest', label: t('blog.sortOldest') },
+            ],
+            neutralValue: 'newest',
+          },
+        ]
+      : []),
   ];
 
   const labels = statusLabels ?? {

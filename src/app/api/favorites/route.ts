@@ -9,8 +9,11 @@ import { listMeta, parseOffsetPagination } from '@/lib/server/pagination';
 import {
   addFavoriteForUser,
   getFavoriteBlogIds,
+  favoriteIdsCacheKey,
+  invalidateFavoriteIdsCache,
   listFavoritesPage,
 } from '@/lib/server/services/favorites-service';
+import { getCachedData, setCachedData } from '@/lib/redis';
 
 const privateCache = {
   'Cache-Control': 'private, s-maxage=60, stale-while-revalidate=120',
@@ -30,7 +33,14 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
 
     if (searchParams.get('idsOnly') === 'true') {
+      const cacheKey = favoriteIdsCacheKey(session.user.id);
+      const cached = await getCachedData<string[]>(cacheKey);
+      if (cached) {
+        return jsonSuccess({ ids: cached }, { headers: privateCache });
+      }
+
       const ids = await getFavoriteBlogIds(session.user.id);
+      await setCachedData(cacheKey, ids, 60);
       return jsonSuccess({ ids }, { headers: privateCache });
     }
 
@@ -87,6 +97,7 @@ export async function POST(req: NextRequest) {
     }
 
     const favorite = serialize(result.favorite) as typeof result.favorite;
+    await invalidateFavoriteIdsCache(session.user.id);
     return jsonSuccess({ favorite }, { status: 201 });
   } catch (error) {
     logApiError(error as Error, 'POST', '/api/favorites', logContext);

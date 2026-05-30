@@ -54,6 +54,7 @@ export type ListBlogsParams = {
   includeStats?: boolean;
   author?: 'self';
   orgId?: string;
+  sort?: 'newest' | 'oldest';
 };
 
 export function getBlogById(id: string): Promise<BlogDocument> {
@@ -86,6 +87,7 @@ export function listBlogsPaginated(params: ListBlogsParams = {}): Promise<BlogsL
   if (params.includeDrafts) searchParams.set('includeDrafts', 'true');
   if (params.includeStats) searchParams.set('includeStats', 'true');
   if (params.author) searchParams.set('author', params.author);
+  if (params.sort && params.sort !== 'newest') searchParams.set('sort', params.sort);
 
   return apiJson<BlogsListPayload>(`${BASE}?${searchParams.toString()}`, { method: 'GET' });
 }

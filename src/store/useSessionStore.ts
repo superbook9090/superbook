@@ -5,6 +5,7 @@ import { create } from 'zustand';
 import type { Session } from '@/types';
 import { authSignOut, fetchAuthSessionJson } from '@/lib/api/auth';
 import { listFavoriteIds } from '@/lib/api/favorites';
+import { clearStoredDeviceRegistration } from '@/lib/notifications/push/deviceRegistrationStorage';
 
 interface SessionState {
   session: Session | null;
@@ -120,6 +121,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
 
   logout: async () => {
     await authSignOut();
+    clearStoredDeviceRegistration();
     set({
       session: null,
       status: 'unauthenticated',

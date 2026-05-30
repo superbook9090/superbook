@@ -1,15 +1,17 @@
-import { registerDeviceToken } from '../notifications/push/registerDevice';
-import { registerDeviceToken as registerDeviceTokenApi } from '@/lib/api/notifications';
+import { registerDeviceToken, registerDeviceTokenIfNeeded } from '../notifications/push/registerDevice';
 import { isAndroidWebView, isIOSWebView } from './mobileDetection';
 import { sendToWebView, onWebViewMessage } from './webviewBridge';
 
-export const initMobileNotifications = async () => {
+let inFlightRegistration: Promise<boolean> | null = null;
+let inFlightUserId: string | null = null;
+
+async function registerForPlatform(userId: string): Promise<boolean> {
   let platform: 'android' | 'ios' | 'web' = 'web';
   if (isAndroidWebView()) platform = 'android';
   else if (isIOSWebView()) platform = 'ios';
 
   if (platform === 'web') {
-    return registerDeviceToken(platform);
+    return registerDeviceToken(userId, platform);
   }
 
   return new Promise<boolean>((resolve) => {
@@ -19,7 +21,7 @@ export const initMobileNotifications = async () => {
         const { token } = data;
         if (token) {
           try {
-            await registerDeviceTokenApi({ deviceToken: token, platform });
+            await registerDeviceTokenIfNeeded(userId, platform, token);
             resolve(true);
           } catch (e) {
             console.error('Failed to register native token', e);
@@ -38,6 +40,20 @@ export const initMobileNotifications = async () => {
       resolve(false);
     }, 10000);
   });
+}
+
+export const initMobileNotifications = async (userId: string): Promise<boolean> => {
+  if (inFlightRegistration && inFlightUserId === userId) {
+    return inFlightRegistration;
+  }
+
+  inFlightUserId = userId;
+  inFlightRegistration = registerForPlatform(userId).finally(() => {
+    inFlightRegistration = null;
+    inFlightUserId = null;
+  });
+
+  return inFlightRegistration;
 };
 
 export const syncBadgeCount = (count: number) => {

@@ -90,6 +90,34 @@ export async function markUserNotificationRead(userId: string, notificationId: s
 
 export async function upsertDeviceToken(userId: string, deviceToken: string, platform: 'android' | 'ios' | 'web') {
   await dbConnect();
+
+  type DeviceTokenExisting = {
+    userId: mongoose.Types.ObjectId;
+    platform: 'android' | 'ios' | 'web';
+    isActive: boolean;
+    updatedAt: Date;
+  };
+
+  const existing = await NotificationToken.findOne({ deviceToken })
+    .select('userId platform isActive updatedAt')
+    .lean<DeviceTokenExisting>();
+
+  if (existing) {
+    const unchanged =
+      existing.userId.toString() === userId &&
+      existing.platform === platform &&
+      existing.isActive;
+
+    if (unchanged) {
+      const touchIntervalMs = 24 * 60 * 60 * 1000;
+      const stale = Date.now() - new Date(existing.updatedAt).getTime() > touchIntervalMs;
+      if (stale) {
+        await NotificationToken.updateOne({ deviceToken }, { $set: { updatedAt: new Date() } });
+      }
+      return;
+    }
+  }
+
   await NotificationToken.findOneAndUpdate(
     { deviceToken },
     { userId, platform, isActive: true, updatedAt: new Date() },

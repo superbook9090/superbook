@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 import { authOptions } from '@/lib/auth';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { jsonSuccess, jsonApiError } from '@/lib/server/api-response';
-import { removeFavoriteBlog } from '@/lib/server/services/favorites-service';
+import { removeFavoriteBlog, invalidateFavoriteIdsCache } from '@/lib/server/services/favorites-service';
 
 // DELETE /api/favorites/[id] - Remove blog from favorites
 export async function DELETE(
@@ -40,6 +40,7 @@ export async function DELETE(
       return jsonApiError('NOT_FOUND', 'Blog not in favorites', 404);
     }
 
+    await invalidateFavoriteIdsCache(session.user.id);
     return jsonSuccess({ removed: true });
   } catch (error) {
     logApiError(error as Error, 'DELETE', '/api/favorites/[id]', logContext);

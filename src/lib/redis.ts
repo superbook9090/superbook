@@ -73,6 +73,18 @@ export async function setCachedData<T>(
   }
 }
 
+export async function deleteCachedData(key: string): Promise<void> {
+  try {
+    const redis = getRedisClient();
+    if (!redis) return;
+
+    await redis.del(key);
+  } catch (error) {
+    const logContext: LogContext = { method: 'REDIS_DEL', path: 'redis' };
+    logError('Redis delete error', logContext, { error: (error as Error).message });
+  }
+}
+
 export async function invalidatePattern(pattern: string): Promise<void> {
   try {
     const redis = getRedisClient();

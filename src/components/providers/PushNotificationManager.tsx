@@ -21,13 +21,15 @@ export default function PushNotificationManager() {
   const { t } = useTranslation();
   const [toastMessage, setToastMessage] = useState<ForegroundToast | null>(null);
 
+  const userId = session?.user?.id;
+
   useEffect(() => {
-    if (!session?.user) return;
+    if (!userId) return;
 
     let unsubscribe: (() => void) | null = null;
     let cancelled = false;
 
-    void initMobileNotifications().then(async () => {
+    void initMobileNotifications(userId).then(async () => {
       if (cancelled) return;
       const unsub = await subscribeToForegroundMessages((payload) => {
         const title = payload.notification?.title;
@@ -46,7 +48,7 @@ export default function PushNotificationManager() {
       cancelled = true;
       unsubscribe?.();
     };
-  }, [session, t]);
+  }, [userId, t]);
 
   if (!toastMessage) return null;
 

@@ -48,8 +48,16 @@ export async function GET(req: NextRequest) {
     const author = searchParams.get('author');
     const orgId = searchParams.get('orgId') || 'public';
     const includeStats = searchParams.get('includeStats') === 'true';
+    const sortParam = searchParams.get('sort') || 'newest';
 
-    const canUseCache = !includeDrafts && !search && !author && status === 'all' && !topic && !language;
+    const canUseCache =
+      !includeDrafts &&
+      !search &&
+      !author &&
+      status === 'all' &&
+      !topic &&
+      !language &&
+      sortParam === 'newest';
     const cacheKey = `blogs:${orgId}:${page}:${limit}`;
 
     if (canUseCache) {
@@ -110,16 +118,13 @@ export async function GET(req: NextRequest) {
         { topic: { $regex: search, $options: 'i' } },
       ];
 
-      const role = session?.user?.role;
-      if (role === 'teacher' || role === 'admin' || role === 'superadmin') {
-        const matchingAuthors = await User.find({ name: { $regex: search, $options: 'i' } })
-          .select('_id')
-          .lean();
-        if (matchingAuthors.length > 0) {
-          searchOr.push({
-            author: { $in: matchingAuthors.map((entry) => entry._id) },
-          });
-        }
+      const matchingAuthors = await User.find({ name: { $regex: search, $options: 'i' } })
+        .select('_id')
+        .lean();
+      if (matchingAuthors.length > 0) {
+        searchOr.push({
+          author: { $in: matchingAuthors.map((entry) => entry._id) },
+        });
       }
 
       andFilters.push({ $or: searchOr });
@@ -132,10 +137,12 @@ export async function GET(req: NextRequest) {
       query.$and = andFilters;
     }
 
+    const sortOrder = sortParam === 'oldest' ? 1 : -1;
+
     const [blogs, total] = await Promise.all([
       Blog.find(query)
         .populate('author', 'name email')
-        .sort({ createdAt: -1 })
+        .sort({ createdAt: sortOrder })
         .skip(skip)
         .limit(limit)
         .lean(),
