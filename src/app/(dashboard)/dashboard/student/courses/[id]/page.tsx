@@ -89,6 +89,10 @@ export default function CourseDetailPage() {
     }
   }, [status, router]);
 
+  useEffect(() => {
+    sessionStorage.removeItem(`lesson-active:${courseId}`);
+  }, [courseId]);
+
   const toggleChapter = (chapterId: string) => {
     setExpandedChapters(prev => ({
       ...prev,
@@ -151,6 +155,7 @@ export default function CourseDetailPage() {
   };
 
   const handleStartLesson = (lessonId: string) => {
+    sessionStorage.setItem(`lesson-active:${courseId}`, '1');
     router.push(ROUTES.student.lesson(courseId, lessonId));
   };
 

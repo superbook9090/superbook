@@ -13,7 +13,7 @@ import {
   AlertCircle,
   ChevronDown
 } from 'lucide-react';
-import Header from '@/components/home/Header';
+import Header from '@/components/home/MarketingHeader';
 import Footer from '@/components/home/Footer';
 import { useTranslation } from '@/hooks/useTranslation';
 import Button from '@/components/ui/Button';

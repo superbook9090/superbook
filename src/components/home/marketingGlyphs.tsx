@@ -1,5 +1,3 @@
-'use client';
-
 /**
  * Inline SVG icons for the marketing home page.
  * Avoids lucide-react in lazy-loaded chunks (Turbopack HMR can keep stale icon modules).

@@ -55,7 +55,17 @@ export async function middleware(request: NextRequest) {
   }
 
   // =========================
-  // ✅ 2. BLOCK AUTHENTICATED USERS FROM LOGIN/REGISTER
+  // ✅ 2. REDIRECT AUTHENTICATED USERS FROM HOME
+  // =========================
+  if (pathname === '/') {
+    if (token?.id) {
+      return NextResponse.redirect(new URL(ROUTES.dashboard, request.url));
+    }
+    return NextResponse.next();
+  }
+
+  // =========================
+  // ✅ 3. BLOCK AUTHENTICATED USERS FROM LOGIN/REGISTER
   // =========================
   if (pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/forgot-password')) {
     if (token?.id) {
@@ -98,6 +108,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    '/',
     '/api/:path*',
     '/dashboard/:path*',
     '/login',

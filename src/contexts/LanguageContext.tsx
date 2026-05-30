@@ -4,6 +4,7 @@ import React, { createContext, useContext, ReactNode, useEffect } from 'react';
 import { translate, type Language, type TranslationKeyInput } from '@/i18n';
 import { supportedLanguages } from '@/i18n/config';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { setLanguageCookie } from '@/lib/cookies/language';
 
 interface LanguageContextType {
   lang: Language;
@@ -24,17 +25,25 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     }
   });
 
+  const t = (key: TranslationKeyInput, params?: Record<string, string | number>): string =>
+    translate(lang, key, params);
+
   useEffect(() => {
     document.documentElement.lang = lang;
+    setLanguageCookie(lang);
+
+    document.querySelectorAll<HTMLElement>('[data-i18n-key]').forEach((el) => {
+      const key = el.getAttribute('data-i18n-key');
+      if (key) {
+        el.textContent = translate(lang, key);
+      }
+    });
   }, [lang]);
 
   const setLang = (language: Language) => {
     setLangState(language);
+    setLanguageCookie(language);
   };
-
-  const t = (key: TranslationKeyInput, params?: Record<string, string | number>): string =>
-    translate(lang, key, params);
-
 
   return (
     <LanguageContext.Provider value={{ lang, setLang, t }}>

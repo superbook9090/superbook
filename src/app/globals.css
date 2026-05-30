@@ -384,6 +384,11 @@ body {
   animation: hero-fade-up 0.55s ease-out both;
 }
 
+.hero-lcp {
+  opacity: 1;
+  transform: none;
+}
+
 .hero-fade-in-delay-1 {
   animation-delay: 0.08s;
 }

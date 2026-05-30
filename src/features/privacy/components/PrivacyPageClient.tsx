@@ -5,7 +5,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { ArrowLeft, Shield, Lock, Eye, Database } from 'lucide-react';
-import Header from '@/components/home/Header';
+import Header from '@/components/home/MarketingHeader';
 import Footer from '@/components/home/Footer';
 import { useTranslation } from '@/hooks/useTranslation';
 

@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
-import { redirect } from 'next/navigation';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import { ROUTES } from '@/constants/routes';
 import JsonLd from '@/components/seo/JsonLd';
-import HomePageClient from '@/components/home/HomePageClient';
+import MarketingHeader from '@/components/home/MarketingHeader';
+import HeroStatic from '@/components/home/HeroStatic';
+import HomeBelowFold from '@/components/home/HomeBelowFold';
 import { createPageMetadata } from '@/lib/seo/metadata';
+
+export const dynamic = 'force-static';
 
 export const metadata: Metadata = createPageMetadata({
   title: 'Online LMS for Courses, Quizzes & Learning Progress',
@@ -21,16 +21,13 @@ export const metadata: Metadata = createPageMetadata({
   ],
 });
 
-export default async function HomePage() {
-  const session = await getServerSession(authOptions);
-  if (session) {
-    redirect(ROUTES.dashboard);
-  }
-
+export default function HomePage() {
   return (
     <main className="min-h-screen">
       <JsonLd includeWebSite />
-      <HomePageClient />
+      <HeroStatic />
+      <MarketingHeader />
+      <HomeBelowFold />
     </main>
   );
 }

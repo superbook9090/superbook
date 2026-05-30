@@ -1,26 +1,31 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import { useSessionStore } from '@/store/useSessionStore';
 
 export function SessionProvider({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const needsSession = pathname.startsWith('/dashboard');
   const { fetchSession, fetchFavorites, status, session } = useSessionStore();
   const hasFetchedFavorites = useRef(false);
   const role = session?.user?.role;
 
   useEffect(() => {
-    // Fetch session on mount
+    if (!needsSession) return;
+
     fetchSession();
 
-    // Optional: Auto-refresh session every 10 minutes
     const sessionInterval = setInterval(() => {
       fetchSession();
-    }, 10 * 60 * 1000); // 10 minutes
+    }, 10 * 60 * 1000);
 
     return () => clearInterval(sessionInterval);
-  }, [fetchSession]);
+  }, [needsSession, fetchSession]);
 
   useEffect(() => {
+    if (!needsSession) return;
+
     if (status === 'unauthenticated') {
       hasFetchedFavorites.current = false;
       return;
@@ -33,8 +38,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       hasFetchedFavorites.current = true;
       fetchFavorites();
     }
-  }, [status, role, fetchFavorites]);
+  }, [needsSession, status, role, fetchFavorites]);
 
-  // Never block first paint — session resolves in the background (improves LCP / INP).
   return <>{children}</>;
 }
