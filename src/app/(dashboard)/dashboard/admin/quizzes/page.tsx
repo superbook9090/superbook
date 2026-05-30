@@ -19,70 +19,60 @@ import Alert from '@/components/ui/Alert';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useTranslation } from '@/hooks/useTranslation';
 import { formatDate } from '@/lib/dateUtils';
-import { listQuizzesAll, patchQuiz, deleteQuiz } from '@/lib/api/quizzes';
+import { usePaginatedQuizzes } from '@/lib/react-query/hooks';
+import { patchQuiz, deleteQuiz } from '@/lib/api/quizzes';
 import { ApiClientError } from '@/lib/api/http';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import DashboardListFilters, { FilterPanel } from '@/components/filters/DashboardListFilters';
 import { buildPublishStatusOptions, type PublishStatusFilter } from '@/components/filters/publishStatusOptions';
 
-interface Quiz {
-  _id: string;
-  title: string;
-  description: string;
-  course: { _id: string; title: string };
-  instructor: { _id: string; name: string };
-  questionCount?: number;
-  timeLimit: number;
-  isPublished: boolean;
-  createdAt: string;
-}
+
 
 export default function AdminQuizzesPage() {
   const { session, status } = useSessionStore();
   const router = useRouter();
   const { theme } = useRoleTheme();
   const { t } = useTranslation();
-  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const limit = 10;
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearch = useDebouncedValue(searchQuery, 300);
   const [filter, setFilter] = useState<PublishStatusFilter>('all');
   const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  const { data: paginatedData, isLoading, refetch } = usePaginatedQuizzes({
+    page,
+    limit,
+    search: debouncedSearch,
+    status: filter,
+  });
+
+  const quizzes = paginatedData?.quizzes ?? [];
+  const pagination = paginatedData?.pagination;
+
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, filter]);
 
   const clearFilters = () => {
     setSearchQuery('');
     setFilter('all');
+    setPage(1);
   };
 
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push(ROUTES.login);
-      return;
     }
-
-    if (status === 'authenticated') {
-      fetchQuizzes();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, status]);
-
-  const fetchQuizzes = async () => {
-    try {
-      const data = await listQuizzesAll();
-      setQuizzes((data.quizzes || []) as Quiz[]);
-    } catch (err) {
-      const text =
-        err instanceof ApiClientError ? err.message : t('admin.failedFetchQuizzes');
-      setMessage({ type: 'error', text });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [session, status, router]);
 
   const handleTogglePublish = async (quizId: string, currentStatus: boolean) => {
     try {
       await patchQuiz(quizId, { isPublished: !currentStatus });
       setMessage({ type: 'success', text: t('admin.quizUpdated') });
-      fetchQuizzes();
+      refetch();
     } catch (err) {
       const text =
         err instanceof ApiClientError ? err.message : t('admin.failedUpdateQuiz');
@@ -95,7 +85,7 @@ export default function AdminQuizzesPage() {
       await deleteQuiz(quizId);
       setMessage({ type: 'success', text: t('admin.quizDeleted') });
       setDeleteId(null);
-      fetchQuizzes();
+      refetch();
     } catch (err) {
       const text =
         err instanceof ApiClientError ? err.message : t('admin.failedDeleteQuiz');
@@ -103,14 +93,7 @@ export default function AdminQuizzesPage() {
     }
   };
 
-  const filteredQuizzes = quizzes.filter(quiz => {
-    const matchesSearch = quiz.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         quiz.instructor.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filter === 'all' ||
-                         (filter === 'published' && quiz.isPublished) ||
-                         (filter === 'draft' && !quiz.isPublished);
-    return matchesSearch && matchesFilter;
-  });
+  // using quizzes directly from backend
 
   if (isLoading) {
     return <PageSkeleton />;
@@ -181,16 +164,14 @@ export default function AdminQuizzesPage() {
         className="grid grid-cols-1 sm:grid-cols-3 gap-4"
       >
         <div className="bg-[var(--card-solid)] rounded-xl p-4 shadow-sm">
-          <p className={`text-2xl font-bold ${theme.text}`}>{quizzes.length}</p>
+          <p className={`text-2xl font-bold ${theme.text}`}>{pagination?.total ?? quizzes.length}</p>
           <p className="text-sm text-[var(--color-muted-foreground)]">{t('admin.totalQuizzes')}</p>
         </div>
-        <div className="bg-[var(--card-solid)] rounded-xl p-4 shadow-sm">
-          <p className={`text-2xl font-bold ${theme.text}`}>{quizzes.filter(q => q.isPublished).length}</p>
-          <p className="text-sm text-[var(--color-muted-foreground)]">{t('common.published')}</p>
+        <div className="bg-[var(--card-solid)] rounded-xl p-4 shadow-sm hidden sm:block">
+          {/* We only show total in pagination now, since stats depend on all quizzes */}
         </div>
-        <div className="bg-[var(--card-solid)] rounded-xl p-4 shadow-sm">
-          <p className={`text-2xl font-bold ${theme.text}`}>{quizzes.filter(q => !q.isPublished).length}</p>
-          <p className="text-sm text-[var(--color-muted-foreground)]">{t('common.draft')}</p>
+        <div className="bg-[var(--card-solid)] rounded-xl p-4 shadow-sm hidden sm:block">
+          {/* We only show total in pagination now, since stats depend on all quizzes */}
         </div>
       </motion.div>
 
@@ -201,14 +182,14 @@ export default function AdminQuizzesPage() {
         transition={{ delay: 0.3 }}
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
       >
-        {filteredQuizzes.length === 0 ? (
+        {quizzes.length === 0 ? (
           <div className="col-span-full text-center py-16 bg-[var(--card-solid)] rounded-2xl shadow-sm">
             <HelpCircle className="w-16 h-16 text-[var(--color-muted-foreground)] mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-[var(--color-foreground)] mb-2">{t('admin.noQuizzesFound')}</h3>
             <p className="text-[var(--color-muted-foreground)]">{t('admin.adjustSearch')}</p>
           </div>
         ) : (
-          filteredQuizzes.map((quiz, index) => (
+          quizzes.map((quiz, index) => (
             <motion.div
               key={quiz._id}
               initial={{ opacity: 0, y: 20 }}
@@ -308,6 +289,59 @@ export default function AdminQuizzesPage() {
           ))
         )}
       </motion.div>
+
+      {/* Pagination Controls */}
+      {pagination && pagination.totalPages > 1 && (
+        <div className="flex items-center justify-between px-4 py-3 sm:px-6 mt-4 bg-[var(--card-solid)] rounded-2xl shadow-sm">
+          <div className="flex flex-1 justify-between sm:hidden">
+            <button
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-[var(--color-foreground)] bg-[var(--card-solid)] border border-[var(--border)] hover:bg-[var(--color-surface-muted)] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {t('common.previous')}
+            </button>
+            <button
+              onClick={() => setPage(p => Math.min(pagination.totalPages, p + 1))}
+              disabled={page === pagination.totalPages}
+              className="relative ml-3 inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-[var(--color-foreground)] bg-[var(--card-solid)] border border-[var(--border)] hover:bg-[var(--color-surface-muted)] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {t('common.next')}
+            </button>
+          </div>
+          <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm text-[var(--color-muted-foreground)]">
+                Showing <span className="font-medium">{(page - 1) * limit + 1}</span> to <span className="font-medium">{Math.min(page * limit, pagination.total)}</span> of <span className="font-medium">{pagination.total}</span> results
+              </p>
+            </div>
+            <div>
+              <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                <button
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="relative inline-flex items-center rounded-l-md px-2 py-2 text-[var(--color-muted-foreground)] ring-1 ring-inset ring-[var(--border)] hover:bg-[var(--color-surface-muted)] focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span className="sr-only">Previous</span>
+                  <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => setPage(p => Math.min(pagination.totalPages, p + 1))}
+                  disabled={page === pagination.totalPages}
+                  className="relative inline-flex items-center rounded-r-md px-2 py-2 text-[var(--color-muted-foreground)] ring-1 ring-inset ring-[var(--border)] hover:bg-[var(--color-surface-muted)] focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span className="sr-only">Next</span>
+                  <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </nav>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

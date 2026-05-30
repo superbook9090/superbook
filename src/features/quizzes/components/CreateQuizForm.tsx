@@ -67,7 +67,7 @@ export default function CreateQuizForm({ quizId }: Props) {
     chapter: '',
     lesson: '',
     timeLimit: '30',
-    isPublished: false,
+    isPublished: true,
   });
   const [chapterOptions, setChapterOptions] = useState<ChapterSelectOption[]>([]);
   const [lessonOptions, setLessonOptions] = useState<LessonSelectOption[]>([]);

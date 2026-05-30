@@ -20,7 +20,7 @@ import {
   reorderCurriculum,
   getLesson
 } from '@/lib/api/courses';
-import { listQuizzesByOrg, listQuizzesAll, listQuizzesByCourse, deleteQuiz } from '@/lib/api/quizzes';
+import { listQuizzesByOrg, listQuizzesAll, listQuizzesByCourse, listQuizzesPaginated, deleteQuiz } from '@/lib/api/quizzes';
 import { toIdString } from '@/lib/id';
 import { listTeacherCoursesSelf } from '@/lib/api/courses';
 import { listEnrollments, enrollInCourse, joinCourseByCode, dropEnrollment } from '@/lib/api/enrollments';
@@ -268,6 +268,28 @@ export function useCourseQuizzes(
   });
 
   return { ...query, quizzes: query.data ?? [] };
+}
+
+export function usePaginatedQuizzes(params: {
+  page: number;
+  limit: number;
+  search?: string;
+  course?: string;
+  status?: string;
+  sort?: string;
+}) {
+  return useQuery({
+    queryKey: ['quizzes', 'paginated', params],
+    queryFn: async () => {
+      const data = await listQuizzesPaginated(params);
+      return {
+        quizzes: (data.quizzes || []) as Quiz[],
+        pagination: data.pagination,
+      };
+    },
+    // Keep previous data while fetching the next page for smoother UI transitions
+    placeholderData: (previousData) => previousData,
+  });
 }
 
 export function useEnrollments() {
@@ -675,6 +697,7 @@ export function invalidateAfterQuizChange(
   queryClient.invalidateQueries({ queryKey: QUERY_KEYS.QUIZZES(orgId) });
   queryClient.invalidateQueries({ queryKey: ['quizzes', 'course', courseId] });
   queryClient.invalidateQueries({ queryKey: ['quizzes', 'teacher-list'] });
+  queryClient.invalidateQueries({ queryKey: ['quizzes', 'paginated'] });
   queryClient.invalidateQueries({ queryKey: ['courses', courseId, 'curriculum'] });
   queryClient.invalidateQueries({ queryKey: QUERY_KEYS.DASHBOARD });
 }

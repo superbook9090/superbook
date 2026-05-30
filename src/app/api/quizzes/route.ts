@@ -46,12 +46,17 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
     const fields = searchParams.get('fields'); // Comma-separated fields to select
 
+    const search = searchParams.get('search');
+    const status = searchParams.get('status');
+    const sortParam = searchParams.get('sort');
+
     // Build cache key (only for published quizzes)
     const orgId = session.user?.organizationId || 'public';
-    const cacheKey = `quizzes:${orgId}:${course || 'all'}:${instructor || 'all'}:${page}:${limit}`;
+    const cacheKey = `quizzes:${orgId}:${course || 'all'}:${instructor || 'all'}:${page}:${limit}:${search || ''}:${status || ''}:${sortParam || ''}`;
 
     // Try cache for published quizzes
     const isPublished = searchParams.get('isPublished') === 'true';
+    // If it's a student fetching published, or explicit isPublished flag
     if (isPublished) {
       const cached = await getCachedData(cacheKey);
       if (cached) {
@@ -87,8 +92,23 @@ export async function GET(request: NextRequest) {
     }
     if (lesson === 'none' || lesson === 'null') {
       andFilters.push({ $or: [{ lesson: null }, { lesson: { $exists: false } }] });
-    } else if (lesson) {
+    } else if (lesson && lesson !== 'all') {
       andFilters.push({ lesson });
+    }
+
+    if (search) {
+      andFilters.push({
+        $or: [
+          { title: { $regex: search, $options: 'i' } },
+          { description: { $regex: search, $options: 'i' } },
+        ],
+      });
+    }
+
+    if (status === 'published' || isPublished) {
+      andFilters.push({ isPublished: true });
+    } else if (status === 'draft') {
+      andFilters.push({ isPublished: false });
     }
 
     if (andFilters.length === 1) {
@@ -118,12 +138,21 @@ export async function GET(request: NextRequest) {
       };
     }
 
+    let sortQuery: Record<string, 1 | -1> = { createdAt: -1 };
+    if (sortParam === 'oldest') {
+      sortQuery = { createdAt: 1 };
+    } else if (sortParam === 'a-z') {
+      sortQuery = { title: 1 };
+    } else if (sortParam === 'z-a') {
+      sortQuery = { title: -1 };
+    }
+
     const quizzes = await Quiz.find(query, selectFields)
       .populate('course', 'title description')
       .populate('chapter', 'title')
       .populate('lesson', 'title')
       .populate('instructor', 'name email')
-      .sort({ createdAt: -1 })
+      .sort(sortQuery)
       .skip(skip)
       .limit(limit)
       .lean();

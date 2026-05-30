@@ -10,14 +10,13 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
 import { patchQuiz, deleteQuiz } from '@/lib/api/quizzes';
-import { invalidateAfterQuizChange, useTeacherQuizzesList, type Quiz } from '@/lib/react-query/hooks';
+import { invalidateAfterQuizChange, usePaginatedQuizzes, useTeacherCourses, type Quiz } from '@/lib/react-query/hooks';
 import { ApiClientError } from '@/lib/api/http';
 import Alert from '@/components/ui/Alert';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { FilterPanel } from '@/components/filters/DashboardListFilters';
 import QuizFilters from '@/features/quizzes/components/QuizFilters';
 import {
-  filterAndSortTeacherQuizzes,
   type QuizSortOption,
   type QuizStatusFilter,
 } from '@/features/quizzes/utils/quizListFilters';
@@ -32,10 +31,12 @@ export default function TeacherQuizzesPage() {
   const { theme } = useRoleTheme();
   const queryClient = useQueryClient();
   const orgId = (session?.user as { organizationId?: string })?.organizationId || 'public';
-  const enabled = status === 'authenticated' && !!session;
-  const { data, isLoading, error: fetchError } = useTeacherQuizzesList(enabled);
-  const courses = useMemo(() => data?.courses ?? [], [data?.courses]);
-  const quizzes = useMemo(() => data?.quizzes ?? [], [data?.quizzes]);
+  const [page, setPage] = useState(1);
+  const limit = 10;
+  
+  const { data: coursesData } = useTeacherCourses(orgId);
+  const courses = useMemo(() => coursesData ?? [], [coursesData]);
+
   const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
   const [searchInput, setSearchInput] = useState('');
   const searchTerm = useDebouncedValue(searchInput, 300);
@@ -45,11 +46,29 @@ export default function TeacherQuizzesPage() {
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const { data: paginatedData, isLoading, error: fetchError } = usePaginatedQuizzes({
+    page,
+    limit,
+    search: searchTerm,
+    status: statusFilter,
+    course: courseFilter,
+    sort,
+  });
+
+  const quizzes = useMemo(() => paginatedData?.quizzes ?? [], [paginatedData?.quizzes]);
+  const pagination = paginatedData?.pagination;
+
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm, statusFilter, courseFilter, sort]);
+
   const clearFilters = useCallback(() => {
     setSearchInput('');
     setStatusFilter('all');
     setCourseFilter('all');
     setSort('newest');
+    setPage(1);
   }, []);
 
   const hasActiveFilters =
@@ -79,17 +98,7 @@ export default function TeacherQuizzesPage() {
     [courses, t]
   );
 
-  const filteredQuizzes = useMemo(
-    () =>
-      filterAndSortTeacherQuizzes(quizzes, {
-        search: searchTerm,
-        status: statusFilter,
-        courseId: courseFilter,
-        sort,
-        getCourseTitle,
-      }),
-    [quizzes, searchTerm, statusFilter, courseFilter, sort, getCourseTitle]
-  );
+  // using quizzes directly from backend
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -213,7 +222,7 @@ export default function TeacherQuizzesPage() {
               </Link>
             </div>
           </div>
-        ) : filteredQuizzes.length === 0 ? (
+        ) : quizzes.length === 0 ? (
           <div className="bg-[var(--card-solid)] overflow-hidden shadow rounded-lg">
             <div className="px-4 py-8 sm:p-6 text-center">
               <p className="text-[var(--color-muted-foreground)] mb-2">{t('teacherQuizzes.noQuizzesMatch')}</p>
@@ -233,7 +242,7 @@ export default function TeacherQuizzesPage() {
           <>
             {/* Mobile Cards View */}
             <div className="md:hidden space-y-3">
-              {filteredQuizzes.map((quiz) => {
+              {quizzes.map((quiz) => {
                 const quizId = toIdString(quiz._id);
                 return (
                 <div key={quizId} className="bg-[var(--card-solid)] shadow rounded-lg p-4 space-y-3">
@@ -302,7 +311,7 @@ export default function TeacherQuizzesPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-[var(--card-solid)] divide-y divide-[var(--border)]">
-                  {filteredQuizzes.map((quiz) => {
+                  {quizzes.map((quiz) => {
                     const quizId = toIdString(quiz._id);
                     return (
                     <tr key={quizId}>
@@ -361,6 +370,59 @@ export default function TeacherQuizzesPage() {
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination Controls */}
+            {pagination && pagination.totalPages > 1 && (
+              <div className="flex items-center justify-between px-4 py-3 sm:px-6 mt-4">
+                <div className="flex flex-1 justify-between sm:hidden">
+                  <button
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    className="relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-[var(--color-foreground)] bg-[var(--card-solid)] border border-[var(--border)] hover:bg-[var(--color-surface-muted)] disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {t('common.previous')}
+                  </button>
+                  <button
+                    onClick={() => setPage(p => Math.min(pagination.totalPages, p + 1))}
+                    disabled={page === pagination.totalPages}
+                    className="relative ml-3 inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-[var(--color-foreground)] bg-[var(--card-solid)] border border-[var(--border)] hover:bg-[var(--color-surface-muted)] disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {t('common.next')}
+                  </button>
+                </div>
+                <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm text-[var(--color-muted-foreground)]">
+                      Showing <span className="font-medium">{(page - 1) * limit + 1}</span> to <span className="font-medium">{Math.min(page * limit, pagination.total)}</span> of <span className="font-medium">{pagination.total}</span> results
+                    </p>
+                  </div>
+                  <div>
+                    <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                      <button
+                        onClick={() => setPage(p => Math.max(1, p - 1))}
+                        disabled={page === 1}
+                        className="relative inline-flex items-center rounded-l-md px-2 py-2 text-[var(--color-muted-foreground)] ring-1 ring-inset ring-[var(--border)] hover:bg-[var(--color-surface-muted)] focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <span className="sr-only">Previous</span>
+                        <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                          <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => setPage(p => Math.min(pagination.totalPages, p + 1))}
+                        disabled={page === pagination.totalPages}
+                        className="relative inline-flex items-center rounded-r-md px-2 py-2 text-[var(--color-muted-foreground)] ring-1 ring-inset ring-[var(--border)] hover:bg-[var(--color-surface-muted)] focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <span className="sr-only">Next</span>
+                        <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                          <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                    </nav>
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>

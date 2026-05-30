@@ -37,7 +37,7 @@ export default function CreateCourseForm({ courseId }: Props) {
     category: '',
     locale: 'en' as 'en' | 'hi',
     thumbnail: '',
-    isPublished: false,
+    isPublished: true,
     isPrivateAccess: false,
     courseCode: '',
   });

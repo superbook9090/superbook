@@ -3,7 +3,15 @@ import { toIdString } from '@/lib/id';
 
 const BASE = '/api/quizzes';
 
-export type QuizzesListPayload = { quizzes: unknown[] };
+export type QuizzesListPayload = { 
+  quizzes: unknown[];
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+};
 
 export function listQuizzesByOrg(orgId: string): Promise<QuizzesListPayload> {
   const o = orgId || 'public';
@@ -22,6 +30,25 @@ export function listQuizzesByCourse(courseId: string): Promise<QuizzesListPayloa
 /** GET `/api/quizzes` without org filter (admin all quizzes, teacher client-side filter). */
 export function listQuizzesAll(): Promise<QuizzesListPayload> {
   return apiJson(BASE, { method: 'GET' });
+}
+
+export function listQuizzesPaginated(params: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  course?: string;
+  status?: string;
+  sort?: string;
+}): Promise<QuizzesListPayload> {
+  const searchParams = new URLSearchParams();
+  if (params.page) searchParams.set('page', params.page.toString());
+  if (params.limit) searchParams.set('limit', params.limit.toString());
+  if (params.search) searchParams.set('search', params.search);
+  if (params.course && params.course !== 'all') searchParams.set('course', params.course);
+  if (params.status && params.status !== 'all') searchParams.set('status', params.status);
+  if (params.sort) searchParams.set('sort', params.sort);
+
+  return apiJson(`${BASE}?${searchParams.toString()}`, { method: 'GET' });
 }
 
 export function getQuizById(quizId: string): Promise<{ quiz: unknown }> {
