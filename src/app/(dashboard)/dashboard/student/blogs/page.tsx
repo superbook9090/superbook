@@ -21,12 +21,14 @@ import {
 } from 'lucide-react';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
-import { useBlogs, useAddFavorite, useRemoveFavorite, type Blog } from '@/lib/react-query/hooks';
+import { useAddFavorite, useRemoveFavorite, usePaginatedBlogs, type Blog } from '@/lib/react-query/hooks';
 import { blogTopicKeys, type BlogTopicKey } from '@/i18n/config';
 import BlogFilters from '@/features/blogs/components/BlogFilters';
+import BlogListPagination from '@/features/blogs/components/BlogListPagination';
 import { FilterPanel } from '@/components/filters/DashboardListFilters';
 
 const topics = ['all', ...blogTopicKeys] as const;
+const PAGE_SIZE = 10;
 
 export default function StudentBlogsPage() {
   const { session, status, favorites } = useSessionStore();
@@ -36,21 +38,40 @@ export default function StudentBlogsPage() {
   const featureEnabled = useFeature('enableBlogs');
 
   const orgId = (session?.user as { organizationId?: string })?.organizationId || 'public';
-  const { data: blogs = [], isLoading } = useBlogs(orgId);
-  const addFavoriteMutation = useAddFavorite();
-  const removeFavoriteMutation = useRemoveFavorite();
-  
+  const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState('');
   const debouncedSearch = useDebouncedValue(searchInput, 300);
   const [selectedTopic, setSelectedTopic] = useState('all');
   const [languageFilter, setLanguageFilter] = useState<'all' | 'en' | 'hi'>('all');
   const [hasRedirected, setHasRedirected] = useState(false);
 
+  const { data, isLoading, isFetching } = usePaginatedBlogs(
+    {
+      orgId,
+      page,
+      limit: PAGE_SIZE,
+      search: debouncedSearch || undefined,
+      topic: selectedTopic !== 'all' ? selectedTopic : undefined,
+      language: languageFilter !== 'all' ? languageFilter : undefined,
+    },
+    status === 'authenticated' && featureEnabled
+  );
+
+  const blogs = data?.blogs ?? [];
+  const pagination = data?.pagination;
+  const addFavoriteMutation = useAddFavorite();
+  const removeFavoriteMutation = useRemoveFavorite();
+
   const clearFilters = () => {
     setSearchInput('');
     setSelectedTopic('all');
     setLanguageFilter('all');
+    setPage(1);
   };
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, selectedTopic, languageFilter]);
 
   const topicOptions = topics.map((topic) => ({
     id: topic,
@@ -86,18 +107,9 @@ export default function StudentBlogsPage() {
     }
   };
 
-  const filteredBlogs = blogs.filter((blog: Blog) => {
-    const q = debouncedSearch.toLowerCase();
-    const matchesSearch =
-      !q ||
-      blog.title.toLowerCase().includes(q) ||
-      blog.topic.toLowerCase().includes(q);
-    const matchesTopic = selectedTopic === 'all' || blog.topic.toLowerCase() === selectedTopic.toLowerCase();
-    const matchesLanguage = languageFilter === 'all' || blog.language === languageFilter;
-    return matchesSearch && matchesTopic && matchesLanguage;
-  });
+  const filteredBlogs = blogs;
 
-  if (isLoading) {
+  if (isLoading && !data) {
     return <PageSkeleton />;
   }
 
@@ -137,7 +149,10 @@ export default function StudentBlogsPage() {
             languageFilter={languageFilter}
             onLanguageChange={setLanguageFilter}
             selectedTopic={selectedTopic}
-            onTopicChange={setSelectedTopic}
+            onTopicChange={(value) => {
+              setSelectedTopic(value);
+              setPage(1);
+            }}
             topicOptions={topicOptions}
             onClear={clearFilters}
             searchPlaceholder={t('blog.searchBlogs')}
@@ -153,7 +168,7 @@ export default function StudentBlogsPage() {
         className="grid grid-cols-2 gap-4"
       >
         <div className="bg-[var(--background)] rounded-xl p-4 shadow-sm">
-          <p className={`text-2xl font-bold ${theme.text}`}>{blogs.length}</p>
+          <p className={`text-2xl font-bold ${theme.text}`}>{pagination?.total ?? 0}</p>
           <p className="text-sm text-[var(--color-muted-foreground)]">{t('blog.totalArticles')}</p>
         </div>
         <div className="bg-[var(--background)] rounded-xl p-4 shadow-sm">
@@ -167,7 +182,7 @@ export default function StudentBlogsPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        className={`grid grid-cols-1 md:grid-cols-2 gap-6 ${isFetching ? 'opacity-60 pointer-events-none' : ''}`}
       >
         {filteredBlogs.length === 0 ? (
           <div className="col-span-full text-center py-16 bg-[var(--card-solid)] rounded-2xl shadow-sm">
@@ -256,6 +271,10 @@ export default function StudentBlogsPage() {
           })
         )}
       </motion.div>
+
+      {pagination && (
+        <BlogListPagination page={page} pagination={pagination} onPageChange={setPage} />
+      )}
     </div>
   );
 }

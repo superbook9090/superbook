@@ -111,7 +111,11 @@ export default function TeacherDashboardPage() {
   const recentCourses = courses.slice(0, 3);
 
   const getLimit = (type: 'courses' | 'quizzes' | 'blogs') => {
-    return limits.userLimits?.[type] || limits[type];
+    const userLimit = limits.userLimits?.[type];
+    if (typeof userLimit === 'number' && userLimit >= 1) {
+      return userLimit;
+    }
+    return limits[type];
   };
 
   const getUsagePercentage = (type: 'courses' | 'quizzes' | 'blogs') => {
@@ -331,7 +335,7 @@ export default function TeacherDashboardPage() {
             description={t('dashboard.addNewContent')}
             href={ROUTES.teacher.courseCreate}
             color="warning"
-            disabled={filteredStats.totalCourses >= limits.courses}
+            disabled={isAtLimit('courses')}
             delay={0.25}
           />
           <QuickActionCard
@@ -340,7 +344,7 @@ export default function TeacherDashboardPage() {
             description={t('dashboard.writeNewContent')}
             href={ROUTES.teacher.blogCreate}
             color="admin"
-            disabled={filteredStats.totalBlogs >= limits.blogs}
+            disabled={isAtLimit('blogs')}
             delay={0.3}
           />
         </ResponsiveGrid>

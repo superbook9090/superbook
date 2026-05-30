@@ -37,6 +37,11 @@ export async function isRegistrationAllowed(): Promise<boolean> {
   return settings?.platformConfig?.allowRegistration ?? true;
 }
 
+export async function isTeacherRegistrationAllowed(): Promise<boolean> {
+  const settings = await getSettingsWithDefaults();
+  return settings?.platformConfig?.allowTeacherRegistration ?? true;
+}
+
 /**
  * Teacher content limit (per-user override from User.limits, else global settings)
  */

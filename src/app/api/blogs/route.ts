@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import Blog from '@/models/Blog';
+import User from '@/models/User';
 import { createBlogSchema } from '@/lib/validation';
 import { logApiError, logFailedRequest, type LogContext } from '@/lib/logger';
 import { requireFeature, checkTeacherLimit } from '@/lib/settingsHelpers';
@@ -11,11 +12,22 @@ import mongoose from 'mongoose';
 import { getAccessFilter } from '@/lib/accessControl';
 import { getCachedData, setCachedData, invalidatePattern } from '@/lib/redis';
 import { revalidateTag } from 'next/cache';
+import { parseOffsetPagination } from '@/lib/server/pagination';
+import { blogTopicValues, type BlogTopicKey } from '@/i18n/config';
 
-// Configure Next.js caching for this route
 export const dynamic = 'force-dynamic';
 
-// GET /api/blogs - Get all published blogs
+function escapeRegex(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function buildTopicFilter(topic: string) {
+  const mapped = blogTopicValues[topic as BlogTopicKey];
+  const value = mapped ?? topic;
+  return { topic: { $regex: new RegExp(`^${escapeRegex(value)}$`, 'i') } };
+}
+
+// GET /api/blogs - List blogs with server-side filters and pagination
 export async function GET(req: NextRequest) {
   const requestId = req.headers.get('X-Request-ID') || 'unknown';
   const logContext: LogContext = {
@@ -26,20 +38,21 @@ export async function GET(req: NextRequest) {
 
   try {
     const session = await getServerSession(authOptions);
-
     const { searchParams } = new URL(req.url);
+    const { page, limit, skip } = parseOffsetPagination(searchParams, { defaultLimit: 10 });
     const topic = searchParams.get('topic');
     const language = searchParams.get('language');
-    const limit = parseInt(searchParams.get('limit') || '20');
-    const page = parseInt(searchParams.get('page') || '1');
+    const search = searchParams.get('search')?.trim() || '';
+    const status = searchParams.get('status') || 'all';
     const includeDrafts = searchParams.get('includeDrafts') === 'true';
+    const author = searchParams.get('author');
     const orgId = searchParams.get('orgId') || 'public';
+    const includeStats = searchParams.get('includeStats') === 'true';
 
-    // Build cache key
-    const cacheKey = `blogs:${orgId}:${topic || 'all'}:${language || 'all'}:${page}:${limit}:${includeDrafts}`;
+    const canUseCache = !includeDrafts && !search && !author && status === 'all' && !topic && !language;
+    const cacheKey = `blogs:${orgId}:${page}:${limit}`;
 
-    // Try to get from cache first (only for published blogs without drafts)
-    if (!includeDrafts) {
+    if (canUseCache) {
       const cached = await getCachedData(cacheKey);
       if (cached) {
         return NextResponse.json(cached);
@@ -48,65 +61,150 @@ export async function GET(req: NextRequest) {
 
     await dbConnect();
 
-    // Check if blogs feature is enabled
     const featureCheck = await requireFeature('enableBlogs');
     if (featureCheck) return featureCheck;
 
-    const query: { isPublished?: boolean; topic?: string; language?: string } = {};
-    if (!includeDrafts) {
-      query.isPublished = true;
-    }
-    if (topic) {
-      query.topic = topic;
-    }
-    if (language && (language === 'en' || language === 'hi')) {
-      query.language = language;
+    const andFilters: Record<string, unknown>[] = [];
+
+    if (status === 'published') {
+      andFilters.push({ isPublished: true });
+    } else if (status === 'draft') {
+      andFilters.push({ isPublished: false });
+    } else if (!includeDrafts) {
+      andFilters.push({ isPublished: true });
     }
 
-    // Apply organization-based access control
+    if (topic && topic !== 'all') {
+      andFilters.push(buildTopicFilter(topic));
+    }
+
+    if (language && language !== 'all' && (language === 'en' || language === 'hi')) {
+      andFilters.push({ language });
+    }
+
     if (session?.user) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const user = session.user as any;
+      const user = session.user as {
+        id: string;
+        organizationId?: string | null;
+        role: 'student' | 'teacher' | 'admin' | 'superadmin';
+      };
       const accessFilter = getAccessFilter({
         _id: new mongoose.Types.ObjectId(user.id),
-        organizationId: user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null,
-        role: user.role as 'student' | 'teacher' | 'admin' | 'superadmin',
+        organizationId: user.organizationId
+          ? new mongoose.Types.ObjectId(user.organizationId)
+          : null,
+        role: user.role,
       });
-      Object.assign(query, accessFilter);
+      if (Object.keys(accessFilter).length > 0) {
+        andFilters.push(accessFilter);
+      }
     }
 
-    const blogs = await Blog.find(query)
-      .populate('author', 'name email')
-      .sort({ createdAt: -1 })
-      .limit(limit)
-      .skip((page - 1) * limit)
-      .lean();
+    if (author === 'self' && session?.user?.id) {
+      andFilters.push({ author: new mongoose.Types.ObjectId(session.user.id) });
+    }
 
-    // Convert ObjectIds to strings for Next.js serialization
+    if (search) {
+      const searchOr: Record<string, unknown>[] = [
+        { title: { $regex: search, $options: 'i' } },
+        { topic: { $regex: search, $options: 'i' } },
+      ];
+
+      const role = session?.user?.role;
+      if (role === 'teacher' || role === 'admin' || role === 'superadmin') {
+        const matchingAuthors = await User.find({ name: { $regex: search, $options: 'i' } })
+          .select('_id')
+          .lean();
+        if (matchingAuthors.length > 0) {
+          searchOr.push({
+            author: { $in: matchingAuthors.map((entry) => entry._id) },
+          });
+        }
+      }
+
+      andFilters.push({ $or: searchOr });
+    }
+
+    const query: Record<string, unknown> = {};
+    if (andFilters.length === 1) {
+      Object.assign(query, andFilters[0]);
+    } else if (andFilters.length > 1) {
+      query.$and = andFilters;
+    }
+
+    const [blogs, total] = await Promise.all([
+      Blog.find(query)
+        .populate('author', 'name email')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Blog.countDocuments(query),
+    ]);
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const serializedBlogs = blogs.map((blog: any) => ({
       ...blog,
       _id: blog._id?.toString(),
-      author: blog.author ? {
-        ...blog.author,
-        _id: blog.author._id?.toString(),
-      } : blog.author,
+      author: blog.author
+        ? {
+            ...blog.author,
+            _id: blog.author._id?.toString(),
+          }
+        : blog.author,
     }));
 
-    const total = await Blog.countDocuments(query);
+    let stats: { total: number; published: number; draft: number } | undefined;
+    if (includeStats && session?.user) {
+      const statsAndFilters: Record<string, unknown>[] = [];
+
+      const user = session.user as {
+        id: string;
+        organizationId?: string | null;
+        role: 'student' | 'teacher' | 'admin' | 'superadmin';
+      };
+      const accessFilter = getAccessFilter({
+        _id: new mongoose.Types.ObjectId(user.id),
+        organizationId: user.organizationId
+          ? new mongoose.Types.ObjectId(user.organizationId)
+          : null,
+        role: user.role,
+      });
+      if (Object.keys(accessFilter).length > 0) {
+        statsAndFilters.push(accessFilter);
+      }
+      if (author === 'self') {
+        statsAndFilters.push({ author: new mongoose.Types.ObjectId(user.id) });
+      }
+
+      const statsQuery: Record<string, unknown> = {};
+      if (statsAndFilters.length === 1) {
+        Object.assign(statsQuery, statsAndFilters[0]);
+      } else if (statsAndFilters.length > 1) {
+        statsQuery.$and = statsAndFilters;
+      }
+
+      const [statsTotal, statsPublished, statsDraft] = await Promise.all([
+        Blog.countDocuments(statsQuery),
+        Blog.countDocuments({ ...statsQuery, isPublished: true }),
+        Blog.countDocuments({ ...statsQuery, isPublished: false }),
+      ]);
+      stats = { total: statsTotal, published: statsPublished, draft: statsDraft };
+    }
 
     const responseData = {
       blogs: serializedBlogs,
       pagination: {
-        total,
         page,
-        pages: Math.ceil(total / limit),
+        limit,
+        total,
+        totalPages: Math.max(1, Math.ceil(total / limit)),
       },
+      ...(stats ? { stats } : {}),
     };
 
-    // Cache the response (only for published blogs)
-    if (!includeDrafts) {
-      await setCachedData(cacheKey, responseData, 300); // 5 minutes
+    if (canUseCache) {
+      await setCachedData(cacheKey, responseData, 300);
     }
 
     return NextResponse.json(responseData, {
@@ -116,10 +214,7 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     logApiError(error as Error, 'GET', '/api/blogs', logContext);
-    return NextResponse.json(
-      { message: 'Failed to fetch blogs' },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: 'Failed to fetch blogs' }, { status: 500 });
   }
 }
 
@@ -137,29 +232,21 @@ export async function POST(req: NextRequest) {
 
     if (!session?.user) {
       logFailedRequest(401, 'POST', '/api/blogs', logContext);
-      return NextResponse.json(
-        { message: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
     logContext.userId = session.user.id;
 
-    // Check if blogs feature is enabled
     const featureCheck = await requireFeature('enableBlogs');
     if (featureCheck) return featureCheck;
 
     if (session.user.role !== 'teacher' && session.user.role !== 'admin') {
       logFailedRequest(403, 'POST', '/api/blogs', logContext);
-      return NextResponse.json(
-        { message: 'Only teachers can create blogs' },
-        { status: 403 }
-      );
+      return NextResponse.json({ message: 'Only teachers can create blogs' }, { status: 403 });
     }
 
     const body = await req.json();
 
-    // Validate input using Zod schema
     const validationResult = createBlogSchema.safeParse(body);
     if (!validationResult.success) {
       logFailedRequest(400, 'POST', '/api/blogs', logContext, validationResult.error);
@@ -170,11 +257,8 @@ export async function POST(req: NextRequest) {
     }
 
     const { title, content, topic, language = 'en', isPublished = true } = validationResult.data;
-
-    // Sanitize HTML content to prevent XSS
     const sanitizedContent = sanitizeHtml(content);
 
-    // Check teacher limits (skip for admins)
     if (session.user.role === 'teacher') {
       const blogCount = await Blog.countDocuments({
         author: session.user.id,
@@ -186,15 +270,11 @@ export async function POST(req: NextRequest) {
 
     if (!['en', 'hi'].includes(language)) {
       logFailedRequest(400, 'POST', '/api/blogs', logContext, new Error('Invalid language'));
-      return NextResponse.json(
-        { message: 'Language must be either en or hi' },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: 'Language must be either en or hi' }, { status: 400 });
     }
 
     await dbConnect();
 
-    // Get organizationId from session
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const user = session.user as any;
     const organizationId = user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null;
@@ -211,19 +291,13 @@ export async function POST(req: NextRequest) {
 
     await blog.populate('author', 'name');
 
-    // Invalidate cache for this organization
-    const orgId = organizationId?.toString() || 'public';
-    await invalidatePattern(`blogs:${orgId}:*`);
-    
-    // Revalidate Next.js cache tag
-    revalidateTag(`blogs:${orgId}`);
+    const orgKey = organizationId?.toString() || 'public';
+    await invalidatePattern(`blogs:${orgKey}:*`);
+    revalidateTag(`blogs:${orgKey}`);
 
     return NextResponse.json(blog, { status: 201 });
   } catch (error) {
     logApiError(error as Error, 'POST', '/api/blogs', logContext);
-    return NextResponse.json(
-      { message: 'Failed to create blog' },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: 'Failed to create blog' }, { status: 500 });
   }
 }

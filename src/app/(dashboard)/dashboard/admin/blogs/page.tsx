@@ -18,7 +18,10 @@ import { PageSkeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
 import { useSessionStore } from '@/store/useSessionStore';
-import { useBlogs, useDeleteBlog, useUpdateBlog, type Blog } from '@/lib/react-query/hooks';
+import { useDeleteBlog, useUpdateBlog, usePaginatedBlogs, type Blog } from '@/lib/react-query/hooks';
+import BlogListPagination from '@/features/blogs/components/BlogListPagination';
+
+const PAGE_SIZE = 10;
 import { useTranslation } from '@/hooks/useTranslation';
 import { formatDate } from '@/lib/dateUtils';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
@@ -33,6 +36,7 @@ export default function AdminBlogsPage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [searchInput, setSearchInput] = useState('');
   const searchTerm = useDebouncedValue(searchInput, 300);
+  const [page, setPage] = useState(1);
   const [filter, setFilter] = useState<BlogStatusFilter>('all');
   const [languageFilter, setLanguageFilter] = useState<BlogLanguageFilter>('all');
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -41,7 +45,12 @@ export default function AdminBlogsPage() {
     setSearchInput('');
     setFilter('all');
     setLanguageFilter('all');
+    setPage(1);
   };
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm, filter, languageFilter]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -49,9 +58,21 @@ export default function AdminBlogsPage() {
     }
   }, [status, router]);
 
-  // Get orgId from session
   const orgId = (session?.user as { organizationId?: string })?.organizationId || 'public';
-  const { data: blogs = [], isLoading } = useBlogs(orgId);
+  const { data, isLoading, isFetching } = usePaginatedBlogs({
+    orgId,
+    page,
+    limit: PAGE_SIZE,
+    search: searchTerm || undefined,
+    status: filter,
+    language: languageFilter !== 'all' ? languageFilter : undefined,
+    includeDrafts: true,
+    includeStats: true,
+  });
+
+  const blogs = data?.blogs ?? [];
+  const pagination = data?.pagination;
+  const stats = data?.stats ?? { total: 0, published: 0, draft: 0 };
 
   const deleteBlog = useDeleteBlog();
   const updateBlog = useUpdateBlog();
@@ -75,17 +96,9 @@ export default function AdminBlogsPage() {
     }
   };
 
-  const filteredBlogs = blogs.filter((blog: Blog) => {
-    const matchesSearch = blog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         blog.author.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filter === 'all' ||
-                         (filter === 'published' && blog.isPublished) ||
-                         (filter === 'draft' && !blog.isPublished);
-    const matchesLanguage = languageFilter === 'all' || blog.language === languageFilter;
-    return matchesSearch && matchesFilter && matchesLanguage;
-  });
+  const filteredBlogs = blogs;
 
-  if (isLoading) {
+  if (isLoading && !data) {
     return <PageSkeleton />;
   }
 
@@ -131,7 +144,10 @@ export default function AdminBlogsPage() {
             searchQuery={searchInput}
             onSearchChange={setSearchInput}
             statusFilter={filter}
-            onStatusChange={setFilter}
+            onStatusChange={(value) => {
+              setFilter(value);
+              setPage(1);
+            }}
             languageFilter={languageFilter}
             onLanguageChange={setLanguageFilter}
             onClear={clearFilters}
@@ -153,15 +169,15 @@ export default function AdminBlogsPage() {
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
       >
         <div className="bg-[var(--card-solid)] rounded-xl p-4 shadow-sm">
-          <p className={`text-2xl font-bold ${theme.text}`}>{blogs.length}</p>
+          <p className={`text-2xl font-bold ${theme.text}`}>{stats.total}</p>
           <p className="text-sm text-[var(--color-muted-foreground)]">{t('admin.totalBlogs')}</p>
         </div>
         <div className="bg-[var(--card-solid)] rounded-xl p-4 shadow-sm">
-          <p className="text-2xl font-bold text-[var(--success)]">{blogs.filter((b: Blog) => b.isPublished).length}</p>
+          <p className="text-2xl font-bold text-[var(--success)]">{stats.published}</p>
           <p className="text-sm text-[var(--color-muted-foreground)]">{t('admin.published')}</p>
         </div>
         <div className="bg-[var(--card-solid)] rounded-xl p-4 shadow-sm">
-          <p className="text-2xl font-bold text-[var(--color-muted-foreground)]">{blogs.filter((b: Blog) => !b.isPublished).length}</p>
+          <p className="text-2xl font-bold text-[var(--color-muted-foreground)]">{stats.draft}</p>
           <p className="text-sm text-[var(--color-muted-foreground)]">{t('admin.drafts')}</p>
         </div>
       </motion.div>
@@ -171,7 +187,7 @@ export default function AdminBlogsPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ${isFetching ? 'opacity-60 pointer-events-none' : ''}`}
       >
         {filteredBlogs.length === 0 ? (
           <div className="col-span-full text-center py-16 px-4 bg-[var(--card-solid)] rounded-2xl shadow-sm">
@@ -218,7 +234,7 @@ export default function AdminBlogsPage() {
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center text-sm text-[var(--color-muted-foreground)]">
                     <User className="w-4 h-4 mr-2" />
-                    {blog.author.name}
+                    {blog.author?.name ?? t('blog.teacher')}
                   </div>
                   <div className="flex items-center text-sm text-[var(--color-muted-foreground)]">
                     <Calendar className="w-4 h-4 mr-2" />
@@ -291,6 +307,10 @@ export default function AdminBlogsPage() {
           ))
         )}
       </motion.div>
+
+      {pagination && (
+        <BlogListPagination page={page} pagination={pagination} onPageChange={setPage} />
+      )}
     </div>
   );
 }

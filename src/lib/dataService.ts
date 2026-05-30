@@ -28,6 +28,7 @@ export const getSettingsWithDefaults = cache(async (): Promise<IAppSettings> => 
       siteDescription: 'A comprehensive learning platform',
       maintenanceMode: false,
       allowRegistration: true,
+      allowTeacherRegistration: true,
       defaultLanguage: 'en',
     },
   } as unknown as IAppSettings;

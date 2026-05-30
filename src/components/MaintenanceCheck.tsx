@@ -1,7 +1,8 @@
 'use client';
-import { ROUTES } from '@/constants/routes';
 
+import { ROUTES } from '@/constants/routes';
 import { useAppSettings } from '@/contexts/AppSettingsContext';
+import { isAdmin, getDashboardHomePath } from '@/lib/roles';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 import { useSessionStore } from '@/store/useSessionStore';
@@ -17,34 +18,26 @@ export default function MaintenanceCheck({ children }: MaintenanceCheckProps) {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (isLoading || !settings) return;
+    if (isLoading) return;
 
-    // Skip check if session is loading
-    if (status === 'loading') return;
+    const maintenanceMode = settings?.platformConfig.maintenanceMode ?? false;
 
-    // Skip check if user is admin
-    if (session?.user?.role === 'admin') return;
+    if (isAdmin(session?.user?.role)) return;
 
-    // If on maintenance page and maintenance mode is now OFF, redirect to dashboard
-    if (pathname === '/maintenance' && !settings.platformConfig.maintenanceMode) {
-      if (session?.user?.role === 'teacher') {
-        router.push(ROUTES.teacher.root);
-      } else if (session?.user?.role === 'student') {
-        router.push(ROUTES.student.root);
-      } else if (session?.user?.role === 'admin') {
-        router.push(ROUTES.admin.settings);
-      } else {
-        router.push(ROUTES.login);
-      }
+    if (pathname === ROUTES.maintenance && !maintenanceMode) {
+      if (status === 'loading') return;
+
+      const home = session?.user?.role
+        ? getDashboardHomePath(session.user.role)
+        : ROUTES.login;
+      router.replace(home);
       return;
     }
 
-    // Skip check if already on maintenance page or login page
-    if (pathname === '/maintenance' || pathname === '/login') return;
+    if (pathname === ROUTES.maintenance || pathname === ROUTES.login) return;
 
-    // If maintenance mode is enabled, redirect to maintenance page
-    if (settings.platformConfig.maintenanceMode) {
-      router.push(ROUTES.maintenance);
+    if (maintenanceMode) {
+      router.replace(ROUTES.maintenance);
     }
   }, [settings, isLoading, session, status, router, pathname]);
 

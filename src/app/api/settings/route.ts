@@ -50,6 +50,7 @@ export async function GET() {
           siteDescription: 'Learning Management System',
           maintenanceMode: false,
           allowRegistration: true,
+          allowTeacherRegistration: true,
           defaultLanguage: 'en',
         },
       };

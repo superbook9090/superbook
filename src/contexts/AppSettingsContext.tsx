@@ -1,139 +1,57 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { fetchPublicSettings } from '@/lib/api/settings';
-import { useTranslation } from '@/hooks/useTranslation';
+import { useEffect, type ReactNode } from 'react';
+import {
+  useSettingsStore,
+  type FeatureToggleKey,
+  type PublicAppSettings,
+  type TeacherLimitKey,
+} from '@/store/useSettingsStore';
 
-interface FeatureToggles {
-  enableBlogs: boolean;
-  enableQuizzes: boolean;
-  enableCourses: boolean;
-  enableAnalytics: boolean;
-}
-
-interface TeacherLimits {
-  courses: number;
-  quizzes: number;
-  blogs: number;
-}
-
-interface PlatformConfig {
-  maintenanceMode: boolean;
-  allowRegistration: boolean;
-  defaultLanguage: 'en' | 'hi';
-}
-
-interface AppSettings {
-  teacherLimits: TeacherLimits;
-  featureToggles: FeatureToggles;
-  platformConfig: PlatformConfig;
-}
-
-interface AppSettingsContextType {
-  settings: AppSettings | null;
-  isLoading: boolean;
-  error: string | null;
-  refetchSettings: () => Promise<void>;
-  isFeatureEnabled: (feature: keyof FeatureToggles) => boolean;
-  canCreateContent: (type: 'courses' | 'quizzes' | 'blogs', currentCount: number) => boolean;
-}
-
-const AppSettingsContext = createContext<AppSettingsContextType | undefined>(undefined);
-
-const defaultSettings: AppSettings = {
-  teacherLimits: {
-    courses: 5,
-    quizzes: 10,
-    blogs: 2,
-  },
-  featureToggles: {
-    enableBlogs: true,
-    enableQuizzes: true,
-    enableCourses: true,
-    enableAnalytics: true,
-  },
-  platformConfig: {
-    maintenanceMode: false,
-    allowRegistration: true,
-    defaultLanguage: 'en',
-  },
-};
-
+/** Bootstraps settings fetch once; safe to mount in a single root layout. */
 export function AppSettingsProvider({ children }: { children: ReactNode }) {
-  const { t } = useTranslation();
-  const [settings, setSettings] = useState<AppSettings>(defaultSettings);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchSettings = useCallback(async () => {
-    try {
-      const data = (await fetchPublicSettings()) as AppSettings;
-      setSettings(data);
-      setError(null);
-    } catch (err) {
-      console.error('Error fetching settings:', err);
-      setError(t('adminSettings.failedLoadSettings'));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [t]);
-
-  const refetchSettings = async () => {
-    setIsLoading(true);
-    await fetchSettings();
-  };
+  const fetchSettings = useSettingsStore((s) => s.fetchSettings);
 
   useEffect(() => {
-    fetchSettings();
+    void fetchSettings();
 
-    // Listen for settings changes from other tabs/windows
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'settingsTimestamp') {
-        fetchSettings();
+        void fetchSettings(true);
       }
     };
 
     window.addEventListener('storage', handleStorageChange);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, [fetchSettings]);
 
-  const isFeatureEnabled = (feature: keyof FeatureToggles): boolean => {
-    return settings?.featureToggles?.[feature] ?? true;
-  };
-
-  const canCreateContent = (type: 'courses' | 'quizzes' | 'blogs', currentCount: number): boolean => {
-    const limit = settings?.teacherLimits?.[type] ?? 10;
-    return currentCount < limit;
-  };
-
-  return (
-    <AppSettingsContext.Provider
-      value={{
-        settings,
-        isLoading,
-        error,
-        refetchSettings,
-        isFeatureEnabled,
-        canCreateContent,
-      }}
-    >
-      {children}
-    </AppSettingsContext.Provider>
-  );
+  return <>{children}</>;
 }
 
 export function useAppSettings() {
-  const context = useContext(AppSettingsContext);
-  if (context === undefined) {
-    throw new Error('useAppSettings must be used within an AppSettingsProvider');
-  }
-  return context;
+  const settings = useSettingsStore((s) => s.settings);
+  const isLoading = useSettingsStore((s) => s.isLoading);
+  const error = useSettingsStore((s) => s.error);
+  const isFeatureEnabled = useSettingsStore((s) => s.isFeatureEnabled);
+  const canCreateContent = useSettingsStore((s) => s.canCreateContent);
+  const fetchSettings = useSettingsStore((s) => s.fetchSettings);
+
+  const refetchSettings = async () => {
+    await fetchSettings(true);
+  };
+
+  return {
+    settings: settings as PublicAppSettings | null,
+    isLoading,
+    error,
+    refetchSettings,
+    isFeatureEnabled,
+    canCreateContent,
+  };
 }
 
-export function useFeature(feature: keyof FeatureToggles) {
-  const { isFeatureEnabled } = useAppSettings();
-  return isFeatureEnabled(feature);
+export function useFeature(feature: FeatureToggleKey) {
+  return useSettingsStore((s) => s.settings.featureToggles[feature] ?? true);
 }
+
+export type { FeatureToggleKey, PublicAppSettings, TeacherLimitKey };

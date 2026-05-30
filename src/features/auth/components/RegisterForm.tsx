@@ -3,7 +3,7 @@ import { ROUTES } from '@/constants/routes';
 import { getDashboardHomePath } from '@/lib/roles';
 
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import PremiumLogo from '@/components/ui/PremiumLogo';
@@ -12,6 +12,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { registerAccount } from '@/lib/api/auth';
 import { roleThemes } from '@/lib/roleTheme';
 import { useSessionStore } from '@/store/useSessionStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import {
   User,
   Mail,
@@ -27,6 +28,9 @@ import { Loader } from '@/components/ui/Loader';
 
 export default function RegisterForm() {
   const { status, fetchSession } = useSessionStore();
+  const allowTeacherRegistration = useSettingsStore(
+    (s) => s.settings.platformConfig.allowTeacherRegistration ?? true
+  );
   const router = useRouter();
   const { t } = useTranslation();
   // Use student theme as base brand identity for auth pages
@@ -51,6 +55,12 @@ export default function RegisterForm() {
     }
   }, [status, router]);
 
+  useEffect(() => {
+    if (!allowTeacherRegistration && formData.role === 'teacher') {
+      setFormData((prev) => ({ ...prev, role: 'student' }));
+    }
+  }, [allowTeacherRegistration, formData.role]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -62,6 +72,11 @@ export default function RegisterForm() {
 
     if (formData.password !== formData.confirmPassword) {
       setError(t('register.passwordsDoNotMatch'));
+      return;
+    }
+
+    if (formData.role === 'teacher' && !allowTeacherRegistration) {
+      setError(t('register.teacherRegistrationDisabled'));
       return;
     }
 
@@ -103,10 +118,14 @@ export default function RegisterForm() {
     }
   };
 
-  const roles = [
-    { id: 'student', label: t('common.student'), icon: BookOpen, theme: roleThemes.student, desc: t('register.iWantToLearn') },
-    { id: 'teacher', label: t('common.teacher'), icon: Users, theme: roleThemes.teacher, desc: t('register.iWantToTeach') },
-  ];
+  const roles = useMemo(
+    () =>
+      [
+        { id: 'student', label: t('common.student'), icon: BookOpen, theme: roleThemes.student, desc: t('register.iWantToLearn') },
+        { id: 'teacher', label: t('common.teacher'), icon: Users, theme: roleThemes.teacher, desc: t('register.iWantToTeach') },
+      ].filter((role) => role.id !== 'teacher' || allowTeacherRegistration),
+    [allowTeacherRegistration, t]
+  );
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-white">
@@ -257,7 +276,7 @@ export default function RegisterForm() {
                 <label className="block text-sm font-semibold text-[var(--color-foreground)] mb-2">
                   {t('register.iWantTo')}
                 </label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className={`grid gap-3 ${roles.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
                   {roles.map((role) => {
                     const Icon = role.icon;
                     const isSelected = formData.role === role.id;

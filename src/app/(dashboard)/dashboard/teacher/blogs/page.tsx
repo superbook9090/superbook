@@ -25,7 +25,10 @@ import { useSessionStore } from '@/store/useSessionStore';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import BlogFilters, { type BlogLanguageFilter, type BlogStatusFilter } from '@/features/blogs/components/BlogFilters';
 import { FilterPanel } from '@/components/filters/DashboardListFilters';
-import { useBlogs, useDeleteBlog, useUpdateBlog, type Blog } from '@/lib/react-query/hooks';
+import { useDeleteBlog, useUpdateBlog, usePaginatedBlogs, type Blog } from '@/lib/react-query/hooks';
+import BlogListPagination from '@/features/blogs/components/BlogListPagination';
+
+const PAGE_SIZE = 10;
 
 export default function TeacherBlogsPage() {
   const session = useSessionStore((s) => s.session) as { user?: { id: string } };
@@ -42,6 +45,7 @@ export default function TeacherBlogsPage() {
   }, [status, router]);
   const [searchInput, setSearchInput] = useState('');
   const searchTerm = useDebouncedValue(searchInput, 300);
+  const [page, setPage] = useState(1);
   const [filter, setFilter] = useState<BlogStatusFilter>('all');
   const [languageFilter, setLanguageFilter] = useState<BlogLanguageFilter>('all');
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -52,16 +56,29 @@ export default function TeacherBlogsPage() {
     setSearchInput('');
     setFilter('all');
     setLanguageFilter('all');
+    setPage(1);
   };
 
-  // Get orgId from session
   const orgId = (session?.user as { organizationId?: string })?.organizationId || 'public';
-  const { data: allBlogs = [], isLoading } = useBlogs(orgId, true);
+  const { data, isLoading, isFetching } = usePaginatedBlogs({
+    orgId,
+    page,
+    limit: PAGE_SIZE,
+    search: searchTerm || undefined,
+    status: filter,
+    language: languageFilter !== 'all' ? languageFilter : undefined,
+    includeDrafts: true,
+    includeStats: true,
+    author: 'self',
+  });
 
-  // Filter blogs by current user
-  const blogs = allBlogs.filter(
-    (blog: Blog) => blog.author?._id === session?.user?.id
-  );
+  const blogs = data?.blogs ?? [];
+  const pagination = data?.pagination;
+  const stats = data?.stats ?? { total: 0, published: 0, draft: 0 };
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm, filter, languageFilter]);
 
   const deleteBlog = useDeleteBlog();
   const updateBlog = useUpdateBlog();
@@ -93,17 +110,9 @@ export default function TeacherBlogsPage() {
     }
   };
 
-  const filteredBlogs = blogs.filter((blog: Blog) => {
-    const matchesSearch = blog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         blog.topic.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filter === 'all' ||
-                         (filter === 'published' && blog.isPublished) ||
-                         (filter === 'draft' && !blog.isPublished);
-    const matchesLanguage = languageFilter === 'all' || blog.language === languageFilter;
-    return matchesSearch && matchesFilter && matchesLanguage;
-  });
+  const filteredBlogs = blogs;
 
-  if (isLoading) {
+  if (isLoading && !data) {
     return <PageSkeleton />;
   }
 
@@ -147,7 +156,10 @@ export default function TeacherBlogsPage() {
             searchQuery={searchInput}
             onSearchChange={setSearchInput}
             statusFilter={filter}
-            onStatusChange={setFilter}
+            onStatusChange={(value) => {
+              setFilter(value);
+              setPage(1);
+            }}
             languageFilter={languageFilter}
             onLanguageChange={setLanguageFilter}
             onClear={clearFilters}
@@ -164,19 +176,15 @@ export default function TeacherBlogsPage() {
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
       >
         <div className="bg-[var(--card-solid)] rounded-xl p-4 shadow-sm">
-          <p className={`text-2xl font-bold ${theme.text}`}>{blogs.length}</p>
+          <p className={`text-2xl font-bold ${theme.text}`}>{stats.total}</p>
           <p className="text-sm text-[var(--color-muted-foreground)]">{t('blog.totalBlogs')}</p>
         </div>
         <div className="bg-[var(--card-solid)] rounded-xl p-4 shadow-sm">
-          <p className={`text-2xl font-bold ${theme.text}`}>
-            {blogs.filter((b: Blog) => b.isPublished).length}
-          </p>
+          <p className={`text-2xl font-bold ${theme.text}`}>{stats.published}</p>
           <p className="text-sm text-[var(--color-muted-foreground)]">{t('blog.published')}</p>
         </div>
         <div className="bg-[var(--card-solid)] rounded-xl p-4 shadow-sm">
-          <p className="text-2xl font-bold text-[var(--color-muted-foreground)]">
-            {blogs.filter((b: Blog) => !b.isPublished).length}
-          </p>
+          <p className="text-2xl font-bold text-[var(--color-muted-foreground)]">{stats.draft}</p>
           <p className="text-sm text-[var(--color-muted-foreground)]">{t('blog.draft')}</p>
         </div>
       </motion.div>
@@ -186,7 +194,7 @@ export default function TeacherBlogsPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="space-y-4"
+        className={`space-y-4 ${isFetching ? 'opacity-60 pointer-events-none' : ''}`}
       >
         {filteredBlogs.length === 0 ? (
           <div className="text-center py-16 px-4 bg-[var(--card-solid)] rounded-2xl shadow-sm">
@@ -270,6 +278,10 @@ export default function TeacherBlogsPage() {
           ))
         )}
       </motion.div>
+
+      {pagination && (
+        <BlogListPagination page={page} pagination={pagination} onPageChange={setPage} />
+      )}
 
       {/* Delete Confirmation Modal */}
       <ConfirmModal

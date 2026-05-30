@@ -15,6 +15,7 @@ export interface IAppSettings extends Document {
   platformConfig: {
     maintenanceMode: boolean;
     allowRegistration: boolean;
+    allowTeacherRegistration: boolean;
     defaultLanguage: 'en' | 'hi';
   };
 }
@@ -70,6 +71,10 @@ const appSettingsSchema = new Schema<IAppSettings>(
         default: false,
       },
       allowRegistration: {
+        type: Boolean,
+        default: true,
+      },
+      allowTeacherRegistration: {
         type: Boolean,
         default: true,
       },

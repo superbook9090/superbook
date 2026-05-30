@@ -148,6 +148,7 @@ export const updateSettingsSchema = z.object({
     siteDescription: z.string().max(500).optional(),
     maintenanceMode: z.boolean().optional(),
     allowRegistration: z.boolean().optional(),
+    allowTeacherRegistration: z.boolean().optional(),
     defaultLanguage: z.enum(['en', 'hi']).optional(),
   }).optional(),
 });

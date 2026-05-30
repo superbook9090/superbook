@@ -41,6 +41,7 @@ interface AppSettings {
   platformConfig: {
     maintenanceMode: boolean;
     allowRegistration: boolean;
+    allowTeacherRegistration: boolean;
     defaultLanguage: 'en' | 'hi';
   };
 }
@@ -66,6 +67,7 @@ export default function AdminSettingsPage() {
     platformConfig: {
       maintenanceMode: false,
       allowRegistration: true,
+      allowTeacherRegistration: true,
       defaultLanguage: 'en',
     },
   });
@@ -76,7 +78,16 @@ export default function AdminSettingsPage() {
   const fetchSettings = useCallback(async () => {
     try {
       const data = (await fetchAdminSettings()) as AppSettings;
-      setSettings(data);
+      setSettings({
+        ...data,
+        platformConfig: {
+          maintenanceMode: false,
+          allowRegistration: true,
+          allowTeacherRegistration: true,
+          defaultLanguage: 'en',
+          ...data.platformConfig,
+        },
+      });
     } catch {
       setMessage({ type: 'error', text: t('adminSettings.failedLoadSettings') });
     } finally {
@@ -411,6 +422,28 @@ export default function AdminSettingsPage() {
                 })
               }
               label={t('adminSettings.allowRegistration')}
+            />
+          </div>
+
+          {/* Allow Teacher Registration */}
+          <div className="flex items-center justify-between gap-4 p-4 bg-[var(--color-surface-muted)] rounded-xl">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <GraduationCap className={`w-5 h-5 shrink-0 ${theme.text}`} />
+              <div className="min-w-0">
+                <p className="font-medium text-[var(--color-foreground)]">{t('adminSettings.allowTeacherRegistration')}</p>
+                <p className="text-sm text-[var(--color-muted-foreground)]">{t('adminSettings.allowTeacherRegistrationDesc')}</p>
+              </div>
+            </div>
+            <ToggleSwitch
+              checked={settings.platformConfig.allowTeacherRegistration}
+              onChange={(allowTeacherRegistration) =>
+                setSettings({
+                  ...settings,
+                  platformConfig: { ...settings.platformConfig, allowTeacherRegistration },
+                })
+              }
+              label={t('adminSettings.allowTeacherRegistration')}
+              disabled={!settings.platformConfig.allowRegistration}
             />
           </div>
         </div>

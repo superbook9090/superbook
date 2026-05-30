@@ -177,6 +177,15 @@ export async function PATCH(req: NextRequest) {
           { status: 400 }
         );
       }
+      if (
+        platformConfig.allowTeacherRegistration !== undefined &&
+        typeof platformConfig.allowTeacherRegistration !== 'boolean'
+      ) {
+        return NextResponse.json(
+          { message: 'allowTeacherRegistration must be a boolean' },
+          { status: 400 }
+        );
+      }
       if (platformConfig.defaultLanguage && !['en', 'hi'].includes(platformConfig.defaultLanguage)) {
         return NextResponse.json(
           { message: 'defaultLanguage must be either en or hi' },

@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import "@/app/globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import { AppSettingsProvider } from '@/contexts/AppSettingsContext';
 import { SessionProvider } from '@/components/providers/SessionProvider';
+import MaintenanceCheck from '@/components/MaintenanceCheck';
 import DeferredAnalytics from '@/components/providers/DeferredAnalytics';
 import { createRootMetadata } from '@/lib/seo/metadata';
 
@@ -28,7 +30,11 @@ export default function RootLayout({
     <html lang="en">
       <body className="antialiased">
         <LanguageProvider>
-          <SessionProvider>{children}</SessionProvider>
+          <AppSettingsProvider>
+            <SessionProvider>
+              <MaintenanceCheck>{children}</MaintenanceCheck>
+            </SessionProvider>
+          </AppSettingsProvider>
         </LanguageProvider>
         <DeferredAnalytics />
       </body>

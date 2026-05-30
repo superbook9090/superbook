@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import type { DashboardData, TeacherDashboardData } from '@/app/api/dashboard/route';
-import { listBlogs, createBlog, deleteBlog, updateBlog, type CreateBlogInput } from '@/lib/api/blogs';
+import { listBlogsPaginated, createBlog, deleteBlog, updateBlog, type CreateBlogInput, type ListBlogsParams } from '@/lib/api/blogs';
 import { addFavorite, listFavorites, removeFavorite, type FavoritesListResult } from '@/lib/api/favorites';
 import { fetchDashboard } from '@/lib/api/dashboard';
 import { 
@@ -202,10 +202,50 @@ export function useBlogs(orgId?: string, includeDrafts = false) {
   return useQuery({
     queryKey: ['blogs', orgId || 'public', includeDrafts],
     queryFn: async () => {
-      const data = await listBlogs(orgId || 'public', includeDrafts);
+      const data = await listBlogsPaginated({
+        orgId: orgId || 'public',
+        includeDrafts,
+        limit: 200,
+        page: 1,
+      });
       return (data.blogs || []) as Blog[];
     },
     enabled: !!orgId || orgId === 'public',
+  });
+}
+
+export function usePaginatedBlogs(params: ListBlogsParams, enabled = true) {
+  return useQuery({
+    queryKey: ['blogs', 'paginated', params],
+    queryFn: async () => {
+      const data = await listBlogsPaginated(params);
+      return {
+        blogs: (data.blogs || []) as Blog[],
+        pagination: data.pagination ?? {
+          page: params.page ?? 1,
+          limit: params.limit ?? 10,
+          total: 0,
+          totalPages: 1,
+        },
+        stats: data.stats,
+      };
+    },
+    enabled,
+    placeholderData: (previousData, previousQuery) => {
+      if (!previousData || !previousQuery) return undefined;
+      const prev = previousQuery.queryKey[2] as ListBlogsParams;
+      const filtersChanged =
+        prev.search !== params.search ||
+        prev.status !== params.status ||
+        prev.topic !== params.topic ||
+        prev.language !== params.language ||
+        prev.limit !== params.limit ||
+        prev.includeDrafts !== params.includeDrafts ||
+        prev.author !== params.author ||
+        prev.orgId !== params.orgId;
+      if (filtersChanged) return undefined;
+      return previousData;
+    },
   });
 }
 

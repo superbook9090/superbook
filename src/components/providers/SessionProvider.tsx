@@ -11,13 +11,17 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const hasFetchedFavorites = useRef(false);
   const role = session?.user?.role;
 
+  // Fetch once on app load (cached) so maintenance mode can detect admin sessions.
+  useEffect(() => {
+    void fetchSession();
+  }, [fetchSession]);
+
+  // Refresh session periodically on dashboard routes only.
   useEffect(() => {
     if (!needsSession) return;
 
-    fetchSession();
-
     const sessionInterval = setInterval(() => {
-      fetchSession();
+      void fetchSession();
     }, 10 * 60 * 1000);
 
     return () => clearInterval(sessionInterval);
@@ -36,7 +40,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       !hasFetchedFavorites.current
     ) {
       hasFetchedFavorites.current = true;
-      fetchFavorites();
+      void fetchFavorites();
     }
   }, [needsSession, status, role, fetchFavorites]);
 

@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import User from '@/models/User';
 import Organization from '@/models/Organization';
-import { isRegistrationAllowed } from '@/lib/settingsHelpers';
+import { isRegistrationAllowed, isTeacherRegistrationAllowed } from '@/lib/settingsHelpers';
 import { findUserByEmail } from '@/lib/user/findByEmail';
 import { logApiError, type LogContext } from '@/lib/logger';
 
@@ -27,6 +27,16 @@ export async function POST(request: Request) {
 
     const { name, email: rawEmail, password, role = 'student', inviteCode } = await request.json();
     const email = typeof rawEmail === 'string' ? rawEmail.trim().toLowerCase() : '';
+
+    if (role === 'teacher') {
+      const teacherRegistrationAllowed = await isTeacherRegistrationAllowed();
+      if (!teacherRegistrationAllowed) {
+        return NextResponse.json(
+          { message: 'Teacher registration is currently disabled by admin' },
+          { status: 403 }
+        );
+      }
+    }
 
     // Check if user already exists
     const existingUser = await findUserByEmail(email);

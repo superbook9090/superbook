@@ -7,9 +7,10 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import { Course, Enrollment, Blog } from '@/models';
+import User, { type IUser } from '@/models/User';
 import Quiz from '@/models/Quiz';
 import QuizAttempt from '@/models/QuizAttempt';
-import AppSettings from '@/models/AppSettings';
+import { getSettingsWithDefaults } from '@/lib/dataService';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
 import { getCachedData, setCachedData } from '@/lib/redis';
@@ -190,6 +191,8 @@ async function getStudentDashboardData(userId: string): Promise<StudentDashboard
 }
 
 // Helper function to get teacher dashboard data
+type TeacherUserLimits = Pick<IUser, 'limits'> | null;
+
 async function getTeacherDashboardData(
   userId: string,
   role: 'teacher' | 'admin',
@@ -236,31 +239,37 @@ async function getTeacherDashboardData(
       .populate('author', 'name email')
       .sort({ createdAt: -1 })
       .lean(),
-    AppSettings.findOne().select('teacherLimits').lean(),
+    getSettingsWithDefaults(),
   ]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const courseIds: string[] = courses.map((c: any) => c._id?.toString()).filter(Boolean);
-  const quizzes = await Quiz.find(
-    { course: { $in: courseIds } },
-    {
-      title: 1,
-      description: 1,
-      timeLimit: 1,
-      isPublished: 1,
-      course: 1,
-      createdAt: 1,
-      questionCount: 1,
-      version: 1,
-    }
-  )
-    .populate('course', 'title description')
-    .sort({ createdAt: -1 })
-    .lean();
+  const [quizzes, teacherUser] = await Promise.all([
+    Quiz.find(
+      { course: { $in: courseIds } },
+      {
+        title: 1,
+        description: 1,
+        timeLimit: 1,
+        isPublished: 1,
+        course: 1,
+        createdAt: 1,
+        questionCount: 1,
+        version: 1,
+      }
+    )
+      .populate('course', 'title description')
+      .sort({ createdAt: -1 })
+      .lean(),
+    User.findById(userId).select('limits').lean<TeacherUserLimits>(),
+  ]);
 
-  const teacherLimits =
-    (settings as { teacherLimits?: { courses: number; quizzes: number; blogs: number } } | null)?.teacherLimits ||
-    { courses: 5, quizzes: 10, blogs: 10 };
+  const teacherLimits = settings.teacherLimits ?? { courses: 5, quizzes: 10, blogs: 10 };
+
+  const userLimits: NonNullable<TeacherDashboardData['limits']['userLimits']> = {};
+  if (teacherUser?.limits?.courses != null) userLimits.courses = teacherUser.limits.courses;
+  if (teacherUser?.limits?.quizzes != null) userLimits.quizzes = teacherUser.limits.quizzes;
+  if (teacherUser?.limits?.blogs != null) userLimits.blogs = teacherUser.limits.blogs;
 
   // Calculate stats
   const totalStudents = courses.reduce((sum, course) => {
@@ -286,11 +295,7 @@ async function getTeacherDashboardData(
     },
     limits: {
       ...teacherLimits,
-      userLimits: {
-        courses: undefined,
-        quizzes: undefined,
-        blogs: undefined,
-      },
+      userLimits,
     },
   };
 }
