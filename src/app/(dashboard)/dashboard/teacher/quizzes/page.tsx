@@ -14,6 +14,7 @@ import { invalidateAfterQuizChange, usePaginatedQuizzes, useTeacherCourses, type
 import { ApiClientError } from '@/lib/api/http';
 import Alert from '@/components/ui/Alert';
 import { PageSkeleton } from '@/components/ui/Skeleton';
+import { Loader } from '@/components/ui/Loader';
 import { FilterPanel } from '@/components/filters/DashboardListFilters';
 import QuizFilters from '@/features/quizzes/components/QuizFilters';
 import {
@@ -34,7 +35,7 @@ export default function TeacherQuizzesPage() {
   const [page, setPage] = useState(1);
   const limit = 10;
   
-  const { data: coursesData } = useTeacherCourses(orgId);
+  const { data: coursesData, isLoading: isCoursesLoading } = useTeacherCourses(orgId);
   const courses = useMemo(() => coursesData ?? [], [coursesData]);
 
   const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
@@ -46,18 +47,19 @@ export default function TeacherQuizzesPage() {
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const { data: paginatedData, isLoading, error: fetchError } = usePaginatedQuizzes({
+  const { data: paginatedData, isLoading: isQuizzesLoading, isFetching, error: fetchError } = usePaginatedQuizzes({
     page,
     limit,
     search: searchTerm,
     status: statusFilter,
     course: courseFilter,
     sort,
+    instructor: 'self',
   });
 
   const quizzes = useMemo(() => paginatedData?.quizzes ?? [], [paginatedData?.quizzes]);
   const pagination = paginatedData?.pagination;
-  const isInitialLoading = isLoading && !paginatedData;
+  const showListLoader = isQuizzesLoading && paginatedData === undefined;
   const totalQuizzes = pagination?.total ?? 0;
 
   // Reset page when debounced search changes
@@ -171,7 +173,7 @@ export default function TeacherQuizzesPage() {
     }
   }, [deleteTarget, quizzes, queryClient, getCourseId, orgId, t]);
 
-  if (status === 'loading' || isInitialLoading) {
+  if (status === 'loading' || isCoursesLoading) {
     return <PageSkeleton />;
   }
 
@@ -223,7 +225,11 @@ export default function TeacherQuizzesPage() {
       )}
 
       <div>
-        {courses.length === 0 ? (
+        {showListLoader ? (
+          <div className="bg-[var(--card-solid)] rounded-lg shadow py-16 flex justify-center">
+            <Loader size="lg" />
+          </div>
+        ) : courses.length === 0 ? (
           <div className="bg-[var(--card-solid)] overflow-hidden shadow rounded-lg">
             <div className="px-4 py-8 sm:p-6 text-center">
               <p className="text-[var(--color-muted-foreground)] mb-4">{t('teacherQuizzes.createCourseFirst')}</p>
@@ -266,7 +272,7 @@ export default function TeacherQuizzesPage() {
         ) : (
           <>
             {/* Mobile Cards View */}
-            <div className="md:hidden space-y-3">
+            <div className={`md:hidden space-y-3 ${isFetching ? 'opacity-60 pointer-events-none' : ''}`}>
               {quizzes.map((quiz) => {
                 const quizId = toIdString(quiz._id);
                 return (
@@ -323,7 +329,8 @@ export default function TeacherQuizzesPage() {
             </div>
 
             {/* Desktop Table View */}
-            <div className="hidden md:block bg-[var(--card-solid)] shadow overflow-hidden rounded-lg">
+            <div className={`hidden md:block bg-[var(--card-solid)] shadow overflow-hidden rounded-lg ${isFetching ? 'opacity-60' : ''}`}>
+              <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-[var(--border)]">
                 <thead className="bg-[var(--color-surface-muted)]">
                   <tr>
@@ -332,7 +339,7 @@ export default function TeacherQuizzesPage() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider">{t('teacherQuizzes.tableQuestions')}</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider">{t('teacherQuizzes.tableTime')}</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider">{t('teacherQuizzes.tableStatus')}</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider">{t('teacherQuizzes.tableActions')}</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-[var(--color-muted-foreground)] uppercase tracking-wider min-w-[220px]">{t('teacherQuizzes.tableActions')}</th>
                   </tr>
                 </thead>
                 <tbody className="bg-[var(--card-solid)] divide-y divide-[var(--border)]">
@@ -366,7 +373,7 @@ export default function TeacherQuizzesPage() {
                           {quiz.isPublished ? t('teacherQuizzes.published') : t('teacherQuizzes.draft')}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium min-w-[220px]">
                         <button
                           type="button"
                           onClick={() => router.push(ROUTES.teacher.quizEdit(quizId))}
@@ -394,6 +401,7 @@ export default function TeacherQuizzesPage() {
                   })}
                 </tbody>
               </table>
+              </div>
             </div>
 
             {/* Pagination Controls */}

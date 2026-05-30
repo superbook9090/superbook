@@ -44,6 +44,16 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ message: 'Quiz not available' }, { status: 403 });
     }
 
+    if (session.user?.role === 'teacher') {
+      const course = await Course.findOne({
+        _id: quiz.course,
+        instructor: session.user.id,
+      }).lean();
+      if (!course) {
+        return NextResponse.json({ message: 'Not authorized to view this quiz' }, { status: 403 });
+      }
+    }
+
     const { searchParams } = new URL(request.url);
     const include = searchParams.get('include')?.split(',').map((s) => s.trim()) ?? [];
 

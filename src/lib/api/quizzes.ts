@@ -54,6 +54,7 @@ export function listQuizzesPaginated(params: {
   course?: string;
   status?: string;
   sort?: string;
+  instructor?: string;
 }): Promise<QuizzesListPayload> {
   const searchParams = new URLSearchParams();
   if (params.page) searchParams.set('page', params.page.toString());
@@ -61,6 +62,7 @@ export function listQuizzesPaginated(params: {
   if (params.search) searchParams.set('search', params.search);
   if (params.course && params.course !== 'all') searchParams.set('course', params.course);
   if (params.status && params.status !== 'all') searchParams.set('status', params.status);
+  if (params.instructor) searchParams.set('instructor', params.instructor);
   const sort = mapQuizSortParam(params.sort);
   if (sort) searchParams.set('sort', sort);
 

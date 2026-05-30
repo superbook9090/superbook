@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+
+echo "pre-push: running production build..."
+npm run build || {
+  echo "pre-push: build failed. Fix errors before pushing."
+  exit 1
+}
+
+echo "pre-push: build passed."

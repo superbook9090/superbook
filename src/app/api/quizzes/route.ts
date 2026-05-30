@@ -81,10 +81,18 @@ export async function GET(request: NextRequest) {
       if (Object.keys(accessFilter).length > 0) {
         andFilters.push(accessFilter);
       }
+
+      // Teachers may only list their own quizzes
+      if (user.role === 'teacher') {
+        andFilters.push({ instructor: new mongoose.Types.ObjectId(user.id) });
+      } else if (instructor === 'self') {
+        andFilters.push({ instructor: new mongoose.Types.ObjectId(user.id) });
+      } else if (instructor) {
+        andFilters.push({ instructor });
+      }
     }
 
     if (course) andFilters.push({ course });
-    if (instructor) andFilters.push({ instructor });
     if (chapter === 'none' || chapter === 'null') {
       andFilters.push({ $or: [{ chapter: null }, { chapter: { $exists: false } }] });
     } else if (chapter) {

@@ -20,7 +20,7 @@ import {
   reorderCurriculum,
   getLesson
 } from '@/lib/api/courses';
-import { listQuizzesByOrg, listQuizzesAll, listQuizzesByCourse, listQuizzesPaginated, deleteQuiz } from '@/lib/api/quizzes';
+import { listQuizzesByOrg, listQuizzesByCourse, listQuizzesPaginated, deleteQuiz } from '@/lib/api/quizzes';
 import { toIdString } from '@/lib/id';
 import { listTeacherCoursesSelf } from '@/lib/api/courses';
 import { listEnrollments, enrollInCourse, joinCourseByCode, dropEnrollment } from '@/lib/api/enrollments';
@@ -232,7 +232,7 @@ export function useTeacherQuizzesList(enabled = true) {
         return { courses, quizzes: [] as Quiz[] };
       }
       const courseIds = new Set(courses.map((c) => c._id));
-      const data = await listQuizzesAll();
+      const data = await listQuizzesPaginated({ limit: 200, instructor: 'self' });
       const all = (data.quizzes || []) as Quiz[];
       const quizzes = all.filter((q) => {
         const id =
@@ -277,6 +277,7 @@ export function usePaginatedQuizzes(params: {
   course?: string;
   status?: string;
   sort?: string;
+  instructor?: string;
 }) {
   return useQuery({
     queryKey: ['quizzes', 'paginated', params],
@@ -296,7 +297,8 @@ export function usePaginatedQuizzes(params: {
         prev.status !== params.status ||
         prev.course !== params.course ||
         prev.sort !== params.sort ||
-        prev.limit !== params.limit;
+        prev.limit !== params.limit ||
+        prev.instructor !== params.instructor;
       if (filtersChanged) return undefined;
       return previousData;
     },
