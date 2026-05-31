@@ -40,8 +40,18 @@ function LoginFormInner() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Load remembered email
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('quizdo_remembered_email');
+    if (savedEmail) {
+      setEmail(savedEmail);
+      setRememberMe(true);
+    }
+  }, []);
 
   // Client-side guard for UX improvement
   useEffect(() => {
@@ -66,6 +76,12 @@ function LoginFormInner() {
         setError(t('login.invalidCredentials'));
         setIsLoading(false);
         return;
+      }
+
+      if (rememberMe) {
+        localStorage.setItem('quizdo_remembered_email', email);
+      } else {
+        localStorage.removeItem('quizdo_remembered_email');
       }
 
       // Also update Zustand store
@@ -340,6 +356,8 @@ function LoginFormInner() {
                 <label className="flex items-center cursor-pointer">
                   <input
                     type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
                     className={`w-4 h-4 rounded border-[var(--color-border)] ${theme.text} focus:${theme.shadow}`}
                   />
                   <span className="ml-2 text-sm text-[var(--color-muted-foreground)]">{t('login.rememberMe')}</span>
