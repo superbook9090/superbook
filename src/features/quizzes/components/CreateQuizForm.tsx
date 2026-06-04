@@ -83,6 +83,11 @@ export default function CreateQuizForm({ quizId }: Props) {
   const [uploadError, setUploadError] = useState('');
   const [isParsing, setIsParsing] = useState(false);
 
+  // Text import states
+  const [showTextImport, setShowTextImport] = useState(false);
+  const [importText, setImportText] = useState('');
+  const [showTextImportHelp, setShowTextImportHelp] = useState(false);
+
   // Fetch teacher's courses (and quiz when editing)
   useEffect(() => {
     let cancelled = false;
@@ -460,6 +465,124 @@ export default function CreateQuizForm({ quizId }: Props) {
     }
   }, [t]);
 
+  const handleTextImport = useCallback(() => {
+    if (!importText.trim()) return;
+    setIsParsing(true);
+    setUploadError('');
+    setPreviewData([]);
+
+    try {
+      const lines = importText.split('\n').map(line => line.trim()).filter(line => line);
+      if (lines.length === 0) {
+        setUploadError(t('createQuizForm.fileEmpty'));
+        setIsParsing(false);
+        return;
+      }
+
+      const firstLineCols = lines[0].split('|').map(h => h.trim().toLowerCase());
+      const requiredColumns = ['question', 'optiona', 'optionb', 'optionc', 'optiond', 'correctanswer'];
+      const isHeader = requiredColumns.every((col) =>
+        firstLineCols.some((h) => h === col || h === col.replace('option', 'option_'))
+      );
+
+      let startIndex = 0;
+      let colMap = {
+        question: 0,
+        optionA: 1,
+        optionB: 2,
+        optionC: 3,
+        optionD: 4,
+        correctAnswer: 5,
+      };
+
+      if (isHeader) {
+        startIndex = 1;
+        const getColIndex = (names: string[]) => {
+          for (const name of names) {
+            const idx = firstLineCols.findIndex((h) => h === name.toLowerCase());
+            if (idx !== -1) return idx;
+          }
+          return -1;
+        };
+
+        colMap = {
+          question: getColIndex(['question']),
+          optionA: getColIndex(['optiona', 'option_a']),
+          optionB: getColIndex(['optionb', 'option_b']),
+          optionC: getColIndex(['optionc', 'option_c']),
+          optionD: getColIndex(['optiond', 'option_d']),
+          correctAnswer: getColIndex(['correctanswer', 'correct_answer']),
+        };
+      }
+
+      const parsed: ExcelRow[] = [];
+      const errors: string[] = [];
+
+      for (let i = startIndex; i < lines.length; i++) {
+        const row = lines[i].split('|').map(cell => cell.trim());
+        if (row.every((cell) => !cell)) continue; // Skip empty rows
+
+        const question = row[colMap.question];
+        const optionA = row[colMap.optionA];
+        const optionB = row[colMap.optionB];
+        const optionC = row[colMap.optionC];
+        const optionD = row[colMap.optionD];
+        const correctAnswer = row[colMap.correctAnswer];
+
+        if (!question) {
+          errors.push(t('createQuizForm.questionRequired').replace('{number}', (i + 1).toString()));
+          continue;
+        }
+        if (!optionA || !optionB || !optionC || !optionD) {
+          errors.push(t('createQuizForm.optionsRequired').replace('{number}', (i + 1).toString()));
+          continue;
+        }
+        if (correctAnswer === undefined || correctAnswer === null || correctAnswer === '') {
+          errors.push(t('createQuizForm.correctAnswerRequired'));
+          continue;
+        }
+
+        let correctIndex: number;
+        const ca = correctAnswer.toString().toUpperCase();
+        if (['A', 'B', 'C', 'D'].includes(ca)) {
+          correctIndex = ca.charCodeAt(0) - 65;
+        } else {
+          correctIndex = parseInt(ca) - 1;
+        }
+
+        if (isNaN(correctIndex) || correctIndex < 0 || correctIndex > 3) {
+          errors.push(t('createQuizForm.correctAnswerInvalid'));
+          continue;
+        }
+
+        parsed.push({
+          question,
+          optionA,
+          optionB,
+          optionC,
+          optionD,
+          correctAnswer: correctIndex,
+        });
+      }
+
+      if (errors.length > 0) {
+        setUploadError(`${t('createQuizForm.validationErrors')}\n${errors.slice(0, 5).join('\n')}${errors.length > 5 ? `\n${t('createQuizForm.andMoreErrors').replace('{count}', (errors.length - 5).toString())}` : ''}`);
+      }
+
+      if (parsed.length === 0) {
+        setUploadError((prev) => prev || t('createQuizForm.noValidQuestions'));
+      } else {
+        setPreviewData(parsed);
+        setShowTextImport(false);
+        setImportText('');
+      }
+    } catch {
+      setUploadError(t('createQuizForm.parsingError'));
+    } finally {
+      setIsParsing(false);
+    }
+  }, [importText, t]);
+
   const handleConfirmImport = useCallback(() => {
     const importedQuestions: Question[] = previewData.map((row) => ({
       question: row.question,
@@ -759,15 +882,82 @@ export default function CreateQuizForm({ quizId }: Props) {
           </button>
           <button
             type="button"
-            onClick={() => setShowImportHelp((open) => !open)}
+            onClick={() => {
+              setShowImportHelp((open) => !open);
+              setShowTextImport(false);
+            }}
             aria-expanded={showImportHelp}
             className="inline-flex flex-1 sm:flex-none items-center justify-center min-h-[44px] px-5 py-2.5 text-sm font-semibold rounded-lg border-2 border-[var(--color-border)] text-[var(--color-foreground)] bg-[var(--color-surface-muted)] hover:bg-[var(--color-accent)] transition-colors"
           >
             {t('createQuizForm.howToUseImport')}
           </button>
+          <button
+            type="button"
+            onClick={() => {
+              setShowTextImport((open) => !open);
+              setShowImportHelp(false);
+            }}
+            aria-expanded={showTextImport}
+            className="inline-flex flex-1 sm:flex-none sm:ml-auto items-center justify-center min-h-[44px] px-5 py-2.5 text-sm font-semibold rounded-lg border-2 border-[var(--color-primary)] text-[var(--color-primary)] bg-[var(--color-card)] hover:bg-[var(--color-accent)] transition-colors"
+          >
+            {t('createQuizForm.pasteText')}
+          </button>
         </div>
 
         <h3 className="text-lg font-medium text-[var(--color-foreground)] mb-4">{t('createQuizForm.questions')}</h3>
+
+        {showTextImport && (
+          <div className="mb-6 rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] overflow-hidden">
+            <div className="flex items-start justify-between gap-3 px-4 py-3 border-b border-[var(--color-border)] bg-[var(--color-accent)]">
+              <h4 className="font-medium text-[var(--color-foreground)]">{t('createQuizForm.pasteText')}</h4>
+              <div className="flex shrink-0 gap-2 items-center">
+                <button
+                  type="button"
+                  onClick={() => setShowTextImportHelp((open) => !open)}
+                  className="text-sm font-medium text-[var(--color-primary)] hover:opacity-80 px-2 py-1"
+                >
+                  {t('createQuizForm.howToUseTextImport')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowTextImport(false)}
+                  className="text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] text-lg leading-none px-1"
+                  aria-label={t('createQuizForm.closeHelp')}
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+            {showTextImportHelp && (
+              <div className="p-4 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)]">
+                <p className="text-sm text-[var(--color-muted-foreground)] whitespace-pre-wrap">
+                  {t('createQuizForm.textImportInstructions')}
+                </p>
+                <p className="text-sm text-[var(--color-muted-foreground)] mt-2">
+                  {t('createQuizForm.importHelpCorrectAnswer')}
+                </p>
+              </div>
+            )}
+            <div className="p-4">
+              <textarea
+                value={importText}
+                onChange={(e) => setImportText(e.target.value)}
+                placeholder={t('createQuizForm.pasteTextPlaceholder')}
+                className="w-full h-40 p-3 text-sm rounded-md border-[var(--color-border)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] bg-[var(--color-surface)] text-[var(--color-foreground)] font-mono resize-y"
+              />
+              <div className="mt-3 flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleTextImport}
+                  disabled={isParsing || !importText.trim()}
+                  className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-[var(--color-primary)] hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {isParsing ? t('createQuizForm.parsingFile') : t('createQuizForm.parseText')}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {showImportHelp && (
           <div className="mb-6 rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] overflow-hidden">
