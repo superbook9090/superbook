@@ -696,6 +696,29 @@ export default function CreateQuizForm({ quizId }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="flex justify-end space-x-3 pb-4 border-b border-[var(--color-border)]">
+        <button
+          type="button"
+          onClick={() => router.push(ROUTES.teacher.quizzes)}
+          className="px-4 py-2 border border-[var(--color-border)] rounded-md shadow-sm text-sm font-medium text-[var(--color-foreground)] bg-[var(--color-card)] hover:bg-[var(--color-accent)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)]"
+        >
+          {t('createQuizForm.cancel')}
+        </button>
+        <button
+          type="submit"
+          disabled={isLoading || (!quizId && courses.length === 0)}
+          className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed`}
+        >
+          {isLoading
+            ? quizId
+              ? t('createQuizForm.saving')
+              : t('createQuizForm.creating')
+            : quizId
+              ? t('createQuizForm.saveChanges')
+              : t('createQuizForm.createQuiz')}
+        </button>
+      </div>
+
       {error && (
         <div className="bg-[var(--color-error-light)] border-l-4 border-[var(--color-error)] p-4">
           <p className="text-sm text-[var(--color-error)]">{error}</p>
@@ -1059,80 +1082,82 @@ export default function CreateQuizForm({ quizId }: Props) {
           </div>
         )}
 
-        {questions.map((question, qIndex) => (
-          <div key={qIndex} className="bg-[var(--color-accent)] rounded-lg p-4 mb-4">
-            <div className="flex justify-between items-center mb-3">
-              <h4 className="font-medium text-[var(--color-foreground)]">{t('createQuizForm.question')} {qIndex + 1}</h4>
-              {questions.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeQuestion(qIndex)}
-                  className="text-red-600 hover:text-red-800 text-sm"
-                >
-                  {t('createQuizForm.remove')}
-                </button>
-              )}
+        <div className="max-h-[600px] overflow-y-auto pr-2 space-y-4">
+          {questions.map((question, qIndex) => (
+            <div key={qIndex} className="bg-[var(--color-accent)] rounded-lg p-4">
+              <div className="flex justify-between items-center mb-3">
+                <h4 className="font-medium text-[var(--color-foreground)]">{t('createQuizForm.question')} {qIndex + 1}</h4>
+                {questions.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeQuestion(qIndex)}
+                    className="text-red-600 hover:text-red-800 text-sm"
+                  >
+                    {t('createQuizForm.remove')}
+                  </button>
+                )}
+              </div>
+
+              <div className="mb-3">
+                <input
+                  type="text"
+                  value={question.question}
+                  onChange={(e) => handleQuestionChange(qIndex, 'question', e.target.value)}
+                  className="px-3 py-2 block w-full rounded-md border-[var(--color-border)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] sm:text-sm text-[var(--color-foreground)]"
+                  placeholder={t('createQuizForm.enterQuestion')}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                {question.options.map((option, oIndex) => (
+                  <div key={oIndex} className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      name={`correct-${qIndex}`}
+                      checked={question.correctAnswer === oIndex}
+                      onChange={() => handleQuestionChange(qIndex, 'correctAnswer', oIndex.toString())}
+                      className="h-4 w-4 text-[var(--color-primary)] focus:ring-[var(--color-primary)] border-[var(--color-border)]"
+                    />
+                    <input
+                      type="text"
+                      value={option}
+                      onChange={(e) => handleQuestionChange(qIndex, `option${oIndex}`, e.target.value)}
+                      className="flex-1 px-3 py-2 rounded-md border-[var(--color-border)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] sm:text-sm text-[var(--color-foreground)]"
+                      placeholder={`${t('createQuizForm.option')} ${oIndex + 1}`}
+                      required
+                    />
+                    {question.options.length > 2 && (
+                      <button
+                        type="button"
+                        onClick={() => removeOption(qIndex, oIndex)}
+                        className="text-red-600 hover:text-red-800 text-sm"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => addOption(qIndex)}
+                className="mt-3 text-sm text-[var(--color-primary)] hover:opacity-80"
+              >
+                {t('createQuizForm.addOption')}
+              </button>
             </div>
+          ))}
 
-            <div className="mb-3">
-              <input
-                type="text"
-                value={question.question}
-                onChange={(e) => handleQuestionChange(qIndex, 'question', e.target.value)}
-                className="px-3 py-2 block w-full rounded-md border-[var(--color-border)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] sm:text-sm text-[var(--color-foreground)]"
-                placeholder={t('createQuizForm.enterQuestion')}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              {question.options.map((option, oIndex) => (
-                <div key={oIndex} className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name={`correct-${qIndex}`}
-                    checked={question.correctAnswer === oIndex}
-                    onChange={() => handleQuestionChange(qIndex, 'correctAnswer', oIndex.toString())}
-                    className="h-4 w-4 text-[var(--color-primary)] focus:ring-[var(--color-primary)] border-[var(--color-border)]"
-                  />
-                  <input
-                    type="text"
-                    value={option}
-                    onChange={(e) => handleQuestionChange(qIndex, `option${oIndex}`, e.target.value)}
-                    className="flex-1 px-3 py-2 rounded-md border-[var(--color-border)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] sm:text-sm text-[var(--color-foreground)]"
-                    placeholder={`${t('createQuizForm.option')} ${oIndex + 1}`}
-                    required
-                  />
-                  {question.options.length > 2 && (
-                    <button
-                      type="button"
-                      onClick={() => removeOption(qIndex, oIndex)}
-                      className="text-red-600 hover:text-red-800 text-sm"
-                    >
-                      ×
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <button
-              type="button"
-              onClick={() => addOption(qIndex)}
-              className="mt-3 text-sm text-[var(--color-primary)] hover:opacity-80"
-            >
-              {t('createQuizForm.addOption')}
-            </button>
-          </div>
-        ))}
-
-        <button
-          type="button"
-          onClick={addQuestion}
-          className="w-full py-2 border-2 border-dashed border-[var(--color-border)] rounded-md text-[var(--color-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors"
-        >
-          {t('createQuizForm.addQuestion')}
-        </button>
+          <button
+            type="button"
+            onClick={addQuestion}
+            className="w-full py-2 border-2 border-dashed border-[var(--color-border)] rounded-md text-[var(--color-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors"
+          >
+            {t('createQuizForm.addQuestion')}
+          </button>
+        </div>
       </div>
 
       <div className="flex items-center pt-4">
@@ -1149,28 +1174,7 @@ export default function CreateQuizForm({ quizId }: Props) {
         </label>
       </div>
 
-      <div className="flex justify-end space-x-3 pt-4 border-t border-[var(--color-border)]">
-        <button
-          type="button"
-          onClick={() => router.push(ROUTES.teacher.quizzes)}
-          className="px-4 py-2 border border-[var(--color-border)] rounded-md shadow-sm text-sm font-medium text-[var(--color-foreground)] bg-[var(--color-card)] hover:bg-[var(--color-accent)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)]"
-        >
-          {t('createQuizForm.cancel')}
-        </button>
-        <button
-          type="submit"
-          disabled={isLoading || (!quizId && courses.length === 0)}
-          className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed`}
-        >
-          {isLoading
-            ? quizId
-              ? t('createQuizForm.saving')
-              : t('createQuizForm.creating')
-            : quizId
-              ? t('createQuizForm.saveChanges')
-              : t('createQuizForm.createQuiz')}
-        </button>
-      </div>
+
     </form>
   );
 }
