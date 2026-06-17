@@ -1,10 +1,20 @@
 /** Site-wide SEO configuration and education-domain keywords. */
 
 export const SITE_NAME = 'Quiz-Do';
-export const SITE_NAME_FULL = 'Quiz-Do — Learning Management System';
+export const SITE_NAME_FULL = 'Quiz-Do — Free Online Quizzes & Learning Management System';
 
 /** Primary education / EdTech keywords for meta tags and structured data. */
 export const EDUCATION_KEYWORDS = [
+  'free online quizzes',
+  'take quizzes online',
+  'quiz builder',
+  'interactive quizzes',
+  'practice quizzes',
+  'online assessments',
+  'mock tests',
+  'exam preparation',
+  'quiz platform',
+  'online tests',
   'learning management system',
   'LMS platform',
   'online learning',
@@ -15,8 +25,6 @@ export const EDUCATION_KEYWORDS = [
   'educational technology',
   'online courses',
   'course management',
-  'quiz platform',
-  'online assessments',
   'student progress tracking',
   'teacher tools',
   'curriculum management',
@@ -30,10 +38,10 @@ export const EDUCATION_KEYWORDS = [
 ] as const;
 
 export const DEFAULT_DESCRIPTION =
-  'Quiz-Do is a modern learning management system (LMS) for students, teachers, and schools. Create online courses, deliver quizzes, track learner progress, and manage education in one platform.';
+  'Quiz-Do is a free online quiz platform and learning management system (LMS). Create and take interactive quizzes, build online courses, track student progress, and practice tests in Hindi & English.';
 
 export const DEFAULT_TITLE =
-  'Quiz-Do | Online LMS for Courses, Quizzes & Student Progress';
+  'Quiz-Do | Free Online Quizzes, Courses & Student Progress';
 
 /** Resolve canonical site URL for metadata, sitemap, and JSON-LD. */
 export function getSiteUrl(): string {

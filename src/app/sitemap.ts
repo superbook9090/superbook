@@ -5,6 +5,7 @@ import { getSiteUrl } from '@/lib/seo/config';
 /** Public marketing pages included in search indexing. */
 const PUBLIC_PATHS: { path: string; changeFrequency: MetadataRoute.Sitemap[number]['changeFrequency']; priority: number }[] = [
   { path: ROUTES.home, changeFrequency: 'weekly', priority: 1 },
+  { path: ROUTES.howItWorks, changeFrequency: 'monthly', priority: 0.8 },
   { path: ROUTES.login, changeFrequency: 'monthly', priority: 0.6 },
   { path: ROUTES.register, changeFrequency: 'monthly', priority: 0.8 },
   { path: ROUTES.contact, changeFrequency: 'monthly', priority: 0.7 },

@@ -2,9 +2,9 @@
 
 export const en = {
   metadata: {
-    siteTitle: 'Quiz-Do | Online LMS for Courses, Quizzes & Learning Progress',
+    siteTitle: 'Quiz-Do | Free Online Quizzes, Courses & Learning Progress',
     siteDescription:
-      'Quiz-Do is a learning management system (LMS) for online courses, quizzes, student progress tracking, and teacher-led education.',
+      'Quiz-Do is a free online quiz platform and learning management system (LMS) for interactive quizzes, structured courses, and progress tracking.',
   },
 
   // Common
@@ -113,18 +113,18 @@ export const en = {
 
   // Home / Landing Page
   home: {
-    title: 'Your courses, quizzes, and progress — in one place',
-    subtitle: 'Quiz-Do is a learning management system for schools, coaches, and self-paced learners',
+    title: 'Free Online Quizzes, Courses & Progress Tracking — in one place',
+    subtitle: 'Quiz-Do is a modern learning platform and quiz creator for schools, teachers, coaching, and self-paced learners',
     description:
-      'Browse and enroll in courses, follow structured lessons with videos and notes, take timed quizzes at course or lesson level, and see how you improve over time. Teachers publish content; students learn with clarity.',
-    badge: 'Courses · Quizzes · Progress tracking',
+      'Browse interactive courses, study with video lessons, take timed online quizzes, and track your progress with analytics. Create free quizzes, practice mock tests, and learn in English & Hindi.',
+    badge: 'Interactive Quizzes · Structured Courses · Learning Analytics',
     login: 'Login',
     register: 'Create free account',
     highlights: {
       courses: 'Structured courses',
       coursesHint: 'Chapters, lessons & files',
-      quizzes: 'Flexible quizzes',
-      quizzesHint: 'Timed attempts & review',
+      quizzes: 'Online Quizzes & Exams',
+      quizzesHint: 'Timed practice & mock tests',
       languages: 'English & Hindi',
       languagesHint: 'Switch anytime',
     },

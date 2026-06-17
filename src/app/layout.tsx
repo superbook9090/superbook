@@ -6,6 +6,7 @@ import { SessionProvider } from '@/components/providers/SessionProvider';
 import MaintenanceCheck from '@/components/MaintenanceCheck';
 import DeferredAnalytics from '@/components/providers/DeferredAnalytics';
 import { createRootMetadata } from '@/lib/seo/metadata';
+import PullToRefresh from '@/components/PullToRefresh';
 
 export const metadata: Metadata = {
   ...createRootMetadata(),
@@ -32,7 +33,11 @@ export default function RootLayout({
         <LanguageProvider>
           <AppSettingsProvider>
             <SessionProvider>
-              <MaintenanceCheck>{children}</MaintenanceCheck>
+              <MaintenanceCheck>
+                <PullToRefresh>
+                  {children}
+                </PullToRefresh>
+              </MaintenanceCheck>
             </SessionProvider>
           </AppSettingsProvider>
         </LanguageProvider>

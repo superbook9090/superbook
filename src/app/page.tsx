@@ -8,16 +8,20 @@ import { createPageMetadata } from '@/lib/seo/metadata';
 export const dynamic = 'force-static';
 
 export const metadata: Metadata = createPageMetadata({
-  title: 'Online LMS for Courses, Quizzes & Learning Progress',
+  title: 'Quiz-Do | Free Online Quizzes, Courses & Student Progress',
   description:
-    'Learn smarter with Quiz-Do — an education platform and learning management system (LMS) for online courses, interactive quizzes, student progress tracking, and teacher-led classrooms. Free to start.',
+    'Take free online quizzes, enroll in structured courses, and track your progress with Quiz-Do. The complete educational platform for interactive tests, mock exams, and online learning.',
   path: '/',
   keywords: [
-    'learn online',
+    'free online quizzes',
+    'online quiz platform',
     'take quizzes online',
+    'practice tests',
+    'course builder',
     'student dashboard',
-    'create online courses',
-    'education app India',
+    'online education app India',
+    'quiz creator',
+    'LMS with quizzes',
   ],
 });
 

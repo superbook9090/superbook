@@ -32,6 +32,10 @@ export default function JsonLd({ includeWebSite = false }: JsonLdProps) {
       'Online Quizzes',
       'Student Assessment',
       'Course Management',
+      'Mock Tests',
+      'Timed practice tests',
+      'Interactive quiz builder',
+      'Exam preparation'
     ],
   };
 
@@ -51,9 +55,10 @@ export default function JsonLd({ includeWebSite = false }: JsonLdProps) {
     },
     featureList: [
       'Online course management',
-      'Quiz and assessment tools',
+      'Quiz and assessment tools with custom timers',
+      'Mock tests and timed practice exams',
       'Student progress analytics',
-      'Teacher content authoring',
+      'Teacher content authoring & quiz creator',
       'Multi-language support (English and Hindi)',
     ],
   };
