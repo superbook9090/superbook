@@ -424,6 +424,15 @@ Teachers can optionally restrict a course with a unique **course code**. Courses
 
 **i18n:** `courses.joinWithCode`, `courses.invalidCourseCode`, `createCourseForm.privateAccess`, etc. (en + hi)
 
+### Pull-to-Refresh Enhancements
+
+- **Confirm Modal**: Added a `ConfirmModal` (warning type) that intercepts the pull-to-refresh action, preventing accidental page reloads.
+- **Form Protection**: Disabled pull-to-refresh entirely on routes involving content creation or modification (e.g., `/create`, `/edit`) and quiz attempts (`/take`) to prevent data loss.
+
+### Full-Screen Quiz Experience
+
+- **Distraction-Free Mode**: Automatically hides the top mobile navigation (`MobileNav`) and bottom navigation menu (`MobileBottomNav`) when a user is actively taking a quiz (`/take`), providing a distraction-free, full-screen environment on mobile devices.
+
 ### Layout, routing & notifications (2025)
 
 - **Mobile-first spacing system**: CSS tokens in `globals.css`, layout components in `src/components/layout/`, reference in `src/constants/spacing.ts`

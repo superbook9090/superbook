@@ -1,6 +1,7 @@
 'use client';
 
 import type { Session } from 'next-auth';
+import { usePathname } from 'next/navigation';
 import { RoleThemeProvider } from '@/contexts/RoleThemeContext';
 import { QuizProvider } from '@/contexts/QuizContext';
 import { DashboardContent } from '@/components/layout';
@@ -32,16 +33,22 @@ export default function DashboardChrome({
   children,
 }: DashboardChromeProps) {
   const role = session.user?.role;
+  const pathname = usePathname();
+  
+  // Hide mobile navs when taking a quiz
+  const isTakingQuiz = pathname?.includes('/take') || false;
 
   return (
     <QuizProvider>
       <div className="dashboard-shell" data-role={(role || 'student').toLowerCase()}>
-        <LazyMobileNav
-          user={session.user}
-          navigation={mainNav}
-          adminNavigation={isAdminUser ? ADMIN_NAV : []}
-          isSuperAdmin={isSuperAdminUser}
-        />
+        {!isTakingQuiz && (
+          <LazyMobileNav
+            user={session.user}
+            navigation={mainNav}
+            adminNavigation={isAdminUser ? ADMIN_NAV : []}
+            isSuperAdmin={isSuperAdminUser}
+          />
+        )}
 
         <aside className="hidden md:block flex-shrink-0" aria-label="Sidebar">
           {isStaff ? (
@@ -64,7 +71,7 @@ export default function DashboardChrome({
             </DashboardContent>
           </RoleThemeProvider>
 
-          <LazyMobileBottomNav items={mainNav} />
+          {!isTakingQuiz && <LazyMobileBottomNav items={mainNav} />}
         </div>
       </div>
     </QuizProvider>
