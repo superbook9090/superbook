@@ -4,6 +4,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { Loader2 } from "lucide-react";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import { useTranslation } from "@/hooks/useTranslation";
+import { usePathname } from "next/navigation";
 
 interface PullToRefreshProps {
   children: React.ReactNode;
@@ -16,11 +17,14 @@ export default function PullToRefresh({ children }: PullToRefreshProps) {
   const startY = useRef<number>(0);
   const currentY = useRef<number>(0);
   const { t } = useTranslation();
+  const pathname = usePathname();
 
   const PULL_THRESHOLD = 80;
 
   useEffect(() => {
-    if (showConfirm) return;
+    const isRefreshDisabled = pathname ? ['/create', '/edit', '/take'].some(route => pathname.includes(route)) : false;
+    
+    if (showConfirm || isRefreshDisabled) return;
 
     const handleTouchStart = (e: TouchEvent) => {
       // Only trigger if we are exactly at the top of the page
