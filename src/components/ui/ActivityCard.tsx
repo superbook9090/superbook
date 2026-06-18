@@ -61,7 +61,7 @@ export default function ActivityCard({
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay }}
       onClick={onClick}
-      className={`px-4 py-3 sm:px-6 sm:py-4 flex items-center space-x-3 sm:space-x-4 hover:bg-[var(--background)]/50 transition-colors cursor-pointer ${onClick ? 'cursor-pointer' : ''}`}
+      className={`px-3 py-2 sm:px-6 sm:py-4 flex items-center space-x-3 sm:space-x-4 hover:bg-[var(--background)]/50 transition-colors cursor-pointer ${onClick ? 'cursor-pointer' : ''}`}
     >
       {/* Icon */}
       <div className={`flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center ${config.bg} ${config.text}`}>

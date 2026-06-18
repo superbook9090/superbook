@@ -165,7 +165,7 @@ function QuizCard({
         </div>
       </div>
 
-      <div className={cn('flex flex-col p-4 sm:p-6', !isCompact && 'flex-1')}>
+      <div className={cn('flex flex-col p-3 sm:p-6', !isCompact && 'flex-1')}>
         <h3
           className={cn(
             'mb-2 line-clamp-2 text-base font-bold text-[var(--color-foreground)] transition-colors sm:text-lg',

@@ -79,7 +79,7 @@ export default function QuickActionCard({
 }: QuickActionCardProps) {
   const config = colorConfig[color];
 
-  const cardClassName = `flex items-center justify-center sm:justify-start w-full min-h-[44px] p-3 sm:p-4 rounded-xl transition-colors group ${
+  const cardClassName = `flex items-center justify-center sm:justify-start w-full min-h-[44px] p-2 sm:p-4 rounded-xl transition-colors group ${
     disabled
       ? 'bg-[var(--color-surface-muted)] cursor-not-allowed'
       : `${config.bg} ${config.hoverBg}`

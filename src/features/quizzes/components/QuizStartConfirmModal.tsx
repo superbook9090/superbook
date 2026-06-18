@@ -81,18 +81,17 @@ export function QuizStartConfirmModal({
             initial={{ opacity: 0, scale: 0.95, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 12 }}
-            className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 pointer-events-none"
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 pointer-events-none"
             role="dialog"
             aria-modal="true"
           >
             <div
-              className="pointer-events-auto w-full sm:max-w-md bg-[var(--card-solid)] rounded-t-3xl sm:rounded-3xl shadow-2xl border border-[var(--color-border)] p-6 sm:p-8 max-h-[90vh] overflow-y-auto"
+              className="pointer-events-auto w-full max-w-[320px] sm:max-w-md bg-[var(--card-solid)] rounded-3xl shadow-2xl border border-[var(--color-border)] p-5 sm:p-8 max-h-[90vh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-[var(--color-border)] sm:hidden" />
 
-              <div className="flex items-center justify-center w-14 h-14 mx-auto mb-4 rounded-full bg-[var(--info-light)]">
-                <Info className="w-7 h-7 text-[var(--info)]" />
+              <div className="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-4 rounded-full bg-[var(--info-light)]">
+                <Info className="w-6 h-6 sm:w-7 sm:h-7 text-[var(--info)]" />
               </div>
 
               <h2 className="text-xl sm:text-2xl font-bold text-[var(--color-foreground)] text-center mb-2">

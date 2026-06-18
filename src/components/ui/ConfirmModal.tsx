@@ -185,11 +185,11 @@ export default function ConfirmModal({
             aria-labelledby="modal-title"
             aria-describedby="modal-description"
           >
-            <div className="w-full max-w-md">
-              <div className={`bg-[var(--card-solid)] rounded-3xl shadow-2xl p-6 md:p-8 border ${colors.border}`}>
+            <div className="w-full max-w-[320px] sm:max-w-md">
+              <div className={`bg-[var(--card-solid)] rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 border ${colors.border}`}>
                 {/* Icon */}
-                <div className={`flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full ${colors.bg}`}>
-                  <Icon className={`w-8 h-8 ${colors.icon}`} />
+                <div className={`flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 rounded-full ${colors.bg}`}>
+                  <Icon className={`w-6 h-6 sm:w-8 sm:h-8 ${colors.icon}`} />
                 </div>
 
                 {/* Title */}

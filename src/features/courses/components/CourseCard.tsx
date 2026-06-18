@@ -106,7 +106,7 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
       </div>
 
       {/* Content */}
-      <div className="p-5 flex-1 flex flex-col">
+      <div className="p-3 sm:p-5 flex-1 flex flex-col">
         <h3 className="heading-md mb-2 line-clamp-1">
           {courseData.title}
         </h3>

@@ -32,7 +32,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <GoogleTagManager gtmId="GTM-PRZ4PRLN" />
-      <body className="antialiased">
+      <body className="antialiased text-sm sm:text-base">
         <LanguageProvider>
           <AppSettingsProvider>
             <SessionProvider>
