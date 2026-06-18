@@ -24,7 +24,14 @@ export default function PullToRefresh({ children }: PullToRefreshProps) {
   useEffect(() => {
     const isRefreshDisabled = pathname ? ['/create', '/edit', '/take'].some(route => pathname.includes(route)) : false;
     
-    if (showConfirm || isRefreshDisabled) return;
+    if (isRefreshDisabled) {
+      if (isPulling) setIsPulling(false);
+      if (isRefreshing) setIsRefreshing(false);
+      if (showConfirm) setShowConfirm(false);
+      return;
+    }
+
+    if (showConfirm) return;
 
     const handleTouchStart = (e: TouchEvent) => {
       // Only trigger if we are exactly at the top of the page
@@ -72,7 +79,7 @@ export default function PullToRefresh({ children }: PullToRefreshProps) {
       window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [isPulling, showConfirm]);
+  }, [isPulling, showConfirm, pathname, isRefreshing]);
 
   const handleConfirm = () => {
     setShowConfirm(false);

@@ -4,7 +4,7 @@
 import { ROUTES } from '@/constants/routes';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { LazyQuizCard } from '@/lib/lazy';
@@ -20,7 +20,18 @@ export default function StudentQuizzesPage() {
   const router = useRouter();
   const { t } = useTranslation();
   const { theme } = useRoleTheme();
-  const [activeTab, setActiveTab] = useState<'available' | 'completed'>('available');
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const tabParam = searchParams.get('tab');
+  const initialTab = tabParam === 'completed' ? 'completed' : 'available';
+  const [activeTab, setActiveTab] = useState<'available' | 'completed'>(initialTab);
+
+  const handleTabChange = (tab: 'available' | 'completed') => {
+    setActiveTab(tab);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('tab', tab);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
   const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
 
   const orgId = (session?.user as { organizationId?: string })?.organizationId || 'public';
@@ -111,7 +122,7 @@ export default function StudentQuizzesPage() {
       <div className="mt-6 border-b border-[var(--border)]">
         <nav className="-mb-px flex space-x-4 sm:space-x-8 overflow-x-auto">
           <button
-            onClick={() => setActiveTab('available')}
+            onClick={() => handleTabChange('available')}
             className={`${
               activeTab === 'available'
                 ? 'border-[var(--success)] text-[var(--success)]'
@@ -121,7 +132,7 @@ export default function StudentQuizzesPage() {
             {t('quiz.available')} ({availableQuizzes.length})
           </button>
           <button
-            onClick={() => setActiveTab('completed')}
+            onClick={() => handleTabChange('completed')}
             className={`${
               activeTab === 'completed'
                 ? 'border-[var(--success)] text-[var(--success)]'

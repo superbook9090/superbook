@@ -130,7 +130,7 @@ export default function TakeQuizPage() {
 
         quizSecurity.stopQuiz();
         setQuizActive(false);
-        router.push(ROUTES.student.quizResult(data.attempt._id));
+        router.replace(ROUTES.student.quizResult(data.attempt._id));
       } catch (err) {
         console.error('Error submitting quiz:', err);
         const errorMsg = options.forceSubmit
@@ -287,7 +287,7 @@ export default function TakeQuizPage() {
         foundAttempt &&
         (foundAttempt.status === 'completed' || foundAttempt.status === 'force_submitted')
       ) {
-        router.push(ROUTES.student.quizResult(foundAttempt._id));
+        router.replace(ROUTES.student.quizResult(foundAttempt._id));
         return;
       } else {
         setError(t('errors.quizAttemptNotFound'));

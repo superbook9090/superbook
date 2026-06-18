@@ -2,7 +2,7 @@
 import { ROUTES } from '@/constants/routes';
 
 import { useEffect, useState, useMemo } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams, usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSessionStore } from '@/store/useSessionStore';
@@ -53,7 +53,19 @@ export default function CourseDetailPage() {
   const router = useRouter();
   const params = useParams();
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<TabType>('curriculum');
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const tabParam = searchParams.get('tab') as TabType;
+  const validTabs: TabType[] = ['curriculum', 'overview', 'quizzes', 'leaderboard'];
+  const initialTab = validTabs.includes(tabParam) ? tabParam : 'curriculum';
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
+
+  const handleTabChange = (tab: TabType) => {
+    setActiveTab(tab);
+    const newParams = new URLSearchParams(searchParams.toString());
+    newParams.set('tab', tab);
+    router.replace(`${pathname}?${newParams.toString()}`, { scroll: false });
+  };
   const [expandedChapters, setExpandedChapters] = useState<Record<string, boolean>>({});
   const [startingQuizId, setStartingQuizId] = useState<string | null>(null);
   const [confirmQuiz, setConfirmQuiz] = useState<PendingQuizStart | null>(null);
@@ -366,7 +378,7 @@ export default function CourseDetailPage() {
           ].map(tab => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as TabType)}
+              onClick={() => handleTabChange(tab.id as TabType)}
               className={cn(
                 "flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all whitespace-nowrap",
                 activeTab === tab.id 
