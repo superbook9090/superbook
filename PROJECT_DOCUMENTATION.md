@@ -267,6 +267,10 @@ src/
 │   │   │   ├── student/     # Student dashboard
 │   │   │   ├── teacher/     # Teacher dashboard
 │   │   │   └── admin/       # Admin panel
+│   ├── tools/
+│   │   └── [slug]/          # Dynamic SEO landing pages (SSG)
+│   │       ├── page.tsx     # Server component — metadata, JSON-LD, static params
+│   │       └── ToolClient.tsx # Client component — landing page UI
 │   └── api/                 # API routes
 │       ├── admin/           # Admin-only endpoints
 │       ├── auth/            # NextAuth configuration
@@ -285,8 +289,11 @@ src/
 │   └── ui/                  # Reusable UI components
 ├── constants/
 │   ├── navigation.ts        # STUDENT_NAV, TEACHER_NAV, ADMIN_NAV
+│   ├── routes.ts            # Centralized route constants (incl. tools helper)
 │   └── spacing.ts           # CSS token name reference for layout
 ├── contexts/                # React contexts (AppSettings, RoleTheme)
+├── data/
+│   └── seo-tools.ts         # SEO tool page data registry (20 keywords)
 ├── features/                # Feature-specific components
 │   ├── courses/
 │   ├── quizzes/
@@ -304,6 +311,7 @@ src/
 │   ├── enrollmentService.ts # Shared enroll / join-by-code logic
 │   ├── apiMiddleware.ts     # API middleware for rate limiting
 │   ├── serialize.ts         # MongoDB serialization
+│   ├── seo/                 # SEO utilities (metadata, config, getSiteUrl)
 │   ├── mobile/              # WebView bridge, deep links, mobile detection
 │   ├── notifications/       # FCM client + admin push helpers
 │   └── files/               # File management utilities
@@ -791,7 +799,75 @@ Invalid code → `404`/`403` with `{ message: "Invalid course code" }`. Rate lim
 
 ---
 
-## 22. Future Improvements
+## 22. SEO Landing Pages (Tools)
+
+### Overview
+
+Dynamic, data-driven SEO landing pages at `/tools/[slug]` targeting 20 educational AI tool keywords. All pages are **statically generated (SSG)** at build time via `generateStaticParams` for optimal Core Web Vitals.
+
+### Architecture
+
+- **Data registry**: `src/data/seo-tools.ts` — centralized `SEO_TOOLS_DATA` record mapping slugs to unique content (title, description, headings, features, benefits, how-it-works steps, FAQs, CTA text)
+- **Server component**: `src/app/tools/[slug]/page.tsx` — `generateStaticParams`, `generateMetadata` (title, description, canonical, OpenGraph, Twitter), FAQ + Breadcrumb JSON-LD schemas
+- **Client component**: `src/app/tools/[slug]/ToolClient.tsx` — renders hero, features grid, how-it-works, benefits, FAQ accordions, CTA, and internal cross-links
+- **Route helper**: `ROUTES.tools(slug)` in `src/constants/routes.ts`
+- **Sitemap**: `src/app/sitemap.ts` auto-includes all tool slugs with `changeFrequency: 'weekly'`, `priority: 0.9`
+
+### Target Keywords (20 pages)
+
+| Slug | Status |
+|------|--------|
+| `quiz-maker-free` | Full content |
+| `ai-quiz-maker-free` | Full content |
+| `online-quiz-maker` | Full content |
+| `mcq-generator-free` | Placeholder |
+| `course-maker-free` | Placeholder |
+| `ai-course-maker` | Placeholder |
+| `course-generator-free` | Placeholder |
+| `test-series-maker-free` | Placeholder |
+| `ai-test-series-generator` | Placeholder |
+| `lesson-maker-free` | Placeholder |
+| `chapter-generator` | Placeholder |
+| `question-paper-maker` | Placeholder |
+| `practice-test-generator` | Placeholder |
+| `online-exam-maker` | Placeholder |
+| `quiz-creator-for-teachers` | Placeholder |
+| `quiz-generator-from-text` | Placeholder |
+| `quiz-generator-from-pdf` | Placeholder |
+| `course-builder-online` | Placeholder |
+| `lms-course-creator` | Placeholder |
+| `ai-education-tools` | Placeholder |
+
+### SEO Output Per Page
+
+- Unique `<title>` and `<meta name="description">`
+- `<link rel="canonical">` via `alternates.canonical`
+- OpenGraph and Twitter Card metadata
+- `application/ld+json` FAQPage schema
+- `application/ld+json` BreadcrumbList schema (Home → Tools → Page)
+- Proper heading hierarchy (`<h1>` → `<h2>` → `<h3>`)
+- Semantic HTML sections
+- Internal cross-links to other tool pages for topical authority
+
+### Adding a New Tool Page
+
+1. Add a new entry to `SEO_TOOLS_DATA` in `src/data/seo-tools.ts` with unique content
+2. The page, metadata, JSON-LD, sitemap entry, and static generation are all automatic
+3. Run `npm run build` to verify the new page appears in the SSG output
+
+### Key Files
+
+| Path | Role |
+|------|------|
+| `src/data/seo-tools.ts` | Data registry (content, metadata, FAQs) |
+| `src/app/tools/[slug]/page.tsx` | Server component (SSG, metadata, JSON-LD) |
+| `src/app/tools/[slug]/ToolClient.tsx` | Client component (landing page UI) |
+| `src/constants/routes.ts` | `ROUTES.tools(slug)` helper |
+| `src/app/sitemap.ts` | Auto-includes tool pages in sitemap |
+
+---
+
+## 23. Future Improvements
 
 ### Performance
 - Add advanced request deduplication (TanStack Query)
@@ -824,7 +900,7 @@ Invalid code → `404`/`403` with `{ message: "Invalid course code" }`. Rate lim
 - Add comprehensive request logging with logger utility
 - Add file upload security and validation
 
-## 23. Database Schemas
+## 24. Database Schemas
 
 ### User Schema
 
@@ -1179,7 +1255,7 @@ interface IAppSettings {
 
 ---
 
-## 24. Future Roadmap
+## 25. Future Roadmap
 
 ### Short Term (1-3 months)
 - **Real-time Features**: WebSocket integration for live updates
