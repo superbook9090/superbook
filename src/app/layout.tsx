@@ -1,10 +1,12 @@
 import type { Metadata, Viewport } from "next";
+import { GoogleTagManager } from '@next/third-parties/google';
 import "@/app/globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AppSettingsProvider } from '@/contexts/AppSettingsContext';
 import { SessionProvider } from '@/components/providers/SessionProvider';
 import MaintenanceCheck from '@/components/MaintenanceCheck';
 import DeferredAnalytics from '@/components/providers/DeferredAnalytics';
+import ClarityInit from '@/components/providers/ClarityInit';
 import { createRootMetadata } from '@/lib/seo/metadata';
 import PullToRefresh from '@/components/PullToRefresh';
 
@@ -29,6 +31,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <GoogleTagManager gtmId="GTM-PRZ4PRLN" />
       <body className="antialiased">
         <LanguageProvider>
           <AppSettingsProvider>
@@ -42,6 +45,7 @@ export default function RootLayout({
           </AppSettingsProvider>
         </LanguageProvider>
         <DeferredAnalytics />
+        <ClarityInit />
       </body>
     </html>
   );
