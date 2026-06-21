@@ -27,7 +27,7 @@ export default async function PublicBlogsPage() {
     ]);
   } catch (err) {
     console.error('[/blogs] Failed to fetch initial blog data:', err);
-    // render with empty state — client will retry via the API
+    throw err;
   }
 
   return (

@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import dbConnect from '@/lib/db';
+import '@/models';
 import Blog from '@/models/Blog';
 import { getSiteUrl } from '@/lib/seo/config';
 
