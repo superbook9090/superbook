@@ -65,6 +65,7 @@ export const authRateLimiter = new RateLimiter(60 * 1000, 5); // 5 requests per 
 export const generalRateLimiter = new RateLimiter(60 * 1000, 60); // 60 requests per minute
 export const adminRateLimiter = new RateLimiter(60 * 1000, 30); // 30 requests per minute
 export const contactRateLimiter = new RateLimiter(60 * 1000, 3); // 3 requests per minute
+export const publicBlogRateLimiter = new RateLimiter(60 * 1000, 120); // 120 requests per minute
 
 /** Forgot-password: 3 requests per 15 minutes per IP */
 export const forgotPasswordIpLimiter = new RateLimiter(15 * 60 * 1000, 3);
@@ -87,6 +88,7 @@ setInterval(() => {
   generalRateLimiter.cleanup();
   adminRateLimiter.cleanup();
   contactRateLimiter.cleanup();
+  publicBlogRateLimiter.cleanup();
   forgotPasswordIpLimiter.cleanup();
   forgotPasswordEmailLimiter.cleanup();
   resetPasswordIpLimiter.cleanup();

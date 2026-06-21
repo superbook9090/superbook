@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next';
 import { ROUTES } from '@/constants/routes';
 import { getSiteUrl } from '@/lib/seo/config';
 import { SEO_TOOLS_DATA } from '@/data/seo-tools';
+import { buildPublicBlogPath, listPublicBlogSlugs } from '@/lib/blogs/public';
 
 /** Public marketing pages included in search indexing. */
 const PUBLIC_PATHS: { path: string; changeFrequency: MetadataRoute.Sitemap[number]['changeFrequency']; priority: number }[] = [
@@ -12,9 +13,10 @@ const PUBLIC_PATHS: { path: string; changeFrequency: MetadataRoute.Sitemap[numbe
   { path: ROUTES.contact, changeFrequency: 'monthly', priority: 0.7 },
   { path: ROUTES.privacy, changeFrequency: 'yearly', priority: 0.3 },
   { path: ROUTES.forgotPassword, changeFrequency: 'yearly', priority: 0.2 },
+  { path: ROUTES.blogs, changeFrequency: 'daily', priority: 0.9 },
 ];
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = getSiteUrl();
   const now = new Date();
 
@@ -32,5 +34,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.9,
   }));
 
-  return [...pages, ...toolPages];
+  const blogSlugs = await listPublicBlogSlugs(500);
+  const blogPages: MetadataRoute.Sitemap = blogSlugs.map((slug) => ({
+    url: `${baseUrl}${buildPublicBlogPath(slug)}`,
+    lastModified: now,
+    changeFrequency: 'weekly',
+    priority: 0.8,
+  }));
+
+  return [...pages, ...toolPages, ...blogPages];
 }

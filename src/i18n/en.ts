@@ -432,8 +432,13 @@ export const en = {
 
   // Blog
   blog: {
+    studyResources: 'Study resources and exam preparation articles',
+    studyResourcesDesc: 'Search public articles, browse by category, and discover featured explainers designed for organic discovery and sharing.',
     readMore: 'Read More',
     share: 'Share',
+    shareLabel: 'Share',
+    copyLinkLabel: 'Copy Link',
+    linkCopiedLabel: 'Link Copied!',
     favorite: 'Add to Favorites',
     unfavorited: 'Remove from Favorites',
     noFavorites: 'No favorites yet',

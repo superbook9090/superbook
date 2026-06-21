@@ -12,7 +12,8 @@ import Alert from '@/components/ui/Alert';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { PageWrapper, ResponsiveGrid } from '@/components/layout';
 import { useAvailableCourses, useEnrollCourse } from '@/lib/react-query/hooks';
-import { BookOpen, ArrowLeft, Sparkles } from 'lucide-react';
+import { BookOpen, Sparkles } from 'lucide-react';
+import BackButton from '@/components/ui/BackButton';
 import { LazyCourseFilters, LazyJoinCourseByCode } from '@/lib/lazy';
 import { FilterPanel } from '@/components/filters/DashboardListFilters';
 
@@ -100,13 +101,11 @@ export default function BrowseCoursesPage() {
       >
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
         <div className="relative z-10 space-y-4">
-          <button
-            onClick={() => router.push(ROUTES.student.courses)}
-            className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-white/70 hover:text-white transition-colors group"
-          >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            {t('courses.backToCourses')}
-          </button>
+          <BackButton
+            href={ROUTES.student.courses}
+            label={t('courses.backToCourses')}
+            className="text-xs font-black uppercase tracking-widest text-white/70 hover:text-white"
+          />
 
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-2">

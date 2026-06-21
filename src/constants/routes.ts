@@ -9,6 +9,8 @@ export const ROUTES = {
   privacy: '/privacy',
   maintenance: '/maintenance',
   howItWorks: '/how-it-works',
+  blogs: '/blogs',
+  blog: (slug: string) => `/blogs/${slug}`,
   tools: (slug: string) => `/tools/${slug}`,
   dashboard: '/dashboard',
   profile: '/dashboard/profile',

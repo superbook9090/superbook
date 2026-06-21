@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import { ROUTES } from '@/constants/routes';
-import { authRateLimiter, generalRateLimiter, adminRateLimiter } from '@/lib/rateLimiter';
+import { authRateLimiter, generalRateLimiter, adminRateLimiter, publicBlogRateLimiter } from '@/lib/rateLimiter';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -29,7 +29,9 @@ export async function middleware(request: NextRequest) {
 
     let limiter;
 
-    if (pathname.startsWith('/api/auth/')) {
+    if (pathname.startsWith('/api/blogs/public')) {
+      limiter = publicBlogRateLimiter;
+    } else if (pathname.startsWith('/api/auth/')) {
       limiter = authRateLimiter;
     } else if (pathname.startsWith('/api/admin/')) {
       limiter = adminRateLimiter;
@@ -52,6 +54,20 @@ export async function middleware(request: NextRequest) {
     // Rate limiting is still enforced above
 
     return response;
+  }
+
+  if (pathname === '/blogs' || pathname.startsWith('/blogs/')) {
+    const ip =
+      request.headers.get('x-forwarded-for') ||
+      request.headers.get('x-real-ip') ||
+      'unknown';
+
+    const result = publicBlogRateLimiter.check(ip);
+    if (!result.allowed) {
+      return new NextResponse('Too many requests. Please try again later.', { status: 429 });
+    }
+
+    return NextResponse.next();
   }
 
   // =========================
@@ -110,6 +126,7 @@ export const config = {
   matcher: [
     '/',
     '/api/:path*',
+    '/blogs/:path*',
     '/dashboard/:path*',
     '/login',
     '/register',

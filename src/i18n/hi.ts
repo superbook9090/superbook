@@ -432,8 +432,13 @@ export const hi = {
 
   // Blog
   blog: {
+    studyResources: 'अध्ययन संसाधन और परीक्षा की तैयारी के लेख',
+    studyResourcesDesc: 'सार्वजनिक लेख खोजें, श्रेणी के अनुसार ब्राउज़ करें, और जैविक खोज और साझा करने के लिए डिज़ाइन किए गए विशेष व्याख्याकारों की खोज करें।',
     readMore: 'और पढ़ें',
     share: 'साझा करें',
+    shareLabel: 'साझा करें',
+    copyLinkLabel: 'लिंक कॉपी करें',
+    linkCopiedLabel: 'लिंक कॉपी हो गया!',
     favorite: 'पसंदीदा में जोड़ें',
     unfavorited: 'पसंदीदा से हटाएं',
     noFavorites: 'अभी तक कोई पसंदीदा नहीं',

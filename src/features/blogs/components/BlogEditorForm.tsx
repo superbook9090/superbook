@@ -2,7 +2,7 @@
 
 import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
-import { Eye, EyeOff, BookOpen, Hash, FileText, Type } from 'lucide-react';
+import { Eye, EyeOff, BookOpen, Hash, FileText, Type, Globe, Star } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { EditorField, editorInputClass, editorSelectClass } from '@/components/ui/editor/EditorField';
@@ -19,6 +19,10 @@ export type BlogFormData = {
   topic: string;
   content: string;
   language: string;
+  visibility: 'public' | 'organization';
+  metaTitle: string;
+  metaDescription: string;
+  isFeatured: boolean;
 };
 
 type BlogEditorFormProps = {
@@ -127,6 +131,45 @@ export default function BlogEditorForm({
           )}
         </div>
 
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <EditorField
+            label={
+              <>
+                <Globe className="w-3.5 h-3.5 inline mr-1.5" />
+                Blog Visibility
+              </>
+            }
+          >
+            <select
+              value={formData.visibility}
+              onChange={(e) => patch({ visibility: e.target.value as 'public' | 'organization' })}
+              className={editorSelectClass}
+            >
+              <option value="organization">Organization Blog</option>
+              <option value="public">Public SEO Blog</option>
+            </select>
+          </EditorField>
+
+          <EditorField
+            label={
+              <>
+                <Star className="w-3.5 h-3.5 inline mr-1.5" />
+                Featured
+              </>
+            }
+          >
+            <label className="flex min-h-[44px] items-center gap-2 rounded-lg border border-[var(--border)] px-3 py-2 text-sm text-[var(--color-foreground)]">
+              <input
+                type="checkbox"
+                checked={formData.isFeatured}
+                onChange={(e) => patch({ isFeatured: e.target.checked })}
+                disabled={formData.visibility !== 'public'}
+              />
+              Mark as featured public article
+            </label>
+          </EditorField>
+        </div>
+
         <EditorField
           label={
             <>
@@ -145,6 +188,32 @@ export default function BlogEditorForm({
             />
           </Suspense>
         </EditorField>
+
+        {formData.visibility === 'public' && (
+          <div className="grid grid-cols-1 gap-4">
+            <EditorField label="Meta Title">
+              <input
+                type="text"
+                value={formData.metaTitle}
+                onChange={(e) => patch({ metaTitle: e.target.value })}
+                placeholder="SEO title for search and social sharing"
+                className={editorInputClass}
+                maxLength={70}
+              />
+            </EditorField>
+
+            <EditorField label="Meta Description">
+              <textarea
+                value={formData.metaDescription}
+                onChange={(e) => patch({ metaDescription: e.target.value })}
+                placeholder="SEO description for search engines and social cards"
+                className={editorInputClass}
+                rows={3}
+                maxLength={180}
+              />
+            </EditorField>
+          </div>
+        )}
 
         <div className="flex flex-col sm:flex-row gap-3 pt-2">
           <Button

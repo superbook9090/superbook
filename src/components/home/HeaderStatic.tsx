@@ -6,14 +6,16 @@ import { ROUTES } from '@/constants/routes';
 import { translate } from '@/i18n';
 import { roleThemes } from '@/lib/roleTheme';
 
-export default function HeaderStatic() {
+export default function HeaderStatic({ forceScrolled = false }: { forceScrolled?: boolean }) {
   const t = (key: Parameters<typeof translate>[1]) => translate('en', key);
   const theme = roleThemes.student;
 
   return (
     <header
       id="site-header"
-      className="fixed top-0 left-0 right-0 z-50 bg-transparent transition-colors duration-300"
+      className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${
+        forceScrolled ? 'bg-white/90 backdrop-blur-lg shadow-sm' : 'bg-transparent'
+      }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
@@ -30,10 +32,18 @@ export default function HeaderStatic() {
           </Link>
 
           <div className="hidden md:flex items-center gap-4">
+            <Link
+              id="header-blogs-link"
+              href={ROUTES.blogs}
+              data-i18n-key="common.blogs"
+              className={`header-nav-btn ${forceScrolled ? 'header-nav-btn-dark' : 'header-nav-btn-light'}`}
+            >
+              {t('common.blogs')}
+            </Link>
             <button
               id="lang-toggle"
               type="button"
-              className="px-3 py-1.5 rounded-lg text-sm font-medium text-white/80 hover:bg-white/10 transition-colors"
+              className={`header-nav-btn ${forceScrolled ? 'header-nav-btn-dark' : 'header-nav-btn-light'}`}
             >
               EN
             </button>
@@ -42,7 +52,9 @@ export default function HeaderStatic() {
               <Link
                 href={ROUTES.login}
                 data-i18n-key="home.login"
-                className="px-4 py-2 rounded-lg text-sm font-medium text-white hover:text-white transition-colors"
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  forceScrolled ? 'text-gray-600 hover:text-gray-900' : 'text-white hover:text-white'
+                }`}
               >
                 {t('home.login')}
               </Link>
@@ -67,8 +79,11 @@ export default function HeaderStatic() {
 
           <details className="md:hidden relative group">
             <summary
+              id="mobile-menu-toggle"
               aria-label="Open menu"
-              className="list-none p-2 rounded-lg text-white hover:bg-white/10 transition-colors cursor-pointer [&::-webkit-details-marker]:hidden"
+              className={`list-none p-2 rounded-lg transition-colors cursor-pointer [&::-webkit-details-marker]:hidden ${
+                forceScrolled ? 'text-gray-800 hover:bg-black/5' : 'text-white hover:bg-white/10'
+              }`}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -88,6 +103,13 @@ export default function HeaderStatic() {
               </svg>
             </summary>
             <div className="absolute right-0 top-full mt-2 w-56 rounded-xl bg-white shadow-lg border border-gray-100 p-4 space-y-3">
+              <Link
+                href={ROUTES.blogs}
+                data-i18n-key="common.blogs"
+                className="block w-full py-2.5 text-center text-gray-700 font-medium border border-gray-200 rounded-xl hover:bg-gray-50"
+              >
+                {t('common.blogs')}
+              </Link>
               <Link
                 href={ROUTES.login}
                 data-i18n-key="home.login"

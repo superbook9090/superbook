@@ -8,11 +8,11 @@ const HeaderEnhancements = nextDynamic(
   { ssr: false }
 );
 
-export default function MarketingHeader() {
+export default function MarketingHeader({ forceScrolled = false }: { forceScrolled?: boolean }) {
   return (
     <>
-      <HeaderStatic />
-      <HeaderEnhancements />
+      <HeaderStatic forceScrolled={forceScrolled} />
+      <HeaderEnhancements forceScrolled={forceScrolled} />
     </>
   );
 }

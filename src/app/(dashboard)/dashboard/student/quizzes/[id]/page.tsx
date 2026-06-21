@@ -15,7 +15,8 @@ import { Loader } from '@/components/ui/Loader';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import Alert from '@/components/ui/Alert';
 import { motion } from 'framer-motion';
-import { HelpCircle, Clock, BookOpen, ArrowLeft, Play } from 'lucide-react';
+import { HelpCircle, Clock, BookOpen, Play } from 'lucide-react';
+import BackButton from '@/components/ui/BackButton';
 import { Badge } from '@/components/ui/Badge';
 import type { QuizStartInfo } from '@/features/quizzes/components/QuizStartConfirmModal';
 
@@ -100,13 +101,11 @@ export default function QuizDetailPage() {
     return (
       <div>
         <Alert type="error" message={error} />
-        <button
-          onClick={() => router.push(ROUTES.student.quizzes)}
-          className={`mt-4 inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r ${theme.gradient} text-white rounded-lg hover:opacity-90`}
-        >
-          <ArrowLeft className="w-4 h-4" />
-          {t('common.back')}
-        </button>
+        <BackButton
+          href={ROUTES.student.quizzes}
+          variant="outline"
+          className="mt-4"
+        />
       </div>
     );
   }
@@ -122,13 +121,9 @@ export default function QuizDetailPage() {
   return (
     <div className="space-y-6">
       {/* Back Button */}
-      <button
-        onClick={() => router.push(ROUTES.student.quizzes)}
-        className="inline-flex items-center gap-2 text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        {t('common.back')}
-      </button>
+      <BackButton
+        href={ROUTES.student.quizzes}
+      />
 
       {/* Quiz Info Card */}
       <motion.div

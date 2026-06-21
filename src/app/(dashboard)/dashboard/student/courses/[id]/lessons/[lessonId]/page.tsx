@@ -8,7 +8,8 @@ import { useSessionStore } from '@/store/useSessionStore';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { flattenCurriculumLessons } from '@/lib/curriculum/tree';
 import { useLesson, useCourseCurriculum } from '@/lib/react-query/hooks';
-import { ChevronLeft, ChevronRight, BookOpen, PlayCircle, Clock, Layout, ArrowLeft } from 'lucide-react';
+import { ChevronLeft, ChevronRight, BookOpen, PlayCircle, Clock, Layout } from 'lucide-react';
+import BackButton from '@/components/ui/BackButton';
 import { LazySecurePlayer } from '@/lib/lazy';
 
 const lessonSessionKey = (courseId: string) => `lesson-active:${courseId}`;
@@ -98,13 +99,12 @@ export default function LessonViewerPage() {
         </div>
         <h2 className="text-2xl font-bold text-[var(--color-foreground)] mb-2">{t('courses.lessonNotFound')}</h2>
         <p className="text-[var(--color-muted-foreground)] mb-8">{t('courses.lessonNotFoundDesc')}</p>
-        <button
+        <BackButton
           onClick={goToCourse}
-          className="flex items-center gap-2 px-6 py-3 bg-[var(--student-primary)] text-white rounded-xl font-bold hover:shadow-lg transition-all"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          {t('courses.backToCourse')}
-        </button>
+          label={t('courses.backToCourse')}
+          variant="button"
+          className="px-6 py-3 bg-[var(--student-primary)] text-white rounded-xl font-bold hover:shadow-lg transition-all"
+        />
       </div>
     );
   }

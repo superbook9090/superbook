@@ -6,7 +6,7 @@ import { translate } from '@/i18n';
 import { supportedLanguages } from '@/i18n/config';
 import { useSessionStore } from '@/store/useSessionStore';
 
-export default function HeaderEnhancements() {
+export default function HeaderEnhancements({ forceScrolled = false }: { forceScrolled?: boolean }) {
   const { lang, setLang } = useTranslation();
   const session = useSessionStore((s) => s.session);
 
@@ -15,19 +15,20 @@ export default function HeaderEnhancements() {
     if (!header) return;
 
     const onScroll = () => {
-      const scrolled = window.scrollY > 20;
+      const scrolled = forceScrolled || window.scrollY > 20;
       header.classList.toggle('bg-white/90', scrolled);
       header.classList.toggle('backdrop-blur-lg', scrolled);
       header.classList.toggle('shadow-sm', scrolled);
       header.classList.toggle('bg-transparent', !scrolled);
 
-      const langToggle = document.getElementById('lang-toggle');
-      if (langToggle) {
-        langToggle.classList.toggle('text-gray-600', scrolled);
-        langToggle.classList.toggle('hover:bg-gray-100', scrolled);
-        langToggle.classList.toggle('text-white/80', !scrolled);
-        langToggle.classList.toggle('hover:bg-white/10', !scrolled);
-      }
+      const toggleNavBtn = (el: HTMLElement | null) => {
+        if (!el) return;
+        el.classList.toggle('header-nav-btn-dark', scrolled);
+        el.classList.toggle('header-nav-btn-light', !scrolled);
+      };
+
+      toggleNavBtn(document.getElementById('lang-toggle'));
+      toggleNavBtn(document.getElementById('header-blogs-link'));
 
       header.querySelectorAll<HTMLElement>('#header-auth-guest a').forEach((link) => {
         if (link.classList.contains('bg-white')) return;
@@ -35,12 +36,20 @@ export default function HeaderEnhancements() {
         link.classList.toggle('hover:text-gray-900', scrolled);
         link.classList.toggle('text-white', !scrolled);
       });
+
+      const mobileToggle = document.getElementById('mobile-menu-toggle');
+      if (mobileToggle) {
+        mobileToggle.classList.toggle('text-gray-800', scrolled);
+        mobileToggle.classList.toggle('hover:bg-black/5', scrolled);
+        mobileToggle.classList.toggle('text-white', !scrolled);
+        mobileToggle.classList.toggle('hover:bg-white/10', !scrolled);
+      }
     };
 
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+  }, [forceScrolled]);
 
   useEffect(() => {
     const toggleLanguage = () => {

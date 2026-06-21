@@ -9,10 +9,10 @@ import {
   Bookmark,
   User,
   ArrowRight,
-  ArrowLeft,
   Trash2,
   BookOpen,
 } from 'lucide-react';
+import BackButton from '@/components/ui/BackButton';
 import { Badge } from '@/components/ui/Badge';
 import { useRemoveFavorite, type Favorite } from '@/lib/react-query/hooks';
 
@@ -49,13 +49,11 @@ export default function FavoritesList({ initialFavorites, totalCount }: Favorite
         className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
       >
         <div>
-          <Link
+          <BackButton
             href={ROUTES.student.blogs}
-            className="inline-flex items-center text-[var(--color-muted-foreground)] hover:text-[var(--student-primary)] mb-2"
-          >
-            <ArrowLeft className="w-4 h-4 mr-1" />
-            {t('favorites.backToBlogs')}
-          </Link>
+            label={t('favorites.backToBlogs')}
+            className="hover:text-[var(--student-primary)] mb-2"
+          />
           <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)] flex items-center gap-2">
             <Bookmark className="w-7 h-7 text-[var(--error)]" />
             {t('favorites.myFavorites')}

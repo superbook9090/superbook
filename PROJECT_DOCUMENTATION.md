@@ -402,6 +402,32 @@ t('common.english') // "English" or "अंग्रेज़ी"
 
 ## 12. Recent Updates
 
+### Public Blogs & SEO (2026)
+
+The blog system has been expanded to support **public** visibility, allowing articles to be shared outside an organization for SEO, marketing, and organic discovery.
+
+**Model Updates (`Blog`):**
+- Added `visibility` field (`'public'` vs `'organization'`).
+- Added SEO and meta fields: `slug` (unique, sparse), `excerpt`, `metaTitle`, `metaDescription`.
+- Added analytics fields: `viewCount` and `isFeatured`.
+- New compound indexes added for efficient querying of public blogs by visibility, publish status, and popularity/date.
+
+**Public Routes:**
+- `/blogs`: A public index listing all published, public blogs with pagination, search, and category filtering.
+- `/blogs/[slug]`: The public reading view for a specific blog. Server-side rendered with full SEO metadata injection.
+
+**API Architecture:**
+- `/api/blogs/public`: Returns paginated public blogs.
+- `/api/blogs/public/[slug]`: Retrieves a public blog by slug.
+- `/api/blogs/public/[slug]/view`: Increments the `viewCount` (called via `PublicBlogViewTracker`).
+- Added `publicBlogRateLimiter` to `middleware.ts` to protect public blog endpoints.
+
+**UI & Content Creation:**
+- **Teacher Dashboard**: `BlogEditorForm` now includes a Settings tab for `visibility`, `slug`, `excerpt`, and SEO metadata.
+- **Home Page**: Created a `HomeLatestBlogsSection` component to optionally feature the latest public blogs on the landing page.
+- **Header Navigation**: Added a global "Blogs" link to the homepage header (`HeaderStatic.tsx`) mapping to `/blogs`. Follows `common.blogs` translations and shared CSS utilities.
+- **Social Sharing**: Included `PublicBlogShareButtons` for easy sharing to X (Twitter), Facebook, LinkedIn, and WhatsApp.
+
 ### Private course access via course codes (2026)
 
 Teachers can optionally restrict a course with a unique **course code**. Courses without a code remain **public** (unchanged behavior).

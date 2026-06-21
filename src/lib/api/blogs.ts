@@ -10,7 +10,12 @@ export type BlogDocument = {
   content: string;
   language?: string;
   isPublished: boolean;
-  excerpt?: string;
+  slug?: string | null;
+  excerpt?: string | null;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  visibility?: 'public' | 'organization';
+  isFeatured?: boolean;
   author?: { _id: string; name: string; email?: string };
   createdAt?: string;
   updatedAt?: string;
@@ -22,6 +27,12 @@ export type CreateBlogInput = {
   content: string;
   language?: string;
   isPublished?: boolean;
+  slug?: string;
+  excerpt?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  visibility?: 'public' | 'organization';
+  isFeatured?: boolean;
 };
 
 export type UpdateBlogInput = Partial<CreateBlogInput & { isPublished: boolean }>;

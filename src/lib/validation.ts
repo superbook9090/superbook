@@ -35,6 +35,12 @@ export const createBlogSchema = z.object({
   topic: z.string().min(1, 'Topic is required'),
   language: z.enum(['en', 'hi']).optional(),
   isPublished: z.boolean().optional(),
+  slug: z.string().trim().min(1).max(240).optional(),
+  excerpt: z.string().trim().max(320).optional(),
+  metaTitle: z.string().trim().max(70).optional(),
+  metaDescription: z.string().trim().max(180).optional(),
+  visibility: z.enum(['public', 'organization']).optional(),
+  isFeatured: z.boolean().optional(),
 });
 
 export const updateBlogSchema = createBlogSchema.partial();

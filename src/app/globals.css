@@ -1544,3 +1544,19 @@ body.quiz-fullscreen nav {
     grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 }
+/* =========================
+   HEADER NAV UTILITIES
+========================= */
+
+.header-nav-btn {
+  @apply px-3 py-1.5 rounded-lg text-sm font-medium transition-colors;
+}
+
+.header-nav-btn-light {
+  @apply text-white/80 hover:bg-white/10;
+}
+
+.header-nav-btn-dark {
+  @apply text-gray-600 hover:bg-gray-100;
+}
+

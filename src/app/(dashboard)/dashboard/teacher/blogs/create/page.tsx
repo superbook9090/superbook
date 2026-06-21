@@ -3,10 +3,10 @@ import { ROUTES } from '@/constants/routes';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowLeft, BookOpen } from 'lucide-react';
+import { BookOpen } from 'lucide-react';
 import Alert from '@/components/ui/Alert';
+import BackButton from '@/components/ui/BackButton';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useCreateBlog } from '@/lib/react-query/useBlogQueries';
 import { ApiClientError } from '@/lib/api/http';
@@ -24,6 +24,10 @@ export default function CreateBlogPage() {
     topic: '',
     content: '',
     language: 'en',
+    visibility: 'organization',
+    metaTitle: '',
+    metaDescription: '',
+    isFeatured: false,
   });
   const [error, setError] = useState('');
   const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
@@ -63,13 +67,11 @@ export default function CreateBlogPage() {
       )}
 
       <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
-        <Link
+        <BackButton
           href={ROUTES.teacher.blogs}
-          className="inline-flex items-center text-sm text-[var(--teacher-primary)] hover:text-[var(--teacher-primary)]/80 mb-3"
-        >
-          <ArrowLeft className="w-4 h-4 mr-1.5" />
-          {t('blog.backToBlogs')}
-        </Link>
+          label={t('blog.backToBlogs')}
+          className="text-[var(--teacher-primary)] hover:text-[var(--teacher-primary)]/80 mb-3"
+        />
         <h1 className="text-lg sm:text-xl font-bold text-[var(--color-foreground)]">{t('createBlogPage.title')}</h1>
         <p className="text-sm text-[var(--color-muted-foreground)] mt-0.5">{t('createBlogPage.description')}</p>
       </motion.div>

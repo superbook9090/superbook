@@ -14,8 +14,57 @@ import { getCachedData, setCachedData, invalidatePattern } from '@/lib/redis';
 import { revalidateTag } from 'next/cache';
 import { parseOffsetPagination } from '@/lib/server/pagination';
 import { blogTopicValues, type BlogTopicKey } from '@/i18n/config';
+import { slugifyBlogTitle } from '@/lib/blogs/public';
 
 export const dynamic = 'force-dynamic';
+
+function publicBlogAccessFilter() {
+  return {
+    $or: [
+      { visibility: 'public' },
+      {
+        $and: [
+          { organizationId: null },
+          {
+            $or: [
+              { visibility: { $exists: false } },
+              { visibility: null },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+}
+
+function stripHtml(input: string) {
+  return input.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function deriveExcerpt(content: string, explicit?: string) {
+  if (explicit?.trim()) return explicit.trim();
+  const plain = stripHtml(content);
+  return plain.slice(0, 160).trim() + (plain.length > 160 ? '...' : '');
+}
+
+async function generateUniqueBlogSlug(title: string, existingId?: string) {
+  const base = slugifyBlogTitle(title);
+  let candidate = base;
+  let count = 1;
+
+  while (true) {
+    const existing = await Blog.findOne({
+      slug: candidate,
+      ...(existingId ? { _id: { $ne: new mongoose.Types.ObjectId(existingId) } } : {}),
+    })
+      .select('_id')
+      .lean();
+
+    if (!existing) return candidate;
+    count += 1;
+    candidate = `${base}-${count}`;
+  }
+}
 
 function escapeRegex(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -106,6 +155,8 @@ export async function GET(req: NextRequest) {
       if (Object.keys(accessFilter).length > 0) {
         andFilters.push(accessFilter);
       }
+    } else {
+      andFilters.push(publicBlogAccessFilter());
     }
 
     if (author === 'self' && session?.user?.id) {
@@ -263,7 +314,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { title, content, topic, language = 'en', isPublished = true } = validationResult.data;
+    const {
+      title,
+      content,
+      topic,
+      language = 'en',
+      isPublished = true,
+      slug,
+      excerpt,
+      metaTitle,
+      metaDescription,
+      visibility,
+      isFeatured = false,
+    } = validationResult.data;
     const sanitizedContent = sanitizeHtml(content);
 
     if (session.user.role === 'teacher') {
@@ -285,12 +348,22 @@ export async function POST(req: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const user = session.user as any;
     const organizationId = user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null;
+    const normalizedVisibility = visibility ?? (organizationId ? 'organization' : 'public');
+    const resolvedSlug = normalizedVisibility === 'public'
+      ? await generateUniqueBlogSlug(slug || title)
+      : undefined;
 
     const blog = await Blog.create({
       title,
       content: sanitizedContent,
       topic,
       language,
+      excerpt: deriveExcerpt(sanitizedContent, excerpt),
+      metaTitle: metaTitle?.trim() || title,
+      metaDescription: metaDescription?.trim() || deriveExcerpt(sanitizedContent, excerpt),
+      visibility: normalizedVisibility,
+      isFeatured: normalizedVisibility === 'public' ? isFeatured : false,
+      ...(resolvedSlug ? { slug: resolvedSlug } : {}),
       author: session.user.id,
       organizationId,
       isPublished,

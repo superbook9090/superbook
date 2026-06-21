@@ -11,6 +11,42 @@ import { logApiError, type LogContext } from '@/lib/logger';
 import { validateContentAccess } from '@/lib/accessControl';
 import { invalidatePattern } from '@/lib/redis';
 import { revalidateTag } from 'next/cache';
+import { slugifyBlogTitle } from '@/lib/blogs/public';
+
+function publicBlogAccessAllowed(blog: {
+  visibility?: 'public' | 'organization' | null;
+  organizationId?: mongoose.Types.ObjectId | null;
+}) {
+  return blog.visibility === 'public' || (!blog.visibility && !blog.organizationId);
+}
+
+async function generateUniqueBlogSlug(title: string, existingId: string) {
+  const base = slugifyBlogTitle(title);
+  let candidate = base;
+  let count = 1;
+
+  while (true) {
+    const existing = await Blog.findOne({
+      slug: candidate,
+      _id: { $ne: new mongoose.Types.ObjectId(existingId) },
+    })
+      .select('_id')
+      .lean();
+    if (!existing) return candidate;
+    count += 1;
+    candidate = `${base}-${count}`;
+  }
+}
+
+function stripHtml(input: string) {
+  return input.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function deriveExcerpt(content: string, explicit?: string | null) {
+  if (explicit?.trim()) return explicit.trim();
+  const plain = stripHtml(content);
+  return plain.slice(0, 160).trim() + (plain.length > 160 ? '...' : '');
+}
 
 // GET /api/blogs/[id] - Get a single blog
 export async function GET(
@@ -62,6 +98,11 @@ export async function GET(
           role: user.role as 'student' | 'teacher' | 'admin',
         },
         'blog'
+      );
+    } else if (!publicBlogAccessAllowed(blog)) {
+      return NextResponse.json(
+        { message: 'Blog not found' },
+        { status: 404 }
       );
     }
 
@@ -149,12 +190,52 @@ export async function PATCH(
       );
     }
 
-    const { title, content, topic, isPublished } = validationResult.data;
+    const {
+      title,
+      content,
+      topic,
+      isPublished,
+      slug,
+      excerpt,
+      metaTitle,
+      metaDescription,
+      visibility,
+      isFeatured,
+    } = validationResult.data;
 
     if (title) blog.title = title;
     if (content) blog.content = sanitizeHtml(content);
     if (topic) blog.topic = topic;
     if (typeof isPublished === 'boolean') blog.isPublished = isPublished;
+    if (visibility) {
+      blog.visibility = visibility;
+    }
+    if (typeof isFeatured === 'boolean') {
+      blog.isFeatured = blog.visibility === 'public' ? isFeatured : false;
+    }
+    if (excerpt !== undefined) {
+      blog.excerpt = excerpt?.trim() || deriveExcerpt(blog.content, null);
+    } else if (content) {
+      blog.excerpt = deriveExcerpt(blog.content, blog.excerpt);
+    }
+    if (metaTitle !== undefined) {
+      blog.metaTitle = metaTitle?.trim() || blog.title;
+    } else if (title) {
+      blog.metaTitle = blog.title;
+    }
+    if (metaDescription !== undefined) {
+      blog.metaDescription = metaDescription?.trim() || deriveExcerpt(blog.content, blog.excerpt);
+    } else if (content) {
+      blog.metaDescription = deriveExcerpt(blog.content, blog.excerpt);
+    }
+    if (blog.visibility === 'public') {
+      if (slug !== undefined || title) {
+        blog.slug = await generateUniqueBlogSlug(slug || blog.title, blog._id.toString());
+      }
+    } else {
+      blog.slug = undefined;
+      blog.isFeatured = false;
+    }
 
     await blog.save();
     await blog.populate('author', 'name');

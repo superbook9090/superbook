@@ -4,7 +4,8 @@ import { ROUTES } from '@/constants/routes';
 import React from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { ArrowLeft, Shield, Lock, Eye, Database } from 'lucide-react';
+import { Shield, Lock, Eye, Database } from 'lucide-react';
+import BackButton from '@/components/ui/BackButton';
 import Header from '@/components/home/MarketingHeader';
 import Footer from '@/components/home/Footer';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -22,13 +23,11 @@ export default function PrivacyPageClient() {
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[var(--color-secondary)]/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <Link 
-            href={ROUTES.home} 
-            className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-muted-foreground)] hover:text-[var(--primary)] transition-colors mb-8 group"
-          >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            {t('privacy.backToHome') || 'Back to Home'}
-          </Link>
+          <BackButton
+            href={ROUTES.home}
+            label={t('privacy.backToHome') || 'Back to Home'}
+            className="hover:text-[var(--primary)] mb-8"
+          />
 
           <motion.div 
             initial={{ opacity: 0, y: 20 }}

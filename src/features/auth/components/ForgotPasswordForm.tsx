@@ -2,9 +2,9 @@
 import { ROUTES } from '@/constants/routes';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Mail, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Mail, ArrowRight } from 'lucide-react';
+import BackButton from '@/components/ui/BackButton';
 import PremiumLogo from '@/components/ui/PremiumLogo';
 import { Loader } from '@/components/ui/Loader';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -98,13 +98,11 @@ export default function ForgotPasswordForm() {
           </form>
         ) : null}
 
-        <Link
+        <BackButton
           href={ROUTES.login}
-          className="mt-6 flex items-center justify-center gap-2 text-sm font-medium text-[var(--student-primary)] hover:underline"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          {t('password.backToLogin')}
-        </Link>
+          label={t('password.backToLogin')}
+          className="mt-6 w-full justify-center text-[var(--student-primary)] hover:underline"
+        />
       </motion.div>
     </div>
   );

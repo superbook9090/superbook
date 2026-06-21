@@ -5,13 +5,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter, useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import Link from 'next/link';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useTranslation } from '@/hooks/useTranslation';
 import { formatDate } from '@/lib/dateUtils';
 import {
-  ArrowLeft,
   Heart,
   Share2,
   Calendar,
@@ -19,6 +17,7 @@ import {
   BookOpen,
   Hash,
 } from 'lucide-react';
+import BackButton from '@/components/ui/BackButton';
 import { Badge } from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
 import DOMPurify from 'isomorphic-dompurify';
@@ -99,13 +98,12 @@ export default function BlogDetailPage() {
         <p className="text-[var(--color-muted-foreground)] mb-6">
           {t('blog.blogNotFoundDesc')}
         </p>
-        <Link
+        <BackButton
           href={ROUTES.student.blogs}
-          className={`inline-flex items-center justify-center min-h-[44px] px-4 py-3 sm:px-4 sm:py-2.5 bg-gradient-to-r ${theme.gradient} text-white rounded-xl hover:opacity-90 transition-colors touch-manipulation`}
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          {t('blog.backToBlogs')}
-        </Link>
+          label={t('blog.backToBlogs')}
+          variant="button"
+          className={`min-h-[44px] px-4 py-3 sm:px-4 sm:py-2.5 bg-gradient-to-r ${theme.gradient} text-white rounded-xl hover:opacity-90`}
+        />
       </div>
     );
   }
@@ -118,13 +116,11 @@ export default function BlogDetailPage() {
         animate={{ opacity: 1, y: 0 }}
         className="mb-6"
       >
-        <Link
+        <BackButton
           href={ROUTES.student.blogs}
-          className="inline-flex items-center text-[var(--student-primary)] hover:text-[var(--student-primary)]/80 touch-manipulation"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          {t('blog.backToBlogs')}
-        </Link>
+          label={t('blog.backToBlogs')}
+          className="text-[var(--student-primary)] hover:text-[var(--student-primary)]/80"
+        />
       </motion.div>
 
       {alertState && (

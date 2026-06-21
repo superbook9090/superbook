@@ -4,8 +4,7 @@ import { ROUTES } from '@/constants/routes';
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import BackButton from '@/components/ui/BackButton';
 import Alert from '@/components/ui/Alert';
 import { useSessionStore } from '@/store/useSessionStore';
 import { getBlogById, updateBlog, type BlogDocument } from '@/lib/api/blogs';
@@ -28,6 +27,10 @@ export default function EditBlogPage() {
     topic: '',
     content: '',
     language: 'en',
+    visibility: 'organization',
+    metaTitle: '',
+    metaDescription: '',
+    isFeatured: false,
   });
   const [isPublished, setIsPublished] = useState(true);
   const [error, setError] = useState('');
@@ -53,6 +56,10 @@ export default function EditBlogPage() {
         topic: blog.topic,
         content: blog.content,
         language: blog.language || 'en',
+        visibility: blog.visibility || 'organization',
+        metaTitle: blog.metaTitle || '',
+        metaDescription: blog.metaDescription || '',
+        isFeatured: Boolean(blog.isFeatured),
       });
       setIsPublished(blog.isPublished);
     } catch (err) {
@@ -81,6 +88,10 @@ export default function EditBlogPage() {
         topic: formData.topic,
         content: formData.content,
         language: formData.language,
+        visibility: formData.visibility,
+        metaTitle: formData.metaTitle,
+        metaDescription: formData.metaDescription,
+        isFeatured: formData.isFeatured,
         isPublished: !saveAsDraft,
       });
       router.push(ROUTES.teacher.blogs);
@@ -108,13 +119,11 @@ export default function EditBlogPage() {
       )}
 
       <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
-        <Link
+        <BackButton
           href={ROUTES.teacher.blogs}
-          className="inline-flex items-center text-sm text-[var(--teacher-primary)] hover:text-[var(--teacher-primary)]/80 mb-3"
-        >
-          <ArrowLeft className="w-4 h-4 mr-1.5" />
-          {t('blog.backToBlogs')}
-        </Link>
+          label={t('blog.backToBlogs')}
+          className="text-[var(--teacher-primary)] hover:text-[var(--teacher-primary)]/80 mb-3"
+        />
         <h1 className="text-lg sm:text-xl font-bold text-[var(--color-foreground)]">{t('editBlogPage.title')}</h1>
         <p className="text-sm text-[var(--color-muted-foreground)] mt-0.5">{t('editBlogPage.description')}</p>
       </motion.div>
