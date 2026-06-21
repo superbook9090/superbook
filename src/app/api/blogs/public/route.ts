@@ -3,7 +3,7 @@ import { listPublicBlogs, listPublicBlogTopics } from '@/lib/blogs/public';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { requireFeature } from '@/lib/settingsHelpers';
 
-export const revalidate = 300;
+export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   const logContext: LogContext = { method: 'GET', path: '/api/blogs/public' };

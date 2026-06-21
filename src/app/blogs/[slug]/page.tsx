@@ -8,6 +8,7 @@ import { buildPublicBlogCanonical, buildPublicBlogPath, getPublicBlogBySlug, lis
 import { createPageMetadata } from '@/lib/seo/metadata';
 
 export const revalidate = 300;
+export const dynamicParams = true; // slugs not in generateStaticParams are rendered on first visit and cached
 
 export async function generateStaticParams() {
   const slugs = await listPublicBlogSlugs(50);
