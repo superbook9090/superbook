@@ -8,7 +8,7 @@ import { signOut } from 'next-auth/react';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
 import PremiumLogo from '@/components/ui/PremiumLogo';
-import { LogOut } from 'lucide-react';
+import LogoutButton from '@/components/ui/LogoutButton';
 import { useQuiz } from '@/contexts/QuizContext';
 import { STUDENT_NAV } from '@/constants/navigation';
 import { getNavIcon } from '@/lib/navigation/icons';
@@ -113,13 +113,7 @@ export default function StudentSidebar({ user }: { user: User | null }) {
                 {user?.email?.toUpperCase()}
               </div>
             </div>
-            <button
-              onClick={() => signOut({ callbackUrl: ROUTES.login })}
-              className="ml-2 p-2 rounded-xl text-[var(--student-primary-light)] hover:text-white hover:bg-white/10 transition-all"
-              aria-label={t('common.signOut')}
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
+            <LogoutButton variant="sidebar" />
           </div>
         </div>
       </div>

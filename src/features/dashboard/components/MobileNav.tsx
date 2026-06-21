@@ -4,11 +4,11 @@ import { ROUTES } from '@/constants/routes';
 import Link from 'next/link';
 import { useState, useMemo, useCallback, memo } from 'react';
 import { usePathname } from 'next/navigation';
-import { signOut } from 'next-auth/react';
 import { useTranslation } from '@/hooks/useTranslation';
 import PremiumLogo from '@/components/ui/PremiumLogo';
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher';
-import { Menu, X, LogOut, Bell } from 'lucide-react';
+import LogoutButton from '@/components/ui/LogoutButton';
+import { Menu, X, Bell } from 'lucide-react';
 import type { DashboardNavItem } from '@/constants/navigation';
 import { getNavIcon } from '@/lib/navigation/icons';
 import { useDashboardNav } from '@/hooks/useDashboardNav';
@@ -59,7 +59,7 @@ function MobileNavComponent({
 
   const toggleMenu = useCallback(() => setIsOpen((prev) => !prev), []);
   const closeMenu = useCallback(() => setIsOpen(false), []);
-  const handleSignOut = useCallback(() => signOut({ callbackUrl: ROUTES.login }), []);
+
 
   return (
     <>
@@ -141,14 +141,7 @@ function MobileNavComponent({
                 <div className="text-base font-medium truncate">{user?.name}</div>
                 <div className="text-sm text-white/70 truncate">{user?.email}</div>
               </div>
-              <button
-                type="button"
-                onClick={handleSignOut}
-                className="mx-[var(--space-2)] w-[calc(100%-var(--space-4))] touch-target bg-white/20 text-white px-[var(--space-4)] py-2.5 rounded-lg text-base font-medium hover:bg-white/30 focus-ring flex items-center justify-center gap-[var(--space-2)]"
-              >
-                <LogOut className="w-5 h-5" aria-hidden />
-                {t('common.signOut')}
-              </button>
+              <LogoutButton variant="mobile" />
             </div>
           </div>
         </div>
