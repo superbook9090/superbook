@@ -38,7 +38,7 @@ const courseSchema = new Schema<ICourse>(
     chapterCount: { type: Number, default: 0 },
     lessonCount: { type: Number, default: 0 },
     enrolledCount: { type: Number, default: 0 },
-    courseCode: { type: String, default: null, trim: true, uppercase: true },
+    courseCode: { type: String, default: undefined, trim: true, uppercase: true },
     lastPublishedLesson: { type: Schema.Types.ObjectId, ref: 'Lesson', default: null },
   },
   { timestamps: true }

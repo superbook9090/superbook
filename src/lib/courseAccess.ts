@@ -70,11 +70,11 @@ export function validateCourseCodeMatch(
 export function resolveCourseCodeForSave(
   courseCode: string | null | undefined,
   existingCode?: string | null
-): string | null {
-  if (courseCode === null || courseCode === '') return null;
-  if (courseCode === undefined) return existingCode ?? null;
+): string | undefined {
+  if (courseCode === null || courseCode === '') return undefined;
+  if (courseCode === undefined) return existingCode ?? undefined;
   const normalized = normalizeCourseCode(courseCode);
-  return normalized.length > 0 ? normalized : null;
+  return normalized.length > 0 ? normalized : undefined;
 }
 
 export async function generateUniqueCourseCode(

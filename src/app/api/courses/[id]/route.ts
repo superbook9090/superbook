@@ -166,7 +166,12 @@ export async function PATCH(
     if (typeof isPublished === 'boolean') course.isPublished = isPublished;
     if (locale) course.locale = locale;
     if (courseCode !== undefined) {
-      course.courseCode = resolveCourseCodeForSave(courseCode, course.courseCode);
+      const resolvedCode = resolveCourseCodeForSave(courseCode, course.courseCode);
+      if (resolvedCode === undefined) {
+        course.set('courseCode', undefined);
+      } else {
+        course.courseCode = resolvedCode;
+      }
     }
 
     await course.save();
