@@ -11,7 +11,6 @@ type Props = {
 
 export default function PublicBlogShareButtons({ title, url }: Props) {
   const encodedUrl = encodeURIComponent(url);
-  const encodedTitle = encodeURIComponent(title);
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
