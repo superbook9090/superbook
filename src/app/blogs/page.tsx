@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { createPageMetadata } from '@/lib/seo/metadata';
 import { listPublicBlogs, listPublicBlogTopics } from '@/lib/blogs/public';
@@ -12,28 +13,32 @@ export const metadata: Metadata = createPageMetadata({
   keywords: ['education blog', 'exam preparation blog', 'study tips', 'quiz-do blogs'],
 });
 
-export default async function PublicBlogsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ page?: string; topic?: string; search?: string }>;
-}) {
-  const params = await searchParams;
-  const page = Math.max(1, Number(params.page || '1'));
-  const topic = params.topic || undefined;
-  const search = params.search || undefined;
+export default async function PublicBlogsPage() {
+  let data: Awaited<ReturnType<typeof listPublicBlogs>> = {
+    blogs: [],
+    pagination: { page: 1, limit: 12, total: 0, totalPages: 1 },
+  };
+  let topics: string[] = [];
 
-  const [data, topics] = await Promise.all([
-    listPublicBlogs({ page, limit: 12, topic, search, sort: 'latest' }),
-    listPublicBlogTopics(),
-  ]);
+  try {
+    [data, topics] = await Promise.all([
+      listPublicBlogs({ page: 1, limit: 12, sort: 'latest' }),
+      listPublicBlogTopics(),
+    ]);
+  } catch (err) {
+    console.error('[/blogs] Failed to fetch initial blog data:', err);
+    // render with empty state — client will retry via the API
+  }
 
   return (
     <main className="page-shell">
-      <PublicBlogsClient
-        blogs={data.blogs}
-        topics={topics}
-        pagination={data.pagination}
-      />
+      <Suspense fallback={null}>
+        <PublicBlogsClient
+          blogs={data.blogs}
+          topics={topics}
+          pagination={data.pagination}
+        />
+      </Suspense>
     </main>
   );
 }
