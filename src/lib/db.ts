@@ -1,11 +1,7 @@
-// src/lib/db.ts
+import 'server-only';
 import mongoose from 'mongoose';
 
 const MONGODB_URI = process.env.MONGODB_URI || '';
-
-if (!MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable');
-}
 
 declare global {
   var mongoose: {
@@ -21,6 +17,10 @@ if (!cached) {
 }
 
 async function dbConnect() {
+  if (!MONGODB_URI) {
+    throw new Error('Please define the MONGODB_URI environment variable');
+  }
+
   const readyState = mongoose.connection.readyState;
 
   if (cached.conn && readyState === 1) {
@@ -28,7 +28,6 @@ async function dbConnect() {
   }
 
   if (cached.conn && readyState !== 1) {
-
     cached.conn = null;
     cached.promise = null;
   }
@@ -38,7 +37,7 @@ async function dbConnect() {
       bufferCommands: false,
       serverSelectionTimeoutMS: 10000,
       socketTimeoutMS: 30000,
-      family: 4, // Force IPv4
+      family: 4,
       retryWrites: true,
       w: 'majority' as const,
     };

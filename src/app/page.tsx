@@ -4,6 +4,8 @@ import MarketingHeader from '@/components/home/MarketingHeader';
 import HeroStatic from '@/components/home/HeroStatic';
 import HomeBelowFold from '@/components/home/HomeBelowFold';
 import HomeQuizMakerSeo from '@/components/home/HomeQuizMakerSeo';
+import FeaturedBlogs from '@/components/home/FeaturedBlogs';
+import SeoResources from '@/components/home/SeoResources';
 import { createPageMetadata } from '@/lib/seo/metadata';
 
 export const dynamic = 'force-static';
@@ -34,6 +36,8 @@ export default function HomePage() {
       <HeroStatic />
       <MarketingHeader />
       <HomeQuizMakerSeo />
+      <SeoResources />
+      <FeaturedBlogs />
       <HomeBelowFold />
     </main>
   );

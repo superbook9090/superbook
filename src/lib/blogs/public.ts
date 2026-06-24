@@ -1,3 +1,4 @@
+import 'server-only';
 import mongoose from 'mongoose';
 import dbConnect from '@/lib/db';
 import '@/models';
