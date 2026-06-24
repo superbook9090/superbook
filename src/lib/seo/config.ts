@@ -5,6 +5,15 @@ export const SITE_NAME_FULL = 'Quiz-Do — Free Online Quizzes & Learning Manage
 
 /** Primary education / EdTech keywords for meta tags and structured data. */
 export const EDUCATION_KEYWORDS = [
+  'free quiz maker',
+  'quiz maker',
+  'quiz maker free',
+  'online quiz maker',
+  'quiz creator',
+  'create quiz online',
+  'free online quiz',
+  'online quiz',
+  'quiz platform',
   'free online quizzes',
   'take quizzes online',
   'quiz builder',
@@ -38,10 +47,10 @@ export const EDUCATION_KEYWORDS = [
 ] as const;
 
 export const DEFAULT_DESCRIPTION =
-  'Quiz-Do is a free online quiz platform and learning management system (LMS). Create and take interactive quizzes, build online courses, track student progress, and practice tests in Hindi & English.';
+  'Quiz-Do is a free quiz maker online. Create quizzes, MCQ tests, mock exams, and courses for free. The online quiz maker trusted by teachers, students, and exam prep coaches in India.';
 
 export const DEFAULT_TITLE =
-  'Quiz-Do | Free Online Quizzes, Courses & Student Progress';
+  'Free Quiz Maker Online | Create Quizzes & Mock Tests — Quiz-Do';
 
 /** Resolve canonical site URL for metadata, sitemap, and JSON-LD. */
 export function getSiteUrl(): string {
@@ -50,6 +59,18 @@ export function getSiteUrl(): string {
     process.env.NEXTAUTH_URL ||
     (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
   return url.replace(/\/$/, '');
+}
+
+/** Search engine verification tokens (set in environment). */
+export function getSearchVerificationMeta(): Record<string, string> {
+  const meta: Record<string, string> = {};
+  if (process.env.GOOGLE_SITE_VERIFICATION) {
+    meta['google-site-verification'] = process.env.GOOGLE_SITE_VERIFICATION;
+  }
+  if (process.env.BING_SITE_VERIFICATION) {
+    meta['msvalidate.01'] = process.env.BING_SITE_VERIFICATION;
+  }
+  return meta;
 }
 
 export const TWITTER_HANDLE = '@quizdo';

@@ -18,6 +18,8 @@ export interface ICourse extends Document {
   enrolledCount: number;
   /** When set, course is private — students need this code to enroll. */
   courseCode?: string | null;
+  /** SEO-friendly URL slug for public course pages */
+  slug?: string | null;
   /** For continue-learning tiles without loading lessons. */
   lastPublishedLesson?: mongoose.Types.ObjectId | null;
   createdAt: Date;
@@ -39,6 +41,7 @@ const courseSchema = new Schema<ICourse>(
     lessonCount: { type: Number, default: 0 },
     enrolledCount: { type: Number, default: 0 },
     courseCode: { type: String, default: undefined, trim: true, uppercase: true },
+    slug: { type: String, trim: true, lowercase: true, maxlength: 240, default: null },
     lastPublishedLesson: { type: Schema.Types.ObjectId, ref: 'Lesson', default: null },
   },
   { timestamps: true }
@@ -49,6 +52,7 @@ courseSchema.index({ organizationId: 1, isPublished: 1, lessonCount: -1 });
 courseSchema.index({ organizationId: 1, isPublished: 1, createdAt: -1 });
 courseSchema.index({ instructor: 1, organizationId: 1 });
 courseSchema.index({ isPublished: 1, category: 1 });
+courseSchema.index({ slug: 1 }, { unique: true, sparse: true });
 courseSchema.index({ createdAt: -1 });
 courseSchema.index({ courseCode: 1 }, { unique: true, sparse: true });
 

@@ -6,6 +6,7 @@ import PublicBlogShareButtons from '@/components/blogs/PublicBlogShareButtons';
 import PublicBlogViewTracker from '@/components/blogs/PublicBlogViewTracker';
 import { buildPublicBlogCanonical, buildPublicBlogPath, getPublicBlogBySlug, listPublicBlogSlugs, listRelatedPublicBlogs } from '@/lib/blogs/public';
 import { createPageMetadata } from '@/lib/seo/metadata';
+import { getSiteUrl } from '@/lib/seo/config';
 
 export const revalidate = 300;
 export const dynamicParams = true; // slugs not in generateStaticParams are rendered on first visit and cached
@@ -66,8 +67,8 @@ export default async function PublicBlogDetailPage({
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: '/' },
-      { '@type': 'ListItem', position: 2, name: 'Blogs', item: '/blogs' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: getSiteUrl() },
+      { '@type': 'ListItem', position: 2, name: 'Blogs', item: `${getSiteUrl()}/blogs` },
       { '@type': 'ListItem', position: 3, name: blog.title, item: canonical },
     ],
   };

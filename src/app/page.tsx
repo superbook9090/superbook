@@ -3,25 +3,27 @@ import JsonLd from '@/components/seo/JsonLd';
 import MarketingHeader from '@/components/home/MarketingHeader';
 import HeroStatic from '@/components/home/HeroStatic';
 import HomeBelowFold from '@/components/home/HomeBelowFold';
+import HomeQuizMakerSeo from '@/components/home/HomeQuizMakerSeo';
 import { createPageMetadata } from '@/lib/seo/metadata';
 
 export const dynamic = 'force-static';
 
 export const metadata: Metadata = createPageMetadata({
-  title: 'Quiz-Do | Free Online Quizzes, Courses & Student Progress',
+  title: 'Free Quiz Maker Online | Create Quizzes, MCQs & Mock Tests',
   description:
-    'Take free online quizzes, enroll in structured courses, and track your progress with Quiz-Do. The complete educational platform for interactive tests, mock exams, and online learning.',
+    'Quiz-Do is a free online quiz maker for teachers and students. Create quizzes, MCQ tests, mock exams, and test series in minutes. No credit card — start free today.',
   path: '/',
   keywords: [
-    'free online quizzes',
-    'online quiz platform',
-    'take quizzes online',
-    'practice tests',
-    'course builder',
-    'student dashboard',
-    'online education app India',
+    'free quiz maker',
+    'quiz maker',
+    'online quiz maker',
+    'quiz maker free',
+    'create quiz online',
+    'free online quiz',
     'quiz creator',
-    'LMS with quizzes',
+    'MCQ quiz maker',
+    'mock test maker',
+    'quiz platform India',
   ],
 });
 
@@ -31,6 +33,7 @@ export default function HomePage() {
       <JsonLd includeWebSite />
       <HeroStatic />
       <MarketingHeader />
+      <HomeQuizMakerSeo />
       <HomeBelowFold />
     </main>
   );

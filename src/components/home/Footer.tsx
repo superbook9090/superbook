@@ -16,6 +16,15 @@ const getFooterLinks = (t: (key: string) => string) => ({
     { label: t('home.about.title'), href: '#about' },
     { label: t('contact.title'), href: ROUTES.contact },
   ],
+  resources: [
+    { label: 'Free Quiz Maker', href: '/quiz-maker-free' },
+    { label: 'AI Quiz Generator', href: '/ai-quiz-generator' },
+    { label: 'MCQ Generator', href: '/mcq-generator' },
+    { label: 'Course Maker', href: '/course-maker-free' },
+    { label: 'Educational Blogs', href: ROUTES.blogs },
+    { label: 'Public Courses', href: ROUTES.courses },
+    { label: 'All Tools', href: ROUTES.toolsIndex },
+  ],
   auth: [
     { label: t('home.login'), href: ROUTES.login },
     { label: t('home.register'), href: ROUTES.register },
@@ -29,7 +38,7 @@ export default function Footer() {
   return (
     <footer className="bg-[var(--color-foreground)] text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -54,6 +63,27 @@ export default function Footer() {
             <h4 className="font-semibold mb-4">{t('home.footer.product')}</h4>
             <ul className="space-y-2">
               {getFooterLinks(t).product.map((link) => (
+                <li key={link.label}>
+                  <Link
+                    href={link.href}
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.15 }}
+          >
+            <h4 className="font-semibold mb-4">Resources</h4>
+            <ul className="space-y-2">
+              {getFooterLinks(t).resources.map((link) => (
                 <li key={link.label}>
                   <Link
                     href={link.href}

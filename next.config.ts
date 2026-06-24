@@ -24,6 +24,13 @@ const nextConfig = {
   },
   // Enable compression
   compress: true,
+  async redirects() {
+    return [
+      { source: '/quiz', destination: '/quiz-maker-free', permanent: true },
+      { source: '/quiz-maker', destination: '/quiz-maker-free', permanent: true },
+      { source: '/free-quiz-maker', destination: '/quiz-maker-free', permanent: true },
+    ];
+  },
   async headers() {
     return [
       {

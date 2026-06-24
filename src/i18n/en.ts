@@ -2,9 +2,9 @@
 
 export const en = {
   metadata: {
-    siteTitle: 'Quiz-Do | Free Online Quizzes, Courses & Learning Progress',
+    siteTitle: 'Free Quiz Maker Online | Create Quizzes & Mock Tests — Quiz-Do',
     siteDescription:
-      'Quiz-Do is a free online quiz platform and learning management system (LMS) for interactive quizzes, structured courses, and progress tracking.',
+      'Quiz-Do is a free online quiz maker. Create MCQ quizzes, mock tests, test series, and courses for teachers and students in India.',
   },
 
   // Common
@@ -113,11 +113,11 @@ export const en = {
 
   // Home / Landing Page
   home: {
-    title: 'Free Online Quizzes, Courses & Progress Tracking — in one place',
-    subtitle: 'Quiz-Do is a modern learning platform and quiz creator for schools, teachers, coaching, and self-paced learners',
+    title: 'Free Quiz Maker — Create Online Quizzes & Mock Tests',
+    subtitle: 'The free online quiz maker for teachers, students, and coaching institutes',
     description:
-      'Browse interactive courses, study with video lessons, take timed online quizzes, and track your progress with analytics. Create free quizzes, practice mock tests, and learn in English & Hindi.',
-    badge: 'Interactive Quizzes · Structured Courses · Learning Analytics',
+      'Create quizzes free with Quiz-Do. Build MCQ tests, timed mock exams, test series, and courses — then share with one link. Auto-grading, analytics, and Hindi & English support included.',
+    badge: 'Free Quiz Maker · Online Tests · Courses & Analytics',
     login: 'Login',
     register: 'Create free account',
     highlights: {

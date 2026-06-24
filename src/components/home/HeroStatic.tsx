@@ -82,6 +82,12 @@ export default function HeroStatic() {
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </Link>
           <Link
+            href="/quiz-maker-free"
+            className="flex items-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm text-white font-semibold rounded-xl border border-white/30 hover:bg-white/20 transition-colors duration-300"
+          >
+            Free Quiz Maker
+          </Link>
+          <Link
             href={ROUTES.login}
             className="flex items-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm text-white font-semibold rounded-xl border border-white/30 hover:bg-white/20 transition-colors duration-300"
             data-i18n-key="home.login"

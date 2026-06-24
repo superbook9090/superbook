@@ -65,7 +65,11 @@ function Accordion({ title, children }: { title: string; children: React.ReactNo
   );
 }
 
-export default function ToolClient({ tool }: { tool: SeoToolData }) {
+type ToolClientProps = {
+  tool: SeoToolData;
+};
+
+export default function ToolClient({ tool }: ToolClientProps) {
   const { t } = useTranslation();
 
   return (
@@ -204,11 +208,14 @@ export default function ToolClient({ tool }: { tool: SeoToolData }) {
             <section className="pt-10 border-t border-[var(--border)]">
               <h3 className="text-lg font-bold text-[var(--color-foreground)] mb-4">Explore More Tools</h3>
               <div className="flex flex-wrap gap-3">
-                <Link href={ROUTES.tools('quiz-maker-free')} className="text-sm px-4 py-2 bg-[var(--color-surface-muted)] rounded-lg hover:bg-[var(--card-solid)] text-[var(--color-foreground)] transition-colors">Free Quiz Maker</Link>
-                <Link href={ROUTES.tools('ai-quiz-maker-free')} className="text-sm px-4 py-2 bg-[var(--color-surface-muted)] rounded-lg hover:bg-[var(--card-solid)] text-[var(--color-foreground)] transition-colors">AI Quiz Maker</Link>
-                <Link href={ROUTES.tools('online-quiz-maker')} className="text-sm px-4 py-2 bg-[var(--color-surface-muted)] rounded-lg hover:bg-[var(--card-solid)] text-[var(--color-foreground)] transition-colors">Online Quiz Maker</Link>
-                <Link href={ROUTES.tools('course-builder-online')} className="text-sm px-4 py-2 bg-[var(--color-surface-muted)] rounded-lg hover:bg-[var(--card-solid)] text-[var(--color-foreground)] transition-colors">Course Builder</Link>
-                <Link href={ROUTES.home} className="text-sm px-4 py-2 bg-[var(--color-surface-muted)] rounded-lg hover:bg-[var(--card-solid)] text-[var(--color-foreground)] transition-colors">Learning Platform</Link>
+                <Link href="/quiz-maker-free" className="text-sm px-4 py-2 bg-[var(--color-surface-muted)] rounded-lg hover:bg-[var(--card-solid)] text-[var(--color-foreground)] transition-colors">Free Quiz Maker</Link>
+                <Link href="/ai-quiz-generator" className="text-sm px-4 py-2 bg-[var(--color-surface-muted)] rounded-lg hover:bg-[var(--card-solid)] text-[var(--color-foreground)] transition-colors">AI Quiz Generator</Link>
+                <Link href="/mcq-generator" className="text-sm px-4 py-2 bg-[var(--color-surface-muted)] rounded-lg hover:bg-[var(--card-solid)] text-[var(--color-foreground)] transition-colors">MCQ Generator</Link>
+                <Link href="/course-maker-free" className="text-sm px-4 py-2 bg-[var(--color-surface-muted)] rounded-lg hover:bg-[var(--card-solid)] text-[var(--color-foreground)] transition-colors">Course Maker</Link>
+                <Link href="/test-series-maker-free" className="text-sm px-4 py-2 bg-[var(--color-surface-muted)] rounded-lg hover:bg-[var(--card-solid)] text-[var(--color-foreground)] transition-colors">Test Series Maker</Link>
+                <Link href={ROUTES.blogs} className="text-sm px-4 py-2 bg-[var(--color-surface-muted)] rounded-lg hover:bg-[var(--card-solid)] text-[var(--color-foreground)] transition-colors">Educational Blogs</Link>
+                <Link href="/courses" className="text-sm px-4 py-2 bg-[var(--color-surface-muted)] rounded-lg hover:bg-[var(--card-solid)] text-[var(--color-foreground)] transition-colors">Public Courses</Link>
+                <Link href="/tools" className="text-sm px-4 py-2 bg-[var(--color-surface-muted)] rounded-lg hover:bg-[var(--card-solid)] text-[var(--color-foreground)] transition-colors">All Tools</Link>
               </div>
             </section>
 

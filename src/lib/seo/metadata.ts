@@ -4,6 +4,7 @@ import {
   DEFAULT_TITLE,
   EDUCATION_KEYWORDS,
   getSiteUrl,
+  getSearchVerificationMeta,
   SITE_NAME,
   TWITTER_HANDLE,
 } from '@/lib/seo/config';
@@ -86,6 +87,7 @@ export function createRootMetadata(): Metadata {
     },
     other: {
       'theme-color': '#0d9488',
+      ...getSearchVerificationMeta(),
     },
   };
 }
