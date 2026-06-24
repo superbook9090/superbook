@@ -7,6 +7,7 @@ interface FeatureToggles {
   enableQuizzes: boolean;
   enableCourses: boolean;
   enableAnalytics: boolean;
+  enableQuizSolutionAnalysis: boolean;
 }
 
 interface TeacherLimits {

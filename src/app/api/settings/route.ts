@@ -44,6 +44,7 @@ export async function GET() {
           enableQuizzes: true,
           enableCourses: true,
           enableAnalytics: true,
+          enableQuizSolutionAnalysis: false,
         },
         platformConfig: {
           siteName: 'Quiz-Do',

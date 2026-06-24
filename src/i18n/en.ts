@@ -934,6 +934,11 @@ export const en = {
     filterUnattempted: 'Unattempted',
     unattempted: 'Unattempted',
     noFilteredQuestions: 'No questions match this filter.',
+    analyzeSolution: 'Analyze solution',
+    analyzingSolution: 'Analyzing...',
+    solutionAnalysis: 'Solution analysis',
+    analyzeSolutionFailed: 'Could not analyze this solution. Please try again.',
+    analyzeSolutionRetry: 'Try again',
   },
 
   // Quizzes (general page)
@@ -1261,6 +1266,9 @@ export const en = {
     enableCoursesDesc: 'Allow teachers to create courses',
     enableAnalytics: 'Enable Analytics',
     enableAnalyticsDesc: 'Enable analytics dashboard for teachers',
+    enableQuizSolutionAnalysis: 'Enable Quiz Solution Analysis',
+    enableQuizSolutionAnalysisDesc:
+      'Allow students to get AI-powered short explanations on quiz result pages (superadmin only)',
     platformConfig: 'Platform Configuration',
     maintenanceMode: 'Maintenance Mode',
     maintenanceModeDesc: 'Disable site for maintenance',

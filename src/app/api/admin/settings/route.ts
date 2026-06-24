@@ -6,6 +6,7 @@ import AppSettings from '@/models/AppSettings';
 import { updateSettingsSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { revalidatePath } from 'next/cache';
+import { isSuperAdmin } from '@/lib/roles';
 
 // GET /api/admin/settings - Get app settings (admin only)
 export async function GET() {
@@ -148,7 +149,30 @@ export async function PATCH(req: NextRequest) {
           { status: 400 }
         );
       }
-      settings.featureToggles = featureToggles;
+      if (
+        featureToggles.enableQuizSolutionAnalysis !== undefined &&
+        typeof featureToggles.enableQuizSolutionAnalysis !== 'boolean'
+      ) {
+        return NextResponse.json(
+          { message: 'enableQuizSolutionAnalysis must be a boolean' },
+          { status: 400 }
+        );
+      }
+
+      const existingToggles = settings.featureToggles ?? {};
+      const mergedToggles = {
+        ...existingToggles,
+        enableBlogs: featureToggles.enableBlogs,
+        enableQuizzes: featureToggles.enableQuizzes,
+        enableCourses: featureToggles.enableCourses,
+        enableAnalytics: featureToggles.enableAnalytics,
+        enableQuizSolutionAnalysis:
+          isSuperAdmin(session.user.role) && featureToggles.enableQuizSolutionAnalysis !== undefined
+            ? featureToggles.enableQuizSolutionAnalysis
+            : (existingToggles.enableQuizSolutionAnalysis ?? false),
+      };
+
+      settings.featureToggles = mergedToggles;
     }
 
     // Update platform config if provided

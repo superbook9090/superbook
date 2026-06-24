@@ -21,6 +21,7 @@ import {
   QuizSolutionsFilter,
   type SolutionFilter,
 } from '@/features/quizzes/components/QuizSolutionsFilter';
+import { QuizSolutionAnalysis } from '@/features/quizzes/components/QuizSolutionAnalysis';
 import { cn } from '@/lib/utils';
 
 interface Question {
@@ -306,6 +307,10 @@ export default function QuizResultPage() {
                         {t('quizResult.unattempted')}
                       </p>
                     )}
+                    <QuizSolutionAnalysis
+                      attemptId={attempt.attempt._id}
+                      questionId={question._id}
+                    />
                   </div>
                 </div>
               );

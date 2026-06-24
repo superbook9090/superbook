@@ -82,6 +82,9 @@ export const changePasswordLimiter = new RateLimiter(60 * 60 * 1000, 5);
 /** Course-code enrollment attempts: 10 per 15 minutes per user/IP */
 export const courseCodeAttemptLimiter = new RateLimiter(15 * 60 * 1000, 10);
 
+/** Quiz solution AI analysis: 15 requests per minute per user/IP */
+export const solutionAnalysisRateLimiter = new RateLimiter(60 * 1000, 15);
+
 // Cleanup expired entries every minute
 setInterval(() => {
   authRateLimiter.cleanup();
@@ -94,6 +97,7 @@ setInterval(() => {
   resetPasswordIpLimiter.cleanup();
   changePasswordLimiter.cleanup();
   courseCodeAttemptLimiter.cleanup();
+  solutionAnalysisRateLimiter.cleanup();
 }, 60 * 1000);
 
 export function getRequestIp(req: Request): string {

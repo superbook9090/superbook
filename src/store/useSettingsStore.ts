@@ -5,7 +5,8 @@ export type FeatureToggleKey =
   | 'enableBlogs'
   | 'enableQuizzes'
   | 'enableCourses'
-  | 'enableAnalytics';
+  | 'enableAnalytics'
+  | 'enableQuizSolutionAnalysis';
 
 export type TeacherLimitKey = 'courses' | 'quizzes' | 'blogs';
 
@@ -35,6 +36,7 @@ export const defaultPublicAppSettings: PublicAppSettings = {
     enableQuizzes: true,
     enableCourses: true,
     enableAnalytics: true,
+    enableQuizSolutionAnalysis: false,
   },
   platformConfig: {
     maintenanceMode: false,
@@ -89,7 +91,18 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       try {
         const data = await fetchPublicSettings<PublicAppSettings>();
         set({
-          settings: data,
+          settings: {
+            ...defaultPublicAppSettings,
+            ...data,
+            featureToggles: {
+              ...defaultPublicAppSettings.featureToggles,
+              ...data.featureToggles,
+            },
+            platformConfig: {
+              ...defaultPublicAppSettings.platformConfig,
+              ...data.platformConfig,
+            },
+          },
           error: null,
           lastFetched: Date.now(),
           isLoading: false,
@@ -112,7 +125,8 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     set({ settings, lastFetched: Date.now(), isLoading: false, error: null });
   },
 
-  isFeatureEnabled: (feature) => get().settings.featureToggles[feature] ?? true,
+  isFeatureEnabled: (feature) =>
+    get().settings.featureToggles[feature] ?? defaultPublicAppSettings.featureToggles[feature],
 
   canCreateContent: (type, currentCount) => {
     const limit = get().settings.teacherLimits[type] ?? 10;

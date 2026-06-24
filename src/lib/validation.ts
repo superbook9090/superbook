@@ -148,6 +148,7 @@ export const updateSettingsSchema = z.object({
     enableQuizzes: z.boolean(),
     enableCourses: z.boolean(),
     enableAnalytics: z.boolean(),
+    enableQuizSolutionAnalysis: z.boolean(),
   }).optional(),
   platformConfig: z.object({
     siteName: z.string().max(100).optional(),

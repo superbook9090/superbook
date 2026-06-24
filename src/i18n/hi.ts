@@ -934,6 +934,11 @@ export const hi = {
     filterUnattempted: 'अनुत्तरित',
     unattempted: 'अनुत्तरित',
     noFilteredQuestions: 'इस फ़िल्टर से कोई प्रश्न मेल नहीं खाता।',
+    analyzeSolution: 'समाधान का विश्लेषण करें',
+    analyzingSolution: 'विश्लेषण हो रहा है...',
+    solutionAnalysis: 'समाधान विश्लेषण',
+    analyzeSolutionFailed: 'इस समाधान का विश्लेषण नहीं हो सका। कृपया पुनः प्रयास करें।',
+    analyzeSolutionRetry: 'पुनः प्रयास करें',
   },
 
   // Quizzes (general page)
@@ -1261,6 +1266,9 @@ export const hi = {
     enableCoursesDesc: 'शिक्षकों को पाठ्यक्रम बनाने की अनुमति दें',
     enableAnalytics: 'विश्लेषिकी सक्षम करें',
     enableAnalyticsDesc: 'शिक्षकों के लिए विश्लेषिकी डैशबोर्ड सक्षम करें',
+    enableQuizSolutionAnalysis: 'क्विज़ समाधान विश्लेषण सक्षम करें',
+    enableQuizSolutionAnalysisDesc:
+      'छात्रों को क्विज़ परिणाम पृष्ठ पर AI आधारित संक्षिप्त व्याख्या प्राप्त करने दें (केवल सुपरएडमिन)',
     platformConfig: 'प्लेटफ़ॉर्म कॉन्फ़िगरेशन',
     maintenanceMode: 'रखरखाव मोड',
     maintenanceModeDesc: 'रखरखाव के लिए साइट अक्षम करें',

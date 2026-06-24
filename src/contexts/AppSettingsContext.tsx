@@ -3,6 +3,7 @@
 import { useEffect, type ReactNode } from 'react';
 import {
   useSettingsStore,
+  defaultPublicAppSettings,
   type FeatureToggleKey,
   type PublicAppSettings,
   type TeacherLimitKey,
@@ -51,7 +52,9 @@ export function useAppSettings() {
 }
 
 export function useFeature(feature: FeatureToggleKey) {
-  return useSettingsStore((s) => s.settings.featureToggles[feature] ?? true);
+  return useSettingsStore(
+    (s) => s.settings.featureToggles[feature] ?? defaultPublicAppSettings.featureToggles[feature]
+  );
 }
 
 export type { FeatureToggleKey, PublicAppSettings, TeacherLimitKey };
