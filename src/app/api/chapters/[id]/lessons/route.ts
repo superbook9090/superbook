@@ -27,6 +27,8 @@ export async function POST(
     if (!chapter) return NextResponse.json({ message: 'Chapter not found' }, { status: 404 });
 
     const course = await Course.findById(chapter.course);
+    if (!course) return NextResponse.json({ message: 'Course not found' }, { status: 404 });
+
     if (
       course.instructor.toString() !== session.user.id &&
       session.user.role !== 'admin' &&
