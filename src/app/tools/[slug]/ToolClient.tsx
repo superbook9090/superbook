@@ -79,7 +79,7 @@ type ToolClientProps = {
 };
 
 export default function ToolClient({ toolSlug }: ToolClientProps) {
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const tool = useSeoTool(toolSlug);
   const enableBlogs = useFeature('enableBlogs');
   const enableCourses = useFeature('enableCourses');
@@ -181,7 +181,7 @@ export default function ToolClient({ toolSlug }: ToolClientProps) {
               </div>
             </section>
 
-            <section className="max-w-3xl mx-auto mt-16">
+            <section key={lang} className="max-w-3xl mx-auto mt-16">
               <h2 className="text-3xl font-bold text-center text-[var(--color-foreground)] mb-10">
                 {t('seoTools.common.faqTitle')}
               </h2>

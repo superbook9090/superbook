@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import mongoose from 'mongoose';
-import { Course } from '@/models';
+import { Course, ensureCourseIndexes } from '@/models';
 import { requireFeature, checkTeacherLimit } from '@/lib/settingsHelpers';
 import { createCourseSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
@@ -211,6 +211,7 @@ export async function POST(request: NextRequest) {
     }
 
     await dbConnect();
+    await ensureCourseIndexes();
 
     const body = await request.json();
 
@@ -272,6 +273,13 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     logApiError(error as Error, 'POST', '/api/courses', logContext);
     if ((error as { code?: number }).code === 11000) {
+      const keyPattern = (error as { keyPattern?: Record<string, unknown> }).keyPattern ?? {};
+      if ('slug' in keyPattern) {
+        return NextResponse.json(
+          { message: 'This course URL slug is already in use' },
+          { status: 409 }
+        );
+      }
       return NextResponse.json(
         { message: 'This course code is already in use' },
         { status: 409 }

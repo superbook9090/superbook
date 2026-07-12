@@ -149,6 +149,9 @@ User.find(query).select('name email role organizationId').lean()
 - `organizationId` on User, Course, Quiz, Blog models
 - `userId` on Enrollment, QuizAttempt, Favorite models
 - `courseId` on Enrollment model
+- `courses.slug` — partial unique index (`slug: { $gt: '' }`); only non-empty slugs are indexed
+- `courses.courseCode` — sparse unique index (private courses only)
+- Index repair helpers: `ensureCourseIndexes()` (`Course`), `ensureChapterIndexes()` (`Chapter`)
 
 ### Example Optimized Query
 
@@ -254,6 +257,12 @@ try {
 - **Fix**: Type casting in SessionSync component
 - **Status**: Functional, pending proper type definition update
 
+### Course slug duplicate key (E11000) — resolved
+- **Issue**: `POST /api/courses` intermittently failed with `E11000 dup key: { slug: null }` when multiple courses were created
+- **Cause**: `slug` defaulted to `null`, so MongoDB's unique index treated every unset course as the same value
+- **Fix**: Omit `slug` when unset; partial unique index on non-empty slugs; `ensureCourseIndexes()` repairs legacy data/index on first course create after deploy
+- **Status**: Fixed in `src/models/Course.ts` and `POST /api/courses`
+
 ## 9. Folder Structure (High Level)
 
 ```
@@ -271,6 +280,9 @@ src/
 │   │   └── [slug]/          # Dynamic SEO landing pages (SSG)
 │   │       ├── page.tsx     # Server component — metadata, JSON-LD, static params
 │   │       └── ToolClient.tsx # Client component — landing page UI
+│   ├── courses/
+│   │   ├── page.tsx         # Public course catalog (ISR)
+│   │   └── [slug]/page.tsx  # Public course detail page (SSG/ISR)
 │   └── api/                 # API routes
 │       ├── admin/           # Admin-only endpoints
 │       ├── auth/            # NextAuth configuration
@@ -300,6 +312,7 @@ src/
 │   └── blogs/
 ├── hooks/                   # Custom React hooks
 ├── i18n/                    # Translation files (en, hi)
+│   └── seo-tools/           # Hindi SEO tool landing page copy
 ├── lib/                     # Utility functions
 │   ├── db.ts                # Database connection
 │   ├── redis.ts             # Upstash Redis client
@@ -308,6 +321,7 @@ src/
 │   ├── logger.ts            # Logging utilities with request tracing
 │   ├── accessControl.ts     # Authorization helpers
 │   ├── courseAccess.ts      # Private course codes, browse filters, response sanitization
+│   ├── courses/public.ts    # Public course listing, slug resolution, SEO paths
 │   ├── enrollmentService.ts # Shared enroll / join-by-code logic
 │   ├── apiMiddleware.ts     # API middleware for rate limiting
 │   ├── serialize.ts         # MongoDB serialization
@@ -401,6 +415,54 @@ t('common.english') // "English" or "अंग्रेज़ी"
 ```
 
 ## 12. Recent Updates
+
+### Course slug index fix (2026)
+
+Fixed intermittent `E11000 duplicate key error` on `POST /api/courses` when creating multiple courses in production.
+
+**Root cause:** The `Course` schema previously set `slug: { default: null }`. MongoDB's unique index on `slug` treats explicit `null` as a value, so only one course could exist with `slug: null`.
+
+**Fix:**
+- `slug` field omits when unset (`default: undefined`) — same pattern as `courseCode`
+- Pre-save hook strips `null`/empty slug values before persistence
+- Replaced sparse unique index with a **partial unique index** (`slug_1_unique_nonempty`) that only indexes non-empty slugs: `{ slug: { $gt: '' } }`
+- `ensureCourseIndexes()` in `src/models/Course.ts`: unsets legacy `slug: null` documents, drops old `slug_1` index, syncs new index — called from `POST /api/courses` (runs once per process)
+- Improved `409` response to distinguish slug vs course-code conflicts
+
+**Manual repair (optional, if needed before deploy):**
+```javascript
+db.courses.updateMany({ $or: [{ slug: null }, { slug: '' }] }, { $unset: { slug: '' } })
+db.courses.dropIndex('slug_1')  // only if legacy index exists
+```
+
+### Public courses SEO (2026)
+
+Published, organization-free public courses are exposed for organic discovery outside the dashboard.
+
+**Routes:**
+- `/courses` — public course catalog with category chips, ISR (`revalidate: 300`)
+- `/courses/[slug]` — public course detail page with SEO metadata and JSON-LD
+
+**Visibility rules** (via `src/lib/courses/public.ts` + `publicCourseFilter()`):
+- `isPublished: true`
+- `organizationId: null` (platform-wide public courses)
+- Not private (no `courseCode`)
+
+**Slug behavior:**
+- Slugs are generated lazily for public listings (`title` + last 6 chars of `_id`) via `ensurePublicSlug()`
+- Courses created in the dashboard do not require a slug; slug is assigned when surfaced on public pages
+- Sitemap includes public course slugs via `listPublicCourseSlugs()` in `src/app/sitemap.ts`
+
+**Key files:** `src/lib/courses/public.ts`, `src/app/courses/page.tsx`, `src/app/courses/[slug]/page.tsx`
+
+### SEO tool pages — Hindi i18n (2026)
+
+SEO landing pages at `/tools/[slug]` now support language-aware content.
+
+- **English content:** `src/data/seo-tools.ts` (`SEO_TOOLS_DATA`)
+- **Hindi content:** `src/i18n/seo-tools/hi.ts` (`SEO_TOOLS_HI`) — falls back to English when a slug has no Hindi entry
+- **Resolver:** `src/lib/seo/getSeoToolContent.ts` — `getSeoToolContent(slug, lang)`, `getSeoToolLabel(slug, lang)`
+- **Client hook:** `src/hooks/useSeoTool.ts` — reads active language from i18n context
 
 ### Public Blogs & SEO (2026)
 
@@ -763,8 +825,6 @@ Initialize lazily via `getAdminMessaging()` in `src/lib/notifications/push/fireb
 
 `src/lib/notifications/push/notificationPayload.ts` — bilingual `title`/`body` + category for lessons, quizzes, announcements.
 
-`src/lib/notifications/push/notificationPayload.ts` — bilingual `title`/`body` + category for lessons, quizzes, announcements.
-
 ---
 
 ## 21. Private Course Access (Course Codes)
@@ -810,13 +870,14 @@ Invalid code → `404`/`403` with `{ message: "Invalid course code" }`. Rate lim
 - **Org access:** Enrollment still checks organization access via `validateContentAccess` unless the student is in the same org / public course rules apply
 - **Enrollment upsert:** `enrollStudentInCourse` uses `findOneAndUpdate` with `$setOnInsert` for new fields and `$set: { status: 'active' }` for reactivation (dropped → active). Do not put the same field in both `$set` and `$setOnInsert` (MongoDB conflict)
 - **Mongoose dev cache:** `Course` model re-registers if a hot-reloaded schema lacks `courseCode` (`src/models/Course.ts`)
+- **Slug index:** Do not set `slug: null` on save — field is omitted when unset; `ensureCourseIndexes()` repairs legacy prod data (see §12)
 - **Validation:** `courseCodeSchema` in `src/lib/validation.ts`; `joinCourseByCodeSchema` for join endpoint
 
 ### Key files
 
 | Path | Role |
 |------|------|
-| `src/models/Course.ts` | `courseCode` field + sparse unique index |
+| `src/models/Course.ts` | `courseCode` + `slug` fields; partial unique slug index; `ensureCourseIndexes()` |
 | `src/lib/courseAccess.ts` | Private detection, browse filter, code match, API sanitization |
 | `src/lib/enrollmentService.ts` | Central enrollment + join-by-code |
 | `src/app/api/enrollments/join-by-code/route.ts` | Join-by-code endpoint |
@@ -833,9 +894,10 @@ Dynamic, data-driven SEO landing pages at `/tools/[slug]` targeting 20 education
 
 ### Architecture
 
-- **Data registry**: `src/data/seo-tools.ts` — centralized `SEO_TOOLS_DATA` record mapping slugs to unique content (title, description, headings, features, benefits, how-it-works steps, FAQs, CTA text)
+- **Data registry**: `src/data/seo-tools.ts` — centralized `SEO_TOOLS_DATA` record mapping slugs to unique English content (title, description, headings, features, benefits, how-it-works steps, FAQs, CTA text)
+- **Hindi translations**: `src/i18n/seo-tools/hi.ts` — `SEO_TOOLS_HI` record; resolved via `getSeoToolContent(slug, lang)` in `src/lib/seo/getSeoToolContent.ts`
 - **Server component**: `src/app/tools/[slug]/page.tsx` — `generateStaticParams`, `generateMetadata` (title, description, canonical, OpenGraph, Twitter), FAQ + Breadcrumb JSON-LD schemas
-- **Client component**: `src/app/tools/[slug]/ToolClient.tsx` — renders hero, features grid, how-it-works, benefits, FAQ accordions, CTA, and internal cross-links
+- **Client component**: `src/app/tools/[slug]/ToolClient.tsx` — renders hero, features grid, how-it-works, benefits, FAQ accordions, CTA, and internal cross-links; uses `useSeoTool(slug)` for language-aware copy
 - **Route helper**: `ROUTES.tools(slug)` in `src/constants/routes.ts`
 - **Sitemap**: `src/app/sitemap.ts` auto-includes all tool slugs with `changeFrequency: 'weekly'`, `priority: 0.9`
 
@@ -885,7 +947,10 @@ Dynamic, data-driven SEO landing pages at `/tools/[slug]` targeting 20 education
 
 | Path | Role |
 |------|------|
-| `src/data/seo-tools.ts` | Data registry (content, metadata, FAQs) |
+| `src/data/seo-tools.ts` | English data registry (content, metadata, FAQs) |
+| `src/i18n/seo-tools/hi.ts` | Hindi SEO tool page copy |
+| `src/lib/seo/getSeoToolContent.ts` | Language-aware content resolver |
+| `src/hooks/useSeoTool.ts` | Client hook for tool page copy |
 | `src/app/tools/[slug]/page.tsx` | Server component (SSG, metadata, JSON-LD) |
 | `src/app/tools/[slug]/ToolClient.tsx` | Client component (landing page UI) |
 | `src/constants/routes.ts` | `ROUTES.tools(slug)` helper |
@@ -1013,6 +1078,7 @@ interface ICourse {
   lessonCount: number;             // Denormalized lesson count
   enrolledCount: number;           // Denormalized enrollment count
   courseCode?: string | null;      // When set, course is private (join-by-code required)
+  slug?: string;                   // SEO URL slug for public course pages (omitted when unset)
   lastPublishedLesson?: ObjectId | null; // For continue-learning tiles
   createdAt: Date;
   updatedAt: Date;
@@ -1027,8 +1093,11 @@ interface ICourse {
 - `organizationId: 1, isPublished: 1, createdAt: -1`
 - `instructor: 1, organizationId: 1`
 - `isPublished: 1, category: 1`
+- `slug: 1` (unique, partial filter `{ slug: { $gt: '' } }` — name: `slug_1_unique_nonempty`)
 - `createdAt: -1`
 - `courseCode: 1` (unique, sparse — private courses only)
+
+**Index maintenance:** `ensureCourseIndexes()` — unsets legacy `slug: null` values, drops old non-partial `slug_1` index, syncs indexes. Called from `POST /api/courses`.
 
 ---
 

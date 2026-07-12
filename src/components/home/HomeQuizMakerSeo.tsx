@@ -1,7 +1,12 @@
+'use client';
+
 import Link from 'next/link';
 import { ROUTES } from '@/constants/routes';
+import { useTranslation } from '@/hooks/useTranslation';
 
-const FAQS = [
+const FAQ_KEYS = ['q1', 'q2', 'q3', 'q4'] as const;
+
+const FAQS_EN = [
   {
     question: 'What is the best free quiz maker online?',
     answer:
@@ -25,10 +30,12 @@ const FAQS = [
 ];
 
 export default function HomeQuizMakerSeo() {
+  const { t } = useTranslation();
+
   const faqSchema = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: FAQS.map((faq) => ({
+    mainEntity: FAQS_EN.map((faq) => ({
       '@type': 'Question',
       name: faq.question,
       acceptedAnswer: { '@type': 'Answer', text: faq.answer },
@@ -40,43 +47,43 @@ export default function HomeQuizMakerSeo() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 id="quiz-maker-heading" className="text-3xl font-bold text-[var(--color-foreground)] mb-4">
-          Free Quiz Maker for Teachers, Students &amp; Coaching Institutes
+          {t('home.quizMakerSeo.title')}
         </h2>
         <p className="text-lg text-[var(--color-muted-foreground)] leading-relaxed mb-6">
-          <strong>Quiz-Do</strong> is a free online <strong>quiz maker</strong> and learning platform.
-          Create interactive quizzes, MCQ tests, mock exams, and full test series — then share them
-          with one link. Whether you need a <strong>free quiz maker</strong> for classroom assessments,
-          competitive exam prep (UPTET, CTET, SSC), or self-study practice, Quiz-Do gives you
-          everything in one place.
+          {t('home.quizMakerSeo.intro')}
         </p>
 
         <div className="grid sm:grid-cols-2 gap-6 mb-10">
           <div className="rounded-xl border border-[var(--border)] p-5">
-            <h3 className="font-semibold text-[var(--color-foreground)] mb-2">Online Quiz Maker</h3>
+            <h3 className="font-semibold text-[var(--color-foreground)] mb-2">
+              {t('home.quizMakerSeo.cards.onlineQuizMaker.title')}
+            </h3>
             <p className="text-sm text-[var(--color-muted-foreground)]">
-              Build MCQ quizzes with time limits, instant auto-grading, and detailed analytics.
-              Perfect for teachers who want a fast, free quiz creator.
+              {t('home.quizMakerSeo.cards.onlineQuizMaker.description')}
             </p>
           </div>
           <div className="rounded-xl border border-[var(--border)] p-5">
-            <h3 className="font-semibold text-[var(--color-foreground)] mb-2">AI Quiz Generator</h3>
+            <h3 className="font-semibold text-[var(--color-foreground)] mb-2">
+              {t('home.quizMakerSeo.cards.aiQuizGenerator.title')}
+            </h3>
             <p className="text-sm text-[var(--color-muted-foreground)]">
-              Paste study notes or a topic and let AI generate quiz questions automatically.
-              Review, edit, and publish in under a minute.
+              {t('home.quizMakerSeo.cards.aiQuizGenerator.description')}
             </p>
           </div>
           <div className="rounded-xl border border-[var(--border)] p-5">
-            <h3 className="font-semibold text-[var(--color-foreground)] mb-2">Test Series &amp; Mock Exams</h3>
+            <h3 className="font-semibold text-[var(--color-foreground)] mb-2">
+              {t('home.quizMakerSeo.cards.testSeries.title')}
+            </h3>
             <p className="text-sm text-[var(--color-muted-foreground)]">
-              Bundle quizzes into timed test series for exam simulation. Track student performance
-              across every attempt.
+              {t('home.quizMakerSeo.cards.testSeries.description')}
             </p>
           </div>
           <div className="rounded-xl border border-[var(--border)] p-5">
-            <h3 className="font-semibold text-[var(--color-foreground)] mb-2">Courses + Quizzes</h3>
+            <h3 className="font-semibold text-[var(--color-foreground)] mb-2">
+              {t('home.quizMakerSeo.cards.coursesQuizzes.title')}
+            </h3>
             <p className="text-sm text-[var(--color-muted-foreground)]">
-              Combine structured lessons with embedded quizzes. One LMS platform for teaching,
-              testing, and progress tracking.
+              {t('home.quizMakerSeo.cards.coursesQuizzes.description')}
             </p>
           </div>
         </div>
@@ -86,50 +93,56 @@ export default function HomeQuizMakerSeo() {
             href="/quiz-maker-free"
             className="inline-flex items-center px-6 py-3 rounded-xl bg-[var(--color-primary)] text-white font-semibold hover:opacity-90 transition-opacity"
           >
-            Try Free Quiz Maker →
+            {t('home.quizMakerSeo.cta.tryQuizMaker')}
           </Link>
           <Link
             href="/ai-quiz-generator"
             className="inline-flex items-center px-6 py-3 rounded-xl border border-[var(--border)] text-[var(--color-foreground)] font-semibold hover:bg-[var(--color-surface-muted)] transition-colors"
           >
-            AI Quiz Generator
+            {t('home.quizMakerSeo.cta.aiQuizGenerator')}
           </Link>
           <Link
             href={ROUTES.register}
             className="inline-flex items-center px-6 py-3 rounded-xl border border-[var(--border)] text-[var(--color-foreground)] font-semibold hover:bg-[var(--color-surface-muted)] transition-colors"
           >
-            Create Free Account
+            {t('home.quizMakerSeo.cta.createAccount')}
           </Link>
         </div>
 
-        <h3 className="text-xl font-bold text-[var(--color-foreground)] mb-4">Frequently Asked Questions</h3>
+        <h3 className="text-xl font-bold text-[var(--color-foreground)] mb-4">
+          {t('seoTools.common.faqTitle')}
+        </h3>
         <dl className="space-y-4">
-          {FAQS.map((faq) => (
-            <div key={faq.question} className="rounded-xl border border-[var(--border)] p-5">
-              <dt className="font-semibold text-[var(--color-foreground)] mb-2">{faq.question}</dt>
-              <dd className="text-sm text-[var(--color-muted-foreground)] leading-relaxed">{faq.answer}</dd>
+          {FAQ_KEYS.map((key) => (
+            <div key={key} className="rounded-xl border border-[var(--border)] p-5">
+              <dt className="font-semibold text-[var(--color-foreground)] mb-2">
+                {t(`home.quizMakerSeo.faqs.${key}.question`)}
+              </dt>
+              <dd className="text-sm text-[var(--color-muted-foreground)] leading-relaxed">
+                {t(`home.quizMakerSeo.faqs.${key}.answer`)}
+              </dd>
             </div>
           ))}
         </dl>
 
         <p className="mt-8 text-sm text-[var(--color-muted-foreground)]">
-          Explore our{' '}
+          {t('home.quizMakerSeo.footer.prefix')}{' '}
           <Link href="/quiz-maker-free" className="text-[var(--color-primary)] hover:underline">
-            free quiz maker
+            {t('home.quizMakerSeo.footer.freeQuizMaker')}
           </Link>
           ,{' '}
           <Link href="/mcq-generator" className="text-[var(--color-primary)] hover:underline">
-            MCQ generator
+            {t('home.quizMakerSeo.footer.mcqGenerator')}
           </Link>
           ,{' '}
           <Link href="/test-series-maker-free" className="text-[var(--color-primary)] hover:underline">
-            test series maker
+            {t('home.quizMakerSeo.footer.testSeriesMaker')}
           </Link>
-          , and{' '}
+          , {t('home.quizMakerSeo.footer.and')}{' '}
           <Link href={ROUTES.blogs} className="text-[var(--color-primary)] hover:underline">
-            educational blogs
+            {t('home.quizMakerSeo.footer.educationalBlogs')}
           </Link>{' '}
-          for study tips and exam preparation guides.
+          {t('home.quizMakerSeo.footer.suffix')}
         </p>
       </div>
     </section>

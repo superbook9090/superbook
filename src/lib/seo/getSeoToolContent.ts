@@ -1,7 +1,7 @@
 import { SEO_TOOLS_DATA, type SeoToolData } from '@/data/seo-tools';
 
 import type { Language } from '@/i18n';
-import { SEO_TOOLS_HI } from '@/i18n/seo-tools/hi';
+import { SEO_TOOLS_HI } from '@/i18n/seo-tools';
 
 export function getSeoToolContent(slug: string, lang: Language): SeoToolData | null {
   const english = SEO_TOOLS_DATA[slug];

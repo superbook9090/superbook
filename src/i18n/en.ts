@@ -311,6 +311,69 @@ export const en = {
       logoAlt: 'Quiz-Do logo',
       openMenu: 'Open menu',
     },
+    quizMakerSeo: {
+      title: 'Free Quiz Maker for Teachers, Students & Coaching Institutes',
+      intro:
+        'Quiz-Do is a free online quiz maker and learning platform. Create interactive quizzes, MCQ tests, mock exams, and full test series — then share them with one link. Whether you need a free quiz maker for classroom assessments, competitive exam prep (UPTET, CTET, SSC), or self-study practice, Quiz-Do gives you everything in one place.',
+      cards: {
+        onlineQuizMaker: {
+          title: 'Online Quiz Maker',
+          description:
+            'Build MCQ quizzes with time limits, instant auto-grading, and detailed analytics. Perfect for teachers who want a fast, free quiz creator.',
+        },
+        aiQuizGenerator: {
+          title: 'AI Quiz Generator',
+          description:
+            'Paste study notes or a topic and let AI generate quiz questions automatically. Review, edit, and publish in under a minute.',
+        },
+        testSeries: {
+          title: 'Test Series & Mock Exams',
+          description:
+            'Bundle quizzes into timed test series for exam simulation. Track student performance across every attempt.',
+        },
+        coursesQuizzes: {
+          title: 'Courses + Quizzes',
+          description:
+            'Combine structured lessons with embedded quizzes. One LMS platform for teaching, testing, and progress tracking.',
+        },
+      },
+      cta: {
+        tryQuizMaker: 'Try Free Quiz Maker →',
+        aiQuizGenerator: 'AI Quiz Generator',
+        createAccount: 'Create Free Account',
+      },
+      faqs: {
+        q1: {
+          question: 'What is the best free quiz maker online?',
+          answer:
+            'Quiz-Do is a free online quiz maker that lets teachers and students create MCQ quizzes, timed mock tests, and practice exams. Sign up free, build your quiz in minutes, and share it instantly — no credit card required.',
+        },
+        q2: {
+          question: 'How do I create a quiz for free?',
+          answer:
+            'Register on Quiz-Do, open the quiz builder, add your questions and answers, set a time limit if needed, and publish. Your quiz is ready to share via link or course enrollment.',
+        },
+        q3: {
+          question: 'Can I use Quiz-Do as an online quiz maker for teachers?',
+          answer:
+            'Yes. Quiz-Do is built for teachers — create classroom quizzes, homework assignments, UPTET/CTET practice tests, and full test series with automatic grading and student analytics.',
+        },
+        q4: {
+          question: 'Is Quiz-Do free for students to take quizzes?',
+          answer:
+            'Yes. Students can register free, enroll in public courses, take practice quizzes, and track their scores and progress on a personal dashboard.',
+        },
+      },
+      footer: {
+        prefix: 'Explore our',
+        freeQuizMaker: 'free quiz maker',
+        mcqGenerator: 'MCQ generator',
+        testSeriesMaker: 'test series maker',
+        and: 'and',
+        educationalBlogs: 'educational blogs',
+        suffix: 'for study tips and exam preparation guides.',
+      },
+    },
   },
 
   seoTools: {
