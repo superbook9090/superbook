@@ -11,6 +11,7 @@ import { createQuizAttemptSchema } from '@/lib/validation';
 import { logInfo, logError, logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
 import { getCachedData, setCachedData, invalidatePattern } from '@/lib/redis';
+import { requireFeature } from '@/lib/settingsHelpers';
 import { listQuestionsForQuiz } from '@/domain/learning/quizContent';
 import { finalizeExpiredQuizAttemptIfNeeded } from '@/domain/learning/finalizeExpiredQuizAttempt';
 import type { Types } from 'mongoose';
@@ -34,6 +35,9 @@ export async function GET(request: NextRequest) {
   const logContext: LogContext = { method: 'GET', path: '/api/quiz-attempts' };
 
   try {
+    const featureCheck = await requireFeature('enableQuizzes');
+    if (featureCheck) return featureCheck;
+
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
@@ -170,6 +174,9 @@ export async function POST(request: NextRequest) {
   const logContext: LogContext = { method: 'POST', path: '/api/quiz-attempts' };
 
   try {
+    const featureCheck = await requireFeature('enableQuizzes');
+    if (featureCheck) return featureCheck;
+
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });

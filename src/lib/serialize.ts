@@ -10,6 +10,11 @@ export function serialize(data: unknown): unknown {
     return data;
   }
 
+  // Handle Date objects - convert to ISO string
+  if (data instanceof Date) {
+    return data.toISOString();
+  }
+
   // Handle ObjectId (has buffer property and toHexString method)
   if (typeof data === 'object' && data !== null) {
     // Check if it's an actual ObjectId instance (has buffer and toHexString method)
@@ -35,11 +40,6 @@ export function serialize(data: unknown): unknown {
       }
     }
     return result;
-  }
-
-  // Handle Date objects - convert to ISO string
-  if (data instanceof Date) {
-    return data.toISOString();
   }
 
   // Handle primitives

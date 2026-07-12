@@ -28,6 +28,7 @@ import { PageSkeleton } from '@/components/ui/Skeleton';
 import StatCard from '@/components/ui/StatCard';
 import QuickActionCard from '@/components/ui/QuickActionCard';
 import { PageWrapper, ResponsiveGrid } from '@/components/layout';
+import { useFeature } from '@/contexts/AppSettingsContext';
 
 // Types are now imported from hooks
 interface Course {
@@ -64,6 +65,10 @@ export default function TeacherDashboardPage() {
   const session = useSessionStore((s) => s.session) as { user?: { id: string; role: string; name: string } };
   const { t } = useTranslation();
   const [limitAlert, setLimitAlert] = useState<{ type: 'courses' | 'quizzes' | 'blogs' } | null>(null);
+  const enableCourses = useFeature('enableCourses');
+  const enableQuizzes = useFeature('enableQuizzes');
+  const enableBlogs = useFeature('enableBlogs');
+  const enableAnalytics = useFeature('enableAnalytics');
 
   // Single React Query call replaces multiple SWR calls
   const { data, isLoading, error } = useDashboard();
@@ -170,27 +175,29 @@ export default function TeacherDashboardPage() {
             </p>
           </div>
           <div className="w-full sm:w-auto">
-            {isAtLimit('courses') ? (
-              <motion.button
-                type="button"
-                whileHover={{ scale: 1 }}
-                whileTap={{ scale: 1 }}
-                onClick={() => setLimitAlert({ type: 'courses' })}
-                className="inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base text-[var(--teacher-primary)] rounded-xl font-semibold shadow-lg transition-all bg-[var(--color-surface-muted)] cursor-not-allowed"
-              >
-                <Plus className="w-5 h-5 mr-2" />
-                {t('dashboard.createCourse')}
-              </motion.button>
-            ) : (
-              <MotionLink
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                href={ROUTES.teacher.courseCreate}
-                className="inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base text-[var(--teacher-primary)] rounded-xl font-semibold shadow-lg transition-all bg-[var(--card-solid)] hover:shadow-xl"
-              >
-                <Plus className="w-5 h-5 mr-2" />
-                {t('dashboard.createCourse')}
-              </MotionLink>
+            {enableCourses && (
+              isAtLimit('courses') ? (
+                <motion.button
+                  type="button"
+                  whileHover={{ scale: 1 }}
+                  whileTap={{ scale: 1 }}
+                  onClick={() => setLimitAlert({ type: 'courses' })}
+                  className="inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base text-[var(--teacher-primary)] rounded-xl font-semibold shadow-lg transition-all bg-[var(--color-surface-muted)] cursor-not-allowed"
+                >
+                  <Plus className="w-5 h-5 mr-2" />
+                  {t('dashboard.createCourse')}
+                </motion.button>
+              ) : (
+                <MotionLink
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  href={ROUTES.teacher.courseCreate}
+                  className="inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base text-[var(--teacher-primary)] rounded-xl font-semibold shadow-lg transition-all bg-[var(--card-solid)] hover:shadow-xl"
+                >
+                  <Plus className="w-5 h-5 mr-2" />
+                  {t('dashboard.createCourse')}
+                </MotionLink>
+              )
             )}
           </div>
         </div>
@@ -212,16 +219,18 @@ export default function TeacherDashboardPage() {
 
       {/* Stats Cards - Modern Design */}
       <ResponsiveGrid variant="stats">
-        <StatCard
-          icon={BookOpen}
-          value={`${stats.totalCourses} / ${getLimit('courses')}`}
-          label={t('dashboard.myCourses')}
-          color="teacher"
-          delay={0.1}
-          showProgress={true}
-          progress={getUsagePercentage('courses')}
-          description={isNearLimit('courses') && !isAtLimit('courses') ? `⚠️ ${Math.round(getUsagePercentage('courses'))}% used` : undefined}
-        />
+        {enableCourses && (
+          <StatCard
+            icon={BookOpen}
+            value={`${stats.totalCourses} / ${getLimit('courses')}`}
+            label={t('dashboard.myCourses')}
+            color="teacher"
+            delay={0.1}
+            showProgress={true}
+            progress={getUsagePercentage('courses')}
+            description={isNearLimit('courses') && !isAtLimit('courses') ? `⚠️ ${Math.round(getUsagePercentage('courses'))}% used` : undefined}
+          />
+        )}
         <StatCard
           icon={Users}
           value={stats.totalStudents}
@@ -229,30 +238,34 @@ export default function TeacherDashboardPage() {
           color="info"
           delay={0.2}
         />
-        <StatCard
-          icon={HelpCircle}
-          value={`${filteredStats.totalQuizzes} / ${getLimit('quizzes')}`}
-          label={t('dashboard.myQuizzes')}
-          color="student"
-          delay={0.3}
-          showProgress={true}
-          progress={getUsagePercentage('quizzes')}
-          description={isNearLimit('quizzes') && !isAtLimit('quizzes') ? `⚠️ ${Math.round(getUsagePercentage('quizzes'))}% used` : undefined}
-        />
-        <StatCard
-          icon={BarChart3}
-          value={`${filteredStats.totalBlogs} / ${getLimit('blogs')}`}
-          label={t('dashboard.myBlogs')}
-          color="admin"
-          delay={0.4}
-          showProgress={true}
-          progress={getUsagePercentage('blogs')}
-          description={isNearLimit('blogs') && !isAtLimit('blogs') ? `⚠️ ${Math.round(getUsagePercentage('blogs'))}% used` : undefined}
-        />
+        {enableQuizzes && (
+          <StatCard
+            icon={HelpCircle}
+            value={`${filteredStats.totalQuizzes} / ${getLimit('quizzes')}`}
+            label={t('dashboard.myQuizzes')}
+            color="student"
+            delay={0.3}
+            showProgress={true}
+            progress={getUsagePercentage('quizzes')}
+            description={isNearLimit('quizzes') && !isAtLimit('quizzes') ? `⚠️ ${Math.round(getUsagePercentage('quizzes'))}% used` : undefined}
+          />
+        )}
+        {enableBlogs && (
+          <StatCard
+            icon={BarChart3}
+            value={`${filteredStats.totalBlogs} / ${getLimit('blogs')}`}
+            label={t('dashboard.myBlogs')}
+            color="admin"
+            delay={0.4}
+            showProgress={true}
+            progress={getUsagePercentage('blogs')}
+            description={isNearLimit('blogs') && !isAtLimit('blogs') ? `⚠️ ${Math.round(getUsagePercentage('blogs'))}% used` : undefined}
+          />
+        )}
       </ResponsiveGrid>
 
       {/* Recent Courses - Modern Design */}
-      {recentCourses.length > 0 && (
+      {enableCourses && recentCourses.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -305,48 +318,58 @@ export default function TeacherDashboardPage() {
       >
         <h2 className="text-lg sm:text-xl font-semibold text-[var(--color-foreground)] mb-4">{t('dashboard.quickActions')}</h2>
         <ResponsiveGrid variant="stats">
-          <QuickActionCard
-            icon={BookOpen}
-            title={t('dashboard.manageCourses')}
-            description={t('dashboard.viewAndEdit')}
-            href={ROUTES.teacher.courses}
-            color="teacher"
-            delay={0.1}
-          />
-          <QuickActionCard
-            icon={HelpCircle}
-            title={t('dashboard.manageQuizzes')}
-            description={t('dashboard.createAndReview')}
-            href={ROUTES.teacher.quizzes}
-            color="student"
-            delay={0.15}
-          />
-          <QuickActionCard
-            icon={BarChart3}
-            title={t('dashboard.analytics')}
-            description={t('dashboard.viewInsights')}
-            href={ROUTES.teacher.analytics}
-            color="info"
-            delay={0.2}
-          />
-          <QuickActionCard
-            icon={Plus}
-            title={t('dashboard.createCourse')}
-            description={t('dashboard.addNewContent')}
-            href={ROUTES.teacher.courseCreate}
-            color="warning"
-            disabled={isAtLimit('courses')}
-            delay={0.25}
-          />
-          <QuickActionCard
-            icon={Plus}
-            title={t('dashboard.createBlog')}
-            description={t('dashboard.writeNewContent')}
-            href={ROUTES.teacher.blogCreate}
-            color="admin"
-            disabled={isAtLimit('blogs')}
-            delay={0.3}
-          />
+          {enableCourses && (
+            <QuickActionCard
+              icon={BookOpen}
+              title={t('dashboard.manageCourses')}
+              description={t('dashboard.viewAndEdit')}
+              href={ROUTES.teacher.courses}
+              color="teacher"
+              delay={0.1}
+            />
+          )}
+          {enableQuizzes && (
+            <QuickActionCard
+              icon={HelpCircle}
+              title={t('dashboard.manageQuizzes')}
+              description={t('dashboard.createAndReview')}
+              href={ROUTES.teacher.quizzes}
+              color="student"
+              delay={0.15}
+            />
+          )}
+          {enableAnalytics && (
+            <QuickActionCard
+              icon={BarChart3}
+              title={t('dashboard.analytics')}
+              description={t('dashboard.viewInsights')}
+              href={ROUTES.teacher.analytics}
+              color="info"
+              delay={0.2}
+            />
+          )}
+          {enableCourses && (
+            <QuickActionCard
+              icon={Plus}
+              title={t('dashboard.createCourse')}
+              description={t('dashboard.addNewContent')}
+              href={ROUTES.teacher.courseCreate}
+              color="warning"
+              disabled={isAtLimit('courses')}
+              delay={0.25}
+            />
+          )}
+          {enableBlogs && (
+            <QuickActionCard
+              icon={Plus}
+              title={t('dashboard.createBlog')}
+              description={t('dashboard.writeNewContent')}
+              href={ROUTES.teacher.blogCreate}
+              color="admin"
+              disabled={isAtLimit('blogs')}
+              delay={0.3}
+            />
+          )}
         </ResponsiveGrid>
       </motion.div>
     </PageWrapper>

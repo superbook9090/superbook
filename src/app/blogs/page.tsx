@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { createPageMetadata } from '@/lib/seo/metadata';
 import { listPublicBlogs, listPublicBlogTopics } from '@/lib/blogs/public';
 import PublicBlogsClient from '@/features/blogs/components/PublicBlogsClient';
+import { ensureFeatureEnabled } from '@/lib/settingsHelpers';
 
 export const revalidate = 300;
 
@@ -14,6 +15,8 @@ export const metadata: Metadata = createPageMetadata({
 });
 
 export default async function PublicBlogsPage() {
+  await ensureFeatureEnabled('enableBlogs');
+
   let data: Awaited<ReturnType<typeof listPublicBlogs>> = {
     blogs: [],
     pagination: { page: 1, limit: 12, total: 0, totalPages: 1 },

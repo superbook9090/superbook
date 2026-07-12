@@ -7,6 +7,7 @@ import { ensureChapterIndexes } from '@/models/Chapter';
 import { reorderCurriculumSchema } from '@/lib/validation';
 import { authorizeCourseEditor } from '@/lib/curriculum/authorize';
 import { logApiError, type LogContext } from '@/lib/logger';
+import { requireFeature } from '@/lib/settingsHelpers';
 
 // POST /api/courses/[id]/curriculum/reorder - Bulk reorder topics, sub-topics, and lessons
 export async function POST(
@@ -15,6 +16,9 @@ export async function POST(
 ) {
   const logContext: LogContext = { method: 'POST', path: '/api/courses/[id]/curriculum/reorder' };
   try {
+    const featureCheck = await requireFeature('enableCourses');
+    if (featureCheck) return featureCheck;
+
     const session = await getServerSession(authOptions);
     await dbConnect();
     await ensureChapterIndexes();

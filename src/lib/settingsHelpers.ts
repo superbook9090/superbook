@@ -1,5 +1,7 @@
 import User from '@/models/User';
 import { NextResponse } from 'next/server';
+import { redirect } from 'next/navigation';
+import { ROUTES } from '@/constants/routes';
 import { getSettingsWithDefaults } from './dataService';
 
 interface FeatureToggles {
@@ -14,6 +16,18 @@ interface TeacherLimits {
   courses: number;
   quizzes: number;
   blogs: number;
+}
+
+export async function isFeatureEnabled(feature: keyof FeatureToggles): Promise<boolean> {
+  const settings = await getSettingsWithDefaults();
+  return Boolean(settings?.featureToggles?.[feature]);
+}
+
+/** Server component helper — redirects to home when a feature is disabled. */
+export async function ensureFeatureEnabled(feature: keyof FeatureToggles): Promise<void> {
+  if (!(await isFeatureEnabled(feature))) {
+    redirect(ROUTES.home);
+  }
 }
 
 /**

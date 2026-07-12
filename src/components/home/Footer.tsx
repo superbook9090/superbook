@@ -7,6 +7,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { Heart } from 'lucide-react';
 import { ROUTES } from '@/constants/routes';
 import { SITE_NAME } from '@/lib/seo/config';
+import { useFeature } from '@/contexts/AppSettingsContext';
 
 const getFooterLinks = (t: (key: string) => string) => ({
   product: [
@@ -17,13 +18,13 @@ const getFooterLinks = (t: (key: string) => string) => ({
     { label: t('contact.title'), href: ROUTES.contact },
   ],
   resources: [
-    { label: 'Free Quiz Maker', href: '/quiz-maker-free' },
-    { label: 'AI Quiz Generator', href: '/ai-quiz-generator' },
-    { label: 'MCQ Generator', href: '/mcq-generator' },
-    { label: 'Course Maker', href: '/course-maker-free' },
-    { label: 'Educational Blogs', href: ROUTES.blogs },
-    { label: 'Public Courses', href: ROUTES.courses },
-    { label: 'All Tools', href: ROUTES.toolsIndex },
+    { label: t('home.footer.freeQuizMaker'), href: '/quiz-maker-free' },
+    { label: t('home.footer.aiQuizGenerator'), href: '/ai-quiz-generator' },
+    { label: t('home.footer.mcqGenerator'), href: '/mcq-generator' },
+    { label: t('home.footer.courseMaker'), href: '/course-maker-free' },
+    { label: t('home.footer.educationalBlogs'), href: ROUTES.blogs },
+    { label: t('home.footer.publicCourses'), href: ROUTES.courses },
+    { label: t('home.footer.allTools'), href: ROUTES.toolsIndex },
   ],
   auth: [
     { label: t('home.login'), href: ROUTES.login },
@@ -33,7 +34,15 @@ const getFooterLinks = (t: (key: string) => string) => ({
 
 export default function Footer() {
   const { t } = useTranslation();
+  const enableBlogs = useFeature('enableBlogs');
+  const enableCourses = useFeature('enableCourses');
   const currentYear = new Date().getFullYear();
+
+  const resourceLinks = getFooterLinks(t).resources.filter((link) => {
+    if (link.href === ROUTES.blogs) return enableBlogs;
+    if (link.href === ROUTES.courses) return enableCourses;
+    return true;
+  });
 
   return (
     <footer className="bg-[var(--color-foreground)] text-white">
@@ -81,9 +90,9 @@ export default function Footer() {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.15 }}
           >
-            <h4 className="font-semibold mb-4">Resources</h4>
+            <h4 className="font-semibold mb-4">{t('home.footer.resources')}</h4>
             <ul className="space-y-2">
-              {getFooterLinks(t).resources.map((link) => (
+              {resourceLinks.map((link) => (
                 <li key={link.label}>
                   <Link
                     href={link.href}

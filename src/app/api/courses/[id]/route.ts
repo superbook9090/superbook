@@ -18,6 +18,7 @@ import {
   resolveCourseCodeForSave,
   sanitizeCourseResponse,
 } from '@/lib/courseAccess';
+import { requireFeature } from '@/lib/settingsHelpers';
 
 // GET /api/courses/[id] - Get a single course
 export async function GET(
@@ -30,6 +31,9 @@ export async function GET(
   };
 
   try {
+    const featureCheck = await requireFeature('enableCourses');
+    if (featureCheck) return featureCheck;
+
     await dbConnect();
     const { id } = await params;
 
@@ -64,7 +68,12 @@ export async function GET(
 
     // Only allow viewing unpublished courses for owner or admin
     if (!course.isPublished) {
-      if (!session || (course.instructor._id.toString() !== session.user.id && session.user.role !== 'admin')) {
+      if (
+        !session ||
+        (course.instructor._id.toString() !== session.user.id &&
+          session.user.role !== 'admin' &&
+          session.user.role !== 'superadmin')
+      ) {
         return NextResponse.json(
           { message: 'Course not found' },
           { status: 404 }
@@ -113,6 +122,9 @@ export async function PATCH(
   };
 
   try {
+    const featureCheck = await requireFeature('enableCourses');
+    if (featureCheck) return featureCheck;
+
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
@@ -137,7 +149,11 @@ export async function PATCH(
     }
 
     // Check ownership or admin
-    if (course.instructor.toString() !== session.user.id && session.user.role !== 'admin') {
+    if (
+      course.instructor.toString() !== session.user.id &&
+      session.user.role !== 'admin' &&
+      session.user.role !== 'superadmin'
+    ) {
       return NextResponse.json(
         { message: 'You can only edit your own courses' },
         { status: 403 }
@@ -211,6 +227,9 @@ export async function DELETE(
   };
 
   try {
+    const featureCheck = await requireFeature('enableCourses');
+    if (featureCheck) return featureCheck;
+
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
@@ -235,7 +254,11 @@ export async function DELETE(
     }
 
     // Check ownership or admin
-    if (course.instructor.toString() !== session.user.id && session.user.role !== 'admin') {
+    if (
+      course.instructor.toString() !== session.user.id &&
+      session.user.role !== 'admin' &&
+      session.user.role !== 'superadmin'
+    ) {
       return NextResponse.json(
         { message: 'You can only delete your own courses' },
         { status: 403 }

@@ -7,6 +7,7 @@ import { listPublicCourses, listPublicCourseCategories, buildPublicCoursePath } 
 import { ROUTES } from '@/constants/routes';
 import MarketingHeader from '@/components/home/MarketingHeader';
 import Footer from '@/components/home/Footer';
+import { ensureFeatureEnabled } from '@/lib/settingsHelpers';
 
 export const revalidate = 300;
 
@@ -18,6 +19,8 @@ export const metadata: Metadata = createPageMetadata({
 });
 
 export default async function PublicCoursesPage() {
+  await ensureFeatureEnabled('enableCourses');
+
   const [data, categories] = await Promise.all([
     listPublicCourses({ page: 1, limit: 24 }),
     listPublicCourseCategories(),

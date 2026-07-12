@@ -13,6 +13,7 @@ import {
   Calendar,
   Users,
   GraduationCap,
+  Edit,
 } from 'lucide-react';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
@@ -25,10 +26,12 @@ import { listCoursesAdmin, patchCourse, deleteCourse } from '@/lib/api/courses';
 import { ApiClientError } from '@/lib/api/http';
 import DashboardListFilters, { FilterPanel } from '@/components/filters/DashboardListFilters';
 import { buildPublishStatusOptions, type PublishStatusFilter } from '@/components/filters/publishStatusOptions';
+import { isSuperAdmin } from '@/lib/roles';
 
 export default function AdminCoursesPage() {
   const { session, status } = useSessionStore();
   const router = useRouter();
+  const isSuperAdminUser = isSuperAdmin(session?.user?.role);
   const { theme } = useRoleTheme();
   const { t } = useTranslation();
   const [courses, setCourses] = useState<Course[]>([]);
@@ -207,53 +210,69 @@ export default function AdminCoursesPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 * index }}
-              className="bg-[var(--card-solid)] rounded-2xl shadow-sm hover:shadow-lg transition-shadow overflow-hidden group"
+              className="bg-[var(--card-solid)] rounded-2xl shadow-sm hover:shadow-lg transition-shadow overflow-hidden group flex flex-col h-full"
             >
-              <div className="p-6">
-                {/* Header */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-[var(--primary)] to-[var(--primary-accent)] text-white">
-                    <GraduationCap className="w-5 h-5" />
+              <div className="p-6 flex flex-col h-full">
+                <div className="flex-grow flex flex-col">
+                  {/* Header */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-[var(--primary)] to-[var(--primary-accent)] text-white">
+                      <GraduationCap className="w-5 h-5" />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={course.isPublished ? 'primary' : 'default'} size="sm">
+                        {course.isPublished ? t('common.published') : t('common.draft')}
+                      </Badge>
+                      {isSuperAdminUser && (
+                        <Badge variant={course.isPrivate ? 'warning' : 'info'} size="sm">
+                          {course.isPrivate ? t('courses.privateCourse') : t('courses.publicCourse')}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={course.isPublished ? 'primary' : 'default'} size="sm">
-                      {course.isPublished ? t('common.published') : t('common.draft')}
-                    </Badge>
-                  </div>
-                </div>
 
-                {/* Title */}
-                <h3 className="text-lg font-semibold text-[var(--color-foreground)] mb-2 line-clamp-2">
-                  {course.title}
-                </h3>
+                  {/* Title */}
+                  <h3 className="text-lg font-semibold text-[var(--color-foreground)] mb-2 line-clamp-2 min-h-[3.5rem]">
+                    {course.title}
+                  </h3>
 
-                {/* Description */}
-                <p className="text-[var(--color-muted-foreground)] text-sm mb-4 line-clamp-2">
-                  {course.description || t('courses.noDescription')}
-                </p>
+                  {/* Description */}
+                  <p className="text-[var(--color-muted-foreground)] text-sm mb-4 line-clamp-2 min-h-[2.5rem]">
+                    {course.description || t('courses.noDescription')}
+                  </p>
 
-                {/* Meta */}
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center text-sm text-[var(--color-muted-foreground)]">
-                    <Users className="w-4 h-4 mr-2" />
-                    {course.instructor?.name || t('admin.unknownInstructor')}
-                  </div>
-                  <div className="flex items-center text-sm text-[var(--color-muted-foreground)]">
-                    <Users className="w-4 h-4 mr-2" />
-                    {t('admin.studentsEnrolled', { count: course.enrolledCount || 0 })}
-                  </div>
-                  <div className="flex items-center text-sm text-[var(--color-muted-foreground)]">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    {formatDate(course.createdAt)}
-                  </div>
-                  <div className="flex items-center text-sm text-[var(--color-muted-foreground)]">
-                    <span className="mr-2">{t('admin.languageLabel')}:</span>
-                    <span className="font-medium">{course.locale === 'hi' ? t('common.hindi') : t('common.english')}</span>
+                  {/* Meta */}
+                  <div className="space-y-2 mb-4 mt-auto">
+                    <div className="flex items-center text-sm text-[var(--color-muted-foreground)]">
+                      <Users className="w-4 h-4 mr-2" />
+                      {course.instructor?.name || t('admin.unknownInstructor')}
+                    </div>
+                    <div className="flex items-center text-sm text-[var(--color-muted-foreground)]">
+                      <Users className="w-4 h-4 mr-2" />
+                      {t('admin.studentsEnrolled', { count: course.enrolledCount || 0 })}
+                    </div>
+                    <div className="flex items-center text-sm text-[var(--color-muted-foreground)]">
+                      <Calendar className="w-4 h-4 mr-2" />
+                      {formatDate(course.createdAt)}
+                    </div>
+                    <div className="flex items-center text-sm text-[var(--color-muted-foreground)]">
+                      <span className="mr-2">{t('admin.languageLabel')}:</span>
+                      <span className="font-medium">{course.locale === 'hi' ? t('common.hindi') : t('common.english')}</span>
+                    </div>
                   </div>
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-2 pt-4 border-t border-[var(--border)]">
+                <div className="flex gap-2 pt-4 border-t border-[var(--border)] mt-auto">
+                  {isSuperAdminUser && (
+                    <button
+                      onClick={() => router.push(ROUTES.teacher.courseEdit(course._id))}
+                      className="flex-1 flex items-center justify-center min-h-[44px] sm:min-h-0 px-3 py-2 bg-[var(--info-light)] text-[var(--info)] rounded-lg hover:bg-[var(--info-light)]/80 transition-colors text-sm font-medium"
+                    >
+                      <Edit className="w-4 h-4 mr-1" />
+                      {t('common.edit')}
+                    </button>
+                  )}
                   <button
                     onClick={() => handleTogglePublish(course._id, course.isPublished)}
                     className="flex-1 flex items-center justify-center min-h-[44px] sm:min-h-0 px-3 py-2 bg-[var(--color-surface-muted)] text-[var(--color-foreground)] rounded-lg hover:bg-[var(--color-surface-muted)]/80 transition-colors text-sm"

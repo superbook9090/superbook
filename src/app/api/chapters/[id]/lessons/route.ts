@@ -6,6 +6,7 @@ import { Course, Chapter, Lesson } from '@/models';
 import { createLessonSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
+import { requireFeature } from '@/lib/settingsHelpers';
 
 // POST /api/chapters/[id]/lessons - Add a lesson to this chapter
 export async function POST(
@@ -14,6 +15,9 @@ export async function POST(
 ) {
   const logContext: LogContext = { method: 'POST', path: '/api/chapters/[id]/lessons' };
   try {
+    const featureCheck = await requireFeature('enableCourses');
+    if (featureCheck) return featureCheck;
+
     const session = await getServerSession(authOptions);
     if (!session?.user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 
@@ -23,7 +27,11 @@ export async function POST(
     if (!chapter) return NextResponse.json({ message: 'Chapter not found' }, { status: 404 });
 
     const course = await Course.findById(chapter.course);
-    if (course.instructor.toString() !== session.user.id && session.user.role !== 'admin') {
+    if (
+      course.instructor.toString() !== session.user.id &&
+      session.user.role !== 'admin' &&
+      session.user.role !== 'superadmin'
+    ) {
       return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
     }
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslation } from '@/hooks/useTranslation';
+import { useSeoTool } from '@/hooks/useSeoTool';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import {
@@ -20,7 +21,7 @@ import Link from 'next/link';
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher';
 import { landing } from '@/components/home/landingStyles';
 import Image from 'next/image';
-import type { SeoToolData } from '@/data/seo-tools';
+import { useFeature } from '@/contexts/AppSettingsContext';
 
 const IconMap: Record<string, React.ElementType> = {
   Zap,
@@ -32,6 +33,14 @@ const IconMap: Record<string, React.ElementType> = {
   BookOpen,
   CheckCircle
 };
+
+const EXPLORE_LINKS = [
+  { slug: 'quiz-maker-free', path: '/quiz-maker-free' },
+  { slug: 'ai-quiz-maker-free', path: '/ai-quiz-generator' },
+  { slug: 'mcq-generator-free', path: '/mcq-generator' },
+  { slug: 'course-maker-free', path: '/course-maker-free' },
+  { slug: 'test-series-maker-free', path: '/test-series-maker-free' },
+] as const;
 
 function Accordion({ title, children }: { title: string; children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -66,22 +75,26 @@ function Accordion({ title, children }: { title: string; children: React.ReactNo
 }
 
 type ToolClientProps = {
-  tool: SeoToolData;
+  toolSlug: string;
 };
 
-export default function ToolClient({ tool }: ToolClientProps) {
+export default function ToolClient({ toolSlug }: ToolClientProps) {
   const { t } = useTranslation();
+  const tool = useSeoTool(toolSlug);
+  const enableBlogs = useFeature('enableBlogs');
+  const enableCourses = useFeature('enableCourses');
+
+  if (!tool) return null;
 
   return (
     <div className="min-h-screen bg-[var(--background)] pb-20">
-      {/* Header bar */}
       <header className="sticky top-0 z-50 bg-[var(--background)]/80 backdrop-blur-md border-b border-[var(--border)]">
         <div className={`${landing.container} h-16 flex items-center justify-between`}>
           <Link href={ROUTES.home} className="flex items-center gap-2">
             <div className="flex items-center px-3 py-2 rounded-xl bg-white/90 shadow-sm">
               <Image
                 src="/logo.svg"
-                alt="Quiz-Do logo"
+                alt={t('home.header.logoAlt')}
                 width={96}
                 height={52}
                 className="h-8 sm:h-9 w-auto object-contain"
@@ -106,7 +119,7 @@ export default function ToolClient({ tool }: ToolClientProps) {
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--student-soft)] rounded-full border border-[var(--student-border)] mb-6">
               <Sparkles className="w-4 h-4 text-[var(--student-primary)]" aria-hidden />
               <span className="text-sm font-semibold text-[var(--student-primary)]">
-                Quiz-Do Education Tools
+                {t('seoTools.common.badge')}
               </span>
             </div>
             <h1 className="text-4xl sm:text-5xl font-extrabold text-[var(--color-foreground)] mb-6 leading-tight">
@@ -118,7 +131,6 @@ export default function ToolClient({ tool }: ToolClientProps) {
           </div>
 
           <div className="space-y-16">
-            {/* Features */}
             <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {tool.features.map((feature, i) => {
                 const Icon = IconMap[feature.iconName] || CheckCircle;
@@ -134,7 +146,6 @@ export default function ToolClient({ tool }: ToolClientProps) {
               })}
             </section>
 
-            {/* How it works */}
             <section className="bg-[var(--card-solid)] border-2 border-[var(--student-border)] rounded-[32px] p-8 sm:p-10 shadow-lg relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)]" />
               <h2 className="text-3xl font-bold text-[var(--color-foreground)] mb-10 text-center">
@@ -153,10 +164,9 @@ export default function ToolClient({ tool }: ToolClientProps) {
               </div>
             </section>
 
-            {/* Benefits */}
             <section className="max-w-4xl mx-auto">
               <h2 className="text-3xl font-bold text-center text-[var(--color-foreground)] mb-10">
-                Why Choose Our Tool
+                {t('seoTools.common.whyChoose')}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {tool.benefits.map((benefit, i) => (
@@ -171,10 +181,9 @@ export default function ToolClient({ tool }: ToolClientProps) {
               </div>
             </section>
 
-            {/* FAQ Accordions */}
             <section className="max-w-3xl mx-auto mt-16">
               <h2 className="text-3xl font-bold text-center text-[var(--color-foreground)] mb-10">
-                Frequently Asked Questions
+                {t('seoTools.common.faqTitle')}
               </h2>
               <div className="space-y-4">
                 {tool.faqs.map((faq, i) => (
@@ -185,15 +194,14 @@ export default function ToolClient({ tool }: ToolClientProps) {
               </div>
             </section>
 
-            {/* CTA Section */}
             <section className="text-center py-20 px-4 bg-[var(--student-primary)] text-white rounded-[40px] mt-20 relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-[var(--student-primary)] to-[var(--teacher-primary)]" />
               <div className="relative z-10">
                 <h2 className="text-4xl font-bold mb-6">
-                  Ready to get started?
+                  {t('seoTools.common.ctaTitle')}
                 </h2>
                 <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto leading-relaxed">
-                  Join thousands of educators and students using Quiz-Do.
+                  {t('seoTools.common.ctaSubtitle')}
                 </p>
                 <Link
                   href={ROUTES.register}
@@ -204,18 +212,25 @@ export default function ToolClient({ tool }: ToolClientProps) {
               </div>
             </section>
 
-            {/* Internal Links for Top Authority */}
             <section className="pt-10 border-t border-[var(--border)]">
-              <h3 className="text-lg font-bold text-[var(--color-foreground)] mb-4">Explore More Tools</h3>
+              <h3 className="text-lg font-bold text-[var(--color-foreground)] mb-4">{t('seoTools.common.exploreMore')}</h3>
               <div className="flex flex-wrap gap-3">
-                <Link href="/quiz-maker-free" className="text-sm px-4 py-2 bg-[var(--color-surface-muted)] rounded-lg hover:bg-[var(--card-solid)] text-[var(--color-foreground)] transition-colors">Free Quiz Maker</Link>
-                <Link href="/ai-quiz-generator" className="text-sm px-4 py-2 bg-[var(--color-surface-muted)] rounded-lg hover:bg-[var(--card-solid)] text-[var(--color-foreground)] transition-colors">AI Quiz Generator</Link>
-                <Link href="/mcq-generator" className="text-sm px-4 py-2 bg-[var(--color-surface-muted)] rounded-lg hover:bg-[var(--card-solid)] text-[var(--color-foreground)] transition-colors">MCQ Generator</Link>
-                <Link href="/course-maker-free" className="text-sm px-4 py-2 bg-[var(--color-surface-muted)] rounded-lg hover:bg-[var(--card-solid)] text-[var(--color-foreground)] transition-colors">Course Maker</Link>
-                <Link href="/test-series-maker-free" className="text-sm px-4 py-2 bg-[var(--color-surface-muted)] rounded-lg hover:bg-[var(--card-solid)] text-[var(--color-foreground)] transition-colors">Test Series Maker</Link>
-                <Link href={ROUTES.blogs} className="text-sm px-4 py-2 bg-[var(--color-surface-muted)] rounded-lg hover:bg-[var(--card-solid)] text-[var(--color-foreground)] transition-colors">Educational Blogs</Link>
-                <Link href="/courses" className="text-sm px-4 py-2 bg-[var(--color-surface-muted)] rounded-lg hover:bg-[var(--card-solid)] text-[var(--color-foreground)] transition-colors">Public Courses</Link>
-                <Link href="/tools" className="text-sm px-4 py-2 bg-[var(--color-surface-muted)] rounded-lg hover:bg-[var(--card-solid)] text-[var(--color-foreground)] transition-colors">All Tools</Link>
+                {EXPLORE_LINKS.filter((link) => link.slug !== toolSlug).map((link) => (
+                  <ExploreToolLink key={link.path} toolSlug={link.slug} href={link.path} />
+                ))}
+                {enableBlogs && (
+                  <Link href={ROUTES.blogs} className="text-sm px-4 py-2 bg-[var(--color-surface-muted)] rounded-lg hover:bg-[var(--card-solid)] text-[var(--color-foreground)] transition-colors">
+                    {t('home.footer.educationalBlogs')}
+                  </Link>
+                )}
+                {enableCourses && (
+                  <Link href={ROUTES.courses} className="text-sm px-4 py-2 bg-[var(--color-surface-muted)] rounded-lg hover:bg-[var(--card-solid)] text-[var(--color-foreground)] transition-colors">
+                    {t('home.footer.publicCourses')}
+                  </Link>
+                )}
+                <Link href={ROUTES.toolsIndex} className="text-sm px-4 py-2 bg-[var(--color-surface-muted)] rounded-lg hover:bg-[var(--card-solid)] text-[var(--color-foreground)] transition-colors">
+                  {t('home.footer.allTools')}
+                </Link>
               </div>
             </section>
 
@@ -223,5 +238,19 @@ export default function ToolClient({ tool }: ToolClientProps) {
         </PageWrapper>
       </div>
     </div>
+  );
+}
+
+function ExploreToolLink({ toolSlug, href }: { toolSlug: string; href: string }) {
+  const tool = useSeoTool(toolSlug);
+  if (!tool) return null;
+
+  return (
+    <Link
+      href={href}
+      className="text-sm px-4 py-2 bg-[var(--color-surface-muted)] rounded-lg hover:bg-[var(--card-solid)] text-[var(--color-foreground)] transition-colors"
+    >
+      {tool.h1}
+    </Link>
   );
 }

@@ -9,6 +9,7 @@ import { logApiError, type LogContext } from '@/lib/logger';
 import { invalidatePattern } from '@/lib/redis';
 import { revalidateTag } from 'next/cache';
 import mongoose from 'mongoose';
+import { requireFeature } from '@/lib/settingsHelpers';
 
 // PATCH /api/enrollments/[id] - Update enrollment progress
 export async function PATCH(
@@ -21,6 +22,9 @@ export async function PATCH(
   };
 
   try {
+    const featureCheck = await requireFeature('enableCourses');
+    if (featureCheck) return featureCheck;
+
     const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -90,6 +94,9 @@ export async function DELETE(
   };
 
   try {
+    const featureCheck = await requireFeature('enableCourses');
+    if (featureCheck) return featureCheck;
+
     const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session) {

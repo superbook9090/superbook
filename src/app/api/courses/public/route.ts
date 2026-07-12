@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { listPublicCourses, listPublicCourseCategories } from '@/lib/courses/public';
+import { requireFeature } from '@/lib/settingsHelpers';
 
 export const revalidate = 300;
 
 export async function GET(request: NextRequest) {
+  const featureCheck = await requireFeature('enableCourses');
+  if (featureCheck) return featureCheck;
+
   const { searchParams } = new URL(request.url);
   const page = parseInt(searchParams.get('page') || '1', 10);
   const limit = parseInt(searchParams.get('limit') || '12', 10);

@@ -1,46 +1,53 @@
 import Link from 'next/link';
-import { PRIMARY_SEO_LANDINGS } from '@/lib/seo/landing-routes';
 import { ROUTES } from '@/constants/routes';
+import { isFeatureEnabled } from '@/lib/settingsHelpers';
+import { translate } from '@/i18n';
+import { SeoLandingGrid } from '@/components/home/SeoLandingGrid';
 
-const EXTRA_LINKS = [
-  { href: '/tools', label: 'All Education Tools' },
-  { href: ROUTES.blogs, label: 'Educational Blogs' },
-  { href: '/courses', label: 'Free Online Courses' },
-  { href: ROUTES.howItWorks, label: 'How It Works' },
-];
+export default async function SeoResources() {
+  const [enableBlogs, enableCourses] = await Promise.all([
+    isFeatureEnabled('enableBlogs'),
+    isFeatureEnabled('enableCourses'),
+  ]);
 
-export default function SeoResources() {
+  const t = (key: Parameters<typeof translate>[1]) => translate('en', key);
+
+  const extraLinks = [
+    { href: '/tools', labelKey: 'home.seoResources.allEducationTools' as const },
+    ...(enableBlogs ? [{ href: ROUTES.blogs, labelKey: 'home.seoResources.educationalBlogs' as const }] : []),
+    ...(enableCourses ? [{ href: '/courses', labelKey: 'home.seoResources.freeOnlineCourses' as const }] : []),
+    { href: ROUTES.howItWorks, labelKey: 'home.seoResources.howItWorks' as const },
+  ];
+
   return (
     <section className="py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <header className="text-center mb-10 max-w-2xl mx-auto">
-          <h2 className="text-3xl font-bold text-[var(--color-foreground)]">Free Tools for Educators</h2>
-          <p className="mt-3 text-[var(--color-muted-foreground)]">
-            Create quizzes, courses, test series, and practice exams — all free on Quiz-Do.
-            Built for teachers, coaching institutes, and competitive exam aspirants.
+          <h2
+            className="text-3xl font-bold text-[var(--color-foreground)]"
+            data-i18n-key="home.seoResources.title"
+          >
+            {t('home.seoResources.title')}
+          </h2>
+          <p
+            className="mt-3 text-[var(--color-muted-foreground)]"
+            data-i18n-key="home.seoResources.subtitle"
+          >
+            {t('home.seoResources.subtitle')}
           </p>
         </header>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-8">
-          {PRIMARY_SEO_LANDINGS.map((landing) => (
-            <Link
-              key={landing.path}
-              href={landing.path}
-              className="rounded-xl border border-[var(--border)] bg-[var(--card-solid)] px-4 py-3 text-sm font-medium text-[var(--color-foreground)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors text-center"
-            >
-              {landing.label}
-            </Link>
-          ))}
-        </div>
+        <SeoLandingGrid />
 
-        <div className="flex flex-wrap justify-center gap-4 text-sm">
-          {EXTRA_LINKS.map((link) => (
+        <div className="flex flex-wrap justify-center gap-3">
+          {extraLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="text-[var(--color-primary)] font-semibold hover:underline"
+              className="text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-primary)] underline-offset-2 hover:underline"
+              data-i18n-key={link.labelKey}
             >
-              {link.label} →
+              {t(link.labelKey)}
             </Link>
           ))}
         </div>

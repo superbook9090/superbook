@@ -19,7 +19,7 @@ export type NavIconName =
   | 'Heart'
   | 'Newspaper';
 
-export type NavFeatureFlag = 'enableBlogs' | 'enableQuizzes' | 'enableCourses';
+export type NavFeatureFlag = 'enableBlogs' | 'enableQuizzes' | 'enableCourses' | 'enableAnalytics';
 
 export interface DashboardNavItem {
   /** i18n key, e.g. `common.dashboard` */
@@ -48,7 +48,7 @@ export const TEACHER_NAV: DashboardNavItem[] = [
   { nameKey: 'common.myCourses', href: ROUTES.teacher.courses, icon: 'BookOpen', feature: 'enableCourses' },
   { nameKey: 'common.quizzes', href: ROUTES.teacher.quizzes, icon: 'HelpCircle', feature: 'enableQuizzes' },
   { nameKey: 'common.blogs', href: ROUTES.teacher.blogs, icon: 'Newspaper', feature: 'enableBlogs' },
-  { nameKey: 'common.analytics', href: ROUTES.teacher.analytics, icon: 'BarChart3' },
+  { nameKey: 'common.analytics', href: ROUTES.teacher.analytics, icon: 'BarChart3', feature: 'enableAnalytics' },
   { nameKey: 'common.profile', href: ROUTES.teacher.profile, icon: 'User' },
   { nameKey: 'contact.title', href: ROUTES.contact, icon: 'Mail' },
 ];
@@ -60,7 +60,7 @@ export const ADMIN_NAV: DashboardNavItem[] = [
   { nameKey: 'common.allQuizzes', href: ROUTES.admin.quizzes, icon: 'HelpCircle', feature: 'enableQuizzes' },
   { nameKey: 'common.allBlogs', href: ROUTES.admin.blogs, icon: 'Newspaper', feature: 'enableBlogs' },
   { nameKey: 'common.files', href: ROUTES.admin.files, icon: 'Folder', superadminOnly: true },
-  { nameKey: 'common.analytics', href: ROUTES.admin.analytics, icon: 'BarChart3' },
+  { nameKey: 'common.analytics', href: ROUTES.admin.analytics, icon: 'BarChart3', feature: 'enableAnalytics' },
   { nameKey: 'common.notifications', href: ROUTES.admin.notifications, icon: 'Bell', superadminOnly: true },
   { nameKey: 'common.settings', href: ROUTES.admin.settings, icon: 'User' },
   { nameKey: 'common.profile', href: ROUTES.admin.profile, icon: 'User' },
@@ -77,11 +77,13 @@ export const MOBILE_BOTTOM_NAV_KEYS = [
 
 export function filterNavByFeatures(
   items: DashboardNavItem[],
-  features: Record<NavFeatureFlag, boolean>
+  features: Record<NavFeatureFlag, boolean>,
+  options?: { hideWhileLoading?: boolean }
 ): DashboardNavItem[] {
   return items.filter((item) => {
-    if (item.feature) return features[item.feature];
-    return true;
+    if (!item.feature) return true;
+    if (options?.hideWhileLoading) return false;
+    return features[item.feature];
   });
 }
 

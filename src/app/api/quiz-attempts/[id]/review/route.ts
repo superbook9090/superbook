@@ -11,6 +11,7 @@ import { serialize } from '@/lib/serialize';
 import { buildQuizComparison } from '@/lib/quiz/quizComparison';
 import { safeNumber, DEFAULT_TIME_LIMIT_MINUTES } from '@/lib/quiz/resultDefaults';
 import type { Types } from 'mongoose';
+import { requireFeature } from '@/lib/settingsHelpers';
 
 export async function GET(
   _request: NextRequest,
@@ -20,6 +21,9 @@ export async function GET(
   const logContext: LogContext = { method: 'GET', path: `/api/quiz-attempts/${id}/review` };
 
   try {
+    const featureCheck = await requireFeature('enableQuizzes');
+    if (featureCheck) return featureCheck;
+
     await dbConnect();
     const session = await getServerSession(authOptions);
     if (!session) {

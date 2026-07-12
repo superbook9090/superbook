@@ -44,7 +44,7 @@ export default function HeroStatic() {
           <div className="flex items-center px-3 py-2 rounded-xl bg-white/90 shadow-sm">
             <Image
               src="/logo.svg"
-              alt="Quiz-Do logo"
+              alt={t('home.header.logoAlt')}
               width={144}
               height={78}
               className="h-12 sm:h-14 w-auto object-contain"

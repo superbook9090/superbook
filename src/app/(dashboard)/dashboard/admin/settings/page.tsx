@@ -27,6 +27,7 @@ import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { fetchAdminSettings, patchAdminSettings } from '@/lib/api/adminSettings';
 import { ApiClientError } from '@/lib/api/http';
 import { isSuperAdmin } from '@/lib/roles';
+import { useSettingsStore } from '@/store/useSettingsStore';
 
 interface AppSettings {
   teacherLimits: {
@@ -54,7 +55,8 @@ export default function AdminSettingsPage() {
   const router = useRouter();
   const { t } = useTranslation();
   const { theme } = useRoleTheme();
-  const {setValue} = useLocalStorage('settingsTimestamp', '')
+  const { setValue } = useLocalStorage('settingsTimestamp', '');
+  const fetchPublicSettings = useSettingsStore((s) => s.fetchSettings);
   const [settings, setSettings] = useState<AppSettings>({
     teacherLimits: {
       courses: 5,
@@ -128,7 +130,8 @@ export default function AdminSettingsPage() {
       setMessage({ type: 'success', text: t('adminSettings.settingsSaved') });
 
       setValue(Date.now().toString());
-      // Force refresh of settings across the app by updating localStorage timestamp
+      await fetchPublicSettings(true);
+      window.dispatchEvent(new Event('settingsUpdated'));
     } catch (err) {
       setMessage({
         type: 'error',

@@ -1,8 +1,16 @@
 import Link from 'next/link';
 import { listPublicBlogs, buildPublicBlogPath } from '@/lib/blogs/public';
 import { ROUTES } from '@/constants/routes';
+import { isFeatureEnabled } from '@/lib/settingsHelpers';
+import { translate } from '@/i18n';
 
 export default async function FeaturedBlogs() {
+  if (!(await isFeatureEnabled('enableBlogs'))) {
+    return null;
+  }
+
+  const t = (key: Parameters<typeof translate>[1]) => translate('en', key);
+
   let blogs: Awaited<ReturnType<typeof listPublicBlogs>>['blogs'] = [];
 
   try {
@@ -23,16 +31,25 @@ export default async function FeaturedBlogs() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-3xl font-bold text-[var(--color-foreground)]">Latest from Our Blog</h2>
-            <p className="mt-2 text-[var(--color-muted-foreground)]">
-              Study tips, exam prep guides, and EdTech insights for teachers and students.
+            <h2
+              className="text-3xl font-bold text-[var(--color-foreground)]"
+              data-i18n-key="home.featuredBlogs.title"
+            >
+              {t('home.featuredBlogs.title')}
+            </h2>
+            <p
+              className="mt-2 text-[var(--color-muted-foreground)]"
+              data-i18n-key="home.featuredBlogs.subtitle"
+            >
+              {t('home.featuredBlogs.subtitle')}
             </p>
           </div>
           <Link
             href={ROUTES.blogs}
             className="hidden sm:inline-flex text-[var(--color-primary)] font-semibold hover:underline"
+            data-i18n-key="home.featuredBlogs.viewAll"
           >
-            View all articles →
+            {t('home.featuredBlogs.viewAll')}
           </Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -51,15 +68,20 @@ export default async function FeaturedBlogs() {
               </h3>
               <p className="text-sm text-[var(--color-muted-foreground)] line-clamp-3 mb-4">{blog.excerpt}</p>
               <div className="text-xs text-[var(--color-muted-foreground)]">
-                {blog.readingTimeMinutes} min read
+                {blog.readingTimeMinutes}{' '}
+                <span data-i18n-key="home.featuredBlogs.minReadUnit">{t('home.featuredBlogs.minReadUnit')}</span>
                 {blog.author?.name && ` · ${blog.author.name}`}
               </div>
             </article>
           ))}
         </div>
         <div className="mt-6 text-center sm:hidden">
-          <Link href={ROUTES.blogs} className="text-[var(--color-primary)] font-semibold hover:underline">
-            View all articles →
+          <Link
+            href={ROUTES.blogs}
+            className="text-[var(--color-primary)] font-semibold hover:underline"
+            data-i18n-key="home.featuredBlogs.viewAll"
+          >
+            {t('home.featuredBlogs.viewAll')}
           </Link>
         </div>
       </div>

@@ -37,6 +37,8 @@ export interface Course {
     name: string;
     email: string;
   };
+  courseCode?: string | null;
+  isPrivate?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }

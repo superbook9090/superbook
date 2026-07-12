@@ -14,6 +14,7 @@ import {
   LazyStudentSidebar,
   LazyTeacherSidebar,
 } from '@/lib/lazy';
+import FeatureRouteGuard from '@/components/dashboard/FeatureRouteGuard';
 
 type DashboardChromeProps = {
   session: Session;
@@ -40,6 +41,7 @@ export default function DashboardChrome({
 
   return (
     <QuizProvider>
+      <FeatureRouteGuard role={role} />
       <div className="dashboard-shell" data-role={(role || 'student').toLowerCase()}>
         {!isTakingQuiz && (
           <LazyMobileNav

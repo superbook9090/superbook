@@ -22,8 +22,16 @@ export function AppSettingsProvider({ children }: { children: ReactNode }) {
       }
     };
 
+    const handleSettingsUpdated = () => {
+      void fetchSettings(true);
+    };
+
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener('settingsUpdated', handleSettingsUpdated);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('settingsUpdated', handleSettingsUpdated);
+    };
   }, [fetchSettings]);
 
   return <>{children}</>;

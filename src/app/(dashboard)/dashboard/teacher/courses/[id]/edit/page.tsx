@@ -11,7 +11,11 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
     redirect(ROUTES.login);
   }
 
-  if (session.user?.role !== 'teacher' && session.user?.role !== 'admin') {
+  if (
+    session.user?.role !== 'teacher' &&
+    session.user?.role !== 'admin' &&
+    session.user?.role !== 'superadmin'
+  ) {
     redirect(ROUTES.student.root);
   }
 

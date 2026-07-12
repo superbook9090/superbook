@@ -13,11 +13,15 @@ import { listQuestionsForQuiz, setQuizQuestions } from '@/domain/learning/quizCo
 import { deleteQuizzesAndQuestions } from '@/lib/cascade/deleteRelated';
 import { resolveQuizPlacement } from '@/lib/quiz/quizPlacement';
 import { invalidatePattern } from '@/lib/redis';
+import { requireFeature } from '@/lib/settingsHelpers';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const logContext: LogContext = { method: 'GET', path: '/api/quizzes/[id]' };
 
   try {
+    const featureCheck = await requireFeature('enableQuizzes');
+    if (featureCheck) return featureCheck;
+
     const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -83,6 +87,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   const logContext: LogContext = { method: 'PATCH', path: '/api/quizzes/[id]' };
 
   try {
+    const featureCheck = await requireFeature('enableQuizzes');
+    if (featureCheck) return featureCheck;
+
     const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -193,6 +200,9 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
   const logContext: LogContext = { method: 'DELETE', path: '/api/quizzes/[id]' };
 
   try {
+    const featureCheck = await requireFeature('enableQuizzes');
+    if (featureCheck) return featureCheck;
+
     const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session) {

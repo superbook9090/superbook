@@ -5,10 +5,12 @@ import Image from 'next/image';
 import { ROUTES } from '@/constants/routes';
 import { translate } from '@/i18n';
 import { roleThemes } from '@/lib/roleTheme';
+import { useFeature } from '@/contexts/AppSettingsContext';
 
 export default function HeaderStatic({ forceScrolled = false }: { forceScrolled?: boolean }) {
   const t = (key: Parameters<typeof translate>[1]) => translate('en', key);
   const theme = roleThemes.student;
+  const enableBlogs = useFeature('enableBlogs');
 
   return (
     <header
@@ -23,7 +25,7 @@ export default function HeaderStatic({ forceScrolled = false }: { forceScrolled?
             <div className="flex items-center px-3 py-2 rounded-xl bg-white/90 shadow-sm">
               <Image
                 src="/logo.svg"
-                alt="Quiz-Do logo"
+                alt={t('home.header.logoAlt')}
                 width={96}
                 height={52}
                 className="h-8 sm:h-9 w-auto object-contain"
@@ -32,14 +34,16 @@ export default function HeaderStatic({ forceScrolled = false }: { forceScrolled?
           </Link>
 
           <div className="hidden md:flex items-center gap-4">
-            <Link
-              id="header-blogs-link"
-              href={ROUTES.blogs}
-              data-i18n-key="common.blogs"
-              className={`header-nav-btn ${forceScrolled ? 'header-nav-btn-dark' : 'header-nav-btn-light'}`}
-            >
-              {t('common.blogs')}
-            </Link>
+            {enableBlogs && (
+              <Link
+                id="header-blogs-link"
+                href={ROUTES.blogs}
+                data-i18n-key="common.blogs"
+                className={`header-nav-btn ${forceScrolled ? 'header-nav-btn-dark' : 'header-nav-btn-light'}`}
+              >
+                {t('common.blogs')}
+              </Link>
+            )}
             <button
               id="lang-toggle"
               type="button"
@@ -80,7 +84,7 @@ export default function HeaderStatic({ forceScrolled = false }: { forceScrolled?
           <details className="md:hidden relative group">
             <summary
               id="mobile-menu-toggle"
-              aria-label="Open menu"
+              aria-label={t('home.header.openMenu')}
               className={`list-none p-2 rounded-lg transition-colors cursor-pointer [&::-webkit-details-marker]:hidden ${
                 forceScrolled ? 'text-gray-800 hover:bg-black/5' : 'text-white hover:bg-white/10'
               }`}
@@ -103,13 +107,15 @@ export default function HeaderStatic({ forceScrolled = false }: { forceScrolled?
               </svg>
             </summary>
             <div className="absolute right-0 top-full mt-2 w-56 rounded-xl bg-white shadow-lg border border-gray-100 p-4 space-y-3">
-              <Link
-                href={ROUTES.blogs}
-                data-i18n-key="common.blogs"
-                className="block w-full py-2.5 text-center text-gray-700 font-medium border border-gray-200 rounded-xl hover:bg-gray-50"
-              >
-                {t('common.blogs')}
-              </Link>
+              {enableBlogs && (
+                <Link
+                  href={ROUTES.blogs}
+                  data-i18n-key="common.blogs"
+                  className="block w-full py-2.5 text-center text-gray-700 font-medium border border-gray-200 rounded-xl hover:bg-gray-50"
+                >
+                  {t('common.blogs')}
+                </Link>
+              )}
               <Link
                 href={ROUTES.login}
                 data-i18n-key="home.login"

@@ -13,6 +13,7 @@ import { getSiteUrl } from '@/lib/seo/config';
 import { ROUTES } from '@/constants/routes';
 import MarketingHeader from '@/components/home/MarketingHeader';
 import Footer from '@/components/home/Footer';
+import { ensureFeatureEnabled } from '@/lib/settingsHelpers';
 
 export const revalidate = 300;
 export const dynamicParams = true;
@@ -46,6 +47,8 @@ export default async function PublicCourseDetailPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  await ensureFeatureEnabled('enableCourses');
+
   const { slug } = await params;
   const course = await getPublicCourseBySlug(slug);
   if (!course) notFound();

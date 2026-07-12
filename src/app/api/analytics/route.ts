@@ -6,6 +6,7 @@ import dbConnect from '@/lib/db';
 import mongoose from 'mongoose';
 import { User, Course, Quiz, Enrollment, QuizAttempt } from '@/models';
 import { logApiError, type LogContext } from '@/lib/logger';
+import { requireFeature } from '@/lib/settingsHelpers';
 
 // GET /api/analytics - Get analytics data
 export async function GET(request: NextRequest) {
@@ -15,6 +16,9 @@ export async function GET(request: NextRequest) {
   };
 
   try {
+    const featureCheck = await requireFeature('enableAnalytics');
+    if (featureCheck) return featureCheck;
+
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });

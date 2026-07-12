@@ -11,6 +11,7 @@ import {
   getRequestIp,
   rateLimitExceededMessage,
 } from '@/lib/rateLimiter';
+import { requireFeature } from '@/lib/settingsHelpers';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,6 +22,9 @@ export async function POST(request: NextRequest) {
   };
 
   try {
+    const featureCheck = await requireFeature('enableCourses');
+    if (featureCheck) return featureCheck;
+
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });

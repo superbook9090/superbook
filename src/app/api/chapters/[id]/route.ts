@@ -8,6 +8,7 @@ import { deleteChapterRelatedData } from '@/lib/cascade/deleteRelated';
 import { authorizeCourseEditorByChapter } from '@/lib/curriculum/authorize';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
+import { requireFeature } from '@/lib/settingsHelpers';
 
 async function validateParentChapterUpdate(
   courseId: string,
@@ -43,6 +44,9 @@ export async function PATCH(
 ) {
   const logContext: LogContext = { method: 'PATCH', path: '/api/chapters/[id]' };
   try {
+    const featureCheck = await requireFeature('enableCourses');
+    if (featureCheck) return featureCheck;
+
     const session = await getServerSession(authOptions);
     await dbConnect();
     const { id } = await params;
@@ -92,6 +96,9 @@ export async function DELETE(
 ) {
   const logContext: LogContext = { method: 'DELETE', path: '/api/chapters/[id]' };
   try {
+    const featureCheck = await requireFeature('enableCourses');
+    if (featureCheck) return featureCheck;
+
     const session = await getServerSession(authOptions);
     await dbConnect();
     const { id } = await params;

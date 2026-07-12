@@ -15,6 +15,7 @@ import {
   getRequestIp,
   rateLimitExceededMessage,
 } from '@/lib/rateLimiter';
+import { requireFeature } from '@/lib/settingsHelpers';
 
 // Configure Next.js caching for this route
 export const dynamic = 'force-dynamic';
@@ -27,6 +28,9 @@ export async function GET(request: NextRequest) {
   };
 
   try {
+    const featureCheck = await requireFeature('enableCourses');
+    if (featureCheck) return featureCheck;
+
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
@@ -141,6 +145,9 @@ export async function POST(request: NextRequest) {
   };
 
   try {
+    const featureCheck = await requireFeature('enableCourses');
+    if (featureCheck) return featureCheck;
+
     const session = await getServerSession(authOptions);
 
     if (!session) {

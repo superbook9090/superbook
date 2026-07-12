@@ -278,11 +278,61 @@ export const hi = {
       tagline:
         'Quiz-Do — छात्र, शिक्षक और व्यवस्थापकों के लिए ऑनलाइन कोर्स, क्विज़ और प्रगति ट्रैकिंग।',
       product: 'एक्सप्लोर',
+      resources: 'संसाधन',
       getStarted: 'खाता',
       copyright: '© {year} {siteName}.',
       madeWith: 'के साथ बनाया गया',
       inIndia: 'भारत में',
       rights: 'सर्वाधिकार सुरक्षित।',
+      freeQuizMaker: 'मुफ़्त क्विज़ मेकर',
+      aiQuizGenerator: 'AI क्विज़ जनरेटर',
+      mcqGenerator: 'MCQ जनरेटर',
+      courseMaker: 'कोर्स मेकर',
+      educationalBlogs: 'शैक्षिक ब्लॉग',
+      publicCourses: 'सार्वजनिक कोर्स',
+      allTools: 'सभी टूल्स',
+    },
+    featuredBlogs: {
+      title: 'हमारे ब्लॉग से नवीनतम',
+      subtitle: 'शिक्षकों और छात्रों के लिए अध्ययन सुझाव, परीक्षा तैयारी गाइड और EdTech अंतर्दृष्टि।',
+      viewAll: 'सभी लेख देखें →',
+      minReadUnit: 'मिनट पढ़ें',
+    },
+    seoResources: {
+      title: 'शिक्षकों के लिए मुफ़्त टूल्स',
+      subtitle:
+        'क्विज़, कोर्स, टेस्ट सीरीज़ और अभ्यास परीक्षाएं बनाएं — Quiz-Do पर सब कुछ मुफ़्त। शिक्षकों, कोचिंग संस्थानों और प्रतियोगी परीक्षा उम्मीदवारों के लिए।',
+      allEducationTools: 'सभी शिक्षा टूल्स',
+      educationalBlogs: 'शैक्षिक ब्लॉग',
+      freeOnlineCourses: 'मुफ़्त ऑनलाइन कोर्स',
+      howItWorks: 'यह कैसे काम करता है',
+    },
+    header: {
+      logoAlt: 'Quiz-Do लोगो',
+      openMenu: 'मेनू खोलें',
+    },
+  },
+
+  seoTools: {
+    common: {
+      badge: 'Quiz-Do शिक्षा टूल्स',
+      whyChoose: 'हमारा टूल क्यों चुनें',
+      faqTitle: 'अक्सर पूछे जाने वाले प्रश्न',
+      ctaTitle: 'शुरू करने के लिए तैयार हैं?',
+      ctaSubtitle: 'हज़ारों शिक्षक और छात्र Quiz-Do का उपयोग कर रहे हैं।',
+      exploreMore: 'और टूल्स देखें',
+      breadcrumbHome: 'होम',
+      breadcrumbTools: 'टूल्स',
+    },
+    index: {
+      title: 'मुफ़्त शिक्षा टूल्स',
+      subtitle:
+        'Quiz-Do शिक्षकों, छात्रों और कोचिंग संस्थानों के लिए मुफ़्त टूल्स प्रदान करता है — क्विज़ बनाने से लेकर पूर्ण कोर्स और टेस्ट सीरीज़ तक।',
+      popularTools: 'लोकप्रिय टूल्स',
+      allTools: 'सभी टूल्स',
+      educationalBlogs: 'शैक्षिक ब्लॉग →',
+      publicCourses: 'सार्वजनिक कोर्स →',
+      getStartedFree: 'मुफ़्त में शुरू करें →',
     },
   },
 
@@ -692,6 +742,7 @@ export const hi = {
     joinCourse: 'कोर्स में शामिल हों',
     joining: 'शामिल हो रहे हैं...',
     privateCourse: 'निजी',
+    publicCourse: 'सार्वजनिक',
     // Course Detail & Viewer
     courseContent: 'पाठ्यक्रम सामग्री',
     leaderboard: 'शीर्ष छात्र',

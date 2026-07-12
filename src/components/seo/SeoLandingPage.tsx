@@ -26,7 +26,7 @@ export default function SeoLandingPage({ route }: SeoLandingPageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
-      <ToolClient tool={tool} />
+      <ToolClient toolSlug={route.toolSlug} />
     </>
   );
 }

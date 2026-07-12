@@ -7,6 +7,7 @@ import PublicBlogViewTracker from '@/components/blogs/PublicBlogViewTracker';
 import { buildPublicBlogCanonical, buildPublicBlogPath, getPublicBlogBySlug, listPublicBlogSlugs, listRelatedPublicBlogs } from '@/lib/blogs/public';
 import { createPageMetadata } from '@/lib/seo/metadata';
 import { getSiteUrl } from '@/lib/seo/config';
+import { ensureFeatureEnabled } from '@/lib/settingsHelpers';
 
 export const revalidate = 300;
 export const dynamicParams = true; // slugs not in generateStaticParams are rendered on first visit and cached
@@ -39,6 +40,8 @@ export default async function PublicBlogDetailPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  await ensureFeatureEnabled('enableBlogs');
+
   const { slug } = await params;
   const blog = await getPublicBlogBySlug(slug);
   if (!blog) notFound();

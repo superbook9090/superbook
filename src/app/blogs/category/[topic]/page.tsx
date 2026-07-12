@@ -9,6 +9,7 @@ import {
   listPublicBlogTopics,
   blogTopicSlug,
 } from '@/lib/blogs/public';
+import { ensureFeatureEnabled } from '@/lib/settingsHelpers';
 
 function topicFromSlug(slug: string, topics: string[]): string | null {
   const decoded = decodeURIComponent(slug);
@@ -48,6 +49,8 @@ export default async function BlogCategoryPage({
 }: {
   params: Promise<{ topic: string }>;
 }) {
+  await ensureFeatureEnabled('enableBlogs');
+
   const { topic: topicSlug } = await params;
   const topics = await listPublicBlogTopics();
   const topic = topicFromSlug(topicSlug, topics);

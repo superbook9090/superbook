@@ -10,6 +10,7 @@ import { attachQuizzesToCurriculumTree, buildCurriculumTree } from '@/lib/curric
 import { authorizeCourseEditor } from '@/lib/curriculum/authorize';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
+import { requireFeature } from '@/lib/settingsHelpers';
 
 async function fetchCurriculumTree(courseId: string, publishedQuizzesOnly: boolean) {
   const chapters = await Chapter.find({ course: courseId }).sort({ order: 1 }).lean();
@@ -61,6 +62,9 @@ export async function GET(
 ) {
   const logContext: LogContext = { method: 'GET', path: '/api/courses/[id]/curriculum' };
   try {
+    const featureCheck = await requireFeature('enableCourses');
+    if (featureCheck) return featureCheck;
+
     await dbConnect();
     await ensureChapterIndexes();
     const { id } = await params;
@@ -83,6 +87,9 @@ export async function POST(
 ) {
   const logContext: LogContext = { method: 'POST', path: '/api/courses/[id]/curriculum' };
   try {
+    const featureCheck = await requireFeature('enableCourses');
+    if (featureCheck) return featureCheck;
+
     const session = await getServerSession(authOptions);
     await dbConnect();
     await ensureChapterIndexes();

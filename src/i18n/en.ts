@@ -278,11 +278,61 @@ export const en = {
       tagline:
         'Quiz-Do — online courses, quizzes, and progress tracking for students, teachers, and administrators.',
       product: 'Explore',
+      resources: 'Resources',
       getStarted: 'Account',
       copyright: '© {year} {siteName}.',
       madeWith: 'Made with',
       inIndia: 'in India',
       rights: 'All rights reserved.',
+      freeQuizMaker: 'Free Quiz Maker',
+      aiQuizGenerator: 'AI Quiz Generator',
+      mcqGenerator: 'MCQ Generator',
+      courseMaker: 'Course Maker',
+      educationalBlogs: 'Educational Blogs',
+      publicCourses: 'Public Courses',
+      allTools: 'All Tools',
+    },
+    featuredBlogs: {
+      title: 'Latest from Our Blog',
+      subtitle: 'Study tips, exam prep guides, and EdTech insights for teachers and students.',
+      viewAll: 'View all articles →',
+      minReadUnit: 'min read',
+    },
+    seoResources: {
+      title: 'Free Tools for Educators',
+      subtitle:
+        'Create quizzes, courses, test series, and practice exams — all free on Quiz-Do. Built for teachers, coaching institutes, and competitive exam aspirants.',
+      allEducationTools: 'All Education Tools',
+      educationalBlogs: 'Educational Blogs',
+      freeOnlineCourses: 'Free Online Courses',
+      howItWorks: 'How It Works',
+    },
+    header: {
+      logoAlt: 'Quiz-Do logo',
+      openMenu: 'Open menu',
+    },
+  },
+
+  seoTools: {
+    common: {
+      badge: 'Quiz-Do Education Tools',
+      whyChoose: 'Why Choose Our Tool',
+      faqTitle: 'Frequently Asked Questions',
+      ctaTitle: 'Ready to get started?',
+      ctaSubtitle: 'Join thousands of educators and students using Quiz-Do.',
+      exploreMore: 'Explore More Tools',
+      breadcrumbHome: 'Home',
+      breadcrumbTools: 'Tools',
+    },
+    index: {
+      title: 'Free Education Tools',
+      subtitle:
+        'Quiz-Do offers a suite of free tools for teachers, students, and coaching institutes — from quiz creation to full course and test series building.',
+      popularTools: 'Popular Tools',
+      allTools: 'All Tools',
+      educationalBlogs: 'Educational Blogs →',
+      publicCourses: 'Public Courses →',
+      getStartedFree: 'Get Started Free →',
     },
   },
 
@@ -692,6 +742,7 @@ export const en = {
     joinCourse: 'Join course',
     joining: 'Joining...',
     privateCourse: 'Private',
+    publicCourse: 'Public',
     // Course Detail & Viewer
     courseContent: 'Course Content',
     leaderboard: 'Top Students',
