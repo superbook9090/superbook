@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import Alert from '@/components/ui/Alert';
+import Tooltip from '@/components/ui/Tooltip';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import { useRouter } from 'next/navigation';
 import { useSessionStore } from '@/store/useSessionStore';
@@ -603,12 +604,15 @@ export default function AdminUsersPage() {
           >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-[var(--color-foreground)]">{t('adminUsers.assignOrganization')}</h3>
-              <button
-                onClick={handleCloseOrgAssign}
-                className="text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <Tooltip label={t('common.close')} position="bottom">
+                <button
+                  onClick={handleCloseOrgAssign}
+                  aria-label={t('common.close')}
+                  className="text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </Tooltip>
             </div>
             <div className="space-y-4">
               <div>
@@ -657,23 +661,29 @@ export default function AdminUsersPage() {
             {t('admin.showing').replace('{current}', String(users.length)).replace('{total}', String(pagination.total))}
           </p>
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => setPage(page - 1)}
-              disabled={page === 1}
-              className="p-2 min-h-[44px] sm:min-h-0 border border-[var(--border)] rounded-lg hover:bg-[var(--color-surface-muted)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
+            <Tooltip label={t('common.previous')}>
+              <button
+                onClick={() => setPage(page - 1)}
+                disabled={page === 1}
+                aria-label={t('common.previous')}
+                className="p-2 min-h-[44px] sm:min-h-0 border border-[var(--border)] rounded-lg hover:bg-[var(--color-surface-muted)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+            </Tooltip>
             <span className="px-3 py-2 text-sm text-[var(--color-muted-foreground)]">
               {t('admin.page').replace('{current}', String(page)).replace('{total}', String(pagination.totalPages))}
             </span>
-            <button
-              onClick={() => setPage(page + 1)}
-              disabled={page === pagination.totalPages}
-              className="p-2 min-h-[44px] sm:min-h-0 border border-[var(--border)] rounded-lg hover:bg-[var(--color-surface-muted)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
+            <Tooltip label={t('common.next')}>
+              <button
+                onClick={() => setPage(page + 1)}
+                disabled={page === pagination.totalPages}
+                aria-label={t('common.next')}
+                className="p-2 min-h-[44px] sm:min-h-0 border border-[var(--border)] rounded-lg hover:bg-[var(--color-surface-muted)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </Tooltip>
           </div>
         </motion.div>
       )}
@@ -721,12 +731,15 @@ export default function AdminUsersPage() {
                     </p>
                   </div>
                 </div>
-                <button
-                  onClick={handleCloseUserDetail}
-                  className="p-2 hover:bg-[var(--color-surface-muted)] rounded-lg transition-colors"
-                >
-                  <X className="w-5 h-5 text-[var(--color-muted-foreground)]" />
-                </button>
+                <Tooltip label={t('common.close')} position="bottom">
+                  <button
+                    onClick={handleCloseUserDetail}
+                    aria-label={t('common.close')}
+                    className="p-2 hover:bg-[var(--color-surface-muted)] rounded-lg transition-colors"
+                  >
+                    <X className="w-5 h-5 text-[var(--color-muted-foreground)]" />
+                  </button>
+                </Tooltip>
               </div>
 
               {/* User Info */}

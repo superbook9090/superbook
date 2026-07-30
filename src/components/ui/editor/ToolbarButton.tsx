@@ -3,6 +3,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
+import Tooltip from '@/components/ui/Tooltip';
 
 interface ToolbarButtonProps {
   onClick: () => void;
@@ -39,6 +40,7 @@ export const ToolbarButton = ({
   const currentTheme = themeStyles[theme];
 
   return (
+    <Tooltip label={title} position="bottom">
     <motion.button
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
@@ -48,7 +50,7 @@ export const ToolbarButton = ({
         onClick();
       }}
       disabled={disabled}
-      title={title}
+      aria-label={title}
       className={cn(
         'p-2 rounded-lg transition-all duration-200 flex items-center justify-center',
         'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]',
@@ -63,5 +65,6 @@ export const ToolbarButton = ({
     >
       {children}
     </motion.button>
+    </Tooltip>
   );
 };

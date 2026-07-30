@@ -9,6 +9,7 @@ import type { CurriculumQuiz } from '@/lib/curriculum/tree';
 import { cn } from '@/lib/utils';
 import { toIdString } from '@/lib/id';
 import { RowIconButton } from './shared';
+import Tooltip from '@/components/ui/Tooltip';
 
 type Props = {
   courseId: string;
@@ -77,13 +78,15 @@ export function CurriculumQuizBlock({
             </p>
           </div>
           <div className="flex items-center shrink-0">
-            <Link
-              href={ROUTES.teacher.quizEdit(toIdString(quiz._id))}
-              className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-[var(--color-muted)] hover:text-[var(--color-primary)]"
-              aria-label={t('curriculum.editQuiz')}
-            >
-              <Pencil className="w-4 h-4" />
-            </Link>
+            <Tooltip label={t('curriculum.editQuiz')}>
+              <Link
+                href={ROUTES.teacher.quizEdit(toIdString(quiz._id))}
+                className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-[var(--color-muted)] hover:text-[var(--color-primary)]"
+                aria-label={t('curriculum.editQuiz')}
+              >
+                <Pencil className="w-4 h-4" />
+              </Link>
+            </Tooltip>
             {onDeleteQuiz && (
               <RowIconButton
                 onClick={(e) => {

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, AlertCircle, CheckCircle, Info } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
+import Tooltip from '@/components/ui/Tooltip';
 
 interface AlertProps {
   type?: 'error' | 'success' | 'info';
@@ -103,13 +104,15 @@ export default function Alert({
           <Icon className="w-5 h-5 flex-shrink-0" />
           <p className="flex-1 text-sm font-medium">{message}</p>
           {onClose && (
-            <button
-              onClick={onClose}
-              className="flex-shrink-0 p-1 hover:bg-[var(--color-foreground)]/5 rounded transition-colors"
-              aria-label="Close alert"
-            >
-              <X className="w-4 h-4" />
-            </button>
+            <Tooltip label="Close alert" className="flex-shrink-0">
+              <button
+                onClick={onClose}
+                className="flex-shrink-0 p-1 hover:bg-[var(--color-foreground)]/5 rounded transition-colors"
+                aria-label="Close alert"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </Tooltip>
           )}
         </div>
         {showProgressBar && duration && (

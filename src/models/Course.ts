@@ -12,6 +12,9 @@ export interface ICourse extends Document {
   /** UI locale (en/hi). Named `locale` so it never collides with MongoDB text-index `language` override. */
   locale: 'en' | 'hi';
   isPublished: boolean;
+  /** Set by the instructor when the course content is finished; unlocks certificate issuance. */
+  isCompleted: boolean;
+  completedAt?: Date | null;
   /** Denormalized for listing cards and sort. */
   chapterCount: number;
   lessonCount: number;
@@ -37,6 +40,8 @@ const courseSchema = new Schema<ICourse>(
     category: String,
     locale: { type: String, enum: ['en', 'hi'], default: 'en' },
     isPublished: { type: Boolean, default: false },
+    isCompleted: { type: Boolean, default: false },
+    completedAt: { type: Date, default: null },
     chapterCount: { type: Number, default: 0 },
     lessonCount: { type: Number, default: 0 },
     enrolledCount: { type: Number, default: 0 },

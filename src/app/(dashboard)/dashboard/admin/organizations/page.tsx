@@ -18,6 +18,7 @@ import {
   ClipboardList,
 } from 'lucide-react';
 import Alert from '@/components/ui/Alert';
+import Tooltip from '@/components/ui/Tooltip';
 import { useRouter } from 'next/navigation';
 import { useSessionStore } from '@/store/useSessionStore';
 import { isSuperAdmin } from '@/lib/roles';
@@ -238,30 +239,36 @@ export default function OrganizationsPage() {
                       <div className="flex items-center gap-2 bg-[var(--color-surface-muted)] px-3 py-1.5 rounded-lg">
                         <span className="text-xs text-[var(--color-muted-foreground)]">{t('organizations.code')}:</span>
                         <code className="text-sm font-mono text-[var(--color-foreground)]">{org.code}</code>
-                        <button
-                          onClick={() => copyToClipboard(org.code, 'code')}
-                          className="text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors"
-                        >
-                          {copiedCode === `code-${org.code}` ? (
-                            <Check className="w-4 h-4 text-[var(--success)]" />
-                          ) : (
-                            <Copy className="w-4 h-4" />
-                          )}
-                        </button>
+                        <Tooltip label={copiedCode === `code-${org.code}` ? t('organizations.codeCopied') : t('organizations.copyCode')}>
+                          <button
+                            onClick={() => copyToClipboard(org.code, 'code')}
+                            aria-label={copiedCode === `code-${org.code}` ? t('organizations.codeCopied') : t('organizations.copyCode')}
+                            className="text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors"
+                          >
+                            {copiedCode === `code-${org.code}` ? (
+                              <Check className="w-4 h-4 text-[var(--success)]" />
+                            ) : (
+                              <Copy className="w-4 h-4" />
+                            )}
+                          </button>
+                        </Tooltip>
                       </div>
                       <div className="flex items-center gap-2 bg-[var(--info-light)] px-3 py-1.5 rounded-lg">
                         <span className="text-xs text-[var(--info)]">{t('organizations.inviteCode')}:</span>
                         <code className="text-sm font-mono text-[var(--info)]">{org.inviteCode}</code>
-                        <button
-                          onClick={() => copyToClipboard(org.inviteCode, 'inviteCode')}
-                          className="text-[var(--info)] hover:text-[var(--info)]/80 transition-colors"
-                        >
-                          {copiedCode === `inviteCode-${org.inviteCode}` ? (
-                            <Check className="w-4 h-4 text-[var(--success)]" />
-                          ) : (
-                            <Copy className="w-4 h-4" />
-                          )}
-                        </button>
+                        <Tooltip label={copiedCode === `inviteCode-${org.inviteCode}` ? t('organizations.codeCopied') : t('organizations.copyCode')}>
+                          <button
+                            onClick={() => copyToClipboard(org.inviteCode, 'inviteCode')}
+                            aria-label={copiedCode === `inviteCode-${org.inviteCode}` ? t('organizations.codeCopied') : t('organizations.copyCode')}
+                            className="text-[var(--info)] hover:text-[var(--info)]/80 transition-colors"
+                          >
+                            {copiedCode === `inviteCode-${org.inviteCode}` ? (
+                              <Check className="w-4 h-4 text-[var(--success)]" />
+                            ) : (
+                              <Copy className="w-4 h-4" />
+                            )}
+                          </button>
+                        </Tooltip>
                       </div>
                     </div>
 
@@ -288,18 +295,24 @@ export default function OrganizationsPage() {
 
                   {/* Actions */}
                   <div className="flex items-center gap-2 sm:ml-4 mt-4 sm:mt-0">
-                    <button
-                      onClick={() => openEditModal(org)}
-                      className="p-2 min-h-[44px] sm:min-h-0 text-[var(--color-muted-foreground)] hover:text-[var(--primary)] hover:bg-[var(--info-light)] rounded-lg transition-colors"
-                    >
-                      <Edit className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(org._id)}
-                      className="p-2 min-h-[44px] sm:min-h-0 text-[var(--color-muted-foreground)] hover:text-[var(--error)] hover:bg-[var(--error-light)] rounded-lg transition-colors"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
+                    <Tooltip label={t('common.edit')}>
+                      <button
+                        onClick={() => openEditModal(org)}
+                        aria-label={t('common.edit')}
+                        className="p-2 min-h-[44px] sm:min-h-0 text-[var(--color-muted-foreground)] hover:text-[var(--primary)] hover:bg-[var(--info-light)] rounded-lg transition-colors"
+                      >
+                        <Edit className="w-5 h-5" />
+                      </button>
+                    </Tooltip>
+                    <Tooltip label={t('common.delete')}>
+                      <button
+                        onClick={() => handleDelete(org._id)}
+                        aria-label={t('common.delete')}
+                        className="p-2 min-h-[44px] sm:min-h-0 text-[var(--color-muted-foreground)] hover:text-[var(--error)] hover:bg-[var(--error-light)] rounded-lg transition-colors"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </Tooltip>
                   </div>
                 </div>
               </motion.div>
@@ -318,12 +331,15 @@ export default function OrganizationsPage() {
           >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-[var(--color-foreground)]">{t('organizations.createOrganization')}</h2>
-              <button
-                onClick={() => setShowCreateModal(false)}
-                className="text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
-              >
-                <X className="w-6 h-6" />
-              </button>
+              <Tooltip label={t('common.close')} position="bottom">
+                <button
+                  onClick={() => setShowCreateModal(false)}
+                  aria-label={t('common.close')}
+                  className="text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </Tooltip>
             </div>
 
             <form onSubmit={handleCreate} className="space-y-4">
@@ -397,12 +413,15 @@ export default function OrganizationsPage() {
           >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-[var(--color-foreground)]">{t('organizations.editOrganization')}</h2>
-              <button
-                onClick={() => setShowEditModal(false)}
-                className="text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
-              >
-                <X className="w-6 h-6" />
-              </button>
+              <Tooltip label={t('common.close')} position="bottom">
+                <button
+                  onClick={() => setShowEditModal(false)}
+                  aria-label={t('common.close')}
+                  className="text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </Tooltip>
             </div>
 
             <form onSubmit={handleUpdate} className="space-y-4">

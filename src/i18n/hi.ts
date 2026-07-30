@@ -45,6 +45,7 @@ export const hi = {
     blogs: 'ब्लॉग',
     favorites: 'पसंदीदा',
     progress: 'प्रगति',
+    certificates: 'प्रमाणपत्र',
     profile: 'प्रोफ़ाइल',
     analytics: 'विश्लेषण',
     users: 'उपयोगकर्ता',
@@ -70,6 +71,7 @@ export const hi = {
     published: 'प्रकाशित',
     overview: 'अवलोकन',
     notifications: 'सूचनाएं',
+    close: 'बंद करें',
   },
 
   privacy: {
@@ -614,6 +616,7 @@ export const hi = {
     adminDesc: 'उपयोगकर्ताओं, पाठ्यक्रमों का प्रबंधन करें और सिस्टम-व्यापी विश्लेषण देखें',
     videoManagement: 'वीडियो व्याख्यान',
     videoDesc: 'केंद्रीय रूप से होस्ट किए गए असूचीबद्ध यूट्यूब वीडियो व्याख्यानों की निगरानी करें।',
+    openOnYouTube: 'YouTube पर खोलें',
     searchVideos: 'शीर्षक, पाठ्यक्रम या शिक्षक द्वारा व्याख्यान खोजें...',
     noVideosFound: 'कोई वीडियो व्याख्यान नहीं मिला',
     noVideosDesc: 'शिक्षकों ने अभी तक कोई वीडियो अपलोड नहीं किया है।',
@@ -1351,6 +1354,32 @@ export const hi = {
     deleteError: 'पाठ्यक्रम हटाने में विफल',
     deleteConfirmTitle: 'पाठ्यक्रम हटाएं?',
     deleteConfirmMessage: 'क्या आप वाकई इस पाठ्यक्रम और इसकी सभी सामग्री को हटाना चाहते हैं? यह क्रिया पूर्ववत नहीं की जा सकती।',
+    completed: 'पूर्ण',
+    markCompleted: 'पूर्ण चिह्नित करें',
+    reopenCourse: 'पाठ्यक्रम पुनः खोलें',
+    courseMarkedCompleted: 'पाठ्यक्रम पूर्ण चिह्नित किया गया। योग्य छात्रों को प्रमाणपत्र मिलेंगे।',
+    courseReopened: 'पाठ्यक्रम सफलतापूर्वक पुनः खोला गया',
+    completeError: 'पाठ्यक्रम पूर्णता स्थिति अपडेट करने में विफल',
+    completeConfirmTitle: 'पाठ्यक्रम को पूर्ण चिह्नित करें?',
+    completeConfirmMessage: 'जिन छात्रों ने सभी प्रकाशित पाठ और क्विज़ पूरे कर लिए हैं, उन्हें स्वचालित रूप से पूर्णता प्रमाणपत्र मिलेगा। जारी रखें?',
+  },
+
+  // Certificates
+  certificates: {
+    title: 'मेरे प्रमाणपत्र',
+    description: 'पाठ्यक्रम पूरा करके अर्जित किए गए आपके प्रमाणपत्र।',
+    noCertificates: 'अभी तक कोई प्रमाणपत्र नहीं।',
+    noCertificatesHint: 'प्रमाणपत्र अर्जित करने के लिए पूर्ण पाठ्यक्रम के सभी पाठ और क्विज़ पूरे करें।',
+    viewCertificate: 'प्रमाणपत्र देखें',
+    certificateOfCompletion: 'पूर्णता प्रमाणपत्र',
+    presentedTo: 'यह प्रमाणपत्र गर्व के साथ प्रदान किया जाता है',
+    forCompleting: 'पाठ्यक्रम सफलतापूर्वक पूर्ण करने के लिए',
+    instructor: 'शिक्षक',
+    issuedOn: 'जारी दिनांक',
+    certificateIdLabel: 'प्रमाणपत्र आईडी',
+    printDownload: 'प्रिंट / डाउनलोड',
+    backToCertificates: 'प्रमाणपत्रों पर वापस जाएं',
+    notFound: 'प्रमाणपत्र नहीं मिला।',
   },
 
   // Maintenance
@@ -1462,6 +1491,8 @@ export const hi = {
     invalidInviteCode: 'अमान्य आमंत्रण कोड',
     failedFetchOrganizations: 'संगठन प्राप्त करने में विफल',
     namePlaceholder: 'जैसे, ABC स्कूल',
+    copyCode: 'कोड कॉपी करें',
+    codeCopied: 'कॉपी हो गया!',
   },
 
   // Not Found
@@ -1511,6 +1542,8 @@ export const hi = {
     changePasswordTitle: 'पासवर्ड बदलें',
     changePasswordDesc: 'साइन इन रहते हुए पासवर्ड अपडेट करें। वर्तमान पासवर्ड आवश्यक है।',
     changeSuccess: 'आपका पासवर्ड अपडेट हो गया है।',
+    showPassword: 'पासवर्ड दिखाएं',
+    hidePassword: 'पासवर्ड छिपाएं',
     invalidResetLink: 'यह रीसेट लिंक अमान्य या समाप्त है। कृपया नया लिंक मांगें।',
     requestNewLink: 'नया रीसेट लिंक मांगें',
     googleNoPassword: 'आप Google से साइन इन करते हैं। ईमेल लॉगिन के लिए पासवर्ड सेट करने हेतु लॉगिन पर Forgot Password का उपयोग करें।',

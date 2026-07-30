@@ -5,6 +5,7 @@ import VideoProgress from '@/models/VideoProgress';
 import LessonCompletion from '@/models/LessonCompletion';
 import dbConnect from '@/lib/db';
 import { logApiError } from '@/lib/logger';
+import { checkAndIssueCertificate } from '@/domain/learning/certificateIssuance';
 
 export const dynamic = 'force-dynamic';
 
@@ -83,6 +84,10 @@ export async function POST(request: NextRequest) {
         { completedAt: new Date() },
         { upsert: true }
       );
+
+      // Issue a certificate if this was the last requirement of a
+      // teacher-completed course. Idempotent; never throws.
+      await checkAndIssueCertificate(session.user.id, String(courseId));
     }
 
     return NextResponse.json({

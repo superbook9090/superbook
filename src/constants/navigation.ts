@@ -17,7 +17,8 @@ export type NavIconName =
   | 'Mail'
   | 'Bell'
   | 'Heart'
-  | 'Newspaper';
+  | 'Newspaper'
+  | 'Award';
 
 export type NavFeatureFlag = 'enableBlogs' | 'enableQuizzes' | 'enableCourses' | 'enableAnalytics';
 
@@ -39,6 +40,7 @@ export const STUDENT_NAV: DashboardNavItem[] = [
   { nameKey: 'common.favorites', href: ROUTES.student.favorites, icon: 'Heart', feature: 'enableBlogs' },
   { nameKey: 'common.quizzes', href: ROUTES.student.quizzes, icon: 'HelpCircle', feature: 'enableQuizzes' },
   { nameKey: 'common.progress', href: ROUTES.student.progress, icon: 'TrendingUp' },
+  { nameKey: 'common.certificates', href: ROUTES.student.certificates, icon: 'Award', feature: 'enableCourses' },
   { nameKey: 'common.profile', href: ROUTES.student.profile, icon: 'User' },
   { nameKey: 'contact.title', href: ROUTES.contact, icon: 'Mail' },
 ];

@@ -7,6 +7,7 @@ import { changePassword, fetchAccountInfo } from '@/lib/api/auth';
 import { ApiClientError } from '@/lib/api/http';
 import Button from '@/components/ui/Button';
 import { Loader } from '@/components/ui/Loader';
+import Tooltip from '@/components/ui/Tooltip';
 
 export default function ChangePasswordForm() {
   const { t } = useTranslation();
@@ -116,13 +117,19 @@ export default function ChangePasswordForm() {
             onChange={(e) => setCurrentPassword(e.target.value)}
             className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[var(--student-primary)]/30 focus:border-[var(--student-primary)]"
           />
-          <button
-            type="button"
-            onClick={() => setShowCurrent(!showCurrent)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+          <Tooltip
+            label={showCurrent ? t('password.hidePassword') : t('password.showPassword')}
+            className="absolute right-3 top-1/2 -translate-y-1/2"
           >
-            {showCurrent ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-          </button>
+            <button
+              type="button"
+              onClick={() => setShowCurrent(!showCurrent)}
+              aria-label={showCurrent ? t('password.hidePassword') : t('password.showPassword')}
+              className="text-gray-400"
+            >
+              {showCurrent ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </Tooltip>
         </div>
       </div>
 
@@ -139,13 +146,19 @@ export default function ChangePasswordForm() {
               onChange={(e) => setNewPassword(e.target.value)}
               className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[var(--student-primary)]/30"
             />
-            <button
-              type="button"
-              onClick={() => setShowNew(!showNew)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+            <Tooltip
+              label={showNew ? t('password.hidePassword') : t('password.showPassword')}
+              className="absolute right-3 top-1/2 -translate-y-1/2"
             >
-              {showNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            </button>
+              <button
+                type="button"
+                onClick={() => setShowNew(!showNew)}
+                aria-label={showNew ? t('password.hidePassword') : t('password.showPassword')}
+                className="text-gray-400"
+              >
+                {showNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </Tooltip>
           </div>
         </div>
         <div>

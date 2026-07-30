@@ -10,9 +10,10 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
 import Alert from '@/components/ui/Alert';
+import Tooltip from '@/components/ui/Tooltip';
 import { PageSkeleton } from '@/components/ui/Skeleton';
-import { useTeacherCourses, usePublishCourse, useDeleteCourse, type Course } from '@/lib/react-query/hooks';
-import { Trash2 } from 'lucide-react';
+import { useTeacherCourses, usePublishCourse, useMarkCourseCompleted, useDeleteCourse, type Course } from '@/lib/react-query/hooks';
+import { Trash2, Award } from 'lucide-react';
 import { LazyConfirmModal } from '@/lib/lazy';
 
 export default function TeacherCoursesPage() {
@@ -22,11 +23,13 @@ export default function TeacherCoursesPage() {
   const { theme } = useRoleTheme();
   const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
   const [confirmDeleteCourse, setConfirmDeleteCourse] = useState<string | null>(null);
+  const [confirmCompleteCourse, setConfirmCompleteCourse] = useState<string | null>(null);
 
   // Get orgId from session
   const orgId = (session?.user as { organizationId?: string })?.organizationId || 'public';
   const { data: courses = [], isLoading, error } = useTeacherCourses(orgId);
   const publishCourse = usePublishCourse();
+  const markCourseCompleted = useMarkCourseCompleted();
   const deleteCourse = useDeleteCourse();
 
   useEffect(() => {
@@ -49,6 +52,23 @@ export default function TeacherCoursesPage() {
         message: t('teacherCourses.publishError')
       });
       console.error('Publish error:', _error);
+    }
+  };
+
+  const handleMarkCompleted = async (courseId: string, isCompleted: boolean) => {
+    try {
+      await markCourseCompleted.mutateAsync({ courseId, isCompleted });
+      setAlertState({
+        type: 'success',
+        message: isCompleted ? t('teacherCourses.courseMarkedCompleted') : t('teacherCourses.courseReopened')
+      });
+      setConfirmCompleteCourse(null);
+    } catch (_error) {
+      setAlertState({
+        type: 'error',
+        message: t('teacherCourses.completeError')
+      });
+      console.error('Mark completed error:', _error);
     }
   };
 
@@ -149,6 +169,12 @@ export default function TeacherCoursesPage() {
                     }`}>
                       {course.isPublished ? t('teacherCourses.published') : t('teacherCourses.draft')}
                     </span>
+                    {course.isCompleted && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <Award className="w-3 h-3" />
+                        {t('teacherCourses.completed')}
+                      </span>
+                    )}
                     {(course as { isPrivate?: boolean }).isPrivate && (
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
                         {t('courses.privateCourse')}
@@ -195,13 +221,33 @@ export default function TeacherCoursesPage() {
                         course.isPublished ? t('teacherCourses.unpublish') : t('teacherCourses.publish')
                       )}
                     </button>
-                    <button
-                      onClick={() => setConfirmDeleteCourse(course._id)}
-                      className="p-2 text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
-                      title={t('teacherCourses.deleteCourse') || 'Delete Course'}
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
+                    <Tooltip label={course.isCompleted ? t('teacherCourses.reopenCourse') : t('teacherCourses.markCompleted')}>
+                      <button
+                        onClick={() =>
+                          course.isCompleted
+                            ? handleMarkCompleted(course._id, false)
+                            : setConfirmCompleteCourse(course._id)
+                        }
+                        disabled={markCourseCompleted.isPending}
+                        aria-label={course.isCompleted ? t('teacherCourses.reopenCourse') : t('teacherCourses.markCompleted')}
+                        className={`p-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                          course.isCompleted
+                            ? 'text-blue-600 bg-blue-50 hover:bg-blue-100'
+                            : 'text-[var(--color-muted-foreground)] bg-[var(--color-surface-muted)] hover:bg-blue-50 hover:text-blue-600'
+                        }`}
+                      >
+                        <Award className="w-5 h-5" />
+                      </button>
+                    </Tooltip>
+                    <Tooltip label={t('teacherCourses.deleteCourse') || 'Delete Course'}>
+                      <button
+                        onClick={() => setConfirmDeleteCourse(course._id)}
+                        aria-label={t('teacherCourses.deleteCourse') || 'Delete Course'}
+                        className="p-2 text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </Tooltip>
                   </div>
                 </div>
               </div>
@@ -210,6 +256,21 @@ export default function TeacherCoursesPage() {
         )}
       </div>
     </div>
+
+    <LazyConfirmModal
+      isOpen={!!confirmCompleteCourse}
+      title={t('teacherCourses.completeConfirmTitle') || 'Mark Course as Completed?'}
+      message={t('teacherCourses.completeConfirmMessage') || 'Students who have finished all lessons and quizzes will automatically receive a completion certificate. Continue?'}
+      onConfirm={() => {
+        if (confirmCompleteCourse) {
+          handleMarkCompleted(confirmCompleteCourse, true);
+        }
+      }}
+      onCancel={() => setConfirmCompleteCourse(null)}
+      confirmText={t('teacherCourses.markCompleted')}
+      type="info"
+      isLoading={markCourseCompleted.isPending}
+    />
 
     <LazyConfirmModal
       isOpen={!!confirmDeleteCourse}

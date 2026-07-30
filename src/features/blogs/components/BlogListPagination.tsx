@@ -2,6 +2,7 @@
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
+import Tooltip from '@/components/ui/Tooltip';
 
 export interface BlogPaginationMeta {
   page: number;
@@ -53,27 +54,31 @@ export default function BlogListPagination({
           {t('blog.paginationSummary', { from: String(from), to: String(to), total: String(pagination.total) })}
         </p>
         <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
-          <button
-            type="button"
-            onClick={() => onPageChange(Math.max(1, page - 1))}
-            disabled={page === 1}
-            aria-label={t('common.previous')}
-            className="relative inline-flex items-center rounded-l-md px-3 py-2 text-[var(--color-muted-foreground)] ring-1 ring-inset ring-[var(--border)] hover:bg-[var(--color-surface-muted)] focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <ChevronLeft className="h-5 w-5" aria-hidden />
-          </button>
+          <Tooltip label={t('common.previous')}>
+            <button
+              type="button"
+              onClick={() => onPageChange(Math.max(1, page - 1))}
+              disabled={page === 1}
+              aria-label={t('common.previous')}
+              className="relative inline-flex items-center rounded-l-md px-3 py-2 text-[var(--color-muted-foreground)] ring-1 ring-inset ring-[var(--border)] hover:bg-[var(--color-surface-muted)] focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronLeft className="h-5 w-5" aria-hidden />
+            </button>
+          </Tooltip>
           <span className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-[var(--color-foreground)] ring-1 ring-inset ring-[var(--border)] bg-[var(--card-solid)]">
             {page} / {pagination.totalPages}
           </span>
-          <button
-            type="button"
-            onClick={() => onPageChange(Math.min(pagination.totalPages, page + 1))}
-            disabled={page === pagination.totalPages}
-            aria-label={t('common.next')}
-            className="relative inline-flex items-center rounded-r-md px-3 py-2 text-[var(--color-muted-foreground)] ring-1 ring-inset ring-[var(--border)] hover:bg-[var(--color-surface-muted)] focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <ChevronRight className="h-5 w-5" aria-hidden />
-          </button>
+          <Tooltip label={t('common.next')}>
+            <button
+              type="button"
+              onClick={() => onPageChange(Math.min(pagination.totalPages, page + 1))}
+              disabled={page === pagination.totalPages}
+              aria-label={t('common.next')}
+              className="relative inline-flex items-center rounded-r-md px-3 py-2 text-[var(--color-muted-foreground)] ring-1 ring-inset ring-[var(--border)] hover:bg-[var(--color-surface-muted)] focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronRight className="h-5 w-5" aria-hidden />
+            </button>
+          </Tooltip>
         </nav>
       </div>
     </div>

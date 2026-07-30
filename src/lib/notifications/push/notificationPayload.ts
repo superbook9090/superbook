@@ -48,6 +48,23 @@ export const generateQuizPayload = (quizName: string, quizId: string): PushNotif
   category: 'quizzes'
 });
 
+export const generateCertificatePayload = (courseName: string, certificateId: string, courseId: string): PushNotificationPayload => ({
+  title: {
+    en: '🎓 Certificate Earned!',
+    hi: '🎓 प्रमाणपत्र प्राप्त हुआ!'
+  },
+  body: {
+    en: `Congratulations! You completed "${courseName}" and earned a certificate.`,
+    hi: `बधाई हो! आपने "${courseName}" पूरा किया और प्रमाणपत्र अर्जित किया।`
+  },
+  data: {
+    url: `quizdo://certificate/${certificateId}`,
+    certificateId,
+    courseId
+  },
+  category: 'system'
+});
+
 export const generateAnnouncementPayload = (courseName: string, courseId: string): PushNotificationPayload => ({
   title: {
     en: '📢 New Course Announcement',

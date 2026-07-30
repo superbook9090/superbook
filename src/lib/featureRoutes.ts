@@ -9,6 +9,7 @@ type FeatureRouteRule = {
 const DASHBOARD_FEATURE_ROUTES: FeatureRouteRule[] = [
   { prefix: ROUTES.student.courses, feature: 'enableCourses' },
   { prefix: ROUTES.student.browse, feature: 'enableCourses' },
+  { prefix: ROUTES.student.certificates, feature: 'enableCourses' },
   { prefix: ROUTES.teacher.courses, feature: 'enableCourses' },
   { prefix: ROUTES.admin.courses, feature: 'enableCourses' },
   { prefix: ROUTES.student.blogs, feature: 'enableBlogs' },

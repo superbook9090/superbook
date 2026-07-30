@@ -5,6 +5,7 @@ import { ApiClientError } from '@/lib/api/http';
 import { Check, X } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useUpdateChapter, type Chapter } from '@/lib/react-query/hooks';
+import Tooltip from '@/components/ui/Tooltip';
 
 interface ChapterTitleEditorProps {
   chapter: Chapter;
@@ -73,30 +74,34 @@ export function ChapterTitleEditor({ chapter, courseId, onDone }: ChapterTitleEd
           className="flex-1 min-w-0 bg-[var(--color-background)] border border-[var(--color-primary)] rounded-lg px-3 py-1.5 text-[var(--color-foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/30 disabled:opacity-60 min-h-[44px]"
           aria-label={t('curriculum.editChapter')}
         />
-        <button
-          type="button"
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={handleSave}
-          disabled={updateChapter.isPending}
-          className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center text-white bg-[var(--color-primary)] hover:opacity-90 rounded-lg transition-opacity disabled:opacity-50"
-          aria-label={t('common.save')}
-        >
-          {updateChapter.isPending ? (
-            <span className="w-4 h-4 block border-2 border-white/30 border-t-white rounded-full animate-spin" />
-          ) : (
-            <Check className="w-4 h-4" />
-          )}
-        </button>
-        <button
-          type="button"
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={onDone}
-          disabled={updateChapter.isPending}
-          className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center text-[var(--color-muted)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted)] rounded-lg transition-colors disabled:opacity-50"
-          aria-label={t('common.cancel')}
-        >
-          <X className="w-4 h-4" />
-        </button>
+        <Tooltip label={t('common.save')}>
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={handleSave}
+            disabled={updateChapter.isPending}
+            className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center text-white bg-[var(--color-primary)] hover:opacity-90 rounded-lg transition-opacity disabled:opacity-50"
+            aria-label={t('common.save')}
+          >
+            {updateChapter.isPending ? (
+              <span className="w-4 h-4 block border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <Check className="w-4 h-4" />
+            )}
+          </button>
+        </Tooltip>
+        <Tooltip label={t('common.cancel')}>
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={onDone}
+            disabled={updateChapter.isPending}
+            className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center text-[var(--color-muted)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted)] rounded-lg transition-colors disabled:opacity-50"
+            aria-label={t('common.cancel')}
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </Tooltip>
       </div>
       {error && (
         <p className="text-xs text-[var(--color-error)] font-medium" role="alert">

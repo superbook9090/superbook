@@ -36,6 +36,8 @@ export const ROUTES = {
     quizTake: (attemptId: string) =>
       `/dashboard/student/quizzes/take?attemptId=${encodeURIComponent(attemptId)}`,
     progress: '/dashboard/student/progress',
+    certificates: '/dashboard/student/certificates',
+    certificate: (id: string) => `/dashboard/student/certificates/${id}`,
     profile: '/dashboard/student/profile',
     notifications: '/dashboard/student/notifications',
   },

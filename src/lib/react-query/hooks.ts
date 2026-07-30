@@ -23,6 +23,7 @@ import { listQuizzesByOrg, listQuizzesByCourse, listQuizzesPaginated, deleteQuiz
 import { toIdString } from '@/lib/id';
 import { listTeacherCoursesSelf } from '@/lib/api/courses';
 import { listEnrollments, enrollInCourse, joinCourseByCode, dropEnrollment } from '@/lib/api/enrollments';
+import { listCertificates } from '@/lib/api/certificates';
 import { listQuizAttempts, startQuizAttempt, submitQuizAttempt, type SubmitQuizAttemptInput } from '@/lib/api/quizAttempts';
 import { queryKeys, favoritesListDefaults } from '@/lib/react-query/query-keys';
 import { useSessionStore } from '@/store/useSessionStore';
@@ -59,6 +60,8 @@ export interface Course {
   price: number;
   instructor: { _id: string; name: string; email: string };
   isPublished: boolean;
+  isCompleted?: boolean;
+  completedAt?: string | null;
   enrolledCount?: number;
   createdAt: string;
 }
@@ -343,6 +346,31 @@ export function usePublishCourse() {
       const orgId = data.organizationId || 'public';
       queryClient.invalidateQueries({ queryKey: ['courses', orgId, 'teacher'] });
       queryClient.invalidateQueries({ queryKey: ['courses', orgId] });
+    },
+  });
+}
+
+export function useMarkCourseCompleted() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ courseId, isCompleted }: { courseId: string; isCompleted: boolean }) => {
+      return patchCourse(courseId, { isCompleted }) as Promise<{ organizationId?: string }>;
+    },
+    onSuccess: (data) => {
+      const orgId = data.organizationId || 'public';
+      queryClient.invalidateQueries({ queryKey: ['courses', orgId, 'teacher'] });
+      queryClient.invalidateQueries({ queryKey: ['courses', orgId] });
+    },
+  });
+}
+
+export function useCertificates() {
+  return useQuery({
+    queryKey: ['certificates'],
+    queryFn: async () => {
+      const data = await listCertificates();
+      return data.certificates || [];
     },
   });
 }

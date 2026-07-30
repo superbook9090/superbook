@@ -53,7 +53,7 @@ export const MenuBubble = ({ editor, theme = 'teacher' }: MenuBubbleProps) => {
         // Only show if there's a selection or we're on a link
         return from !== to || editor.isActive('link');
       }}
-      className="flex items-center gap-0.5 p-1 bg-[var(--card-solid)] border border-[var(--color-border)] rounded-xl shadow-xl backdrop-blur-md overflow-hidden"
+      className="flex items-center gap-0.5 p-1 bg-[var(--card-solid)] border border-[var(--color-border)] rounded-xl shadow-xl backdrop-blur-md"
     >
       {isEditingLink ? (
         <LinkInput

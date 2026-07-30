@@ -25,6 +25,7 @@ import {
   Building2
 } from 'lucide-react';
 import { Loader } from '@/components/ui/Loader';
+import Tooltip from '@/components/ui/Tooltip';
 
 export default function RegisterForm() {
   const { status, fetchSession } = useSessionStore();
@@ -375,13 +376,19 @@ export default function RegisterForm() {
                     placeholder="Create a password"
                     className={`w-full pl-12 pr-12 py-3 bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-xl text-[var(--color-foreground)] placeholder-[var(--color-muted)] focus:outline-none focus:ring-2 focus:${theme.shadow} focus:${theme.border.replace('border-', 'border-')} transition-all`}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-foreground)] transition-colors"
+                  <Tooltip
+                    label={showPassword ? t('password.hidePassword') : t('password.showPassword')}
+                    className="absolute right-4 top-1/2 -translate-y-1/2"
                   >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? t('password.hidePassword') : t('password.showPassword')}
+                      className="text-[var(--color-muted)] hover:text-[var(--color-foreground)] transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </Tooltip>
                 </div>
               </motion.div>
 
@@ -405,13 +412,19 @@ export default function RegisterForm() {
                     placeholder="Confirm your password"
                     className={`w-full pl-12 pr-12 py-3 bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-xl text-[var(--color-foreground)] placeholder-[var(--color-muted)] focus:outline-none focus:ring-2 focus:${theme.shadow} focus:${theme.border.replace('border-', 'border-')} transition-all`}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-foreground)] transition-colors"
+                  <Tooltip
+                    label={showConfirmPassword ? t('password.hidePassword') : t('password.showPassword')}
+                    className="absolute right-4 top-1/2 -translate-y-1/2"
                   >
-                    {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      aria-label={showConfirmPassword ? t('password.hidePassword') : t('password.showPassword')}
+                      className="text-[var(--color-muted)] hover:text-[var(--color-foreground)] transition-colors"
+                    >
+                      {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </Tooltip>
                 </div>
               </motion.div>
 

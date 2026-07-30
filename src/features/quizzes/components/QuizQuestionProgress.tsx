@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { cn } from '@/lib/utils';
+import Tooltip from '@/components/ui/Tooltip';
 
 export type QuestionProgressState = 'current' | 'answered' | 'unanswered';
 
@@ -122,20 +123,22 @@ export function QuizQuestionProgress({
       </div>
 
       <div className="flex items-center gap-1.5 sm:gap-2">
-        <button
-          type="button"
-          onClick={() => scrollWindow(-1)}
-          disabled={!canScrollLeft}
-          aria-label={t('quiz.showPreviousQuestions')}
-          className={cn(
-            'shrink-0 flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl border-2 transition-all',
-            canScrollLeft
-              ? 'border-[var(--color-border)] bg-[var(--card-solid)] text-[var(--color-foreground)] hover:border-[var(--color-primary)]/40 hover:text-[var(--color-primary)]'
-              : 'border-transparent bg-[var(--color-surface-muted)]/50 text-[var(--color-muted-foreground)]/40 cursor-not-allowed'
-          )}
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
+        <Tooltip label={t('quiz.showPreviousQuestions')} className="shrink-0">
+          <button
+            type="button"
+            onClick={() => scrollWindow(-1)}
+            disabled={!canScrollLeft}
+            aria-label={t('quiz.showPreviousQuestions')}
+            className={cn(
+              'shrink-0 flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl border-2 transition-all',
+              canScrollLeft
+                ? 'border-[var(--color-border)] bg-[var(--card-solid)] text-[var(--color-foreground)] hover:border-[var(--color-primary)]/40 hover:text-[var(--color-primary)]'
+                : 'border-transparent bg-[var(--color-surface-muted)]/50 text-[var(--color-muted-foreground)]/40 cursor-not-allowed'
+            )}
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+        </Tooltip>
 
         <div
           className="flex flex-1 gap-1.5 sm:gap-2 justify-center min-w-0"
@@ -181,20 +184,22 @@ export function QuizQuestionProgress({
           })}
         </div>
 
-        <button
-          type="button"
-          onClick={() => scrollWindow(1)}
-          disabled={!canScrollRight}
-          aria-label={t('quiz.showNextQuestions')}
-          className={cn(
-            'shrink-0 flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl border-2 transition-all',
-            canScrollRight
-              ? 'border-[var(--color-border)] bg-[var(--card-solid)] text-[var(--color-foreground)] hover:border-[var(--color-primary)]/40 hover:text-[var(--color-primary)]'
-              : 'border-transparent bg-[var(--color-surface-muted)]/50 text-[var(--color-muted-foreground)]/40 cursor-not-allowed'
-          )}
-        >
-          <ChevronRight className="w-5 h-5" />
-        </button>
+        <Tooltip label={t('quiz.showNextQuestions')} className="shrink-0">
+          <button
+            type="button"
+            onClick={() => scrollWindow(1)}
+            disabled={!canScrollRight}
+            aria-label={t('quiz.showNextQuestions')}
+            className={cn(
+              'shrink-0 flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl border-2 transition-all',
+              canScrollRight
+                ? 'border-[var(--color-border)] bg-[var(--card-solid)] text-[var(--color-foreground)] hover:border-[var(--color-primary)]/40 hover:text-[var(--color-primary)]'
+                : 'border-transparent bg-[var(--color-surface-muted)]/50 text-[var(--color-muted-foreground)]/40 cursor-not-allowed'
+            )}
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </Tooltip>
       </div>
 
       <div className="flex flex-wrap gap-3 text-[10px] sm:text-xs text-[var(--color-muted-foreground)]">

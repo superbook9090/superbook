@@ -9,6 +9,7 @@ import { formatDateTime } from '@/lib/dateUtils';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
 import { PageSkeleton } from '@/components/ui/Skeleton';
+import Tooltip from '@/components/ui/Tooltip';
 import { getQuizAttemptReview } from '@/lib/api/quizAttempts';
 import type { QuizComparison } from '@/lib/quiz/quizComparison';
 import { resolveQuizComparison, safeNumber, DEFAULT_TIME_LIMIT_MINUTES } from '@/lib/quiz/resultDefaults';
@@ -181,14 +182,16 @@ export default function QuizResultPage() {
     <div className="max-w-2xl lg:max-w-4xl mx-auto px-2 sm:px-4 pb-8">
       <div className="sticky top-0 z-10 -mx-2 sm:-mx-4 px-2 sm:px-4 py-3 mb-2 bg-[var(--color-background)]/95 backdrop-blur-sm border-b border-[var(--color-border)] lg:static lg:bg-transparent lg:backdrop-blur-none lg:border-b-0 lg:mb-4 lg:px-0 lg:py-0">
         <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => router.push(ROUTES.student.quizzes)}
-            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--card-solid)] text-[var(--color-foreground)] shrink-0"
-            aria-label={t('quizResult.backToQuizzes')}
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
+          <Tooltip label={t('quizResult.backToQuizzes')} position="bottom" className="shrink-0">
+            <button
+              type="button"
+              onClick={() => router.push(ROUTES.student.quizzes)}
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--card-solid)] text-[var(--color-foreground)] shrink-0"
+              aria-label={t('quizResult.backToQuizzes')}
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+          </Tooltip>
           <h1 className="text-sm sm:text-base lg:text-lg font-bold text-[var(--color-foreground)] line-clamp-2 flex-1 min-w-0">
             {quizTitle}
           </h1>

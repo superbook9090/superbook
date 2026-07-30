@@ -14,6 +14,7 @@ import { getCachedData, setCachedData, invalidatePattern } from '@/lib/redis';
 import { requireFeature } from '@/lib/settingsHelpers';
 import { listQuestionsForQuiz } from '@/domain/learning/quizContent';
 import { finalizeExpiredQuizAttemptIfNeeded } from '@/domain/learning/finalizeExpiredQuizAttempt';
+import { checkAndIssueCertificate } from '@/domain/learning/certificateIssuance';
 import type { Types } from 'mongoose';
 
 function toClientQuestions(rows: { _id: Types.ObjectId; order: number; prompt: string; options: string[] }[]) {
@@ -323,6 +324,10 @@ export async function POST(request: NextRequest) {
         enrollment.completedAt = new Date();
       }
       await enrollment.save();
+
+      // Issue a certificate if this was the last requirement of a
+      // teacher-completed course. Idempotent; never throws.
+      await checkAndIssueCertificate(session.user.id, String(courseId));
 
       await invalidatePattern(`quiz-attempts:${session.user.id}:*`);
       await invalidatePattern(`dashboard:${session.user.id}:*`);

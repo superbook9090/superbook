@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Check, X, ExternalLink, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import Tooltip from '@/components/ui/Tooltip';
 
 interface LinkInputProps {
   initialUrl?: string;
@@ -54,44 +55,53 @@ export const LinkInput = ({
           )}
         />
         {url && (
-          <a
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--color-muted)] hover:text-[var(--color-foreground)]"
-          >
-            <ExternalLink className="w-3 h-3" />
-          </a>
+          <Tooltip label="Open link" position="bottom" className="absolute right-2 top-1/2 -translate-y-1/2">
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Open link"
+              className="text-[var(--color-muted)] hover:text-[var(--color-foreground)]"
+            >
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          </Tooltip>
         )}
       </div>
 
-      <button
-        type="submit"
-        className="p-1.5 text-[var(--color-success)] hover:bg-[var(--color-success-light)] dark:hover:bg-[var(--color-success)]/20 rounded-md transition-colors"
-        title="Save"
-      >
-        <Check className="w-4 h-4" />
-      </button>
+      <Tooltip label="Save" position="bottom">
+        <button
+          type="submit"
+          className="p-1.5 text-[var(--color-success)] hover:bg-[var(--color-success-light)] dark:hover:bg-[var(--color-success)]/20 rounded-md transition-colors"
+          aria-label="Save"
+        >
+          <Check className="w-4 h-4" />
+        </button>
+      </Tooltip>
 
       {onRemove && initialUrl && (
-        <button
-          type="button"
-          onClick={onRemove}
-          className="p-1.5 text-[var(--color-error)] hover:bg-[var(--color-error-light)] dark:hover:bg-[var(--color-error)]/20 rounded-md transition-colors"
-          title="Remove Link"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
+        <Tooltip label="Remove Link" position="bottom">
+          <button
+            type="button"
+            onClick={onRemove}
+            className="p-1.5 text-[var(--color-error)] hover:bg-[var(--color-error-light)] dark:hover:bg-[var(--color-error)]/20 rounded-md transition-colors"
+            aria-label="Remove Link"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </Tooltip>
       )}
 
-      <button
-        type="button"
-        onClick={onCancel}
-        className="p-1.5 text-[var(--color-muted)] hover:bg-[var(--color-surface-muted)] dark:hover:bg-gray-800 rounded-md transition-colors"
-        title="Cancel"
-      >
-        <X className="w-4 h-4" />
-      </button>
+      <Tooltip label="Cancel" position="bottom">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="p-1.5 text-[var(--color-muted)] hover:bg-[var(--color-surface-muted)] dark:hover:bg-gray-800 rounded-md transition-colors"
+          aria-label="Cancel"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      </Tooltip>
     </form>
   );
 };

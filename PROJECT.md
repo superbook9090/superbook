@@ -416,6 +416,26 @@ t('common.english') // "English" or "अंग्रेज़ी"
 
 ## 12. Recent Updates
 
+### Course completion certificates (2026)
+
+Students automatically receive a completion certificate once **both** conditions hold:
+1. The instructor marked the course as completed (`Course.isCompleted`, set via the award button on the teacher courses page → `PATCH /api/courses/[id] { isCompleted }`).
+2. The student finished **every published lesson** (`LessonCompletion`) and **every published quiz** (`QuizAttempt` with status `completed`/`force_submitted`) of the course.
+
+**Model:** `Certificate` (`src/models/Certificate.ts`) — `student`, `course`, `organizationId`, public serial `certificateId` (`QD-<year>-<hex>`), snapshots (`studentName`, `courseTitle`, `instructorName`), `issuedAt`. Unique index `{ student: 1, course: 1 }` makes issuance race-safe; unique `certificateId` supports verification. Cascade-deleted with the course (`deleteCourseRelatedData`).
+
+**Issuance logic:** `src/domain/learning/certificateIssuance.ts`
+- `checkAndIssueCertificate(studentId, courseId)` — per-student check; idempotent, never throws. Triggered on quiz submit (`POST /api/quiz-attempts`) and lesson completion (`POST /api/video/progress`).
+- `issueCertificatesForCourse(courseId)` — backfill for all enrolled students; triggered when the teacher flips `isCompleted` to `true`.
+- Courses with zero published lessons **and** zero published quizzes never issue certificates.
+- On issue: enrollment set to `completed`/100%, bilingual in-app + FCM push notification (`generateCertificatePayload`, category `system`, deep link `quizdo://certificate/<serial>`).
+
+**API:** `GET /api/certificates` (own list, optional `?course=` filter) · `GET /api/certificates/[id]` (accepts Mongo `_id` **or** the printed serial; visible to owner, course instructor, admins).
+
+**UI:** Student sidebar → **Certificates** (`/dashboard/student/certificates`, gated by `enableCourses`) → printable certificate view (`/certificates/[id]`, print CSS isolates the sheet). Teacher courses page: award button with confirm modal, **Completed** badge, reopen option.
+
+**Known gap:** lesson completion is only written by the video progress API (≥90% watched) — text-only lessons cannot currently be completed, so courses containing published non-video lessons cannot reach certificate eligibility.
+
 ### Course slug index fix (2026)
 
 Fixed intermittent `E11000 duplicate key error` on `POST /api/courses` when creating multiple courses in production.
@@ -970,7 +990,7 @@ Dynamic, data-driven SEO landing pages at `/tools/[slug]` targeting 20 education
 - Avatar upload functionality (Cloudinary integration)
 - Email verification system
 - Video lessons support
-- Course completion certificates
+- **Course completion certificates** — implemented (see §12 "Course completion certificates")
 - Real-time in-app notifications (WebSocket) — push via FCM and in-app inbox via `UserNotification` are implemented (see §20)
 - **Private courses via course codes** — implemented (see §21)
 - Payment gateway integration (Stripe)
@@ -1074,6 +1094,8 @@ interface ICourse {
   category?: string;               // Course category
   locale: 'en' | 'hi';            // UI locale for course content
   isPublished: boolean;            // Publication status
+  isCompleted: boolean;            // Teacher marked course finished (unlocks certificate issuance)
+  completedAt?: Date | null;       // When the teacher marked it completed
   chapterCount: number;            // Denormalized chapter count
   lessonCount: number;             // Denormalized lesson count
   enrolledCount: number;           // Denormalized enrollment count
@@ -1233,6 +1255,36 @@ interface IEnrollment {
 
 ---
 
+### Certificate Schema
+
+**Collection**: `certificates`
+
+```typescript
+interface ICertificate {
+  _id: ObjectId;
+  student: ObjectId;              // Reference to User
+  course: ObjectId;               // Reference to Course
+  organizationId?: ObjectId | null; // Organization reference
+  certificateId: string;          // Public serial for display/verification (QD-<year>-<hex>)
+  studentName: string;            // Snapshot at issue time
+  courseTitle: string;            // Snapshot at issue time
+  instructorName: string;         // Snapshot at issue time
+  issuedAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+**Indexes**:
+- `student: 1, course: 1` (unique — one certificate per student per course, race-safe issuance)
+- `certificateId: 1` (unique)
+- `student: 1, issuedAt: -1`
+- `course: 1`
+
+**Issuance**: see §12 "Course completion certificates" (`src/domain/learning/certificateIssuance.ts`).
+
+---
+
 ### Blog Schema
 
 **Collection**: `blogs`
@@ -1361,7 +1413,7 @@ interface IAppSettings {
 
 ### Medium Term (3-6 months)
 - **Video Platform**: Video lessons with streaming
-- **Certificate System**: Automated course completion certificates
+- **Certificate System**: Automated course completion certificates — implemented (see §12 "Course completion certificates")
 - **Advanced Quizzes**: Multiple question types and timed assessments
 - **Social Features**: Student forums and discussion boards
 - **API v2**: GraphQL implementation for efficient data fetching

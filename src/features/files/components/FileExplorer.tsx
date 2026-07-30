@@ -15,6 +15,7 @@ import {
   Upload,
 } from 'lucide-react';
 import Alert from '@/components/ui/Alert';
+import Tooltip from '@/components/ui/Tooltip';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSessionStore } from '@/store/useSessionStore';
@@ -299,26 +300,28 @@ export default function FileExplorer() {
 
           <div className="flex items-center justify-between sm:justify-end gap-2">
             <div className="inline-flex items-center rounded-xl border border-[var(--border)] overflow-hidden bg-[var(--card-solid)]">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`px-3 py-2 text-sm text-[var(--foreground)] hover:opacity-80 transition ${
-                  viewMode === 'grid' ? 'bg-[var(--primary-soft)] font-semibold' : ''
-                }`}
-                aria-label={t('files.grid')}
-                title={t('files.grid')}
-              >
-                <Grid2X2 className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`px-3 py-2 text-sm text-[var(--foreground)] hover:opacity-80 transition ${
-                  viewMode === 'list' ? 'bg-[var(--primary-soft)] font-semibold' : ''
-                }`}
-                aria-label={t('files.list')}
-                title={t('files.list')}
-              >
-                <ListIcon className="w-4 h-4" />
-              </button>
+              <Tooltip label={t('files.grid')}>
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`px-3 py-2 text-sm text-[var(--foreground)] hover:opacity-80 transition ${
+                    viewMode === 'grid' ? 'bg-[var(--primary-soft)] font-semibold' : ''
+                  }`}
+                  aria-label={t('files.grid')}
+                >
+                  <Grid2X2 className="w-4 h-4" />
+                </button>
+              </Tooltip>
+              <Tooltip label={t('files.list')}>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`px-3 py-2 text-sm text-[var(--foreground)] hover:opacity-80 transition ${
+                    viewMode === 'list' ? 'bg-[var(--primary-soft)] font-semibold' : ''
+                  }`}
+                  aria-label={t('files.list')}
+                >
+                  <ListIcon className="w-4 h-4" />
+                </button>
+              </Tooltip>
             </div>
 
             {headerActions}
@@ -380,32 +383,34 @@ export default function FileExplorer() {
                     </div>
                     <div className="flex items-center gap-1">
                       {canRename && (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRenameNode(f._id, f.name);
-                          }}
-                          className="opacity-0 group-hover:opacity-100 p-2 rounded-lg hover:bg-[var(--primary-soft)] transition"
-                          aria-label={t('common.edit')}
-                          title={t('common.edit')}
-                        >
-                          <Pencil className="w-4 h-4 text-[var(--muted)]" />
-                        </button>
+                        <Tooltip label={t('common.edit')} className="opacity-0 group-hover:opacity-100">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRenameNode(f._id, f.name);
+                            }}
+                            className="p-2 rounded-lg hover:bg-[var(--primary-soft)] transition"
+                            aria-label={t('common.edit')}
+                          >
+                            <Pencil className="w-4 h-4 text-[var(--muted)]" />
+                          </button>
+                        </Tooltip>
                       )}
                       {canMutate && (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteNode(f._id, f.name);
-                          }}
-                          className="opacity-0 group-hover:opacity-100 p-2 rounded-lg hover:bg-[var(--primary-soft)] transition"
-                          aria-label={t('common.delete')}
-                          title={t('common.delete')}
-                        >
-                          <Trash2 className="w-4 h-4 text-[var(--muted)]" />
-                        </button>
+                        <Tooltip label={t('common.delete')} className="opacity-0 group-hover:opacity-100">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteNode(f._id, f.name);
+                            }}
+                            className="p-2 rounded-lg hover:bg-[var(--primary-soft)] transition"
+                            aria-label={t('common.delete')}
+                          >
+                            <Trash2 className="w-4 h-4 text-[var(--muted)]" />
+                          </button>
+                        </Tooltip>
                       )}
                     </div>
                   </div>
@@ -435,24 +440,26 @@ export default function FileExplorer() {
                         </button>
                       )}
                       {canRename && (
-                        <button
-                          onClick={() => handleRenameNode(file._id, file.name)}
-                          className="opacity-0 group-hover:opacity-100 p-2 rounded-lg hover:bg-[var(--primary-soft)] transition"
-                          aria-label={t('common.edit')}
-                          title={t('common.edit')}
-                        >
-                          <Pencil className="w-4 h-4 text-[var(--muted)]" />
-                        </button>
+                        <Tooltip label={t('common.edit')} className="opacity-0 group-hover:opacity-100">
+                          <button
+                            onClick={() => handleRenameNode(file._id, file.name)}
+                            className="p-2 rounded-lg hover:bg-[var(--primary-soft)] transition"
+                            aria-label={t('common.edit')}
+                          >
+                            <Pencil className="w-4 h-4 text-[var(--muted)]" />
+                          </button>
+                        </Tooltip>
                       )}
                       {canMutate && (
-                        <button
-                          onClick={() => handleDeleteNode(file._id, file.name)}
-                          className="opacity-0 group-hover:opacity-100 p-2 rounded-lg hover:bg-[var(--primary-soft)] transition"
-                          aria-label={t('common.delete')}
-                          title={t('common.delete')}
-                        >
-                          <Trash2 className="w-4 h-4 text-[var(--muted)]" />
-                        </button>
+                        <Tooltip label={t('common.delete')} className="opacity-0 group-hover:opacity-100">
+                          <button
+                            onClick={() => handleDeleteNode(file._id, file.name)}
+                            className="p-2 rounded-lg hover:bg-[var(--primary-soft)] transition"
+                            aria-label={t('common.delete')}
+                          >
+                            <Trash2 className="w-4 h-4 text-[var(--muted)]" />
+                          </button>
+                        </Tooltip>
                       )}
                     </div>
                   </div>

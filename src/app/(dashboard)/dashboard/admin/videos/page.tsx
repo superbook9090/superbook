@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { Video, User, BookOpen, Calendar, ExternalLink } from 'lucide-react';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import Alert from '@/components/ui/Alert';
+import Tooltip from '@/components/ui/Tooltip';
 import DashboardListFilters, { FilterPanel } from '@/components/filters/DashboardListFilters';
 
 interface VideoLecture {
@@ -133,14 +134,17 @@ export default function AdminVideosPage() {
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <a
-                    href={`https://youtube.com/watch?v=${vid.youtubeVideoId}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="p-3 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/40 transition-colors"
-                  >
-                    <ExternalLink className="w-5 h-5" />
-                  </a>
+                  <Tooltip label={t('admin.openOnYouTube')}>
+                    <a
+                      href={`https://youtube.com/watch?v=${vid.youtubeVideoId}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={t('admin.openOnYouTube')}
+                      className="p-3 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/40 transition-colors"
+                    >
+                      <ExternalLink className="w-5 h-5" />
+                    </a>
+                  </Tooltip>
                 </div>
                 {vid.duration ? (
                   <span className="absolute bottom-2 right-2 px-2 py-1 bg-black/75 text-white text-xs font-medium rounded">

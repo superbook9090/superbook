@@ -8,6 +8,7 @@ import LessonCompletion from '@/models/LessonCompletion';
 import VideoProgress from '@/models/VideoProgress';
 import Enrollment from '@/models/Enrollment';
 import CourseBookmark from '@/models/CourseBookmark';
+import Certificate from '@/models/Certificate';
 
 type Id = Types.ObjectId | string;
 
@@ -62,6 +63,7 @@ export async function deleteCourseRelatedData(courseId: Id): Promise<void> {
     VideoProgress.deleteMany({ course: courseId }),
     Enrollment.deleteMany({ course: courseId }),
     CourseBookmark.deleteMany({ course: courseId }),
+    Certificate.deleteMany({ course: courseId }),
     Lesson.deleteMany({ course: courseId }),
     Chapter.deleteMany({ course: courseId }),
   ]);

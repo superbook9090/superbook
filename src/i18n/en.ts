@@ -45,6 +45,7 @@ export const en = {
     blogs: 'Blogs',
     favorites: 'Favorites',
     progress: 'Progress',
+    certificates: 'Certificates',
     profile: 'Profile',
     analytics: 'Analytics',
     users: 'Users',
@@ -70,6 +71,7 @@ export const en = {
     published: 'Published',
     overview: 'Overview',
     notifications: 'Notifications',
+    close: 'Close',
   },
 
   privacy: {
@@ -614,6 +616,7 @@ export const en = {
     adminDesc: 'Manage users, courses, and view system-wide analytics',
     videoManagement: 'Video Lectures',
     videoDesc: 'Monitor centrally hosted unlisted YouTube video lectures.',
+    openOnYouTube: 'Open on YouTube',
     searchVideos: 'Search lectures by title, course, or instructor...',
     noVideosFound: 'No video lectures found',
     noVideosDesc: 'Instructors have not uploaded any videos yet.',
@@ -1351,6 +1354,32 @@ export const en = {
     deleteError: 'Failed to delete course',
     deleteConfirmTitle: 'Delete Course?',
     deleteConfirmMessage: 'Are you sure you want to delete this course and all its content? This action cannot be undone.',
+    completed: 'Completed',
+    markCompleted: 'Mark Completed',
+    reopenCourse: 'Reopen Course',
+    courseMarkedCompleted: 'Course marked as completed. Eligible students will receive certificates.',
+    courseReopened: 'Course reopened successfully',
+    completeError: 'Failed to update course completion status',
+    completeConfirmTitle: 'Mark Course as Completed?',
+    completeConfirmMessage: 'Students who have finished all published lessons and quizzes will automatically receive a completion certificate. Continue?',
+  },
+
+  // Certificates
+  certificates: {
+    title: 'My Certificates',
+    description: 'Certificates you have earned by completing courses.',
+    noCertificates: 'No certificates yet.',
+    noCertificatesHint: 'Complete all lessons and quizzes of a completed course to earn a certificate.',
+    viewCertificate: 'View Certificate',
+    certificateOfCompletion: 'Certificate of Completion',
+    presentedTo: 'This certificate is proudly presented to',
+    forCompleting: 'for successfully completing the course',
+    instructor: 'Instructor',
+    issuedOn: 'Issued on',
+    certificateIdLabel: 'Certificate ID',
+    printDownload: 'Print / Download',
+    backToCertificates: 'Back to Certificates',
+    notFound: 'Certificate not found.',
   },
 
   // Maintenance
@@ -1462,6 +1491,8 @@ export const en = {
     invalidInviteCode: 'Invalid invite code',
     failedFetchOrganizations: 'Failed to fetch organizations',
     namePlaceholder: 'e.g., ABC School',
+    copyCode: 'Copy code',
+    codeCopied: 'Copied!',
   },
 
   // Not Found
@@ -1511,6 +1542,8 @@ export const en = {
     changePasswordTitle: 'Change password',
     changePasswordDesc: 'Update your password while signed in. You must know your current password.',
     changeSuccess: 'Your password has been updated.',
+    showPassword: 'Show password',
+    hidePassword: 'Hide password',
     invalidResetLink: 'This reset link is invalid or missing. Please request a new one.',
     requestNewLink: 'Request a new reset link',
     googleNoPassword: 'You sign in with Google. To set a password for email login, use Forgot Password on the login page.',

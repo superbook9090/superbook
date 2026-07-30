@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
+import Tooltip from '@/components/ui/Tooltip';
 import { useAddFavorite, useRemoveFavorite } from '@/lib/react-query/hooks';
 import { usePaginatedBlogs, type Blog } from '@/lib/react-query/useBlogQueries';
 import { blogTopicKeys, type BlogTopicKey } from '@/i18n/config';
@@ -230,18 +231,21 @@ export default function StudentBlogsPage() {
                     <Badge variant="primary" size="sm">
                       {blog.topic}
                     </Badge>
-                    <button
-                      onClick={() => toggleFavorite(blog._id)}
-                      className="p-2 min-h-[44px] sm:min-h-0 rounded-full hover:bg-[var(--color-surface-muted)] transition-colors"
-                    >
-                      <Heart
-                        className={`w-5 h-5 transition-colors ${
-                          isFavorited
-                            ? `fill-current ${theme.text}`
-                            : `text-[var(--color-muted-foreground)] hover:${theme.text}`
-                        }`}
-                      />
-                    </button>
+                    <Tooltip label={isFavorited ? t('favorites.removeFromFavorites') : t('blog.addToFavorites')}>
+                      <button
+                        onClick={() => toggleFavorite(blog._id)}
+                        aria-label={isFavorited ? t('favorites.removeFromFavorites') : t('blog.addToFavorites')}
+                        className="p-2 min-h-[44px] sm:min-h-0 rounded-full hover:bg-[var(--color-surface-muted)] transition-colors"
+                      >
+                        <Heart
+                          className={`w-5 h-5 transition-colors ${
+                            isFavorited
+                              ? `fill-current ${theme.text}`
+                              : `text-[var(--color-muted-foreground)] hover:${theme.text}`
+                          }`}
+                        />
+                      </button>
+                    </Tooltip>
                   </div>
 
                   {/* Title */}

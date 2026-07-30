@@ -5,6 +5,13 @@ import { GripVertical, Pencil, Trash2, ChevronDown, ChevronUp } from 'lucide-rea
 import type { DraggableAttributes } from '@dnd-kit/core';
 import type { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities';
 import { cn } from '@/lib/utils';
+import Tooltip from '@/components/ui/Tooltip';
+
+/** Wraps children in a Tooltip only when a label is provided. */
+function MaybeTooltip({ label, children }: { label?: string; children: React.ReactElement }) {
+  if (!label) return children;
+  return <Tooltip label={label}>{children}</Tooltip>;
+}
 
 export const TOUCH_TARGET_CLASS =
   'min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg transition-colors';
@@ -19,18 +26,20 @@ export function DragHandleButton({
   label: string;
 }) {
   return (
-    <button
-      type="button"
-      {...attributes}
-      {...listeners}
-      className={cn(
-        TOUCH_TARGET_CLASS,
-        'text-[var(--color-muted)] cursor-grab active:cursor-grabbing touch-none hover:bg-[var(--color-surface-muted)]'
-      )}
-      aria-label={label}
-    >
-      <GripVertical className="w-5 h-5" />
-    </button>
+    <MaybeTooltip label={label}>
+      <button
+        type="button"
+        {...attributes}
+        {...listeners}
+        className={cn(
+          TOUCH_TARGET_CLASS,
+          'text-[var(--color-muted)] cursor-grab active:cursor-grabbing touch-none hover:bg-[var(--color-surface-muted)]'
+        )}
+        aria-label={label}
+      >
+        <GripVertical className="w-5 h-5" />
+      </button>
+    </MaybeTooltip>
   );
 }
 
@@ -46,19 +55,21 @@ export function RowIconButton({
   children: React.ReactNode;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      className={cn(
-        TOUCH_TARGET_CLASS,
-        variant === 'danger'
-          ? 'text-[var(--color-muted)] hover:text-[var(--color-error)]'
-          : 'text-[var(--color-muted)] hover:text-[var(--color-primary)]'
-      )}
-    >
-      {children}
-    </button>
+    <MaybeTooltip label={label}>
+      <button
+        type="button"
+        onClick={onClick}
+        aria-label={label}
+        className={cn(
+          TOUCH_TARGET_CLASS,
+          variant === 'danger'
+            ? 'text-[var(--color-muted)] hover:text-[var(--color-error)]'
+            : 'text-[var(--color-muted)] hover:text-[var(--color-primary)]'
+        )}
+      >
+        {children}
+      </button>
+    </MaybeTooltip>
   );
 }
 
@@ -72,9 +83,11 @@ export function ExpandToggleButton({
   label?: string;
 }) {
   return (
-    <button type="button" onClick={onClick} aria-label={label} className={cn(TOUCH_TARGET_CLASS, 'text-[var(--color-muted)]')}>
-      {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-    </button>
+    <MaybeTooltip label={label}>
+      <button type="button" onClick={onClick} aria-label={label} className={cn(TOUCH_TARGET_CLASS, 'text-[var(--color-muted)]')}>
+        {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+      </button>
+    </MaybeTooltip>
   );
 }
 

@@ -17,6 +17,7 @@ const CurriculumTreeEditor = dynamic(() => import('./curriculum/CurriculumTreeEd
   loading: () => <PageSkeleton variant="embed" />,
 });
 import Button from '@/components/ui/Button';
+import Tooltip from '@/components/ui/Tooltip';
 import { EditorField, editorInputClass } from '@/components/ui/editor/EditorField';
 import { EditorSection } from '@/components/ui/editor/EditorSection';
 import { useSessionStore } from '@/store/useSessionStore';
@@ -203,9 +204,11 @@ function LessonForm({ lesson, onClose, onSave, isSaving }: LessonFormProps) {
           <h3 className="text-base sm:text-lg font-bold text-[var(--color-foreground)]">
             {lesson ? t('curriculum.editLesson') : t('curriculum.addNewLesson')}
           </h3>
-          <button type="button" onClick={onClose} className="p-1.5 hover:bg-[var(--color-surface-muted)] rounded-full transition-colors text-[var(--color-foreground)]">
-            <X className="w-5 h-5" />
-          </button>
+          <Tooltip label={t('common.close')}>
+            <button type="button" onClick={onClose} aria-label={t('common.close')} className="p-1.5 hover:bg-[var(--color-surface-muted)] rounded-full transition-colors text-[var(--color-foreground)]">
+              <X className="w-5 h-5" />
+            </button>
+          </Tooltip>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-hide">

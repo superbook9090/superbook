@@ -31,7 +31,7 @@ export const MenuFloating = ({ editor, theme = 'teacher' }: MenuFloatingProps) =
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
         isActive={editor.isActive('heading', { level: 1 })}
-        title="H1"
+        title="Heading 1"
         theme={theme}
         className="p-1.5"
       >
@@ -40,7 +40,7 @@ export const MenuFloating = ({ editor, theme = 'teacher' }: MenuFloatingProps) =
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
         isActive={editor.isActive('heading', { level: 2 })}
-        title="H2"
+        title="Heading 2"
         theme={theme}
         className="p-1.5"
       >

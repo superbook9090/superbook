@@ -4,6 +4,7 @@ import React, { useState, useRef } from 'react';
 import Image from 'next/image';
 import { Upload, X, ImageIcon, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import Tooltip from '@/components/ui/Tooltip';
 import { useTranslation } from '@/hooks/useTranslation';
 import { MAX_IMAGE_SIZE_BYTES } from '@/lib/constants';
 
@@ -106,22 +107,26 @@ export const ImageUpload = ({
               unoptimized
             />
             <div className="absolute inset-0 bg-[var(--color-foreground)]/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="p-1.5 bg-white/10 backdrop-blur-md rounded-lg text-white hover:bg-white/20 transition-colors"
-                title={t('imageUpload.changeImage')}
-              >
-                <Upload className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={removeImage}
-                className="p-1.5 bg-red-500/60 backdrop-blur-md rounded-lg text-white hover:bg-red-500 transition-colors"
-                title={t('imageUpload.removeImage')}
-              >
-                <X className="w-4 h-4" />
-              </button>
+              <Tooltip label={t('imageUpload.changeImage')}>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="p-1.5 bg-white/10 backdrop-blur-md rounded-lg text-white hover:bg-white/20 transition-colors"
+                  aria-label={t('imageUpload.changeImage')}
+                >
+                  <Upload className="w-4 h-4" />
+                </button>
+              </Tooltip>
+              <Tooltip label={t('imageUpload.removeImage')}>
+                <button
+                  type="button"
+                  onClick={removeImage}
+                  className="p-1.5 bg-red-500/60 backdrop-blur-md rounded-lg text-white hover:bg-red-500 transition-colors"
+                  aria-label={t('imageUpload.removeImage')}
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </Tooltip>
             </div>
           </>
         ) : (

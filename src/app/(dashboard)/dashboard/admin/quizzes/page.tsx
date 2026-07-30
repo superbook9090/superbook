@@ -16,6 +16,7 @@ import {
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
+import Tooltip from '@/components/ui/Tooltip';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useTranslation } from '@/hooks/useTranslation';
 import { formatDate } from '@/lib/dateUtils';
@@ -252,12 +253,15 @@ export default function AdminQuizzesPage() {
                       </>
                     )}
                   </button>
-                  <button
-                    onClick={() => setDeleteId(quiz._id)}
-                    className="px-3 py-2 min-h-[44px] sm:min-h-0 bg-[var(--error-light)] text-[var(--error)] rounded-lg hover:bg-[var(--error-light)]/80 transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <Tooltip label={t('common.delete')}>
+                    <button
+                      onClick={() => setDeleteId(quiz._id)}
+                      aria-label={t('common.delete')}
+                      className="px-3 py-2 min-h-[44px] sm:min-h-0 bg-[var(--error-light)] text-[var(--error)] rounded-lg hover:bg-[var(--error-light)]/80 transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </Tooltip>
                 </div>
               </div>
 

@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { handleDeepLink } from '@/lib/mobile/deepLink';
 import { useTranslation } from '@/hooks/useTranslation';
 import { X } from 'lucide-react';
+import Tooltip from '@/components/ui/Tooltip';
 
 type ForegroundToast = {
   title: string;
@@ -60,14 +61,16 @@ export default function PushNotificationManager() {
     >
       <div className="flex justify-between items-start gap-3">
         <h3 className="font-semibold text-sm text-[var(--color-foreground)]">{toastMessage.title}</h3>
-        <button
-          type="button"
-          onClick={() => setToastMessage(null)}
-          className="p-1 rounded hover:bg-[var(--color-foreground)]/5 text-[var(--color-muted-foreground)]"
-          aria-label={t('common.cancel')}
-        >
-          <X className="w-4 h-4" />
-        </button>
+        <Tooltip label={t('common.cancel')}>
+          <button
+            type="button"
+            onClick={() => setToastMessage(null)}
+            className="p-1 rounded hover:bg-[var(--color-foreground)]/5 text-[var(--color-muted-foreground)]"
+            aria-label={t('common.cancel')}
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </Tooltip>
       </div>
       <p className="text-xs text-[var(--color-muted-foreground)] mt-1">{toastMessage.body}</p>
       {toastMessage.data?.url && (

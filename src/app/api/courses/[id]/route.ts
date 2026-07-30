@@ -19,6 +19,7 @@ import {
   sanitizeCourseResponse,
 } from '@/lib/courseAccess';
 import { requireFeature } from '@/lib/settingsHelpers';
+import { issueCertificatesForCourse } from '@/domain/learning/certificateIssuance';
 
 // GET /api/courses/[id] - Get a single course
 export async function GET(
@@ -171,8 +172,10 @@ export async function PATCH(
       );
     }
 
-    const { title, description, price, category, thumbnail, isPublished, locale, courseCode } =
+    const { title, description, price, category, thumbnail, isPublished, isCompleted, locale, courseCode } =
       validationResult.data;
+
+    const wasCompleted = course.isCompleted === true;
 
     if (title) course.title = title;
     if (description) course.description = description;
@@ -180,6 +183,10 @@ export async function PATCH(
     if (category) course.category = category;
     if (thumbnail) course.thumbnail = thumbnail;
     if (typeof isPublished === 'boolean') course.isPublished = isPublished;
+    if (typeof isCompleted === 'boolean') {
+      course.isCompleted = isCompleted;
+      course.completedAt = isCompleted ? (course.completedAt || new Date()) : null;
+    }
     if (locale) course.locale = locale;
     if (courseCode !== undefined) {
       const resolvedCode = resolveCourseCodeForSave(courseCode, course.courseCode);
@@ -191,6 +198,13 @@ export async function PATCH(
     }
 
     await course.save();
+
+    // Teacher just marked the course completed: issue certificates to every
+    // student who already finished all published lessons and quizzes.
+    if (!wasCompleted && course.isCompleted) {
+      await issueCertificatesForCourse(id);
+    }
+
     await course.populate('instructor', 'name email');
 
     // Invalidate cache for this organization

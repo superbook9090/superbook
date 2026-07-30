@@ -8,6 +8,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import PremiumLogo from '@/components/ui/PremiumLogo';
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher';
 import LogoutButton from '@/components/ui/LogoutButton';
+import Tooltip from '@/components/ui/Tooltip';
 import { Menu, X, Bell } from 'lucide-react';
 import type { DashboardNavItem } from '@/constants/navigation';
 import { getNavIcon } from '@/lib/navigation/icons';
@@ -73,24 +74,28 @@ function MobileNavComponent({
           </Link>
           <div className="flex items-center gap-[var(--space-3)] shrink-0">
             {!isStaff && (
-              <Link
-                href={ROUTES.student.notifications}
-                className="touch-target text-white rounded-lg hover:bg-white/10 transition-colors focus-ring flex items-center justify-center"
-                aria-label={t('common.notifications')}
-              >
-                <Bell className="h-5 w-5" />
-              </Link>
+              <Tooltip label={t('common.notifications')} position="bottom">
+                <Link
+                  href={ROUTES.student.notifications}
+                  className="touch-target text-white rounded-lg hover:bg-white/10 transition-colors focus-ring flex items-center justify-center"
+                  aria-label={t('common.notifications')}
+                >
+                  <Bell className="h-5 w-5" />
+                </Link>
+              </Tooltip>
             )}
             <LanguageSwitcher compact alwaysShowLabel />
-            <button
-              type="button"
-              onClick={toggleMenu}
-              className="touch-target text-white rounded-lg focus-ring active:scale-95 transition-transform flex items-center justify-center"
-              aria-label={t('common.toggleMenu')}
-              aria-expanded={isOpen}
-            >
-              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
+            <Tooltip label={t('common.toggleMenu')} position="bottom">
+              <button
+                type="button"
+                onClick={toggleMenu}
+                className="touch-target text-white rounded-lg focus-ring active:scale-95 transition-transform flex items-center justify-center"
+                aria-label={t('common.toggleMenu')}
+                aria-expanded={isOpen}
+              >
+                {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </button>
+            </Tooltip>
           </div>
         </div>
       </div>

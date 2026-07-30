@@ -18,6 +18,7 @@ import {
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
+import Tooltip from '@/components/ui/Tooltip';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import { useTranslation } from '@/hooks/useTranslation';
 import { formatDate } from '@/lib/dateUtils';
@@ -247,31 +248,37 @@ export default function TeacherBlogsPage() {
                 </div>
 
                 <div className="flex items-center gap-2 sm:gap-1">
-                  <button
-                    onClick={() => togglePublish(blog._id, blog.isPublished)}
-                    className={`p-2.5 sm:p-2 rounded-lg transition-colors touch-manipulation min-h-[44px] sm:min-h-0 ${
-                      blog.isPublished
-                        ? `${theme.activeBg} ${theme.text} hover:opacity-80`
-                        : 'bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)] hover:bg-[var(--color-surface-muted)]/80'
-                    }`}
-                    title={blog.isPublished ? t('blog.unpublish') : t('blog.publish')}
-                  >
-                    {blog.isPublished ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
-                  </button>
-                  <Link
-                    href={ROUTES.teacher.blogEdit(blog._id)}
-                    className="p-2.5 sm:p-2 bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)] rounded-lg hover:bg-[var(--color-surface-muted)]/80 transition-colors touch-manipulation min-h-[44px] sm:min-h-0"
-                    title={t('blog.edit')}
-                  >
-                    <Edit2 className="w-5 h-5" />
-                  </Link>
-                  <button
-                    onClick={() => handleDelete(blog._id)}
-                    className="p-2.5 sm:p-2 bg-[var(--error-light)] text-[var(--error)] rounded-lg hover:bg-[var(--error-light)]/80 transition-colors touch-manipulation min-h-[44px] sm:min-h-0"
-                    title={t('blog.delete')}
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
+                  <Tooltip label={blog.isPublished ? t('blog.unpublish') : t('blog.publish')}>
+                    <button
+                      onClick={() => togglePublish(blog._id, blog.isPublished)}
+                      className={`p-2.5 sm:p-2 rounded-lg transition-colors touch-manipulation min-h-[44px] sm:min-h-0 ${
+                        blog.isPublished
+                          ? `${theme.activeBg} ${theme.text} hover:opacity-80`
+                          : 'bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)] hover:bg-[var(--color-surface-muted)]/80'
+                      }`}
+                      aria-label={blog.isPublished ? t('blog.unpublish') : t('blog.publish')}
+                    >
+                      {blog.isPublished ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                    </button>
+                  </Tooltip>
+                  <Tooltip label={t('blog.edit')}>
+                    <Link
+                      href={ROUTES.teacher.blogEdit(blog._id)}
+                      className="p-2.5 sm:p-2 bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)] rounded-lg hover:bg-[var(--color-surface-muted)]/80 transition-colors touch-manipulation min-h-[44px] sm:min-h-0"
+                      aria-label={t('blog.edit')}
+                    >
+                      <Edit2 className="w-5 h-5" />
+                    </Link>
+                  </Tooltip>
+                  <Tooltip label={t('blog.delete')}>
+                    <button
+                      onClick={() => handleDelete(blog._id)}
+                      className="p-2.5 sm:p-2 bg-[var(--error-light)] text-[var(--error)] rounded-lg hover:bg-[var(--error-light)]/80 transition-colors touch-manipulation min-h-[44px] sm:min-h-0"
+                      aria-label={t('blog.delete')}
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </Tooltip>
                 </div>
               </div>
             </motion.div>

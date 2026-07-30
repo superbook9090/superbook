@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Loader } from '@/components/ui/Loader';
+import Tooltip from '@/components/ui/Tooltip';
 import type { Course } from '@/types';
 import type { Enrollment } from '@/lib/react-query/hooks';
 import { cn } from '@/lib/utils';
@@ -171,14 +172,16 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
                     <><ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" /> {t('courses.continue')}</>
                   )}
                 </button>
-                <button
-                  onClick={handleDrop}
-                  disabled={isLoading}
-                  className="p-3 border-2 border-red-50 text-red-400 rounded-xl hover:bg-red-50 hover:border-red-100 transition-all disabled:opacity-50"
-                  title={t('courses.dropCourse')}
-                >
-                  {isLoading ? <Loader size="sm" /> : <Trash2 className="w-5 h-5" />}
-                </button>
+                <Tooltip label={t('courses.dropCourse')}>
+                  <button
+                    onClick={handleDrop}
+                    disabled={isLoading}
+                    className="p-3 border-2 border-red-50 text-red-400 rounded-xl hover:bg-red-50 hover:border-red-100 transition-all disabled:opacity-50"
+                    aria-label={t('courses.dropCourse')}
+                  >
+                    {isLoading ? <Loader size="sm" /> : <Trash2 className="w-5 h-5" />}
+                  </button>
+                </Tooltip>
               </>
             )}
           </div>

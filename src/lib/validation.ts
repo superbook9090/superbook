@@ -22,6 +22,7 @@ export const createCourseSchema = z.object({
   category: z.string().optional(),
   thumbnail: z.preprocess((val) => val === '' ? undefined : val, z.string().url('Invalid thumbnail URL').optional()),
   isPublished: z.boolean().optional(),
+  isCompleted: z.boolean().optional(),
   locale: z.enum(['en', 'hi']).optional(),
   courseCode: courseCodeSchema,
 });

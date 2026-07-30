@@ -23,12 +23,12 @@ export default function StudentCoursesPage() {
   const { session, status } = useSessionStore();
   const router = useRouter();
   const { t } = useTranslation();
-  
+
   // States
   const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
   const [isDropModalOpen, setIsDropModalOpen] = useState(false);
   const [enrollmentToDrop, setEnrollmentToDrop] = useState<string | null>(null);
-  
+
   // Filter States
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<CourseStatusFilter>('all');
@@ -67,13 +67,13 @@ export default function StudentCoursesPage() {
   const filteredEnrollments = useMemo(() => {
     return enrollments.filter(e => {
       const searchLower = searchQuery.toLowerCase();
-      const matchesSearch = e.course.title.toLowerCase().includes(searchLower) || 
-                           e.course.description?.toLowerCase().includes(searchLower) ||
-                           e.course.instructor?.name?.toLowerCase().includes(searchLower);
-      
-      const matchesStatus = statusFilter === 'all' || 
-                           (statusFilter === 'completed' ? e.progress === 100 : e.progress < 100);
-      
+      const matchesSearch = e.course.title.toLowerCase().includes(searchLower) ||
+        e.course.description?.toLowerCase().includes(searchLower) ||
+        e.course.instructor?.name?.toLowerCase().includes(searchLower);
+
+      const matchesStatus = statusFilter === 'all' ||
+        (statusFilter === 'completed' ? e.progress === 100 : e.progress < 100);
+
       const matchesCategory = selectedCategory === 'All' || e.course.category === selectedCategory;
       const matchesInstructor = selectedInstructor === 'All' || e.course.instructor?.name === selectedInstructor;
 
@@ -112,14 +112,14 @@ export default function StudentCoursesPage() {
 
   const inProgressCount = enrollments.filter(e => e.progress < 100).length;
   const completedCount = enrollments.filter(e => e.progress === 100).length;
-  const avgProgress = enrollments.length > 0 
+  const avgProgress = enrollments.length > 0
     ? Math.round(enrollments.reduce((acc, e) => acc + e.progress, 0) / enrollments.length)
     : 0;
 
   return (
     <PageWrapper>
       {/* Page Header */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="hero-banner bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)] text-white"
@@ -211,7 +211,7 @@ export default function StudentCoursesPage() {
             <BookOpen className="w-12 h-12 text-[var(--muted)] mx-auto mb-4 opacity-20" />
             <h3 className="heading-md text-[var(--color-foreground)] mb-1">{t('courses.noCoursesFound')}</h3>
             <p className="text-sm text-[var(--color-muted-foreground)] mb-6">{t('courses.tryAdjustingFilters')}</p>
-            <button 
+            <button
               onClick={clearFilters}
               className="px-6 py-2 bg-[var(--color-foreground)] text-white rounded-xl text-sm font-bold hover:opacity-90 transition-opacity"
             >
@@ -241,6 +241,7 @@ export default function StudentCoursesPage() {
         title={t('courses.dropCourse')}
         message={t('courses.dropCourseConfirm')}
         onConfirm={confirmDrop}
+        cancelText={t('common.no')}
         onCancel={() => {
           setIsDropModalOpen(false);
           setEnrollmentToDrop(null);

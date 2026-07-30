@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import BackButton from '@/components/ui/BackButton';
 import { Badge } from '@/components/ui/Badge';
+import Tooltip from '@/components/ui/Tooltip';
 import { useRemoveFavorite, type Favorite } from '@/lib/react-query/hooks';
 
 interface FavoritesListProps {
@@ -127,13 +128,15 @@ export default function FavoritesList({ initialFavorites, totalCount }: Favorite
                     <Badge variant="primary" size="sm">
                       {blog.topic}
                     </Badge>
-                    <button
-                      onClick={() => removeFavorite(favorite._id, blog._id)}
-                      className="p-2 min-h-[44px] sm:min-h-0 rounded-full text-[var(--error)] hover:bg-[var(--error-light)] transition-colors"
-                      title={t('favorites.removeFromFavorites')}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <Tooltip label={t('favorites.removeFromFavorites')}>
+                      <button
+                        onClick={() => removeFavorite(favorite._id, blog._id)}
+                        className="p-2 min-h-[44px] sm:min-h-0 rounded-full text-[var(--error)] hover:bg-[var(--error-light)] transition-colors"
+                        aria-label={t('favorites.removeFromFavorites')}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </Tooltip>
                   </div>
 
                   {/* Title */}
