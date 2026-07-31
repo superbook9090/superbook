@@ -104,7 +104,7 @@ export default function PullToRefresh({ children }: PullToRefreshProps) {
       />
       {(isPulling || isRefreshing) && (
         <div className="fixed top-0 left-0 w-full flex justify-center py-4 z-50 transition-all duration-300 pointer-events-none">
-          <div className="bg-white rounded-full shadow-md p-2 flex items-center justify-center text-teal-600">
+          <div className="bg-[var(--card-solid)] rounded-full shadow-md p-2 flex items-center justify-center text-[var(--primary)]">
             {isRefreshing ? (
               <Loader2 className="w-6 h-6 animate-spin" />
             ) : (

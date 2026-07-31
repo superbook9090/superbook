@@ -45,7 +45,7 @@ export default function Footer() {
   });
 
   return (
-    <footer className="bg-[var(--color-foreground)] text-white">
+    <footer className="bg-[var(--card-solid)] text-[var(--foreground)] border-t border-[var(--border)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
           <motion.div
@@ -75,7 +75,7 @@ export default function Footer() {
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-gray-400 hover:text-white transition-colors"
+                    className="text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -96,7 +96,7 @@ export default function Footer() {
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-gray-400 hover:text-white transition-colors"
+                    className="text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -117,7 +117,7 @@ export default function Footer() {
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-gray-400 hover:text-white transition-colors"
+                    className="text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -127,14 +127,14 @@ export default function Footer() {
           </motion.div>
         </div>
 
-        <div className="pt-8 border-t border-[var(--color-surface-muted-strong)] flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="pt-8 border-t border-[var(--border)] flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-[var(--color-muted)] text-sm" suppressHydrationWarning>
             {t('home.footer.copyright', { year: currentYear, siteName: SITE_NAME })}{' '}
             {t('home.footer.rights')}
           </p>
           <p className="text-[var(--color-muted)] text-sm flex items-center gap-1">
             {t('home.footer.madeWith')}{' '}
-            <Heart className="w-4 h-4 text-red-500 fill-red-500" aria-hidden />{' '}
+            <Heart className="w-4 h-4 text-[var(--color-error)] fill-[var(--color-error)]" aria-hidden />{' '}
             {t('home.footer.inIndia')}
           </p>
         </div>

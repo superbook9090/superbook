@@ -30,30 +30,19 @@ export default function StudentSidebar({ user }: { user: User | null }) {
   if (isQuizActive) return null;
 
   return (
-    <div className="hidden md:flex flex-col w-72 h-screen bg-gradient-to-br from-[var(--student-primary)] via-[var(--student-primary)] to-[var(--student-primary-dark)] relative overflow-hidden">
-      {/* Decorative background elements */}
-      <div className="absolute top-0 right-0 w-48 h-48 lg:w-64 lg:h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-32 h-32 lg:w-48 lg:h-48 bg-[var(--student-primary-light)]/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
-      <div className="absolute top-1/3 left-0 w-24 h-24 bg-[var(--student-accent)]/10 rounded-full blur-2xl -translate-x-1/2 pointer-events-none" />
-      <div className="absolute bottom-1/4 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl translate-x-1/2 pointer-events-none" />
-      <div className="absolute top-1/2 left-1/2 w-40 h-40 bg-gradient-to-br from-[var(--student-accent)]/5 to-transparent rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
-
+    <div className="sidebar-rail hidden md:flex">
       {/* Scrollable Content Area */}
-      <div className="flex-1 flex flex-col min-h-0 overflow-y-auto pt-4 sm:pt-6 pb-4 relative z-10 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
+      <div className="flex-1 flex flex-col min-h-0 overflow-y-auto pt-4 sm:pt-6 pb-4">
         {/* Logo */}
         <div className="flex items-center flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4">
           <Link href={ROUTES.student.root} className="flex items-center gap-2 sm:gap-3 group">
-            <PremiumLogo 
-              variant="default"
-              size="xl"
-              theme="student"
-            />
+            <PremiumLogo size="xl" />
           </Link>
         </div>
 
         {/* Role Badge */}
         <div className="mt-4 sm:mt-6 px-4 sm:px-6">
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-white/20 text-white backdrop-blur-sm border border-white/10">
+          <span className="rail-chip">
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--success)] mr-2 animate-pulse" />
             {t('common.student')}
           </span>
@@ -74,22 +63,14 @@ export default function StudentSidebar({ user }: { user: User | null }) {
               >
                 <Link
                   href={item.href}
-                  className={`group flex items-center px-3 sm:px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
-                    isActive
-                      ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm'
-                      : 'text-[var(--student-primary-light)] hover:bg-white/10 hover:text-white'
-                  }`}
+                  className={`rail-link ${isActive ? 'rail-link--active' : ''}`}
                 >
-                  <div className={`mr-2 sm:mr-3 p-1.5 rounded-lg transition-colors ${
-                    isActive ? 'bg-white/20' : 'bg-transparent group-hover:bg-white/10'
-                  }`}>
-                    <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </div>
+                  <Icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
                   <span className="truncate">{t(item.nameKey)}</span>
                   {isActive && (
                     <motion.div
                       layoutId="activeIndicator"
-                      className="ml-auto w-1.5 h-1.5 rounded-full bg-white"
+                      className="rail-link__dot"
                     />
                   )}
                 </Link>
@@ -100,15 +81,15 @@ export default function StudentSidebar({ user }: { user: User | null }) {
       </div>
 
       {/* User Profile Section - Fixed at Bottom */}
-      <div className="flex-shrink-0 p-3 sm:p-4 relative z-10 bg-gradient-to-b from-transparent to-[var(--student-primary-dark)]/50">
-        <div className="glass-dark rounded-2xl p-3 sm:p-4">
+      <div className="flex-shrink-0 p-3 sm:p-4">
+        <div className="card-surface rounded-2xl p-3 sm:p-4">
           <div className="flex items-center">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-[var(--student-primary-light)] to-[var(--student-accent)] flex items-center justify-center text-white font-semibold">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full gradient-bg flex items-center justify-center text-white font-semibold">
               {user?.name?.charAt(0)?.toUpperCase() || 'S'}
             </div>
             <div className="flex-1 min-w-0 ml-2 sm:ml-3">
-              <div className="text-xs sm:text-sm font-semibold truncate">{user?.name ? user.name.charAt(0).toUpperCase() + user.name.slice(1) : user?.name}</div>
-              <div className="text-xs text-[var(--student-primary-light)] truncate">
+              <div className="text-xs sm:text-sm font-semibold text-[var(--color-foreground)] truncate">{user?.name ? user.name.charAt(0).toUpperCase() + user.name.slice(1) : user?.name}</div>
+              <div className="text-xs text-[var(--color-muted-foreground)] truncate">
                 {user?.email?.toUpperCase()}
               </div>
             </div>

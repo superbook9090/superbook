@@ -7,15 +7,15 @@ export default function Quizzes() {
 
   return (
     <div>
-      <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{t('quizzesPage.quizzes')}</h1>
-      <p className="mt-2 text-sm sm:text-base text-gray-600">
+      <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-foreground)]">{t('quizzesPage.quizzes')}</h1>
+      <p className="mt-2 text-sm sm:text-base text-[var(--color-muted-foreground)]">
         {t('quizzesPage.quizzesDesc')}
       </p>
 
       <div className="mt-6 sm:mt-8">
-        <div className="bg-white overflow-hidden shadow rounded-lg">
+        <div className="bg-[var(--card-solid)] overflow-hidden shadow rounded-lg">
           <div className="px-3 sm:px-4 py-4 sm:py-6">
-            <p className="text-sm sm:text-base text-gray-500">{t('quizzesPage.quizListPlaceholder')}</p>
+            <p className="text-sm sm:text-base text-[var(--color-muted-foreground)]">{t('quizzesPage.quizListPlaceholder')}</p>
           </div>
         </div>
       </div>

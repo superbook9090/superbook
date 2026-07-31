@@ -18,11 +18,11 @@ interface LogoutButtonProps {
 
 const variantStyles: Record<LogoutButtonVariant, string> = {
   sidebar:
-    'p-2 rounded-xl text-[var(--student-primary-light)] hover:text-white hover:bg-white/10 transition-all',
+    'p-2 rounded-xl text-[var(--color-muted-foreground)] hover:text-[var(--color-error)] hover:bg-[var(--color-error-light)] transition-all',
   mobile:
-    'w-full touch-target bg-white/20 text-white px-[var(--space-4)] py-2.5 rounded-lg text-base font-medium hover:bg-white/30 focus-ring flex items-center justify-center gap-[var(--space-2)]',
+    'w-full touch-target bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--color-border)] px-[var(--space-4)] py-2.5 rounded-lg text-base font-medium hover:bg-[var(--color-surface-muted-strong)] focus-ring flex items-center justify-center gap-[var(--space-2)]',
   profile:
-    'w-full sm:w-auto px-6 py-3 rounded-xl text-sm font-semibold text-red-600 border border-red-200 bg-red-50 hover:bg-red-100 transition-colors flex items-center justify-center gap-2',
+    'w-full sm:w-auto px-6 py-3 rounded-xl text-sm font-semibold text-[var(--color-error)] border border-[var(--color-error)]/20 bg-[var(--color-error-light)] hover:bg-[var(--color-error)]/20 transition-colors flex items-center justify-center gap-2',
 };
 
 export default function LogoutButton({ variant = 'profile', className }: LogoutButtonProps) {

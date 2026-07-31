@@ -37,10 +37,10 @@ export default function CurriculumQuizRow({
       type="button"
       onClick={onAction}
       disabled={isLoading}
-      className="flex w-full items-center justify-between gap-4 p-4 text-left hover:bg-violet-50/50 transition-colors disabled:opacity-60"
+      className="flex w-full items-center justify-between gap-4 p-4 text-left hover:bg-[var(--primary-soft)] transition-colors disabled:opacity-60"
     >
       <div className="flex min-w-0 items-center gap-4">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet-50 text-violet-600">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--primary-soft)] text-[var(--primary)]">
           <Target className="h-4 w-4" />
         </div>
         <div className="min-w-0">
@@ -57,10 +57,10 @@ export default function CurriculumQuizRow({
           className={cn(
             'text-xs font-semibold',
             status === 'completed'
-              ? 'text-emerald-600'
+              ? 'text-[var(--color-success)]'
               : status === 'in_progress'
-                ? 'text-amber-600'
-                : 'text-violet-600'
+                ? 'text-[var(--color-warning)]'
+                : 'text-[var(--primary)]'
           )}
         >
           {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : actionLabel}

@@ -34,8 +34,19 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
     document.querySelectorAll<HTMLElement>('[data-i18n-key]').forEach((el) => {
       const key = el.getAttribute('data-i18n-key');
-      if (key) {
-        el.textContent = translate(lang, key);
+      if (!key) return;
+      const text = translate(lang, key);
+      const sep = ' — ';
+      // Elements opting in keep the trailing phrase wrapped in a gradient span
+      if (el.hasAttribute('data-i18n-gradient') && text.includes(sep)) {
+        const i = text.indexOf(sep) + sep.length;
+        el.textContent = text.slice(0, i);
+        const span = document.createElement('span');
+        span.className = 'gradient-text';
+        span.textContent = text.slice(i);
+        el.append(span);
+      } else {
+        el.textContent = text;
       }
     });
   }, [lang]);

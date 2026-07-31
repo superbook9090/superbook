@@ -126,12 +126,12 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
 
           {/* Progress (for enrolled courses) */}
           {type === 'enrolled' && enrollment && (
-            <div className="p-3.5 bg-gray-50/50 rounded-xl border border-[var(--border)]">
+            <div className="p-3.5 bg-[var(--color-surface-muted)] rounded-xl border border-[var(--border)]">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] font-black uppercase tracking-widest text-[var(--color-muted-foreground)]">{t('courses.progress')}</span>
                 <span className={cn("text-xs font-black", theme.text)}>{enrollment.progress}%</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+              <div className="w-full bg-[var(--color-surface-muted-strong)] rounded-full h-1.5 overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${enrollment.progress}%` }}
@@ -176,7 +176,7 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
                   <button
                     onClick={handleDrop}
                     disabled={isLoading}
-                    className="p-3 border-2 border-red-50 text-red-400 rounded-xl hover:bg-red-50 hover:border-red-100 transition-all disabled:opacity-50"
+                    className="p-3 border-2 border-[var(--color-error-light)] text-[var(--color-error)] rounded-xl hover:bg-[var(--color-error-light)] hover:border-[var(--color-error)]/30 transition-all disabled:opacity-50"
                     aria-label={t('courses.dropCourse')}
                   >
                     {isLoading ? <Loader size="sm" /> : <Trash2 className="w-5 h-5" />}

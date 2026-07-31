@@ -121,7 +121,7 @@ export const ImageUpload = ({
                 <button
                   type="button"
                   onClick={removeImage}
-                  className="p-1.5 bg-red-500/60 backdrop-blur-md rounded-lg text-white hover:bg-red-500 transition-colors"
+                  className="p-1.5 bg-[var(--color-error)]/60 backdrop-blur-md rounded-lg text-white hover:bg-[var(--color-error)] transition-colors"
                   aria-label={t('imageUpload.removeImage')}
                 >
                   <X className="w-4 h-4" />
@@ -164,7 +164,7 @@ export const ImageUpload = ({
       </div>
 
       {error && (
-        <p className="text-[10px] text-red-500 font-medium animate-in slide-in-from-top-1 px-1">
+        <p className="text-[10px] text-[var(--color-error)] font-medium animate-in slide-in-from-top-1 px-1">
           {error}
         </p>
       )}

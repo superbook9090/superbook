@@ -16,55 +16,36 @@ interface QuickActionCardProps {
   delay?: number;
 }
 
+/* Quiet cards: color lives only in the icon chip. Role keys resolve through
+   --primary* so the [data-role] scope picks the right palette. */
 const colorConfig = {
   info: {
-    bg: 'bg-[var(--info-light)]',
+    iconBg: 'bg-[var(--info-light)]',
     text: 'text-[var(--info)]',
-    hoverBg: 'hover:bg-[var(--info-light)]/80',
-    iconBg: 'bg-[var(--info)]/20',
-    iconHoverBg: 'group-hover:bg-[var(--info)]/30',
   },
   success: {
-    bg: 'bg-[var(--success-light)]',
+    iconBg: 'bg-[var(--success-light)]',
     text: 'text-[var(--success)]',
-    hoverBg: 'hover:bg-[var(--success-light)]/80',
-    iconBg: 'bg-[var(--success)]/20',
-    iconHoverBg: 'group-hover:bg-[var(--success)]/30',
   },
   warning: {
-    bg: 'bg-[var(--warning-light)]',
+    iconBg: 'bg-[var(--warning-light)]',
     text: 'text-[var(--warning)]',
-    hoverBg: 'hover:bg-[var(--warning-light)]/80',
-    iconBg: 'bg-[var(--warning)]/20',
-    iconHoverBg: 'group-hover:bg-[var(--warning)]/30',
   },
   error: {
-    bg: 'bg-[var(--error-light)]',
+    iconBg: 'bg-[var(--error-light)]',
     text: 'text-[var(--error)]',
-    hoverBg: 'hover:bg-[var(--error-light)]/80',
-    iconBg: 'bg-[var(--error)]/20',
-    iconHoverBg: 'group-hover:bg-[var(--error)]/30',
   },
   student: {
-    bg: 'bg-[var(--student-soft)]',
-    text: 'text-[var(--student-primary)]',
-    hoverBg: 'hover:bg-[var(--student-border)]',
-    iconBg: 'bg-[var(--student-primary)]/20',
-    iconHoverBg: 'group-hover:bg-[var(--student-primary)]/30',
+    iconBg: 'bg-[var(--primary-soft)]',
+    text: 'text-[var(--primary)]',
   },
   teacher: {
-    bg: 'bg-[var(--teacher-soft)]',
-    text: 'text-[var(--teacher-primary)]',
-    hoverBg: 'hover:bg-[var(--teacher-border)]',
-    iconBg: 'bg-[var(--teacher-primary)]/20',
-    iconHoverBg: 'group-hover:bg-[var(--teacher-primary)]/30',
+    iconBg: 'bg-[var(--primary-soft)]',
+    text: 'text-[var(--primary)]',
   },
   admin: {
-    bg: 'bg-[var(--admin-soft)]',
-    text: 'text-[var(--admin-primary)]',
-    hoverBg: 'hover:bg-[var(--admin-border)]',
-    iconBg: 'bg-[var(--admin-primary)]/20',
-    iconHoverBg: 'group-hover:bg-[var(--admin-primary)]/30',
+    iconBg: 'bg-[var(--primary-soft)]',
+    text: 'text-[var(--primary)]',
   },
 };
 
@@ -79,10 +60,10 @@ export default function QuickActionCard({
 }: QuickActionCardProps) {
   const config = colorConfig[color];
 
-  const cardClassName = `flex items-center justify-center sm:justify-start w-full min-h-[44px] p-2 sm:p-4 rounded-xl transition-colors group ${
+  const cardClassName = `flex items-center justify-center sm:justify-start w-full min-h-[44px] p-2 sm:p-4 rounded-xl border transition-all group ${
     disabled
-      ? 'bg-[var(--color-surface-muted)] cursor-not-allowed'
-      : `${config.bg} ${config.hoverBg}`
+      ? 'bg-[var(--color-surface-muted)] border-[var(--color-border)] cursor-not-allowed'
+      : 'bg-[var(--card-solid)] border-[var(--color-border)] hover:border-[var(--primary-border)] hover:shadow-[var(--shadow-md)]'
   }`;
 
   const motionProps = {
@@ -98,8 +79,8 @@ export default function QuickActionCard({
       <div
         className={`p-2 sm:p-3 rounded-lg transition-colors ${
           disabled
-            ? 'bg-[var(--color-muted-foreground)] text-[var(--color-muted-foreground)]'
-            : `${config.iconBg} ${config.text} ${config.iconHoverBg}`
+            ? 'bg-[var(--color-surface-muted-strong)] text-[var(--color-muted-foreground)]'
+            : `${config.iconBg} ${config.text}`
         }`}
       >
         <Icon className="w-5 h-5" />

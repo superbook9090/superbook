@@ -97,30 +97,29 @@ export default function BrowseCoursesPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="hero-banner bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)] text-white"
+        className="hero-banner"
       >
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-        <div className="relative z-10 space-y-4">
+        <div className="space-y-4">
           <BackButton
             href={ROUTES.student.courses}
             label={t('courses.backToCourses')}
-            className="text-xs font-black uppercase tracking-widest text-white/70 hover:text-white"
+            className="text-xs font-black uppercase tracking-widest text-[var(--color-muted)] hover:text-[var(--color-foreground)]"
           />
 
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-2">
-              <h1 className="heading-xl text-white">{t('courses.browseCourses')}</h1>
-              <p className="text-white/80 text-sm sm:text-base max-w-xl">
+              <h1 className="heading-xl">{t('courses.browseCourses')}</h1>
+              <p className="text-[var(--color-muted-foreground)] text-sm sm:text-base max-w-xl">
                 {t('courses.browseDesc')}
               </p>
             </div>
 
-            <div className="flex items-center gap-4 bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/10 min-w-[180px]">
+            <div className="flex items-center gap-4 bg-[var(--card-solid)] p-4 rounded-xl border border-[var(--color-border)] shadow-[var(--shadow-sm)] min-w-[180px]">
               <div className="text-right flex-1">
-                <p className="text-[10px] font-black uppercase tracking-widest text-white/50">{t('courses.availableCourses')}</p>
-                <p className="text-2xl font-black leading-none mt-1">{availableCourses.length}</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-[var(--color-muted)]">{t('courses.availableCourses')}</p>
+                <p className="text-2xl font-black leading-none mt-1 tabular-nums text-[var(--color-foreground)]">{availableCourses.length}</p>
               </div>
-              <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg gradient-bg text-white flex items-center justify-center">
                 <Sparkles className="w-6 h-6" />
               </div>
             </div>
@@ -166,13 +165,13 @@ export default function BrowseCoursesPage() {
       {/* Grid Content */}
       <ResponsiveGrid variant="cards">
         {filteredCourses.length === 0 ? (
-          <div className="col-span-full text-center py-20 bg-gray-50/50 border border-dashed border-[var(--border)] rounded-2xl">
+          <div className="col-span-full text-center py-20 bg-[var(--color-surface-muted)]/50 border border-dashed border-[var(--border)] rounded-2xl">
             <BookOpen className="w-12 h-12 text-[var(--muted)] mx-auto mb-4 opacity-20" />
             <h3 className="heading-md text-[var(--color-foreground)] mb-1">{t('courses.noAvailableCourses')}</h3>
             <p className="text-sm text-[var(--color-muted-foreground)] mb-6">{t('courses.tryAdjustingFilters')}</p>
             <button
               onClick={clearFilters}
-              className="px-6 py-2 bg-[var(--color-foreground)] text-white rounded-xl text-sm font-bold hover:opacity-90 transition-opacity"
+              className="px-6 py-2 bg-[var(--color-foreground)] text-[var(--background)] rounded-xl text-sm font-bold hover:opacity-90 transition-opacity"
             >
               {t('common.reset')}
             </button>

@@ -70,15 +70,15 @@ export default function FavoritesList({ initialFavorites, totalCount }: Favorite
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="bg-gradient-to-r from-[var(--error)] to-[var(--error)]/80 rounded-2xl p-6 text-white"
+        className="rounded-2xl p-6 bg-[var(--card-solid)] border border-[var(--color-border)] shadow-[var(--shadow-sm)]"
       >
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
-            <Bookmark className="w-7 h-7 fill-white" />
+          <div className="w-14 h-14 bg-[var(--error-light)] text-[var(--error)] rounded-xl flex items-center justify-center">
+            <Bookmark className="w-7 h-7 fill-current" />
           </div>
           <div>
-            <p className="text-3xl font-bold">{totalCount}</p>
-            <p className="text-white/80">{t('favorites.savedArticles')}</p>
+            <p className="text-3xl font-bold tabular-nums font-[family-name:var(--font-display)] text-[var(--color-foreground)]">{totalCount}</p>
+            <p className="text-[var(--color-muted-foreground)]">{t('favorites.savedArticles')}</p>
           </div>
         </div>
       </motion.div>

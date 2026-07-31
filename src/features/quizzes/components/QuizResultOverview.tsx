@@ -18,13 +18,13 @@ import { cn } from '@/lib/utils';
 type StatTone = 'blue' | 'purple' | 'pink' | 'green' | 'red' | 'sky' | 'orange';
 
 const TONE_STYLES: Record<StatTone, { icon: string; bg: string }> = {
-  blue: { icon: 'text-blue-600', bg: 'bg-blue-100 dark:bg-blue-500/15' },
-  purple: { icon: 'text-violet-600', bg: 'bg-violet-100 dark:bg-violet-500/15' },
-  pink: { icon: 'text-pink-600', bg: 'bg-pink-100 dark:bg-pink-500/15' },
-  green: { icon: 'text-emerald-600', bg: 'bg-emerald-100 dark:bg-emerald-500/15' },
-  red: { icon: 'text-red-600', bg: 'bg-red-100 dark:bg-red-500/15' },
-  sky: { icon: 'text-sky-600', bg: 'bg-sky-100 dark:bg-sky-500/15' },
-  orange: { icon: 'text-orange-600', bg: 'bg-orange-100 dark:bg-orange-500/15' },
+  blue: { icon: 'text-[var(--color-info)]', bg: 'bg-[var(--color-info-light)]' },
+  purple: { icon: 'text-[var(--primary)]', bg: 'bg-[var(--primary-soft)]' },
+  pink: { icon: 'text-[var(--primary-accent)]', bg: 'bg-[var(--primary-soft)]' },
+  green: { icon: 'text-[var(--color-success)]', bg: 'bg-[var(--color-success-light)]' },
+  red: { icon: 'text-[var(--color-error)]', bg: 'bg-[var(--color-error-light)]' },
+  sky: { icon: 'text-[var(--color-info)]', bg: 'bg-[var(--color-info-light)]' },
+  orange: { icon: 'text-[var(--color-warning)]', bg: 'bg-[var(--color-warning-light)]' },
 };
 
 function StatCard({
@@ -80,9 +80,9 @@ function AnswerDonut({
   const circumference = 2 * Math.PI * radius;
 
   const segments = [
-    { value: correct, color: '#22c55e', label: labels.correct },
-    { value: incorrect, color: '#ef4444', label: labels.incorrect },
-    { value: unattempted, color: '#38bdf8', label: labels.unattempted },
+    { value: correct, color: 'var(--color-success)', label: labels.correct },
+    { value: incorrect, color: 'var(--color-error)', label: labels.incorrect },
+    { value: unattempted, color: 'var(--color-info)', label: labels.unattempted },
   ];
 
   const drawableSegments = segments.filter((s) => s.value > 0);

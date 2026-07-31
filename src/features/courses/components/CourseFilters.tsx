@@ -93,7 +93,7 @@ export default function CourseFilters({
       headerAside={
         !showStatusFilter ? (
           <div className="hidden lg:flex items-center gap-3 px-6 py-4 border border-dashed border-[var(--border)] rounded-2xl">
-            <Sparkles className="w-5 h-5 text-amber-500" aria-hidden />
+            <Sparkles className="w-5 h-5 text-[var(--color-warning)]" aria-hidden />
             <span className="text-xs font-black uppercase tracking-widest text-[var(--color-muted-foreground)]">
               Find your next mastery
             </span>

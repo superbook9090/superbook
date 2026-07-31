@@ -777,7 +777,7 @@ export default function CreateQuizForm({ quizId }: Props) {
           ))}
         </select>
         {courses.length === 0 && (
-          <p className="mt-2 text-sm text-amber-600">
+          <p className="mt-2 text-sm text-[var(--color-warning)]">
             {t('createQuizForm.needCourseFirst')}
           </p>
         )}
@@ -857,7 +857,7 @@ export default function CreateQuizForm({ quizId }: Props) {
                 ))}
               </select>
               {lessonOptions.length === 0 && (
-                <p className="mt-2 text-sm text-amber-600">{t('createQuizForm.noLessonsInCourse')}</p>
+                <p className="mt-2 text-sm text-[var(--color-warning)]">{t('createQuizForm.noLessonsInCourse')}</p>
               )}
               <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
                 {t('createQuizForm.selectLessonHint')}
@@ -1018,8 +1018,8 @@ export default function CreateQuizForm({ quizId }: Props) {
         )}
 
         {uploadError && (
-          <div className="mb-4 bg-red-50 border border-red-200 rounded-md p-3">
-            <p className="text-sm text-red-700 whitespace-pre-line">{uploadError}</p>
+          <div className="mb-4 bg-[var(--color-error-light)] border border-[var(--color-error)]/30 rounded-md p-3">
+            <p className="text-sm text-[var(--color-error)] whitespace-pre-line">{uploadError}</p>
           </div>
         )}
 
@@ -1034,7 +1034,7 @@ export default function CreateQuizForm({ quizId }: Props) {
                   <button
                     type="button"
                     onClick={handleCancelImport}
-                    className="text-sm text-[var(--color-muted)] hover:text-gray-800 px-3 py-1.5 rounded border border-[var(--color-border)] hover:bg-[var(--color-accent)]"
+                    className="text-sm text-[var(--color-muted)] hover:text-[var(--color-foreground)] px-3 py-1.5 rounded border border-[var(--color-border)] hover:bg-[var(--color-accent)]"
                   >
                     {t('createQuizForm.cancel')}
                   </button>
@@ -1049,7 +1049,7 @@ export default function CreateQuizForm({ quizId }: Props) {
               </div>
             </div>
             <div className="max-h-60 overflow-y-auto">
-              <table className="min-w-full divide-y divide-gray-200">
+              <table className="min-w-full divide-y divide-[var(--color-border)]">
                 <thead className="bg-[var(--color-accent)] sticky top-0">
                   <tr>
                     <th className="px-3 py-2 text-left text-xs font-medium text-[var(--color-muted-foreground)] uppercase">#</th>
@@ -1058,13 +1058,13 @@ export default function CreateQuizForm({ quizId }: Props) {
                     <th className="px-3 py-2 text-left text-xs font-medium text-[var(--color-muted-foreground)] uppercase">{t('createQuizForm.answer')}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-[var(--color-border)]">
                   {previewData.slice(0, 5).map((row, idx) => (
                     <tr key={idx}>
                       <td className="px-3 py-2 text-sm text-[var(--color-foreground)]">{idx + 1}</td>
                       <td className="px-3 py-2 text-sm text-[var(--color-foreground)] max-w-xs truncate">{row.question}</td>
                       <td className="px-3 py-2 text-sm text-[var(--color-muted-foreground)]">A, B, C, D</td>
-                      <td className="px-3 py-2 text-sm font-medium text-green-600">
+                      <td className="px-3 py-2 text-sm font-medium text-[var(--color-success)]">
                         {['A', 'B', 'C', 'D'][typeof row.correctAnswer === 'number' ? row.correctAnswer : 0]}
                       </td>
                     </tr>
@@ -1091,7 +1091,7 @@ export default function CreateQuizForm({ quizId }: Props) {
                   <button
                     type="button"
                     onClick={() => removeQuestion(qIndex)}
-                    className="text-red-600 hover:text-red-800 text-sm"
+                    className="text-[var(--color-error)] hover:opacity-80 text-sm"
                   >
                     {t('createQuizForm.remove')}
                   </button>
@@ -1131,7 +1131,7 @@ export default function CreateQuizForm({ quizId }: Props) {
                       <button
                         type="button"
                         onClick={() => removeOption(qIndex, oIndex)}
-                        className="text-red-600 hover:text-red-800 text-sm"
+                        className="text-[var(--color-error)] hover:opacity-80 text-sm"
                       >
                         ×
                       </button>

@@ -33,7 +33,7 @@ function buildRows(
       you: formatMarks(you.scoreMarks, you.maxMarks),
       topper: formatMarks(topper.scoreMarks, topper.maxMarks),
       average: formatMarks(average.scoreMarks, average.maxMarks),
-      rowClass: 'bg-violet-100/80 dark:bg-violet-500/15',
+      rowClass: 'bg-[var(--primary-soft)]',
     },
     {
       key: 'accuracy',
@@ -41,7 +41,7 @@ function buildRows(
       you: formatPercent(you.accuracy),
       topper: formatPercent(topper.accuracy),
       average: formatPercent(average.accuracy),
-      rowClass: 'bg-sky-100/80 dark:bg-sky-500/15',
+      rowClass: 'bg-[var(--color-info-light)]',
     },
     {
       key: 'correct',
@@ -49,7 +49,7 @@ function buildRows(
       you: formatCount(you.correct, total),
       topper: formatCount(topper.correct, total),
       average: formatCount(average.correct, total),
-      rowClass: 'bg-amber-100/80 dark:bg-amber-500/15',
+      rowClass: 'bg-[var(--color-warning-light)]',
     },
     {
       key: 'wrong',
@@ -57,7 +57,7 @@ function buildRows(
       you: formatCount(you.wrong, total),
       topper: formatCount(topper.wrong, total),
       average: formatCount(average.wrong, total),
-      rowClass: 'bg-rose-100/80 dark:bg-rose-500/15',
+      rowClass: 'bg-[var(--color-error-light)]',
     },
     {
       key: 'time',
@@ -65,7 +65,7 @@ function buildRows(
       you: formatTimeTaken(you.timeTaken, you.timeLimitMinutes),
       topper: formatTimeTaken(topper.timeTaken, topper.timeLimitMinutes),
       average: formatTimeTaken(average.timeTaken, average.timeLimitMinutes),
-      rowClass: 'bg-yellow-100/80 dark:bg-yellow-500/15',
+      rowClass: 'bg-[var(--color-warning-light)]',
     },
   ];
 }
@@ -109,13 +109,13 @@ export function QuizComparisonTable({
         <thead>
           <tr>
             <th className="p-2 sm:p-3 border border-[var(--color-border)] rounded-tl-lg" />
-            <th className="p-2 sm:p-3 text-center font-semibold border border-[var(--color-border)] bg-violet-100/90 dark:bg-violet-500/20 text-[var(--color-foreground)]">
+            <th className="p-2 sm:p-3 text-center font-semibold border border-[var(--color-border)] bg-[var(--primary-soft)] text-[var(--color-foreground)]">
               {t('quizResult.comparisonYou')}
             </th>
-            <th className="p-2 sm:p-3 text-center font-semibold border border-[var(--color-border)] bg-emerald-100/90 dark:bg-emerald-500/20 text-[var(--color-foreground)]">
+            <th className="p-2 sm:p-3 text-center font-semibold border border-[var(--color-border)] bg-[var(--color-success-light)] text-[var(--color-foreground)]">
               {t('quizResult.comparisonTopper')}
             </th>
-            <th className="p-2 sm:p-3 text-center font-semibold border border-[var(--color-border)] rounded-tr-lg bg-sky-100/90 dark:bg-sky-500/20 text-[var(--color-foreground)]">
+            <th className="p-2 sm:p-3 text-center font-semibold border border-[var(--color-border)] rounded-tr-lg bg-[var(--color-info-light)] text-[var(--color-foreground)]">
               {t('quizResult.comparisonAverage')}
             </th>
           </tr>

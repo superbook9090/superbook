@@ -31,16 +31,16 @@ const colorConfig = {
     text: 'text-[var(--error)]',
   },
   student: {
-    bg: 'bg-[var(--student-soft)]',
-    text: 'text-[var(--student-primary)]',
+    bg: 'bg-[var(--primary-soft)]',
+    text: 'text-[var(--primary)]',
   },
   teacher: {
-    bg: 'bg-[var(--teacher-soft)]',
-    text: 'text-[var(--teacher-primary)]',
+    bg: 'bg-[var(--primary-soft)]',
+    text: 'text-[var(--primary)]',
   },
   admin: {
-    bg: 'bg-[var(--admin-soft)]',
-    text: 'text-[var(--admin-primary)]',
+    bg: 'bg-[var(--primary-soft)]',
+    text: 'text-[var(--primary)]',
   },
 };
 

@@ -94,7 +94,7 @@ export default function LessonViewerPage() {
   if (!lesson) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-8">
-        <div className="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-6">
+        <div className="w-20 h-20 bg-[var(--color-error-light)] text-[var(--color-error)] rounded-full flex items-center justify-center mb-6">
           <BookOpen className="w-10 h-10" />
         </div>
         <h2 className="text-2xl font-bold text-[var(--color-foreground)] mb-2">{t('courses.lessonNotFound')}</h2>
@@ -133,7 +133,7 @@ export default function LessonViewerPage() {
         </button>
         
         <div className="flex items-center gap-3">
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-600 rounded-lg border border-emerald-100 text-[10px] font-bold uppercase tracking-wider">
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-[var(--color-success-light)] text-[var(--color-success)] rounded-lg border border-[var(--color-success)]/20 text-[10px] font-bold uppercase tracking-wider">
             <Layout className="w-3.5 h-3.5" />
             {t('courses.readingMode')}
           </div>
@@ -147,11 +147,11 @@ export default function LessonViewerPage() {
         </h1>
         <div className="flex flex-wrap items-center gap-6 text-sm text-[var(--color-muted-foreground)] font-medium">
           <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-orange-400" />
+            <Clock className="w-4 h-4 text-[var(--color-warning)]" />
             <span>{t('courses.minutesRead', { count: lesson.duration || 10 })}</span>
           </div>
           <div className="flex items-center gap-2">
-            <BookOpen className="w-4 h-4 text-blue-400" />
+            <BookOpen className="w-4 h-4 text-[var(--color-info)]" />
             <span>{t('courses.educationalContent')}</span>
           </div>
         </div>
@@ -214,7 +214,7 @@ export default function LessonViewerPage() {
                 className="flex items-center justify-between p-4 bg-[var(--color-surface-muted)]/40 hover:bg-[var(--student-soft)]/20 border border-[var(--border)] rounded-2xl group transition-all"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-950/30 text-orange-500 flex items-center justify-center font-bold">
+                  <div className="w-10 h-10 rounded-xl bg-[var(--color-warning-light)] text-[var(--color-warning)] flex items-center justify-center font-bold">
                     PDF
                   </div>
                   <div className="text-left">
@@ -235,7 +235,7 @@ export default function LessonViewerPage() {
                 className="flex items-center justify-between p-4 bg-[var(--color-surface-muted)]/40 hover:bg-[var(--student-soft)]/20 border border-[var(--border)] rounded-2xl group transition-all"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950/30 text-blue-500 flex items-center justify-center font-bold">
+                  <div className="w-10 h-10 rounded-xl bg-[var(--color-info-light)] text-[var(--color-info)] flex items-center justify-center font-bold">
                     ZIP
                   </div>
                   <div className="text-left">

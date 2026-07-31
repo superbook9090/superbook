@@ -42,9 +42,9 @@ export default function ScoreTrendChart({
   const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
     if (active && payload && payload[0]) {
       return (
-        <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200">
-          <p className="text-sm font-medium text-gray-900">{label}</p>
-          <p className="text-sm text-gray-600">{payload[0].payload.quizTitle}</p>
+        <div className="bg-[var(--card-solid)] p-3 rounded-lg shadow-lg border border-[var(--color-border)]">
+          <p className="text-sm font-medium text-[var(--color-foreground)]">{label}</p>
+          <p className="text-sm text-[var(--color-muted-foreground)]">{payload[0].payload.quizTitle}</p>
           <p className="text-lg font-bold text-[var(--student-primary)]">
             {payload[0].value}%
           </p>
@@ -56,19 +56,19 @@ export default function ScoreTrendChart({
 
   if (!processedData || processedData.length === 0) {
     return (
-      <div className="bg-white rounded-2xl p-5 shadow-sm h-[300px] flex flex-col items-center justify-center">
-        <Calendar className="w-12 h-12 text-gray-400 mb-3" />
-        <p className="text-gray-500 text-center">{t('charts.noQuizAttemptsYet')}</p>
-        <p className="text-gray-400 text-sm text-center mt-1">{t('charts.startQuizzesToSeeProgress')}</p>
+      <div className="bg-[var(--card-solid)] rounded-2xl p-5 shadow-sm h-[300px] flex flex-col items-center justify-center">
+        <Calendar className="w-12 h-12 text-[var(--color-muted)] mb-3" />
+        <p className="text-[var(--color-muted-foreground)] text-center">{t('charts.noQuizAttemptsYet')}</p>
+        <p className="text-[var(--color-muted)] text-sm text-center mt-1">{t('charts.startQuizzesToSeeProgress')}</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-2xl p-5 shadow-sm">
+    <div className="bg-[var(--card-solid)] rounded-2xl p-5 shadow-sm">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">{resolvedTitle}</h3>
-        <div className="flex items-center gap-2 text-sm text-gray-500">
+        <h3 className="text-lg font-semibold text-[var(--color-foreground)]">{resolvedTitle}</h3>
+        <div className="flex items-center gap-2 text-sm text-[var(--color-muted-foreground)]">
           <TrendingUp className="w-4 h-4" />
           <span>{t('charts.attemptsCount', { count: processedData.length })}</span>
         </div>

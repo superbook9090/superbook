@@ -42,11 +42,11 @@ export default function ForgotPasswordForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-[var(--student-primary)]/10 to-[var(--student-accent)]/10">
+    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 sm:p-10"
+        className="w-full max-w-md bg-[var(--card-solid)]/70 backdrop-blur-md border border-[var(--border)] rounded-3xl shadow-[var(--shadow-md)] p-8 sm:p-10"
       >
         <div className="flex justify-center mb-6">
           <PremiumLogo variant="default" size="md" theme="student" />

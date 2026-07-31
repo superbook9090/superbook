@@ -65,7 +65,7 @@ export default function QuizLeaderboard({
   if (error) {
     return (
       <div className="text-center py-12">
-        <p className="text-red-500 font-medium">{error}</p>
+        <p className="text-[var(--color-error)] font-medium">{error}</p>
         <button
           onClick={fetchLeaderboard}
           className="mt-4 px-4 py-2 bg-[var(--student-primary)] text-white rounded-lg hover:brightness-110 active:brightness-95 transition-all"

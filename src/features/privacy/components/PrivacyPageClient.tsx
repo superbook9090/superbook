@@ -68,8 +68,8 @@ export default function PrivacyPageClient() {
               </section>
 
               <section className="space-y-4">
-                <div className="flex items-center gap-3 text-blue-500 mb-4">
-                  <div className="p-3 bg-blue-500/10 rounded-2xl">
+                <div className="flex items-center gap-3 text-[var(--color-info)] mb-4">
+                  <div className="p-3 bg-[var(--color-info-light)] rounded-2xl">
                     <Eye className="w-6 h-6" />
                   </div>
                   <h2 className="text-2xl font-bold text-[var(--color-foreground)]">
@@ -82,8 +82,8 @@ export default function PrivacyPageClient() {
               </section>
 
               <section className="space-y-4">
-                <div className="flex items-center gap-3 text-orange-500 mb-4">
-                  <div className="p-3 bg-orange-500/10 rounded-2xl">
+                <div className="flex items-center gap-3 text-[var(--color-warning)] mb-4">
+                  <div className="p-3 bg-[var(--color-warning-light)] rounded-2xl">
                     <Shield className="w-6 h-6" />
                   </div>
                   <h2 className="text-2xl font-bold text-[var(--color-foreground)]">
@@ -96,8 +96,8 @@ export default function PrivacyPageClient() {
               </section>
 
               <section className="space-y-4">
-                <div className="flex items-center gap-3 text-emerald-500 mb-4">
-                  <div className="p-3 bg-emerald-500/10 rounded-2xl">
+                <div className="flex items-center gap-3 text-[var(--color-success)] mb-4">
+                  <div className="p-3 bg-[var(--color-success-light)] rounded-2xl">
                     <Lock className="w-6 h-6" />
                   </div>
                   <h2 className="text-2xl font-bold text-[var(--color-foreground)]">

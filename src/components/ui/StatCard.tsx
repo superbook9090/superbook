@@ -15,41 +15,43 @@ interface StatCardProps {
   description?: string;
 }
 
+/* Role keys resolve through --primary* so the [data-role] scope picks the
+   right palette; status keys use the status tokens. `bar` is a CSS value. */
 const colorConfig = {
   info: {
     bg: 'bg-[var(--info-light)]',
     text: 'text-[var(--info)]',
-    blur: 'bg-[var(--info-light)]',
+    bar: 'var(--info)',
   },
   success: {
     bg: 'bg-[var(--success-light)]',
     text: 'text-[var(--success)]',
-    blur: 'bg-[var(--success-light)]',
+    bar: 'var(--success)',
   },
   warning: {
     bg: 'bg-[var(--warning-light)]',
     text: 'text-[var(--warning)]',
-    blur: 'bg-[var(--warning-light)]',
+    bar: 'var(--warning)',
   },
   error: {
     bg: 'bg-[var(--error-light)]',
     text: 'text-[var(--error)]',
-    blur: 'bg-[var(--error-light)]',
+    bar: 'var(--error)',
   },
   student: {
-    bg: 'bg-[var(--student-soft)]',
-    text: 'text-[var(--student-primary)]',
-    blur: 'bg-[var(--student-soft)]',
+    bg: 'bg-[var(--primary-soft)]',
+    text: 'text-[var(--primary)]',
+    bar: 'var(--primary-gradient)',
   },
   teacher: {
-    bg: 'bg-[var(--teacher-soft)]',
-    text: 'text-[var(--teacher-primary)]',
-    blur: 'bg-[var(--teacher-soft)]',
+    bg: 'bg-[var(--primary-soft)]',
+    text: 'text-[var(--primary)]',
+    bar: 'var(--primary-gradient)',
   },
   admin: {
-    bg: 'bg-[var(--admin-soft)]',
-    text: 'text-[var(--admin-primary)]',
-    blur: 'bg-[var(--admin-soft)]',
+    bg: 'bg-[var(--primary-soft)]',
+    text: 'text-[var(--primary)]',
+    bar: 'var(--primary-gradient)',
   },
 };
 
@@ -71,29 +73,30 @@ export default function StatCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
-      className="group relative overflow-hidden rounded-2xl bg-[var(--card-solid)] card-body shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+      className="rounded-2xl bg-[var(--card-solid)] border border-[var(--color-border)] card-body shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5 transition-all duration-300"
     >
-      <div className={`absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 ${config.blur} rounded-full blur-2xl -translate-y-1/2 translate-x-1/2`} />
-      <div className="relative">
-        <div className={`p-2 sm:p-3 rounded-xl ${config.bg} ${config.text} w-fit mb-4`}>
-          <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <div className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[var(--color-muted)] pt-1">
+          {label}
         </div>
-        <div className="text-2xl sm:text-3xl font-bold text-[var(--color-foreground)] mb-1">
-          {value}{suffix}
+        <div className={`p-2 sm:p-2.5 rounded-xl ${config.bg} ${config.text} flex-shrink-0`}>
+          <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
         </div>
-        <div className="text-sm text-[var(--color-muted-foreground)] mb-2">{label}</div>
-        {description && (
-          <div className="text-xs text-[var(--color-muted-foreground)]">{description}</div>
-        )}
-        {showProgress && progress !== undefined && (
-          <div className="w-full bg-[var(--border)] rounded-full h-2 mt-3">
-            <div
-              className={`h-2 rounded-full transition-all ${config.text.replace('text-', 'bg-')}`}
-              style={{ width: `${Math.min(progress, 100)}%` }}
-            />
-          </div>
-        )}
       </div>
+      <div className="text-2xl sm:text-3xl font-bold tracking-tight tabular-nums font-[family-name:var(--font-display)] text-[var(--color-foreground)]">
+        {value}{suffix}
+      </div>
+      {description && (
+        <div className="text-xs text-[var(--color-muted-foreground)] mt-1">{description}</div>
+      )}
+      {showProgress && progress !== undefined && (
+        <div className="w-full bg-[var(--color-surface-muted-strong)] rounded-full h-1.5 mt-3">
+          <div
+            className="h-1.5 rounded-full transition-all"
+            style={{ width: `${Math.min(progress, 100)}%`, background: config.bar }}
+          />
+        </div>
+      )}
     </motion.div>
   );
 }

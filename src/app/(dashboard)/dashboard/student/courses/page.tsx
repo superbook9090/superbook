@@ -122,19 +122,18 @@ export default function StudentCoursesPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="hero-banner bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)] text-white"
+        className="hero-banner"
       >
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <h1 className="heading-xl text-white mb-2">{t('courses.myCourses')}</h1>
-            <p className="text-white/80 text-sm sm:text-base">
+            <h1 className="heading-xl mb-2">{t('courses.myCourses')}</h1>
+            <p className="text-[var(--color-muted-foreground)] text-sm sm:text-base">
               {t('dashboard.continueLearning').replace('{count}', String(enrollments.length))}
             </p>
           </div>
           <button
             onClick={() => router.push(ROUTES.student.browse)}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-[var(--student-primary)] rounded-xl text-sm font-bold shadow-lg hover:bg-gray-50 transition-all transform hover:-translate-y-1 active:translate-y-0"
+            className="btn-premium"
           >
             <Sparkles className="w-4 h-4" />
             {t('courses.browseMore')}
@@ -207,13 +206,13 @@ export default function StudentCoursesPage() {
       {/* Course Grid */}
       <ResponsiveGrid variant="dense">
         {filteredEnrollments.length === 0 ? (
-          <div className="col-span-full text-center py-20 bg-gray-50/50 border border-dashed border-[var(--border)] rounded-2xl">
+          <div className="col-span-full text-center py-20 bg-[var(--color-surface-muted)]/50 border border-dashed border-[var(--border)] rounded-2xl">
             <BookOpen className="w-12 h-12 text-[var(--muted)] mx-auto mb-4 opacity-20" />
             <h3 className="heading-md text-[var(--color-foreground)] mb-1">{t('courses.noCoursesFound')}</h3>
             <p className="text-sm text-[var(--color-muted-foreground)] mb-6">{t('courses.tryAdjustingFilters')}</p>
             <button
               onClick={clearFilters}
-              className="px-6 py-2 bg-[var(--color-foreground)] text-white rounded-xl text-sm font-bold hover:opacity-90 transition-opacity"
+              className="px-6 py-2 bg-[var(--color-foreground)] text-[var(--background)] rounded-xl text-sm font-bold hover:opacity-90 transition-opacity"
             >
               {t('common.reset')}
             </button>

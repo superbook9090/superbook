@@ -162,16 +162,18 @@ export default function TeacherDashboardPage() {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="hero-banner bg-gradient-to-r from-[var(--teacher-primary)] to-[var(--teacher-accent)] text-white"
+        className="hero-banner"
       >
-        <div className="absolute top-0 right-0 w-32 h-32 sm:w-48 sm:h-48 lg:w-64 lg:h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-        <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="w-full sm:w-auto">
-            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold mb-2 truncate">
-              {t('dashboard.teacherDashboard')}
+            <h1 className="heading-xl mb-2 truncate">
+              {t('dashboard.welcomeBack')},{' '}
+              <span className="gradient-text">
+                {session?.user?.name ? session.user.name.charAt(0).toUpperCase() + session.user.name.slice(1) : session?.user?.name}
+              </span>!
             </h1>
-            <p className="text-white/80 text-sm sm:text-base truncate">
-              {t('dashboard.welcomeBack')}, {session?.user?.name ? session.user.name.charAt(0).toUpperCase() + session.user.name.slice(1) : session?.user?.name}! {t('dashboard.manageContent')}
+            <p className="text-[var(--color-muted-foreground)] text-sm sm:text-base truncate">
+              {t('dashboard.manageContent')}
             </p>
           </div>
           <div className="w-full sm:w-auto">
@@ -182,7 +184,7 @@ export default function TeacherDashboardPage() {
                   whileHover={{ scale: 1 }}
                   whileTap={{ scale: 1 }}
                   onClick={() => setLimitAlert({ type: 'courses' })}
-                  className="inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base text-[var(--teacher-primary)] rounded-xl font-semibold shadow-lg transition-all bg-[var(--color-surface-muted)] cursor-not-allowed"
+                  className="inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base text-[var(--color-muted-foreground)] rounded-full font-semibold transition-all bg-[var(--color-surface-muted)] border border-[var(--color-border)] cursor-not-allowed"
                 >
                   <Plus className="w-5 h-5 mr-2" />
                   {t('dashboard.createCourse')}
@@ -192,7 +194,7 @@ export default function TeacherDashboardPage() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   href={ROUTES.teacher.courseCreate}
-                  className="inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base text-[var(--teacher-primary)] rounded-xl font-semibold shadow-lg transition-all bg-[var(--card-solid)] hover:shadow-xl"
+                  className="btn-premium w-full sm:w-auto min-h-[44px]"
                 >
                   <Plus className="w-5 h-5 mr-2" />
                   {t('dashboard.createCourse')}

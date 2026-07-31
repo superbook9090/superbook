@@ -22,7 +22,7 @@ export default function ToolsIndexClient() {
   });
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen bg-[var(--background)]">
       <MarketingHeader />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <header className="mb-12 text-center max-w-3xl mx-auto">

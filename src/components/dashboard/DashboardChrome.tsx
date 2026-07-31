@@ -43,6 +43,10 @@ export default function DashboardChrome({
     <QuizProvider>
       <FeatureRouteGuard role={role} />
       <div className="dashboard-shell" data-role={(role || 'student').toLowerCase()}>
+        <div className="dashboard-aurora" aria-hidden="true">
+          <div className="dashboard-aurora__blob dashboard-aurora__blob--one" />
+          <div className="dashboard-aurora__blob dashboard-aurora__blob--two" />
+        </div>
         {!isTakingQuiz && (
           <LazyMobileNav
             user={session.user}
@@ -60,7 +64,7 @@ export default function DashboardChrome({
           )}
         </aside>
 
-        <div className="flex flex-1 flex-col min-h-0 md:h-screen overflow-hidden">
+        <div className="dashboard-col flex flex-1 flex-col min-h-0 md:h-screen overflow-hidden">
           <LazyDashboardHeader
             isTeacherOrAdmin={isStaff}
             showNotifications={role === 'student'}

@@ -209,13 +209,13 @@ function QuizCard({
               </div>
               <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2 sm:gap-4">
                 <div className="flex min-w-0 items-center gap-2">
-                  <CheckCircle className="h-4 w-4 shrink-0 text-emerald-500" />
+                  <CheckCircle className="h-4 w-4 shrink-0 text-[var(--color-success)]" />
                   <span className="truncate text-[var(--color-muted-foreground)]">
                     {attempt.correctCount}/{attempt.totalQuestions} {t('quiz.correct')}
                   </span>
                 </div>
                 <div className="flex min-w-0 items-center gap-2">
-                  <Clock className="h-4 w-4 shrink-0 text-blue-500" />
+                  <Clock className="h-4 w-4 shrink-0 text-[var(--color-info)]" />
                   <span className="truncate text-[var(--color-muted-foreground)]">
                     {formatDuration(attempt.timeTaken)}
                   </span>
@@ -230,7 +230,7 @@ function QuizCard({
           )}
 
           {type === 'in_progress' && attempt && (
-            <div className="rounded-xl border border-amber-200/80 bg-amber-50/80 p-3 sm:p-4">
+            <div className="rounded-xl border border-[var(--color-warning)]/30 bg-[var(--color-warning-light)] p-3 sm:p-4">
               <Badge variant="warning" size="sm">
                 {t('courses.inProgress')}
               </Badge>

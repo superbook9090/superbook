@@ -170,13 +170,13 @@ export default function TeacherCoursesPage() {
                       {course.isPublished ? t('teacherCourses.published') : t('teacherCourses.draft')}
                     </span>
                     {course.isCompleted && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[var(--color-info-light)] text-[var(--color-info)]">
                         <Award className="w-3 h-3" />
                         {t('teacherCourses.completed')}
                       </span>
                     )}
                     {(course as { isPrivate?: boolean }).isPrivate && (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[var(--color-warning-light)] text-[var(--color-warning)]">
                         {t('courses.privateCourse')}
                       </span>
                     )}
@@ -205,8 +205,8 @@ export default function TeacherCoursesPage() {
                       disabled={publishCourse.isPending}
                       className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                         course.isPublished
-                          ? 'text-orange-600 bg-orange-50 hover:bg-orange-100'
-                          : 'text-green-600 bg-green-50 hover:bg-green-100'
+                          ? 'text-[var(--color-warning)] bg-[var(--color-warning-light)] hover:bg-[var(--color-warning)]/20'
+                          : 'text-[var(--color-success)] bg-[var(--color-success-light)] hover:bg-[var(--color-success)]/20'
                       }`}
                     >
                       {publishCourse.isPending ? (
@@ -232,8 +232,8 @@ export default function TeacherCoursesPage() {
                         aria-label={course.isCompleted ? t('teacherCourses.reopenCourse') : t('teacherCourses.markCompleted')}
                         className={`p-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                           course.isCompleted
-                            ? 'text-blue-600 bg-blue-50 hover:bg-blue-100'
-                            : 'text-[var(--color-muted-foreground)] bg-[var(--color-surface-muted)] hover:bg-blue-50 hover:text-blue-600'
+                            ? 'text-[var(--color-info)] bg-[var(--color-info-light)] hover:bg-[var(--color-info)]/20'
+                            : 'text-[var(--color-muted-foreground)] bg-[var(--color-surface-muted)] hover:bg-[var(--color-info-light)] hover:text-[var(--color-info)]'
                         }`}
                       >
                         <Award className="w-5 h-5" />
@@ -243,7 +243,7 @@ export default function TeacherCoursesPage() {
                       <button
                         onClick={() => setConfirmDeleteCourse(course._id)}
                         aria-label={t('teacherCourses.deleteCourse') || 'Delete Course'}
-                        className="p-2 text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+                        className="p-2 text-[var(--color-error)] bg-[var(--color-error-light)] rounded-lg hover:bg-[var(--color-error)]/20 transition-colors"
                       >
                         <Trash2 className="w-5 h-5" />
                       </button>

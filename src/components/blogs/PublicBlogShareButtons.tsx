@@ -50,7 +50,7 @@ export default function PublicBlogShareButtons({ title, url }: Props) {
       >
         {copied ? (
           <>
-            <Check className="w-4 h-4 text-emerald-500 animate-in fade-in zoom-in-50 duration-200" />
+            <Check className="w-4 h-4 text-[var(--color-success)] animate-in fade-in zoom-in-50 duration-200" />
             <span className="animate-in fade-in duration-200">{t('blog.linkCopiedLabel') || 'Link Copied!'}</span>
           </>
         ) : (

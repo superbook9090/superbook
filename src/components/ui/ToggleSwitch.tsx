@@ -36,7 +36,7 @@ export default function ToggleSwitch({
         className={cn(
           'relative inline-flex items-center rounded-full transition-colors duration-200',
           'h-7 w-12 sm:h-6 sm:w-11',
-          checked ? 'bg-[var(--primary)]' : 'bg-neutral-300'
+          checked ? 'bg-[var(--primary)]' : 'bg-[var(--color-surface-muted-strong)]'
         )}
       >
         <span

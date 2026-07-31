@@ -170,7 +170,7 @@ export default function CurriculumTreeEditor({
         <div className="flex flex-wrap gap-2">
           <Link
             href={buildTeacherCreateQuizUrl({ courseId, placement: 'course' })}
-            className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2 rounded-xl text-sm font-semibold border border-violet-200 text-violet-700 hover:bg-violet-50 transition-colors"
+            className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2 rounded-xl text-sm font-semibold border border-[var(--primary-border)] text-[var(--primary)] hover:bg-[var(--primary-soft)] transition-colors"
           >
             <Target className="w-4 h-4" />
             {t('curriculum.addQuiz')}

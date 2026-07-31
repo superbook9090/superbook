@@ -141,14 +141,16 @@ export default function StudentDashboardPage() {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="hero-banner bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)] text-white"
+        className="hero-banner"
       >
-        <div className="absolute top-0 right-0 w-32 h-32 sm:w-48 sm:h-48 lg:w-64 lg:h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-        <div className="relative z-10">
-          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold mb-2 truncate">
-            {t('dashboard.welcomeBack')}, {session?.user?.name ? session.user.name.charAt(0).toUpperCase() + session.user.name.slice(1) : session?.user?.name}!
+        <div>
+          <h1 className="heading-xl mb-2 truncate">
+            {t('dashboard.welcomeBack')},{' '}
+            <span className="gradient-text">
+              {session?.user?.name ? session.user.name.charAt(0).toUpperCase() + session.user.name.slice(1) : session?.user?.name}
+            </span>!
           </h1>
-          <p className="text-white/80 text-sm sm:text-base truncate">
+          <p className="text-[var(--color-muted-foreground)] text-sm sm:text-base truncate">
             {t('dashboard.continueLearning').replace('{count}', String(stats.enrolledCount))}
           </p>
         </div>

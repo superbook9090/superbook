@@ -107,15 +107,15 @@ export default function ChangePasswordForm() {
       )}
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">{t('password.currentPassword')}</label>
+        <label className="block text-sm font-medium text-[var(--color-muted-foreground)] mb-1">{t('password.currentPassword')}</label>
         <div className="relative">
-          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted)]" />
           <input
             type={showCurrent ? 'text' : 'password'}
             required
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
-            className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[var(--student-primary)]/30 focus:border-[var(--student-primary)]"
+            className="w-full pl-10 pr-10 py-2.5 border border-[var(--color-border)] rounded-lg text-sm focus:ring-2 focus:ring-[var(--student-primary)]/30 focus:border-[var(--student-primary)]"
           />
           <Tooltip
             label={showCurrent ? t('password.hidePassword') : t('password.showPassword')}
@@ -125,7 +125,7 @@ export default function ChangePasswordForm() {
               type="button"
               onClick={() => setShowCurrent(!showCurrent)}
               aria-label={showCurrent ? t('password.hidePassword') : t('password.showPassword')}
-              className="text-gray-400"
+              className="text-[var(--color-muted)]"
             >
               {showCurrent ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
@@ -135,16 +135,16 @@ export default function ChangePasswordForm() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">{t('password.newPassword')}</label>
+          <label className="block text-sm font-medium text-[var(--color-muted-foreground)] mb-1">{t('password.newPassword')}</label>
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted)]" />
             <input
               type={showNew ? 'text' : 'password'}
               required
               minLength={8}
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[var(--student-primary)]/30"
+              className="w-full pl-10 pr-10 py-2.5 border border-[var(--color-border)] rounded-lg text-sm focus:ring-2 focus:ring-[var(--student-primary)]/30"
             />
             <Tooltip
               label={showNew ? t('password.hidePassword') : t('password.showPassword')}
@@ -154,7 +154,7 @@ export default function ChangePasswordForm() {
                 type="button"
                 onClick={() => setShowNew(!showNew)}
                 aria-label={showNew ? t('password.hidePassword') : t('password.showPassword')}
-                className="text-gray-400"
+                className="text-[var(--color-muted)]"
               >
                 {showNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -162,16 +162,16 @@ export default function ChangePasswordForm() {
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">{t('register.confirmPassword')}</label>
+          <label className="block text-sm font-medium text-[var(--color-muted-foreground)] mb-1">{t('register.confirmPassword')}</label>
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted)]" />
             <input
               type={showNew ? 'text' : 'password'}
               required
               minLength={8}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[var(--student-primary)]/30"
+              className="w-full pl-10 pr-4 py-2.5 border border-[var(--color-border)] rounded-lg text-sm focus:ring-2 focus:ring-[var(--student-primary)]/30"
             />
           </div>
         </div>

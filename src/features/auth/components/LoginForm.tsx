@@ -145,7 +145,7 @@ function LoginFormInner() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-white">
+    <div className="min-h-screen flex flex-col lg:flex-row">
       {/* Left Side - Branding (Desktop) */}
       <div className="hidden lg:flex lg:w-1/2 xl:w-[55%] relative overflow-hidden">
         {/* Animated Gradient Background */}
@@ -194,7 +194,7 @@ function LoginFormInner() {
               <PremiumLogo 
                 variant="default"
                 size="lg"
-                theme="student"
+                mono
               />
             </motion.div>
 
@@ -229,9 +229,7 @@ function LoginFormInner() {
 
       {/* Right Side - Login Form */}
       <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 relative">
-        {/* Mobile Background */}
-        <div className={`lg:hidden absolute inset-0 bg-gradient-to-br ${theme.gradient}`} />
-        
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -257,7 +255,7 @@ function LoginFormInner() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="bg-white lg:bg-white/95 lg:backdrop-blur-xl rounded-3xl shadow-2xl p-8 sm:p-10"
+            className="bg-[var(--card-solid)]/70 backdrop-blur-md border border-[var(--border)] rounded-3xl shadow-[var(--shadow-md)] p-8 sm:p-10"
           >
             {/* Header */}
             <div className="text-center mb-8">

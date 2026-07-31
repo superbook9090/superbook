@@ -374,8 +374,8 @@ export default function FileExplorer() {
                     }}
                     className="group w-full text-left flex items-center gap-3 p-3 rounded-xl border border-[var(--border)] bg-[var(--card)] hover:bg-[var(--card-solid)] transition cursor-pointer select-none"
                   >
-                    <div className="p-2 rounded-lg bg-amber-500/15 border border-amber-500/20">
-                      <Folder className="w-5 h-5 text-amber-200" />
+                    <div className="p-2 rounded-lg bg-[var(--color-warning-light)] border border-[var(--color-warning)]/20">
+                      <Folder className="w-5 h-5 text-[var(--color-warning)]" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-semibold text-[var(--foreground)] truncate">{f.name}</div>
@@ -421,8 +421,8 @@ export default function FileExplorer() {
                     key={file._id}
                     className="group flex items-center gap-3 p-3 rounded-xl border border-[var(--border)] bg-[var(--card)] hover:bg-[var(--card-solid)] transition"
                   >
-                    <div className="p-2 rounded-lg bg-rose-500/15 border border-rose-500/20">
-                      <FileText className="w-5 h-5 text-rose-200" />
+                    <div className="p-2 rounded-lg bg-[var(--color-error-light)] border border-[var(--color-error)]/20">
+                      <FileText className="w-5 h-5 text-[var(--color-error)]" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-semibold text-[var(--foreground)] truncate">{file.name}</div>

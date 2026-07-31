@@ -1,11 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
+import BrandLogo from '@/components/ui/BrandLogo';
 import { ROUTES } from '@/constants/routes';
 import { translate } from '@/i18n';
 import { roleThemes } from '@/lib/roleTheme';
 import { useFeature } from '@/contexts/AppSettingsContext';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 
 export default function HeaderStatic({ forceScrolled = false }: { forceScrolled?: boolean }) {
   const t = (key: Parameters<typeof translate>[1]) => translate('en', key);
@@ -16,24 +17,21 @@ export default function HeaderStatic({ forceScrolled = false }: { forceScrolled?
     <header
       id="site-header"
       className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${
-        forceScrolled ? 'bg-white/90 backdrop-blur-lg shadow-sm' : 'bg-transparent'
+        forceScrolled
+          ? 'bg-[var(--card-solid)]/80 backdrop-blur-md border-b border-[var(--border)] shadow-sm'
+          : 'bg-transparent'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
           <Link href={ROUTES.home} className="flex items-center gap-2">
-            <div className="flex items-center px-3 py-2 rounded-xl bg-white/90 shadow-sm">
-              <Image
-                src="/logo.svg"
-                alt={t('home.header.logoAlt')}
-                width={96}
-                height={52}
-                className="h-8 sm:h-9 w-auto object-contain"
-              />
+            <div className="flex items-center">
+              <BrandLogo size="md" className="text-[var(--color-foreground)]" />
             </div>
           </Link>
 
           <div className="hidden md:flex items-center gap-4">
+            <ThemeToggle />
             {enableBlogs && (
               <Link
                 id="header-blogs-link"
@@ -56,9 +54,7 @@ export default function HeaderStatic({ forceScrolled = false }: { forceScrolled?
               <Link
                 href={ROUTES.login}
                 data-i18n-key="home.login"
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  forceScrolled ? 'text-gray-600 hover:text-gray-900' : 'text-white hover:text-white'
-                }`}
+                className="px-4 py-2 rounded-lg text-sm font-medium transition-colors text-[var(--muted)] hover:text-[var(--foreground)]"
               >
                 {t('home.login')}
               </Link>
@@ -81,13 +77,13 @@ export default function HeaderStatic({ forceScrolled = false }: { forceScrolled?
             </Link>
           </div>
 
-          <details className="md:hidden relative group">
+          <div className="md:hidden flex items-center gap-2">
+            <ThemeToggle />
+            <details className="relative group">
             <summary
               id="mobile-menu-toggle"
               aria-label={t('home.header.openMenu')}
-              className={`list-none p-2 rounded-lg transition-colors cursor-pointer [&::-webkit-details-marker]:hidden ${
-                forceScrolled ? 'text-gray-800 hover:bg-black/5' : 'text-white hover:bg-white/10'
-              }`}
+              className="list-none p-2 rounded-lg transition-colors cursor-pointer [&::-webkit-details-marker]:hidden text-[var(--foreground)] hover:bg-[var(--surface-muted)]"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -106,12 +102,12 @@ export default function HeaderStatic({ forceScrolled = false }: { forceScrolled?
                 <line x1="4" x2="20" y1="18" y2="18" />
               </svg>
             </summary>
-            <div className="absolute right-0 top-full mt-2 w-56 rounded-xl bg-white shadow-lg border border-gray-100 p-4 space-y-3">
+            <div className="absolute right-0 top-full mt-2 w-56 rounded-xl bg-[var(--card-solid)] shadow-lg border border-[var(--border)] p-4 space-y-3">
               {enableBlogs && (
                 <Link
                   href={ROUTES.blogs}
                   data-i18n-key="common.blogs"
-                  className="block w-full py-2.5 text-center text-gray-700 font-medium border border-gray-200 rounded-xl hover:bg-gray-50"
+                  className="block w-full py-2.5 text-center text-[var(--foreground)] font-medium border border-[var(--border)] rounded-xl hover:bg-[var(--surface-muted)]"
                 >
                   {t('common.blogs')}
                 </Link>
@@ -119,7 +115,7 @@ export default function HeaderStatic({ forceScrolled = false }: { forceScrolled?
               <Link
                 href={ROUTES.login}
                 data-i18n-key="home.login"
-                className="block w-full py-2.5 text-center text-gray-700 font-medium border border-gray-200 rounded-xl hover:bg-gray-50"
+                className="block w-full py-2.5 text-center text-[var(--foreground)] font-medium border border-[var(--border)] rounded-xl hover:bg-[var(--surface-muted)]"
               >
                 {t('home.login')}
               </Link>
@@ -133,12 +129,13 @@ export default function HeaderStatic({ forceScrolled = false }: { forceScrolled?
               <button
                 id="lang-toggle-mobile"
                 type="button"
-                className="block w-full py-2.5 text-center text-gray-600 font-medium border border-gray-200 rounded-xl hover:bg-gray-50"
+                className="block w-full py-2.5 text-center text-[var(--muted)] font-medium border border-[var(--border)] rounded-xl hover:bg-[var(--surface-muted)]"
               >
                 {t('common.switchToHindi')}
               </button>
             </div>
-          </details>
+            </details>
+          </div>
         </div>
       </div>
     </header>

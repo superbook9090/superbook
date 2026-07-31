@@ -43,9 +43,7 @@ function MobileNavComponent({
   const mainItems = useDashboardNav(navigation);
   const adminItems = useDashboardNav(adminNavigation, { isSuperAdmin });
 
-  const headerBg = isStaff
-    ? 'bg-[var(--teacher-primary)]'
-    : 'bg-[var(--student-primary)]';
+  const headerBg = 'bg-[var(--card-solid)]';
 
   const allNavItems = useMemo(() => {
     if (isStaff && adminItems.length > 0) {
@@ -64,20 +62,20 @@ function MobileNavComponent({
 
   return (
     <>
-      <div className={cn(headerBg, 'md:hidden fixed top-0 left-0 right-0 z-50 safe-area-pt shadow-[var(--shadow-sm)] border-b border-white/10')}>
+      <div className={cn(headerBg, 'md:hidden fixed top-0 left-0 right-0 z-50 safe-area-pt shadow-[var(--shadow-sm)] border-b border-[var(--border)]')}>
         <div className="mobile-header-bar">
           <Link
             href={isStaff ? ROUTES.teacher.root : ROUTES.student.root}
             className="flex items-center gap-[var(--space-3)] touch-target shrink-0"
           >
-            <PremiumLogo variant="default" size="md" theme={isStaff ? 'teacher' : 'student'} />
+            <PremiumLogo size="md" />
           </Link>
           <div className="flex items-center gap-[var(--space-3)] shrink-0">
             {!isStaff && (
               <Tooltip label={t('common.notifications')} position="bottom">
                 <Link
                   href={ROUTES.student.notifications}
-                  className="touch-target text-white rounded-lg hover:bg-white/10 transition-colors focus-ring flex items-center justify-center"
+                  className="touch-target text-[var(--color-muted-foreground)] rounded-lg hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-foreground)] transition-colors focus-ring flex items-center justify-center"
                   aria-label={t('common.notifications')}
                 >
                   <Bell className="h-5 w-5" />
@@ -89,7 +87,7 @@ function MobileNavComponent({
               <button
                 type="button"
                 onClick={toggleMenu}
-                className="touch-target text-white rounded-lg focus-ring active:scale-95 transition-transform flex items-center justify-center"
+                className="touch-target text-[var(--color-foreground)] rounded-lg focus-ring active:scale-95 transition-transform flex items-center justify-center"
                 aria-label={t('common.toggleMenu')}
                 aria-expanded={isOpen}
               >
@@ -104,7 +102,7 @@ function MobileNavComponent({
         <div
           className={cn(
             headerBg,
-            'md:hidden fixed left-0 right-0 bottom-0 z-40 border-t border-white/20 top-[calc(var(--mobile-header-height)+env(safe-area-inset-top,0px))]'
+            'md:hidden fixed left-0 right-0 bottom-0 z-40 border-t border-[var(--border)] top-[calc(var(--mobile-header-height)+env(safe-area-inset-top,0px))]'
           )}
         >
           <div className="h-full overflow-y-auto px-[var(--space-2)] py-[var(--space-4)] pb-24">
@@ -118,8 +116,8 @@ function MobileNavComponent({
                     className={cn(
                       'flex items-center min-h-[44px] px-[var(--space-4)] py-[var(--space-3)] text-sm font-medium rounded-xl transition-colors focus-ring',
                       pathname === item.href
-                        ? 'bg-white/20 text-white shadow-[var(--shadow-sm)]'
-                        : 'text-white/90 hover:bg-white/10'
+                        ? 'bg-[var(--primary-soft)] text-[var(--primary)]'
+                        : 'text-[var(--color-muted-foreground)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-foreground)]'
                     )}
                     aria-current={pathname === item.href ? 'page' : undefined}
                   >
@@ -134,17 +132,17 @@ function MobileNavComponent({
                 ) : (
                   <div
                     key={item.nameKey}
-                    className="px-[var(--space-3)] py-[var(--space-2)] text-xs font-semibold text-white/60 uppercase tracking-wider"
+                    className="px-[var(--space-3)] py-[var(--space-2)] text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wider"
                   >
                     {t(item.nameKey)}
                   </div>
                 )
               )}
             </nav>
-            <div className="mt-[var(--space-6)] pt-[var(--space-4)] border-t border-white/20">
-              <div className="text-white mb-[var(--space-3)] px-[var(--space-4)]">
+            <div className="mt-[var(--space-6)] pt-[var(--space-4)] border-t border-[var(--border)]">
+              <div className="text-[var(--color-foreground)] mb-[var(--space-3)] px-[var(--space-4)]">
                 <div className="text-base font-medium truncate">{user?.name}</div>
-                <div className="text-sm text-white/70 truncate">{user?.email}</div>
+                <div className="text-sm text-[var(--color-muted-foreground)] truncate">{user?.email}</div>
               </div>
               <LogoutButton variant="mobile" />
             </div>

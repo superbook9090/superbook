@@ -16,8 +16,8 @@ export default function Tooltip({ label, children, position = 'top', className =
     position === 'top' ? 'bottom-full mb-2' : 'top-full mt-2';
   const arrowPlacement =
     position === 'top'
-      ? 'top-full border-t-gray-900'
-      : 'bottom-full border-b-gray-900';
+      ? 'top-full border-t-[var(--color-foreground)]'
+      : 'bottom-full border-b-[var(--color-foreground)]';
 
   // Both `relative` and a caller-provided `absolute`/`fixed` would conflict in the
   // compiled stylesheet (order there wins, not class order) — so only add `relative`
@@ -29,7 +29,7 @@ export default function Tooltip({ label, children, position = 'top', className =
       {children}
       <span
         role="tooltip"
-        className={`pointer-events-none absolute left-1/2 -translate-x-1/2 ${bubblePlacement} z-50 whitespace-nowrap rounded-md bg-gray-900 text-white text-xs font-medium px-2.5 py-1.5 shadow-lg opacity-0 scale-95 transition-all duration-150 group-hover/tooltip:opacity-100 group-hover/tooltip:scale-100 group-focus-within/tooltip:opacity-100 group-focus-within/tooltip:scale-100`}
+        className={`pointer-events-none absolute left-1/2 -translate-x-1/2 ${bubblePlacement} z-50 whitespace-nowrap rounded-md bg-[var(--color-foreground)] text-[var(--color-background)] text-xs font-medium px-2.5 py-1.5 shadow-lg opacity-0 scale-95 transition-all duration-150 group-hover/tooltip:opacity-100 group-hover/tooltip:scale-100 group-focus-within/tooltip:opacity-100 group-focus-within/tooltip:scale-100`}
       >
         {label}
         <span

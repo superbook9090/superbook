@@ -291,7 +291,7 @@ export default function ContactPageClient() {
   ];
 
   return (
-    <div data-role={role} className="min-h-screen flex flex-col bg-[var(--student-primary)] text-[var(--color-foreground)] overflow-x-hidden selection:bg-[var(--primary)] selection:text-white">
+    <div data-role={role} className="min-h-screen flex flex-col bg-[var(--background)] text-[var(--color-foreground)] overflow-x-hidden selection:bg-[var(--primary)] selection:text-white">
       <Header />
 
       {/* --- HERO SECTION --- */}
@@ -343,7 +343,7 @@ export default function ContactPageClient() {
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="lg:col-span-7 glass border border-[var(--color-border)] rounded-3xl p-6 sm:p-8 lg:p-10 shadow-2xl bg-white/70 backdrop-blur-xl relative overflow-hidden"
+            className="lg:col-span-7 glass border border-[var(--color-border)] rounded-3xl p-6 sm:p-8 lg:p-10 shadow-2xl backdrop-blur-xl relative overflow-hidden"
           >
             {/* Elegant glass accent line */}
             <div className="absolute top-0 inset-x-0 h-1 bg-[var(--primary-gradient)]" />
@@ -360,7 +360,7 @@ export default function ContactPageClient() {
               {/* Name Field */}
               <div>
                 <label htmlFor="name" className="block text-xs font-bold uppercase tracking-wider text-[var(--color-muted)] mb-2">
-                  {t('contact.form.name')} <span className="text-red-500">*</span>
+                  {t('contact.form.name')} <span className="text-[var(--color-error)]">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -372,16 +372,16 @@ export default function ContactPageClient() {
                     onBlur={() => handleBlur('name')}
                     placeholder={t('contact.form.namePlaceholder')}
                     disabled={isSubmitting}
-                    className={`w-full px-4 py-3 rounded-xl border bg-white/50 text-sm font-semibold transition-all duration-300 outline-none focus:bg-white focus:shadow-md ${touched.name && errors.name
-                      ? 'border-red-500 focus:ring-1 focus:ring-red-500'
+                    className={`w-full px-4 py-3 rounded-xl border bg-[var(--color-surface-muted)] text-[var(--color-foreground)] text-sm font-semibold transition-all duration-300 outline-none focus:bg-[var(--card-solid)] focus:shadow-md ${touched.name && errors.name
+                      ? 'border-[var(--color-error)] focus:ring-1 focus:ring-[var(--color-error)]'
                       : touched.name && !errors.name
-                        ? 'border-green-500 focus:ring-1 focus:ring-green-500'
+                        ? 'border-[var(--color-success)] focus:ring-1 focus:ring-[var(--color-success)]'
                         : 'border-[var(--color-border)] focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]'
                       }`}
                   />
                 </div>
                 {touched.name && errors.name && (
-                  <p className="mt-1.5 text-xs font-bold text-red-500 flex items-center gap-1.5 animate-fadeIn">
+                  <p className="mt-1.5 text-xs font-bold text-[var(--color-error)] flex items-center gap-1.5 animate-fadeIn">
                     <AlertCircle className="w-3.5 h-3.5" />
                     {errors.name}
                   </p>
@@ -391,7 +391,7 @@ export default function ContactPageClient() {
               {/* Email Field */}
               <div>
                 <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-[var(--color-muted)] mb-2">
-                  {t('contact.form.email')} <span className="text-red-500">*</span>
+                  {t('contact.form.email')} <span className="text-[var(--color-error)]">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -403,16 +403,16 @@ export default function ContactPageClient() {
                     onBlur={() => handleBlur('email')}
                     placeholder={t('contact.form.emailPlaceholder')}
                     disabled={isSubmitting}
-                    className={`w-full px-4 py-3 rounded-xl border bg-white/50 text-sm font-semibold transition-all duration-300 outline-none focus:bg-white focus:shadow-md ${touched.email && errors.email
-                      ? 'border-red-500 focus:ring-1 focus:ring-red-500'
+                    className={`w-full px-4 py-3 rounded-xl border bg-[var(--color-surface-muted)] text-[var(--color-foreground)] text-sm font-semibold transition-all duration-300 outline-none focus:bg-[var(--card-solid)] focus:shadow-md ${touched.email && errors.email
+                      ? 'border-[var(--color-error)] focus:ring-1 focus:ring-[var(--color-error)]'
                       : touched.email && !errors.email
-                        ? 'border-green-500 focus:ring-1 focus:ring-green-500'
+                        ? 'border-[var(--color-success)] focus:ring-1 focus:ring-[var(--color-success)]'
                         : 'border-[var(--color-border)] focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]'
                       }`}
                   />
                 </div>
                 {touched.email && errors.email && (
-                  <p className="mt-1.5 text-xs font-bold text-red-500 flex items-center gap-1.5 animate-fadeIn">
+                  <p className="mt-1.5 text-xs font-bold text-[var(--color-error)] flex items-center gap-1.5 animate-fadeIn">
                     <AlertCircle className="w-3.5 h-3.5" />
                     {errors.email}
                   </p>
@@ -422,7 +422,7 @@ export default function ContactPageClient() {
               {/* Subject Field */}
               <div>
                 <label htmlFor="subject" className="block text-xs font-bold uppercase tracking-wider text-[var(--color-muted)] mb-2">
-                  {t('contact.form.subject')} <span className="text-red-500">*</span>
+                  {t('contact.form.subject')} <span className="text-[var(--color-error)]">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -434,16 +434,16 @@ export default function ContactPageClient() {
                     onBlur={() => handleBlur('subject')}
                     placeholder={t('contact.form.subjectPlaceholder')}
                     disabled={isSubmitting}
-                    className={`w-full px-4 py-3 rounded-xl border bg-white/50 text-sm font-semibold transition-all duration-300 outline-none focus:bg-white focus:shadow-md ${touched.subject && errors.subject
-                      ? 'border-red-500 focus:ring-1 focus:ring-red-500'
+                    className={`w-full px-4 py-3 rounded-xl border bg-[var(--color-surface-muted)] text-[var(--color-foreground)] text-sm font-semibold transition-all duration-300 outline-none focus:bg-[var(--card-solid)] focus:shadow-md ${touched.subject && errors.subject
+                      ? 'border-[var(--color-error)] focus:ring-1 focus:ring-[var(--color-error)]'
                       : touched.subject && !errors.subject
-                        ? 'border-green-500 focus:ring-1 focus:ring-green-500'
+                        ? 'border-[var(--color-success)] focus:ring-1 focus:ring-[var(--color-success)]'
                         : 'border-[var(--color-border)] focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]'
                       }`}
                   />
                 </div>
                 {touched.subject && errors.subject && (
-                  <p className="mt-1.5 text-xs font-bold text-red-500 flex items-center gap-1.5 animate-fadeIn">
+                  <p className="mt-1.5 text-xs font-bold text-[var(--color-error)] flex items-center gap-1.5 animate-fadeIn">
                     <AlertCircle className="w-3.5 h-3.5" />
                     {errors.subject}
                   </p>
@@ -453,7 +453,7 @@ export default function ContactPageClient() {
               {/* Message Field */}
               <div>
                 <label htmlFor="message" className="block text-xs font-bold uppercase tracking-wider text-[var(--color-muted)] mb-2">
-                  {t('contact.form.message')} <span className="text-red-500">*</span>
+                  {t('contact.form.message')} <span className="text-[var(--color-error)]">*</span>
                 </label>
                 <div className="relative">
                   <textarea
@@ -465,16 +465,16 @@ export default function ContactPageClient() {
                     onBlur={() => handleBlur('message')}
                     placeholder={t('contact.form.messagePlaceholder')}
                     disabled={isSubmitting}
-                    className={`w-full px-4 py-3 rounded-xl border bg-white/50 text-sm font-semibold transition-all duration-300 outline-none focus:bg-white focus:shadow-md resize-none ${touched.message && errors.message
-                      ? 'border-red-500 focus:ring-1 focus:ring-red-500'
+                    className={`w-full px-4 py-3 rounded-xl border bg-[var(--color-surface-muted)] text-[var(--color-foreground)] text-sm font-semibold transition-all duration-300 outline-none focus:bg-[var(--card-solid)] focus:shadow-md resize-none ${touched.message && errors.message
+                      ? 'border-[var(--color-error)] focus:ring-1 focus:ring-[var(--color-error)]'
                       : touched.message && !errors.message
-                        ? 'border-green-500 focus:ring-1 focus:ring-green-500'
+                        ? 'border-[var(--color-success)] focus:ring-1 focus:ring-[var(--color-success)]'
                         : 'border-[var(--color-border)] focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]'
                       }`}
                   />
                 </div>
                 {touched.message && errors.message && (
-                  <p className="mt-1.5 text-xs font-bold text-red-500 flex items-center gap-1.5 animate-fadeIn">
+                  <p className="mt-1.5 text-xs font-bold text-[var(--color-error)] flex items-center gap-1.5 animate-fadeIn">
                     <AlertCircle className="w-3.5 h-3.5" />
                     {errors.message}
                   </p>
@@ -505,7 +505,7 @@ export default function ContactPageClient() {
             className="lg:col-span-5 space-y-6"
           >
             {/* Information Block */}
-            <div className="glass border border-[var(--color-border)] rounded-3xl p-6 sm:p-8 bg-white/70 shadow-xl backdrop-blur-xl">
+            <div className="glass border border-[var(--color-border)] rounded-3xl p-6 sm:p-8 shadow-xl backdrop-blur-xl">
               <h3 className="text-lg font-black uppercase tracking-tight text-[var(--color-foreground)] mb-6">
                 {t('contact.info.title')}
               </h3>
@@ -578,7 +578,7 @@ export default function ContactPageClient() {
                       aria-label={`Visit our ${soc.name}`}
                       whileHover={{ y: -3, scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className="p-3 rounded-2xl bg-slate-50 border border-slate-200/50 hover:bg-[var(--primary-soft)] hover:border-[var(--primary-border)] text-slate-600 hover:text-[var(--primary)] transition-all shadow-sm"
+                      className="p-3 rounded-2xl bg-[var(--color-surface-muted)] border border-[var(--color-border)] hover:bg-[var(--primary-soft)] hover:border-[var(--primary-border)] text-[var(--color-muted-foreground)] hover:text-[var(--primary)] transition-all shadow-sm"
                     >
                       <soc.icon className="w-4 h-4" />
                     </motion.a>
@@ -588,11 +588,11 @@ export default function ContactPageClient() {
             </div>
 
             {/* Embedded interactive map block mock */}
-            <div className="glass border border-[var(--color-border)] rounded-3xl p-4 bg-white/70 shadow-md backdrop-blur-xl relative h-[220px] overflow-hidden flex items-center justify-center">
-              <div className="absolute inset-0 bg-slate-100 flex flex-col items-center justify-center p-6 text-center">
+            <div className="glass border border-[var(--color-border)] rounded-3xl p-4 shadow-md backdrop-blur-xl relative h-[220px] overflow-hidden flex items-center justify-center">
+              <div className="absolute inset-0 bg-[var(--color-surface-muted)] flex flex-col items-center justify-center p-6 text-center">
                 <MapPin className="w-8 h-8 text-[var(--primary)] mb-2 animate-bounce" />
-                <span className="text-xs font-black text-slate-800 uppercase tracking-widest mb-1">{t('contact.info.mapMock')}</span>
-                <span className="text-[11px] text-slate-500 font-semibold">{t('contact.info.officeValue')}</span>
+                <span className="text-xs font-black text-[var(--color-foreground)] uppercase tracking-widest mb-1">{t('contact.info.mapMock')}</span>
+                <span className="text-[11px] text-[var(--color-muted-foreground)] font-semibold">{t('contact.info.officeValue')}</span>
               </div>
             </div>
           </motion.div>
@@ -601,7 +601,7 @@ export default function ContactPageClient() {
       </section>
 
       {/* --- FAQ SECTION --- */}
-      <section className="py-20 bg-slate-50 border-t border-b border-[var(--color-border)] w-full">
+      <section className="py-20 bg-[var(--color-surface-muted)] border-t border-b border-[var(--color-border)] w-full">
         <div className="max-w-4xl mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-[var(--color-foreground)] mb-3">
@@ -618,11 +618,11 @@ export default function ContactPageClient() {
               return (
                 <div
                   key={idx}
-                  className="bg-white border border-[var(--color-border)] rounded-2xl overflow-hidden shadow-sm hover:shadow transition-shadow"
+                  className="bg-[var(--card-solid)] border border-[var(--color-border)] rounded-2xl overflow-hidden shadow-sm hover:shadow transition-shadow"
                 >
                   <button
                     onClick={() => setActiveFaq(isOpen ? null : idx)}
-                    className="w-full flex items-center justify-between p-5 text-left transition-colors hover:bg-slate-50 outline-none"
+                    className="w-full flex items-center justify-between p-5 text-left transition-colors hover:bg-[var(--color-surface-muted)] outline-none"
                     aria-expanded={isOpen}
                   >
                     <span className="text-sm sm:text-base font-bold text-[var(--color-foreground)] pr-4">
@@ -631,7 +631,7 @@ export default function ContactPageClient() {
                     <motion.div
                       animate={{ rotate: isOpen ? 180 : 0 }}
                       transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-                      className="text-slate-400 p-1"
+                      className="text-[var(--color-muted-foreground)] p-1"
                     >
                       <ChevronDown className="w-5 h-5" />
                     </motion.div>
@@ -645,7 +645,7 @@ export default function ContactPageClient() {
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.25, ease: 'easeInOut' }}
                       >
-                        <div className="p-5 pt-0 border-t border-[var(--color-border)] text-xs sm:text-sm text-[var(--color-muted)] leading-relaxed font-medium bg-slate-50/50">
+                        <div className="p-5 pt-0 border-t border-[var(--color-border)] text-xs sm:text-sm text-[var(--color-muted)] leading-relaxed font-medium bg-[var(--color-surface-muted)]/50">
                           {faq.a}
                         </div>
                       </motion.div>
@@ -694,27 +694,27 @@ export default function ContactPageClient() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            className="fixed bottom-6 right-6 z-50 max-w-md w-full sm:w-[380px] p-4 rounded-2xl shadow-2xl glass backdrop-blur-xl border flex items-start gap-3 bg-white/95"
+            className="fixed bottom-6 right-6 z-50 max-w-md w-full sm:w-[380px] p-4 rounded-2xl shadow-2xl glass backdrop-blur-xl border flex items-start gap-3 bg-[var(--card-solid)]/95"
             style={{
               borderColor: toast.type === 'success' ? '#22c55e' : '#ef4444',
             }}
           >
             {toast.type === 'success' ? (
-              <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+              <CheckCircle className="w-5 h-5 text-[var(--color-success)] flex-shrink-0 mt-0.5" />
             ) : (
-              <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+              <AlertCircle className="w-5 h-5 text-[var(--color-error)] flex-shrink-0 mt-0.5" />
             )}
             <div className="flex-1">
-              <h4 className="text-xs font-black uppercase tracking-wider text-slate-800 mb-0.5">
+              <h4 className="text-xs font-black uppercase tracking-wider text-[var(--color-foreground)] mb-0.5">
                 {toast.type === 'success' ? t('contact.toast.success') : t('contact.toast.attention')}
               </h4>
-              <p className="text-xs font-semibold text-slate-600 leading-relaxed">
+              <p className="text-xs font-semibold text-[var(--color-muted-foreground)] leading-relaxed">
                 {toast.message}
               </p>
             </div>
             <button
               onClick={() => setToast((prev) => ({ ...prev, show: false }))}
-              className="text-slate-400 hover:text-slate-600 text-xs font-bold px-1"
+              className="text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] text-xs font-bold px-1"
             >
               ✕
             </button>

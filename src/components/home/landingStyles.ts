@@ -16,7 +16,8 @@ export const landing = {
   featureIcon:
     'w-6 h-6 text-[var(--student-primary)] group-hover:text-white transition-colors duration-300',
   highlightCard:
-    'flex flex-col items-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-4 py-5 backdrop-blur-sm',
-  highlightIconWrap: 'flex h-10 w-10 items-center justify-center rounded-xl bg-white/15',
-  highlightIcon: 'h-5 w-5 text-white',
+    'flex flex-col items-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--card)] px-4 py-5 backdrop-blur-sm',
+  highlightIconWrap:
+    'flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--student-soft)]',
+  highlightIcon: 'h-5 w-5 text-[var(--student-primary)]',
 } as const;

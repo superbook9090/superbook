@@ -175,13 +175,13 @@ export default function CourseDetailPage() {
     <div key={lesson._id} className="divide-y divide-[var(--border)]">
       <div
         onClick={() => handleStartLesson(lesson._id)}
-        className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors cursor-pointer group/lesson"
+        className="flex items-center justify-between p-4 hover:bg-[var(--color-surface-muted)] transition-colors cursor-pointer group/lesson"
       >
         <div className="flex items-center gap-4">
           <div
             className={cn(
               'w-8 h-8 rounded-lg flex items-center justify-center transition-all',
-              lesson.videoUrl ? 'bg-blue-50 text-blue-500' : 'bg-orange-50 text-orange-500'
+              lesson.videoUrl ? 'bg-[var(--color-info-light)] text-[var(--color-info)]' : 'bg-[var(--color-warning-light)] text-[var(--color-warning)]'
             )}
           >
             {lesson.videoUrl ? <PlayCircle className="w-4 h-4" /> : <BookOpen className="w-4 h-4" />}
@@ -328,36 +328,35 @@ export default function CourseDetailPage() {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)] p-6 sm:p-8 text-white shadow-xl"
+        className="hero-banner"
       >
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-        <div className="relative z-10 space-y-4">
-          <button 
+        <div className="space-y-4">
+          <button
             onClick={() => router.push(ROUTES.student.courses)}
-            className="flex items-center gap-2 text-xs font-medium text-white/80 hover:text-white transition-colors group"
+            className="flex items-center gap-2 text-xs font-medium text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors group"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
             {t('courses.backToCourses')}
           </button>
-          
+
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="space-y-2">
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-foreground)]">
                 {course.title}
               </h1>
-              <div className="flex flex-wrap items-center gap-4 text-sm text-white/80">
-                <span className="px-2.5 py-0.5 bg-white/20 rounded-lg backdrop-blur-sm text-xs font-medium">{course.category || t('courses.course')}</span>
+              <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--color-muted-foreground)]">
+                <span className="px-2.5 py-0.5 bg-[var(--primary-soft)] text-[var(--primary)] rounded-lg text-xs font-medium">{course.category || t('courses.course')}</span>
                 <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> {allLessons.length} {t('dashboard.lessons')}</span>
                 <span className="flex items-center gap-1.5"><Target className="w-4 h-4" /> {courseQuizzes.length} {t('nav.quizzes')}</span>
               </div>
             </div>
 
-            <div className="flex items-center gap-4 bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/10">
+            <div className="flex items-center gap-4 bg-[var(--card-solid)] p-4 rounded-xl border border-[var(--color-border)] shadow-[var(--shadow-sm)]">
               <div className="text-right">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-white/60">{t('courses.progress')}</p>
-                <p className="text-2xl font-bold leading-none mt-1">{enrollment.progress}%</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-muted)]">{t('courses.progress')}</p>
+                <p className="text-2xl font-bold leading-none mt-1 tabular-nums text-[var(--color-foreground)]">{enrollment.progress}%</p>
               </div>
-              <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg gradient-bg text-white flex items-center justify-center">
                 <CheckCircle className="w-6 h-6" />
               </div>
             </div>
@@ -369,7 +368,7 @@ export default function CourseDetailPage() {
       <div className="rounded-2xl bg-[var(--card-solid)] border border-[var(--border)] shadow-sm overflow-hidden min-h-[500px] flex flex-col">
         
         {/* Tab Navigation */}
-        <div className="flex items-center gap-1 p-1 bg-gray-50/50 border-b border-[var(--border)] sticky top-0 z-20 backdrop-blur-md overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-1 p-1 bg-[var(--color-surface-muted)]/50 border-b border-[var(--border)] sticky top-0 z-20 backdrop-blur-md overflow-x-auto no-scrollbar">
           {[
             { id: 'curriculum', label: t('courses.courseContent'), icon: <BookOpen className="w-4 h-4" /> },
             { id: 'overview', label: t('common.overview'), icon: <Info className="w-4 h-4" /> },
@@ -382,7 +381,7 @@ export default function CourseDetailPage() {
               className={cn(
                 "flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all whitespace-nowrap",
                 activeTab === tab.id 
-                  ? "bg-white text-[var(--student-primary)] shadow-sm" 
+                  ? "bg-[var(--card-solid)] text-[var(--student-primary)] shadow-sm"
                   : "text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
               )}
             >
@@ -414,7 +413,7 @@ export default function CourseDetailPage() {
                   <div key={chapter._id} className="group/chapter">
                     <div className={cn(
                       "rounded-xl border transition-all duration-200",
-                      expandedChapters[chapter._id] ? "bg-white border-[var(--student-primary)]/30 shadow-sm" : "bg-gray-50/30 border-[var(--border)] hover:border-[var(--student-primary)]/20"
+                      expandedChapters[chapter._id] ? "bg-[var(--card-solid)] border-[var(--student-primary)]/30 shadow-sm" : "bg-[var(--color-surface-muted)]/30 border-[var(--border)] hover:border-[var(--student-primary)]/20"
                     )}>
                       <button 
                         onClick={() => toggleChapter(chapter._id)}
@@ -423,7 +422,7 @@ export default function CourseDetailPage() {
                         <div className="flex items-center gap-4">
                           <div className={cn(
                             "w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold transition-all",
-                            expandedChapters[chapter._id] ? "bg-[var(--student-primary)] text-white" : "bg-white text-[var(--color-muted-foreground)] border border-[var(--border)]"
+                            expandedChapters[chapter._id] ? "bg-[var(--student-primary)] text-white" : "bg-[var(--card-solid)] text-[var(--color-muted-foreground)] border border-[var(--border)]"
                           )}>
                             {idx + 1}
                           </div>
@@ -433,15 +432,15 @@ export default function CourseDetailPage() {
                       </button>
 
                       {expandedChapters[chapter._id] && (
-                        <div className="border-t border-[var(--border)] divide-y divide-[var(--border)] bg-white rounded-b-xl overflow-hidden">
+                        <div className="border-t border-[var(--border)] divide-y divide-[var(--border)] bg-[var(--card-solid)] rounded-b-xl overflow-hidden">
                           {chapter.lessons?.map(renderLessonRow)}
                           {renderChapterQuizzes(chapter.quizzes)}
                           {chapter.subChapters?.map((sub) => (
-                            <div key={sub._id} className="bg-gray-50/40">
+                            <div key={sub._id} className="bg-[var(--color-surface-muted)]/40">
                               <button
                                 type="button"
                                 onClick={() => toggleChapter(sub._id)}
-                                className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-gray-50 transition-colors"
+                                className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-[var(--color-surface-muted)] transition-colors"
                               >
                                 <p className="text-sm font-semibold text-[var(--color-foreground)] pl-12">{sub.title}</p>
                                 <ChevronDown
@@ -466,7 +465,7 @@ export default function CourseDetailPage() {
                 ))}
 
                 {courseLevelQuizzes.length > 0 && (
-                  <div className="rounded-xl border border-[var(--border)] bg-white overflow-hidden">
+                  <div className="rounded-xl border border-[var(--border)] bg-[var(--card-solid)] overflow-hidden">
                     <div className="border-b border-[var(--border)] px-4 py-3 sm:px-5">
                       <h3 className="font-semibold text-[var(--color-foreground)]">
                         {t('courses.courseLevelQuizzes')}
@@ -510,9 +509,9 @@ export default function CourseDetailPage() {
                   <h4 className="text-[10px] font-bold uppercase tracking-wider text-[var(--primary)] mb-1">{t('courses.category')}</h4>
                   <p className="text-base font-bold text-[var(--primary-dark)]">{course.category || 'General'}</p>
                 </div>
-                <div className="p-5 rounded-2xl bg-emerald-50/50 border border-emerald-100/50">
-                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 mb-1">{t('dashboard.progress')}</h4>
-                  <p className="text-base font-bold text-emerald-900">{enrollment.progress}% {t('dashboard.completed')}</p>
+                <div className="p-5 rounded-2xl bg-[var(--color-success-light)] border border-[var(--color-success)]/20">
+                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-success)] mb-1">{t('dashboard.progress')}</h4>
+                  <p className="text-base font-bold text-[var(--color-foreground)]">{enrollment.progress}% {t('dashboard.completed')}</p>
                 </div>
               </div>
             </div>
@@ -566,9 +565,9 @@ export default function CourseDetailPage() {
             <div className="max-w-4xl mx-auto space-y-6">
               <div className="flex items-center justify-between mb-2">
                 <h2 className="text-lg font-bold text-[var(--color-foreground)]">{t('courses.leaderboard')}</h2>
-                <Trophy className="w-6 h-6 text-amber-500" />
+                <Trophy className="w-6 h-6 text-[var(--color-warning)]" />
               </div>
-              <div className="bg-gray-50/50 rounded-2xl border border-[var(--border)] overflow-hidden">
+              <div className="bg-[var(--color-surface-muted)]/50 rounded-2xl border border-[var(--border)] overflow-hidden">
                 <LazyCourseLeaderboard
                   courseId={courseId}
                   courseTitle={enrollment.course.title}

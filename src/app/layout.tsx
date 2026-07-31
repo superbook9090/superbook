@@ -8,6 +8,7 @@ import MaintenanceCheck from '@/components/MaintenanceCheck';
 import DeferredAnalytics from '@/components/providers/DeferredAnalytics';
 import ClarityInit from '@/components/providers/ClarityInit';
 import { createRootMetadata } from '@/lib/seo/metadata';
+import { fontVariables } from '@/lib/fonts';
 import PullToRefresh from '@/components/PullToRefresh';
 
 export const metadata: Metadata = {
@@ -21,7 +22,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#0d9488',
+  themeColor: '#7c3aed',
 };
 
 export default function RootLayout({
@@ -30,9 +31,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={fontVariables} data-theme="dark" suppressHydrationWarning>
       <GoogleTagManager gtmId="GTM-PRZ4PRLN" />
       <body className="antialiased text-sm sm:text-base">
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t)}}catch(e){}",
+          }}
+        />
         <LanguageProvider>
           <AppSettingsProvider>
             <SessionProvider>

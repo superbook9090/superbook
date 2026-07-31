@@ -10,8 +10,13 @@
 
 :root {
   /* Core */
-  --background: #f6f8fb;
-  --foreground: #0b1220;
+  --background: #f9fafb;
+  --foreground: #141822;
+
+  /* Typography (populated by next/font in src/lib/fonts.ts) */
+  --font-sans: var(--font-sans-body), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-display: var(--font-sans-display), var(--font-sans);
 
   /* Spacing scale (rem) */
   --space-0: 0;
@@ -47,25 +52,27 @@
   --radius-xl: 1.25rem;
   --radius-2xl: 1.5rem;
 
-  /* Role: student */
-  --student-primary: #0d9488;
-  --student-hover: #0f766e;
-  --student-soft: #f0fdfa;
-  --student-border: #ccfbf1;
-  --student-accent: #2dd4bf;
-  --student-primary-dark: #115e59;
-  --student-gradient: linear-gradient(135deg, #14b8a6, #0d9488, #2dd4bf);
-  --student-shadow: 0 10px 40px rgba(13, 148, 136, 0.15);
+  /* Role: student — indigo→purple brand gradient */
+  --student-primary: #7c3aed;
+  --student-hover: #6d28d9;
+  --student-soft: #f3effd;
+  --student-border: #e4dafb;
+  --student-accent: #a855f7;
+  --student-primary-dark: #5b21b6;
+  --student-primary-light: #c4b5fd;
+  --student-gradient: linear-gradient(100deg, #6366f1, #a855f7);
+  --student-shadow: 0 10px 40px rgba(124, 58, 237, 0.18);
 
-  /* Role: teacher / staff */
-  --teacher-primary: #0891b2;
-  --teacher-hover: #0e7490;
-  --teacher-soft: #ecfeff;
-  --teacher-border: #cffafe;
-  --teacher-accent: #22d3ee;
-  --teacher-primary-dark: #155e75;
-  --teacher-gradient: linear-gradient(135deg, #0891b2, #06b6d4, #22d3ee);
-  --teacher-shadow: 0 10px 40px rgba(8, 145, 178, 0.15);
+  /* Role: teacher / staff — orchid variant */
+  --teacher-primary: #a21caf;
+  --teacher-hover: #86198f;
+  --teacher-soft: #fbeffc;
+  --teacher-border: #f5d9f8;
+  --teacher-accent: #d946ef;
+  --teacher-primary-dark: #86198f;
+  --teacher-primary-light: #f0abfc;
+  --teacher-gradient: linear-gradient(100deg, #a855f7, #d946ef);
+  --teacher-shadow: 0 10px 40px rgba(192, 38, 211, 0.18);
 
   --primary: var(--student-primary);
   --primary-hover: var(--student-hover);
@@ -79,27 +86,28 @@
   /* Surfaces */
   --card: rgba(255, 255, 255, 0.7);
   --card-solid: #ffffff;
-  --border: #e6eaf0;
-  --muted: #6b7280;
-  --muted-light: #9ca3af;
+  --border: #dbdee3;
+  --muted: #5e636f;
+  --muted-light: #70757e;
   /* Fills for inputs, table bands, hovers — NOT for body text (use --color-muted-foreground / --color-muted for text) */
   --surface-muted: color-mix(in srgb, var(--foreground) 5%, var(--background));
   --surface-muted-strong: color-mix(in srgb, var(--foreground) 8%, var(--background));
 
   /* Status */
-  --success: #22c55e;
+  --success: #00a159;
   --success-light: #dcfce7;
   --warning: #f59e0b;
   --warning-light: #fef3c7;
-  --error: #ef4444;
+  --error: #df2225;
   --error-light: #fee2e2;
   --info: #3b82f6;
   --info-light: #dbeafe;
 
-  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.12);
-  --blur-glass: blur(12px);
+  /* Layered, cool-tinted shadows (hue 265 matches the brand palette) */
+  --shadow-sm: 0 1px 2px hsl(265 25% 20% / 0.06);
+  --shadow-md: 0 1px 2px hsl(265 25% 20% / 0.1), 0 8px 24px -12px hsl(265 25% 20% / 0.5);
+  --shadow-lg: 0 1px 2px hsl(265 25% 20% / 0.12), 0 24px 56px -20px hsl(265 25% 20% / 0.6);
+  --blur-glass: blur(16px);
 
   /* Aliases used across TSX (tailwind arbitrary values) */
   --color-background: var(--background);
@@ -140,6 +148,127 @@
     --card-padding: var(--space-6);
     --card-gap: var(--space-6);
   }
+}
+
+/* =========================
+   DARK THEME
+   Portfolio dark palette. Applied globally via html[data-theme="dark"]
+   (see the init script in src/app/layout.tsx and ThemeToggle);
+   .theme-dark still works as a per-element scope.
+========================= */
+
+[data-theme="dark"],
+.theme-dark {
+  color-scheme: dark;
+  --background: #080a0f;
+  --foreground: #f4f5f8;
+  --card: rgba(22, 25, 33, 0.55);
+  --card-solid: #101319;
+  --border: rgba(255, 255, 255, 0.09);
+  --muted: #9398a4;
+  --muted-light: #7e838e;
+  --surface-muted: #161921;
+  --surface-muted-strong: #1c2029;
+
+  /* Accents brighten on dark */
+  --student-primary: #818cf8;
+  --student-hover: #a5b0fb;
+  --student-soft: rgba(129, 140, 248, 0.16);
+  --student-border: rgba(129, 140, 248, 0.3);
+  --student-accent: #c084fc;
+  --student-primary-dark: #6366f1;
+  --student-primary-light: #c7d2fe;
+  --student-gradient: linear-gradient(100deg, #818cf8, #c084fc);
+  --student-shadow: 0 10px 40px rgba(129, 140, 248, 0.25);
+
+  --teacher-primary: #e879f9;
+  --teacher-hover: #f0abfc;
+  --teacher-soft: rgba(232, 121, 249, 0.16);
+  --teacher-border: rgba(232, 121, 249, 0.3);
+  --teacher-accent: #c084fc;
+  --teacher-primary-dark: #d946ef;
+  --teacher-primary-light: #f5d0fe;
+  --teacher-gradient: linear-gradient(100deg, #c084fc, #e879f9);
+  --teacher-shadow: 0 10px 40px rgba(232, 121, 249, 0.25);
+
+  /* Status colors brighten; the -light fills become translucent tints */
+  --success: #33cc7d;
+  --success-light: rgba(51, 204, 125, 0.15);
+  --warning: #fbbf24;
+  --warning-light: rgba(251, 191, 36, 0.15);
+  --error: #fb575d;
+  --error-light: rgba(251, 87, 93, 0.15);
+  --info: #60a5fa;
+  --info-light: rgba(96, 165, 250, 0.15);
+
+  --shadow-sm: 0 1px 2px hsl(265 60% 2% / 0.4);
+  --shadow-md: 0 1px 2px hsl(265 60% 2% / 0.5), 0 8px 24px -12px hsl(265 60% 2% / 0.9);
+  --shadow-lg: 0 1px 2px hsl(265 60% 2% / 0.6), 0 24px 56px -20px hsl(265 60% 2% / 1);
+
+  /* Re-declare derived vars: var() aliases compute at the scope where they are
+     DEFINED, so the :root versions bake in light values and must be re-run here. */
+  --primary: var(--student-primary);
+  --primary-hover: var(--student-hover);
+  --primary-soft: var(--student-soft);
+  --primary-border: var(--student-border);
+  --primary-accent: var(--student-accent);
+  --primary-gradient: var(--student-gradient);
+  --primary-shadow: var(--student-shadow);
+  --primary-dark: var(--student-primary-dark);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted);
+  --color-muted: var(--muted-light);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-muted-strong: var(--surface-muted-strong);
+  --color-border: var(--border);
+  --color-card: var(--card);
+  --color-accent: var(--primary-soft);
+  --color-primary: var(--primary);
+  --color-success: var(--success);
+  --color-success-light: var(--success-light);
+  --color-warning: var(--warning);
+  --color-warning-light: var(--warning-light);
+  --color-error: var(--error);
+  --color-error-light: var(--error-light);
+  --color-info: var(--info);
+  --color-info-light: var(--info-light);
+
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Aurora backdrop (portfolio signature) */
+.aurora-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.aurora-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(120px);
+  pointer-events: none;
+  animation: float-slow 14s ease-in-out infinite alternate;
+}
+
+@keyframes float-slow {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  to {
+    transform: translate3d(0, -22px, 0) scale(1.06);
+  }
+}
+
+.grid-lines {
+  background-image: linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 64px 64px;
 }
 
 [data-role="student"] {
@@ -201,8 +330,9 @@
 .page-title {
   font-size: 1.25rem;
   line-height: 1.35;
+  font-family: var(--font-display);
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   color: var(--foreground);
 }
 
@@ -327,9 +457,23 @@ body {
   color: var(--foreground);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
-    "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
-    "Noto Color Emoji";
+  font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss01";
+  font-variant-ligatures: contextual;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
+  color: var(--foreground);
 }
 
 /* =========================
@@ -450,8 +594,10 @@ body {
 
 .landing-title {
   font-size: 1.875rem;
-  line-height: 1.25;
+  line-height: 1.2;
+  font-family: var(--font-display);
   font-weight: 700;
+  letter-spacing: -0.03em;
   color: var(--color-foreground);
   margin-bottom: var(--space-4);
 }
@@ -645,6 +791,8 @@ body {
 
   .hero-blob,
   .hero-fade-in,
+  .aurora-blob,
+  .dashboard-aurora__blob,
   .hero-scroll-hint>div {
     animation: none !important;
     opacity: 1;
@@ -665,10 +813,10 @@ pre,
 .heading-xl {
   font-size: 1.5rem;
   /* 24px */
-  line-height: 1.2;
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  text-transform: uppercase;
+  line-height: 1.15;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.03em;
 }
 
 @media (min-width: 640px) {
@@ -682,9 +830,9 @@ pre,
   font-size: 1.25rem;
   /* 20px */
   line-height: 1.3;
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  text-transform: uppercase;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 @media (min-width: 640px) {
@@ -698,7 +846,8 @@ pre,
   font-size: 1rem;
   /* 16px */
   line-height: 1.4;
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-weight: 600;
 }
 
 @media (min-width: 640px) {
@@ -727,13 +876,11 @@ pre,
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.75rem;
-  font-size: 0.75rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  transition: all 0.3s ease;
+  padding: 0.75rem 1.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   background: var(--primary-gradient);
   color: white;
   box-shadow: var(--shadow-md);
@@ -762,10 +909,19 @@ pre,
 
 .glass {
   background: var(--card);
-  backdrop-filter: var(--blur-glass);
-  border: 1px solid var(--border);
+  backdrop-filter: var(--blur-glass) saturate(160%);
+  -webkit-backdrop-filter: var(--blur-glass) saturate(160%);
+  border: 1px solid rgba(20, 24, 34, 0.09);
   box-shadow: var(--shadow-md);
   border-radius: 16px;
+}
+
+/* Dark glass for use on gradient/colored surfaces (e.g. sidebar footer card) */
+.glass-dark {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
 }
 
 .gradient-bg {
@@ -786,11 +942,11 @@ pre,
 .btn-primary {
   background: var(--primary-gradient);
   color: white;
-  border-radius: 12px;
-  padding: 10px 18px;
-  font-weight: 500;
+  border-radius: 9999px;
+  padding: 10px 20px;
+  font-weight: 600;
   box-shadow: var(--primary-shadow);
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-primary:hover {
@@ -1064,11 +1220,148 @@ body.quiz-fullscreen nav {
 }
 
 .dashboard-shell {
+  position: relative;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
   background: var(--background);
+}
+
+/* Aurora canvas behind the whole dashboard — role-tinted via --primary,
+   read through the glass chrome. Chrome/content sit above at z-index 1. */
+.dashboard-aurora {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.dashboard-aurora__blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(120px);
+  animation: float-slow 18s ease-in-out infinite alternate;
+}
+
+.dashboard-aurora__blob--one {
+  top: -16%;
+  right: -10%;
+  width: 42rem;
+  height: 42rem;
+  background: color-mix(in srgb, var(--primary) 13%, transparent);
+}
+
+.dashboard-aurora__blob--two {
+  bottom: -20%;
+  left: -12%;
+  width: 36rem;
+  height: 36rem;
+  background: color-mix(in srgb, var(--primary-accent) 9%, transparent);
+  animation-delay: -7s;
+}
+
+.dashboard-shell > aside,
+.dashboard-shell > .dashboard-col {
+  position: relative;
+  z-index: 1;
+}
+
+/* =========================
+   DASHBOARD CHROME (quiet glass rail + topbar)
+========================= */
+
+.sidebar-rail {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 18rem;
+  height: 100dvh;
+  background: var(--card);
+  backdrop-filter: var(--blur-glass) saturate(160%);
+  -webkit-backdrop-filter: var(--blur-glass) saturate(160%);
+  border-right: 1px solid var(--border);
+}
+
+/* Role signature: a soft gradient hairline on the rail's content edge */
+.sidebar-rail::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -1px;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(to bottom,
+      transparent,
+      var(--primary) 32%,
+      var(--primary-accent) 68%,
+      transparent);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.rail-link {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: var(--radius-lg);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-muted-foreground);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.rail-link:hover {
+  background: var(--surface-muted);
+  color: var(--color-foreground);
+}
+
+.rail-link--active {
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.rail-link__dot {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 9999px;
+  background: var(--primary-gradient);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.rail-section-label {
+  padding: 0 0.75rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.rail-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--primary-soft);
+  color: var(--primary);
+  border: 1px solid var(--primary-border);
+}
+
+.dashboard-topbar {
+  background: var(--card);
+  backdrop-filter: var(--blur-glass) saturate(160%);
+  -webkit-backdrop-filter: var(--blur-glass) saturate(160%);
+  border-bottom: 1px solid var(--border);
 }
 
 @media (min-width: 768px) {
@@ -1081,7 +1374,8 @@ body.quiz-fullscreen nav {
   flex: 1;
   overflow-x: hidden;
   overflow-y: auto;
-  background: var(--background);
+  /* transparent so the fixed .dashboard-aurora canvas reads through */
+  background: transparent;
   padding-inline: var(--gutter-x);
   padding-top: calc(var(--gutter-y) + var(--mobile-header-gap));
   padding-bottom: calc(var(--mobile-nav-offset) + env(safe-area-inset-bottom, 0px));
@@ -1430,13 +1724,46 @@ body.quiz-fullscreen nav {
    SPACING UTILITIES (centralized)
 ========================= */
 
+/* Glass hero: quiet surface with a role-tinted aurora wash. Text uses
+   foreground/muted tokens — never white-on-gradient. */
 .hero-banner {
   position: relative;
   overflow: hidden;
   border-radius: var(--radius-2xl);
   padding: var(--card-padding);
-  color: white;
-  box-shadow: var(--shadow-md);
+  background: var(--card);
+  backdrop-filter: var(--blur-glass) saturate(160%);
+  -webkit-backdrop-filter: var(--blur-glass) saturate(160%);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  box-shadow: var(--shadow-sm);
+}
+
+.hero-banner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(40rem 18rem at 106% -40%,
+      color-mix(in srgb, var(--primary) 18%, transparent), transparent 62%),
+    radial-gradient(30rem 16rem at -8% 140%,
+      color-mix(in srgb, var(--primary-accent) 12%, transparent), transparent 60%);
+}
+
+.hero-banner > * {
+  position: relative;
+}
+
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--primary);
 }
 
 @media (min-width: 640px) {
@@ -1454,6 +1781,7 @@ body.quiz-fullscreen nav {
 .card-panel {
   border-radius: var(--radius-2xl);
   background: var(--card-solid);
+  border: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
   overflow: hidden;
 }
@@ -1483,7 +1811,7 @@ body.quiz-fullscreen nav {
 .form-field:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 20%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent);
 }
 
 .btn-action {
@@ -1553,10 +1881,20 @@ body.quiz-fullscreen nav {
 }
 
 .header-nav-btn-light {
-  @apply text-white/80 hover:bg-white/10;
+  color: var(--color-muted-foreground);
+}
+
+.header-nav-btn-light:hover {
+  background: var(--surface-muted);
+  color: var(--color-foreground);
 }
 
 .header-nav-btn-dark {
-  @apply text-gray-600 hover:bg-gray-100;
+  color: var(--muted);
+}
+
+.header-nav-btn-dark:hover {
+  background: var(--surface-muted);
+  color: var(--foreground);
 }
 

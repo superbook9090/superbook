@@ -49,9 +49,9 @@ export function CurriculumQuizBlock({
       {quizzes.map((quiz) => (
         <div
           key={quiz._id}
-          className="flex items-center gap-2 p-2 sm:p-3 bg-violet-50/50 border border-violet-100 rounded-xl group"
+          className="flex items-center gap-2 p-2 sm:p-3 bg-[var(--primary-soft)] border border-[var(--primary-border)] rounded-xl group"
         >
-          <Target className="w-4 h-4 text-violet-600 shrink-0" />
+          <Target className="w-4 h-4 text-[var(--primary)] shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-[var(--color-foreground)] truncate">{quiz.title}</p>
             <p className="text-[10px] text-[var(--color-muted-foreground)] flex items-center gap-2 flex-wrap">
@@ -69,8 +69,8 @@ export function CurriculumQuizBlock({
                 className={cn(
                   'px-1.5 py-0.5 rounded font-medium',
                   quiz.isPublished
-                    ? 'bg-emerald-100 text-emerald-700'
-                    : 'bg-amber-100 text-amber-700'
+                    ? 'bg-[var(--color-success-light)] text-[var(--color-success)]'
+                    : 'bg-[var(--color-warning-light)] text-[var(--color-warning)]'
                 )}
               >
                 {quiz.isPublished ? t('curriculum.quizPublished') : t('curriculum.quizDraft')}
@@ -104,7 +104,7 @@ export function CurriculumQuizBlock({
       ))}
       <Link
         href={createHref}
-        className="w-full flex items-center justify-center gap-2 p-3 min-h-[44px] border-2 border-dashed border-violet-200 rounded-xl text-violet-700 hover:bg-violet-50/80 transition-all text-sm font-medium"
+        className="w-full flex items-center justify-center gap-2 p-3 min-h-[44px] border-2 border-dashed border-[var(--primary-border)] rounded-xl text-[var(--primary)] hover:bg-[var(--primary-soft)] transition-all text-sm font-medium"
       >
         <PlusCircle className="w-4 h-4" />
         {t('curriculum.addQuiz')}

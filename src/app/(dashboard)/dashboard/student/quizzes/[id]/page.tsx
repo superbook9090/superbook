@@ -5,7 +5,6 @@ import { ROUTES } from '@/constants/routes';
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
-import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
 import { LazyQuizLeaderboard, LazyQuizStartConfirmModal } from '@/lib/lazy';
 import { useStartQuizAttempt } from '@/lib/react-query/hooks';
@@ -37,7 +36,6 @@ export default function QuizDetailPage() {
   const router = useRouter();
   const params = useParams();
   const quizId = params.id as string;
-  const { theme } = useRoleTheme();
   const startQuiz = useStartQuizAttempt();
 
   const [quiz, setQuiz] = useState<Quiz | null>(null);
@@ -129,26 +127,26 @@ export default function QuizDetailPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${theme.gradient} text-white p-6 sm:p-8`}
+        className="hero-banner"
       >
-        <div className="relative z-10">
+        <div>
           <div className="flex items-center gap-2 mb-4">
-            <Badge variant="default" size="sm" className="bg-[var(--card-solid)]/20 text-white">
+            <Badge variant="default" size="sm" className="bg-[var(--primary-soft)] text-[var(--primary)]">
               <BookOpen className="w-3 h-3 mr-1" />
               {quiz.course?.title || t('quiz.course')}
             </Badge>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2">{quiz.title}</h1>
-          <p className="text-white/80 mb-6 max-w-2xl">{quiz.description || t('quiz.noDescription')}</p>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-[var(--color-foreground)]">{quiz.title}</h1>
+          <p className="text-[var(--color-muted-foreground)] mb-6 max-w-2xl">{quiz.description || t('quiz.noDescription')}</p>
 
-          <div className="flex flex-wrap items-center gap-6 text-sm">
+          <div className="flex flex-wrap items-center gap-6 text-sm text-[var(--color-muted-foreground)]">
             <div className="flex items-center gap-2">
-              <HelpCircle className="w-5 h-5" />
+              <HelpCircle className="w-5 h-5 text-[var(--primary)]" />
               <span>{quiz.questionCount ?? 0} {t('quiz.questions')}</span>
             </div>
             <div className="flex items-center gap-2">
-              <Clock className="w-5 h-5" />
+              <Clock className="w-5 h-5 text-[var(--primary)]" />
               <span>{quiz.timeLimit} {t('quiz.min')}</span>
             </div>
           </div>
@@ -159,7 +157,7 @@ export default function QuizDetailPage() {
               whileTap={{ scale: 0.98 }}
               onClick={() => setShowStartConfirm(true)}
               disabled={startQuiz.isPending}
-              className="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-[var(--card-solid)] text-[var(--primary)] rounded-xl font-semibold hover:bg-[var(--card-solid)]/90 transition-all disabled:opacity-50"
+              className="btn-premium mt-6 disabled:opacity-50"
             >
               {startQuiz.isPending ? (
                 <Loader size="sm" />

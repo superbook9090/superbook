@@ -162,7 +162,7 @@ export default function CreateCourseForm({ courseId }: Props) {
 
   if (initialLoading) {
     return (
-      <div className="py-12 text-center text-sm text-gray-600" role="status">
+      <div className="py-12 text-center text-sm text-[var(--color-muted-foreground)]" role="status">
         {t('common.loading')}
       </div>
     );
@@ -171,13 +171,13 @@ export default function CreateCourseForm({ courseId }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       {error && (
-        <div className="bg-red-50 border-l-4 border-red-400 p-3 sm:p-4 rounded-r-lg">
-          <p className="text-sm text-red-700">{error}</p>
+        <div className="bg-[var(--color-error-light)] border-l-4 border-[var(--color-error)] p-3 sm:p-4 rounded-r-lg">
+          <p className="text-sm text-[var(--color-error)]">{error}</p>
           {courseId && (
             <button
               type="button"
               onClick={() => router.push(ROUTES.teacher.courses)}
-              className="mt-3 text-sm font-medium text-red-800 underline"
+              className="mt-3 text-sm font-medium text-[var(--color-error)] underline"
             >
               {t('createCourseForm.cancel')}
             </button>

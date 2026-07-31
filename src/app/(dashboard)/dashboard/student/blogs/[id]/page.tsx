@@ -136,7 +136,7 @@ export default function BlogDetailPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="bg-white rounded-2xl shadow-sm overflow-hidden"
+        className="bg-[var(--card-solid)] rounded-2xl shadow-sm overflow-hidden"
       >
         {/* Header */}
         <div className="p-4 sm:p-6 lg:p-8 border-b border-[var(--border)]">

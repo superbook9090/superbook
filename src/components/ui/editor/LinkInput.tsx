@@ -96,7 +96,7 @@ export const LinkInput = ({
         <button
           type="button"
           onClick={onCancel}
-          className="p-1.5 text-[var(--color-muted)] hover:bg-[var(--color-surface-muted)] dark:hover:bg-gray-800 rounded-md transition-colors"
+          className="p-1.5 text-[var(--color-muted)] hover:bg-[var(--color-surface-muted)] rounded-md transition-colors"
           aria-label="Cancel"
         >
           <X className="w-4 h-4" />

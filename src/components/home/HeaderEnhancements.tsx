@@ -16,8 +16,10 @@ export default function HeaderEnhancements({ forceScrolled = false }: { forceScr
 
     const onScroll = () => {
       const scrolled = forceScrolled || window.scrollY > 20;
-      header.classList.toggle('bg-white/90', scrolled);
-      header.classList.toggle('backdrop-blur-lg', scrolled);
+      header.classList.toggle('bg-[var(--card-solid)]/80', scrolled);
+      header.classList.toggle('backdrop-blur-md', scrolled);
+      header.classList.toggle('border-b', scrolled);
+      header.classList.toggle('border-[var(--border)]', scrolled);
       header.classList.toggle('shadow-sm', scrolled);
       header.classList.toggle('bg-transparent', !scrolled);
 
@@ -30,20 +32,8 @@ export default function HeaderEnhancements({ forceScrolled = false }: { forceScr
       toggleNavBtn(document.getElementById('lang-toggle'));
       toggleNavBtn(document.getElementById('header-blogs-link'));
 
-      header.querySelectorAll<HTMLElement>('#header-auth-guest a').forEach((link) => {
-        if (link.classList.contains('bg-white')) return;
-        link.classList.toggle('text-gray-600', scrolled);
-        link.classList.toggle('hover:text-gray-900', scrolled);
-        link.classList.toggle('text-white', !scrolled);
-      });
-
-      const mobileToggle = document.getElementById('mobile-menu-toggle');
-      if (mobileToggle) {
-        mobileToggle.classList.toggle('text-gray-800', scrolled);
-        mobileToggle.classList.toggle('hover:bg-black/5', scrolled);
-        mobileToggle.classList.toggle('text-white', !scrolled);
-        mobileToggle.classList.toggle('hover:bg-white/10', !scrolled);
-      }
+      // Nav/link colors are theme-token driven in both states now (HeaderStatic);
+      // only the header surface itself changes on scroll.
     };
 
     onScroll();

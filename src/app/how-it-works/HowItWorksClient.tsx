@@ -22,7 +22,7 @@ import { ROUTES } from '@/constants/routes';
 import Link from 'next/link';
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher';
 import { landing } from '@/components/home/landingStyles';
-import Image from 'next/image';
+import BrandLogo from '@/components/ui/BrandLogo';
 
 function Accordion({ title, children }: { title: string; children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -95,14 +95,8 @@ export default function HowItWorksClient() {
       <header className="sticky top-0 z-50 bg-[var(--background)]/80 backdrop-blur-md border-b border-[var(--border)]">
         <div className={`${landing.container} h-16 flex items-center justify-between`}>
           <Link href={ROUTES.home} className="flex items-center gap-2">
-            <div className="flex items-center px-3 py-2 rounded-xl bg-white/90 shadow-sm">
-              <Image
-                src="/logo.svg"
-                alt="Quiz-Do logo"
-                width={96}
-                height={52}
-                className="h-8 sm:h-9 w-auto object-contain"
-              />
+            <div className="flex items-center">
+              <BrandLogo size="md" className="text-[var(--color-foreground)]" />
             </div>
           </Link>
           <div className="flex items-center gap-4">
@@ -281,7 +275,7 @@ export default function HowItWorksClient() {
                 </p>
                 <Link
                   href={ROUTES.register}
-                  className="inline-flex items-center justify-center px-10 py-5 text-lg font-bold rounded-2xl text-[var(--student-primary)] bg-white hover:bg-[var(--student-soft)] transition-colors shadow-xl"
+                  className="inline-flex items-center justify-center px-10 py-5 text-lg font-bold rounded-2xl text-[var(--student-primary)] bg-white hover:bg-white/90 transition-colors shadow-xl"
                 >
                   {t('home.cta.button')}
                 </Link>

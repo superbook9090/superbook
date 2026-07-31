@@ -4,9 +4,9 @@
 import { ROUTES } from '@/constants/routes';
 import Link from 'next/link';
 import { useTranslation } from '@/hooks/useTranslation';
-import PremiumLogo from '@/components/ui/PremiumLogo';
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher';
 import Tooltip from '@/components/ui/Tooltip';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 import { Bell } from 'lucide-react';
 
 interface DashboardHeaderProps {
@@ -18,23 +18,11 @@ export default function DashboardHeader({ isTeacherOrAdmin, showNotifications = 
   const { t } = useTranslation();
 
   return (
-    <header className="hidden md:block flex-shrink-0 bg-[var(--card-solid)] shadow-[var(--shadow-sm)] border-b border-[var(--border)]">
+    <header className="dashboard-topbar hidden md:block flex-shrink-0">
       <div className="max-w-[var(--page-max-width)] mx-auto px-[var(--gutter-x)] py-[var(--space-3)] sm:py-[var(--space-4)] flex justify-between items-center">
-        <div className="flex items-center gap-2 sm:gap-4">
-          <Link
-            href={isTeacherOrAdmin ? ROUTES.teacher.root : ROUTES.student.root}
-            className="group flex-shrink-0"
-          >
-            <PremiumLogo
-              variant="default"
-              size="md"
-              theme="white"
-            />
-          </Link>
-          <h1 className="text-base sm:text-lg lg:text-xl font-semibold text-[var(--foreground)] truncate">
-            {isTeacherOrAdmin ? t('dashboard.teacherDashboard') : t('dashboard.studentDashboard')}
-          </h1>
-        </div>
+        <h1 className="text-base sm:text-lg lg:text-xl font-semibold font-[family-name:var(--font-display)] tracking-tight text-[var(--foreground)] truncate">
+          {isTeacherOrAdmin ? t('dashboard.teacherDashboard') : t('dashboard.studentDashboard')}
+        </h1>
         <div className="flex items-center gap-3 flex-shrink-0">
           {showNotifications && (
             <Tooltip label={t('common.notifications')} position="bottom">
@@ -47,6 +35,7 @@ export default function DashboardHeader({ isTeacherOrAdmin, showNotifications = 
               </Link>
             </Tooltip>
           )}
+          <ThemeToggle />
           <LanguageSwitcher />
         </div>
       </div>

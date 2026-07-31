@@ -100,7 +100,7 @@ export default function RichTextEditor({
           'prose-p:leading-relaxed prose-p:text-[var(--color-foreground)] prose-p:mb-2',
           'prose-blockquote:border-l-4 prose-blockquote:border-[var(--color-primary)] prose-blockquote:bg-[var(--color-accent)]/20 prose-blockquote:py-1 prose-blockquote:px-4 prose-blockquote:rounded-r-lg prose-blockquote:italic prose-blockquote:my-3',
           'prose-code:text-[var(--color-primary)] prose-code:bg-[var(--color-accent)]/30 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none',
-          'prose-pre:bg-[var(--color-foreground)] dark:prose-pre:bg-black prose-pre:rounded-lg prose-pre:border prose-pre:border-[var(--color-border)] prose-pre:p-3 prose-pre:my-3',
+          'prose-pre:bg-[var(--color-surface-muted)] prose-pre:rounded-lg prose-pre:border prose-pre:border-[var(--color-border)] prose-pre:p-3 prose-pre:my-3',
           'prose-ul:my-2 prose-ol:my-2 prose-li:my-0.5',
           'prose-img:rounded-lg prose-img:mx-auto prose-img:my-4',
           'selection:bg-[var(--color-accent)]'

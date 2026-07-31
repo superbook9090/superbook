@@ -86,7 +86,7 @@ export function createRootMetadata(): Metadata {
       creator: TWITTER_HANDLE,
     },
     other: {
-      'theme-color': '#0d9488',
+      'theme-color': '#7c3aed',
       ...getSearchVerificationMeta(),
     },
   };

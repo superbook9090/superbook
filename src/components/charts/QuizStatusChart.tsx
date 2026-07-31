@@ -82,15 +82,15 @@ export default function QuizStatusChart({
       const data = payload[0].payload;
       const percentage = ((data.value / totalQuizzes) * 100).toFixed(1);
       return (
-        <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200">
+        <div className="bg-[var(--card-solid)] p-3 rounded-lg shadow-lg border border-[var(--color-border)]">
           <div className="flex items-center gap-2 mb-1">
             {data.icon}
-            <p className="text-sm font-medium text-gray-900 capitalize">{data.name}</p>
+            <p className="text-sm font-medium text-[var(--color-foreground)] capitalize">{data.name}</p>
           </div>
           <p className="text-lg font-bold" style={{ color: data.color }}>
             {t('charts.quizzesCount', { count: data.value })}
           </p>
-          <p className="text-sm text-gray-500">{t('charts.percentOfTotal', { percent: percentage })}</p>
+          <p className="text-sm text-[var(--color-muted-foreground)]">{t('charts.percentOfTotal', { percent: percentage })}</p>
         </div>
       );
     }
@@ -136,19 +136,19 @@ const renderCustomizedLabel = (props: CustomLabelProps) => {
 
   if (!processedData || processedData.length === 0) {
     return (
-      <div className="bg-white rounded-2xl p-5 shadow-sm h-[300px] flex flex-col items-center justify-center">
-        <PieChartIcon className="w-12 h-12 text-gray-400 mb-3" />
-        <p className="text-gray-500 text-center">{t('charts.noQuizData')}</p>
-        <p className="text-gray-400 text-sm text-center mt-1">{t('charts.takeQuizzesToSeeEngagement')}</p>
+      <div className="bg-[var(--card-solid)] rounded-2xl p-5 shadow-sm h-[300px] flex flex-col items-center justify-center">
+        <PieChartIcon className="w-12 h-12 text-[var(--color-muted)] mb-3" />
+        <p className="text-[var(--color-muted-foreground)] text-center">{t('charts.noQuizData')}</p>
+        <p className="text-[var(--color-muted)] text-sm text-center mt-1">{t('charts.takeQuizzesToSeeEngagement')}</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-2xl p-5 shadow-sm">
+    <div className="bg-[var(--card-solid)] rounded-2xl p-5 shadow-sm">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">{resolvedTitle}</h3>
-        <div className="text-sm text-gray-500">
+        <h3 className="text-lg font-semibold text-[var(--color-foreground)]">{resolvedTitle}</h3>
+        <div className="text-sm text-[var(--color-muted-foreground)]">
           {t('charts.totalQuizzes', { count: totalQuizzes })}
         </div>
       </div>
