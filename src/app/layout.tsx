@@ -10,6 +10,7 @@ import ClarityInit from '@/components/providers/ClarityInit';
 import { createRootMetadata } from '@/lib/seo/metadata';
 import { fontVariables } from '@/lib/fonts';
 import PullToRefresh from '@/components/PullToRefresh';
+import { AnimatedCursor } from '@/components/layout';
 
 export const metadata: Metadata = {
   ...createRootMetadata(),
@@ -51,6 +52,7 @@ export default function RootLayout({
             </SessionProvider>
           </AppSettingsProvider>
         </LanguageProvider>
+        <AnimatedCursor />
         <DeferredAnalytics />
         <ClarityInit />
       </body>

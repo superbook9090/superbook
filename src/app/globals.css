@@ -1364,6 +1364,44 @@ body.quiz-fullscreen nav {
   border-bottom: 1px solid var(--border);
 }
 
+/* =========================
+   ANIMATED CURSOR (AnimatedCursor.tsx)
+   Fine pointers only; the component skips rendering under reduced motion.
+========================= */
+
+.cursor-dot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--primary);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.cursor-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  border: 1px solid color-mix(in srgb, var(--primary) 45%, transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease, width 0.3s ease, height 0.3s ease,
+    background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Hovering an interactive element: the ring grows and tints */
+.cursor-ring--active {
+  width: 2.75rem;
+  height: 2.75rem;
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  border-color: color-mix(in srgb, var(--primary) 70%, transparent);
+}
+
 @media (min-width: 768px) {
   .dashboard-shell {
     flex-direction: row;

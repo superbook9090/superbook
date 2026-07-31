@@ -5,7 +5,6 @@ import { useState, memo } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
-import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { formatDateTime, formatDuration } from '@/lib/dateUtils';
 import { cn } from '@/lib/utils';
 import {
@@ -68,7 +67,6 @@ function QuizCard({
 }: QuizCardProps) {
   const router = useRouter();
   const { t } = useTranslation();
-  const { theme } = useRoleTheme();
   const [isLoading, setIsLoading] = useState(false);
   const [confirmQuiz, setConfirmQuiz] = useState<QuizStartInfo | null>(null);
 
@@ -136,17 +134,19 @@ function QuizCard({
       whileHover={{ y: -4 }}
       transition={{ duration: 0.3 }}
       className={cn(
-        'group relative flex flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--card-solid)] shadow-md transition-all duration-300 hover:shadow-xl',
+        'group relative flex flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--card-solid)] shadow-[var(--shadow-sm)] transition-all duration-300 hover:shadow-[var(--shadow-md)]',
         isCompact ? 'h-auto' : 'h-full min-h-[420px]',
         className
       )}
     >
-      <div className={cn('relative h-28 shrink-0 bg-gradient-to-br sm:h-32', theme.gradient)}>
-        <div className="absolute inset-0 bg-black/10" />
+      {/* Role keyline — replaces the old gradient banner */}
+      <div className="h-[3px] w-full shrink-0" style={{ background: 'var(--primary-gradient)' }} aria-hidden />
+
+      <div className={cn('flex flex-col p-3 sm:p-6', !isCompact && 'flex-1')}>
         {!hideCourseBadge && (
-          <div className="absolute bottom-3 left-4 right-16 sm:bottom-4 sm:left-6 sm:right-20">
+          <div className="mb-3">
             <Badge
-              variant="success"
+              variant="primary"
               size="sm"
               icon={<BookOpen className="w-3 h-3 shrink-0" />}
               className="max-w-full truncate"
@@ -155,22 +155,10 @@ function QuizCard({
             </Badge>
           </div>
         )}
-        <div className="absolute top-3 right-3 sm:top-4 sm:right-4">
-          <div className="flex max-w-[calc(100%-1.5rem)] items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-xs font-medium text-gray-700 backdrop-blur-sm sm:gap-1.5 sm:px-3 sm:py-1.5 sm:text-sm">
-            <HelpCircle className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
-            <span className="truncate">
-              {quiz.questionCount ?? 0} {t('quiz.questions')}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div className={cn('flex flex-col p-3 sm:p-6', !isCompact && 'flex-1')}>
         <h3
           className={cn(
-            'mb-2 line-clamp-2 text-base font-bold text-[var(--color-foreground)] transition-colors sm:text-lg',
-            !isCompact && 'min-h-[2.75rem] sm:min-h-[3.25rem]',
-            `group-hover:${theme.text}`
+            'mb-2 line-clamp-2 text-base font-bold text-[var(--color-foreground)] sm:text-lg',
+            !isCompact && 'min-h-[2.75rem] sm:min-h-[3.25rem]'
           )}
         >
           {quiz.title}
@@ -184,13 +172,14 @@ function QuizCard({
           {quiz.description || t('quiz.noDescription')}
         </p>
 
-        <div className="mb-4 flex items-center gap-2 text-sm text-[var(--color-muted-foreground)]">
-          <Clock className="h-4 w-4 shrink-0" />
-          <span className="truncate">
-            {t('quiz.timeLimit')}:{' '}
-            <span className="font-medium text-[var(--color-foreground)]">
-              {quiz.timeLimit} {t('quiz.min')}
-            </span>
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--primary-soft)] px-2.5 py-1 text-xs font-medium text-[var(--primary)]">
+            <HelpCircle className="h-3.5 w-3.5 shrink-0" />
+            {quiz.questionCount ?? 0} {t('quiz.questions')}
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-surface-muted)] px-2.5 py-1 text-xs font-medium text-[var(--color-muted-foreground)]">
+            <Clock className="h-3.5 w-3.5 shrink-0" />
+            {quiz.timeLimit} {t('quiz.min')}
           </span>
         </div>
 
@@ -264,10 +253,7 @@ function QuizCard({
               whileTap={{ scale: 0.98 }}
               onClick={() => openStartConfirm('start')}
               disabled={isLoading}
-              className={cn(
-                'flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r px-4 py-3 text-sm font-semibold text-white transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:text-base',
-                theme.gradient
-              )}
+              className="gradient-bg flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:text-base"
             >
               {isLoading ? (
                 <Loader size="sm" />
@@ -283,10 +269,7 @@ function QuizCard({
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={openContinueConfirm}
-              className={cn(
-                'flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r px-4 py-3 text-sm font-semibold text-white transition-all hover:opacity-90 sm:text-base',
-                theme.gradient
-              )}
+              className="gradient-bg flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white transition-all hover:opacity-90 sm:text-base"
             >
               <Play className="h-4 w-4 shrink-0" />
               <span className="truncate">{t('courses.continue')}</span>
@@ -297,10 +280,7 @@ function QuizCard({
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleReview}
-                className={cn(
-                  'flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r px-4 py-3 text-sm font-semibold text-white transition-all hover:opacity-90 sm:text-base',
-                  theme.gradient
-                )}
+                className="gradient-bg flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white transition-all hover:opacity-90 sm:text-base"
               >
                 <CheckCircle className="h-4 w-4 shrink-0" />
                 <span className="truncate">{t('quiz.review')}</span>
@@ -310,12 +290,7 @@ function QuizCard({
                 whileTap={{ scale: 0.95 }}
                 onClick={handleRetake}
                 disabled={isLoading}
-                className={cn(
-                  'flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl border-2 px-4 py-3 text-sm font-semibold transition-all hover:opacity-80 disabled:opacity-50 sm:flex-none sm:text-base',
-                  theme.border,
-                  theme.text,
-                  theme.activeBg
-                )}
+                className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl border border-[var(--primary-border)] bg-transparent px-4 py-3 text-sm font-semibold text-[var(--primary)] transition-all hover:bg-[var(--primary-soft)] disabled:opacity-50 sm:flex-none sm:text-base"
               >
                 {isLoading ? (
                   <Loader size="sm" />

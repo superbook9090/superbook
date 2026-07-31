@@ -195,7 +195,7 @@ export default function StudentBlogsPage() {
         className={`grid grid-cols-1 md:grid-cols-2 gap-6 ${isFetching ? 'opacity-60 pointer-events-none' : ''}`}
       >
         {filteredBlogs.length === 0 ? (
-          <div className="col-span-full text-center py-16 bg-[var(--card-solid)] rounded-2xl shadow-sm">
+          <div className="col-span-full text-center py-16 card-panel">
             <BookOpen className="w-16 h-16 text-[var(--color-muted-foreground)] mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-[var(--color-foreground)] mb-2">
               {debouncedSearch || selectedTopic !== 'all'
@@ -223,7 +223,7 @@ export default function StudentBlogsPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 * index }}
-                className="bg-[var(--card-solid)] rounded-2xl shadow-sm hover:shadow-lg transition-shadow overflow-hidden group"
+                className="bg-[var(--card-solid)] rounded-2xl border border-[var(--color-border)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5 transition-all overflow-hidden group"
               >
                 <div className="p-6">
                   {/* Topic Badge */}
@@ -240,8 +240,8 @@ export default function StudentBlogsPage() {
                         <Heart
                           className={`w-5 h-5 transition-colors ${
                             isFavorited
-                              ? `fill-current ${theme.text}`
-                              : `text-[var(--color-muted-foreground)] hover:${theme.text}`
+                              ? 'fill-current text-[var(--primary)]'
+                              : 'text-[var(--color-muted-foreground)] hover:text-[var(--primary)]'
                           }`}
                         />
                       </button>

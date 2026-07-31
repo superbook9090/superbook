@@ -32,6 +32,11 @@ const nextConfig = {
     ];
   },
   async headers() {
+    // Dev chunk URLs are path-based (not content-hashed), so immutable caching
+    // in development serves stale code after every edit. Prod-only.
+    if (process.env.NODE_ENV === 'development') {
+      return [];
+    }
     return [
       {
         source: '/:path*\\.(svg|png|jpg|jpeg|webp|avif|ico|woff2)',

@@ -18,9 +18,9 @@ import {
 import { PageWrapper } from '@/components/layout';
 import { ROUTES } from '@/constants/routes';
 import Link from 'next/link';
-import LanguageSwitcher from '@/components/ui/LanguageSwitcher';
 import { landing } from '@/components/home/landingStyles';
-import BrandLogo from '@/components/ui/BrandLogo';
+import MarketingHeader from '@/components/home/MarketingHeader';
+import Footer from '@/components/home/Footer';
 import { useFeature } from '@/contexts/AppSettingsContext';
 
 const IconMap: Record<string, React.ElementType> = {
@@ -87,41 +87,31 @@ export default function ToolClient({ toolSlug }: ToolClientProps) {
   if (!tool) return null;
 
   return (
-    <div className="min-h-screen bg-[var(--background)] pb-20">
-      <header className="sticky top-0 z-50 bg-[var(--background)]/80 backdrop-blur-md border-b border-[var(--border)]">
-        <div className={`${landing.container} h-16 flex items-center justify-between`}>
-          <Link href={ROUTES.home} className="flex items-center gap-2">
-            <div className="flex items-center">
-              <BrandLogo size="md" className="text-[var(--color-foreground)]" />
-            </div>
-          </Link>
-          <div className="flex items-center gap-4">
-            <LanguageSwitcher />
-            <Link
-              href={ROUTES.login}
-              className="text-sm font-medium text-[var(--color-foreground)] hover:text-[var(--student-primary)] transition-colors"
-            >
-              {t('home.login')}
-            </Link>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-[var(--background)] flex flex-col">
+      <MarketingHeader forceScrolled />
 
-      <div className={landing.container}>
+      <div className={`${landing.container} flex-1 mt-20 sm:mt-24 pb-20`}>
         <PageWrapper>
-          <div className="py-16 text-center max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--student-soft)] rounded-full border border-[var(--student-border)] mb-6">
-              <Sparkles className="w-4 h-4 text-[var(--student-primary)]" aria-hidden />
-              <span className="text-sm font-semibold text-[var(--student-primary)]">
-                {t('seoTools.common.badge')}
-              </span>
+          {/* Hero on the aurora canvas */}
+          <div className="relative py-16 text-center max-w-3xl mx-auto">
+            <div className="aurora-bg" aria-hidden>
+              <div className="aurora-blob w-[34rem] h-[34rem] -top-40 -right-52 bg-[var(--primary)] opacity-[0.14]" />
+              <div className="aurora-blob w-[26rem] h-[26rem] -bottom-32 -left-48 bg-[var(--primary-accent)] opacity-[0.10]" />
             </div>
-            <h1 className="text-4xl sm:text-5xl font-extrabold text-[var(--color-foreground)] mb-6 leading-tight">
-              {tool.h1}
-            </h1>
-            <p className="text-xl text-[var(--color-muted-foreground)] leading-relaxed">
-              {tool.intro}
-            </p>
+            <div className="relative">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--student-soft)] rounded-full border border-[var(--student-border)] mb-6">
+                <Sparkles className="w-4 h-4 text-[var(--student-primary)]" aria-hidden />
+                <span className="text-sm font-semibold text-[var(--student-primary)]">
+                  {t('seoTools.common.badge')}
+                </span>
+              </div>
+              <h1 className="text-4xl sm:text-5xl font-extrabold text-[var(--color-foreground)] mb-6 leading-tight">
+                {tool.h1}
+              </h1>
+              <p className="text-xl text-[var(--color-muted-foreground)] leading-relaxed">
+                {tool.intro}
+              </p>
+            </div>
           </div>
 
           <div className="space-y-16">
@@ -140,8 +130,8 @@ export default function ToolClient({ toolSlug }: ToolClientProps) {
               })}
             </section>
 
-            <section className="bg-[var(--card-solid)] border-2 border-[var(--student-border)] rounded-[32px] p-8 sm:p-10 shadow-lg relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)]" />
+            <section className="bg-[var(--card-solid)] border border-[var(--color-border)] rounded-[32px] p-6 sm:p-10 shadow-[var(--shadow-sm)] relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-[3px]" style={{ background: 'var(--student-gradient)' }} />
               <h2 className="text-3xl font-bold text-[var(--color-foreground)] mb-10 text-center">
                 {tool.h2}
               </h2>
@@ -188,18 +178,17 @@ export default function ToolClient({ toolSlug }: ToolClientProps) {
               </div>
             </section>
 
-            <section className="text-center py-20 px-4 bg-[var(--student-primary)] text-white rounded-[40px] mt-20 relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-[var(--student-primary)] to-[var(--teacher-primary)]" />
-              <div className="relative z-10">
-                <h2 className="text-4xl font-bold mb-6">
+            <section className="hero-banner text-center mt-20">
+              <div className="py-10 sm:py-14 px-2">
+                <h2 className="text-3xl sm:text-4xl font-bold text-[var(--color-foreground)] mb-6">
                   {t('seoTools.common.ctaTitle')}
                 </h2>
-                <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto leading-relaxed">
+                <p className="text-lg sm:text-xl text-[var(--color-muted-foreground)] mb-10 max-w-2xl mx-auto leading-relaxed">
                   {t('seoTools.common.ctaSubtitle')}
                 </p>
                 <Link
                   href={ROUTES.register}
-                  className="inline-flex items-center justify-center px-10 py-5 text-lg font-bold rounded-2xl text-[var(--student-primary)] bg-white hover:bg-white/90 transition-colors shadow-xl"
+                  className="btn-premium px-10 py-4 text-lg focus-ring"
                 >
                   {tool.callToAction}
                 </Link>
@@ -231,6 +220,7 @@ export default function ToolClient({ toolSlug }: ToolClientProps) {
           </div>
         </PageWrapper>
       </div>
+      <Footer />
     </div>
   );
 }

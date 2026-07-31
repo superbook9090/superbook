@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { useTranslation } from '@/hooks/useTranslation';
-import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import {
   BookOpen,
   User,
@@ -21,7 +20,6 @@ import { Loader } from '@/components/ui/Loader';
 import Tooltip from '@/components/ui/Tooltip';
 import type { Course } from '@/types';
 import type { Enrollment } from '@/lib/react-query/hooks';
-import { cn } from '@/lib/utils';
 
 interface CourseCardProps {
   course: Course | Enrollment;
@@ -33,7 +31,6 @@ interface CourseCardProps {
 function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
   const router = useRouter();
   const { t } = useTranslation();
-  const { theme } = useRoleTheme();
   const [isLoading, setIsLoading] = useState(false);
 
   // Handle both course and enrollment objects
@@ -69,23 +66,25 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
     <motion.div
       whileHover={{ y: -4 }}
       transition={{ duration: 0.3 }}
-      className="card-premium group h-full flex flex-col"
+      className="group h-full flex flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--card-solid)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-shadow duration-300"
     >
       {/* Thumbnail */}
-      <div className="relative h-48 overflow-hidden rounded-t-2xl">
+      <div className="relative h-48 overflow-hidden">
         {(courseData.thumbnail || courseData.thumbnailUrl) ? (
-          <Image
-            src={courseData.thumbnail || courseData.thumbnailUrl || ''}
-            alt={courseData.title}
-            fill
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          />
+          <>
+            <Image
+              src={courseData.thumbnail || courseData.thumbnailUrl || ''}
+              alt={courseData.title}
+              fill
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+          </>
         ) : (
-          <div className={cn("w-full h-full flex items-center justify-center bg-gradient-to-br", theme.gradient)}>
-            <BookOpen className="w-12 h-12 text-white/50" />
+          <div className="w-full h-full flex items-center justify-center bg-[var(--primary-soft)] border-b border-[var(--color-border)]">
+            <BookOpen className="w-12 h-12 text-[var(--primary)] opacity-70" />
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         
         {/* Category Badge */}
         {courseData.category && (
@@ -118,7 +117,7 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
         <div className="mt-auto space-y-4">
           {/* Instructor */}
           <div className="flex items-center gap-2 text-xs font-bold text-[var(--color-muted-foreground)]">
-            <div className={cn("w-6 h-6 rounded-lg flex items-center justify-center bg-gradient-to-br shadow-sm", theme.gradient)}>
+            <div className="gradient-bg w-6 h-6 rounded-lg flex items-center justify-center shadow-[var(--shadow-sm)]">
               <User className="w-3 h-3 text-white" />
             </div>
             <span>{courseData.instructor?.name || t('courses.unknown')}</span>
@@ -129,13 +128,13 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
             <div className="p-3.5 bg-[var(--color-surface-muted)] rounded-xl border border-[var(--border)]">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] font-black uppercase tracking-widest text-[var(--color-muted-foreground)]">{t('courses.progress')}</span>
-                <span className={cn("text-xs font-black", theme.text)}>{enrollment.progress}%</span>
+                <span className="text-xs font-black tabular-nums text-[var(--primary)]">{enrollment.progress}%</span>
               </div>
               <div className="w-full bg-[var(--color-surface-muted-strong)] rounded-full h-1.5 overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${enrollment.progress}%` }}
-                  className={cn("h-full rounded-full bg-gradient-to-r", theme.gradient)}
+                  className="gradient-bg h-full rounded-full"
                 />
               </div>
             </div>
@@ -176,7 +175,7 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
                   <button
                     onClick={handleDrop}
                     disabled={isLoading}
-                    className="p-3 border-2 border-[var(--color-error-light)] text-[var(--color-error)] rounded-xl hover:bg-[var(--color-error-light)] hover:border-[var(--color-error)]/30 transition-all disabled:opacity-50"
+                    className="p-3 border border-[var(--color-error)]/25 text-[var(--color-error)] rounded-xl hover:bg-[var(--color-error-light)] transition-all disabled:opacity-50"
                     aria-label={t('courses.dropCourse')}
                   >
                     {isLoading ? <Loader size="sm" /> : <Trash2 className="w-5 h-5" />}

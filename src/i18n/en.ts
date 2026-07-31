@@ -149,6 +149,7 @@ export const en = {
     howItWorksPage: {
       title: 'How Quiz-Do Works',
       subtitle: 'Understanding the complete platform workflow for all user types',
+      deepDive: 'Deep dive into features',
       platformOverview: {
         title: '1. Platform Overview',
         intro: 'Quiz-Do is a comprehensive Learning Management System (LMS) designed for schools, coaches, and self-paced learners. It bridges the gap between structured course delivery and interactive assessments.',

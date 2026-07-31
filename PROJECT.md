@@ -350,49 +350,45 @@ src/
 ├── scripts/                 # Database scripts and utilities
 ```
 
-## 10. Role-Based Theming System
+## 10. Design System & Theming ("quiet chrome, one aurora")
 
-The platform features a comprehensive role-based theming system that provides consistent color schemes across all dashboards (student, teacher, admin, superadmin) on both mobile and desktop.
+The platform uses a single token-driven design system (July 2026 redesign, matched to the owner's portfolio): aurora backdrops, glass surfaces, pill buttons, Inter body + Sora display (`src/lib/fonts.ts`). All colors flow through CSS variables in `src/app/globals.css` — **no hardcoded Tailwind palette classes** (exceptions: `text-white` on gradient/solid-colored chips and buttons, image scrims, the print-targeted certificate page).
 
-### Theme Implementation
+### Palette & tokens
 
-**CSS Variables (globals.css):**
-- Role-specific primary colors: `--student-primary` (Teal), `--teacher-primary` (Teal/Mint), `--admin-primary` (Rose/Pink), `--superadmin-primary` (Slate)
-- Dark variants for gradients: `--student-primary-dark`, `--teacher-primary-dark`, etc.
-- Accent colors, soft backgrounds, borders, and shadows for each role
-- Gradient definitions for smooth visual transitions
+- **Student**: indigo→purple — light `#7c3aed`, gradient `#6366f1 → #a855f7`; dark `#818cf8`, gradient `#818cf8 → #c084fc`
+- **Teacher / admin / superadmin**: orchid/fuchsia variant (`--teacher-*`), mapped onto `--primary*` by the `[data-role]` scope
+- Status colors (`--success/-light` etc.) have per-theme values; `-light` fills become translucent tints in dark
+- Aliases (`--color-*`, `--primary*`) are re-declared inside every theme scope — `var()` aliases resolve where they are *defined*, so they must be repeated in `[data-theme="dark"]` / `[data-role]` blocks
 
-**Theme Colors:**
-- **Student**: Eucalyptus Teal & Ocean Cyan gradient (#0ea5e9 → #14b8a6)
-- **Teacher**: Mint & Emerald gradient (#10b981 → #06b6d4)
-- **Admin**: Rose & Pink gradient (#f43f5e → #d946ef)
-- **Super Admin**: Slate dark gradient (#1e293b → #020617)
+### Light/dark theme
 
-**Usage Pattern:**
-```css
-background: linear-gradient(135deg, var(--teacher-primary), var(--teacher-primary-dark));
-color: var(--teacher-primary);
-```
+Global toggle like the portfolio: `html[data-theme="dark"]` (default, no-flash init script in `src/app/layout.tsx` + localStorage) drives the dark token block; `ThemeToggle` (`src/components/ui/ThemeToggle.tsx`) sits in `HeaderStatic` (public pages) and `DashboardHeader` (dashboards).
 
-**Cascading Data-Role Injection:**
-- The outermost shell inside `layout.tsx` is decorated with `data-role="[active-role]"`. This propagates design tokens (`--primary`, `--primary-soft`, `--color-primary`, `--border`) dynamically down the DOM tree. Standard elements, dashboard cards, sidebars, and custom forms dynamically adapt at runtime without role duplication.
+### Design rules
 
-**Components with Role-Based Theming:**
-- Desktop sidebars (TeacherSidebar, StudentSidebar, AdminSidebar)
-- Mobile navigation header (MobileNav) & Bottom Navigation Panel (MobileBottomNav)
-- Dashboard cards, forms (e.g., CreateQuizForm), and interactive actions
-- TipTap RichTextEditor: Theme prop upgraded to a semantic `'student' | 'teacher'` role definition, linking bubble menus, float menus, toolbars, and active links perfectly to active role variables.
-- Session-Aware Navigation Header: Desktop and mobile public page header integrates `useSessionStore` to dynamically display "Dashboard" in place of "Login / Sign up" links when a session is active.
+- **Saturated role color is banned at panel scale** — no gradient sidebar slabs, no white-on-gradient hero banners
+- The signature is the **aurora canvas**: `.dashboard-aurora` (dashboards) / `.aurora-bg` + `.aurora-blob` (public pages) — two slow role-tinted blobs behind glass chrome; respects `prefers-reduced-motion`
+- Chrome is glass: `.sidebar-rail` (gradient hairline edge, `.rail-link--active` pill), `.dashboard-topbar`, glass `.hero-banner` with a role-tinted radial wash
+- Role color appears only in small touches: 1–3px gradient keylines, icon chips (`--primary-soft` fill), `gradient-text` on greeting names, gradient pill buttons (`.btn-premium`, `.btn-primary`)
+- Stat/action/activity cards map role color keys to `--primary*` (role-scope aware); `--admin-*` tokens do not exist
+- The dashboard topbar has no logo — the rail carries the single brand mark; `BrandLogo` generates its SVG gradient id with `useId()` (fixed ids break when the first DOM occurrence sits in a `display:none` container)
 
-**Mobile Consistency:**
-- Mobile header and bottom panels dynamically inherit active-theme HSL bracket custom properties based on user role.
-- No breakpoint-based color changes - colors are role-based, not device-based.
+**Cascading data-role injection:** the dashboard shell carries `data-role="[active-role]"`, which re-points `--primary*`/`--color-primary`/`--surface-muted` for the whole subtree — components below need no per-role logic.
 
-### Accessibility Enhancements
+### Public/marketing pages
 
-**Touch Targets:**
-- All buttons and inputs have `min-h-[44px]` for mobile-friendly touch interaction
-- Consistent spacing and sizing across mobile and desktop
+All public pages (`/`, `/how-it-works`, `/tools`, `/tools/[slug]` + SEO landing aliases, `/blogs`, auth pages) share `MarketingHeader` (`forceScrolled` on subpages) with ThemeToggle, language toggle, session-aware auth links, plus the shared `Footer`. Subpage shell pattern: `MarketingHeader forceScrolled` + content wrapper `mt-20 sm:mt-24` + `Footer`. Hero sections sit on an `.aurora-bg` canvas; CTAs are glass `.hero-banner` panels with `.btn-premium` pills.
+
+### Animated cursor
+
+`AnimatedCursor` (`src/components/layout/AnimatedCursor.tsx`, mounted once in the root layout) renders a `--primary` dot that tracks the pointer plus a trailing ring that grows and tints over interactive elements (`.cursor-dot` / `.cursor-ring` / `.cursor-ring--active` in globals.css). It writes transforms straight to the DOM in a rAF loop (no React re-renders) and renders **only** for fine pointers without reduced motion (`usePointerFine` / `useReducedMotion` from `src/hooks/useMediaQuery.ts`). The native cursor stays visible — this is an accent, not a replacement.
+
+### Accessibility
+
+- Touch targets: interactive elements keep `min-h-[44px]` on mobile (`.touch-target`)
+- `.focus-ring` for visible keyboard focus; `::selection` tinted by role
+- Aurora/hero animations and the animated cursor disabled under `prefers-reduced-motion`
 
 ## 11. Internationalization (i18n)
 
@@ -415,6 +411,14 @@ t('common.english') // "English" or "अंग्रेज़ी"
 ```
 
 ## 12. Recent Updates
+
+### Design-system rollout to dashboards & public pages (July 2026)
+
+- Dashboards (student/teacher/admin/superadmin) moved to "quiet chrome, one aurora" (see §10): glass `.sidebar-rail` + `.dashboard-topbar` over a fixed `.dashboard-aurora` canvas; gradient welcome banners replaced by glass `.hero-banner` panels with `gradient-text` greetings; `StatCard`/`QuickActionCard` redesigned as hairline cards (small-caps eyebrow labels, Sora tabular numerals, thin gradient progress bars).
+- Content cards followed (July 2026): `QuizCard` lost its gradient banner for a 3px `--primary-gradient` keyline + tinted meta chips; `CourseCard` got the hairline shell, a `--primary-soft` thumbnail placeholder, and token-gradient (`gradient-bg`) buttons/progress; certificate and blog cards got hairline borders + keylines. `useRoleTheme` is no longer needed for card styling — cards read `--primary*` directly, and dynamic Tailwind classes like `` hover:${theme.text} `` (which never compile) were removed.
+- Public subpages (`/how-it-works`, `/tools`, `/tools/[slug]`) now share `MarketingHeader` (theme toggle + language switcher + session-aware links) and `Footer`; white-on-gradient CTA slabs replaced by glass panels with `.btn-premium` pills; added `home.howItWorksPage.deepDive` i18n key (en + hi).
+- `BrandLogo` SVG gradient id switched to `useId()` (fixed id rendered blank when referenced from a `display:none` subtree).
+- **Dev-cache fix (`next.config.ts`):** the custom `Cache-Control: immutable, max-age=1y` header on `/_next/static/*` is now production-only. In dev, Turbopack chunk URLs are path-based (not content-hashed), so the immutable header made browsers serve stale chunks after every edit — the cause of "my change doesn't show up" bugs. Anyone who browsed the dev server before this fix must do one hard reload (Cmd+Shift+R) to purge poisoned cache entries.
 
 ### Course completion certificates (2026)
 

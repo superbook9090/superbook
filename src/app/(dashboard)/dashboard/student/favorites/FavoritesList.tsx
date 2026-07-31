@@ -91,7 +91,7 @@ export default function FavoritesList({ initialFavorites, totalCount }: Favorite
         className="grid grid-cols-1 md:grid-cols-2 gap-6"
       >
         {favorites.length === 0 ? (
-          <div className="col-span-full text-center py-16 bg-[var(--card-solid)] rounded-2xl shadow-sm">
+          <div className="col-span-full text-center py-16 card-panel">
             <Bookmark className="w-16 h-16 text-[var(--color-muted-foreground)] mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-[var(--color-foreground)] mb-2">
               {t('favorites.noFavoritesYet')}
@@ -101,7 +101,7 @@ export default function FavoritesList({ initialFavorites, totalCount }: Favorite
             </p>
             <Link
               href={ROUTES.student.blogs}
-              className="inline-flex items-center min-h-[44px] px-5 py-3 sm:px-5 sm:py-2.5 bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)] text-white font-medium rounded-xl shadow-lg hover:shadow-xl hover:brightness-110 transition-all"
+              className="btn-premium focus-ring"
             >
               <BookOpen className="w-5 h-5 mr-2" />
               {t('favorites.exploreBlogs')}
@@ -120,7 +120,7 @@ export default function FavoritesList({ initialFavorites, totalCount }: Favorite
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 * index }}
-                className="bg-[var(--card-solid)] rounded-2xl shadow-sm hover:shadow-lg transition-shadow overflow-hidden group"
+                className="bg-[var(--card-solid)] rounded-2xl border border-[var(--color-border)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5 transition-all overflow-hidden group"
               >
                 <div className="p-6">
                   {/* Header */}

@@ -48,7 +48,7 @@ export default function StudentCertificatesPage() {
 
       <div className="mt-8">
         {certificates.length === 0 ? (
-          <div className="bg-[var(--background)] overflow-hidden shadow rounded-lg">
+          <div className="card-panel">
             <div className="px-4 py-10 sm:p-8 text-center">
               <Award className="w-12 h-12 mx-auto text-[var(--color-muted-foreground)] mb-4" />
               <p className="text-[var(--color-muted-foreground)] mb-2">{t('certificates.noCertificates')}</p>
@@ -61,12 +61,12 @@ export default function StudentCertificatesPage() {
               <Link
                 key={certificate._id}
                 href={ROUTES.student.certificate(certificate._id)}
-                className="block bg-[var(--card-solid)] rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+                className="block bg-[var(--card-solid)] rounded-2xl border border-[var(--color-border)] shadow-[var(--shadow-sm)] overflow-hidden hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5 transition-all"
               >
-                <div className="h-2 bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)]" />
+                <div className="h-[3px]" style={{ background: 'var(--primary-gradient)' }} aria-hidden />
                 <div className="p-6">
                   <div className="flex items-start gap-3">
-                    <div className="p-2 rounded-full bg-[var(--student-soft,#eef2ff)] text-[var(--student-primary)]">
+                    <div className="p-2 rounded-full bg-[var(--primary-soft)] text-[var(--primary)]">
                       <Award className="w-6 h-6" />
                     </div>
                     <div className="min-w-0">
@@ -82,7 +82,7 @@ export default function StudentCertificatesPage() {
                       </p>
                     </div>
                   </div>
-                  <div className="mt-4 text-sm font-medium text-[var(--student-primary)]">
+                  <div className="mt-4 text-sm font-medium text-[var(--primary)]">
                     {t('certificates.viewCertificate')} →
                   </div>
                 </div>

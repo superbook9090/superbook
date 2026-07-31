@@ -23,11 +23,17 @@ export default function ToolsIndexClient() {
 
   return (
     <main className="min-h-screen bg-[var(--background)]">
-      <MarketingHeader />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <header className="mb-12 text-center max-w-3xl mx-auto">
-          <h1 className="text-4xl font-bold text-[var(--color-foreground)] mb-4">{t('seoTools.index.title')}</h1>
-          <p className="text-lg text-[var(--color-muted-foreground)]">{t('seoTools.index.subtitle')}</p>
+      <MarketingHeader forceScrolled />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-20 sm:mt-24 py-12">
+        <header className="relative mb-12 text-center max-w-3xl mx-auto py-6">
+          <div className="aurora-bg" aria-hidden>
+            <div className="aurora-blob w-[30rem] h-[30rem] -top-36 -right-48 bg-[var(--primary)] opacity-[0.14]" />
+            <div className="aurora-blob w-[22rem] h-[22rem] -bottom-28 -left-44 bg-[var(--primary-accent)] opacity-[0.10]" />
+          </div>
+          <div className="relative">
+            <h1 className="text-4xl font-bold text-[var(--color-foreground)] mb-4">{t('seoTools.index.title')}</h1>
+            <p className="text-lg text-[var(--color-muted-foreground)]">{t('seoTools.index.subtitle')}</p>
+          </div>
         </header>
 
         <section className="mb-12">
@@ -80,10 +86,17 @@ function ToolCard({ slug, href, featured = false }: { slug: string; href: string
       href={href}
       className={
         featured
-          ? 'rounded-2xl border-2 border-[var(--student-border)] bg-[var(--student-soft)] p-6 hover:shadow-md transition-shadow'
-          : 'rounded-xl border border-[var(--border)] bg-[var(--card-solid)] p-5 hover:shadow-sm transition-shadow'
+          ? 'relative overflow-hidden rounded-2xl border border-[var(--student-border)] bg-[var(--card-solid)] p-6 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5 transition-all'
+          : 'rounded-xl border border-[var(--border)] bg-[var(--card-solid)] p-5 hover:shadow-[var(--shadow-sm)] transition-shadow'
       }
     >
+      {featured && (
+        <span
+          aria-hidden
+          className="absolute top-0 left-0 w-full h-[3px]"
+          style={{ background: 'var(--student-gradient)' }}
+        />
+      )}
       <h3 className={`font-bold text-[var(--color-foreground)] mb-2 ${featured ? 'text-lg' : 'font-semibold mb-1'}`}>
         {tool.h1}
       </h3>
