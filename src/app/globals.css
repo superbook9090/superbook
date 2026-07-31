@@ -242,9 +242,23 @@
 /* Aurora backdrop (portfolio signature) */
 .aurora-bg {
   position: absolute;
-  inset: 0;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: calc(100% + 2rem);
+  max-width: calc(var(--page-max-width, 80rem) + 3rem);
+  transform: translateX(-50%);
   overflow: hidden;
   pointer-events: none;
+  padding: var(--space-4, 1rem) var(--space-6, 1.5rem);
+  border-radius: var(--radius-2xl, 1.5rem);
+}
+
+@media (min-width: 640px) {
+  .aurora-bg {
+    width: calc(100% + 3rem);
+    padding: var(--space-6, 1.5rem) var(--space-10, 2.5rem);
+  }
 }
 
 .aurora-blob {
@@ -1262,8 +1276,8 @@ body.quiz-fullscreen nav {
   animation-delay: -7s;
 }
 
-.dashboard-shell > aside,
-.dashboard-shell > .dashboard-col {
+.dashboard-shell>aside,
+.dashboard-shell>.dashboard-col {
   position: relative;
   z-index: 1;
 }
@@ -1789,7 +1803,7 @@ body.quiz-fullscreen nav {
       color-mix(in srgb, var(--primary-accent) 12%, transparent), transparent 60%);
 }
 
-.hero-banner > * {
+.hero-banner>* {
   position: relative;
 }
 
@@ -1910,6 +1924,7 @@ body.quiz-fullscreen nav {
     grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 }
+
 /* =========================
    HEADER NAV UTILITIES
 ========================= */
@@ -1935,4 +1950,3 @@ body.quiz-fullscreen nav {
   background: var(--surface-muted);
   color: var(--foreground);
 }
-
