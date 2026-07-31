@@ -71,8 +71,8 @@ function VisibilityChip({ isPublished, liveLabel, draftLabel }: { isPublished: b
   );
 }
 
-/** Presentational body — exported so design previews/tests can feed fixture stats. */
-export function AnalyticsView({ stats }: { stats: TeacherStats }) {
+/** Presentational body for the page. */
+function AnalyticsView({ stats }: { stats: TeacherStats }) {
   const { t } = useTranslation();
 
   const courseCells: Array<{ key: keyof CourseStat; label: string }> = [
