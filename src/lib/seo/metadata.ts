@@ -85,6 +85,16 @@ export function createRootMetadata(): Metadata {
       images: ['/logo.svg'],
       creator: TWITTER_HANDLE,
     },
+    appLinks: {
+      android: {
+        package: 'com.quizdo',
+        app_name: SITE_NAME,
+      },
+      web: {
+        url: siteUrl,
+        should_fallback: true,
+      },
+    },
     other: {
       'theme-color': '#7c3aed',
       ...getSearchVerificationMeta(),
