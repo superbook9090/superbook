@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { Copy, Check, Share2 } from 'lucide-react';
+import { isNativeWebViewBridgeAvailable, shareViaNativeApp } from '@/lib/mobile/webviewBridge';
 
 type Props = {
   title: string;
@@ -15,6 +16,11 @@ export default function PublicBlogShareButtons({ title, url }: Props) {
   const [copied, setCopied] = useState(false);
 
   async function handleNativeShare() {
+    if (isNativeWebViewBridgeAvailable()) {
+      shareViaNativeApp({ title, url, message: `${title}\n${url}` });
+      return;
+    }
+
     if (navigator.share) {
       await navigator.share({ title, url });
       return;

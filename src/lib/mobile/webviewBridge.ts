@@ -1,3 +1,11 @@
+export type NativeSharePayload = {
+  title?: string;
+  message?: string;
+  url?: string;
+};
+
+export type NativeOpenLinkTarget = 'internal' | 'external';
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const sendToWebView = (action: string, payload: any = {}) => {
   if (typeof window !== 'undefined') {
@@ -15,6 +23,50 @@ export const sendToWebView = (action: string, payload: any = {}) => {
     }
   }
 };
+
+export const isNativeWebViewBridgeAvailable = () => {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  return Boolean(
+    window.QuizdoNativeApp?.isNativeApp ||
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).AndroidBridge?.postMessage ||
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).ReactNativeWebView?.postMessage
+  );
+};
+
+export const shareViaNativeApp = (payload: NativeSharePayload) => {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  if (window.QuizdoNativeApp?.share) {
+    return window.QuizdoNativeApp.share(payload);
+  }
+
+  sendToWebView('REQUEST_SHARE', payload);
+  return true;
+};
+
+export const openLinkViaNativeApp = (url: string, target: NativeOpenLinkTarget = 'external') => {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  if (window.QuizdoNativeApp?.openLink) {
+    return window.QuizdoNativeApp.openLink(url, target);
+  }
+
+  sendToWebView('REQUEST_OPEN_LINK', { url, target });
+  return true;
+};
+
+export const openExternalLinkViaNativeApp = (url: string) => openLinkViaNativeApp(url, 'external');
+
+export const openInternalLinkViaNativeApp = (url: string) => openLinkViaNativeApp(url, 'internal');
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const onWebViewMessage = (callback: (data: any) => void) => {
