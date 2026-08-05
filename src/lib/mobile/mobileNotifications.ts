@@ -33,7 +33,7 @@ async function registerForPlatform(userId: string): Promise<boolean> {
       }
     });
 
-    sendToWebView('REQUEST_NATIVE_TOKEN');
+    sendToWebView({ action: 'REQUEST_NATIVE_TOKEN' });
 
     setTimeout(() => {
       cleanup();
@@ -58,6 +58,6 @@ export const initMobileNotifications = async (userId: string): Promise<boolean> 
 
 export const syncBadgeCount = (count: number) => {
   if (isAndroidWebView() || isIOSWebView()) {
-    sendToWebView('SET_BADGE_COUNT', { count });
+    sendToWebView({ action: 'SET_BADGE_COUNT', payload: { count } });
   }
 };
