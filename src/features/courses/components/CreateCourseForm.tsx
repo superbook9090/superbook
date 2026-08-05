@@ -7,6 +7,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { createCourse, getCourseById, patchCourse } from '@/lib/api/courses';
+import { fetchAccountInfo } from '@/lib/api/auth';
 import { ApiClientError } from '@/lib/api/http';
 import { supportedLanguages } from '@/i18n/config';
 import { useSessionStore } from '@/store/useSessionStore';
@@ -42,6 +43,9 @@ export default function CreateCourseForm({ courseId }: Props) {
     courseCode: '',
   });
   const [copied, setCopied] = useState(false);
+  /** True when this teacher may only create private (course-code) courses. */
+  const [privateOnly, setPrivateOnly] = useState(false);
+  const [blockedNotice, setBlockedNotice] = useState(false);
 
   const loadCourse = useCallback(async () => {
     if (!courseId) return;
@@ -78,6 +82,35 @@ export default function CreateCourseForm({ courseId }: Props) {
     }
   }, [courseId, loadCourse]);
 
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const account = await fetchAccountInfo();
+        if (!cancelled) setPrivateOnly(account.canCreatePublicCourses === false);
+      } catch {
+        // Leave the toggle usable; the API rejects public courses regardless.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Runs again once an edited course has loaded, so loadCourse cannot re-open access.
+  useEffect(() => {
+    if (!privateOnly || initialLoading) return;
+    setFormData((prev) =>
+      prev.isPrivateAccess && prev.courseCode
+        ? prev
+        : {
+            ...prev,
+            isPrivateAccess: true,
+            courseCode: prev.courseCode || generateInviteCode(8),
+          }
+    );
+  }, [privateOnly, initialLoading]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     setFormData((prev) => ({
@@ -96,6 +129,13 @@ export default function CreateCourseForm({ courseId }: Props) {
     e.preventDefault();
     setError('');
     setIsLoading(true);
+
+    if (privateOnly && !formData.isPrivateAccess) {
+      setBlockedNotice(true);
+      setError(t('createCourseForm.publicCourseNotAllowed'));
+      setIsLoading(false);
+      return;
+    }
 
     if (formData.isPrivateAccess && formData.courseCode.trim().length < 4) {
       setError(t('createCourseForm.courseCodePlaceholder'));
@@ -282,28 +322,57 @@ export default function CreateCourseForm({ courseId }: Props) {
             <Lock className="h-4 w-4" />
           </div>
           <div className="min-w-0 flex-1">
-            <div className="flex items-center py-1">
-              <input
-                type="checkbox"
-                id="isPrivateAccess"
-                checked={formData.isPrivateAccess}
-                onChange={(e) => {
-                  const checked = e.target.checked;
-                  setFormData((prev) => ({
-                    ...prev,
-                    isPrivateAccess: checked,
-                    courseCode: checked && !prev.courseCode ? generateInviteCode(8) : prev.courseCode,
-                  }));
-                }}
-                className="h-5 w-5 rounded border-[var(--color-border)] text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
-              />
-              <label htmlFor="isPrivateAccess" className="ml-3 text-sm font-medium text-[var(--color-foreground)]">
+            <div
+              className="flex items-center py-1"
+              onClick={privateOnly ? () => setBlockedNotice(true) : undefined}
+            >
+              {/* Wrapper catches the click: a disabled input fires no events of its own. */}
+              <span className={privateOnly ? 'inline-flex cursor-not-allowed' : 'inline-flex'}>
+                <input
+                  type="checkbox"
+                  id="isPrivateAccess"
+                  checked={formData.isPrivateAccess}
+                  disabled={privateOnly}
+                  aria-describedby={privateOnly ? 'privateAccessLocked' : undefined}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setFormData((prev) => ({
+                      ...prev,
+                      isPrivateAccess: checked,
+                      courseCode: checked && !prev.courseCode ? generateInviteCode(8) : prev.courseCode,
+                    }));
+                  }}
+                  className={`h-5 w-5 rounded border-[var(--color-border)] text-[var(--color-primary)] focus:ring-[var(--color-primary)] ${
+                    privateOnly ? 'pointer-events-none opacity-70' : ''
+                  }`}
+                />
+              </span>
+              <label
+                htmlFor="isPrivateAccess"
+                className={`ml-3 text-sm font-medium text-[var(--color-foreground)] ${
+                  privateOnly ? 'cursor-not-allowed' : ''
+                }`}
+              >
                 {t('createCourseForm.privateAccess')}
               </label>
             </div>
             <p className="mt-1 text-xs text-[var(--color-muted-foreground)]">
               {t('createCourseForm.privateAccessDesc')}
             </p>
+            {privateOnly && (
+              <p
+                id="privateAccessLocked"
+                role="note"
+                aria-live="polite"
+                className={`mt-2 rounded-lg border px-3 py-2 text-xs transition-colors ${
+                  blockedNotice
+                    ? 'border-[var(--color-error)] bg-[var(--color-error-light)] text-[var(--color-error)]'
+                    : 'border-[var(--color-border)] bg-[var(--color-surface-muted)]/60 text-[var(--color-muted-foreground)]'
+                }`}
+              >
+                {t('createCourseForm.publicCourseNotAllowed')}
+              </p>
+            )}
           </div>
         </div>
 

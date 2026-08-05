@@ -36,6 +36,8 @@ export type AccountInfo = {
   provider: string;
   hasPassword: boolean;
   canChangePassword: boolean;
+  /** False when the teacher may only create private (course-code) courses. */
+  canCreatePublicCourses: boolean;
 };
 
 export function fetchAccountInfo(): Promise<AccountInfo> {

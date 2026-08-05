@@ -17,6 +17,7 @@ import {
   UserPlus,
   ToggleLeft,
   Sparkles,
+  Shield,
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import ToggleSwitch from '@/components/ui/ToggleSwitch';
@@ -41,6 +42,7 @@ interface AppSettings {
     enableCourses: boolean;
     enableAnalytics: boolean;
     enableQuizSolutionAnalysis: boolean;
+    restrictPublicCourseCreation?: boolean;
   };
   platformConfig: {
     maintenanceMode: boolean;
@@ -69,6 +71,7 @@ export default function AdminSettingsPage() {
       enableCourses: true,
       enableAnalytics: true,
       enableQuizSolutionAnalysis: false,
+      restrictPublicCourseCreation: false,
     },
     platformConfig: {
       maintenanceMode: false,
@@ -90,6 +93,7 @@ export default function AdminSettingsPage() {
         featureToggles: {
           ...data.featureToggles,
           enableQuizSolutionAnalysis: data.featureToggles.enableQuizSolutionAnalysis ?? false,
+          restrictPublicCourseCreation: data.featureToggles.restrictPublicCourseCreation ?? false,
         },
         platformConfig: {
           ...{
@@ -383,29 +387,55 @@ export default function AdminSettingsPage() {
           </div>
 
           {canManageSolutionAnalysis && (
-            <div className="flex items-center justify-between gap-4 p-4 bg-[var(--color-surface-muted)] rounded-xl">
-              <div className="flex items-center gap-3 min-w-0 flex-1">
-                <Sparkles className={`w-5 h-5 shrink-0 ${theme.text}`} />
-                <div className="min-w-0">
-                  <p className="font-medium text-[var(--color-foreground)]">
-                    {t('adminSettings.enableQuizSolutionAnalysis')}
-                  </p>
-                  <p className="text-sm text-[var(--color-muted-foreground)]">
-                    {t('adminSettings.enableQuizSolutionAnalysisDesc')}
-                  </p>
+            <>
+              <div className="flex items-center justify-between gap-4 p-4 bg-[var(--color-surface-muted)] rounded-xl">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <Sparkles className={`w-5 h-5 shrink-0 ${theme.text}`} />
+                  <div className="min-w-0">
+                    <p className="font-medium text-[var(--color-foreground)]">
+                      {t('adminSettings.enableQuizSolutionAnalysis')}
+                    </p>
+                    <p className="text-sm text-[var(--color-muted-foreground)]">
+                      {t('adminSettings.enableQuizSolutionAnalysisDesc')}
+                    </p>
+                  </div>
                 </div>
+                <ToggleSwitch
+                  checked={settings.featureToggles.enableQuizSolutionAnalysis}
+                  onChange={(enableQuizSolutionAnalysis) =>
+                    setSettings({
+                      ...settings,
+                      featureToggles: { ...settings.featureToggles, enableQuizSolutionAnalysis },
+                    })
+                  }
+                  label={t('adminSettings.enableQuizSolutionAnalysis')}
+                />
               </div>
-              <ToggleSwitch
-                checked={settings.featureToggles.enableQuizSolutionAnalysis}
-                onChange={(enableQuizSolutionAnalysis) =>
-                  setSettings({
-                    ...settings,
-                    featureToggles: { ...settings.featureToggles, enableQuizSolutionAnalysis },
-                  })
-                }
-                label={t('adminSettings.enableQuizSolutionAnalysis')}
-              />
-            </div>
+
+              <div className="flex items-center justify-between gap-4 p-4 bg-[var(--color-surface-muted)] rounded-xl">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <Shield className={`w-5 h-5 shrink-0 ${theme.text}`} />
+                  <div className="min-w-0">
+                    <p className="font-medium text-[var(--color-foreground)]">
+                      {t('adminSettings.restrictPublicCourseCreation')}
+                    </p>
+                    <p className="text-sm text-[var(--color-muted-foreground)]">
+                      {t('adminSettings.restrictPublicCourseCreationDesc')}
+                    </p>
+                  </div>
+                </div>
+                <ToggleSwitch
+                  checked={settings.featureToggles.restrictPublicCourseCreation ?? false}
+                  onChange={(restrictPublicCourseCreation) =>
+                    setSettings({
+                      ...settings,
+                      featureToggles: { ...settings.featureToggles, restrictPublicCourseCreation },
+                    })
+                  }
+                  label={t('adminSettings.restrictPublicCourseCreation')}
+                />
+              </div>
+            </>
           )}
         </div>
       </motion.div>

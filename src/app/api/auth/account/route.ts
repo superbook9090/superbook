@@ -4,8 +4,9 @@ import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import User from '@/models/User';
 import { logApiError, type LogContext } from '@/lib/logger';
+import { canUserCreatePublicCourses } from '@/lib/settingsHelpers';
 
-/** Returns account flags for profile UI (password change eligibility). */
+/** Returns account flags for profile and course-form UI (password change, public course permission). */
 export async function GET() {
   const logContext: LogContext = { method: 'GET', path: '/api/auth/account' };
 
@@ -26,6 +27,10 @@ export async function GET() {
       provider: user.provider ?? 'credentials',
       hasPassword: Boolean(user.password),
       canChangePassword: Boolean(user.password),
+      canCreatePublicCourses: await canUserCreatePublicCourses(
+        session.user.id,
+        session.user.role
+      ),
     });
   } catch (error) {
     logApiError(error as Error, 'GET', '/api/auth/account', logContext);

@@ -5,7 +5,7 @@ import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import mongoose from 'mongoose';
 import { Course, ensureCourseIndexes } from '@/models';
-import { requireFeature, checkTeacherLimit } from '@/lib/settingsHelpers';
+import { requireFeature, checkTeacherLimit, checkPublicCoursePermission } from '@/lib/settingsHelpers';
 import { createCourseSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
@@ -227,6 +227,16 @@ export async function POST(request: NextRequest) {
     const { title, description, price, category, thumbnail, isPublished, locale, courseCode } =
       validationResult.data;
 
+    const savedCourseCode = resolveCourseCodeForSave(courseCode);
+    const isPublicCourse = !savedCourseCode;
+
+    const publicPermissionCheck = await checkPublicCoursePermission(
+      session.user.id,
+      session.user.role,
+      isPublicCourse
+    );
+    if (publicPermissionCheck) return publicPermissionCheck;
+
     // Check teacher limits (skip for admins)
     if (session.user?.role === 'teacher') {
       const courseCount = await Course.countDocuments({
@@ -254,7 +264,7 @@ export async function POST(request: NextRequest) {
       thumbnail,
       locale: locale || 'en',
       isPublished: isPublished || false,
-      courseCode: resolveCourseCodeForSave(courseCode),
+      courseCode: savedCourseCode,
     });
 
     await course.save();

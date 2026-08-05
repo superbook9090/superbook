@@ -234,6 +234,14 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
+    // Validate canCreatePublicCourses if provided
+    if (updates.canCreatePublicCourses !== undefined && typeof updates.canCreatePublicCourses !== 'boolean') {
+      return NextResponse.json(
+        { message: 'canCreatePublicCourses must be a boolean' },
+        { status: 400 }
+      );
+    }
+
     // Validate limits if provided
     if (updates.limits) {
       if (updates.limits.courses !== undefined && (typeof updates.limits.courses !== 'number' || updates.limits.courses < 1)) {

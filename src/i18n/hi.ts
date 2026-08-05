@@ -1162,6 +1162,8 @@ export const hi = {
     copyCode: 'कॉपी',
     codeCopied: 'कॉपी हो गया!',
     courseCodeInUse: 'यह कोर्स कोड पहले से उपयोग में है। दूसरा चुनें।',
+    publicCourseNotAllowed:
+      'आपको सार्वजनिक पाठ्यक्रम बनाने की अनुमति नहीं है। यदि आप सार्वजनिक पाठ्यक्रम जोड़ना चाहते हैं, तो सहायता टीम से संपर्क करें।',
   },
 
   // CreateQuizForm
@@ -1413,6 +1415,9 @@ export const hi = {
     enableQuizSolutionAnalysis: 'क्विज़ समाधान विश्लेषण सक्षम करें',
     enableQuizSolutionAnalysisDesc:
       'छात्रों को क्विज़ परिणाम पृष्ठ पर AI आधारित संक्षिप्त व्याख्या प्राप्त करने दें (केवल सुपरएडमिन)',
+    restrictPublicCourseCreation: 'सार्वजनिक पाठ्यक्रम निर्माण प्रतिबंधित करें',
+    restrictPublicCourseCreationDesc:
+      'केवल चयनित शिक्षकों को सार्वजनिक पाठ्यक्रम बनाने की अनुमति दें (दूसरों को पाठ्यक्रम कोड प्रदान करना होगा)',
     platformConfig: 'प्लेटफ़ॉर्म कॉन्फ़िगरेशन',
     maintenanceMode: 'रखरखाव मोड',
     maintenanceModeDesc: 'रखरखाव के लिए साइट अक्षम करें',
@@ -1443,6 +1448,8 @@ export const hi = {
     leaveEmptyForGlobal: 'वैश्विक सीमा के लिए खाली छोड़ें',
     saveLimits: 'सीमाएं सहेजें',
     userLimitsUpdated: 'उपयोगकर्ता सीमाएं सफलतापूर्वक अपडेट की गईं',
+    canCreatePublicCourses: 'सार्वजनिक पाठ्यक्रम निर्माण',
+    publicCoursePermissionUpdated: 'सार्वजनिक पाठ्यक्रम निर्माण अनुमति सफलतापूर्वक अपडेट की गई',
     failedUpdateLimits: 'सीमाएं अपडेट करने में विफल',
     organization: 'संगठन',
     assign: 'सौंपें',

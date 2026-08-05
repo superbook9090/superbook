@@ -1162,6 +1162,8 @@ export const en = {
     copyCode: 'Copy',
     codeCopied: 'Copied!',
     courseCodeInUse: 'This course code is already in use. Choose another.',
+    publicCourseNotAllowed:
+      'You are not allowed to create a public course. If you want to add a public course, contact support.',
   },
 
   // CreateQuizForm
@@ -1413,6 +1415,9 @@ export const en = {
     enableQuizSolutionAnalysis: 'Enable Quiz Solution Analysis',
     enableQuizSolutionAnalysisDesc:
       'Allow students to get AI-powered short explanations on quiz result pages (superadmin only)',
+    restrictPublicCourseCreation: 'Restrict Public Course Creation',
+    restrictPublicCourseCreationDesc:
+      'Allow only selected teachers to create public courses (others must provide a course code)',
     platformConfig: 'Platform Configuration',
     maintenanceMode: 'Maintenance Mode',
     maintenanceModeDesc: 'Disable site for maintenance',
@@ -1443,6 +1448,8 @@ export const en = {
     leaveEmptyForGlobal: 'Leave empty for global limit',
     saveLimits: 'Save Limits',
     userLimitsUpdated: 'User limits updated successfully',
+    canCreatePublicCourses: 'Public Course Creation',
+    publicCoursePermissionUpdated: 'Public course permission updated successfully',
     failedUpdateLimits: 'Failed to update limits',
     organization: 'Organization',
     assign: 'Assign',

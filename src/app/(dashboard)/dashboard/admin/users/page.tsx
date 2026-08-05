@@ -53,6 +53,7 @@ interface User {
     blogs: number;
   };
   canUploadVideos?: boolean;
+  canCreatePublicCourses?: boolean;
 }
 
 export default function AdminUsersPage() {
@@ -179,6 +180,26 @@ export default function AdminUsersPage() {
           err instanceof ApiClientError
             ? err.message
             : t('adminUsers.errorUpdatingVideoPermission'),
+      });
+    }
+  };
+
+  const handleTogglePublicCoursePermission = async (userId: string, currentVal: boolean) => {
+    try {
+      const newVal = !currentVal;
+      await patchAdminUser({ userId, updates: { canCreatePublicCourses: newVal } });
+      setUsers(users.map((u) => (u._id === userId ? { ...u, canCreatePublicCourses: newVal } : u)));
+      if (selectedUser && selectedUser._id === userId) {
+        setSelectedUser({ ...selectedUser, canCreatePublicCourses: newVal });
+      }
+      setMessage({ type: 'success', text: t('adminUsers.publicCoursePermissionUpdated') });
+    } catch (err) {
+      setMessage({
+        type: 'error',
+        text:
+          err instanceof ApiClientError
+            ? err.message
+            : t('adminSettings.errorUpdatingUser'),
       });
     }
   };
@@ -821,6 +842,33 @@ export default function AdminUsersPage() {
                         type="checkbox"
                         checked={selectedUser.canUploadVideos || false}
                         onChange={() => handleToggleVideoUpload(selectedUser._id, selectedUser.canUploadVideos || false)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-[var(--color-surface-muted-strong)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[var(--color-border)] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--primary)]"></div>
+                    </label>
+                  </div>
+                )}
+
+                {selectedUser.role === 'teacher' && (
+                  <div className="flex items-center justify-between p-4 bg-[var(--color-surface-muted)]/30 rounded-xl">
+                    <div>
+                      <p className="text-sm font-medium text-[var(--color-foreground)]">
+                        {t('adminUsers.canCreatePublicCourses') || 'Public Course Creation'}
+                      </p>
+                      <p className="text-xs text-[var(--color-muted-foreground)] mt-0.5">
+                        Allow teacher to create public courses (without requiring a course code).
+                      </p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedUser.canCreatePublicCourses !== false}
+                        onChange={() =>
+                          handleTogglePublicCoursePermission(
+                            selectedUser._id,
+                            selectedUser.canCreatePublicCourses !== false
+                          )
+                        }
                         className="sr-only peer"
                       />
                       <div className="w-11 h-6 bg-[var(--color-surface-muted-strong)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[var(--color-border)] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--primary)]"></div>

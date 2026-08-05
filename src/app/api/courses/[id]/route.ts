@@ -18,7 +18,7 @@ import {
   resolveCourseCodeForSave,
   sanitizeCourseResponse,
 } from '@/lib/courseAccess';
-import { requireFeature } from '@/lib/settingsHelpers';
+import { requireFeature, checkPublicCoursePermission } from '@/lib/settingsHelpers';
 import { issueCertificatesForCourse } from '@/domain/learning/certificateIssuance';
 
 // GET /api/courses/[id] - Get a single course
@@ -174,6 +174,19 @@ export async function PATCH(
 
     const { title, description, price, category, thumbnail, isPublished, isCompleted, locale, courseCode } =
       validationResult.data;
+
+    const targetCode =
+      courseCode !== undefined
+        ? resolveCourseCodeForSave(courseCode, course.courseCode)
+        : course.courseCode;
+    const willBePublic = !targetCode || targetCode.trim() === '';
+
+    const publicPermissionCheck = await checkPublicCoursePermission(
+      session.user.id,
+      session.user.role,
+      willBePublic
+    );
+    if (publicPermissionCheck) return publicPermissionCheck;
 
     const wasCompleted = course.isCompleted === true;
 

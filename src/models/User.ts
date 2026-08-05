@@ -2,6 +2,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
 export interface IUser extends Document {
+  _id: mongoose.Types.ObjectId;
   name: string;
   email: string;
   password?: string;
@@ -18,6 +19,7 @@ export interface IUser extends Document {
     blogs: number;
   };
   canUploadVideos: boolean;
+  canCreatePublicCourses?: boolean;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -39,6 +41,7 @@ const userSchema = new Schema<IUser>(
       blogs: { type: Number, default: undefined },
     },
     canUploadVideos: { type: Boolean, default: false },
+    canCreatePublicCourses: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
@@ -73,5 +76,10 @@ userSchema.index({ createdAt: -1 });
 userSchema.index({ isVerified: 1 });
 userSchema.index({ isSuspended: 1 });
 userSchema.index({ canUploadVideos: 1 });
+userSchema.index({ canCreatePublicCourses: 1 });
 
-export default mongoose.models.User || mongoose.model<IUser>('User', userSchema);
+const User: mongoose.Model<IUser> =
+  (mongoose.models.User as mongoose.Model<IUser>) ||
+  mongoose.model<IUser>('User', userSchema);
+
+export default User;

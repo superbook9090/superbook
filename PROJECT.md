@@ -514,9 +514,16 @@ The blog system has been expanded to support **public** visibility, allowing art
 - **Header Navigation**: Added a global "Blogs" link to the homepage header (`HeaderStatic.tsx`) mapping to `/blogs`. Follows `common.blogs` translations and shared CSS utilities.
 - **Social Sharing**: Included `PublicBlogShareButtons` for easy sharing to X (Twitter), Facebook, LinkedIn, and WhatsApp.
 
-### Private course access via course codes (2026)
+### Private course access via course codes & public course restrictions (2026)
 
 Teachers can optionally restrict a course with a unique **course code**. Courses without a code remain **public** (unchanged behavior).
+
+**Public Course Restrictions (Super Admin Setting):**
+- Super admins can enable **"Restrict Public Course Creation"** (`restrictPublicCourseCreation`) in Admin Settings.
+- When enabled, public courses can only be created by selected teachers who have `canCreatePublicCourses = true` explicitly granted in Admin User Management (or admins/superadmins).
+- Unrestricted teachers attempting to create a public course will receive a 403 response requiring a `courseCode` to create a private course.
+- `canUserCreatePublicCourses(userId, role)` in `src/lib/settingsHelpers.ts` is the single source of truth; `checkPublicCoursePermission()` (API guard) and the teacher UI both read it.
+- The effective permission is returned as `canCreatePublicCourses` by `GET /api/auth/account` — an uncached, session-aware endpoint, so a newly granted permission applies without re-login (the NextAuth JWT is only populated at sign-in).
 
 **Rules:**
 - **Public course** (`courseCode` null/empty): visible in student browse; one-click enroll
@@ -526,6 +533,8 @@ Teachers can optionally restrict a course with a unique **course code**. Courses
 - Course codes are stripped from API responses for unauthorized clients; owners/admins see `courseCode` + `isPrivate` flag
 
 **Teacher UI:** `CreateCourseForm` — “Private course access” toggle, generate/copy code (`/dashboard/teacher/courses/create`, edit flow)
+
+For a teacher restricted to private courses, the form locks the toggle: it is auto-checked with a generated course code, rendered `disabled`, and an attempt to uncheck it surfaces `createCourseForm.publicCourseNotAllowed` (en + hi) instead of toggling. The click is caught by a wrapper element because a disabled input emits no events of its own. The forcing effect re-runs after `loadCourse()` resolves so the edit flow cannot re-open public access, and `handleSubmit` re-checks before sending.
 
 **Student UI:** `JoinCourseByCode` on browse page (`/dashboard/student/browse`)
 

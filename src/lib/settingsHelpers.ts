@@ -10,6 +10,7 @@ interface FeatureToggles {
   enableCourses: boolean;
   enableAnalytics: boolean;
   enableQuizSolutionAnalysis: boolean;
+  restrictPublicCourseCreation?: boolean;
 }
 
 interface TeacherLimits {
@@ -42,6 +43,53 @@ export async function requireFeature(feature: keyof FeatureToggles): Promise<Nex
     );
   }
   return null;
+}
+
+/**
+ * Whether a user may create or update a *public* (non-code) course.
+ * If public course creation is restricted globally by super admin settings,
+ * only selected teachers with `canCreatePublicCourses: true` (or admins/superadmins) are allowed.
+ *
+ * Shared by the API guard and the teacher UI so both apply the same rule.
+ */
+export async function canUserCreatePublicCourses(userId: string, role: string): Promise<boolean> {
+  if (role === 'admin' || role === 'superadmin') {
+    return true;
+  }
+
+  const settings = await getSettingsWithDefaults();
+  const isRestricted = Boolean(settings?.featureToggles?.restrictPublicCourseCreation);
+  if (!isRestricted) {
+    return true;
+  }
+
+  const user = await User.findById(userId).select('canCreatePublicCourses').lean();
+  return Boolean(user) && user?.canCreatePublicCourses !== false;
+}
+
+/**
+ * Check if a user is permitted to create or update a public course.
+ */
+export async function checkPublicCoursePermission(
+  userId: string,
+  role: string,
+  isPublicCourse: boolean
+): Promise<NextResponse | null> {
+  if (!isPublicCourse) {
+    return null;
+  }
+
+  if (await canUserCreatePublicCourses(userId, role)) {
+    return null;
+  }
+
+  return NextResponse.json(
+    {
+      message:
+        'Public course creation is restricted to selected teachers. Please provide a course code to create a private course or contact your administrator.',
+    },
+    { status: 403 }
+  );
 }
 
 /**
