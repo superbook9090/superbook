@@ -57,14 +57,8 @@ export async function canUserCreatePublicCourses(userId: string, role: string): 
     return true;
   }
 
-  const settings = await getSettingsWithDefaults();
-  const isRestricted = Boolean(settings?.featureToggles?.restrictPublicCourseCreation);
-  if (!isRestricted) {
-    return true;
-  }
-
   const user = await User.findById(userId).select('canCreatePublicCourses').lean();
-  return Boolean(user) && user?.canCreatePublicCourses !== false;
+  return Boolean(user?.canCreatePublicCourses);
 }
 
 /**

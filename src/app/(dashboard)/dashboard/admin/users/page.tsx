@@ -862,11 +862,11 @@ export default function AdminUsersPage() {
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
                         type="checkbox"
-                        checked={selectedUser.canCreatePublicCourses !== false}
+                        checked={Boolean(selectedUser.canCreatePublicCourses)}
                         onChange={() =>
                           handleTogglePublicCoursePermission(
                             selectedUser._id,
-                            selectedUser.canCreatePublicCourses !== false
+                            Boolean(selectedUser.canCreatePublicCourses)
                           )
                         }
                         className="sr-only peer"
