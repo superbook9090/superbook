@@ -1367,6 +1367,22 @@ export const en = {
     completeConfirmMessage: 'Students who have finished all published lessons and quizzes will automatically receive a completion certificate. Continue?',
   },
 
+  enrolledStudents: {
+    title: 'Enrolled Students',
+    viewStudents: 'View Students',
+    student: 'Student',
+    progress: 'Progress',
+    status: 'Status',
+    enrolledOn: 'Enrolled On',
+    empty: 'No students enrolled in this course yet.',
+    fetchError: 'Failed to load enrolled students',
+    remove: 'Remove',
+    removeSuccess: 'Student removed from course successfully',
+    removeError: 'Failed to remove student from course',
+    removeConfirmTitle: 'Remove Student?',
+    removeConfirmMessage: 'Are you sure you want to remove this student from the course? Their progress and enrollment will be deleted. This action cannot be undone.',
+  },
+
   // Certificates
   certificates: {
     title: 'My Certificates',
@@ -1418,6 +1434,9 @@ export const en = {
     restrictPublicCourseCreation: 'Restrict Public Course Creation',
     restrictPublicCourseCreationDesc:
       'Allow only selected teachers to create public courses (others must provide a course code)',
+    enableEnrollmentManagement: 'Enable Enrollment Management',
+    enableEnrollmentManagementDesc:
+      'Allow teachers and admins to view enrolled students and remove a student\'s enrollment from a course (superadmin only)',
     platformConfig: 'Platform Configuration',
     maintenanceMode: 'Maintenance Mode',
     maintenanceModeDesc: 'Disable site for maintenance',

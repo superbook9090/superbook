@@ -27,11 +27,13 @@ import { ApiClientError } from '@/lib/api/http';
 import DashboardListFilters, { FilterPanel } from '@/components/filters/DashboardListFilters';
 import { buildPublishStatusOptions, type PublishStatusFilter } from '@/components/filters/publishStatusOptions';
 import { isSuperAdmin } from '@/lib/roles';
+import { useFeature } from '@/contexts/AppSettingsContext';
 
 export default function AdminCoursesPage() {
   const { session, status } = useSessionStore();
   const router = useRouter();
   const isSuperAdminUser = isSuperAdmin(session?.user?.role);
+  const isEnrollmentManagementEnabled = useFeature('enableEnrollmentManagement');
   const { t } = useTranslation();
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -112,10 +114,10 @@ export default function AdminCoursesPage() {
 
   const filteredCourses = courses.filter(course => {
     const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         course.instructor?.name?.toLowerCase().includes(searchQuery.toLowerCase());
+      course.instructor?.name?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = filter === 'all' ||
-                         (filter === 'published' && course.isPublished) ||
-                         (filter === 'draft' && !course.isPublished);
+      (filter === 'published' && course.isPublished) ||
+      (filter === 'draft' && !course.isPublished);
     return matchesSearch && matchesFilter;
   });
 
@@ -283,6 +285,17 @@ export default function AdminCoursesPage() {
                       <Edit className="w-4 h-4 mr-1" />
                       {t('common.edit')}
                     </button>
+                  )}
+                  {isEnrollmentManagementEnabled && (
+                    <Tooltip label={t('enrolledStudents.viewStudents')}>
+                      <button
+                        onClick={() => router.push(ROUTES.admin.courseStudents(course._id))}
+                        aria-label={t('enrolledStudents.viewStudents')}
+                        className="px-3 py-2 min-h-[44px] sm:min-h-0 bg-[var(--color-surface-muted)] text-[var(--color-foreground)] rounded-lg hover:bg-[var(--info-light)] hover:text-[var(--info)] transition-colors"
+                      >
+                        <Users className="w-4 h-4" />
+                      </button>
+                    </Tooltip>
                   )}
                   <button
                     onClick={() => handleTogglePublish(course._id, course.isPublished)}

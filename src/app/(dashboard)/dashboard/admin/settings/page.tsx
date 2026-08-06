@@ -18,6 +18,7 @@ import {
   ToggleLeft,
   Sparkles,
   Shield,
+  Users,
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import ToggleSwitch from '@/components/ui/ToggleSwitch';
@@ -43,6 +44,7 @@ interface AppSettings {
     enableAnalytics: boolean;
     enableQuizSolutionAnalysis: boolean;
     restrictPublicCourseCreation?: boolean;
+    enableEnrollmentManagement?: boolean;
   };
   platformConfig: {
     maintenanceMode: boolean;
@@ -72,6 +74,7 @@ export default function AdminSettingsPage() {
       enableAnalytics: true,
       enableQuizSolutionAnalysis: false,
       restrictPublicCourseCreation: false,
+      enableEnrollmentManagement: true,
     },
     platformConfig: {
       maintenanceMode: false,
@@ -94,6 +97,7 @@ export default function AdminSettingsPage() {
           ...data.featureToggles,
           enableQuizSolutionAnalysis: data.featureToggles.enableQuizSolutionAnalysis ?? false,
           restrictPublicCourseCreation: data.featureToggles.restrictPublicCourseCreation ?? false,
+          enableEnrollmentManagement: data.featureToggles.enableEnrollmentManagement ?? true,
         },
         platformConfig: {
           ...{
@@ -433,6 +437,30 @@ export default function AdminSettingsPage() {
                     })
                   }
                   label={t('adminSettings.restrictPublicCourseCreation')}
+                />
+              </div>
+
+              <div className="flex items-center justify-between gap-4 p-4 bg-[var(--color-surface-muted)] rounded-xl">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <Users className={`w-5 h-5 shrink-0 ${theme.text}`} />
+                  <div className="min-w-0">
+                    <p className="font-medium text-[var(--color-foreground)]">
+                      {t('adminSettings.enableEnrollmentManagement')}
+                    </p>
+                    <p className="text-sm text-[var(--color-muted-foreground)]">
+                      {t('adminSettings.enableEnrollmentManagementDesc')}
+                    </p>
+                  </div>
+                </div>
+                <ToggleSwitch
+                  checked={settings.featureToggles.enableEnrollmentManagement ?? true}
+                  onChange={(enableEnrollmentManagement) =>
+                    setSettings({
+                      ...settings,
+                      featureToggles: { ...settings.featureToggles, enableEnrollmentManagement },
+                    })
+                  }
+                  label={t('adminSettings.enableEnrollmentManagement')}
                 />
               </div>
             </>

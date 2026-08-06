@@ -1367,6 +1367,22 @@ export const hi = {
     completeConfirmMessage: 'जिन छात्रों ने सभी प्रकाशित पाठ और क्विज़ पूरे कर लिए हैं, उन्हें स्वचालित रूप से पूर्णता प्रमाणपत्र मिलेगा। जारी रखें?',
   },
 
+  enrolledStudents: {
+    title: 'नामांकित छात्र',
+    viewStudents: 'छात्र देखें',
+    student: 'छात्र',
+    progress: 'प्रगति',
+    status: 'स्थिति',
+    enrolledOn: 'नामांकन तिथि',
+    empty: 'इस पाठ्यक्रम में अभी तक कोई छात्र नामांकित नहीं है।',
+    fetchError: 'नामांकित छात्रों को लोड करने में विफल',
+    remove: 'हटाएं',
+    removeSuccess: 'छात्र को पाठ्यक्रम से सफलतापूर्वक हटा दिया गया',
+    removeError: 'छात्र को पाठ्यक्रम से हटाने में विफल',
+    removeConfirmTitle: 'छात्र को हटाएं?',
+    removeConfirmMessage: 'क्या आप वाकई इस छात्र को पाठ्यक्रम से हटाना चाहते हैं? उनकी प्रगति और नामांकन हटा दिया जाएगा। यह क्रिया पूर्ववत नहीं की जा सकती।',
+  },
+
   // Certificates
   certificates: {
     title: 'मेरे प्रमाणपत्र',
@@ -1418,6 +1434,9 @@ export const hi = {
     restrictPublicCourseCreation: 'सार्वजनिक पाठ्यक्रम निर्माण प्रतिबंधित करें',
     restrictPublicCourseCreationDesc:
       'केवल चयनित शिक्षकों को सार्वजनिक पाठ्यक्रम बनाने की अनुमति दें (दूसरों को पाठ्यक्रम कोड प्रदान करना होगा)',
+    enableEnrollmentManagement: 'नामांकन प्रबंधन सक्षम करें',
+    enableEnrollmentManagementDesc:
+      'शिक्षकों और एडमिन को नामांकित छात्रों को देखने और किसी छात्र का नामांकन पाठ्यक्रम से हटाने की अनुमति दें (केवल सुपरएडमिन)',
     platformConfig: 'प्लेटफ़ॉर्म कॉन्फ़िगरेशन',
     maintenanceMode: 'रखरखाव मोड',
     maintenanceModeDesc: 'रखरखाव के लिए साइट अक्षम करें',

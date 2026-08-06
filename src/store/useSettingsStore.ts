@@ -6,7 +6,8 @@ export type FeatureToggleKey =
   | 'enableQuizzes'
   | 'enableCourses'
   | 'enableAnalytics'
-  | 'enableQuizSolutionAnalysis';
+  | 'enableQuizSolutionAnalysis'
+  | 'enableEnrollmentManagement';
 
 export type TeacherLimitKey = 'courses' | 'quizzes' | 'blogs';
 
@@ -37,6 +38,7 @@ export const defaultPublicAppSettings: PublicAppSettings = {
     enableCourses: true,
     enableAnalytics: true,
     enableQuizSolutionAnalysis: false,
+    enableEnrollmentManagement: true,
   },
   platformConfig: {
     maintenanceMode: false,

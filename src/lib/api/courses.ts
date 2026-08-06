@@ -41,6 +41,20 @@ export function getCourseById(courseId: string): Promise<CourseDetail> {
   return apiJson<CourseDetail>(`${BASE}/${encodeURIComponent(courseId)}`, { method: 'GET' });
 }
 
+export type CourseStudentRow = {
+  enrollmentId: string;
+  student: { _id: string; name: string; email: string; avatar?: string };
+  progress: number;
+  status: 'active' | 'completed' | 'dropped';
+  lessonCompletedCount: number;
+  enrolledAt: string;
+  completedAt?: string | null;
+};
+
+export function listCourseStudents(courseId: string): Promise<{ students: CourseStudentRow[] }> {
+  return apiJson(`${BASE}/${encodeURIComponent(courseId)}/students`, { method: 'GET' });
+}
+
 export function createCourse(body: unknown): Promise<unknown> {
   return apiJson(BASE, { method: 'POST', body });
 }

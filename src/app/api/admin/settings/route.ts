@@ -167,6 +167,15 @@ export async function PATCH(req: NextRequest) {
           { status: 400 }
         );
       }
+      if (
+        featureToggles.enableEnrollmentManagement !== undefined &&
+        typeof featureToggles.enableEnrollmentManagement !== 'boolean'
+      ) {
+        return NextResponse.json(
+          { message: 'enableEnrollmentManagement must be a boolean' },
+          { status: 400 }
+        );
+      }
 
       const existingToggles = settings.featureToggles ?? {};
       const mergedToggles = {
@@ -183,6 +192,10 @@ export async function PATCH(req: NextRequest) {
           isSuperAdmin(session.user.role) && featureToggles.restrictPublicCourseCreation !== undefined
             ? featureToggles.restrictPublicCourseCreation
             : (existingToggles.restrictPublicCourseCreation ?? false),
+        enableEnrollmentManagement:
+          isSuperAdmin(session.user.role) && featureToggles.enableEnrollmentManagement !== undefined
+            ? featureToggles.enableEnrollmentManagement
+            : (existingToggles.enableEnrollmentManagement ?? true),
       };
 
       settings.featureToggles = mergedToggles;
