@@ -412,6 +412,20 @@ t('common.english') // "English" or "अंग्रेज़ी"
 
 ## 12. Recent Updates
 
+### Default Public Course Permissions & Admin Course Deletion Emails (August 2026)
+
+- **Default Public Course Creation Permission (`false` by default)**:
+  - Users (teachers) have `canCreatePublicCourses: false` by default on registration (`src/models/User.ts`).
+  - Public course creation is restricted by default until an Admin explicitly grants permission by toggling `canCreatePublicCourses = true` in Admin User Management (`/dashboard/admin/users`).
+  - `canUserCreatePublicCourses(userId, role)` in `src/lib/settingsHelpers.ts` serves as the backend source of truth, returning `true` for admins/superadmins and checking `Boolean(user?.canCreatePublicCourses)` for teachers.
+
+- **Admin Course Deletion with Mandatory Reason & Email Notification**:
+  - When an Admin or Super Admin deletes a course (via `/dashboard/admin/courses` or `DELETE /api/courses/[id]`), a mandatory **deletion reason** is required in the deletion modal.
+  - `DELETE /api/courses/[id]` validates the deletion reason for admin callers and triggers `sendCourseDeletionEmail()` (`src/lib/email/index.ts`) to email the course's instructor (teacher) detailing the course title and the admin's explanation.
+
+- **Localhost Logout Callback URL Fix**:
+  - Updated `LogoutButton.tsx` to dynamically set `callbackUrl` using `window.location.origin` (if available), ensuring signout on local dev environments stays on `http://localhost:3000/login` rather than redirecting to a production domain set in `NEXTAUTH_URL`.
+
 ### Design-system rollout to dashboards & public pages (July 2026)
 
 - Dashboards (student/teacher/admin/superadmin) moved to "quiet chrome, one aurora" (see §10): glass `.sidebar-rail` + `.dashboard-topbar` over a fixed `.dashboard-aurora` canvas; gradient welcome banners replaced by glass `.hero-banner` panels with `gradient-text` greetings; `StatCard`/`QuickActionCard` redesigned as hairline cards (small-caps eyebrow labels, Sora tabular numerals, thin gradient progress bars).

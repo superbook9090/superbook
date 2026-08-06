@@ -3,7 +3,6 @@ import { ROUTES } from '@/constants/routes';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { motion } from 'framer-motion';
 import {
   BookOpen,
@@ -33,13 +32,14 @@ export default function AdminCoursesPage() {
   const { session, status } = useSessionStore();
   const router = useRouter();
   const isSuperAdminUser = isSuperAdmin(session?.user?.role);
-  const { theme } = useRoleTheme();
   const { t } = useTranslation();
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<PublishStatusFilter>('all');
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteReason, setDeleteReason] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const clearFilters = () => {
@@ -86,17 +86,27 @@ export default function AdminCoursesPage() {
   };
 
   const handleDelete = async (courseId: string) => {
-    if (!confirm(t('admin.deleteCourseConfirm'))) return;
+    if (!deleteReason.trim()) {
+      setMessage({ type: 'error', text: 'Please provide a reason for deleting this course.' });
+      return;
+    }
 
+    setIsDeleting(true);
     try {
-      await deleteCourse(courseId);
-      setMessage({ type: 'success', text: t('admin.courseDeleted') });
+      await deleteCourse(courseId, deleteReason.trim());
+      setMessage({
+        type: 'success',
+        text: 'Course deleted successfully. An email notification has been sent to the instructor.',
+      });
       setDeleteId(null);
+      setDeleteReason('');
       fetchCourses();
     } catch (err) {
       const text =
         err instanceof ApiClientError ? err.message : t('admin.failedDeleteCourse');
       setMessage({ type: 'error', text });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -292,7 +302,10 @@ export default function AdminCoursesPage() {
                   </button>
                   <Tooltip label={t('common.delete')}>
                     <button
-                      onClick={() => setDeleteId(course._id)}
+                      onClick={() => {
+                        setDeleteId(course._id);
+                        setDeleteReason('');
+                      }}
                       aria-label={t('common.delete')}
                       className="px-3 py-2 min-h-[44px] sm:min-h-0 bg-[var(--error-light)] text-[var(--error)] rounded-lg hover:bg-[var(--error-light)]/80 transition-colors"
                     >
@@ -301,35 +314,83 @@ export default function AdminCoursesPage() {
                   </Tooltip>
                 </div>
               </div>
-
-              {/* Delete Confirmation */}
-              {deleteId === course._id && (
-                <div className="px-6 pb-6">
-                  <div className="bg-[var(--error-light)] border border-[var(--error)] rounded-xl p-4">
-                    <p className="text-sm text-[var(--error)] mb-3">
-                      {t('admin.deleteCourseConfirm')}
-                    </p>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleDelete(course._id)}
-                        className={`flex-1 min-h-[44px] sm:min-h-0 px-3 py-2 bg-gradient-to-r ${theme.gradient} text-white rounded-lg hover:opacity-90 transition-colors text-sm`}
-                      >
-                        {t('common.delete')}
-                      </button>
-                      <button
-                        onClick={() => setDeleteId(null)}
-                        className="flex-1 min-h-[44px] sm:min-h-0 px-3 py-2 bg-[var(--card-solid)] text-[var(--error)] border border-[var(--error)] rounded-lg hover:bg-[var(--error-light)] transition-colors text-sm"
-                      >
-                        {t('common.cancel')}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
             </motion.div>
           ))
         )}
       </motion.div>
+
+      {/* Delete Confirmation Modal with Deletion Reason Requirement */}
+      {deleteId && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-[var(--card-solid)] border border-[var(--border)] rounded-2xl p-6 max-w-lg w-full shadow-xl space-y-4"
+          >
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-[var(--color-foreground)]">Delete Course</h3>
+                <p className="text-xs text-[var(--color-muted-foreground)] mt-1">
+                  Deleting course: <strong className="text-[var(--color-foreground)]">{courses.find((c) => c._id === deleteId)?.title}</strong>
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setDeleteId(null);
+                  setDeleteReason('');
+                }}
+                className="text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] p-1"
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="bg-[var(--error-light)] border-l-4 border-[var(--color-error)] p-3 rounded-r-lg">
+              <p className="text-xs text-[var(--color-error)]">
+                Warning: This action will permanently remove the course and its contents. An email notification will be sent to the instructor with your reason for deletion.
+              </p>
+            </div>
+
+            <div>
+              <label htmlFor="deleteReason" className="block text-sm font-medium text-[var(--color-foreground)] mb-1.5">
+                Reason for Deletion <span className="text-[var(--color-error)]">*</span>
+              </label>
+              <textarea
+                id="deleteReason"
+                rows={4}
+                required
+                value={deleteReason}
+                onChange={(e) => setDeleteReason(e.target.value)}
+                placeholder="Please state why this course is being deleted. This reason will be emailed directly to the instructor..."
+                className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] placeholder-[var(--color-muted-foreground)] focus:ring-2 focus:ring-[var(--color-error)] focus:outline-none"
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setDeleteId(null);
+                  setDeleteReason('');
+                }}
+                disabled={isDeleting}
+                className="px-4 py-2 text-sm font-medium text-[var(--color-foreground)] bg-[var(--color-surface-muted)] hover:bg-[var(--color-surface-muted-strong)] rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDelete(deleteId)}
+                disabled={isDeleting || !deleteReason.trim()}
+                className="px-4 py-2 text-sm font-medium text-white bg-[var(--color-error)] hover:opacity-90 rounded-lg transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {isDeleting ? 'Deleting...' : 'Confirm & Delete'}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

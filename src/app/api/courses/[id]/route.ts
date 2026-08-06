@@ -20,6 +20,8 @@ import {
 } from '@/lib/courseAccess';
 import { requireFeature, checkPublicCoursePermission } from '@/lib/settingsHelpers';
 import { issueCertificatesForCourse } from '@/domain/learning/certificateIssuance';
+import { sendCourseDeletionEmail } from '@/lib/email';
+import { isAdmin } from '@/lib/roles';
 
 // GET /api/courses/[id] - Get a single course
 export async function GET(
@@ -268,10 +270,21 @@ export async function DELETE(
 
     logContext.userId = session.user.id;
 
+    const { searchParams } = new URL(req.url);
+    let reason = searchParams.get('reason') || '';
+    if (!reason) {
+      try {
+        const body = await req.json();
+        if (body?.reason) reason = body.reason;
+      } catch {
+        // no JSON body
+      }
+    }
+
     await dbConnect();
     const { id } = await params;
 
-    const course = await Course.findById(id);
+    const course = await Course.findById(id).populate('instructor', 'name email');
 
     if (!course) {
       return NextResponse.json(
@@ -280,16 +293,42 @@ export async function DELETE(
       );
     }
 
+    const isUserAdmin = isAdmin(session.user.role);
+
     // Check ownership or admin
-    if (
-      course.instructor.toString() !== session.user.id &&
-      session.user.role !== 'admin' &&
-      session.user.role !== 'superadmin'
-    ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const instructorObj = course.instructor as any;
+    const instructorId =
+      typeof instructorObj === 'object' && instructorObj !== null
+        ? instructorObj._id?.toString()
+        : String(instructorObj);
+
+    if (instructorId !== session.user.id && !isUserAdmin) {
       return NextResponse.json(
         { message: 'You can only delete your own courses' },
         { status: 403 }
       );
+    }
+
+    // Require reason and email teacher when course is deleted by admin/superadmin
+    if (isUserAdmin) {
+      if (!reason || !reason.trim()) {
+        return NextResponse.json(
+          { message: 'A reason for deletion is required when deleting a course.' },
+          { status: 400 }
+        );
+      }
+
+      const teacherObj = course.instructor as unknown as { name?: string; email?: string } | null;
+      if (teacherObj && teacherObj.email) {
+        await sendCourseDeletionEmail({
+          to: teacherObj.email,
+          teacherName: teacherObj.name || 'Teacher',
+          courseTitle: course.title,
+          reason: reason.trim(),
+          deletedBy: session.user.name || session.user.email || 'Administrator',
+        });
+      }
     }
 
     await deleteCourseRelatedData(id);

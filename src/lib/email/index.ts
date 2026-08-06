@@ -529,3 +529,80 @@ export async function sendPasswordResetEmail(params: {
     throw error;
   }
 }
+
+function courseDeletionHtml(params: {
+  teacherName: string;
+  courseTitle: string;
+  reason: string;
+  deletedBy?: string;
+}): string {
+  return `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Deletion Notice</title>
+  </head>
+  <body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background-color:#f8fafc;color:#1e293b;">
+    <div style="width:100%;background-color:#f8fafc;padding:40px 0;">
+      <div style="max-width:600px;margin:0 auto;background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);border:1px solid #e2e8f0;">
+        <div style="background:linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);padding:32px 24px;text-align:center;">
+          <div style="font-size:24px;font-weight:800;color:#ffffff;text-transform:uppercase;letter-spacing:1px;margin:0 0 6px 0;">Quiz-Do</div>
+          <div style="font-size:14px;font-weight:600;color:#fee2e2;text-transform:uppercase;letter-spacing:2px;margin:0;">Course Removal Notice</div>
+        </div>
+        <div style="padding:32px 24px;">
+          <h3 style="font-size:18px;font-weight:700;color:#0f172a;margin:0 0 16px 0;">Hello ${params.teacherName},</h3>
+          <p style="font-size:14px;line-height:1.6;color:#475569;margin:0 0 20px 0;">
+            This email is to notify you that your course <strong>"${params.courseTitle}"</strong> has been deleted from the platform by an administrator${params.deletedBy ? ` (${params.deletedBy})` : ''}.
+          </p>
+          <div style="background-color:#fef2f2;border-left:4px solid #ef4444;border-radius:8px;padding:20px;margin-bottom:24px;border-top:1px solid #fee2e2;border-right:1px solid #fee2e2;border-bottom:1px solid #fee2e2;">
+            <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#991b1b;margin-bottom:8px;">Reason for Deletion:</div>
+            <p style="margin:0;font-size:14px;line-height:1.6;color:#7f1d1d;white-space:pre-wrap;">${params.reason}</p>
+          </div>
+          <p style="font-size:14px;line-height:1.6;color:#475569;margin:0;">
+            If you have any questions regarding this action, please contact the platform administration or support team.
+          </p>
+        </div>
+        <div style="background-color:#f1f5f9;padding:24px;text-align:center;border-top:1px solid #e2e8f0;">
+          <p style="font-size:12px;color:#64748b;margin:0;line-height:1.5;">
+            © ${new Date().getFullYear()} <strong>Quiz-Do</strong>. All rights reserved.
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+  </html>`;
+}
+
+export async function sendCourseDeletionEmail(params: {
+  to: string;
+  teacherName: string;
+  courseTitle: string;
+  reason: string;
+  deletedBy?: string;
+}): Promise<boolean> {
+  try {
+    const transporter = getTransporter();
+    const safeTeacherName = params.teacherName.replace(/[<>]/g, '');
+    const safeCourseTitle = params.courseTitle.replace(/[<>]/g, '');
+    const safeReason = params.reason.replace(/[<>]/g, '');
+
+    await transporter.sendMail({
+      from: `"${smtpFromName}" <${smtpFromEmail}>`,
+      to: params.to,
+      subject: `Notice: Your course "${safeCourseTitle}" has been removed`,
+      text: `Hello ${safeTeacherName},\n\nYour course "${safeCourseTitle}" has been deleted by an administrator.\n\nReason for deletion:\n${safeReason}\n\nIf you have any questions, please contact support.\n\n— Quiz-Do Team`,
+      html: courseDeletionHtml({
+        teacherName: safeTeacherName,
+        courseTitle: safeCourseTitle,
+        reason: safeReason,
+        deletedBy: params.deletedBy,
+      }),
+    });
+    return true;
+  } catch (error) {
+    logApiError(error as Error, 'sendMail', '/lib/email/index.ts', { method: 'SMTP_COURSE_DELETION' });
+    return false;
+  }
+}

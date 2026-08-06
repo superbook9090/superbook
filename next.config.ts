@@ -1,8 +1,5 @@
-import path from 'path';
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  outputFileTracingRoot: path.join(__dirname),
   reactStrictMode: false, // Disabled to prevent double renders during debugging
   images: {
     remotePatterns: [

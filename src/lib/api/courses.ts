@@ -49,8 +49,11 @@ export function patchCourse(courseId: string, body: unknown): Promise<unknown> {
   return apiJson(`${BASE}/${encodeURIComponent(courseId)}`, { method: 'PATCH', body });
 }
 
-export function deleteCourse(courseId: string): Promise<unknown> {
-  return apiJson(`${BASE}/${encodeURIComponent(courseId)}`, { method: 'DELETE' });
+export function deleteCourse(courseId: string, reason?: string): Promise<unknown> {
+  const url = reason
+    ? `${BASE}/${encodeURIComponent(courseId)}?reason=${encodeURIComponent(reason)}`
+    : `${BASE}/${encodeURIComponent(courseId)}`;
+  return apiJson(url, { method: 'DELETE' });
 }
 
 // Curriculum APIs

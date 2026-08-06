@@ -27,7 +27,10 @@ const variantStyles: Record<LogoutButtonVariant, string> = {
 
 export default function LogoutButton({ variant = 'profile', className }: LogoutButtonProps) {
   const { t } = useTranslation();
-  const handleSignOut = useCallback(() => signOut({ callbackUrl: ROUTES.login }), []);
+  const handleSignOut = useCallback(() => {
+    const callbackUrl = typeof window !== 'undefined' ? `${window.location.origin}${ROUTES.login}` : ROUTES.login;
+    signOut({ callbackUrl });
+  }, []);
 
   const showLabel = variant !== 'sidebar';
 
