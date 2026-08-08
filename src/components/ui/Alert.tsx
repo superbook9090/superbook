@@ -92,7 +92,7 @@ export default function Alert({
         }}
         className={cn(
           "fixed top-5 right-5 sm:right-5 sm:left-auto left-1/2 -translate-x-1/2 sm:translate-x-0",
-          "z-50 flex flex-col gap-2 px-3 py-2 sm:px-4 sm:py-3 rounded-xl border shadow-lg w-80 max-w-[calc(100vw-2rem)]",
+          "z-[9999] flex flex-col gap-2 px-3 py-2 sm:px-4 sm:py-3 rounded-xl border shadow-lg w-80 max-w-[calc(100vw-2rem)]",
           styles[type],
           className
         )}
