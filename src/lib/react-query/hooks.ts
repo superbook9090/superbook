@@ -63,6 +63,9 @@ export interface Course {
   isCompleted?: boolean;
   completedAt?: string | null;
   enrolledCount?: number;
+  courseCode?: string | null;
+  slug?: string | null;
+  isPrivate?: boolean;
   createdAt: string;
 }
 
@@ -93,6 +96,9 @@ export interface Enrollment {
     price: number;
     instructor: { name: string; email: string };
     isPublished: boolean;
+    courseCode?: string | null;
+    slug?: string | null;
+    isPrivate?: boolean;
   };
   progress: number;
   status: string;

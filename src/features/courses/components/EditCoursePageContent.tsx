@@ -5,6 +5,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { LazyCreateCourseForm, LazyCurriculumEditor } from '@/lib/lazy';
 import { Settings, Layout } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import CourseActionBar from './CourseActionBar';
 
 export default function EditCoursePageContent({ courseId }: { courseId: string }) {
   const { t } = useTranslation();
@@ -12,13 +13,16 @@ export default function EditCoursePageContent({ courseId }: { courseId: string }
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-[var(--color-foreground)]">
-          {t('createCoursePage.editTitle')}
-        </h1>
-        <p className="mt-2 text-[var(--color-muted-foreground)]">
-          {t('createCoursePage.editDescription')}
-        </p>
+      <div className="mb-8 flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-[var(--color-foreground)]">
+            {t('createCoursePage.editTitle')}
+          </h1>
+          <p className="mt-2 text-[var(--color-muted-foreground)]">
+            {t('createCoursePage.editDescription')}
+          </p>
+        </div>
+        <CourseActionBar courseId={courseId} />
       </div>
 
       <div className="flex gap-1 mb-8 bg-[var(--color-surface-muted)] p-1 rounded-2xl w-fit border border-[var(--color-border)]">

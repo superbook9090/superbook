@@ -10,6 +10,7 @@ import PremiumLogo from '@/components/ui/PremiumLogo';
 import { useTranslation } from '@/hooks/useTranslation';
 import { roleThemes } from '@/lib/roleTheme';
 import { useSessionStore } from '@/store/useSessionStore';
+import { getSafeCallbackUrl } from '@/lib/callbackUrl';
 import {
   Mail,
   Lock,
@@ -34,6 +35,7 @@ declare global {
 function LoginFormInner() {
   const searchParams = useSearchParams();
   const resetSuccess = searchParams.get('reset') === 'success';
+  const callbackUrl = getSafeCallbackUrl(searchParams.get('callbackUrl'));
   const { status, fetchSession } = useSessionStore();
   const router = useRouter();
   const { t } = useTranslation();
@@ -58,9 +60,9 @@ function LoginFormInner() {
   // Client-side guard for UX improvement
   useEffect(() => {
     if (status === 'authenticated') {
-      router.replace(ROUTES.dashboard);
+      router.replace(callbackUrl);
     }
-  }, [status, router]);
+  }, [status, router, callbackUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,8 +94,8 @@ function LoginFormInner() {
       // Delay to ensure session is fully loaded and network tab captures the request
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Redirect to /dashboard - server-side redirect will handle role-based routing
-      router.push(ROUTES.dashboard);
+      // Redirect to the requested callback URL (role-based fallback if none provided)
+      router.push(callbackUrl);
     } catch (error) {
       setError(t('login.genericError'));
       console.error('Login error:', error);
@@ -122,7 +124,7 @@ function LoginFormInner() {
 
           await fetchSession(true);
           await new Promise(resolve => setTimeout(resolve, 500));
-          router.push(ROUTES.dashboard);
+          router.push(callbackUrl);
         } catch (error) {
           setError(t('login.genericError'));
           console.error('Native Google Login error:', error);
@@ -133,7 +135,7 @@ function LoginFormInner() {
 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, [router, fetchSession, t]);
+  }, [router, fetchSession, t, callbackUrl]);
 
   const handleGoogleSignIn = () => {
     // Check if we are running inside the React Native WebView
@@ -141,7 +143,7 @@ function LoginFormInner() {
       window.ReactNativeWebView.postMessage(JSON.stringify({ action: 'REQUEST_GOOGLE_SIGN_IN' }));
     } else {
       // Standard web flow
-      signIn('google', { callbackUrl: ROUTES.dashboard });
+      signIn('google', { callbackUrl });
     }
   };
 
@@ -428,7 +430,11 @@ function LoginFormInner() {
             <p className="mt-8 text-center text-sm text-[var(--color-muted-foreground)]">
               {t('login.dontHaveAccount')}{' '}
               <Link
-                href={ROUTES.register}
+                href={
+                  callbackUrl === ROUTES.dashboard
+                    ? ROUTES.register
+                    : `${ROUTES.register}?callbackUrl=${encodeURIComponent(callbackUrl)}`
+                }
                 className={`font-semibold ${theme.text} ${theme.hover.replace('hover:', 'hover:').replace('bg-', 'text-')} transition-colors`}
               >
                 {t('login.createOne')}

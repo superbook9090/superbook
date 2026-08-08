@@ -1,8 +1,9 @@
 'use client';
 import { ROUTES } from '@/constants/routes';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { motion } from 'framer-motion';
 import {
@@ -13,6 +14,7 @@ import {
   Calendar,
   BookOpen,
 } from 'lucide-react';
+import { listCoursesAdmin } from '@/lib/api/courses';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
@@ -20,7 +22,7 @@ import Tooltip from '@/components/ui/Tooltip';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useTranslation } from '@/hooks/useTranslation';
 import { formatDate } from '@/lib/dateUtils';
-import { usePaginatedQuizzes } from '@/lib/react-query/hooks';
+import { usePaginatedQuizzes, type Course } from '@/lib/react-query/hooks';
 import { patchQuiz, deleteQuiz } from '@/lib/api/quizzes';
 import { ApiClientError } from '@/lib/api/http';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
@@ -40,26 +42,49 @@ export default function AdminQuizzesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebouncedValue(searchQuery, 300);
   const [filter, setFilter] = useState<PublishStatusFilter>('all');
+  const [courseFilter, setCourseFilter] = useState<string>('all');
+  const [courseFilterInitialized, setCourseFilterInitialized] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  const { data: coursesData, isLoading: isCoursesLoading } = useQuery({
+    queryKey: ['courses', 'admin'],
+    queryFn: listCoursesAdmin,
+    select: (data) => (data.courses ?? []) as Course[],
+  });
+  const courses = useMemo(() => coursesData ?? [], [coursesData]);
 
   const { data: paginatedData, isLoading, refetch } = usePaginatedQuizzes({
     page,
     limit,
     search: debouncedSearch,
     status: filter,
+    course: courseFilter,
   });
 
   const quizzes = paginatedData?.quizzes ?? [];
   const pagination = paginatedData?.pagination;
 
+  // Default course filter to the most recently created course
+  useEffect(() => {
+    if (courseFilterInitialized || courses.length === 0) return;
+    const latest = [...courses].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )[0];
+    if (latest?._id) {
+      setCourseFilter(latest._id);
+      setCourseFilterInitialized(true);
+    }
+  }, [courses, courseFilterInitialized]);
+
   // Reset page when filters change
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearch, filter]);
+  }, [debouncedSearch, filter, courseFilter]);
 
   const clearFilters = () => {
     setSearchQuery('');
     setFilter('all');
+    setCourseFilter('all');
     setPage(1);
   };
 
@@ -96,7 +121,7 @@ export default function AdminQuizzesPage() {
 
   // using quizzes directly from backend
 
-  if (isLoading) {
+  if (isLoading || isCoursesLoading) {
     return <PageSkeleton />;
   }
 
@@ -153,6 +178,24 @@ export default function AdminQuizzesPage() {
                 draft: t('common.draft'),
               }),
             }}
+            chipGroups={
+              courses.length > 0
+                ? [
+                    {
+                      label: t('teacherQuizzes.tableCourse'),
+                      icon: <BookOpen className="w-3.5 h-3.5" aria-hidden />,
+                      value: courseFilter,
+                      onChange: (id) => setCourseFilter(id),
+                      options: [
+                        { id: 'all', label: t('teacherQuizzes.allCourses') },
+                        ...courses.map((course) => ({ id: course._id, label: course.title })),
+                      ],
+                      neutralValue: 'all',
+                      minOptions: 2,
+                    },
+                  ]
+                : undefined
+            }
           />
         </FilterPanel>
       </motion.div>

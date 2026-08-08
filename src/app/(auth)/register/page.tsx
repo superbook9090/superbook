@@ -5,6 +5,7 @@ import { authOptions } from '@/lib/auth';
 import { ROUTES } from '@/constants/routes';
 import { createPageMetadata } from '@/lib/seo/metadata';
 import { LazyRegisterForm } from '@/lib/lazy';
+import { getSafeCallbackUrl } from '@/lib/callbackUrl';
 
 export const metadata: Metadata = createPageMetadata({
   title: 'Register — Free Online Learning Account',
@@ -14,11 +15,16 @@ export const metadata: Metadata = createPageMetadata({
   keywords: ['sign up LMS', 'free online learning', 'register as teacher', 'student registration'],
 });
 
-export default async function RegisterPage() {
+export default async function RegisterPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ callbackUrl?: string }>;
+}) {
   const session = await getServerSession(authOptions);
 
   if (session) {
-    redirect(ROUTES.dashboard);
+    const { callbackUrl } = await searchParams;
+    redirect(getSafeCallbackUrl(callbackUrl, ROUTES.dashboard));
   }
 
   return <LazyRegisterForm />;

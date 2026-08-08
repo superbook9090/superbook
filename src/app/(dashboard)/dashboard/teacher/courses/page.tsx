@@ -12,9 +12,8 @@ import { useSessionStore } from '@/store/useSessionStore';
 import Alert from '@/components/ui/Alert';
 import Tooltip from '@/components/ui/Tooltip';
 import { PageSkeleton } from '@/components/ui/Skeleton';
-import { useTeacherCourses, usePublishCourse, useMarkCourseCompleted, useDeleteCourse, type Course } from '@/lib/react-query/hooks';
-import { Trash2, Award, Users } from 'lucide-react';
-import { LazyConfirmModal } from '@/lib/lazy';
+import { useTeacherCourses, type Course } from '@/lib/react-query/hooks';
+import { Award } from 'lucide-react';
 import { useFeature } from '@/contexts/AppSettingsContext';
 
 export default function TeacherCoursesPage() {
@@ -22,17 +21,11 @@ export default function TeacherCoursesPage() {
   const router = useRouter();
   const { t } = useTranslation();
   const { theme } = useRoleTheme();
-  const isEnrollmentManagementEnabled = useFeature('enableEnrollmentManagement');
   const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
-  const [confirmDeleteCourse, setConfirmDeleteCourse] = useState<string | null>(null);
-  const [confirmCompleteCourse, setConfirmCompleteCourse] = useState<string | null>(null);
 
   // Get orgId from session
   const orgId = (session?.user as { organizationId?: string })?.organizationId || 'public';
   const { data: courses = [], isLoading, error } = useTeacherCourses(orgId);
-  const publishCourse = usePublishCourse();
-  const markCourseCompleted = useMarkCourseCompleted();
-  const deleteCourse = useDeleteCourse();
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -40,56 +33,6 @@ export default function TeacherCoursesPage() {
       router.push(ROUTES.login);
     }
   }, [status, session, router]);
-
-  const handlePublishUnpublish = async (courseId: string, isPublished: boolean) => {
-    try {
-      await publishCourse.mutateAsync({ courseId, isPublished });
-      setAlertState({
-        type: 'success',
-        message: isPublished ? t('teacherCourses.coursePublished') : t('teacherCourses.courseUnpublished')
-      });
-    } catch (_error) {
-      setAlertState({
-        type: 'error',
-        message: t('teacherCourses.publishError')
-      });
-      console.error('Publish error:', _error);
-    }
-  };
-
-  const handleMarkCompleted = async (courseId: string, isCompleted: boolean) => {
-    try {
-      await markCourseCompleted.mutateAsync({ courseId, isCompleted });
-      setAlertState({
-        type: 'success',
-        message: isCompleted ? t('teacherCourses.courseMarkedCompleted') : t('teacherCourses.courseReopened')
-      });
-      setConfirmCompleteCourse(null);
-    } catch (_error) {
-      setAlertState({
-        type: 'error',
-        message: t('teacherCourses.completeError')
-      });
-      console.error('Mark completed error:', _error);
-    }
-  };
-
-  const handleDeleteCourse = async (courseId: string) => {
-    try {
-      await deleteCourse.mutateAsync(courseId);
-      setAlertState({
-        type: 'success',
-        message: t('teacherCourses.courseDeleted')
-      });
-      setConfirmDeleteCourse(null);
-    } catch (_error) {
-      setAlertState({
-        type: 'error',
-        message: t('teacherCourses.deleteError')
-      });
-      console.error('Delete error:', _error);
-    }
-  };
 
   if (status === 'loading' || isLoading) {
     return <PageSkeleton />;
@@ -197,70 +140,13 @@ export default function TeacherCoursesPage() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex gap-2 mt-4">
+                    <div className="flex mt-4 pt-4 border-t border-[var(--border)]">
                       <button
                         onClick={() => router.push(ROUTES.teacher.courseEdit(course._id))}
-                        className="flex-1 px-3 py-2 text-sm font-medium text-[var(--teacher-primary)] bg-[var(--teacher-soft)] rounded-lg hover:bg-[var(--teacher-border)] transition-colors"
+                        className="flex-1 px-4 py-2.5 text-sm font-semibold text-center text-white bg-gradient-to-r from-[var(--teacher-primary)] to-[var(--teacher-accent)] hover:opacity-90 rounded-xl transition-opacity"
                       >
-                        {t('teacherCourses.edit')}
+                        {t('teacherCourses.edit') || 'Edit Course'}
                       </button>
-                      <button
-                        onClick={() => handlePublishUnpublish(course._id, !course.isPublished)}
-                        disabled={publishCourse.isPending}
-                        className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${course.isPublished
-                          ? 'text-[var(--color-warning)] bg-[var(--color-warning-light)] hover:bg-[var(--color-warning)]/20'
-                          : 'text-[var(--color-success)] bg-[var(--color-success-light)] hover:bg-[var(--color-success)]/20'
-                          }`}
-                      >
-                        {publishCourse.isPending ? (
-                          <span className="flex items-center justify-center">
-                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            {t('common.loading')}
-                          </span>
-                        ) : (
-                          course.isPublished ? t('teacherCourses.unpublish') : t('teacherCourses.publish')
-                        )}
-                      </button>
-                      {isEnrollmentManagementEnabled && (
-                        <Tooltip label={t('enrolledStudents.viewStudents')}>
-                          <button
-                            onClick={() => router.push(ROUTES.teacher.courseStudents(course._id))}
-                            aria-label={t('enrolledStudents.viewStudents')}
-                            className="p-2 text-[var(--color-muted-foreground)] bg-[var(--color-surface-muted)] rounded-lg hover:bg-[var(--info-light)] hover:text-[var(--info)] transition-colors"
-                          >
-                            <Users className="w-5 h-5" />
-                          </button>
-                        </Tooltip>
-                      )}
-                      <Tooltip label={course.isCompleted ? t('teacherCourses.reopenCourse') : t('teacherCourses.markCompleted')}>
-                        <button
-                          onClick={() =>
-                            course.isCompleted
-                              ? handleMarkCompleted(course._id, false)
-                              : setConfirmCompleteCourse(course._id)
-                          }
-                          disabled={markCourseCompleted.isPending}
-                          aria-label={course.isCompleted ? t('teacherCourses.reopenCourse') : t('teacherCourses.markCompleted')}
-                          className={`p-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${course.isCompleted
-                            ? 'text-[var(--color-info)] bg-[var(--color-info-light)] hover:bg-[var(--color-info)]/20'
-                            : 'text-[var(--color-muted-foreground)] bg-[var(--color-surface-muted)] hover:bg-[var(--color-info-light)] hover:text-[var(--color-info)]'
-                            }`}
-                        >
-                          <Award className="w-5 h-5" />
-                        </button>
-                      </Tooltip>
-                      <Tooltip label={t('teacherCourses.deleteCourse') || 'Delete Course'}>
-                        <button
-                          onClick={() => setConfirmDeleteCourse(course._id)}
-                          aria-label={t('teacherCourses.deleteCourse') || 'Delete Course'}
-                          className="p-2 text-[var(--color-error)] bg-[var(--color-error-light)] rounded-lg hover:bg-[var(--color-error)]/20 transition-colors"
-                        >
-                          <Trash2 className="w-5 h-5" />
-                        </button>
-                      </Tooltip>
                     </div>
                   </div>
                 </div>
@@ -269,36 +155,6 @@ export default function TeacherCoursesPage() {
           )}
         </div>
       </div>
-
-      <LazyConfirmModal
-        isOpen={!!confirmCompleteCourse}
-        title={t('teacherCourses.completeConfirmTitle') || 'Mark Course as Completed?'}
-        message={t('teacherCourses.completeConfirmMessage') || 'Students who have finished all lessons and quizzes will automatically receive a completion certificate. Continue?'}
-        onConfirm={() => {
-          if (confirmCompleteCourse) {
-            handleMarkCompleted(confirmCompleteCourse, true);
-          }
-        }}
-        onCancel={() => setConfirmCompleteCourse(null)}
-        confirmText={t('teacherCourses.markCompleted')}
-        type="info"
-        isLoading={markCourseCompleted.isPending}
-      />
-
-      <LazyConfirmModal
-        isOpen={!!confirmDeleteCourse}
-        title={t('teacherCourses.deleteConfirmTitle') || 'Delete Course'}
-        message={t('teacherCourses.deleteConfirmMessage') || 'Are you sure you want to delete this course? This action cannot be undone.'}
-        onConfirm={() => {
-          if (confirmDeleteCourse) {
-            handleDeleteCourse(confirmDeleteCourse);
-          }
-        }}
-        onCancel={() => setConfirmDeleteCourse(null)}
-        confirmText={t('common.delete')}
-        type="danger"
-        isLoading={deleteCourse.isPending}
-      />
     </>
   );
 }

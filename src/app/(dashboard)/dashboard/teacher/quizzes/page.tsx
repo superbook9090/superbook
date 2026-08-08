@@ -43,6 +43,7 @@ export default function TeacherQuizzesPage() {
   const searchTerm = useDebouncedValue(searchInput, 300);
   const [statusFilter, setStatusFilter] = useState<QuizStatusFilter>('all');
   const [courseFilter, setCourseFilter] = useState('all');
+  const [courseFilterInitialized, setCourseFilterInitialized] = useState(false);
   const [sort, setSort] = useState<QuizSortOption>('newest');
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -61,6 +62,18 @@ export default function TeacherQuizzesPage() {
   const pagination = paginatedData?.pagination;
   const showListLoader = isQuizzesLoading && paginatedData === undefined;
   const totalQuizzes = pagination?.total ?? 0;
+
+  // Default course filter to the most recently created course
+  useEffect(() => {
+    if (courseFilterInitialized || courses.length === 0) return;
+    const latest = [...courses].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )[0];
+    if (latest?._id) {
+      setCourseFilter(latest._id);
+      setCourseFilterInitialized(true);
+    }
+  }, [courses, courseFilterInitialized]);
 
   // Reset page when debounced search changes
   useEffect(() => {

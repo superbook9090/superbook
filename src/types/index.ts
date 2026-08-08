@@ -39,6 +39,7 @@ export interface Course {
   };
   courseCode?: string | null;
   isPrivate?: boolean;
+  slug?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }

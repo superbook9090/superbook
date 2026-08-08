@@ -15,6 +15,7 @@ export type CourseDetail = {
   language?: 'en' | 'hi';
   courseCode?: string | null;
   isPrivate?: boolean;
+  isCompleted?: boolean;
 };
 
 export type CoursesListPayload = { courses: unknown[]; organizationId?: string };

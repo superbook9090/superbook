@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
+import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import {
   buildPublicCourseCanonical,
@@ -14,6 +15,7 @@ import { ROUTES } from '@/constants/routes';
 import MarketingHeader from '@/components/home/MarketingHeader';
 import Footer from '@/components/home/Footer';
 import { ensureFeatureEnabled } from '@/lib/settingsHelpers';
+import AutoEnrollHandler from '@/components/courses/AutoEnrollHandler';
 
 export const revalidate = 300;
 export const dynamicParams = true;
@@ -125,13 +127,17 @@ export default async function PublicCourseDetailPage({
           <p>{course.description}</p>
         </div>
 
+        <Suspense fallback={null}>
+          <AutoEnrollHandler courseId={course._id} />
+        </Suspense>
+
         <div className="rounded-2xl bg-[var(--student-soft)] border border-[var(--student-border)] p-8 text-center">
           <h2 className="text-2xl font-bold text-[var(--color-foreground)] mb-3">Ready to start learning?</h2>
           <p className="text-[var(--color-muted-foreground)] mb-6">
             Sign up free to enroll in this course and access all lessons and quizzes.
           </p>
           <Link
-            href={ROUTES.register}
+            href={`${ROUTES.register}?callbackUrl=${encodeURIComponent(`/courses/${course.slug}?enroll=true`)}`}
             className="inline-flex items-center px-8 py-3 rounded-xl bg-[var(--color-primary)] text-white font-semibold hover:opacity-90 transition-opacity"
           >
             Enroll Free

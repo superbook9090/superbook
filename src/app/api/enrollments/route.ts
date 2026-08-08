@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
     const enrollments = await Enrollment.find(query, selectFields)
       .populate({
         path: 'course',
-        select: 'title description thumbnail category instructor price',
+        select: 'title description thumbnail category instructor price slug courseCode',
         populate: { path: 'instructor', select: 'name email' }
       })
       .populate('student', 'name email')

@@ -5,6 +5,7 @@ import { authOptions } from '@/lib/auth';
 import { ROUTES } from '@/constants/routes';
 import { createPageMetadata } from '@/lib/seo/metadata';
 import { LazyLoginForm } from '@/lib/lazy';
+import { getSafeCallbackUrl } from '@/lib/callbackUrl';
 
 export const metadata: Metadata = createPageMetadata({
   title: 'Login — Access Courses & Quizzes',
@@ -14,11 +15,16 @@ export const metadata: Metadata = createPageMetadata({
   keywords: ['student login LMS', 'teacher login', 'online course login'],
 });
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ callbackUrl?: string }>;
+}) {
   const session = await getServerSession(authOptions);
 
   if (session) {
-    redirect(ROUTES.dashboard);
+    const { callbackUrl } = await searchParams;
+    redirect(getSafeCallbackUrl(callbackUrl, ROUTES.dashboard));
   }
 
   return <LazyLoginForm />;

@@ -2,8 +2,8 @@
 import { ROUTES } from '@/constants/routes';
 import { getDashboardHomePath } from '@/lib/roles';
 
-import { useRouter } from 'next/navigation';
-import { useState, useEffect, useMemo } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import PremiumLogo from '@/components/ui/PremiumLogo';
@@ -13,6 +13,7 @@ import { registerAccount } from '@/lib/api/auth';
 import { roleThemes } from '@/lib/roleTheme';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
+import { getSafeCallbackUrl } from '@/lib/callbackUrl';
 import {
   User,
   Mail,
@@ -28,12 +29,14 @@ import Alert from '@/components/ui/Alert';
 import { Loader } from '@/components/ui/Loader';
 import Tooltip from '@/components/ui/Tooltip';
 
-export default function RegisterForm() {
+function RegisterFormInner() {
   const { status, fetchSession } = useSessionStore();
   const allowTeacherRegistration = useSettingsStore(
     (s) => s.settings.platformConfig.allowTeacherRegistration ?? true
   );
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = getSafeCallbackUrl(searchParams.get('callbackUrl'));
   const { t } = useTranslation();
   // Use student theme as base brand identity for auth pages
   const theme = roleThemes.student;
@@ -53,9 +56,9 @@ export default function RegisterForm() {
   // Client-side guard for UX improvement
   useEffect(() => {
     if (status === 'authenticated') {
-      router.replace(ROUTES.dashboard);
+      router.replace(callbackUrl);
     }
-  }, [status, router]);
+  }, [status, router, callbackUrl]);
 
   useEffect(() => {
     if (!allowTeacherRegistration && formData.role === 'teacher') {
@@ -110,8 +113,12 @@ export default function RegisterForm() {
       // Delay to ensure session is fully loaded
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Redirect to dashboard based on role
-      router.push(getDashboardHomePath(formData.role));
+      // For students, return to the callback URL so seamless enrollment can complete
+      const redirectTo =
+        formData.role === 'student' && callbackUrl !== ROUTES.dashboard
+          ? callbackUrl
+          : getDashboardHomePath(formData.role);
+      router.push(redirectTo);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Registration failed. Please try again.';
       setError(message);
@@ -484,7 +491,7 @@ export default function RegisterForm() {
             {/* Google Sign Up */}
             <motion.button
               type="button"
-              onClick={() => signIn('google', { callbackUrl: ROUTES.dashboard })}
+              onClick={() => signIn('google', { callbackUrl })}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className="w-full flex items-center justify-center py-3 px-4 bg-[var(--card-solid)] border-2 border-[var(--color-border)] rounded-xl hover:border-[var(--color-muted)] hover:bg-[var(--color-surface-muted)] transition-all"
@@ -502,7 +509,11 @@ export default function RegisterForm() {
             <p className="mt-6 text-center text-sm text-[var(--color-muted-foreground)]">
               {t('register.alreadyHaveAccount')}{' '}
               <Link
-                href={ROUTES.login}
+                href={
+                  callbackUrl === ROUTES.dashboard
+                    ? ROUTES.login
+                    : `${ROUTES.login}?callbackUrl=${encodeURIComponent(callbackUrl)}`
+                }
                 className={`font-semibold ${theme.text} ${theme.hover.replace('hover:', 'hover:').replace('bg-', 'text-')} transition-colors`}
               >
                 {t('register.signIn')}
@@ -512,5 +523,13 @@ export default function RegisterForm() {
         </motion.div>
       </div>
     </div>
+  );
+}
+
+export default function RegisterForm() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader /></div>}>
+      <RegisterFormInner />
+    </Suspense>
   );
 }

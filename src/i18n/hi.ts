@@ -72,6 +72,9 @@ export const hi = {
     overview: 'अवलोकन',
     notifications: 'सूचनाएं',
     close: 'बंद करें',
+    share: 'साझा करें',
+    copyLink: 'लिंक कॉपी करें',
+    linkCopied: 'लिंक कॉपी हो गया!',
   },
 
   privacy: {

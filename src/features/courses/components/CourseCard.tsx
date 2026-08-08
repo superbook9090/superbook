@@ -15,6 +15,7 @@ import {
   RotateCcw,
   Trash2
 } from 'lucide-react';
+import CourseShareButton from '@/components/courses/CourseShareButton';
 import { Badge } from '@/components/ui/Badge';
 import { Loader } from '@/components/ui/Loader';
 import Tooltip from '@/components/ui/Tooltip';
@@ -143,20 +144,23 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
           {/* Actions */}
           <div className="flex gap-2 pt-2">
             {type === 'available' ? (
-              <button
-                onClick={handleEnroll}
-                disabled={isLoading}
-                className="btn-premium flex-1 group/btn"
-              >
-                {isLoading ? (
-                  <Loader size="sm" />
-                ) : (
-                  <>
-                    {t('courses.enrollNow')}
-                    <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                  </>
-                )}
-              </button>
+              <>
+                <button
+                  onClick={handleEnroll}
+                  disabled={isLoading}
+                  className="btn-premium flex-1 group/btn"
+                >
+                  {isLoading ? (
+                    <Loader size="sm" />
+                  ) : (
+                    <>
+                      {t('courses.enrollNow')}
+                      <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                    </>
+                  )}
+                </button>
+                <CourseShareButton course={courseData} />
+              </>
             ) : (
               <>
                 <button
@@ -171,6 +175,7 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
                     <><ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" /> {t('courses.continue')}</>
                   )}
                 </button>
+                <CourseShareButton course={courseData} />
                 <Tooltip label={t('courses.dropCourse')}>
                   <button
                     onClick={handleDrop}

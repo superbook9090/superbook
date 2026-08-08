@@ -72,6 +72,9 @@ export const en = {
     overview: 'Overview',
     notifications: 'Notifications',
     close: 'Close',
+    share: 'Share',
+    copyLink: 'Copy Link',
+    linkCopied: 'Link Copied!',
   },
 
   privacy: {

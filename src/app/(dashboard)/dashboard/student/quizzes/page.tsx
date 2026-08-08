@@ -33,6 +33,8 @@ export default function StudentQuizzesPage() {
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
   const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState<string>('all');
+  const [courseFilterInitialized, setCourseFilterInitialized] = useState(false);
 
   const orgId = (session?.user as { organizationId?: string })?.organizationId || 'public';
   const { data: enrollments = [] } = useEnrollments();
@@ -41,6 +43,19 @@ export default function StudentQuizzesPage() {
   const isLoading = quizzesLoading;
 
   const startQuiz = useStartQuizAttempt();
+
+  // Default to the most recently enrolled course once enrollments load
+  useEffect(() => {
+    if (courseFilterInitialized || enrollments.length === 0) return;
+    const latest = [...enrollments].sort(
+      (a, b) => new Date(b.enrolledAt).getTime() - new Date(a.enrolledAt).getTime()
+    )[0];
+    const latestCourseId = latest.course?._id?.toString();
+    if (latestCourseId) {
+      setSelectedCourse(latestCourseId);
+      setCourseFilterInitialized(true);
+    }
+  }, [courseFilterInitialized, enrollments]);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -64,21 +79,25 @@ export default function StudentQuizzesPage() {
       }
     ).filter(Boolean);
 
+    const courseMatches = (courseId: string | undefined) =>
+      selectedCourse === 'all' || courseId === selectedCourse;
+
     // Filter for published quizzes from enrolled courses that haven't been completed
     const relevantQuizzes = allQuizzes.filter((q: Quiz) => {
       const quizCourseId = q.course?._id?.toString();
       const isEnrolled = quizCourseId && enrolledCourseIds.includes(quizCourseId);
+      const matchesCourse = courseMatches(quizCourseId);
 
       // Check if quiz has been completed
       const isCompleted = attempts.some(
         (a: QuizAttempt) => a.quiz?._id === q._id && a.status === 'completed'
       );
 
-      return q.isPublished && isEnrolled && !isCompleted;
+      return q.isPublished && isEnrolled && matchesCourse && !isCompleted;
     });
 
     return relevantQuizzes;
-  }, [enrollments, attempts, allQuizzes]);
+  }, [enrollments, attempts, allQuizzes, selectedCourse]);
 
   const handleStartQuiz = useCallback(
     async (quizId: string) => {
@@ -95,8 +114,12 @@ export default function StudentQuizzesPage() {
   );
 
   const completedAttempts = useMemo(() =>
-    attempts.filter((a: QuizAttempt) => a.status === 'completed'),
-    [attempts]
+    attempts.filter((a: QuizAttempt) => {
+      const quizCourseId = a.quiz?.course?._id?.toString();
+      const matchesCourse = selectedCourse === 'all' || quizCourseId === selectedCourse;
+      return a.status === 'completed' && matchesCourse;
+    }),
+    [attempts, selectedCourse]
   );
 
   if (status === 'loading' || isLoading) {
@@ -116,6 +139,38 @@ export default function StudentQuizzesPage() {
           message={alertState.message}
           onClose={() => setAlertState(null)}
         />
+      )}
+
+      {/* Course filter */}
+      {enrollments.length > 0 && (
+        <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+          <label
+            htmlFor="course-filter"
+            className="text-sm font-medium text-[var(--color-muted-foreground)]"
+          >
+            {t('teacherQuizzes.tableCourse')}:
+          </label>
+          <select
+            id="course-filter"
+            value={selectedCourse}
+            onChange={(e) => setSelectedCourse(e.target.value)}
+            className="bg-[var(--card-solid)] border border-[var(--border)] rounded-xl px-3 py-2 text-sm text-[var(--color-foreground)] focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] outline-none"
+          >
+            <option value="all">{t('teacherQuizzes.allCourses')}</option>
+            {enrollments.map((enrollment) => {
+              const course =
+                typeof enrollment.course === 'object' && enrollment.course !== null
+                  ? enrollment.course
+                  : null;
+              if (!course) return null;
+              return (
+                <option key={course._id} value={course._id.toString()}>
+                  {course.title}
+                </option>
+              );
+            })}
+          </select>
+        </div>
       )}
 
       {/* Tabs */}
