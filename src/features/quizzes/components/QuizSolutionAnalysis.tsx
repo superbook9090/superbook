@@ -5,7 +5,7 @@ import { Sparkles } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useFeature } from '@/contexts/AppSettingsContext';
 import { analyzeQuizSolution } from '@/lib/api/quizSolutionAnalysis';
-import { ApiClientError, getApiErrorMessage } from '@/lib/api/http';
+import { getApiErrorMessage } from '@/lib/api/http';
 import Alert from '@/components/ui/Alert';
 import { Loader } from '@/components/ui/Loader';
 import { cn } from '@/lib/utils';

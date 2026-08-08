@@ -7,7 +7,7 @@ import { KeyRound, Loader2 } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useJoinCourseByCode } from '@/lib/react-query/hooks';
-import { ApiClientError, getApiErrorMessage } from '@/lib/api/http';
+import { getApiErrorMessage } from '@/lib/api/http';
 import Alert from '@/components/ui/Alert';
 import { cn } from '@/lib/utils';
 
