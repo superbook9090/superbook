@@ -125,7 +125,7 @@ export default function TeacherCoursesPage() {
           <Alert
             type="error"
             message={String(error)}
-            onClose={() => setError(null)}
+            onClose={() => setAlertState(null)}
             className="relative top-0 right-0 left-0 translate-x-0 w-full mt-4 z-10"
           />
         )}
@@ -168,8 +168,8 @@ export default function TeacherCoursesPage() {
                     <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
                       <div className="flex items-center gap-2">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${course.isPublished
-                            ? 'bg-[var(--success-light)] text-[var(--success)]'
-                            : 'bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)]'
+                          ? 'bg-[var(--success-light)] text-[var(--success)]'
+                          : 'bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)]'
                           }`}>
                           {course.isPublished ? t('teacherCourses.published') : t('teacherCourses.draft')}
                         </span>
@@ -208,8 +208,8 @@ export default function TeacherCoursesPage() {
                         onClick={() => handlePublishUnpublish(course._id, !course.isPublished)}
                         disabled={publishCourse.isPending}
                         className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${course.isPublished
-                            ? 'text-[var(--color-warning)] bg-[var(--color-warning-light)] hover:bg-[var(--color-warning)]/20'
-                            : 'text-[var(--color-success)] bg-[var(--color-success-light)] hover:bg-[var(--color-success)]/20'
+                          ? 'text-[var(--color-warning)] bg-[var(--color-warning-light)] hover:bg-[var(--color-warning)]/20'
+                          : 'text-[var(--color-success)] bg-[var(--color-success-light)] hover:bg-[var(--color-success)]/20'
                           }`}
                       >
                         {publishCourse.isPending ? (
@@ -245,8 +245,8 @@ export default function TeacherCoursesPage() {
                           disabled={markCourseCompleted.isPending}
                           aria-label={course.isCompleted ? t('teacherCourses.reopenCourse') : t('teacherCourses.markCompleted')}
                           className={`p-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${course.isCompleted
-                              ? 'text-[var(--color-info)] bg-[var(--color-info-light)] hover:bg-[var(--color-info)]/20'
-                              : 'text-[var(--color-muted-foreground)] bg-[var(--color-surface-muted)] hover:bg-[var(--color-info-light)] hover:text-[var(--color-info)]'
+                            ? 'text-[var(--color-info)] bg-[var(--color-info-light)] hover:bg-[var(--color-info)]/20'
+                            : 'text-[var(--color-muted-foreground)] bg-[var(--color-surface-muted)] hover:bg-[var(--color-info-light)] hover:text-[var(--color-info)]'
                             }`}
                         >
                           <Award className="w-5 h-5" />
