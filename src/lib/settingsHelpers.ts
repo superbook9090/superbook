@@ -9,6 +9,7 @@ interface FeatureToggles {
   enableQuizzes: boolean;
   enableCourses: boolean;
   enableAnalytics: boolean;
+  enableClarity?: boolean;
   enableQuizSolutionAnalysis: boolean;
   restrictPublicCourseCreation?: boolean;
   enableEnrollmentManagement?: boolean;

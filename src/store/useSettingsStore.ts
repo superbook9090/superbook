@@ -6,6 +6,7 @@ export type FeatureToggleKey =
   | 'enableQuizzes'
   | 'enableCourses'
   | 'enableAnalytics'
+  | 'enableClarity'
   | 'enableQuizSolutionAnalysis'
   | 'enableEnrollmentManagement';
 
@@ -37,6 +38,7 @@ export const defaultPublicAppSettings: PublicAppSettings = {
     enableQuizzes: true,
     enableCourses: true,
     enableAnalytics: true,
+    enableClarity: true,
     enableQuizSolutionAnalysis: false,
     enableEnrollmentManagement: true,
   },

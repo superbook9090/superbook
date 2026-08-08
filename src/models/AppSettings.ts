@@ -11,6 +11,7 @@ export interface IAppSettings extends Document {
     enableQuizzes: boolean;
     enableCourses: boolean;
     enableAnalytics: boolean;
+    enableClarity: boolean;
     enableQuizSolutionAnalysis: boolean;
     restrictPublicCourseCreation?: boolean;
     enableEnrollmentManagement?: boolean;
@@ -56,6 +57,10 @@ const appSettingsSchema = new Schema<IAppSettings>(
         default: true,
       },
       enableAnalytics: {
+        type: Boolean,
+        default: true,
+      },
+      enableClarity: {
         type: Boolean,
         default: true,
       },

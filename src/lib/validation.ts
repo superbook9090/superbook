@@ -149,6 +149,7 @@ export const updateSettingsSchema = z.object({
     enableQuizzes: z.boolean(),
     enableCourses: z.boolean(),
     enableAnalytics: z.boolean(),
+    enableClarity: z.boolean().optional(),
     enableQuizSolutionAnalysis: z.boolean(),
     restrictPublicCourseCreation: z.boolean().optional(),
     enableEnrollmentManagement: z.boolean().optional(),

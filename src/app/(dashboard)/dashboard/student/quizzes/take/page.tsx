@@ -136,7 +136,6 @@ export default function TakeQuizPage() {
         const errorMsg = options.forceSubmit
           ? t('errors.securityForceSubmitFailed')
           : t('errors.errorSubmittingQuiz');
-        setError(errorMsg);
         setAlertState({ type: 'error', message: errorMsg });
         isSubmittingRef.current = false;
         setIsAutoSubmitting(false);

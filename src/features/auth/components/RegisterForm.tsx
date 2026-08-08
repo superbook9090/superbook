@@ -24,6 +24,7 @@ import {
   Users,
   Building2
 } from 'lucide-react';
+import Alert from '@/components/ui/Alert';
 import { Loader } from '@/components/ui/Loader';
 import Tooltip from '@/components/ui/Tooltip';
 
@@ -252,16 +253,12 @@ export default function RegisterForm() {
 
             {/* Error Message */}
             {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-4 p-3 bg-[var(--error-light)] border border-[var(--error)]/20 rounded-xl flex items-start"
-              >
-                <div className="w-5 h-5 rounded-full bg-[var(--error)]/10 flex items-center justify-center mr-3 mt-0.5">
-                  <span className="text-[var(--error)] text-xs">!</span>
-                </div>
-                <p className="text-sm text-[var(--error)]">{error}</p>
-              </motion.div>
+              <Alert
+                type="error"
+                message={error}
+                onClose={() => setError('')}
+                className="relative top-0 right-0 left-0 translate-x-0 w-full mb-4 z-10"
+              />
             )}
 
             {/* Form */}

@@ -18,6 +18,7 @@ import {
   ArrowRight,
   Sparkles
 } from 'lucide-react';
+import Alert from '@/components/ui/Alert';
 import { Loader } from '@/components/ui/Loader';
 import Tooltip from '@/components/ui/Tooltip';
 import { Suspense } from 'react';
@@ -276,16 +277,12 @@ function LoginFormInner() {
 
             {/* Error Message */}
             {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-6 p-4 bg-[var(--error-light)] border border-[var(--error)]/20 rounded-xl flex items-start"
-              >
-                <div className="w-5 h-5 rounded-full bg-[var(--error)]/10 flex items-center justify-center mr-3 mt-0.5">
-                  <span className="text-[var(--error)] text-xs">!</span>
-                </div>
-                <p className="text-sm text-[var(--error)]">{error}</p>
-              </motion.div>
+              <Alert
+                type="error"
+                message={error}
+                onClose={() => setError('')}
+                className="relative top-0 right-0 left-0 translate-x-0 w-full mb-6 z-10"
+              />
             )}
 
             {/* Form */}

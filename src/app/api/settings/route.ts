@@ -44,6 +44,7 @@ export async function GET() {
           enableQuizzes: true,
           enableCourses: true,
           enableAnalytics: true,
+          enableClarity: true,
           enableQuizSolutionAnalysis: false,
           restrictPublicCourseCreation: false,
           enableEnrollmentManagement: true,

@@ -17,6 +17,41 @@ export class ApiClientError extends Error {
   }
 }
 
+/** Helper function to extract user-friendly alert messages for all types of API errors */
+export function getApiErrorMessage(err: unknown, fallbackMessage = 'An unexpected error occurred'): string {
+  if (err instanceof ApiClientError) {
+    if (err.message && err.message !== 'Request failed') {
+      return err.message;
+    }
+    switch (err.status) {
+      case 400:
+        return 'Bad request. Please check your input.';
+      case 401:
+        return 'Session expired or unauthenticated. Please sign in.';
+      case 403:
+        return 'Access denied or feature is disabled by administrator.';
+      case 404:
+        return 'The requested resource was not found.';
+      case 429:
+        return 'Too many requests. Please wait a moment and try again.';
+      case 500:
+      case 502:
+      case 503:
+      case 504:
+        return 'Server error. Please try again later.';
+      default:
+        return `API Error (${err.status}): ${err.message || fallbackMessage}`;
+    }
+  }
+  if (err instanceof Error) {
+    if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+      return 'Network error. Please check your connection and try again.';
+    }
+    return err.message;
+  }
+  return fallbackMessage;
+}
+
 function parseErrorMessage(data: unknown): { message: string; code?: string } {
   if (typeof data !== 'object' || data === null) {
     return { message: 'Request failed' };

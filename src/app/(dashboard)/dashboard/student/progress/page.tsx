@@ -213,9 +213,12 @@ export default function StudentProgressPage() {
       )}
 
       {error && (
-        <div className="mt-4 bg-[var(--error-light)] border-l-4 border-[var(--error)] p-4">
-          <p className="text-sm text-[var(--error)]">{error}</p>
-        </div>
+        <Alert
+          type="error"
+          message={error}
+          onClose={() => setError('')}
+          className="relative top-0 right-0 left-0 translate-x-0 w-full mt-4 z-10"
+        />
       )}
 
       {/* Overall Stats */}

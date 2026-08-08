@@ -1428,6 +1428,8 @@ export const en = {
     enableCoursesDesc: 'Allow teachers to create courses',
     enableAnalytics: 'Enable Analytics',
     enableAnalyticsDesc: 'Enable analytics dashboard for teachers',
+    enableClarity: 'Enable Microsoft Clarity',
+    enableClarityDesc: 'Enable Microsoft Clarity session replay and analytics tracking',
     enableQuizSolutionAnalysis: 'Enable Quiz Solution Analysis',
     enableQuizSolutionAnalysisDesc:
       'Allow students to get AI-powered short explanations on quiz result pages (superadmin only)',

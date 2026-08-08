@@ -9,8 +9,9 @@ import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSessionStore } from '@/store/useSessionStore';
 import { PageSkeleton } from '@/components/ui/Skeleton';
+import Alert from '@/components/ui/Alert';
 import { fetchAnalytics } from '@/lib/api/analytics';
-import { ApiClientError } from '@/lib/api/http';
+import { getApiErrorMessage } from '@/lib/api/http';
 import StatCard from '@/components/ui/StatCard';
 import { PageWrapper } from '@/components/layout';
 import { BookOpen, Radio, Users, HelpCircle, ClipboardList } from 'lucide-react';
@@ -305,7 +306,7 @@ export default function TeacherAnalyticsPage() {
       const data = (await fetchAnalytics('teacher')) as { stats?: TeacherStats };
       setStats(data.stats || null);
     } catch (err) {
-      setError(err instanceof ApiClientError ? err.message : t('teacherAnalytics.errorLoading'));
+      setError(getApiErrorMessage(err, t('teacherAnalytics.errorLoading')));
     } finally {
       setIsLoading(false);
     }
@@ -330,8 +331,14 @@ export default function TeacherAnalyticsPage() {
   if (!stats) {
     return (
       <div className="card-panel text-center py-10 px-4">
-        {error && <p className="text-[var(--error)] mb-4">{error}</p>}
-        <button onClick={fetchStats} className="btn-premium focus-ring">
+        {error && (
+          <Alert
+            type="error"
+            message={error}
+            onClose={() => setError('')}
+          />
+        )}
+        <button onClick={fetchStats} className="btn-premium focus-ring mt-4">
           {t('teacherAnalytics.retry')}
         </button>
       </div>

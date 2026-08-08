@@ -5,7 +5,8 @@ import { Sparkles } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useFeature } from '@/contexts/AppSettingsContext';
 import { analyzeQuizSolution } from '@/lib/api/quizSolutionAnalysis';
-import { ApiClientError } from '@/lib/api/http';
+import { ApiClientError, getApiErrorMessage } from '@/lib/api/http';
+import Alert from '@/components/ui/Alert';
 import { Loader } from '@/components/ui/Loader';
 import { cn } from '@/lib/utils';
 
@@ -23,23 +24,13 @@ export function QuizSolutionAnalysis({ attemptId, questionId, className }: Props
   const [error, setError] = useState<string | null>(null);
 
   const handleAnalyze = async () => {
-    if (analysis || isLoading) return;
-
     setIsLoading(true);
     setError(null);
-
     try {
-      const result = await analyzeQuizSolution({ attemptId, questionId });
-      setAnalysis(result.analysis);
+      const data = await analyzeQuizSolution({ attemptId, questionId });
+      setAnalysis(data.analysis);
     } catch (err) {
-      if (err instanceof ApiClientError && err.status === 403) {
-        return;
-      }
-      const message =
-        err instanceof ApiClientError
-          ? err.message
-          : t('quizResult.analyzeSolutionFailed');
-      setError(message);
+      setError(getApiErrorMessage(err, t('quizResult.solutionAnalysisFailed')));
     } finally {
       setIsLoading(false);
     }
@@ -69,7 +60,12 @@ export function QuizSolutionAnalysis({ attemptId, questionId, className }: Props
 
       {error && (
         <div className="mt-2 space-y-2">
-          <p className="text-sm text-[var(--error)]">{error}</p>
+          <Alert
+            type="error"
+            message={error}
+            onClose={() => setError(null)}
+            className="relative top-0 right-0 left-0 translate-x-0 w-full z-10"
+          />
           <button
             type="button"
             onClick={handleAnalyze}

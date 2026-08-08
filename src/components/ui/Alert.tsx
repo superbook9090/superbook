@@ -16,12 +16,12 @@ interface AlertProps {
   className?: string;
 }
 
-export default function Alert({ 
-  type = 'info', 
-  message, 
-  onClose, 
-  duration = 4000, 
-  index = 0, 
+export default function Alert({
+  type = 'info',
+  message,
+  onClose,
+  duration = 4000,
+  index = 0,
   showProgressBar = true,
   className
 }: AlertProps) {
@@ -84,7 +84,7 @@ export default function Alert({
     <AnimatePresence mode="popLayout">
       <motion.div
         initial={{ opacity: 0, y: -20, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
+        animate={{ opacity: 1, y: 60, scale: 1 }}
         exit={{ opacity: 0, y: -20, scale: 0.95 }}
         transition={{
           duration: 0.3,

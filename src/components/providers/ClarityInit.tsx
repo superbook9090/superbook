@@ -3,13 +3,17 @@
 import { useEffect, useRef } from "react";
 import clarity from "@microsoft/clarity";
 import { useSessionStore } from "@/store/useSessionStore";
+import { useSettingsStore } from "@/store/useSettingsStore";
 
 export default function ClarityInit() {
   const session = useSessionStore((s) => s.session);
   const status = useSessionStore((s) => s.status);
+  const isFeatureEnabled = useSettingsStore((s) => s.isFeatureEnabled);
+  const enableClarity = isFeatureEnabled('enableClarity');
   const initialized = useRef(false);
 
   useEffect(() => {
+    if (!enableClarity) return;
     if (!initialized.current) {
       try {
         clarity.init("x8rnrn451j");
@@ -18,10 +22,10 @@ export default function ClarityInit() {
         console.error("Failed to initialize Microsoft Clarity", error);
       }
     }
-  }, []);
+  }, [enableClarity]);
 
   useEffect(() => {
-    if (initialized.current && status === "authenticated" && session?.user?.email) {
+    if (enableClarity && initialized.current && status === "authenticated" && session?.user?.email) {
       try {
         clarity.identify(session.user.email);
         clarity.setTag("is_logged_in", "true");
@@ -29,7 +33,7 @@ export default function ClarityInit() {
         console.error("Failed to set user data in Microsoft Clarity", error);
       }
     }
-  }, [session, status]);
+  }, [enableClarity, session, status]);
 
   return null;
 }

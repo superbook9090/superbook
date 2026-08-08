@@ -1428,6 +1428,8 @@ export const hi = {
     enableCoursesDesc: 'शिक्षकों को पाठ्यक्रम बनाने की अनुमति दें',
     enableAnalytics: 'विश्लेषिकी सक्षम करें',
     enableAnalyticsDesc: 'शिक्षकों के लिए विश्लेषिकी डैशबोर्ड सक्षम करें',
+    enableClarity: 'माइक्रोसॉफ्ट क्लैरिटी सक्षम करें',
+    enableClarityDesc: 'माइक्रोसॉफ्ट क्लैरिटी सत्र पुनरावृत्ति और विश्लेषिकी ट्रैकिंग सक्षम करें',
     enableQuizSolutionAnalysis: 'क्विज़ समाधान विश्लेषण सक्षम करें',
     enableQuizSolutionAnalysisDesc:
       'छात्रों को क्विज़ परिणाम पृष्ठ पर AI आधारित संक्षिप्त व्याख्या प्राप्त करने दें (केवल सुपरएडमिन)',

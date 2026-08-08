@@ -33,7 +33,6 @@ export default function EditBlogPage() {
     isFeatured: false,
   });
   const [isPublished, setIsPublished] = useState(true);
-  const [error, setError] = useState('');
   const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
 
   useEffect(() => {
@@ -64,20 +63,17 @@ export default function EditBlogPage() {
       setIsPublished(blog.isPublished);
     } catch (err) {
       const errorMsg = err instanceof ApiClientError ? err.message : t('blog.failedToLoadBlog');
-      setError(errorMsg);
+      setAlertState({ type: 'error', message: errorMsg });
     } finally {
       setIsLoading(false);
     }
   };
 
   const submit = async (saveAsDraft: boolean) => {
-    setError('');
     setIsSaving(true);
 
     if (!formData.title.trim() || !formData.topic || isBlogContentEmpty(formData.content)) {
-      const errorMsg = t('blog.fillAllFields');
-      setError(errorMsg);
-      setAlertState({ type: 'error', message: errorMsg });
+      setAlertState({ type: 'error', message: t('blog.fillAllFields') });
       setIsSaving(false);
       return;
     }
@@ -97,7 +93,6 @@ export default function EditBlogPage() {
       router.push(ROUTES.teacher.blogs);
     } catch (err) {
       const errorMsg = err instanceof ApiClientError ? err.message : t('blog.saveErrorGeneric');
-      setError(errorMsg);
       setAlertState({ type: 'error', message: errorMsg });
     } finally {
       setIsSaving(false);
@@ -132,7 +127,6 @@ export default function EditBlogPage() {
         <LazyBlogEditorForm
           formData={formData}
           onChange={setFormData}
-          error={error}
           isSaving={isSaving}
           onPublish={() => submit(false)}
           onSaveDraft={() => submit(true)}

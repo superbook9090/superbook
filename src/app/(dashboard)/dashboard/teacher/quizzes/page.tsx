@@ -201,11 +201,13 @@ export default function TeacherQuizzesPage() {
         />
       )}
 
-      {error ? (
-        <div className="bg-[var(--error-light)] border-l-4 border-[var(--error)] p-3 sm:p-4 rounded-r-lg">
-          <p className="text-sm text-[var(--error)]">{error}</p>
-        </div>
-      ) : null}
+      {error && (
+        <Alert
+          type="error"
+          message={error}
+          className="relative top-0 right-0 left-0 translate-x-0 w-full z-10"
+        />
+      )}
 
       {courses.length > 0 && (
         <FilterPanel>

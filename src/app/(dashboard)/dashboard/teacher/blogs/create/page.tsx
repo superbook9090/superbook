@@ -29,7 +29,6 @@ export default function CreateBlogPage() {
     metaDescription: '',
     isFeatured: false,
   });
-  const [error, setError] = useState('');
   const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
 
   if (status === 'unauthenticated') {
@@ -38,12 +37,8 @@ export default function CreateBlogPage() {
   }
 
   const submit = async (asDraft: boolean) => {
-    setError('');
-
     if (!formData.title.trim() || !formData.topic || isBlogContentEmpty(formData.content)) {
-      const errorMsg = t('blog.fillAllFields');
-      setError(errorMsg);
-      setAlertState({ type: 'error', message: errorMsg });
+      setAlertState({ type: 'error', message: t('blog.fillAllFields') });
       return;
     }
 
@@ -55,7 +50,6 @@ export default function CreateBlogPage() {
       router.push(ROUTES.teacher.blogs);
     } catch (err) {
       const errorMsg = err instanceof ApiClientError ? err.message : t('blog.saveErrorGeneric');
-      setError(errorMsg);
       setAlertState({ type: 'error', message: errorMsg });
     }
   };
@@ -80,7 +74,6 @@ export default function CreateBlogPage() {
         <LazyBlogEditorForm
           formData={formData}
           onChange={setFormData}
-          error={error}
           isSaving={createBlogMutation.isPending}
           onPublish={() => submit(false)}
           onSaveDraft={() => submit(true)}

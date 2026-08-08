@@ -5,6 +5,7 @@ import { Lock, Eye, EyeOff } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { changePassword, fetchAccountInfo } from '@/lib/api/auth';
 import { ApiClientError } from '@/lib/api/http';
+import Alert from '@/components/ui/Alert';
 import Button from '@/components/ui/Button';
 import { Loader } from '@/components/ui/Loader';
 import Tooltip from '@/components/ui/Tooltip';
@@ -96,14 +97,20 @@ export default function ChangePasswordForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <div className="p-3 text-sm bg-[var(--error-light)] border border-[var(--error)]/20 rounded-lg text-[var(--error)]">
-          {error}
-        </div>
+        <Alert
+          type="error"
+          message={error}
+          onClose={() => setError('')}
+          className="relative top-0 right-0 left-0 translate-x-0 w-full z-10"
+        />
       )}
       {success && (
-        <div className="p-3 text-sm bg-[var(--success-light)] border border-[var(--success)]/20 rounded-lg text-[var(--success)]">
-          {success}
-        </div>
+        <Alert
+          type="success"
+          message={success}
+          onClose={() => setSuccess('')}
+          className="relative top-0 right-0 left-0 translate-x-0 w-full z-10"
+        />
       )}
 
       <div>

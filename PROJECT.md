@@ -1408,6 +1408,7 @@ interface IAppSettings {
     enableQuizzes: boolean;       // Enable quiz feature
     enableCourses: boolean;       // Enable course feature
     enableAnalytics: boolean;      // Enable analytics feature
+    enableClarity: boolean;        // Enable Microsoft Clarity tracking
   };
   platformConfig: {
     siteName: string;             // Site name (default: 'Quiz-Do')
@@ -1423,6 +1424,26 @@ interface IAppSettings {
 
 **Indexes**:
 - `updatedAt: -1`
+
+---
+
+### Feature Toggles, Analytics & API Error UI Alerts (2026)
+
+#### Microsoft Clarity & Analytics Feature Flag
+- **`enableClarity` Feature Flag**: Controls session replay and web analytics tracking powered by Microsoft Clarity. Added to `AppSettings.featureToggles` schema, Zod validation, `useSettingsStore`, `dataService`, and `GET/PUT /api/admin/settings`.
+- **Admin Control**: Superadmins and Admins can toggle `enableClarity` on/off live via `/dashboard/admin/settings`.
+- **Clarity Initialization**: `ClarityInit.tsx` checks `isFeatureEnabled('enableClarity')` before calling `clarity.init()` or sending user identifier telemetry.
+
+#### Standardized API Error Handling on UI
+- **`getApiErrorMessage()` Helper**: Located in `src/lib/api/http.ts`, transforms all types of API errors into standard, human-readable UI text:
+  - `400`: Bad request / invalid parameter inputs.
+  - `401`: Session expired or unauthenticated user.
+  - `403`: Access denied or feature toggle disabled by administrator.
+  - `404`: Requested resource not found.
+  - `429`: Rate limit exceeded / too many requests.
+  - `500/502/503`: Internal server errors.
+  - Network disconnection / fetch failures.
+- **UI Alerts**: Integrated with the reusable `<Alert type="error" message={...} onClose={...} />` component across analytics dashboards and application pages for instant visual feedback.
 
 **Constraints**:
 - Only one document allowed in collection (enforced by pre-save hook)

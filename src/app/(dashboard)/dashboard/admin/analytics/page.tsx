@@ -20,7 +20,7 @@ import { useSessionStore } from '@/store/useSessionStore';
 import { useTranslation } from '@/hooks/useTranslation';
 import { formatDateTime } from '@/lib/dateUtils';
 import { fetchAnalytics } from '@/lib/api/analytics';
-import { ApiClientError } from '@/lib/api/http';
+import { getApiErrorMessage } from '@/lib/api/http';
 import StatCard from '@/components/ui/StatCard';
 import ActivityCard from '@/components/ui/ActivityCard';
 import { PageWrapper, PageHeader } from '@/components/layout';
@@ -77,8 +77,7 @@ export default function AdminAnalyticsPage() {
     } catch (err) {
       setMessage({
         type: 'error',
-        text:
-          err instanceof ApiClientError ? err.message : t('errors.errorLoadingAnalytics'),
+        text: getApiErrorMessage(err, t('errors.errorLoadingAnalytics')),
       });
       console.error('Analytics error:', err);
     } finally {

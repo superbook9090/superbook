@@ -110,8 +110,12 @@ export default function QuizDetailPage() {
 
   if (!quiz) {
     return (
-      <div>
-        <p className="text-[var(--error)]">{t('errors.quizNotFound')}</p>
+      <div className="p-4 sm:p-6 max-w-7xl mx-auto">
+        <Alert
+          type="error"
+          message={t('errors.quizNotFound')}
+          className="relative top-0 right-0 left-0 translate-x-0 w-full z-10"
+        />
       </div>
     );
   }

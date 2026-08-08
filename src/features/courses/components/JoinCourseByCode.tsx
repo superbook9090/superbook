@@ -7,7 +7,8 @@ import { KeyRound, Loader2 } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useJoinCourseByCode } from '@/lib/react-query/hooks';
-import { ApiClientError } from '@/lib/api/http';
+import { ApiClientError, getApiErrorMessage } from '@/lib/api/http';
+import Alert from '@/components/ui/Alert';
 import { cn } from '@/lib/utils';
 
 export default function JoinCourseByCode() {
@@ -32,13 +33,7 @@ export default function JoinCourseByCode() {
       await joinCourse.mutateAsync(code.toUpperCase());
       router.push(ROUTES.student.courses);
     } catch (err) {
-      const message =
-        err instanceof ApiClientError
-          ? err.status === 429
-            ? t('courses.courseCodeRateLimited')
-            : err.message || t('courses.invalidCourseCode')
-          : t('courses.invalidCourseCode');
-      setError(message);
+      setError(getApiErrorMessage(err, t('courses.invalidCourseCode')));
     }
   };
 
@@ -83,9 +78,12 @@ export default function JoinCourseByCode() {
             className="block w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)]/40 px-4 py-3 text-sm font-mono uppercase tracking-widest text-[var(--color-foreground)] placeholder:text-[var(--color-muted-foreground)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20"
           />
           {error && (
-            <p className="mt-2 text-sm text-[var(--error)]" role="alert">
-              {error}
-            </p>
+            <Alert
+              type="error"
+              message={error}
+              onClose={() => setError('')}
+              className="relative top-0 right-0 left-0 translate-x-0 w-full mt-3 z-10"
+            />
           )}
         </div>
         <button

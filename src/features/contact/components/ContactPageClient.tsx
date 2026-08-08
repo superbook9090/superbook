@@ -9,7 +9,6 @@ import {
   Phone,
   MapPin,
   Send,
-  CheckCircle,
   AlertCircle,
   ChevronDown
 } from 'lucide-react';
@@ -17,6 +16,7 @@ import Header from '@/components/home/MarketingHeader';
 import Footer from '@/components/home/Footer';
 import { useTranslation } from '@/hooks/useTranslation';
 import Button from '@/components/ui/Button';
+import Alert from '@/components/ui/Alert';
 import { useSessionStore } from '@/store/useSessionStore';
 
 // Custom SVG Brand Icons since Lucide v1.x has removed brand icons
@@ -119,12 +119,6 @@ interface FormErrors {
   message?: string;
 }
 
-interface ToastState {
-  show: boolean;
-  type: 'success' | 'error';
-  message: string;
-}
-
 export default function ContactPageClient() {
   const { t } = useTranslation();
   const { session } = useSessionStore();
@@ -147,13 +141,9 @@ export default function ContactPageClient() {
     message: false,
   });
 
-  // Submission & Toast state
+  // Submission & alert state
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [toast, setToast] = useState<ToastState>({
-    show: false,
-    type: 'success',
-    message: '',
-  });
+  const [alertState, setAlertState] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   // FAQ Accordion state
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
@@ -232,7 +222,7 @@ export default function ContactPageClient() {
     const isMessageValid = validateField('message');
 
     if (!isNameValid || !isEmailValid || !isSubjectValid || !isMessageValid) {
-      showToast('error', t('contact.form.error'));
+      setAlertState({ type: 'error', message: t('contact.form.error') });
       return;
     }
 
@@ -250,7 +240,7 @@ export default function ContactPageClient() {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        showToast('success', t('contact.form.success'));
+        setAlertState({ type: 'success', message: t('contact.form.success') });
         // Reset form
         setForm({
           name: '',
@@ -265,21 +255,13 @@ export default function ContactPageClient() {
           message: false,
         });
       } else {
-        showToast('error', data.error?.message || t('contact.form.error'));
+        setAlertState({ type: 'error', message: data.error?.message || t('contact.form.error') });
       }
     } catch {
-      showToast('error', t('contact.form.error'));
+      setAlertState({ type: 'error', message: t('contact.form.error') });
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  // Custom Toast display helper
-  const showToast = (type: 'success' | 'error', message: string) => {
-    setToast({ show: true, type, message });
-    setTimeout(() => {
-      setToast((prev) => ({ ...prev, show: false }));
-    }, 4000);
   };
 
   // FAQ helper list
@@ -686,41 +668,13 @@ export default function ContactPageClient() {
 
       <Footer />
 
-      {/* --- SLEEK FLOATING CUSTOM TOAST NOTIFICATION --- */}
-      <AnimatePresence>
-        {toast.show && (
-          <motion.div
-            initial={{ opacity: 0, y: 50, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            className="fixed bottom-6 right-6 z-50 max-w-md w-full sm:w-[380px] p-4 rounded-2xl shadow-2xl glass backdrop-blur-xl border flex items-start gap-3 bg-[var(--card-solid)]/95"
-            style={{
-              borderColor: toast.type === 'success' ? '#22c55e' : '#ef4444',
-            }}
-          >
-            {toast.type === 'success' ? (
-              <CheckCircle className="w-5 h-5 text-[var(--color-success)] flex-shrink-0 mt-0.5" />
-            ) : (
-              <AlertCircle className="w-5 h-5 text-[var(--color-error)] flex-shrink-0 mt-0.5" />
-            )}
-            <div className="flex-1">
-              <h4 className="text-xs font-black uppercase tracking-wider text-[var(--color-foreground)] mb-0.5">
-                {toast.type === 'success' ? t('contact.toast.success') : t('contact.toast.attention')}
-              </h4>
-              <p className="text-xs font-semibold text-[var(--color-muted-foreground)] leading-relaxed">
-                {toast.message}
-              </p>
-            </div>
-            <button
-              onClick={() => setToast((prev) => ({ ...prev, show: false }))}
-              className="text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] text-xs font-bold px-1"
-            >
-              ✕
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {alertState && (
+        <Alert
+          type={alertState.type}
+          message={alertState.message}
+          onClose={() => setAlertState(null)}
+        />
+      )}
 
     </div>
   );

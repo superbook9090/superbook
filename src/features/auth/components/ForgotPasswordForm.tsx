@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { Mail, ArrowRight } from 'lucide-react';
 import BackButton from '@/components/ui/BackButton';
 import PremiumLogo from '@/components/ui/PremiumLogo';
+import Alert from '@/components/ui/Alert';
 import { Loader } from '@/components/ui/Loader';
 import { useTranslation } from '@/hooks/useTranslation';
 import { roleThemes } from '@/lib/roleTheme';
@@ -60,9 +61,12 @@ export default function ForgotPasswordForm() {
         </p>
 
         {error && (
-          <div className="mb-4 p-3 text-sm bg-[var(--error-light)] border border-[var(--error)]/20 rounded-xl text-[var(--error)]">
-            {error}
-          </div>
+          <Alert
+            type="error"
+            message={error}
+            onClose={() => setError('')}
+            className="relative top-0 right-0 left-0 translate-x-0 w-full mb-4 z-10"
+          />
         )}
 
         {!sent ? (

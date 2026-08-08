@@ -28,7 +28,6 @@ export type BlogFormData = {
 type BlogEditorFormProps = {
   formData: BlogFormData;
   onChange: (data: BlogFormData) => void;
-  error?: string;
   isSaving: boolean;
   onPublish: () => void;
   onSaveDraft: () => void;
@@ -44,7 +43,6 @@ export function isBlogContentEmpty(html: string) {
 export default function BlogEditorForm({
   formData,
   onChange,
-  error,
   isSaving,
   onPublish,
   onSaveDraft,
@@ -58,12 +56,6 @@ export default function BlogEditorForm({
 
   return (
     <div className="bg-[var(--card-solid)] rounded-xl shadow-sm p-4 sm:p-5">
-      {error && (
-        <div className="mb-4 p-3 text-sm bg-[var(--error-light)] border border-[var(--error)]/20 rounded-lg text-[var(--error)]">
-          {error}
-        </div>
-      )}
-
       <div className="space-y-4">
         <EditorField
           label={

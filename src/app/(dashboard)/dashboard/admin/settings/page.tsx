@@ -42,6 +42,7 @@ interface AppSettings {
     enableQuizzes: boolean;
     enableCourses: boolean;
     enableAnalytics: boolean;
+    enableClarity: boolean;
     enableQuizSolutionAnalysis: boolean;
     restrictPublicCourseCreation?: boolean;
     enableEnrollmentManagement?: boolean;
@@ -72,6 +73,7 @@ export default function AdminSettingsPage() {
       enableQuizzes: true,
       enableCourses: true,
       enableAnalytics: true,
+      enableClarity: true,
       enableQuizSolutionAnalysis: false,
       restrictPublicCourseCreation: false,
       enableEnrollmentManagement: true,
@@ -95,6 +97,7 @@ export default function AdminSettingsPage() {
         ...data,
         featureToggles: {
           ...data.featureToggles,
+          enableClarity: data.featureToggles.enableClarity ?? true,
           enableQuizSolutionAnalysis: data.featureToggles.enableQuizSolutionAnalysis ?? false,
           restrictPublicCourseCreation: data.featureToggles.restrictPublicCourseCreation ?? false,
           enableEnrollmentManagement: data.featureToggles.enableEnrollmentManagement ?? true,
@@ -387,6 +390,27 @@ export default function AdminSettingsPage() {
                 })
               }
               label={t('adminSettings.enableAnalytics')}
+            />
+          </div>
+
+          {/* Enable Microsoft Clarity */}
+          <div className="flex items-center justify-between gap-4 p-4 bg-[var(--color-surface-muted)] rounded-xl">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <Settings className={`w-5 h-5 shrink-0 ${theme.text}`} />
+              <div className="min-w-0">
+                <p className="font-medium text-[var(--color-foreground)]">{t('adminSettings.enableClarity')}</p>
+                <p className="text-sm text-[var(--color-muted-foreground)]">{t('adminSettings.enableClarityDesc')}</p>
+              </div>
+            </div>
+            <ToggleSwitch
+              checked={settings.featureToggles.enableClarity}
+              onChange={(enableClarity) =>
+                setSettings({
+                  ...settings,
+                  featureToggles: { ...settings.featureToggles, enableClarity },
+                })
+              }
+              label={t('adminSettings.enableClarity')}
             />
           </div>
 

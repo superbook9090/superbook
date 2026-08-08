@@ -150,6 +150,15 @@ export async function PATCH(req: NextRequest) {
         );
       }
       if (
+        featureToggles.enableClarity !== undefined &&
+        typeof featureToggles.enableClarity !== 'boolean'
+      ) {
+        return NextResponse.json(
+          { message: 'enableClarity must be a boolean' },
+          { status: 400 }
+        );
+      }
+      if (
         featureToggles.enableQuizSolutionAnalysis !== undefined &&
         typeof featureToggles.enableQuizSolutionAnalysis !== 'boolean'
       ) {
@@ -184,6 +193,7 @@ export async function PATCH(req: NextRequest) {
         enableQuizzes: featureToggles.enableQuizzes,
         enableCourses: featureToggles.enableCourses,
         enableAnalytics: featureToggles.enableAnalytics,
+        enableClarity: featureToggles.enableClarity ?? existingToggles.enableClarity ?? true,
         enableQuizSolutionAnalysis:
           isSuperAdmin(session.user.role) && featureToggles.enableQuizSolutionAnalysis !== undefined
             ? featureToggles.enableQuizSolutionAnalysis

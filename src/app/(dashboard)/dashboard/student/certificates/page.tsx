@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSessionStore } from '@/store/useSessionStore';
 import { PageSkeleton } from '@/components/ui/Skeleton';
+import Alert from '@/components/ui/Alert';
 import { useCertificates } from '@/lib/react-query/hooks';
 import { Award } from 'lucide-react';
 
@@ -23,14 +24,14 @@ export default function StudentCertificatesPage() {
     if (!session) {
       router.push(ROUTES.login);
     }
-  }, [status, session, router]);
+  }, [session, status, router]);
 
   if (status === 'loading' || isLoading) {
     return <PageSkeleton />;
   }
 
   return (
-    <div>
+    <div className="p-4 sm:p-6 max-w-7xl mx-auto">
       <div>
         <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">
           {t('certificates.title')}
@@ -41,9 +42,11 @@ export default function StudentCertificatesPage() {
       </div>
 
       {error && (
-        <div className="mt-4 bg-[var(--error-light)] border-l-4 border-[var(--error)] p-4 rounded-r-lg">
-          <p className="text-sm text-[var(--error)]">{String(error)}</p>
-        </div>
+        <Alert
+          type="error"
+          message={String(error)}
+          className="relative top-0 right-0 left-0 translate-x-0 w-full mt-4 z-10"
+        />
       )}
 
       <div className="mt-8">

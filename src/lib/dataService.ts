@@ -22,6 +22,7 @@ export const getSettingsWithDefaults = cache(async (): Promise<IAppSettings> => 
       enableQuizzes: true,
       enableCourses: true,
       enableAnalytics: true,
+      enableClarity: true,
       enableQuizSolutionAnalysis: false,
       restrictPublicCourseCreation: false,
       enableEnrollmentManagement: true,
