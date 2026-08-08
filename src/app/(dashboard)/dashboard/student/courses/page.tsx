@@ -7,9 +7,9 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSessionStore } from '@/store/useSessionStore';
+import { useAlert } from '@/components/ui/AlertContainer';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { LazyCourseCard } from '@/lib/lazy';
-import Alert from '@/components/ui/Alert';
 import { LazyConfirmModal } from '@/lib/lazy';
 import { useEnrollments, useDropEnrollment } from '@/lib/react-query/hooks';
 import { BookOpen, CheckCircle, Clock, TrendingUp, Sparkles } from 'lucide-react';
@@ -23,9 +23,9 @@ export default function StudentCoursesPage() {
   const { session, status } = useSessionStore();
   const router = useRouter();
   const { t } = useTranslation();
+  const { addAlert } = useAlert();
 
   // States
-  const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
   const [isDropModalOpen, setIsDropModalOpen] = useState(false);
   const [enrollmentToDrop, setEnrollmentToDrop] = useState<string | null>(null);
 
@@ -91,11 +91,11 @@ export default function StudentCoursesPage() {
 
     try {
       await dropEnrollment.mutateAsync(enrollmentToDrop);
-      setAlertState({ type: 'success', message: t('courses.dropSuccess') });
+      addAlert({ type: 'success', message: t('courses.dropSuccess'), duration: 3000 });
       setIsDropModalOpen(false);
       setEnrollmentToDrop(null);
     } catch {
-      setAlertState({ type: 'error', message: t('courses.dropFailed') });
+      addAlert({ type: 'error', message: t('courses.dropFailed'), duration: 5000 });
     }
   };
 
@@ -188,20 +188,6 @@ export default function StudentCoursesPage() {
         />
       </FilterPanel>
 
-      {alertState && (
-        <Alert
-          type={alertState.type}
-          message={alertState.message}
-          onClose={() => setAlertState(null)}
-        />
-      )}
-
-      {error && (
-        <Alert
-          type="error"
-          message={String(error)}
-        />
-      )}
 
       {/* Course Grid */}
       <ResponsiveGrid variant="dense">

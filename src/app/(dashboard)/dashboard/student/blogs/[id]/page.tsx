@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useAlert } from '@/components/ui/AlertContainer';
 import { formatDate } from '@/lib/dateUtils';
 import {
   Heart,
@@ -19,7 +20,6 @@ import {
 } from 'lucide-react';
 import BackButton from '@/components/ui/BackButton';
 import { Badge } from '@/components/ui/Badge';
-import Alert from '@/components/ui/Alert';
 import DOMPurify from 'isomorphic-dompurify';
 import { getBlogById, type BlogDocument } from '@/lib/api/blogs';
 import { addFavorite as postFavorite, removeFavorite as removeFavoriteApi } from '@/lib/api/favorites';
@@ -35,10 +35,10 @@ export default function BlogDetailPage() {
   const params = useParams();
   const blogId = params.id as string;
   const { t } = useTranslation();
+  const { addAlert } = useAlert();
 
   const [blog, setBlog] = useState<BlogDocument | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
 
   const fetchBlog = useCallback(async () => {
     try {
@@ -76,7 +76,7 @@ export default function BlogDetailPage() {
     } catch (err) {
       const message =
         err instanceof ApiClientError ? err.message : t('blog.failedUpdateFavorite');
-      setAlertState({ type: 'error', message });
+      addAlert({ type: 'error', message, duration: 5000 });
     }
   };
 
@@ -123,13 +123,6 @@ export default function BlogDetailPage() {
         />
       </motion.div>
 
-      {alertState && (
-        <Alert
-          type={alertState.type}
-          message={alertState.message}
-          onClose={() => setAlertState(null)}
-        />
-      )}
 
       {/* Blog Content */}
       <motion.article

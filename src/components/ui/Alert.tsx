@@ -32,7 +32,7 @@ export default function Alert({
   useEffect(() => {
     if (duration && showProgressBar) {
       const startTime = Date.now();
-      const interval = 16; // Update every ~16ms (60fps)
+      const interval = 16;
 
       progressIntervalRef.current = setInterval(() => {
         const elapsed = Date.now() - startTime;
@@ -91,18 +91,21 @@ export default function Alert({
           delay: index * 0.1,
         }}
         className={cn(
-          "fixed top-5 right-5 sm:right-5 sm:left-auto left-1/2 -translate-x-1/2 sm:translate-x-0",
-          "z-[9999] flex flex-col gap-2 px-3 py-2 sm:px-4 sm:py-3 rounded-xl border shadow-lg w-80 max-w-[calc(100vw-2rem)]",
+          "fixed right-4 sm:right-6 left-4 sm:left-auto sm:max-w-md",
+          "z-[999999] flex flex-col gap-2 px-3 py-2 sm:px-4 sm:py-3 rounded-xl border shadow-2xl backdrop-blur-sm",
           styles[type],
           className
         )}
         role="alert"
         aria-live="assertive"
-        style={{ top: `calc(20px + ${index * 90}px)` }}
+        style={{
+          top: `calc(${16 + index * 88}px)`,
+          pointerEvents: 'auto',
+        }}
       >
         <div className="flex items-center gap-3">
           <Icon className="w-5 h-5 flex-shrink-0" />
-          <p className="flex-1 text-sm font-medium">{message}</p>
+          <p className="flex-1 text-sm font-medium line-clamp-3">{message}</p>
           {onClose && (
             <Tooltip label="Close alert" className="flex-shrink-0">
               <button

@@ -7,8 +7,8 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSessionStore } from '@/store/useSessionStore';
+import { useAlert } from '@/components/ui/AlertContainer';
 import { LazyCourseCard } from '@/lib/lazy';
-import Alert from '@/components/ui/Alert';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { PageWrapper, ResponsiveGrid } from '@/components/layout';
 import { useAvailableCourses, useEnrollCourse } from '@/lib/react-query/hooks';
@@ -21,15 +21,15 @@ export default function BrowseCoursesPage() {
   const { session, status } = useSessionStore();
   const { t } = useTranslation();
   const router = useRouter();
+  const { addAlert } = useAlert();
 
   // States
-  const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [selectedInstructor, setSelectedInstructor] = useState<string>('All');
 
   const orgId = (session?.user as { organizationId?: string })?.organizationId || 'public';
-  const { data: availableCourses = [], isLoading: coursesLoading, error } = useAvailableCourses(orgId);
+  const { data: availableCourses = [], isLoading: coursesLoading } = useAvailableCourses(orgId);
   const enrollCourse = useEnrollCourse();
 
   useEffect(() => {
@@ -77,7 +77,7 @@ export default function BrowseCoursesPage() {
       await enrollCourse.mutateAsync({ courseId });
       router.push(ROUTES.student.courses);
     } catch {
-      setAlertState({ type: 'error', message: t('courses.errorEnrolling') });
+      addAlert({ type: 'error', message: t('courses.errorEnrolling'), duration: 5000 });
     }
   };
 
@@ -146,21 +146,6 @@ export default function BrowseCoursesPage() {
           searchPlaceholder={t('common.search')}
         />
       </FilterPanel>
-
-      {alertState && (
-        <Alert
-          type={alertState.type}
-          message={alertState.message}
-          onClose={() => setAlertState(null)}
-        />
-      )}
-
-      {error && (
-        <Alert
-          type="error"
-          message={String(error)}
-        />
-      )}
 
       {/* Grid Content */}
       <ResponsiveGrid variant="cards">

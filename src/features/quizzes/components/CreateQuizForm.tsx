@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSessionStore } from '@/store/useSessionStore';
+import { useAlert } from '@/components/ui/AlertContainer';
 import { invalidateAfterQuizChange } from '@/lib/react-query/hooks';
 import * as XLSX from 'xlsx';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -55,9 +56,9 @@ export default function CreateQuizForm({ quizId }: Props) {
   const session = useSessionStore((s) => s.session);
   const orgId = (session?.user as { organizationId?: string })?.organizationId || 'public';
   const { theme } = useRoleTheme();
+  const { addAlert } = useAlert();
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
-  const [error, setError] = useState('');
   const [courses, setCourses] = useState<Course[]>([]);
   const [formData, setFormData] = useState({
     title: '',
@@ -94,7 +95,6 @@ export default function CreateQuizForm({ quizId }: Props) {
 
     const run = async () => {
       setIsFetching(true);
-      setError('');
       try {
         const data = await listTeacherCoursesSelf();
         if (cancelled) return;
@@ -162,8 +162,13 @@ export default function CreateQuizForm({ quizId }: Props) {
               : quizId
                 ? t('createQuizForm.loadError')
                 : t('createQuizForm.loadingCourses');
-          setError(quizId ? message || t('createQuizForm.loadError') : '');
-          if (!quizId) {
+          if (quizId) {
+            addAlert({
+              type: 'error',
+              message: message || t('createQuizForm.loadError'),
+              duration: 5000,
+            });
+          } else {
             console.error('Error fetching courses:', err);
           }
         }
@@ -178,7 +183,7 @@ export default function CreateQuizForm({ quizId }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [quizId, t]);
+  }, [quizId, t, addAlert]);
 
   useEffect(() => {
     if (quizId) return;
@@ -593,7 +598,6 @@ export default function CreateQuizForm({ quizId }: Props) {
     setQuestions(importedQuestions);
     setPreviewData([]);
     setUploadError('');
-    setError('');
   }, [previewData]);
 
   const handleCancelImport = useCallback(() => {
@@ -624,19 +628,26 @@ export default function CreateQuizForm({ quizId }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     setIsLoading(true);
 
     // Validate questions
     for (let i = 0; i < questions.length; i++) {
       const q = questions[i];
       if (!q.question.trim()) {
-        setError(t('createQuizForm.questionRequiredNumber').replace('{number}', (i + 1).toString()));
+        addAlert({
+          type: 'error',
+          message: t('createQuizForm.questionRequiredNumber').replace('{number}', (i + 1).toString()),
+          duration: 5000,
+        });
         setIsLoading(false);
         return;
       }
       if (q.options.some(opt => !opt.trim())) {
-        setError(t('createQuizForm.optionsRequiredNumber').replace('{number}', (i + 1).toString()));
+        addAlert({
+          type: 'error',
+          message: t('createQuizForm.optionsRequiredNumber').replace('{number}', (i + 1).toString()),
+          duration: 5000,
+        });
         setIsLoading(false);
         return;
       }
@@ -660,6 +671,11 @@ export default function CreateQuizForm({ quizId }: Props) {
           isPublished: formData.isPublished,
           questions,
         });
+        addAlert({
+          type: 'success',
+          message: t('createQuizForm.updateSuccess'),
+          duration: 3000,
+        });
       } else {
         await createQuiz({
           title: formData.title,
@@ -670,6 +686,11 @@ export default function CreateQuizForm({ quizId }: Props) {
           timeLimit: Number(formData.timeLimit),
           isPublished: formData.isPublished,
           questions,
+        });
+        addAlert({
+          type: 'success',
+          message: t('createQuizForm.createSuccess'),
+          duration: 3000,
         });
       }
 
@@ -684,7 +705,11 @@ export default function CreateQuizForm({ quizId }: Props) {
             : quizId
               ? t('createQuizForm.updateFailed')
               : t('createQuizForm.errorOccurred');
-      setError(message);
+      addAlert({
+        type: 'error',
+        message,
+        duration: 5000,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -718,12 +743,6 @@ export default function CreateQuizForm({ quizId }: Props) {
               : t('createQuizForm.createQuiz')}
         </button>
       </div>
-
-      {error && (
-        <div className="bg-[var(--color-error-light)] border-l-4 border-[var(--color-error)] p-4">
-          <p className="text-sm text-[var(--color-error)]">{error}</p>
-        </div>
-      )}
 
       <div>
         <label htmlFor="title" className="block text-sm font-medium text-[var(--color-foreground)]">

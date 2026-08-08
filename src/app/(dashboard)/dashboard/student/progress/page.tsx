@@ -7,11 +7,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useAlert } from '@/components/ui/AlertContainer';
 import { formatDate } from '@/lib/dateUtils';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
 import { PageSkeleton } from '@/components/ui/Skeleton';
-import Alert from '@/components/ui/Alert';
 import { motion } from 'framer-motion';
 import { CheckCircle, Clock, Circle } from 'lucide-react';
 import {
@@ -71,11 +71,11 @@ export default function StudentProgressPage() {
   const router = useRouter();
   const { t } = useTranslation();
   const { theme } = useRoleTheme();
+  const { addAlert } = useAlert();
   const [progressData, setProgressData] = useState<CourseProgress[]>([]);
   const [overallStats, setOverallStats] = useState<OverallStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
 
   useEffect(() => {
@@ -101,7 +101,7 @@ export default function StudentProgressPage() {
       const errorMsg =
         err instanceof ApiClientError ? err.message : t('progress.errorLoadingProgress');
       setError(errorMsg);
-      setAlertState({ type: 'error', message: errorMsg });
+      addAlert({ type: 'error', message: errorMsg, duration: 5000 });
     } finally {
       setIsLoading(false);
     }
@@ -203,23 +203,6 @@ export default function StudentProgressPage() {
         title={t('progress.myProgress')}
         description={t('progress.progressDesc')}
       />
-
-      {alertState && (
-        <Alert
-          type={alertState.type}
-          message={alertState.message}
-          onClose={() => setAlertState(null)}
-        />
-      )}
-
-      {error && (
-        <Alert
-          type="error"
-          message={error}
-          onClose={() => setError('')}
-          className="relative top-0 right-0 left-0 translate-x-0 w-full mt-4 z-10"
-        />
-      )}
 
       {/* Overall Stats */}
       {overallStats && (

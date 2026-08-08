@@ -7,8 +7,8 @@ import Link from 'next/link';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
+import { useAlert } from '@/components/ui/AlertContainer';
 import { LazyQuizCard } from '@/lib/lazy';
-import Alert from '@/components/ui/Alert';
 import { useSessionStore } from '@/store/useSessionStore';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { useStartQuizAttempt, useEnrollments, useQuizAttempts, useQuizzes, type QuizAttempt, type Quiz } from '@/lib/react-query/hooks';
@@ -20,6 +20,7 @@ export default function StudentQuizzesPage() {
   const router = useRouter();
   const { t } = useTranslation();
   const { theme } = useRoleTheme();
+  const { addAlert } = useAlert();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const tabParam = searchParams.get('tab');
@@ -32,7 +33,6 @@ export default function StudentQuizzesPage() {
     params.set('tab', tab);
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
-  const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
   const [selectedCourse, setSelectedCourse] = useState<string>('all');
   const [courseFilterInitialized, setCourseFilterInitialized] = useState(false);
 
@@ -90,13 +90,18 @@ export default function StudentQuizzesPage() {
 
       // Check if quiz has been completed
       const isCompleted = attempts.some(
-        (a: QuizAttempt) => a.quiz?._id === q._id && a.status === 'completed'
+        (a) => a.quiz?._id === q._id && a.status === 'completed'
       );
 
       return q.isPublished && isEnrolled && matchesCourse && !isCompleted;
     });
 
-    return relevantQuizzes;
+    // Sort by creation date (first created first)
+    return relevantQuizzes.sort((a: Quiz, b: Quiz) => {
+      const dateA = new Date(a.createdAt).getTime();
+      const dateB = new Date(b.createdAt).getTime();
+      return dateA - dateB;
+    });
   }, [enrollments, attempts, allQuizzes, selectedCourse]);
 
   const handleStartQuiz = useCallback(
@@ -107,20 +112,33 @@ export default function StudentQuizzesPage() {
       } catch (e) {
         const message =
           e instanceof ApiClientError ? e.message : t('errors.errorStartingQuiz');
-        setAlertState({ type: 'error', message: message || t('errors.failedStartQuiz') });
+        addAlert({ type: 'error', message: message || t('errors.failedStartQuiz'), duration: 5000 });
       }
     },
-    [startQuiz, router, t]
+    [startQuiz, router, t, addAlert]
   );
 
-  const completedAttempts = useMemo(() =>
-    attempts.filter((a: QuizAttempt) => {
-      const quizCourseId = a.quiz?.course?._id?.toString();
+  const completedAttempts = useMemo(() => {
+    const filtered = attempts.filter((a) => {
+      let quizCourseId: string | undefined;
+      if (a.quiz?.course) {
+        if (typeof a.quiz.course === 'object' && a.quiz.course !== null) {
+          quizCourseId = a.quiz.course._id?.toString();
+        } else {
+          quizCourseId = String(a.quiz.course);
+        }
+      }
       const matchesCourse = selectedCourse === 'all' || quizCourseId === selectedCourse;
       return a.status === 'completed' && matchesCourse;
-    }),
-    [attempts, selectedCourse]
-  );
+    });
+
+    // Sort by latest attempted first (most recent first)
+    return filtered.sort((a, b) => {
+      const dateA = new Date(a.submittedAt || a.startedAt).getTime();
+      const dateB = new Date(b.submittedAt || b.startedAt).getTime();
+      return dateB - dateA;
+    });
+  }, [attempts, selectedCourse]);
 
   if (status === 'loading' || isLoading) {
     return <PageSkeleton />;
@@ -132,14 +150,6 @@ export default function StudentQuizzesPage() {
       <p className="mt-2 text-sm sm:text-base text-[var(--color-muted-foreground)]">
         {t('quiz.quizzesDesc')}
       </p>
-
-      {alertState && (
-        <Alert
-          type={alertState.type}
-          message={alertState.message}
-          onClose={() => setAlertState(null)}
-        />
-      )}
 
       {/* Course filter */}
       {enrollments.length > 0 && (
@@ -178,21 +188,19 @@ export default function StudentQuizzesPage() {
         <nav className="-mb-px flex space-x-4 sm:space-x-8 overflow-x-auto">
           <button
             onClick={() => handleTabChange('available')}
-            className={`${
-              activeTab === 'available'
-                ? 'border-[var(--success)] text-[var(--success)]'
-                : 'border-transparent text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:border-[var(--border)]'
-            } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm min-h-[44px] flex items-center`}
+            className={`${activeTab === 'available'
+              ? 'border-[var(--success)] text-[var(--success)]'
+              : 'border-transparent text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:border-[var(--border)]'
+              } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm min-h-[44px] flex items-center`}
           >
             {t('quiz.available')} ({availableQuizzes.length})
           </button>
           <button
             onClick={() => handleTabChange('completed')}
-            className={`${
-              activeTab === 'completed'
-                ? 'border-[var(--success)] text-[var(--success)]'
-                : 'border-transparent text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:border-[var(--border)]'
-            } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm min-h-[44px] flex items-center`}
+            className={`${activeTab === 'completed'
+              ? 'border-[var(--success)] text-[var(--success)]'
+              : 'border-transparent text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:border-[var(--border)]'
+              } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm min-h-[44px] flex items-center`}
           >
             {t('quiz.completed')} ({completedAttempts.length})
           </button>
@@ -237,7 +245,7 @@ export default function StudentQuizzesPage() {
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6">
             {completedAttempts.map((attempt: QuizAttempt) => (
-              <div key={`${attempt._id}-${attempt.attemptNumber}`} className="h-full min-w-0">
+              <div key={attempt._id} className="h-full min-w-0">
                 <LazyQuizCard
                   quiz={attempt.quiz}
                   attempt={attempt}

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
+import { useAlert } from '@/components/ui/AlertContainer';
 import { createCourse, getCourseById, patchCourse } from '@/lib/api/courses';
 import { fetchAccountInfo } from '@/lib/api/auth';
 import { ApiClientError } from '@/lib/api/http';
@@ -26,11 +27,11 @@ export default function CreateCourseForm({ courseId }: Props) {
   const { theme } = useRoleTheme();
   const queryClient = useQueryClient();
   const session = useSessionStore((s) => s.session);
+  const { addAlert } = useAlert();
   const orgId = (session?.user as { organizationId?: string })?.organizationId || 'public';
 
   const [isLoading, setIsLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(!!courseId);
-  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -50,7 +51,6 @@ export default function CreateCourseForm({ courseId }: Props) {
   const loadCourse = useCallback(async () => {
     if (!courseId) return;
     setInitialLoading(true);
-    setError('');
     try {
       const data = await getCourseById(courseId);
       const loc = data.locale ?? data.language ?? 'en';
@@ -70,11 +70,15 @@ export default function CreateCourseForm({ courseId }: Props) {
         err instanceof ApiClientError
           ? err.message
           : t('createCourseForm.loadError');
-      setError(message || t('createCourseForm.loadError'));
+      addAlert({
+        type: 'error',
+        message: message || t('createCourseForm.loadError'),
+        duration: 5000,
+      });
     } finally {
       setInitialLoading(false);
     }
-  }, [courseId, t]);
+  }, [courseId, t, addAlert]);
 
   useEffect(() => {
     if (courseId) {
@@ -127,18 +131,25 @@ export default function CreateCourseForm({ courseId }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     setIsLoading(true);
 
     if (privateOnly && !formData.isPrivateAccess) {
       setBlockedNotice(true);
-      setError(t('createCourseForm.publicCourseNotAllowed'));
+      addAlert({
+        type: 'error',
+        message: t('createCourseForm.publicCourseNotAllowed'),
+        duration: 5000,
+      });
       setIsLoading(false);
       return;
     }
 
     if (formData.isPrivateAccess && formData.courseCode.trim().length < 4) {
-      setError(t('createCourseForm.courseCodePlaceholder'));
+      addAlert({
+        type: 'error',
+        message: t('createCourseForm.courseCodePlaceholder'),
+        duration: 5000,
+      });
       setIsLoading(false);
       return;
     }
@@ -160,10 +171,20 @@ export default function CreateCourseForm({ courseId }: Props) {
       if (courseId) {
         await patchCourse(courseId, body);
         invalidateCourseLists();
+        addAlert({
+          type: 'success',
+          message: t('createCourseForm.updateSuccess'),
+          duration: 3000,
+        });
         router.push(ROUTES.teacher.courses);
       } else {
         await createCourse(body);
         invalidateCourseLists();
+        addAlert({
+          type: 'success',
+          message: t('createCourseForm.createSuccess'),
+          duration: 3000,
+        });
         router.push(ROUTES.teacher.courses);
       }
     } catch (err) {
@@ -175,7 +196,11 @@ export default function CreateCourseForm({ courseId }: Props) {
             : courseId
               ? t('createCourseForm.updateFailed')
               : t('createCourseForm.errorOccurred');
-      setError(message);
+      addAlert({
+        type: 'error',
+        message,
+        duration: 5000,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -210,20 +235,6 @@ export default function CreateCourseForm({ courseId }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      {error && (
-        <div className="bg-[var(--color-error-light)] border-l-4 border-[var(--color-error)] p-3 sm:p-4 rounded-r-lg">
-          <p className="text-sm text-[var(--color-error)]">{error}</p>
-          {courseId && (
-            <button
-              type="button"
-              onClick={() => router.push(ROUTES.teacher.courses)}
-              className="mt-3 text-sm font-medium text-[var(--color-error)] underline"
-            >
-              {t('createCourseForm.cancel')}
-            </button>
-          )}
-        </div>
-      )}
 
       <div>
         <label htmlFor="title" className="block text-sm font-medium text-[var(--color-foreground)] mb-1.5">

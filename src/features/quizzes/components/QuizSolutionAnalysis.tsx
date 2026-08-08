@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { Sparkles } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useFeature } from '@/contexts/AppSettingsContext';
+import { useAlert } from '@/components/ui/AlertContainer';
 import { analyzeQuizSolution } from '@/lib/api/quizSolutionAnalysis';
 import { getApiErrorMessage } from '@/lib/api/http';
-import Alert from '@/components/ui/Alert';
 import { Loader } from '@/components/ui/Loader';
 import { cn } from '@/lib/utils';
 
@@ -19,18 +19,22 @@ type Props = {
 export function QuizSolutionAnalysis({ attemptId, questionId, className }: Props) {
   const { t } = useTranslation();
   const isEnabled = useFeature('enableQuizSolutionAnalysis');
+  const { addAlert } = useAlert();
   const [analysis, setAnalysis] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const handleAnalyze = async () => {
     setIsLoading(true);
-    setError(null);
     try {
       const data = await analyzeQuizSolution({ attemptId, questionId });
       setAnalysis(data.analysis);
     } catch (err) {
-      setError(getApiErrorMessage(err, t('quizResult.solutionAnalysisFailed')));
+      const errorMsg = getApiErrorMessage(err, t('quizResult.solutionAnalysisFailed'));
+      addAlert({
+        type: 'error',
+        message: errorMsg,
+        duration: 5000,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -58,24 +62,6 @@ export function QuizSolutionAnalysis({ attemptId, questionId, className }: Props
         </button>
       )}
 
-      {error && (
-        <div className="mt-2 space-y-2">
-          <Alert
-            type="error"
-            message={error}
-            onClose={() => setError(null)}
-            className="relative top-0 right-0 left-0 translate-x-0 w-full z-10"
-          />
-          <button
-            type="button"
-            onClick={handleAnalyze}
-            disabled={isLoading}
-            className="text-sm font-medium text-[var(--color-primary)] hover:underline disabled:opacity-60"
-          >
-            {t('quizResult.analyzeSolutionRetry')}
-          </button>
-        </div>
-      )}
 
       {analysis && (
         <div className="mt-2 rounded-lg bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 p-3">

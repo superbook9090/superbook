@@ -7,7 +7,7 @@ import { Bell } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
-import Alert from '@/components/ui/Alert';
+import { useAlert } from '@/components/ui/AlertContainer';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { PageWrapper, PageHeader, EmptyState } from '@/components/layout';
 import {
@@ -38,21 +38,21 @@ export default function StudentNotificationsPage() {
   const router = useRouter();
   const { t, lang } = useTranslation();
   const { theme } = useRoleTheme();
+  const { addAlert } = useAlert();
 
   const [notifications, setNotifications] = useState<UserNotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [alertState, setAlertState] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const loadNotifications = useCallback(async () => {
     try {
       const { notifications: items } = await fetchUserNotifications();
       setNotifications(items);
     } catch {
-      setAlertState({ type: 'error', message: t('notifications.inbox.loadFailed') });
+      addAlert({ type: 'error', message: t('notifications.inbox.loadFailed'), duration: 5000 });
     } finally {
       setLoading(false);
     }
-  }, [t]);
+  }, [t, addAlert]);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -73,7 +73,7 @@ export default function StudentNotificationsPage() {
         await markNotificationRead(item._id);
         setNotifications((prev) => prev.map((n) => (n._id === item._id ? { ...n, read: true } : n)));
       } catch {
-        setAlertState({ type: 'error', message: t('notifications.inbox.markReadFailed') });
+        addAlert({ type: 'error', message: t('notifications.inbox.markReadFailed'), duration: 5000 });
       }
     }
 
@@ -98,10 +98,6 @@ export default function StudentNotificationsPage() {
         }
         description={t('notifications.inbox.description')}
       />
-
-      {alertState ? (
-        <Alert type={alertState.type} message={alertState.message} onClose={() => setAlertState(null)} />
-      ) : null}
 
       {notifications.length === 0 ? (
         <EmptyState icon={Bell} title={t('notifications.inbox.empty')} />

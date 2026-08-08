@@ -7,11 +7,11 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useQuiz } from '@/contexts/QuizContext';
+import { useAlert } from '@/components/ui/AlertContainer';
 import { useSubmitQuizAttempt, useStartQuizAttempt } from '@/lib/react-query/hooks';
 import { getQuizAttemptByAttemptId } from '@/lib/api/quizAttempts';
 import { ApiClientError } from '@/lib/api/http';
 import { useQuizSecurity } from '@/hooks/useQuizSecurity';
-import Alert from '@/components/ui/Alert';
 import { LazyConfirmModal } from '@/lib/lazy';
 import { useSessionStore } from '@/store/useSessionStore';
 import { LazyQuizQuestionProgress } from '@/lib/lazy';
@@ -51,6 +51,7 @@ export default function TakeQuizPage() {
   const attemptId = searchParams.get('attemptId');
   const { t } = useTranslation();
   const { theme } = useRoleTheme();
+  const { addAlert } = useAlert();
   const submitQuizMutation = useSubmitQuizAttempt();
   const startQuizMutation = useStartQuizAttempt();
 
@@ -59,7 +60,6 @@ export default function TakeQuizPage() {
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [securityWarning, setSecurityWarning] = useState<string | null>(null);
@@ -136,12 +136,12 @@ export default function TakeQuizPage() {
         const errorMsg = options.forceSubmit
           ? t('errors.securityForceSubmitFailed')
           : t('errors.errorSubmittingQuiz');
-        setAlertState({ type: 'error', message: errorMsg });
+        addAlert({ type: 'error', message: errorMsg, duration: 5000 });
         isSubmittingRef.current = false;
         setIsAutoSubmitting(false);
       }
     },
-    [router, submitQuizMutation, quizSecurity, setQuizActive, t]
+    [router, submitQuizMutation, quizSecurity, setQuizActive, t, addAlert]
   );
 
   // Force submit quiz on security violation
@@ -352,13 +352,6 @@ export default function TakeQuizPage() {
   if (error || !attempt) {
     return (
       <div className="text-center py-8">
-        {alertState && (
-          <Alert
-            type={alertState.type}
-            message={alertState.message}
-            onClose={() => setAlertState(null)}
-          />
-        )}
         {error === 'quiz_completed' ? (
           <>
             <p className="text-[var(--color-muted-foreground)] mb-4">{t('quiz.takeAlreadyCompleted')}</p>
@@ -516,14 +509,6 @@ export default function TakeQuizPage() {
         )}
         </div>
       </div>
-
-      {alertState && (
-        <Alert
-          type={alertState.type}
-          message={alertState.message}
-          onClose={() => setAlertState(null)}
-        />
-      )}
 
       {/* Warning if time is low */}
       {timeRemaining < 300 && (

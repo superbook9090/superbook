@@ -4,6 +4,7 @@ import "@/app/globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AppSettingsProvider } from '@/contexts/AppSettingsContext';
 import { SessionProvider } from '@/components/providers/SessionProvider';
+import { AlertProvider } from '@/components/ui/AlertContainer';
 import MaintenanceCheck from '@/components/MaintenanceCheck';
 import DeferredAnalytics from '@/components/providers/DeferredAnalytics';
 import ClarityInit from '@/components/providers/ClarityInit';
@@ -41,17 +42,19 @@ export default function RootLayout({
               "try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t)}}catch(e){}",
           }}
         />
-        <LanguageProvider>
-          <AppSettingsProvider>
-            <SessionProvider>
-              <MaintenanceCheck>
-                <PullToRefresh>
-                  {children}
-                </PullToRefresh>
-              </MaintenanceCheck>
-            </SessionProvider>
-          </AppSettingsProvider>
-        </LanguageProvider>
+        <AlertProvider>
+          <LanguageProvider>
+            <AppSettingsProvider>
+              <SessionProvider>
+                <MaintenanceCheck>
+                  <PullToRefresh>
+                    {children}
+                  </PullToRefresh>
+                </MaintenanceCheck>
+              </SessionProvider>
+            </AppSettingsProvider>
+          </LanguageProvider>
+        </AlertProvider>
         <AnimatedCursor />
         <DeferredAnalytics />
         <ClarityInit />
