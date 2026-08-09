@@ -847,6 +847,11 @@ export const en = {
     email: 'Email',
     role: 'Role',
     teacherProfileDesc: 'Manage your account settings and teacher information.',
+    editName: 'Edit Name',
+    updateName: 'Update Name',
+    nameUpdateSuccess: 'Name updated successfully.',
+    nameUpdateError: 'Failed to update name.',
+    nameRequired: 'Name is required.',
   },
 
   // Progress

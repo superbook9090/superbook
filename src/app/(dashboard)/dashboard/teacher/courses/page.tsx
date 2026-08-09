@@ -10,11 +10,10 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
 import Alert from '@/components/ui/Alert';
-import Tooltip from '@/components/ui/Tooltip';
+import Button from '@/components/ui/Button';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { useTeacherCourses, type Course } from '@/lib/react-query/hooks';
 import { Award } from 'lucide-react';
-import { useFeature } from '@/contexts/AppSettingsContext';
 
 export default function TeacherCoursesPage() {
   const { session, status } = useSessionStore();
@@ -141,12 +140,13 @@ export default function TeacherCoursesPage() {
 
                     {/* Action Buttons */}
                     <div className="flex mt-4 pt-4 border-t border-[var(--border)]">
-                      <button
+                      <Button
                         onClick={() => router.push(ROUTES.teacher.courseEdit(course._id))}
-                        className="flex-1 px-4 py-2.5 text-sm font-semibold text-center text-white bg-gradient-to-r from-[var(--teacher-primary)] to-[var(--teacher-accent)] hover:opacity-90 rounded-xl transition-opacity"
+                        variant="primary"
+                        fullWidth
                       >
                         {t('teacherCourses.edit') || 'Edit Course'}
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 </div>

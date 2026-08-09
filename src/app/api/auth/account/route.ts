@@ -37,3 +37,38 @@ export async function GET() {
     return NextResponse.json({ message: 'Something went wrong' }, { status: 500 });
   }
 }
+
+export async function PATCH(request: Request) {
+  const logContext: LogContext = { method: 'PATCH', path: '/api/auth/account' };
+
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { name } = await request.json();
+    if (!name || typeof name !== 'string' || !name.trim()) {
+      return NextResponse.json({ message: 'Name is required' }, { status: 400 });
+    }
+
+    await dbConnect();
+    const user = await User.findByIdAndUpdate(
+      session.user.id,
+      { name: name.trim() },
+      { new: true }
+    );
+
+    if (!user) {
+      return NextResponse.json({ message: 'User not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      message: 'Name updated successfully',
+      name: user.name,
+    });
+  } catch (error) {
+    logApiError(error as Error, 'PATCH', '/api/auth/account', logContext);
+    return NextResponse.json({ message: 'Something went wrong' }, { status: 500 });
+  }
+}

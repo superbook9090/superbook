@@ -14,6 +14,7 @@ import {
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
+import Button from '@/components/ui/Button';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useTranslation } from '@/hooks/useTranslation';
 import { formatDate } from '@/lib/dateUtils';
@@ -23,7 +24,6 @@ import { ApiClientError } from '@/lib/api/http';
 import DashboardListFilters, { FilterPanel } from '@/components/filters/DashboardListFilters';
 import { buildPublishStatusOptions, type PublishStatusFilter } from '@/components/filters/publishStatusOptions';
 import { isSuperAdmin } from '@/lib/roles';
-import { useFeature } from '@/contexts/AppSettingsContext';
 
 export default function AdminCoursesPage() {
   const { session, status } = useSessionStore();
@@ -230,13 +230,14 @@ export default function AdminCoursesPage() {
 
                 {/* Actions */}
                 <div className="flex pt-4 border-t border-[var(--border)] mt-auto">
-                  <button
+                  <Button
                     onClick={() => router.push(ROUTES.teacher.courseEdit(course._id))}
-                    className="flex-1 px-4 py-2.5 text-sm font-semibold text-center text-[var(--info)] bg-[var(--info-light)] hover:bg-[var(--info-light)]/80 rounded-xl transition-colors flex items-center justify-center gap-2"
+                    variant="secondary"
+                    className="flex-grow flex items-center justify-center gap-2"
                   >
                     <Edit className="w-4 h-4" />
                     {t('common.edit')}
-                  </button>
+                  </Button>
                 </div>
               </div>
             </motion.div>

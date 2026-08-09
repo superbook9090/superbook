@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { Share2, Check } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import Tooltip from '@/components/ui/Tooltip';
+import Button from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 
 interface CourseShareButtonProps {
@@ -53,35 +54,29 @@ export default function CourseShareButton({
 
   if (variant === 'button') {
     return (
-      <button
+      <Button
         type="button"
         onClick={handleShare}
-        className={cn(
-          'inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-          'bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)] hover:bg-[var(--color-primary-soft)] hover:text-[var(--color-primary)]',
-          className
-        )}
+        variant={copied ? "primary" : "secondary"}
+        className={className}
       >
         {copied ? <Check className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
         {label}
-      </button>
+      </Button>
     );
   }
 
   return (
     <Tooltip label={label}>
-      <button
+      <Button
         type="button"
         onClick={handleShare}
         aria-label={label}
-        className={cn(
-          'flex items-center justify-center rounded-xl p-2.5 transition-colors',
-          'bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)] hover:bg-[var(--color-primary-soft)] hover:text-[var(--color-primary)]',
-          className
-        )}
+        variant={copied ? "primary" : "secondary"}
+        className={cn('p-2.5 rounded-xl flex items-center justify-center', className)}
       >
         {copied ? <Check className="h-5 w-5" /> : <Share2 className="h-5 w-5" />}
-      </button>
+      </Button>
     </Tooltip>
   );
 }

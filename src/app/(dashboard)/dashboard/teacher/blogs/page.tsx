@@ -19,6 +19,7 @@ import { PageSkeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
 import Tooltip from '@/components/ui/Tooltip';
+import Button from '@/components/ui/Button';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import { useTranslation } from '@/hooks/useTranslation';
 import { formatDate } from '@/lib/dateUtils';
@@ -249,17 +250,15 @@ export default function TeacherBlogsPage() {
 
                 <div className="flex items-center gap-2 sm:gap-1">
                   <Tooltip label={blog.isPublished ? t('blog.unpublish') : t('blog.publish')}>
-                    <button
+                    <Button
+                      type="button"
+                      variant={blog.isPublished ? 'primary' : 'secondary'}
                       onClick={() => togglePublish(blog._id, blog.isPublished)}
-                      className={`p-2.5 sm:p-2 rounded-lg transition-colors touch-manipulation min-h-[44px] sm:min-h-0 ${
-                        blog.isPublished
-                          ? `${theme.activeBg} ${theme.text} hover:opacity-80`
-                          : 'bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)] hover:bg-[var(--color-surface-muted)]/80'
-                      }`}
+                      className="p-2.5 sm:p-2 rounded-lg"
                       aria-label={blog.isPublished ? t('blog.unpublish') : t('blog.publish')}
                     >
                       {blog.isPublished ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
-                    </button>
+                    </Button>
                   </Tooltip>
                   <Tooltip label={t('blog.edit')}>
                     <Link
@@ -271,13 +270,15 @@ export default function TeacherBlogsPage() {
                     </Link>
                   </Tooltip>
                   <Tooltip label={t('blog.delete')}>
-                    <button
+                    <Button
+                      type="button"
+                      variant="danger"
                       onClick={() => handleDelete(blog._id)}
-                      className="p-2.5 sm:p-2 bg-[var(--error-light)] text-[var(--error)] rounded-lg hover:bg-[var(--error-light)]/80 transition-colors touch-manipulation min-h-[44px] sm:min-h-0"
+                      className="p-2.5 sm:p-2 bg-[var(--error-light)] text-[var(--error)] rounded-lg hover:bg-[var(--error-light)]/80"
                       aria-label={t('blog.delete')}
                     >
                       <Trash2 className="w-5 h-5" />
-                    </button>
+                    </Button>
                   </Tooltip>
                 </div>
               </div>

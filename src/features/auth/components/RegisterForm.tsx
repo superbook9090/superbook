@@ -18,8 +18,6 @@ import {
   User,
   Mail,
   Lock,
-  Eye,
-  EyeOff,
   ArrowRight,
   BookOpen,
   Users,
@@ -27,7 +25,7 @@ import {
 } from 'lucide-react';
 import Alert from '@/components/ui/Alert';
 import { Loader } from '@/components/ui/Loader';
-import Tooltip from '@/components/ui/Tooltip';
+import { TextField } from '@/components/ui/TextField';
 
 function RegisterFormInner() {
   const { status, fetchSession } = useSessionStore();
@@ -48,8 +46,6 @@ function RegisterFormInner() {
     role: 'student',
     inviteCode: '',
   });
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -318,21 +314,17 @@ function RegisterFormInner() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                <label className="block text-sm font-semibold text-[var(--color-foreground)] mb-1.5">
-                  {t('register.fullName')}
-                </label>
-                <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-muted)]" />
-                  <input
-                    type="text"
-                    name="name"
-                    required
-                    value={formData.name}
-                    onChange={handleChange}
-                    placeholder="John Doe"
-                    className={`w-full pl-12 pr-4 py-3 bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-xl text-[var(--color-foreground)] placeholder-[var(--color-muted)] focus:outline-none focus:ring-2 focus:${theme.shadow} focus:${theme.border.replace('border-', 'border-')} transition-all`}
-                  />
-                </div>
+                <TextField
+                  label={t('register.fullName')}
+                  type="text"
+                  name="name"
+                  required
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="John Doe"
+                  startIcon={<User className="w-5 h-5 text-[var(--color-muted)]" />}
+                  fullWidth
+                />
               </motion.div>
 
               {/* Email Input */}
@@ -341,21 +333,17 @@ function RegisterFormInner() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                <label className="block text-sm font-semibold text-[var(--color-foreground)] mb-1.5">
-                  {t('register.emailAddress')}
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-muted)]" />
-                  <input
-                    type="email"
-                    name="email"
-                    required
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="you@example.com"
-                    className={`w-full pl-12 pr-4 py-3 bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-xl text-[var(--color-foreground)] placeholder-[var(--color-muted)] focus:outline-none focus:ring-2 focus:${theme.shadow} focus:${theme.border.replace('border-', 'border-')} transition-all`}
-                  />
-                </div>
+                <TextField
+                  label={t('register.emailAddress')}
+                  type="email"
+                  name="email"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="you@example.com"
+                  startIcon={<Mail className="w-5 h-5 text-[var(--color-muted)]" />}
+                  fullWidth
+                />
               </motion.div>
 
               {/* Password Input */}
@@ -364,34 +352,17 @@ function RegisterFormInner() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.4 }}
               >
-                <label className="block text-sm font-semibold text-[var(--color-foreground)] mb-1.5">
-                  {t('register.password')}
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-muted)]" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    name="password"
-                    required
-                    value={formData.password}
-                    onChange={handleChange}
-                    placeholder="Create a password"
-                    className={`w-full pl-12 pr-12 py-3 bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-xl text-[var(--color-foreground)] placeholder-[var(--color-muted)] focus:outline-none focus:ring-2 focus:${theme.shadow} focus:${theme.border.replace('border-', 'border-')} transition-all`}
-                  />
-                  <Tooltip
-                    label={showPassword ? t('password.hidePassword') : t('password.showPassword')}
-                    className="absolute right-4 top-1/2 -translate-y-1/2"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      aria-label={showPassword ? t('password.hidePassword') : t('password.showPassword')}
-                      className="text-[var(--color-muted)] hover:text-[var(--color-foreground)] transition-colors"
-                    >
-                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
-                  </Tooltip>
-                </div>
+                <TextField
+                  label={t('register.password')}
+                  type="password"
+                  name="password"
+                  required
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Create a password"
+                  startIcon={<Lock className="w-5 h-5 text-[var(--color-muted)]" />}
+                  fullWidth
+                />
               </motion.div>
 
               {/* Confirm Password Input */}
@@ -400,34 +371,17 @@ function RegisterFormInner() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.5 }}
               >
-                <label className="block text-sm font-semibold text-[var(--color-foreground)] mb-1.5">
-                  {t('register.confirmPassword')}
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-muted)]" />
-                  <input
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    name="confirmPassword"
-                    required
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    placeholder="Confirm your password"
-                    className={`w-full pl-12 pr-12 py-3 bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-xl text-[var(--color-foreground)] placeholder-[var(--color-muted)] focus:outline-none focus:ring-2 focus:${theme.shadow} focus:${theme.border.replace('border-', 'border-')} transition-all`}
-                  />
-                  <Tooltip
-                    label={showConfirmPassword ? t('password.hidePassword') : t('password.showPassword')}
-                    className="absolute right-4 top-1/2 -translate-y-1/2"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      aria-label={showConfirmPassword ? t('password.hidePassword') : t('password.showPassword')}
-                      className="text-[var(--color-muted)] hover:text-[var(--color-foreground)] transition-colors"
-                    >
-                      {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
-                  </Tooltip>
-                </div>
+                <TextField
+                  label={t('register.confirmPassword')}
+                  type="password"
+                  name="confirmPassword"
+                  required
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Confirm your password"
+                  startIcon={<Lock className="w-5 h-5 text-[var(--color-muted)]" />}
+                  fullWidth
+                />
               </motion.div>
 
               {/* Organization Code Input (Optional) */}
@@ -436,20 +390,16 @@ function RegisterFormInner() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.55 }}
               >
-                <label className="block text-sm font-semibold text-[var(--color-foreground)] mb-1.5">
-                  {t('register.inviteCode')} <span className="font-normal text-[var(--color-muted)]">({t('register.optional')})</span>
-                </label>
-                <div className="relative">
-                  <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-muted)]" />
-                  <input
-                    type="text"
-                    name="inviteCode"
-                    value={formData.inviteCode}
-                    onChange={handleChange}
-                    placeholder="Enter invite code (optional)"
-                    className={`w-full pl-12 pr-4 py-3 bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-xl text-[var(--color-foreground)] placeholder-[var(--color-muted)] focus:outline-none focus:ring-2 focus:${theme.shadow} focus:${theme.border.replace('border-', 'border-')} transition-all`}
-                  />
-                </div>
+                <TextField
+                  label={`${t('register.inviteCode')} (${t('register.optional')})`}
+                  type="text"
+                  name="inviteCode"
+                  value={formData.inviteCode}
+                  onChange={handleChange}
+                  placeholder="Enter invite code (optional)"
+                  startIcon={<Building2 className="w-5 h-5 text-[var(--color-muted)]" />}
+                  fullWidth
+                />
               </motion.div>
 
               {/* Submit Button */}

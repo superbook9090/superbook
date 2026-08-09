@@ -23,6 +23,7 @@ import { fetchAnalytics } from '@/lib/api/analytics';
 import { getApiErrorMessage } from '@/lib/api/http';
 import StatCard from '@/components/ui/StatCard';
 import ActivityCard from '@/components/ui/ActivityCard';
+import Button from '@/components/ui/Button';
 import { PageWrapper, PageHeader } from '@/components/layout';
 
 interface AdminStats {
@@ -115,14 +116,15 @@ export default function AdminAnalyticsPage() {
         }
         description={t('progress.overviewDescription')}
         actions={
-          <button
+          <Button
             type="button"
             onClick={fetchStats}
-            className="btn-action bg-[var(--card-solid)] text-[var(--color-foreground)] shadow-sm hover:shadow-md"
+            variant="secondary"
+            className="flex items-center gap-2"
           >
             <RefreshCw className="w-4 h-4" />
             {t('progress.refresh')}
-          </button>
+          </Button>
         }
       />
 

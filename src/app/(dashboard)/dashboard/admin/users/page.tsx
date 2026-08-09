@@ -6,7 +6,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { formatDate } from '@/lib/dateUtils';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
-import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { motion } from 'framer-motion';
 import {
   Users,
@@ -22,6 +21,9 @@ import {
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import Alert from '@/components/ui/Alert';
 import Tooltip from '@/components/ui/Tooltip';
+import { TextField } from '@/components/ui/TextField';
+import Button from '@/components/ui/Button';
+import { Dropdown } from '@/components/ui/Dropdown';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import { useRouter } from 'next/navigation';
 import { useSessionStore } from '@/store/useSessionStore';
@@ -60,7 +62,6 @@ export default function AdminUsersPage() {
   const { session, status } = useSessionStore();
   const router = useRouter();
   const { t } = useTranslation();
-  const { theme } = useRoleTheme();
   const [users, setUsers] = useState<User[]>([]);
 
   // Frontend role guard (secondary security layer)
@@ -559,53 +560,49 @@ export default function AdminUsersPage() {
           >
             <h3 className="text-lg font-semibold text-[var(--color-foreground)] mb-4">{t('adminUsers.editTeacherLimits')}</h3>
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-[var(--color-foreground)] mb-2">{t('adminUsers.coursesLimit')}</label>
-                <input
-                  type="number"
-                  min="1"
-                  value={limitsForm.courses}
-                  onChange={(e) => setLimitsForm({ ...limitsForm, courses: e.target.value })}
-                  placeholder={t('adminUsers.leaveEmptyForGlobal')}
-                  className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[var(--color-foreground)] mb-2">{t('adminUsers.quizzesLimit')}</label>
-                <input
-                  type="number"
-                  min="1"
-                  value={limitsForm.quizzes}
-                  onChange={(e) => setLimitsForm({ ...limitsForm, quizzes: e.target.value })}
-                  placeholder={t('adminUsers.leaveEmptyForGlobal')}
-                  className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[var(--color-foreground)] mb-2">{t('adminUsers.blogsLimit')}</label>
-                <input
-                  type="number"
-                  min="1"
-                  value={limitsForm.blogs}
-                  onChange={(e) => setLimitsForm({ ...limitsForm, blogs: e.target.value })}
-                  placeholder={t('adminUsers.leaveEmptyForGlobal')}
-                  className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
-                />
-              </div>
+              <TextField
+                label={t('adminUsers.coursesLimit')}
+                type="number"
+                min="1"
+                value={limitsForm.courses}
+                onChange={(e) => setLimitsForm({ ...limitsForm, courses: e.target.value })}
+                placeholder={t('adminUsers.leaveEmptyForGlobal')}
+                fullWidth
+              />
+              <TextField
+                label={t('adminUsers.quizzesLimit')}
+                type="number"
+                min="1"
+                value={limitsForm.quizzes}
+                onChange={(e) => setLimitsForm({ ...limitsForm, quizzes: e.target.value })}
+                placeholder={t('adminUsers.leaveEmptyForGlobal')}
+                fullWidth
+              />
+              <TextField
+                label={t('adminUsers.blogsLimit')}
+                type="number"
+                min="1"
+                value={limitsForm.blogs}
+                onChange={(e) => setLimitsForm({ ...limitsForm, blogs: e.target.value })}
+                placeholder={t('adminUsers.leaveEmptyForGlobal')}
+                fullWidth
+              />
             </div>
             <div className="flex gap-3 mt-6">
-              <button
+              <Button
                 onClick={handleSaveLimits}
-                className={`flex-1 min-h-[44px] sm:min-h-0 px-4 py-2.5 bg-gradient-to-r ${theme.gradient} text-white rounded-xl hover:opacity-90 transition-colors text-sm font-medium`}
+                variant="primary"
+                className="flex-1"
               >
                 {t('adminUsers.saveLimits')}
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleCloseLimits}
-                className="flex-1 min-h-[44px] sm:min-h-0 px-4 py-2.5 bg-[var(--color-surface-muted)] text-[var(--color-foreground)] rounded-xl hover:bg-[var(--color-surface-muted)]/80 transition-colors text-sm font-medium"
+                variant="secondary"
+                className="flex-1"
               >
                 {t('common.cancel')}
-              </button>
+              </Button>
             </div>
           </motion.div>
         </motion.div>
@@ -636,35 +633,35 @@ export default function AdminUsersPage() {
               </Tooltip>
             </div>
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-[var(--color-foreground)] mb-2">{t('adminUsers.selectOrganization')}</label>
-                <select
-                  value={selectedOrganizationId || ''}
-                  onChange={(e) => setSelectedOrganizationId(e.target.value || null)}
-                  className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
-                >
-                  <option value="">{t('adminUsers.noOrganization')}</option>
-                  {organizations.map((org) => (
-                    <option key={org._id} value={org._id}>
-                      {org.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <Dropdown
+                label={t('adminUsers.selectOrganization')}
+                value={selectedOrganizationId || ''}
+                onChange={(val) => setSelectedOrganizationId(val || null)}
+                options={[
+                  { value: '', label: t('adminUsers.noOrganization') },
+                  ...organizations.map((org) => ({
+                    value: org._id,
+                    label: org.name,
+                  })),
+                ]}
+                placeholder=""
+              />
             </div>
             <div className="flex gap-3 mt-6">
-              <button
+              <Button
                 onClick={handleSaveOrgAssign}
-                className={`flex-1 min-h-[44px] sm:min-h-0 px-4 py-2.5 bg-gradient-to-r ${theme.gradient} text-white rounded-xl hover:opacity-90 transition-colors text-sm font-medium`}
+                variant="primary"
+                className="flex-1"
               >
                 Save
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleCloseOrgAssign}
-                className="flex-1 min-h-[44px] sm:min-h-0 px-4 py-2.5 bg-[var(--color-surface-muted)] text-[var(--color-foreground)] rounded-xl hover:bg-[var(--color-surface-muted)]/80 transition-colors text-sm font-medium"
+                variant="secondary"
+                className="flex-1"
               >
                 Cancel
-              </button>
+              </Button>
             </div>
           </motion.div>
         </motion.div>
@@ -683,27 +680,29 @@ export default function AdminUsersPage() {
           </p>
           <div className="flex items-center gap-2">
             <Tooltip label={t('common.previous')}>
-              <button
+              <Button
                 onClick={() => setPage(page - 1)}
                 disabled={page === 1}
                 aria-label={t('common.previous')}
-                className="p-2 min-h-[44px] sm:min-h-0 border border-[var(--border)] rounded-lg hover:bg-[var(--color-surface-muted)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                variant="secondary"
+                className="p-2 rounded-lg animate-none"
               >
                 <ChevronLeft className="w-4 h-4" />
-              </button>
+              </Button>
             </Tooltip>
             <span className="px-3 py-2 text-sm text-[var(--color-muted-foreground)]">
               {t('admin.page').replace('{current}', String(page)).replace('{total}', String(pagination.totalPages))}
             </span>
             <Tooltip label={t('common.next')}>
-              <button
+              <Button
                 onClick={() => setPage(page + 1)}
                 disabled={page === pagination.totalPages}
                 aria-label={t('common.next')}
-                className="p-2 min-h-[44px] sm:min-h-0 border border-[var(--border)] rounded-lg hover:bg-[var(--color-surface-muted)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                variant="secondary"
+                className="p-2 rounded-lg animate-none"
               >
                 <ChevronRight className="w-4 h-4" />
-              </button>
+              </Button>
             </Tooltip>
           </div>
         </motion.div>
@@ -786,43 +785,43 @@ export default function AdminUsersPage() {
               {/* Operations */}
               <div className="space-y-4">
                 {/* Change Role */}
-                <div>
-                  <label className="block text-sm font-medium text-[var(--color-foreground)] mb-2">Change Role</label>
-                  <select
-                    value={selectedUser.role}
-                    onChange={(e) => handleRoleChange(selectedUser._id, e.target.value)}
-                    disabled={selectedUser._id === session?.user?.id}
-                    className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] disabled:bg-[var(--color-surface-muted)] disabled:cursor-not-allowed"
-                  >
-                    <option value="student">{t('roles.student')}</option>
-                    <option value="teacher">{t('roles.teacher')}</option>
-                    <option value="admin">{t('roles.admin')}</option>
-                  </select>
-                </div>
+                <Dropdown
+                  label="Change Role"
+                  value={selectedUser.role}
+                  onChange={(val) => handleRoleChange(selectedUser._id, val)}
+                  disabled={selectedUser._id === session?.user?.id}
+                  options={[
+                    { value: 'student', label: t('roles.student') },
+                    { value: 'teacher', label: t('roles.teacher') },
+                    { value: 'admin', label: t('roles.admin') },
+                  ]}
+                  placeholder=""
+                />
 
                 {/* Assign Organization */}
                 <div>
-                  <label className="block text-sm font-medium text-[var(--color-foreground)] mb-2">Assign Organization</label>
-                  <div className="flex gap-2">
-                    <select
+                  <div className="flex gap-2 items-end">
+                    <Dropdown
+                      label="Assign Organization"
                       value={selectedUser.organizationId || ''}
-                      onChange={(e) => {
+                      onChange={(val) => {
                         setOrgAssignUserId(selectedUser._id);
-                        setSelectedOrganizationId(e.target.value || null);
+                        setSelectedOrganizationId(val || null);
                       }}
-                      className="flex-1 px-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
-                    >
-                      <option value="">None</option>
-                      {organizations.map(org => (
-                        <option key={org._id} value={org._id}>{org.name}</option>
-                      ))}
-                    </select>
-                    <button
+                      options={[
+                        { value: '', label: 'None' },
+                        ...organizations.map((org) => ({ value: org._id, label: org.name })),
+                      ]}
+                      placeholder=""
+                      containerClassName="flex-1"
+                    />
+                    <Button
                       onClick={() => handleSaveOrgAssign()}
-                      className="px-4 py-2.5 min-h-[44px] bg-[var(--primary)] text-white rounded-xl hover:bg-[var(--primary)]/90 transition-colors"
+                      variant="primary"
+                      className="px-4 py-2.5"
                     >
                       Save
-                    </button>
+                    </Button>
                   </div>
                 </div>
 
@@ -881,73 +880,71 @@ export default function AdminUsersPage() {
                   <div>
                     <label className="block text-sm font-medium text-[var(--color-foreground)] mb-2">Teacher Limits</label>
                     <div className="grid grid-cols-3 gap-2">
-                      <div>
-                        <label className="block text-xs text-[var(--color-muted-foreground)] mb-1">Courses</label>
-                        <input
-                          type="number"
-                          min="1"
-                          value={limitsUserId === selectedUser._id ? limitsForm.courses : selectedUser.limits?.courses || ''}
-                          onChange={(e) => {
-                            setLimitsUserId(selectedUser._id);
-                            setLimitsForm({ ...limitsForm, courses: e.target.value });
-                          }}
-                          placeholder="Unlimited"
-                          className="w-full px-3 py-2 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-[var(--color-muted-foreground)] mb-1">Quizzes</label>
-                        <input
-                          type="number"
-                          min="1"
-                          value={limitsUserId === selectedUser._id ? limitsForm.quizzes : selectedUser.limits?.quizzes || ''}
-                          onChange={(e) => {
-                            setLimitsUserId(selectedUser._id);
-                            setLimitsForm({ ...limitsForm, quizzes: e.target.value });
-                          }}
-                          placeholder="Unlimited"
-                          className="w-full px-3 py-2 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-[var(--color-muted-foreground)] mb-1">Blogs</label>
-                        <input
-                          type="number"
-                          min="1"
-                          value={limitsUserId === selectedUser._id ? limitsForm.blogs : selectedUser.limits?.blogs || ''}
-                          onChange={(e) => {
-                            setLimitsUserId(selectedUser._id);
-                            setLimitsForm({ ...limitsForm, blogs: e.target.value });
-                          }}
-                          placeholder="Unlimited"
-                          className="w-full px-3 py-2 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
-                        />
-                      </div>
+                      <TextField
+                        label="Courses"
+                        type="number"
+                        min="1"
+                        value={limitsUserId === selectedUser._id ? limitsForm.courses : selectedUser.limits?.courses || ''}
+                        onChange={(e) => {
+                          setLimitsUserId(selectedUser._id);
+                          setLimitsForm({ ...limitsForm, courses: e.target.value });
+                        }}
+                        placeholder="Unlimited"
+                        fullWidth
+                      />
+                      <TextField
+                        label="Quizzes"
+                        type="number"
+                        min="1"
+                        value={limitsUserId === selectedUser._id ? limitsForm.quizzes : selectedUser.limits?.quizzes || ''}
+                        onChange={(e) => {
+                          setLimitsUserId(selectedUser._id);
+                          setLimitsForm({ ...limitsForm, quizzes: e.target.value });
+                        }}
+                        placeholder="Unlimited"
+                        fullWidth
+                      />
+                      <TextField
+                        label="Blogs"
+                        type="number"
+                        min="1"
+                        value={limitsUserId === selectedUser._id ? limitsForm.blogs : selectedUser.limits?.blogs || ''}
+                        onChange={(e) => {
+                          setLimitsUserId(selectedUser._id);
+                          setLimitsForm({ ...limitsForm, blogs: e.target.value });
+                        }}
+                        placeholder="Unlimited"
+                        fullWidth
+                      />
                     </div>
                     {(limitsForm.courses || limitsForm.quizzes || limitsForm.blogs) && (
-                      <button
+                      <Button
                         onClick={() => handleSaveLimits()}
-                        className="mt-2 w-full px-4 py-2.5 min-h-[44px] bg-[var(--primary)] text-white rounded-xl hover:bg-[var(--primary)]/90 transition-colors"
+                        variant="primary"
+                        fullWidth
+                        className="mt-2"
                       >
                         Save Limits
-                      </button>
+                      </Button>
                     )}
                   </div>
                 )}
 
                 {/* Delete User */}
                 <div className="pt-4 border-t border-[var(--border)]">
-                  <button
+                  <Button
                     onClick={() => {
                       handleCloseUserDetail();
                       handleDeleteClick(selectedUser._id);
                     }}
                     disabled={selectedUser._id === session?.user?.id || selectedUser.role === 'superadmin'}
-                    className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--error-light)] text-[var(--error)] rounded-xl hover:bg-[var(--error-light)]/80 transition-colors disabled:bg-[var(--color-surface-muted)] disabled:text-[var(--color-muted-foreground)] disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    variant="danger"
+                    fullWidth
+                    className="flex items-center justify-center gap-2"
                   >
                     <Trash2 className="w-4 h-4" />
                     {t('admin.delete')}
-                  </button>
+                  </Button>
                   {selectedUser.role === 'superadmin' && (
                     <p className="text-xs text-[var(--color-muted-foreground)] mt-2 text-center">Super admin accounts cannot be deleted</p>
                   )}

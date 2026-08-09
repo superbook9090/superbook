@@ -16,6 +16,7 @@ import { LazyConfirmModal } from '@/lib/lazy';
 import { useSessionStore } from '@/store/useSessionStore';
 import { LazyQuizQuestionProgress } from '@/lib/lazy';
 import { PageSkeleton } from '@/components/ui/Skeleton';
+import Button from '@/components/ui/Button';
 import {
   computeQuizTimeRemainingSeconds,
   computeQuizTimeTakenSeconds,
@@ -356,29 +357,29 @@ export default function TakeQuizPage() {
           <>
             <p className="text-[var(--color-muted-foreground)] mb-4">{t('quiz.takeAlreadyCompleted')}</p>
             <div className="flex gap-4 justify-center">
-              <button
+              <Button
                 onClick={handleRetry}
-                className={`min-h-[44px] px-4 py-3 sm:px-4 sm:py-2 bg-gradient-to-r ${theme.gradient} text-white rounded-md`}
+                variant="primary"
               >
                 {t('quiz.takeRetryQuiz')}
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => router.push(ROUTES.student.quizzes)}
-                className="min-h-[44px] px-4 py-3 sm:px-4 sm:py-2 bg-[var(--color-surface-muted)] text-[var(--color-foreground)] rounded-md hover:bg-[var(--color-surface-muted)]/80"
+                variant="secondary"
               >
                 {t('quiz.takeBackToQuizzes')}
-              </button>
+              </Button>
             </div>
           </>
         ) : (
           <>
             <p className="text-[var(--error)] mb-4">{error || t('quiz.takeQuizNotFound')}</p>
-            <button
+            <Button
               onClick={() => router.push(ROUTES.student.quizzes)}
-              className={`min-h-[44px] px-4 py-3 sm:px-4 sm:py-2 bg-gradient-to-r ${theme.gradient} text-white rounded-md`}
+              variant="primary"
             >
               {t('quiz.takeBackToQuizzes')}
-            </button>
+            </Button>
           </>
         )}
       </div>
@@ -483,29 +484,30 @@ export default function TakeQuizPage() {
       {/* Navigation */}
       <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-[var(--color-border)] bg-[var(--card-solid)]/95 backdrop-blur-sm p-3 sm:p-0 sm:static sm:bg-transparent sm:border-0 sm:backdrop-blur-none">
         <div className="max-w-4xl mx-auto flex justify-between items-center gap-2">
-        <button
+        <Button
           onClick={() => setCurrentQuestion((prev) => Math.max(0, prev - 1))}
           disabled={currentQuestion === 0}
-          className="min-h-[44px] sm:min-h-0 px-4 py-3 sm:px-4 sm:py-2 border border-[var(--border)] rounded-md text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted)] disabled:opacity-50 disabled:cursor-not-allowed"
+          variant="outline"
         >
           {t('common.previous')}
-        </button>
+        </Button>
 
         {currentQuestion < questions.length - 1 ? (
-          <button
+          <Button
             onClick={() => setCurrentQuestion((prev) => Math.min(questions.length - 1, prev + 1))}
-            className={`min-h-[44px] sm:min-h-0 px-4 py-3 sm:px-4 sm:py-2 bg-gradient-to-r ${theme.gradient} text-white rounded-md hover:opacity-90`}
+            variant="primary"
           >
             {t('common.next')}
-          </button>
+          </Button>
         ) : (
-          <button
+          <Button
             onClick={() => handleSubmit()}
             disabled={submitQuizMutation.isPending}
-            className={`min-h-[44px] sm:min-h-0 px-6 py-3 sm:px-6 sm:py-2 bg-gradient-to-r ${theme.gradient} text-white rounded-md hover:opacity-90 disabled:opacity-50`}
+            isLoading={submitQuizMutation.isPending}
+            variant="primary"
           >
-            {submitQuizMutation.isPending ? t('quiz.submitting') : t('quiz.submit')}
-          </button>
+            {t('quiz.submit')}
+          </Button>
         )}
         </div>
       </div>

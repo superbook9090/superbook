@@ -6,8 +6,9 @@
 import { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle, AlertTriangle, Info, CheckCircle } from 'lucide-react';
-import { Loader } from '@/components/ui/Loader';
 import { useTranslation } from '@/hooks/useTranslation';
+import Button from '@/components/ui/Button';
+import { cn } from '@/lib/utils';
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -28,37 +29,6 @@ const iconMap = {
   success: CheckCircle,
 };
 
-const colorMap = {
-  warning: {
-    bg: 'bg-[var(--warning-light)]',
-    border: 'border-[var(--warning)]/20',
-    icon: 'text-[var(--warning)]',
-    button: 'bg-[var(--warning)] hover:opacity-90',
-    buttonText: 'text-[var(--warning)]',
-  },
-  danger: {
-    bg: 'bg-[var(--error-light)]',
-    border: 'border-[var(--error)]/20',
-    icon: 'text-[var(--error)]',
-    button: 'bg-[var(--error)] hover:opacity-90',
-    buttonText: 'text-[var(--error)]',
-  },
-  info: {
-    bg: 'bg-[var(--info-light)]',
-    border: 'border-[var(--info)]/20',
-    icon: 'text-[var(--info)]',
-    button: 'bg-[var(--info)] hover:opacity-90',
-    buttonText: 'text-[var(--info)]',
-  },
-  success: {
-    bg: 'bg-[var(--success-light)]',
-    border: 'border-[var(--success)]/20',
-    icon: 'text-[var(--success)]',
-    button: 'bg-[var(--success)] hover:opacity-90',
-    buttonText: 'text-[var(--success)]',
-  },
-};
-
 const defaultTitles = {
   warning: 'common.confirmAction',
   danger: 'common.confirmDeletion',
@@ -71,16 +41,15 @@ export default function ConfirmModal({
   title,
   message,
   onConfirm,
-  onCancel=()=>{},
+  onCancel,
   confirmText,
-  cancelText = '',
+  cancelText,
   type = 'warning',
   isLoading = false,
 }: ConfirmModalProps) {
   const { t } = useTranslation();
   const modalRef = useRef<HTMLDivElement>(null);
   const Icon = iconMap[type];
-  const colors = colorMap[type];
   const modalTitle = title || t(defaultTitles[type]);
   const defaultConfirmText = confirmText || t('common.confirm');
   const defaultCancelText = cancelText || t('common.cancel');
@@ -102,7 +71,7 @@ export default function ConfirmModal({
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen && !isLoading) {
-        onCancel();
+        onCancel?.();
       }
     };
 
@@ -147,7 +116,7 @@ export default function ConfirmModal({
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget && !isLoading) {
-      onCancel();
+      onCancel?.();
     }
   };
 
@@ -161,23 +130,22 @@ export default function ConfirmModal({
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
+          {/* Backdrop with premium blur */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--color-foreground)]/60 p-4"
+            className="fixed inset-0 z-50 bg-[var(--color-foreground)]/30 backdrop-blur-sm"
             onClick={handleBackdropClick}
             aria-hidden="true"
           />
 
-          {/* Modal */}
+          {/* Modal Container */}
           <motion.div
-            ref={modalRef}
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            initial={{ opacity: 0, scale: 0.95, y: 16 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            exit={{ opacity: 0, scale: 0.95, y: 16 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
             role="dialog"
@@ -185,55 +153,70 @@ export default function ConfirmModal({
             aria-labelledby="modal-title"
             aria-describedby="modal-description"
           >
-            <div className="w-full max-w-[320px] sm:max-w-md">
-              <div className={`bg-[var(--card-solid)] rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 border ${colors.border}`}>
-                {/* Icon */}
-                <div className={`flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 rounded-full ${colors.bg}`}>
-                  <Icon className={`w-6 h-6 sm:w-8 sm:h-8 ${colors.icon}`} />
-                </div>
+            <div className="w-full max-w-[340px] sm:max-w-md relative overflow-hidden bg-[var(--color-card)] rounded-2xl border border-[var(--color-border)] shadow-2xl p-6 sm:p-8">
+              {/* Type indicator top bar */}
+              <div className={cn(
+                "absolute top-0 left-0 right-0 h-1.5",
+                type === 'danger' && 'bg-[var(--color-error)]',
+                type === 'warning' && 'bg-[var(--color-warning)]',
+                type === 'success' && 'bg-[var(--color-success)]',
+                type === 'info' && 'bg-[var(--color-info)]'
+              )} />
 
-                {/* Title */}
-                <h2
-                  id="modal-title"
-                  className="text-2xl font-bold text-[var(--color-foreground)] text-center mb-2"
-                >
-                  {modalTitle}
-                </h2>
+              {/* Icon in squircle theme-colored container */}
+              <div className={cn(
+                "flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-4 rounded-xl",
+                type === 'danger' && 'bg-[var(--color-error-light)] text-[var(--color-error)]',
+                type === 'warning' && 'bg-[var(--color-warning-light)] text-[var(--color-warning)]',
+                type === 'success' && 'bg-[var(--color-success-light)] text-[var(--color-success)]',
+                type === 'info' && 'bg-[var(--color-info-light)] text-[var(--color-info)]',
+              )}>
+                <Icon className="w-6 h-6 sm:w-7 sm:h-7" />
+              </div>
 
-                {/* Message */}
-                <p
-                  id="modal-description"
-                  className="text-[var(--color-muted)] text-center mb-8 leading-relaxed"
-                >
-                  {message}
-                </p>
+              {/* Title using heading scale */}
+              <h2
+                id="modal-title"
+                className="heading-md sm:heading-lg text-[var(--color-foreground)] text-center mb-2"
+              >
+                {modalTitle}
+              </h2>
 
-                {/* Buttons */}
-                <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4">
-                  {cancelText && <button
+              {/* Message text description */}
+              <p
+                id="modal-description"
+                className="text-body text-[var(--color-muted-foreground)] text-center mb-8 leading-relaxed"
+              >
+                {message}
+              </p>
+
+              {/* Action Buttons utilizing custom Button elements */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                {onCancel && cancelText !== '' && (
+                  <Button
                     type="button"
+                    variant="secondary"
                     onClick={onCancel}
                     disabled={isLoading}
-                    className="flex-1 px-6 py-3 text-[var(--color-foreground)] bg-[var(--color-surface-muted)] hover:opacity-80 rounded-xl font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[var(--color-border)] focus:ring-offset-2"
+                    fullWidth
                   >
                     {defaultCancelText}
-                  </button>}
-                  <button
-                    type="button"
-                    onClick={handleConfirm}
-                    disabled={isLoading}
-                    className={`flex-1 px-6 py-3 text-white ${colors.button} rounded-xl font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 flex items-center justify-center gap-2`}
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader size="sm" />
-                        {t('common.loading')}
-                      </>
-                    ) : (
-                      defaultConfirmText
-                    )}
-                  </button>
-                </div>
+                  </Button>
+                )}
+                <Button
+                  type="button"
+                  variant={type === 'danger' ? 'danger' : 'primary'}
+                  onClick={handleConfirm}
+                  isLoading={isLoading}
+                  fullWidth
+                  className={cn(
+                    type === 'warning' && 'bg-none bg-[var(--color-warning)] hover:bg-[var(--color-warning)]/90 focus-visible:ring-[var(--color-warning)]',
+                    type === 'success' && 'bg-none bg-[var(--color-success)] hover:bg-[var(--color-success)]/90 focus-visible:ring-[var(--color-success)]',
+                    type === 'info' && 'bg-none bg-[var(--color-info)] hover:bg-[var(--color-info)]/90 focus-visible:ring-[var(--color-info)]',
+                  )}
+                >
+                  {defaultConfirmText}
+                </Button>
               </div>
             </div>
           </motion.div>

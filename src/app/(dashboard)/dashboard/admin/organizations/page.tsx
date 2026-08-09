@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import Alert from '@/components/ui/Alert';
 import Tooltip from '@/components/ui/Tooltip';
+import Button from '@/components/ui/Button';
 import { useRouter } from 'next/navigation';
 import { useSessionStore } from '@/store/useSessionStore';
 import { isSuperAdmin } from '@/lib/roles';
@@ -178,13 +179,14 @@ export default function OrganizationsPage() {
           <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">{t('organizations.title')}</h1>
           <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">{t('organizations.description')}</p>
         </div>
-        <button
+        <Button
           onClick={() => setShowCreateModal(true)}
-          className="w-full sm:w-auto flex items-center justify-center gap-2 min-h-[44px] px-4 py-3 sm:px-4 sm:py-2 bg-[var(--primary)] text-white rounded-lg hover:bg-[var(--primary)]/90 transition-colors"
+          variant="primary"
+          className="w-full sm:w-auto flex items-center justify-center gap-2"
         >
           <Plus className="w-5 h-5" />
           {t('organizations.createOrganization')}
-        </button>
+        </Button>
       </div>
 
       {/* Error Alert */}
@@ -203,13 +205,14 @@ export default function OrganizationsPage() {
             <Building2 className="w-16 h-16 mx-auto text-[var(--color-muted-foreground)] mb-4" />
             <h3 className="text-lg font-semibold text-[var(--color-foreground)] mb-2">{t('organizations.noOrganizations')}</h3>
             <p className="text-[var(--color-muted-foreground)] mb-4">{t('organizations.noOrganizationsDesc')}</p>
-            <button
+            <Button
               onClick={() => setShowCreateModal(true)}
-              className="inline-flex items-center gap-2 min-h-[44px] px-4 py-3 sm:px-4 sm:py-2 bg-[var(--primary)] text-white rounded-lg hover:bg-[var(--primary)]/90 transition-colors"
+              variant="primary"
+              className="inline-flex items-center gap-2"
             >
               <Plus className="w-5 h-5" />
               {t('organizations.createOrganization')}
-            </button>
+            </Button>
           </div>
         ) : (
           <div className="divide-y divide-[var(--border)]">
@@ -296,22 +299,24 @@ export default function OrganizationsPage() {
                   {/* Actions */}
                   <div className="flex items-center gap-2 sm:ml-4 mt-4 sm:mt-0">
                     <Tooltip label={t('common.edit')}>
-                      <button
+                      <Button
                         onClick={() => openEditModal(org)}
                         aria-label={t('common.edit')}
-                        className="p-2 min-h-[44px] sm:min-h-0 text-[var(--color-muted-foreground)] hover:text-[var(--primary)] hover:bg-[var(--info-light)] rounded-lg transition-colors"
+                        variant="secondary"
+                        className="p-2 rounded-lg"
                       >
                         <Edit className="w-5 h-5" />
-                      </button>
+                      </Button>
                     </Tooltip>
                     <Tooltip label={t('common.delete')}>
-                      <button
+                      <Button
                         onClick={() => handleDelete(org._id)}
                         aria-label={t('common.delete')}
-                        className="p-2 min-h-[44px] sm:min-h-0 text-[var(--color-muted-foreground)] hover:text-[var(--error)] hover:bg-[var(--error-light)] rounded-lg transition-colors"
+                        variant="danger"
+                        className="p-2 rounded-lg"
                       >
                         <Trash2 className="w-5 h-5" />
-                      </button>
+                      </Button>
                     </Tooltip>
                   </div>
                 </div>
@@ -384,19 +389,21 @@ export default function OrganizationsPage() {
               </div>
 
               <div className="flex gap-3 pt-4">
-                <button
+                <Button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="flex-1 min-h-[44px] sm:min-h-0 px-4 py-2 border border-[var(--border)] text-[var(--color-foreground)] rounded-lg hover:bg-[var(--color-surface-muted)] transition-colors"
+                  variant="secondary"
+                  className="flex-1"
                 >
                   {t('organizations.cancel')}
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
-                  className="flex-1 min-h-[44px] sm:min-h-0 px-4 py-2 bg-[var(--primary)] text-white rounded-lg hover:bg-[var(--primary)]/90 transition-colors"
+                  variant="primary"
+                  className="flex-1"
                 >
                   {t('organizations.create')}
-                </button>
+                </Button>
               </div>
             </form>
           </motion.div>
@@ -465,19 +472,21 @@ export default function OrganizationsPage() {
               </div>
 
               <div className="flex gap-3 pt-4">
-                <button
+                <Button
                   type="button"
                   onClick={() => setShowEditModal(false)}
-                  className="flex-1 min-h-[44px] sm:min-h-0 px-4 py-2 border border-[var(--border)] text-[var(--color-foreground)] rounded-lg hover:bg-[var(--color-surface-muted)] transition-colors"
+                  variant="secondary"
+                  className="flex-1"
                 >
                   {t('organizations.cancel')}
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
-                  className="flex-1 min-h-[44px] sm:min-h-0 px-4 py-2 bg-[var(--primary)] text-white rounded-lg hover:bg-[var(--primary)]/90 transition-colors"
+                  variant="primary"
+                  className="flex-1"
                 >
                   {t('organizations.update')}
-                </button>
+                </Button>
               </div>
             </form>
           </motion.div>

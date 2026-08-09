@@ -13,6 +13,7 @@ import { useSessionStore } from '@/store/useSessionStore';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { useStartQuizAttempt, useEnrollments, useQuizAttempts, useQuizzes, type QuizAttempt, type Quiz } from '@/lib/react-query/hooks';
 import { ApiClientError } from '@/lib/api/http';
+import { Dropdown } from '@/components/ui/Dropdown';
 
 export default function StudentQuizzesPage() {
   const session = useSessionStore((s) => s.session);
@@ -153,33 +154,30 @@ export default function StudentQuizzesPage() {
 
       {/* Course filter */}
       {enrollments.length > 0 && (
-        <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-          <label
-            htmlFor="course-filter"
-            className="text-sm font-medium text-[var(--color-muted-foreground)]"
-          >
-            {t('teacherQuizzes.tableCourse')}:
-          </label>
-          <select
+        <div className="mt-4 max-w-xs">
+          <Dropdown
             id="course-filter"
+            label={`${t('teacherQuizzes.tableCourse')}:`}
             value={selectedCourse}
-            onChange={(e) => setSelectedCourse(e.target.value)}
-            className="bg-[var(--card-solid)] border border-[var(--border)] rounded-xl px-3 py-2 text-sm text-[var(--color-foreground)] focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] outline-none"
-          >
-            <option value="all">{t('teacherQuizzes.allCourses')}</option>
-            {enrollments.map((enrollment) => {
-              const course =
-                typeof enrollment.course === 'object' && enrollment.course !== null
-                  ? enrollment.course
-                  : null;
-              if (!course) return null;
-              return (
-                <option key={course._id} value={course._id.toString()}>
-                  {course.title}
-                </option>
-              );
-            })}
-          </select>
+            onChange={(val) => setSelectedCourse(val)}
+            options={[
+              { value: 'all', label: t('teacherQuizzes.allCourses') },
+              ...enrollments
+                .map((enrollment) => {
+                  const course =
+                    typeof enrollment.course === 'object' && enrollment.course !== null
+                      ? enrollment.course
+                      : null;
+                  if (!course) return null;
+                  return {
+                    value: course._id.toString(),
+                    label: course.title,
+                  };
+                })
+                .filter((item): item is { value: string; label: string } => item !== null),
+            ]}
+            placeholder=""
+          />
         </div>
       )}
 

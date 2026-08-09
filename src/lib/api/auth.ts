@@ -62,3 +62,7 @@ export async function fetchAuthSessionJson(): Promise<Record<string, unknown>> {
 export async function authSignOut(): Promise<void> {
   await fetch('/api/auth/signout', { method: 'POST', cache: 'no-store' });
 }
+
+export function updateProfileName(body: { name: string }): Promise<{ message: string; name: string }> {
+  return apiJson('/api/auth/account', { method: 'PATCH', body });
+}

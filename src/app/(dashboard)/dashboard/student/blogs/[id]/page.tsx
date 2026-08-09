@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import BackButton from '@/components/ui/BackButton';
 import { Badge } from '@/components/ui/Badge';
+import Button from '@/components/ui/Button';
 import DOMPurify from 'isomorphic-dompurify';
 import { getBlogById, type BlogDocument } from '@/lib/api/blogs';
 import { addFavorite as postFavorite, removeFavorite as removeFavoriteApi } from '@/lib/api/favorites';
@@ -167,27 +168,27 @@ export default function BlogDetailPage() {
         {/* Actions */}
         <div className="p-4 sm:p-6 lg:p-8 bg-[var(--color-surface-muted)] border-t border-[var(--border)]">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <button
+            <Button
+              type="button"
+              variant={favorites.has(blogId) ? "primary" : "secondary"}
               onClick={toggleFavorite}
-              className={`flex items-center justify-center gap-2 min-h-[44px] sm:min-h-0 px-4 py-3 sm:px-4 sm:py-2.5 rounded-xl font-medium transition-all touch-manipulation ${
-                favorites.has(blogId)
-                  ? `${theme.activeBg} ${theme.text} hover:opacity-80`
-                  : `${theme.activeBg} ${theme.text} hover:opacity-70`
-              }`}
+              className="flex items-center justify-center gap-2"
             >
               <Heart
                 className={`w-5 h-5 ${favorites.has(blogId) ? 'fill-current' : ''}`}
               />
               <span className="hidden sm:inline">{favorites.has(blogId) ? t('blog.favorited') : t('blog.addToFavorites')}</span>
               <span className="sm:hidden">{favorites.has(blogId) ? t('blog.saved') : t('blog.save')}</span>
-            </button>
+            </Button>
 
-            <button
-              className={`flex items-center justify-center gap-2 min-h-[44px] sm:min-h-0 px-4 py-3 sm:px-4 sm:py-2.5 bg-gradient-to-r ${theme.gradient} text-white rounded-xl hover:opacity-90 transition-all touch-manipulation`}
+            <Button
+              type="button"
+              variant="primary"
+              className="flex items-center justify-center gap-2"
             >
               <Share2 className="w-4 h-4" />
               {t('blog.share')}
-            </button>
+            </Button>
           </div>
         </div>
       </motion.article>

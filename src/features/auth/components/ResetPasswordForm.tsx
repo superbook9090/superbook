@@ -5,11 +5,11 @@ import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { Lock, ArrowRight } from 'lucide-react';
 import PremiumLogo from '@/components/ui/PremiumLogo';
 import Alert from '@/components/ui/Alert';
 import { Loader } from '@/components/ui/Loader';
-import Tooltip from '@/components/ui/Tooltip';
+import { TextField } from '@/components/ui/TextField';
 import { useTranslation } from '@/hooks/useTranslation';
 import { roleThemes } from '@/lib/roleTheme';
 import { resetPasswordWithToken } from '@/lib/api/auth';
@@ -24,7 +24,6 @@ function ResetPasswordFormInner() {
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -100,47 +99,26 @@ function ResetPasswordFormInner() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-semibold mb-2">{t('password.newPassword')}</label>
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-muted)]" />
-              <input
-                type={showPassword ? 'text' : 'password'}
-                required
-                minLength={8}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-12 pr-12 py-3 bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--student-primary)]/30"
-              />
-              <Tooltip
-                label={showPassword ? t('password.hidePassword') : t('password.showPassword')}
-                className="absolute right-4 top-1/2 -translate-y-1/2"
-              >
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? t('password.hidePassword') : t('password.showPassword')}
-                  className="text-[var(--color-muted)]"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </Tooltip>
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-semibold mb-2">{t('register.confirmPassword')}</label>
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-muted)]" />
-              <input
-                type={showPassword ? 'text' : 'password'}
-                required
-                minLength={8}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--student-primary)]/30"
-              />
-            </div>
-          </div>
+          <TextField
+            label={t('password.newPassword')}
+            type="password"
+            required
+            minLength={8}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            startIcon={<Lock className="w-5 h-5 text-[var(--color-muted)]" />}
+            fullWidth
+          />
+          <TextField
+            label={t('register.confirmPassword')}
+            type="password"
+            required
+            minLength={8}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            startIcon={<Lock className="w-5 h-5 text-[var(--color-muted)]" />}
+            fullWidth
+          />
           <button
             type="submit"
             disabled={isLoading}

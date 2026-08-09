@@ -155,13 +155,17 @@ export const authOptions: AuthOptions = {
 
       return true;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
         token.email = user.email || '';
+        token.name = user.name || '';
         token.organizationId = user.organizationId || null;
         token.canUploadVideos = user.canUploadVideos || false;
+      }
+      if (trigger === 'update' && session?.name) {
+        token.name = session.name;
       }
       return token;
     },
@@ -170,6 +174,9 @@ export const authOptions: AuthOptions = {
         session.user.id = token.id;
         session.user.role = token.role;
         session.user.email = token.email;
+        if (token.name) {
+          session.user.name = token.name;
+        }
         session.user.organizationId = token.organizationId || null;
         session.user.canUploadVideos = token.canUploadVideos || false;
       }

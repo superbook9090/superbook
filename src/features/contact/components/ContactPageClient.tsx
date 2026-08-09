@@ -9,7 +9,6 @@ import {
   Phone,
   MapPin,
   Send,
-  AlertCircle,
   ChevronDown
 } from 'lucide-react';
 import Header from '@/components/home/MarketingHeader';
@@ -18,6 +17,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import Button from '@/components/ui/Button';
 import Alert from '@/components/ui/Alert';
 import { useSessionStore } from '@/store/useSessionStore';
+import { TextField } from '@/components/ui/TextField';
 
 // Custom SVG Brand Icons since Lucide v1.x has removed brand icons
 const Github = (props: React.SVGProps<SVGSVGElement>) => (
@@ -340,128 +340,81 @@ export default function ContactPageClient() {
             <form onSubmit={handleSubmit} className="space-y-6" noValidate>
 
               {/* Name Field */}
-              <div>
-                <label htmlFor="name" className="block text-xs font-bold uppercase tracking-wider text-[var(--color-muted)] mb-2">
-                  {t('contact.form.name')} <span className="text-[var(--color-error)]">*</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={form.name}
-                    onChange={handleChange}
-                    onBlur={() => handleBlur('name')}
-                    placeholder={t('contact.form.namePlaceholder')}
-                    disabled={isSubmitting}
-                    className={`w-full px-4 py-3 rounded-xl border bg-[var(--color-surface-muted)] text-[var(--color-foreground)] text-sm font-semibold transition-all duration-300 outline-none focus:bg-[var(--card-solid)] focus:shadow-md ${touched.name && errors.name
-                      ? 'border-[var(--color-error)] focus:ring-1 focus:ring-[var(--color-error)]'
-                      : touched.name && !errors.name
-                        ? 'border-[var(--color-success)] focus:ring-1 focus:ring-[var(--color-success)]'
-                        : 'border-[var(--color-border)] focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]'
-                      }`}
-                  />
-                </div>
-                {touched.name && errors.name && (
-                  <p className="mt-1.5 text-xs font-bold text-[var(--color-error)] flex items-center gap-1.5 animate-fadeIn">
-                    <AlertCircle className="w-3.5 h-3.5" />
-                    {errors.name}
-                  </p>
-                )}
-              </div>
+              <TextField
+                id="name"
+                name="name"
+                label={
+                  <>
+                    {t('contact.form.name')} <span className="text-[var(--color-error)]">*</span>
+                  </>
+                }
+                type="text"
+                value={form.name}
+                onChange={handleChange}
+                onBlur={() => handleBlur('name')}
+                placeholder={t('contact.form.namePlaceholder')}
+                disabled={isSubmitting}
+                error={touched.name && errors.name ? errors.name : undefined}
+                fullWidth
+              />
 
               {/* Email Field */}
-              <div>
-                <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-[var(--color-muted)] mb-2">
-                  {t('contact.form.email')} <span className="text-[var(--color-error)]">*</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={form.email}
-                    onChange={handleChange}
-                    onBlur={() => handleBlur('email')}
-                    placeholder={t('contact.form.emailPlaceholder')}
-                    disabled={isSubmitting}
-                    className={`w-full px-4 py-3 rounded-xl border bg-[var(--color-surface-muted)] text-[var(--color-foreground)] text-sm font-semibold transition-all duration-300 outline-none focus:bg-[var(--card-solid)] focus:shadow-md ${touched.email && errors.email
-                      ? 'border-[var(--color-error)] focus:ring-1 focus:ring-[var(--color-error)]'
-                      : touched.email && !errors.email
-                        ? 'border-[var(--color-success)] focus:ring-1 focus:ring-[var(--color-success)]'
-                        : 'border-[var(--color-border)] focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]'
-                      }`}
-                  />
-                </div>
-                {touched.email && errors.email && (
-                  <p className="mt-1.5 text-xs font-bold text-[var(--color-error)] flex items-center gap-1.5 animate-fadeIn">
-                    <AlertCircle className="w-3.5 h-3.5" />
-                    {errors.email}
-                  </p>
-                )}
-              </div>
+              <TextField
+                id="email"
+                name="email"
+                label={
+                  <>
+                    {t('contact.form.email')} <span className="text-[var(--color-error)]">*</span>
+                  </>
+                }
+                type="email"
+                value={form.email}
+                onChange={handleChange}
+                onBlur={() => handleBlur('email')}
+                placeholder={t('contact.form.emailPlaceholder')}
+                disabled={isSubmitting}
+                error={touched.email && errors.email ? errors.email : undefined}
+                fullWidth
+              />
 
               {/* Subject Field */}
-              <div>
-                <label htmlFor="subject" className="block text-xs font-bold uppercase tracking-wider text-[var(--color-muted)] mb-2">
-                  {t('contact.form.subject')} <span className="text-[var(--color-error)]">*</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    id="subject"
-                    name="subject"
-                    value={form.subject}
-                    onChange={handleChange}
-                    onBlur={() => handleBlur('subject')}
-                    placeholder={t('contact.form.subjectPlaceholder')}
-                    disabled={isSubmitting}
-                    className={`w-full px-4 py-3 rounded-xl border bg-[var(--color-surface-muted)] text-[var(--color-foreground)] text-sm font-semibold transition-all duration-300 outline-none focus:bg-[var(--card-solid)] focus:shadow-md ${touched.subject && errors.subject
-                      ? 'border-[var(--color-error)] focus:ring-1 focus:ring-[var(--color-error)]'
-                      : touched.subject && !errors.subject
-                        ? 'border-[var(--color-success)] focus:ring-1 focus:ring-[var(--color-success)]'
-                        : 'border-[var(--color-border)] focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]'
-                      }`}
-                  />
-                </div>
-                {touched.subject && errors.subject && (
-                  <p className="mt-1.5 text-xs font-bold text-[var(--color-error)] flex items-center gap-1.5 animate-fadeIn">
-                    <AlertCircle className="w-3.5 h-3.5" />
-                    {errors.subject}
-                  </p>
-                )}
-              </div>
+              <TextField
+                id="subject"
+                name="subject"
+                label={
+                  <>
+                    {t('contact.form.subject')} <span className="text-[var(--color-error)]">*</span>
+                  </>
+                }
+                type="text"
+                value={form.subject}
+                onChange={handleChange}
+                onBlur={() => handleBlur('subject')}
+                placeholder={t('contact.form.subjectPlaceholder')}
+                disabled={isSubmitting}
+                error={touched.subject && errors.subject ? errors.subject : undefined}
+                fullWidth
+              />
 
               {/* Message Field */}
-              <div>
-                <label htmlFor="message" className="block text-xs font-bold uppercase tracking-wider text-[var(--color-muted)] mb-2">
-                  {t('contact.form.message')} <span className="text-[var(--color-error)]">*</span>
-                </label>
-                <div className="relative">
-                  <textarea
-                    id="message"
-                    name="message"
-                    rows={5}
-                    value={form.message}
-                    onChange={handleChange}
-                    onBlur={() => handleBlur('message')}
-                    placeholder={t('contact.form.messagePlaceholder')}
-                    disabled={isSubmitting}
-                    className={`w-full px-4 py-3 rounded-xl border bg-[var(--color-surface-muted)] text-[var(--color-foreground)] text-sm font-semibold transition-all duration-300 outline-none focus:bg-[var(--card-solid)] focus:shadow-md resize-none ${touched.message && errors.message
-                      ? 'border-[var(--color-error)] focus:ring-1 focus:ring-[var(--color-error)]'
-                      : touched.message && !errors.message
-                        ? 'border-[var(--color-success)] focus:ring-1 focus:ring-[var(--color-success)]'
-                        : 'border-[var(--color-border)] focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]'
-                      }`}
-                  />
-                </div>
-                {touched.message && errors.message && (
-                  <p className="mt-1.5 text-xs font-bold text-[var(--color-error)] flex items-center gap-1.5 animate-fadeIn">
-                    <AlertCircle className="w-3.5 h-3.5" />
-                    {errors.message}
-                  </p>
-                )}
-              </div>
+              <TextField
+                id="message"
+                name="message"
+                label={
+                  <>
+                    {t('contact.form.message')} <span className="text-[var(--color-error)]">*</span>
+                  </>
+                }
+                multiline
+                rows={5}
+                value={form.message}
+                onChange={handleChange}
+                onBlur={() => handleBlur('message')}
+                placeholder={t('contact.form.messagePlaceholder')}
+                disabled={isSubmitting}
+                error={touched.message && errors.message ? errors.message : undefined}
+                fullWidth
+              />
 
               {/* Submit Button */}
               <div className="pt-2">

@@ -10,6 +10,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { useSessionStore } from '@/store/useSessionStore';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import Alert from '@/components/ui/Alert';
+import Button from '@/components/ui/Button';
 import { fetchAnalytics } from '@/lib/api/analytics';
 import { getApiErrorMessage } from '@/lib/api/http';
 import StatCard from '@/components/ui/StatCard';
@@ -338,9 +339,9 @@ export default function TeacherAnalyticsPage() {
             onClose={() => setError('')}
           />
         )}
-        <button onClick={fetchStats} className="btn-premium focus-ring mt-4">
+        <Button onClick={fetchStats} className="btn-premium mt-4">
           {t('teacherAnalytics.retry')}
-        </button>
+        </Button>
       </div>
     );
   }

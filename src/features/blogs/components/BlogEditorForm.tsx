@@ -5,7 +5,9 @@ import dynamic from 'next/dynamic';
 import { Eye, EyeOff, BookOpen, Hash, FileText, Type, Globe, Star } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { PageSkeleton } from '@/components/ui/Skeleton';
-import { EditorField, editorInputClass, editorSelectClass } from '@/components/ui/editor/EditorField';
+import { EditorField } from '@/components/ui/editor/EditorField';
+import { TextField } from '@/components/ui/TextField';
+import { Dropdown } from '@/components/ui/Dropdown';
 import { useTranslation } from '@/hooks/useTranslation';
 import { blogTopicKeys, blogTopicValues, supportedLanguages, type BlogTopicKey } from '@/i18n/config';
 
@@ -57,90 +59,74 @@ export default function BlogEditorForm({
   return (
     <div className="bg-[var(--card-solid)] rounded-xl shadow-sm p-4 sm:p-5">
       <div className="space-y-4">
-        <EditorField
+        <TextField
           label={
             <>
               <Type className="w-3.5 h-3.5 inline mr-1.5" />
               {t('createBlogPage.blogTitle')}
             </>
           }
-          hint={t('createBlogPage.charactersCount', { count: formData.title.length, max: 200 })}
-        >
-          <input
-            type="text"
-            value={formData.title}
-            onChange={(e) => patch({ title: e.target.value })}
-            placeholder={t('createBlogPage.titlePlaceholder')}
-            className={editorInputClass}
-            maxLength={200}
-          />
-        </EditorField>
+          helperText={t('createBlogPage.charactersCount', { count: formData.title.length, max: 200 })}
+          type="text"
+          value={formData.title}
+          onChange={(e) => patch({ title: e.target.value })}
+          placeholder={t('createBlogPage.titlePlaceholder')}
+          maxLength={200}
+          fullWidth
+        />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <EditorField
+          <Dropdown
             label={
               <>
                 <Hash className="w-3.5 h-3.5 inline mr-1.5" />
                 {t('createBlogPage.topic')}
               </>
             }
-          >
-            <select
-              value={formData.topic}
-              onChange={(e) => patch({ topic: e.target.value })}
-              className={editorSelectClass}
-            >
-              <option value="">{t('createBlogPage.selectTopic')}</option>
-              {blogTopicKeys.map((topic) => (
-                <option key={topic} value={blogTopicValues[topic]}>
-                  {t(`topics.${topic}` as `topics.${BlogTopicKey}`)}
-                </option>
-              ))}
-            </select>
-          </EditorField>
+            value={formData.topic}
+            onChange={(val) => patch({ topic: val })}
+            options={blogTopicKeys.map((topic) => ({
+              value: blogTopicValues[topic],
+              label: t(`topics.${topic}` as `topics.${BlogTopicKey}`),
+            }))}
+            placeholder={t('createBlogPage.selectTopic')}
+          />
 
           {showLanguage && (
-            <EditorField
+            <Dropdown
               label={
                 <>
                   <BookOpen className="w-3.5 h-3.5 inline mr-1.5" />
                   {t('createBlogPage.language')}
                 </>
               }
-            >
-              <select
-                value={formData.language}
-                onChange={(e) => patch({ language: e.target.value })}
-                className={editorSelectClass}
-              >
-                {supportedLanguages.map((language) => (
-                  <option key={language} value={language}>
-                    {t(language === 'en' ? 'common.english' : 'common.hindi')}
-                  </option>
-                ))}
-              </select>
-            </EditorField>
+              value={formData.language}
+              onChange={(val) => patch({ language: val })}
+              options={supportedLanguages.map((language) => ({
+                value: language,
+                label: t(language === 'en' ? 'common.english' : 'common.hindi'),
+              }))}
+              placeholder=""
+            />
           )}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <EditorField
+          <Dropdown
             label={
               <>
                 <Globe className="w-3.5 h-3.5 inline mr-1.5" />
                 Blog Visibility
               </>
             }
-          >
-            <select
-              value={formData.visibility}
-              onChange={(e) => patch({ visibility: e.target.value as 'public' | 'organization' })}
-              className={editorSelectClass}
-            >
-              <option value="organization">Organization Blog</option>
-              <option value="public">Public SEO Blog</option>
-            </select>
-          </EditorField>
+            value={formData.visibility}
+            onChange={(val) => patch({ visibility: val as 'public' | 'organization' })}
+            options={[
+              { value: 'organization', label: 'Organization Blog' },
+              { value: 'public', label: 'Public SEO Blog' },
+            ]}
+            placeholder=""
+          />
 
           <EditorField
             label={
@@ -183,27 +169,26 @@ export default function BlogEditorForm({
 
         {formData.visibility === 'public' && (
           <div className="grid grid-cols-1 gap-4">
-            <EditorField label="Meta Title">
-              <input
-                type="text"
-                value={formData.metaTitle}
-                onChange={(e) => patch({ metaTitle: e.target.value })}
-                placeholder="SEO title for search and social sharing"
-                className={editorInputClass}
-                maxLength={70}
-              />
-            </EditorField>
+            <TextField
+              label="Meta Title"
+              type="text"
+              value={formData.metaTitle}
+              onChange={(e) => patch({ metaTitle: e.target.value })}
+              placeholder="SEO title for search and social sharing"
+              maxLength={70}
+              fullWidth
+            />
 
-            <EditorField label="Meta Description">
-              <textarea
-                value={formData.metaDescription}
-                onChange={(e) => patch({ metaDescription: e.target.value })}
-                placeholder="SEO description for search engines and social cards"
-                className={editorInputClass}
-                rows={3}
-                maxLength={180}
-              />
-            </EditorField>
+            <TextField
+              label="Meta Description"
+              multiline
+              value={formData.metaDescription}
+              onChange={(e) => patch({ metaDescription: e.target.value })}
+              placeholder="SEO description for search engines and social cards"
+              rows={3}
+              maxLength={180}
+              fullWidth
+            />
           </div>
         )}
 

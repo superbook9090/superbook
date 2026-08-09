@@ -8,6 +8,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { useSessionStore } from '@/store/useSessionStore';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { cn } from '@/lib/utils';
+import Button from '@/components/ui/Button';
 import { 
   useEnrollments,
   useCourseQuizzes,
@@ -312,9 +313,9 @@ export default function CourseDetailPage() {
         </div>
         <h2 className="text-xl font-bold text-[var(--color-foreground)] mb-2">{t('courses.noEnrollmentFound')}</h2>
         <p className="text-[var(--color-muted-foreground)] mb-6">{t('courses.noEnrollmentDesc')}</p>
-        <button onClick={() => router.push(ROUTES.student.courses)} className="px-6 py-2 bg-[var(--student-primary)] text-white rounded-xl font-medium">
+        <Button onClick={() => router.push(ROUTES.student.courses)} variant="primary">
           {t('courses.backToCourses')}
-        </button>
+        </Button>
       </div>
     );
   }
@@ -399,13 +400,14 @@ export default function CourseDetailPage() {
             <div className="max-w-4xl mx-auto space-y-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-bold text-[var(--color-foreground)]">{t('courses.courseContent')}</h2>
-                <button 
+                <Button 
                   onClick={() => allLessons[0] && handleStartLesson(allLessons[0]._id)}
-                  className="flex items-center gap-2 px-5 py-2 bg-[var(--student-primary)] text-white rounded-lg text-sm font-bold shadow-md hover:opacity-90 transition-opacity"
+                  variant="primary"
+                  className="flex items-center gap-2"
                 >
                   <Play className="w-3.5 h-3.5 fill-current" />
                   {enrollment.progress > 0 ? t('courses.continue') : t('courses.start')}
-                </button>
+                </Button>
               </div>
 
               <div className="space-y-4">

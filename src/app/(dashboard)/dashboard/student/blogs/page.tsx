@@ -22,6 +22,7 @@ import {
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
 import Tooltip from '@/components/ui/Tooltip';
+import Button from '@/components/ui/Button';
 import { useAddFavorite, useRemoveFavorite } from '@/lib/react-query/hooks';
 import { usePaginatedBlogs, type Blog } from '@/lib/react-query/useBlogQueries';
 import { blogTopicKeys, type BlogTopicKey } from '@/i18n/config';
@@ -232,10 +233,12 @@ export default function StudentBlogsPage() {
                       {blog.topic}
                     </Badge>
                     <Tooltip label={isFavorited ? t('favorites.removeFromFavorites') : t('blog.addToFavorites')}>
-                      <button
+                      <Button
+                        type="button"
+                        variant="ghost"
                         onClick={() => toggleFavorite(blog._id)}
                         aria-label={isFavorited ? t('favorites.removeFromFavorites') : t('blog.addToFavorites')}
-                        className="p-2 min-h-[44px] sm:min-h-0 rounded-full hover:bg-[var(--color-surface-muted)] transition-colors"
+                        className="p-2 rounded-full flex items-center justify-center"
                       >
                         <Heart
                           className={`w-5 h-5 transition-colors ${
@@ -244,7 +247,7 @@ export default function StudentBlogsPage() {
                               : 'text-[var(--color-muted-foreground)] hover:text-[var(--primary)]'
                           }`}
                         />
-                      </button>
+                      </Button>
                     </Tooltip>
                   </div>
 

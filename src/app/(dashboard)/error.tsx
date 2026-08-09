@@ -1,7 +1,7 @@
 'use client';
 
-import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useTranslation } from '@/hooks/useTranslation';
+import Button from '@/components/ui/Button';
 
 export default function Error({
   reset,
@@ -9,7 +9,6 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  const { theme } = useRoleTheme();
   const { t } = useTranslation();
 
   return (
@@ -37,12 +36,12 @@ export default function Error({
           <p className="text-[var(--color-muted)] mb-6">
             {t('errors.pageErrorDescription')}
           </p>
-          <button
+          <Button
             onClick={reset}
-            className={`inline-flex items-center px-6 py-3 bg-gradient-to-r ${theme.gradient} text-white font-medium rounded-xl hover:opacity-90 transition-colors`}
+            variant="primary"
           >
             {t('errors.tryAgainButton')}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

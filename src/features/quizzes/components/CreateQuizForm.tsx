@@ -22,6 +22,8 @@ import {
 import { getQuizLessonId } from '@/lib/quiz/quizLesson';
 import { getQuizChapterId } from '@/lib/quiz/quizChapter';
 import type { Chapter } from '@/lib/react-query/hooks';
+import { TextField } from '@/components/ui/TextField';
+import { Dropdown } from '@/components/ui/Dropdown';
 
 interface Course {
   _id: string;
@@ -744,57 +746,47 @@ export default function CreateQuizForm({ quizId }: Props) {
         </button>
       </div>
 
-      <div>
-        <label htmlFor="title" className="block text-sm font-medium text-[var(--color-foreground)]">
-          {t('createQuizForm.quizTitle')} *
-        </label>
-        <input
-          type="text"
-          name="title"
-          id="title"
-          required
-          value={formData.title}
-          onChange={handleChange}
-          className="mt-1 px-3 py-2 block w-full rounded-md border-[var(--color-border)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] sm:text-sm text-[var(--color-foreground)] placeholder-[var(--color-muted-foreground)]"
-          placeholder={t('createQuizForm.enterQuizTitle')}
-        />
-      </div>
+      <TextField
+        label={`${t('createQuizForm.quizTitle')} *`}
+        type="text"
+        name="title"
+        id="title"
+        required
+        value={formData.title}
+        onChange={handleChange}
+        placeholder={t('createQuizForm.enterQuizTitle')}
+        fullWidth
+      />
+
+      <TextField
+        label={t('createQuizForm.description')}
+        multiline
+        name="description"
+        id="description"
+        rows={2}
+        value={formData.description}
+        onChange={handleChange}
+        placeholder={t('createQuizForm.enterQuizDescription')}
+        fullWidth
+      />
 
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-[var(--color-foreground)]">
-          {t('createQuizForm.description')}
-        </label>
-        <textarea
-          name="description"
-          id="description"
-          rows={2}
-          value={formData.description}
-          onChange={handleChange}
-          className="mt-1 px-3 py-2 block w-full rounded-md border-[var(--color-border)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] sm:text-sm text-[var(--color-foreground)] placeholder-[var(--color-muted-foreground)]"
-          placeholder={t('createQuizForm.enterQuizDescription')}
-        />
-      </div>
-
-      <div>
-        <label htmlFor="course" className="block text-sm font-medium text-[var(--color-foreground)]">
-          {t('createQuizForm.course')} *
-        </label>
-        <select
+        <Dropdown
+          label={`${t('createQuizForm.course')} *`}
           name="course"
           id="course"
           required={!quizId}
           disabled={!!quizId}
           value={formData.course}
-          onChange={handleChange}
-          className="mt-1 px-3 py-2 block w-full rounded-md border-[var(--color-border)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] sm:text-sm text-[var(--color-foreground)] disabled:opacity-60 disabled:cursor-not-allowed"
-        >
-          <option value="">{t('createQuizForm.selectCourse')}</option>
-          {courses.map(course => (
-            <option key={course._id} value={course._id}>
-              {course.title}
-            </option>
-          ))}
-        </select>
+          onChange={(val) => {
+            handleChange({ target: { name: 'course', value: val } } as React.ChangeEvent<HTMLSelectElement>);
+          }}
+          options={courses.map((course) => ({
+            value: course._id,
+            label: course.title,
+          }))}
+          placeholder={t('createQuizForm.selectCourse')}
+        />
         {courses.length === 0 && (
           <p className="mt-2 text-sm text-[var(--color-warning)]">
             {t('createQuizForm.needCourseFirst')}
@@ -809,45 +801,41 @@ export default function CreateQuizForm({ quizId }: Props) {
 
       {formData.course && (
         <>
-          <div>
-            <label htmlFor="placement" className="block text-sm font-medium text-[var(--color-foreground)]">
-              {t('createQuizForm.placement')}
-            </label>
-            <select
-              name="placement"
-              id="placement"
-              value={formData.placement}
-              onChange={handleChange}
-              disabled={chaptersLoading}
-              className="mt-1 px-3 py-2 block w-full rounded-md border-[var(--color-border)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] sm:text-sm text-[var(--color-foreground)] disabled:opacity-60"
-            >
-              <option value="course">{t('createQuizForm.placementCourse')}</option>
-              <option value="chapter">{t('createQuizForm.placementChapter')}</option>
-              <option value="lesson">{t('createQuizForm.placementLesson')}</option>
-            </select>
-          </div>
+          <Dropdown
+            label={t('createQuizForm.placement')}
+            name="placement"
+            id="placement"
+            value={formData.placement}
+            onChange={(val) => {
+              handleChange({ target: { name: 'placement', value: val } } as React.ChangeEvent<HTMLSelectElement>);
+            }}
+            disabled={chaptersLoading}
+            options={[
+              { value: 'course', label: t('createQuizForm.placementCourse') },
+              { value: 'chapter', label: t('createQuizForm.placementChapter') },
+              { value: 'lesson', label: t('createQuizForm.placementLesson') },
+            ]}
+            placeholder=""
+          />
 
           {formData.placement === 'chapter' && (
             <div>
-              <label htmlFor="chapter" className="block text-sm font-medium text-[var(--color-foreground)]">
-                {t('createQuizForm.chapter')}
-              </label>
-              <select
+              <Dropdown
+                label={t('createQuizForm.chapter')}
                 name="chapter"
                 id="chapter"
                 required
                 value={formData.chapter}
-                onChange={handleChange}
+                onChange={(val) => {
+                  handleChange({ target: { name: 'chapter', value: val } } as React.ChangeEvent<HTMLSelectElement>);
+                }}
                 disabled={chaptersLoading}
-                className="mt-1 px-3 py-2 block w-full rounded-md border-[var(--color-border)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] sm:text-sm text-[var(--color-foreground)] disabled:opacity-60"
-              >
-                <option value="">{t('createQuizForm.selectChapterRequired')}</option>
-                {chapterOptions.map((ch) => (
-                  <option key={ch.id} value={ch.id}>
-                    {ch.label}
-                  </option>
-                ))}
-              </select>
+                options={chapterOptions.map((ch) => ({
+                  value: ch.id,
+                  label: ch.label,
+                }))}
+                placeholder={t('createQuizForm.selectChapterRequired')}
+              />
               <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
                 {t('createQuizForm.selectChapterHint')}
               </p>
@@ -856,25 +844,22 @@ export default function CreateQuizForm({ quizId }: Props) {
 
           {formData.placement === 'lesson' && (
             <div>
-              <label htmlFor="lesson" className="block text-sm font-medium text-[var(--color-foreground)]">
-                {t('createQuizForm.lesson')}
-              </label>
-              <select
+              <Dropdown
+                label={t('createQuizForm.lesson')}
                 name="lesson"
                 id="lesson"
                 required
                 value={formData.lesson}
-                onChange={handleChange}
+                onChange={(val) => {
+                  handleChange({ target: { name: 'lesson', value: val } } as React.ChangeEvent<HTMLSelectElement>);
+                }}
                 disabled={chaptersLoading || lessonOptions.length === 0}
-                className="mt-1 px-3 py-2 block w-full rounded-md border-[var(--color-border)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] sm:text-sm text-[var(--color-foreground)] disabled:opacity-60"
-              >
-                <option value="">{t('createQuizForm.selectLessonRequired')}</option>
-                {lessonOptions.map((ls) => (
-                  <option key={ls.id} value={ls.id}>
-                    {ls.label}
-                  </option>
-                ))}
-              </select>
+                options={lessonOptions.map((ls) => ({
+                  value: ls.id,
+                  label: ls.label,
+                }))}
+                placeholder={t('createQuizForm.selectLessonRequired')}
+              />
               {lessonOptions.length === 0 && (
                 <p className="mt-2 text-sm text-[var(--color-warning)]">{t('createQuizForm.noLessonsInCourse')}</p>
               )}
@@ -886,21 +871,17 @@ export default function CreateQuizForm({ quizId }: Props) {
         </>
       )}
 
-      <div>
-        <label htmlFor="timeLimit" className="block text-sm font-medium text-[var(--color-foreground)]">
-          {t('createQuizForm.timeLimit')}
-        </label>
-        <input
-          type="number"
-          name="timeLimit"
-          id="timeLimit"
-          min="1"
-          max="180"
-          value={formData.timeLimit}
-          onChange={handleChange}
-          className="mt-1 px-3 py-2 block w-full rounded-md border-[var(--color-border)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] sm:text-sm text-[var(--color-foreground)]"
-        />
-      </div>
+      <TextField
+        label={t('createQuizForm.timeLimit')}
+        type="number"
+        name="timeLimit"
+        id="timeLimit"
+        min="1"
+        max="180"
+        value={formData.timeLimit}
+        onChange={handleChange}
+        fullWidth
+      />
 
       {/* Questions Section */}
       <div className="border-t border-[var(--color-border)] pt-6">

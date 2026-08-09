@@ -25,6 +25,7 @@ import ToggleSwitch from '@/components/ui/ToggleSwitch';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import Alert from '@/components/ui/Alert';
 import { useSessionStore } from '@/store/useSessionStore';
+import { TextField } from '@/components/ui/TextField';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { fetchAdminSettings, patchAdminSettings } from '@/lib/api/adminSettings';
 import { ApiClientError } from '@/lib/api/http';
@@ -210,10 +211,8 @@ export default function AdminSettingsPage() {
               <GraduationCap className={`w-5 h-5 ${theme.text}`} />
             </div>
             <div className="flex-1">
-              <label className="block text-sm font-medium text-[var(--color-foreground)] mb-2">
-                {t('adminSettings.coursesLimit')}
-              </label>
-              <input
+              <TextField
+                label={t('adminSettings.coursesLimit')}
                 type="number"
                 min="1"
                 value={settings.teacherLimits.courses}
@@ -226,11 +225,9 @@ export default function AdminSettingsPage() {
                     },
                   })
                 }
-                className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
+                helperText={t('adminSettings.coursesLimitDesc')}
+                fullWidth
               />
-              <p className="text-xs text-[var(--color-muted-foreground)] mt-1">
-                {t('adminSettings.coursesLimitDesc')}
-              </p>
             </div>
           </div>
 
@@ -240,10 +237,8 @@ export default function AdminSettingsPage() {
               <FileText className={`w-5 h-5 ${theme.text}`} />
             </div>
             <div className="flex-1">
-              <label className="block text-sm font-medium text-[var(--color-foreground)] mb-2">
-                {t('adminSettings.quizzesLimit')}
-              </label>
-              <input
+              <TextField
+                label={t('adminSettings.quizzesLimit')}
                 type="number"
                 min="1"
                 value={settings.teacherLimits.quizzes}
@@ -256,11 +251,9 @@ export default function AdminSettingsPage() {
                     },
                   })
                 }
-                className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
+                helperText={t('adminSettings.quizzesLimitDesc')}
+                fullWidth
               />
-              <p className="text-xs text-[var(--color-muted-foreground)] mt-1">
-                {t('adminSettings.quizzesLimitDesc')}
-              </p>
             </div>
           </div>
 
@@ -270,10 +263,8 @@ export default function AdminSettingsPage() {
               <BookOpen className={`w-5 h-5 ${theme.text}`} />
             </div>
             <div className="flex-1">
-              <label className="block text-sm font-medium text-[var(--color-foreground)] mb-2">
-                {t('adminSettings.blogsLimit')}
-              </label>
-              <input
+              <TextField
+                label={t('adminSettings.blogsLimit')}
                 type="number"
                 min="1"
                 value={settings.teacherLimits.blogs}
@@ -286,11 +277,9 @@ export default function AdminSettingsPage() {
                     },
                   })
                 }
-                className="w-full px-4 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]"
+                helperText={t('adminSettings.blogsLimitDesc')}
+                fullWidth
               />
-              <p className="text-xs text-[var(--color-muted-foreground)] mt-1">
-                {t('adminSettings.blogsLimitDesc')}
-              </p>
             </div>
           </div>
         </div>

@@ -13,6 +13,7 @@ import { patchQuiz, deleteQuiz } from '@/lib/api/quizzes';
 import { invalidateAfterQuizChange, usePaginatedQuizzes, useTeacherCourses, type Quiz } from '@/lib/react-query/hooks';
 import { ApiClientError } from '@/lib/api/http';
 import Alert from '@/components/ui/Alert';
+import Button from '@/components/ui/Button';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { Loader } from '@/components/ui/Loader';
 import { FilterPanel } from '@/components/filters/DashboardListFilters';
@@ -274,13 +275,13 @@ export default function TeacherQuizzesPage() {
               <p className="text-[var(--color-muted-foreground)] mb-2">{t('teacherQuizzes.noQuizzesMatch')}</p>
               <p className="text-sm text-[var(--color-muted-foreground)] mb-4">{t('teacherQuizzes.tryAdjustingFilters')}</p>
               {hasActiveFilters && (
-                <button
+                <Button
                   type="button"
                   onClick={clearFilters}
-                  className={`inline-flex items-center justify-center min-h-[44px] px-4 py-3 text-sm font-medium rounded-lg text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 touch-manipulation`}
+                  variant="primary"
                 >
                   {t('common.reset')}
-                </button>
+                </Button>
               )}
             </div>
           </div>
@@ -318,25 +319,33 @@ export default function TeacherQuizzesPage() {
                   </div>
 
                   <div className="flex gap-2 pt-2 border-t border-[var(--border)]">
-                    <button
+                    <Button
                       type="button"
+                      variant="secondary"
                       onClick={() => router.push(ROUTES.teacher.quizEdit(quizId))}
-                      className="flex-1 min-h-[44px] sm:min-h-0 px-3 py-2 text-sm font-medium text-[var(--teacher-primary)] bg-[var(--teacher-soft)] rounded-lg hover:bg-[var(--teacher-border)] transition-colors touch-manipulation"
+                      size="sm"
+                      fullWidth
                     >
                       {t('teacherQuizzes.edit')}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
                       onClick={() => handleTogglePublish(quiz)}
-                      className={`flex-1 min-h-[44px] sm:min-h-0 px-3 py-2 text-sm font-medium ${theme.text} ${theme.activeBg} rounded-lg hover:opacity-80 touch-manipulation`}
+                      size="sm"
+                      fullWidth
                     >
                       {quiz.isPublished ? t('teacherQuizzes.unpublish') : t('teacherQuizzes.publish')}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="danger"
                       onClick={() => setDeleteTarget({ id: quizId, title: quiz.title })}
-                      className="min-h-[44px] sm:min-h-0 px-3 py-2 text-sm font-medium text-[var(--error)] bg-[var(--error-light)] rounded-lg hover:bg-[var(--error)]/20 touch-manipulation"
+                      size="sm"
+                      fullWidth
                     >
                       {t('teacherQuizzes.delete')}
-                    </button>
+                    </Button>
                   </div>
                 </div>
                 );
@@ -423,20 +432,23 @@ export default function TeacherQuizzesPage() {
             {pagination && pagination.totalPages > 1 && (
               <div className="flex items-center justify-between px-4 py-3 sm:px-6 mt-4">
                 <div className="flex flex-1 justify-between sm:hidden">
-                  <button
+                  <Button
                     onClick={() => setPage(p => Math.max(1, p - 1))}
                     disabled={page === 1}
-                    className="relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-[var(--color-foreground)] bg-[var(--card-solid)] border border-[var(--border)] hover:bg-[var(--color-surface-muted)] disabled:opacity-50 disabled:cursor-not-allowed"
+                    variant="secondary"
+                    size="sm"
                   >
                     {t('common.previous')}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={() => setPage(p => Math.min(pagination.totalPages, p + 1))}
                     disabled={page === pagination.totalPages}
-                    className="relative ml-3 inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-[var(--color-foreground)] bg-[var(--card-solid)] border border-[var(--border)] hover:bg-[var(--color-surface-muted)] disabled:opacity-50 disabled:cursor-not-allowed"
+                    variant="secondary"
+                    size="sm"
+                    className="ml-3"
                   >
                     {t('common.next')}
-                  </button>
+                  </Button>
                 </div>
                 <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
                   <div>

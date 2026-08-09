@@ -9,6 +9,7 @@ import PremiumLogo from '@/components/ui/PremiumLogo';
 import Alert from '@/components/ui/Alert';
 import { Loader } from '@/components/ui/Loader';
 import { useTranslation } from '@/hooks/useTranslation';
+import { TextField } from '@/components/ui/TextField';
 import { roleThemes } from '@/lib/roleTheme';
 import { requestForgotPassword } from '@/lib/api/auth';
 import { ApiClientError } from '@/lib/api/http';
@@ -71,22 +72,16 @@ export default function ForgotPasswordForm() {
 
         {!sent ? (
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-semibold text-[var(--color-foreground)] mb-2">
-                {t('login.emailAddress')}
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-muted)]" />
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  className="w-full pl-12 pr-4 py-3 bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--student-primary)]/30"
-                />
-              </div>
-            </div>
+            <TextField
+              label={t('login.emailAddress')}
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              startIcon={<Mail className="w-5 h-5 text-[var(--color-muted)]" />}
+              fullWidth
+            />
             <button
               type="submit"
               disabled={isLoading}

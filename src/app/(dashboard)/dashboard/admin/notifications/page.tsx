@@ -4,14 +4,16 @@ import { ROUTES } from '@/constants/routes';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
-import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
 import { isAdmin, isSuperAdmin } from '@/lib/roles';
 import { sendAdminNotification } from '@/lib/api/notifications';
 import { ApiClientError } from '@/lib/api/http';
 import Alert from '@/components/ui/Alert';
+import Button from '@/components/ui/Button';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import type { NotificationCategory } from '@/lib/notifications/push/notificationPayload';
+import { TextField } from '@/components/ui/TextField';
+import { Dropdown } from '@/components/ui/Dropdown';
 
 const CATEGORIES: NotificationCategory[] = [
   'lessons',
@@ -26,7 +28,6 @@ export default function AdminNotificationsPage() {
   const { session, status } = useSessionStore();
   const router = useRouter();
   const { t } = useTranslation();
-  const { theme } = useRoleTheme();
 
   const [titleEn, setTitleEn] = useState('');
   const [titleHi, setTitleHi] = useState('');
@@ -103,8 +104,6 @@ export default function AdminNotificationsPage() {
     return null;
   }
 
-  const inputClass =
-    'w-full px-3 py-2.5 min-h-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]';
 
   return (
     
@@ -129,103 +128,79 @@ export default function AdminNotificationsPage() {
         <div className="bg-[var(--card-solid)] shadow rounded-2xl border border-[var(--border)]">
           <div className="px-4 py-5 sm:p-6">
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label htmlFor="titleEn" className="block text-sm font-medium text-[var(--color-muted-foreground)] mb-1">
-                  {t('admin.notifications.titleEn')}
-                </label>
-                <input
-                  id="titleEn"
-                  type="text"
-                  value={titleEn}
-                  onChange={(e) => setTitleEn(e.target.value)}
-                  required
-                  className={inputClass}
-                />
-              </div>
+              <TextField
+                id="titleEn"
+                label={t('admin.notifications.titleEn')}
+                type="text"
+                value={titleEn}
+                onChange={(e) => setTitleEn(e.target.value)}
+                required
+                fullWidth
+              />
 
-              <div>
-                <label htmlFor="titleHi" className="block text-sm font-medium text-[var(--color-muted-foreground)] mb-1">
-                  {t('admin.notifications.titleHi')}
-                </label>
-                <input
-                  id="titleHi"
-                  type="text"
-                  value={titleHi}
-                  onChange={(e) => setTitleHi(e.target.value)}
-                  className={inputClass}
-                />
-              </div>
+              <TextField
+                id="titleHi"
+                label={t('admin.notifications.titleHi')}
+                type="text"
+                value={titleHi}
+                onChange={(e) => setTitleHi(e.target.value)}
+                fullWidth
+              />
 
-              <div>
-                <label htmlFor="bodyEn" className="block text-sm font-medium text-[var(--color-muted-foreground)] mb-1">
-                  {t('admin.notifications.bodyEn')}
-                </label>
-                <textarea
-                  id="bodyEn"
-                  value={bodyEn}
-                  onChange={(e) => setBodyEn(e.target.value)}
-                  required
-                  rows={3}
-                  className={inputClass}
-                />
-              </div>
+              <TextField
+                id="bodyEn"
+                label={t('admin.notifications.bodyEn')}
+                multiline
+                value={bodyEn}
+                onChange={(e) => setBodyEn(e.target.value)}
+                required
+                rows={3}
+                fullWidth
+              />
 
-              <div>
-                <label htmlFor="bodyHi" className="block text-sm font-medium text-[var(--color-muted-foreground)] mb-1">
-                  {t('admin.notifications.bodyHi')}
-                </label>
-                <textarea
-                  id="bodyHi"
-                  value={bodyHi}
-                  onChange={(e) => setBodyHi(e.target.value)}
-                  rows={3}
-                  className={inputClass}
-                />
-              </div>
+              <TextField
+                id="bodyHi"
+                label={t('admin.notifications.bodyHi')}
+                multiline
+                value={bodyHi}
+                onChange={(e) => setBodyHi(e.target.value)}
+                rows={3}
+                fullWidth
+              />
 
-              <div>
-                <label htmlFor="category" className="block text-sm font-medium text-[var(--color-muted-foreground)] mb-1">
-                  {t('admin.notifications.category')}
-                </label>
-                <select
-                  id="category"
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value as NotificationCategory)}
-                  required
-                  className={inputClass}
-                >
-                  <option value="">{t('admin.notifications.selectCategory')}</option>
-                  {CATEGORIES.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {t(`notifications.categories.${cat}`)}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <Dropdown
+                id="category"
+                label={t('admin.notifications.category')}
+                value={category}
+                onChange={(val) => setCategory(val as NotificationCategory)}
+                required
+                options={CATEGORIES.map((cat) => ({
+                  value: cat,
+                  label: t(`notifications.categories.${cat}`),
+                }))}
+                placeholder={t('admin.notifications.selectCategory')}
+              />
 
               {showOrgField && (
-                <div>
-                  <label htmlFor="organizationId" className="block text-sm font-medium text-[var(--color-muted-foreground)] mb-1">
-                    {t('admin.notifications.organizationId')}
-                  </label>
-                  <input
-                    id="organizationId"
-                    type="text"
-                    value={organizationId}
-                    onChange={(e) => setOrganizationId(e.target.value)}
-                    placeholder={t('admin.notifications.organizationPlaceholder')}
-                    className={inputClass}
-                  />
-                </div>
+                <TextField
+                  id="organizationId"
+                  label={t('admin.notifications.organizationId')}
+                  type="text"
+                  value={organizationId}
+                  onChange={(e) => setOrganizationId(e.target.value)}
+                  placeholder={t('admin.notifications.organizationPlaceholder')}
+                  fullWidth
+                />
               )}
 
-              <button
+              <Button
                 type="submit"
                 disabled={loading}
-                className={`w-full min-h-[44px] py-2.5 rounded-xl text-white font-medium bg-gradient-to-r ${theme.gradient} hover:opacity-90 disabled:opacity-50 transition-opacity`}
+                isLoading={loading}
+                fullWidth
               >
-                {loading ? t('admin.notifications.sending') : t('admin.notifications.send')}
-              </button>
+                {t('admin.notifications.send')}
+              </Button>
             </form>
           </div>
         </div>

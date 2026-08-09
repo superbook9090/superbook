@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Clock, HelpCircle, Info, ShieldAlert } from 'lucide-react';
-import { Loader } from '@/components/ui/Loader';
 import { useTranslation } from '@/hooks/useTranslation';
+import Button from '@/components/ui/Button';
 
 export type QuizStartInfo = {
   title: string;
@@ -121,29 +121,23 @@ export function QuizStartConfirmModal({
               </div>
 
               <div className="flex flex-col-reverse sm:flex-row gap-3">
-                <button
+                <Button
                   type="button"
+                  variant="secondary"
                   onClick={onCancel}
                   disabled={isLoading}
-                  className="flex-1 min-h-[44px] px-4 py-2.5 rounded-xl font-medium bg-[var(--color-surface-muted)] text-[var(--color-foreground)] disabled:opacity-50"
                 >
                   {t('common.cancel')}
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
+                  variant="primary"
                   onClick={onConfirm}
                   disabled={isLoading}
-                  className="flex-1 min-h-[44px] px-4 py-2.5 rounded-xl font-semibold bg-[var(--color-primary)] text-white disabled:opacity-50 flex items-center justify-center gap-2"
+                  isLoading={isLoading}
                 >
-                  {isLoading ? (
-                    <>
-                      <Loader size="sm" />
-                      {t('common.loading')}
-                    </>
-                  ) : (
-                    t(confirmKey)
-                  )}
-                </button>
+                  {t(confirmKey)}
+                </Button>
               </div>
             </div>
           </motion.div>

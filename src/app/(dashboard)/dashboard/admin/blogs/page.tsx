@@ -17,6 +17,7 @@ import {
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
+import Button from '@/components/ui/Button';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useDeleteBlog, useUpdateBlog, usePaginatedBlogs, type Blog } from '@/lib/react-query/useBlogQueries';
 import BlogListPagination from '@/features/blogs/components/BlogListPagination';
@@ -248,34 +249,37 @@ export default function AdminBlogsPage() {
 
                 {/* Actions */}
                 <div className="flex gap-2 pt-4 border-t border-[var(--border)]">
-                  <button
+                  <Button
+                    type="button"
+                    variant={blog.isPublished ? 'primary' : 'secondary'}
                     onClick={() => handleTogglePublish(blog._id, blog.isPublished)}
-                    className="flex-1 flex items-center justify-center min-h-[44px] sm:min-h-0 px-3 py-2.5 bg-[var(--color-surface-muted)] text-[var(--color-foreground)] rounded-lg hover:bg-[var(--color-surface-muted)]/80 transition-colors text-sm touch-manipulation"
+                    className="flex-1 flex items-center justify-center gap-2"
                   >
                     {blog.isPublished ? (
                       <>
-                        <EyeOff className="w-4 h-4 mr-1" />
+                        <EyeOff className="w-4 h-4" />
                         <span className="hidden sm:inline">{t('admin.unpublish')}</span>
                         <span className="sm:hidden">{t('admin.hide')}</span>
                       </>
                     ) : (
                       <>
-                        <Eye className="w-4 h-4 mr-1" />
+                        <Eye className="w-4 h-4" />
                         <span className="hidden sm:inline">{t('admin.publish')}</span>
                         <span className="sm:hidden">{t('admin.show')}</span>
                       </>
                     )}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="danger"
                     onClick={() => {
                       setDeleteId(blog._id);
-                      handleDelete(blog._id);
                     }}
-                    className="flex-1 flex items-center justify-center min-h-[44px] sm:min-h-0 px-3 py-2.5 bg-[var(--error-light)] text-[var(--error)] rounded-lg hover:bg-[var(--error-light)]/80 transition-colors text-sm touch-manipulation"
+                    className="flex-1 flex items-center justify-center gap-2"
                   >
-                    <Trash2 className="w-4 h-4 mr-1" />
+                    <Trash2 className="w-4 h-4" />
                     {t('common.delete')}
-                  </button>
+                  </Button>
                 </div>
               </div>
 
@@ -287,18 +291,22 @@ export default function AdminBlogsPage() {
                       {t('admin.deleteBlogConfirm')}
                     </p>
                     <div className="flex gap-2">
-                      <button
+                      <Button
+                        type="button"
+                        variant="danger"
                         onClick={() => handleDelete(blog._id)}
-                        className={`flex-1 min-h-[44px] sm:min-h-0 px-3 py-2 bg-gradient-to-r ${theme.gradient} text-white rounded-lg hover:opacity-90 transition-colors text-sm`}
+                        className="flex-1"
                       >
                         {t('common.delete')}
-                      </button>
-                      <button
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="secondary"
                         onClick={() => setDeleteId(null)}
-                        className="flex-1 min-h-[44px] sm:min-h-0 px-3 py-2 bg-[var(--card-solid)] text-[var(--error)] border border-[var(--error)] rounded-lg hover:bg-[var(--error-light)] transition-colors text-sm"
+                        className="flex-1"
                       >
                         {t('common.cancel')}
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 </div>

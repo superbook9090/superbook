@@ -3,13 +3,14 @@ import { ROUTES } from '@/constants/routes';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { KeyRound, Loader2 } from 'lucide-react';
+import { KeyRound } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useJoinCourseByCode } from '@/lib/react-query/hooks';
 import { getApiErrorMessage } from '@/lib/api/http';
-import Alert from '@/components/ui/Alert';
 import { cn } from '@/lib/utils';
+import { TextField } from '@/components/ui/TextField';
+import Button from '@/components/ui/Button';
 
 export default function JoinCourseByCode() {
   const { t } = useTranslation();
@@ -59,11 +60,7 @@ export default function JoinCourseByCode() {
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row sm:items-start">
-        <div className="flex-1 min-w-0">
-          <label htmlFor="courseCode" className="sr-only">
-            {t('courses.courseCode')}
-          </label>
-          <input
+          <TextField
             id="courseCode"
             type="text"
             value={courseCode}
@@ -75,35 +72,18 @@ export default function JoinCourseByCode() {
             maxLength={12}
             autoComplete="off"
             spellCheck={false}
-            className="block w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)]/40 px-4 py-3 text-sm font-mono uppercase tracking-widest text-[var(--color-foreground)] placeholder:text-[var(--color-muted-foreground)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20"
+            className="font-mono uppercase tracking-widest"
+            error={error}
+            fullWidth
           />
-          {error && (
-            <Alert
-              type="error"
-              message={error}
-              onClose={() => setError('')}
-              className="relative top-0 right-0 left-0 translate-x-0 w-full mt-3 z-10"
-            />
-          )}
-        </div>
-        <button
+        <Button
           type="submit"
           disabled={joinCourse.isPending}
-          className={cn(
-            'inline-flex min-h-[48px] shrink-0 items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50',
-            'bg-gradient-to-r',
-            theme.gradient
-          )}
+          isLoading={joinCourse.isPending}
+          className="min-h-[48px] shrink-0"
         >
-          {joinCourse.isPending ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              {t('courses.joining')}
-            </>
-          ) : (
-            t('courses.joinCourse')
-          )}
-        </button>
+          {t('courses.joinCourse')}
+        </Button>
       </form>
     </div>
   );

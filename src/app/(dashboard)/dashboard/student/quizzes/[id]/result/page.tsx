@@ -6,10 +6,10 @@ import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, Check, X, Minus } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { formatDateTime } from '@/lib/dateUtils';
-import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import Tooltip from '@/components/ui/Tooltip';
+import Button from '@/components/ui/Button';
 import { getQuizAttemptReview } from '@/lib/api/quizAttempts';
 import type { QuizComparison } from '@/lib/quiz/quizComparison';
 import { resolveQuizComparison, safeNumber, DEFAULT_TIME_LIMIT_MINUTES } from '@/lib/quiz/resultDefaults';
@@ -73,7 +73,6 @@ export default function QuizResultPage() {
   const router = useRouter();
   const params = useParams();
   const attemptId = params.id as string;
-  const { theme } = useRoleTheme();
 
   const [attempt, setAttempt] = useState<Attempt | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -165,12 +164,13 @@ export default function QuizResultPage() {
     return (
       <div className="text-center py-8 px-4">
         <p className="text-[var(--error)] mb-4">{t('quizResult.resultNotFound')}</p>
-        <button
+        <Button
           onClick={() => router.push(ROUTES.student.quizzes)}
-          className={`inline-flex items-center justify-center min-h-[44px] px-4 py-3 sm:px-4 sm:py-2.5 sm:w-auto w-full bg-gradient-to-r ${theme.gradient} text-white rounded-xl transition-all`}
+          variant="primary"
+          className="sm:w-auto w-full"
         >
           {t('quizResult.backToQuizzes')}
-        </button>
+        </Button>
       </div>
     );
   }
@@ -183,14 +183,15 @@ export default function QuizResultPage() {
       <div className="sticky top-0 z-10 -mx-2 sm:-mx-4 px-2 sm:px-4 py-3 mb-2 bg-[var(--color-background)]/95 backdrop-blur-sm border-b border-[var(--color-border)] lg:static lg:bg-transparent lg:backdrop-blur-none lg:border-b-0 lg:mb-4 lg:px-0 lg:py-0">
         <div className="flex items-center gap-3">
           <Tooltip label={t('quizResult.backToQuizzes')} position="bottom" className="shrink-0">
-            <button
+            <Button
               type="button"
+              variant="secondary"
               onClick={() => router.push(ROUTES.student.quizzes)}
-              className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--card-solid)] text-[var(--color-foreground)] shrink-0"
+              className="min-w-[44px] min-h-[44px] p-0 flex items-center justify-center rounded-xl shrink-0"
               aria-label={t('quizResult.backToQuizzes')}
             >
               <ArrowLeft className="w-5 h-5" />
-            </button>
+            </Button>
           </Tooltip>
           <h1 className="text-sm sm:text-base lg:text-lg font-bold text-[var(--color-foreground)] line-clamp-2 flex-1 min-w-0">
             {quizTitle}

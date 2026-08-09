@@ -15,6 +15,8 @@ import { useSessionStore } from '@/store/useSessionStore';
 import { ImageUpload } from '@/components/ui/ImageUpload';
 import { generateInviteCode } from '@/lib/inviteCode';
 import { Copy, RefreshCw, Lock } from 'lucide-react';
+import { TextField } from '@/components/ui/TextField';
+import { Dropdown } from '@/components/ui/Dropdown';
 
 type Props = {
   /** When set, form loads this course and PATCHes on submit. */
@@ -236,88 +238,67 @@ export default function CreateCourseForm({ courseId }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
 
-      <div>
-        <label htmlFor="title" className="block text-sm font-medium text-[var(--color-foreground)] mb-1.5">
-          {t('createCourseForm.courseTitle')} *
-        </label>
-        <input
-          type="text"
-          name="title"
-          id="title"
-          required
-          value={formData.title}
-          onChange={handleChange}
-          className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-[var(--color-border)] bg-[var(--card-solid)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] text-base sm:text-sm text-[var(--color-foreground)] placeholder-[var(--color-muted)] touch-manipulation"
-          placeholder={t('createCourseForm.enterCourseTitle')}
-        />
-      </div>
+      <TextField
+        label={t('createCourseForm.courseTitle')}
+        type="text"
+        name="title"
+        id="title"
+        required
+        value={formData.title}
+        onChange={handleChange}
+        placeholder={t('createCourseForm.enterCourseTitle')}
+        fullWidth
+      />
 
-      <div>
-        <label htmlFor="description" className="block text-sm font-medium text-[var(--color-foreground)] mb-1.5">
-          {t('createCourseForm.description')}
-        </label>
-        <textarea
-          name="description"
-          id="description"
-          rows={4}
-          value={formData.description}
-          onChange={handleChange}
-          className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-[var(--color-border)] bg-[var(--card-solid)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] text-base sm:text-sm text-[var(--color-foreground)] placeholder-[var(--color-muted)] resize-y"
-          placeholder={t('createCourseForm.enterCourseDescription')}
-        />
-      </div>
+      <TextField
+        label={t('createCourseForm.description')}
+        multiline
+        name="description"
+        id="description"
+        rows={4}
+        value={formData.description}
+        onChange={handleChange}
+        placeholder={t('createCourseForm.enterCourseDescription')}
+        fullWidth
+      />
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-        <div>
-          <label htmlFor="price" className="block text-sm font-medium text-[var(--color-foreground)] mb-1.5">
-            {t('createCourseForm.price')}
-          </label>
-          <input
-            type="number"
-            name="price"
-            id="price"
-            min="0"
-            step="0.01"
-            value={formData.price}
-            onChange={handleChange}
-            className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-[var(--color-border)] bg-[var(--card-solid)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] text-base sm:text-sm text-[var(--color-foreground)] placeholder-[var(--color-muted)]"
-            placeholder={t('createCourseForm.pricePlaceholder')}
-          />
-        </div>
+        <TextField
+          label={t('createCourseForm.price')}
+          type="number"
+          name="price"
+          id="price"
+          min="0"
+          step="0.01"
+          value={formData.price}
+          onChange={handleChange}
+          placeholder={t('createCourseForm.pricePlaceholder')}
+          fullWidth
+        />
 
-        <div>
-          <label htmlFor="category" className="block text-sm font-medium text-[var(--color-foreground)] mb-1.5">
-            {t('createCourseForm.category')}
-          </label>
-          <input
-            type="text"
-            name="category"
-            id="category"
-            value={formData.category}
-            onChange={handleChange}
-            className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-[var(--color-border)] bg-[var(--card-solid)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] text-base sm:text-sm text-[var(--color-foreground)] placeholder-[var(--color-muted)]"
-            placeholder={t('createCourseForm.categoryPlaceholder')}
-          />
-        </div>
+        <TextField
+          label={t('createCourseForm.category')}
+          type="text"
+          name="category"
+          id="category"
+          value={formData.category}
+          onChange={handleChange}
+          placeholder={t('createCourseForm.categoryPlaceholder')}
+          fullWidth
+        />
 
-        <div>
-          <label htmlFor="locale" className="block text-sm font-medium text-[var(--color-foreground)] mb-1.5">
-            {t('createCourseForm.language')}
-          </label>
-          <select
-            name="locale"
-            id="locale"
-            value={formData.locale}
-            onChange={handleChange}
-            className="px-3 py-2.5 sm:py-2 block w-full rounded-lg border-[var(--color-border)] bg-[var(--card-solid)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] text-base sm:text-sm text-[var(--color-foreground)]"
-          >
-            {supportedLanguages.map((language) => (
-              <option key={language} value={language}>
-                {t(language === 'en' ? 'common.english' : 'common.hindi')}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Dropdown
+          label={t('createCourseForm.language')}
+          name="locale"
+          id="locale"
+          value={formData.locale}
+          onChange={(val) => setFormData((prev) => ({ ...prev, locale: val as 'en' | 'hi' }))}
+          options={supportedLanguages.map((language) => ({
+            value: language,
+            label: t(language === 'en' ? 'common.english' : 'common.hindi'),
+          }))}
+          placeholder=""
+        />
       </div>
 
       <ImageUpload
@@ -388,12 +369,10 @@ export default function CreateCourseForm({ courseId }: Props) {
         </div>
 
         {formData.isPrivateAccess && (
-          <div>
-            <label htmlFor="courseCode" className="block text-sm font-medium text-[var(--color-foreground)] mb-1.5">
-              {t('createCourseForm.courseCode')}
-            </label>
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <input
+          <div className="space-y-1.5 w-full">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+              <TextField
+                label={t('createCourseForm.courseCode')}
                 type="text"
                 name="courseCode"
                 id="courseCode"
@@ -406,8 +385,9 @@ export default function CreateCourseForm({ courseId }: Props) {
                 }
                 maxLength={12}
                 required={formData.isPrivateAccess}
-                className="flex-1 rounded-lg border border-[var(--color-border)] bg-[var(--card-solid)] px-3 py-2.5 font-mono text-sm uppercase tracking-widest text-[var(--color-foreground)] focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)]"
+                className="font-mono uppercase tracking-widest"
                 placeholder={t('createCourseForm.courseCodePlaceholder')}
+                containerClassName="flex-1"
               />
               <div className="flex gap-2">
                 <button

@@ -10,6 +10,7 @@ import { flattenCurriculumLessons } from '@/lib/curriculum/tree';
 import { useLesson, useCourseCurriculum } from '@/lib/react-query/hooks';
 import { ChevronLeft, ChevronRight, BookOpen, PlayCircle, Clock, Layout } from 'lucide-react';
 import BackButton from '@/components/ui/BackButton';
+import Button from '@/components/ui/Button';
 import { LazySecurePlayer } from '@/lib/lazy';
 
 const lessonSessionKey = (courseId: string) => `lesson-active:${courseId}`;
@@ -122,15 +123,16 @@ export default function LessonViewerPage() {
     <div className="max-w-5xl mx-auto space-y-8 pb-20">
       {/* Top Navigation */}
       <div className="flex items-center justify-between">
-        <button
+        <Button
           onClick={goToCourse}
+          variant="ghost"
           className="flex items-center gap-2 text-sm font-bold text-[var(--color-muted-foreground)] hover:text-[var(--student-primary)] transition-colors group"
         >
           <div className="w-8 h-8 rounded-lg bg-[var(--color-surface-muted)]/20 flex items-center justify-center group-hover:bg-[var(--student-soft)] transition-colors">
             <ChevronLeft className="w-4 h-4" />
           </div>
           {t('courses.backToCourse')}
-        </button>
+        </Button>
         
         <div className="flex items-center gap-3">
           <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-[var(--color-success-light)] text-[var(--color-success)] rounded-lg border border-[var(--color-success)]/20 text-[10px] font-bold uppercase tracking-wider">
@@ -300,12 +302,13 @@ export default function LessonViewerPage() {
             </div>
           </button>
         ) : (
-          <button
+          <Button
             onClick={goToCourse}
-            className="w-full sm:w-auto flex-1 p-6 bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-primary-light)] text-white rounded-2xl shadow-lg hover:shadow-xl transition-all text-center font-bold"
+            variant="primary"
+            className="w-full sm:w-auto flex-1 p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all text-center font-bold"
           >
             {t('courses.finishCourse')}
-          </button>
+          </Button>
         )}
       </div>
     </div>

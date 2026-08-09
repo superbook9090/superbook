@@ -8,6 +8,7 @@ import { PageSkeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
 import Tooltip from '@/components/ui/Tooltip';
+import Button from '@/components/ui/Button';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import { useTranslation } from '@/hooks/useTranslation';
 import { formatDate } from '@/lib/dateUtils';
@@ -83,13 +84,14 @@ export default function EnrolledStudentsList({
         animate={{ opacity: 1, y: 0 }}
         className="flex items-center gap-3"
       >
-        <button
+        <Button
           onClick={() => router.push(backHref)}
           aria-label={t('common.back')}
-          className="p-2 rounded-lg bg-[var(--color-surface-muted)] hover:bg-[var(--color-surface-muted-strong)] transition-colors"
+          variant="secondary"
+          className="p-2 rounded-lg"
         >
-          <ArrowLeft className="w-5 h-5 text-[var(--color-foreground)]" />
-        </button>
+          <ArrowLeft className="w-5 h-5" />
+        </Button>
         <div className="p-3 bg-[var(--info-light)] rounded-xl">
           <Users className="w-6 h-6 text-[var(--info)]" />
         </div>
@@ -174,13 +176,14 @@ export default function EnrolledStudentsList({
                     </td>
                     <td className="px-6 py-4">
                       <Tooltip label={t('enrolledStudents.remove')}>
-                        <button
+                        <Button
                           onClick={() => setRemoveId(row.enrollmentId)}
                           aria-label={t('enrolledStudents.remove')}
-                          className="p-2 text-[var(--error)] bg-[var(--error-light)] rounded-lg hover:bg-[var(--error-light)]/80 transition-colors"
+                          variant="danger"
+                          className="p-2 rounded-lg"
                         >
                           <Trash2 className="w-4 h-4" />
-                        </button>
+                        </Button>
                       </Tooltip>
                     </td>
                   </motion.tr>
@@ -225,13 +228,15 @@ export default function EnrolledStudentsList({
                     {formatDate(row.enrolledAt)}
                   </span>
                 </div>
-                <button
+                <Button
                   onClick={() => setRemoveId(row.enrollmentId)}
-                  className="w-full flex items-center justify-center min-h-[44px] px-3 py-2 bg-[var(--error-light)] text-[var(--error)] rounded-lg hover:bg-[var(--error-light)]/80 transition-colors text-sm font-medium"
+                  variant="danger"
+                  fullWidth
+                  className="flex items-center justify-center gap-1"
                 >
-                  <Trash2 className="w-4 h-4 mr-1" />
+                  <Trash2 className="w-4 h-4" />
                   {t('enrolledStudents.remove')}
-                </button>
+                </Button>
               </motion.div>
             ))}
           </motion.div>

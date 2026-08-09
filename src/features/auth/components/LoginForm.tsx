@@ -14,14 +14,12 @@ import { getSafeCallbackUrl } from '@/lib/callbackUrl';
 import {
   Mail,
   Lock,
-  Eye,
-  EyeOff,
   ArrowRight,
   Sparkles
 } from 'lucide-react';
 import Alert from '@/components/ui/Alert';
 import { Loader } from '@/components/ui/Loader';
-import Tooltip from '@/components/ui/Tooltip';
+import { TextField } from '@/components/ui/TextField';
 import { Suspense } from 'react';
 
 declare global {
@@ -43,7 +41,6 @@ function LoginFormInner() {
   const theme = roleThemes.student;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -295,20 +292,16 @@ function LoginFormInner() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                <label className="block text-sm font-semibold text-[var(--color-foreground)] mb-2">
-                  {t('login.emailAddress')}
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-muted)]" />
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    className={`w-full pl-12 pr-4 py-3.5 bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-xl text-[var(--color-foreground)] placeholder-[var(--color-muted)] focus:outline-none focus:ring-2 focus:${theme.shadow} focus:${theme.border.replace('border-', 'border-')} transition-all`}
-                  />
-                </div>
+                <TextField
+                  label={t('login.emailAddress')}
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  startIcon={<Mail className="w-5 h-5 text-[var(--color-muted)]" />}
+                  fullWidth
+                />
               </motion.div>
 
               {/* Password Input */}
@@ -317,37 +310,16 @@ function LoginFormInner() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                <label className="block text-sm font-semibold text-[var(--color-foreground)] mb-2">
-                  {t('login.password')}
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-muted)]" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
-                    className={`w-full pl-12 pr-12 py-3.5 bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-xl text-[var(--color-foreground)] placeholder-[var(--color-muted)] focus:outline-none focus:ring-2 focus:${theme.shadow} focus:${theme.border.replace('border-', 'border-')} transition-all`}
-                  />
-                  <Tooltip
-                    label={showPassword ? t('password.hidePassword') : t('password.showPassword')}
-                    className="absolute right-4 top-1/2 -translate-y-1/2"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      aria-label={showPassword ? t('password.hidePassword') : t('password.showPassword')}
-                      className="text-[var(--color-muted)] hover:text-[var(--color-foreground)] transition-colors"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="w-5 h-5" />
-                      ) : (
-                        <Eye className="w-5 h-5" />
-                      )}
-                    </button>
-                  </Tooltip>
-                </div>
+                <TextField
+                  label={t('login.password')}
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  startIcon={<Lock className="w-5 h-5 text-[var(--color-muted)]" />}
+                  fullWidth
+                />
               </motion.div>
 
               {/* Remember Me & Forgot Password */}

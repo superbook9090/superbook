@@ -847,6 +847,11 @@ export const hi = {
     email: 'ईमेल',
     role: 'भूमिका',
     teacherProfileDesc: 'अपने खाते की सेटिंग्स और शिक्षक जानकारी प्रबंधित करें।',
+    editName: 'नाम संपादित करें',
+    updateName: 'नाम अपडेट करें',
+    nameUpdateSuccess: 'नाम सफलतापूर्वक अपडेट किया गया।',
+    nameUpdateError: 'नाम अपडेट करने में विफल।',
+    nameRequired: 'नाम आवश्यक है।',
   },
 
   // Progress

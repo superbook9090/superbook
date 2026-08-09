@@ -14,6 +14,7 @@ import { LazyConfirmModal } from '@/lib/lazy';
 import { useEnrollments, useDropEnrollment } from '@/lib/react-query/hooks';
 import { BookOpen, CheckCircle, Clock, TrendingUp, Sparkles } from 'lucide-react';
 import StatCard from '@/components/ui/StatCard';
+import Button from '@/components/ui/Button';
 import { LazyCourseFilters } from '@/lib/lazy';
 import type { CourseStatusFilter } from '@/features/courses/components/CourseFilters';
 import { FilterPanel } from '@/components/filters/DashboardListFilters';
@@ -35,7 +36,7 @@ export default function StudentCoursesPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [selectedInstructor, setSelectedInstructor] = useState<string>('All');
 
-  const { data: enrollments = [], isLoading, error } = useEnrollments();
+  const { data: enrollments = [], isLoading } = useEnrollments();
   const dropEnrollment = useDropEnrollment();
 
   useEffect(() => {
@@ -131,13 +132,13 @@ export default function StudentCoursesPage() {
               {t('dashboard.continueLearning').replace('{count}', String(enrollments.length))}
             </p>
           </div>
-          <button
+          <Button
             onClick={() => router.push(ROUTES.student.browse)}
             className="btn-premium"
           >
             <Sparkles className="w-4 h-4" />
             {t('courses.browseMore')}
-          </button>
+          </Button>
         </div>
       </motion.div>
 
@@ -196,12 +197,12 @@ export default function StudentCoursesPage() {
             <BookOpen className="w-12 h-12 text-[var(--muted)] mx-auto mb-4 opacity-20" />
             <h3 className="heading-md text-[var(--color-foreground)] mb-1">{t('courses.noCoursesFound')}</h3>
             <p className="text-sm text-[var(--color-muted-foreground)] mb-6">{t('courses.tryAdjustingFilters')}</p>
-            <button
+            <Button
               onClick={clearFilters}
-              className="px-6 py-2 bg-[var(--color-foreground)] text-[var(--background)] rounded-xl text-sm font-bold hover:opacity-90 transition-opacity"
+              variant="primary"
             >
               {t('common.reset')}
-            </button>
+            </Button>
           </div>
         ) : (
           filteredEnrollments.map((enrollment) => (

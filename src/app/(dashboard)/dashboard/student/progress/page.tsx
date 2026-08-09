@@ -23,6 +23,7 @@ import {
 import { fetchStudentProgress } from '@/lib/api/progress';
 import { ApiClientError } from '@/lib/api/http';
 import { PageWrapper, PageHeader, ResponsiveGrid } from '@/components/layout';
+import Button from '@/components/ui/Button';
 
 interface CourseProgress {
   enrollment: {
@@ -75,7 +76,6 @@ export default function StudentProgressPage() {
   const [progressData, setProgressData] = useState<CourseProgress[]>([]);
   const [overallStats, setOverallStats] = useState<OverallStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
 
   useEffect(() => {
@@ -100,7 +100,6 @@ export default function StudentProgressPage() {
     } catch (err) {
       const errorMsg =
         err instanceof ApiClientError ? err.message : t('progress.errorLoadingProgress');
-      setError(errorMsg);
       addAlert({ type: 'error', message: errorMsg, duration: 5000 });
     } finally {
       setIsLoading(false);
@@ -374,14 +373,16 @@ export default function StudentProgressPage() {
                   </div>
 
                   {/* Expand Button */}
-                  <button
+                  <Button
                     onClick={() => setSelectedCourse(
                       selectedCourse === item.enrollment._id ? null : item.enrollment._id
                     )}
-                    className="mt-4 min-h-[44px] sm:min-h-0 text-[var(--student-primary)] hover:text-[var(--student-primary)]/80 text-sm font-medium"
+                    variant="ghost"
+                    size="sm"
+                    className="mt-4 text-[var(--student-primary)]"
                   >
                     {selectedCourse === item.enrollment._id ? t('progress.hideDetails') : t('progress.viewQuizHistory')}
-                  </button>
+                  </Button>
                 </div>
 
                 {/* Quiz History */}

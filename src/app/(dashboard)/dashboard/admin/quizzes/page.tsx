@@ -19,6 +19,7 @@ import { PageSkeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
 import Alert from '@/components/ui/Alert';
 import Tooltip from '@/components/ui/Tooltip';
+import Button from '@/components/ui/Button';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useTranslation } from '@/hooks/useTranslation';
 import { formatDate } from '@/lib/dateUtils';
@@ -280,30 +281,34 @@ export default function AdminQuizzesPage() {
 
                 {/* Actions */}
                 <div className="flex gap-2 pt-4 border-t border-[var(--border)]">
-                  <button
+                  <Button
+                    type="button"
+                    variant={quiz.isPublished ? 'primary' : 'secondary'}
                     onClick={() => handleTogglePublish(quiz._id, quiz.isPublished)}
-                    className="flex-1 flex items-center justify-center min-h-[44px] sm:min-h-0 px-3 py-2 bg-[var(--color-surface-muted)] text-[var(--color-foreground)] rounded-lg hover:bg-[var(--color-surface-muted)]/80 transition-colors text-sm"
+                    className="flex-1 flex items-center justify-center gap-2"
                   >
                     {quiz.isPublished ? (
                       <>
-                        <EyeOff className="w-4 h-4 mr-1" />
+                        <EyeOff className="w-4 h-4" />
                         {t('admin.unpublish')}
                       </>
                     ) : (
                       <>
-                        <Eye className="w-4 h-4 mr-1" />
+                        <Eye className="w-4 h-4" />
                         {t('admin.publish')}
                       </>
                     )}
-                  </button>
+                  </Button>
                   <Tooltip label={t('common.delete')}>
-                    <button
+                    <Button
+                      type="button"
+                      variant="danger"
                       onClick={() => setDeleteId(quiz._id)}
                       aria-label={t('common.delete')}
-                      className="px-3 py-2 min-h-[44px] sm:min-h-0 bg-[var(--error-light)] text-[var(--error)] rounded-lg hover:bg-[var(--error-light)]/80 transition-colors"
+                      className="px-3 py-2 rounded-lg"
                     >
                       <Trash2 className="w-4 h-4" />
-                    </button>
+                    </Button>
                   </Tooltip>
                 </div>
               </div>
@@ -316,18 +321,22 @@ export default function AdminQuizzesPage() {
                       {t('admin.deleteQuizConfirm')}
                     </p>
                     <div className="flex gap-2">
-                      <button
+                      <Button
+                        type="button"
+                        variant="danger"
                         onClick={() => handleDelete(quiz._id)}
-                        className={`flex-1 min-h-[44px] sm:min-h-0 px-3 py-2 bg-gradient-to-r ${theme.gradient} text-white rounded-lg hover:opacity-90 transition-colors text-sm`}
+                        className="flex-1"
                       >
                         {t('common.delete')}
-                      </button>
-                      <button
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="secondary"
                         onClick={() => setDeleteId(null)}
-                        className="flex-1 min-h-[44px] sm:min-h-0 px-3 py-2 bg-[var(--card-solid)] text-[var(--error)] border border-[var(--error)] rounded-lg hover:bg-[var(--error-light)] transition-colors text-sm"
+                        className="flex-1"
                       >
                         {t('common.cancel')}
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -341,20 +350,23 @@ export default function AdminQuizzesPage() {
       {pagination && pagination.totalPages > 1 && (
         <div className="flex items-center justify-between px-4 py-3 sm:px-6 mt-4 bg-[var(--card-solid)] rounded-2xl shadow-sm">
           <div className="flex flex-1 justify-between sm:hidden">
-            <button
+            <Button
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-[var(--color-foreground)] bg-[var(--card-solid)] border border-[var(--border)] hover:bg-[var(--color-surface-muted)] disabled:opacity-50 disabled:cursor-not-allowed"
+              variant="secondary"
+              size="sm"
             >
               {t('common.previous')}
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => setPage(p => Math.min(pagination.totalPages, p + 1))}
               disabled={page === pagination.totalPages}
-              className="relative ml-3 inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-[var(--color-foreground)] bg-[var(--card-solid)] border border-[var(--border)] hover:bg-[var(--color-surface-muted)] disabled:opacity-50 disabled:cursor-not-allowed"
+              variant="secondary"
+              size="sm"
+              className="ml-3"
             >
               {t('common.next')}
-            </button>
+            </Button>
           </div>
           <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
             <div>
