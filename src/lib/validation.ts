@@ -153,6 +153,7 @@ export const updateSettingsSchema = z.object({
     enableQuizSolutionAnalysis: z.boolean(),
     restrictPublicCourseCreation: z.boolean().optional(),
     enableEnrollmentManagement: z.boolean().optional(),
+    enablePhoneAuth: z.boolean().optional(),
   }).optional(),
   platformConfig: z.object({
     siteName: z.string().max(100).optional(),
@@ -269,4 +270,14 @@ export const changePasswordSchema = z
   .refine((data) => data.currentPassword !== data.newPassword, {
     message: 'New password must be different from current password',
     path: ['newPassword'],
+  });
+
+export const setPasswordSchema = z
+  .object({
+    password: passwordFieldSchema,
+    confirmPassword: z.string().min(1, 'Confirm password is required'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
   });

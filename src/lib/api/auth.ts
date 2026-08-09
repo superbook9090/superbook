@@ -25,9 +25,10 @@ export function resetPasswordWithToken(body: {
 }
 
 export function changePassword(body: {
-  currentPassword: string;
-  newPassword: string;
+  currentPassword?: string;
+  newPassword?: string;
   confirmPassword: string;
+  password?: string;
 }): Promise<{ message: string }> {
   return apiJson('/api/auth/change-password', { method: 'POST', body });
 }
@@ -64,5 +65,9 @@ export async function authSignOut(): Promise<void> {
 }
 
 export function updateProfileName(body: { name: string }): Promise<{ message: string; name: string }> {
+  return apiJson('/api/auth/account', { method: 'PATCH', body });
+}
+
+export function updateProfileEmail(body: { email: string }): Promise<{ message: string; email: string }> {
   return apiJson('/api/auth/account', { method: 'PATCH', body });
 }

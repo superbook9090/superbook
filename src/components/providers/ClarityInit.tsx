@@ -8,8 +8,7 @@ import { useSettingsStore } from "@/store/useSettingsStore";
 export default function ClarityInit() {
   const session = useSessionStore((s) => s.session);
   const status = useSessionStore((s) => s.status);
-  const isFeatureEnabled = useSettingsStore((s) => s.isFeatureEnabled);
-  const enableClarity = isFeatureEnabled('enableClarity');
+  const enableClarity = useSettingsStore((s) => s.settings.featureToggles.enableClarity ?? true);
   const initialized = useRef(false);
 
   useEffect(() => {

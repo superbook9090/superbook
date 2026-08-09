@@ -1,5 +1,6 @@
 import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
 import { getMessaging, getToken, onMessage, isSupported, type Messaging, type MessagePayload } from 'firebase/messaging';
+import { getAuth, type Auth } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -13,6 +14,18 @@ const firebaseConfig = {
 function getFirebaseApp(): FirebaseApp | null {
   if (!firebaseConfig.apiKey) return null;
   return !getApps().length ? initializeApp(firebaseConfig) : getApp();
+}
+
+let authInstance: Auth | null = null;
+
+export function getFirebaseAuth(): Auth | null {
+  if (typeof window === 'undefined') return null;
+  const app = getFirebaseApp();
+  if (!app) return null;
+  if (!authInstance) {
+    authInstance = getAuth(app);
+  }
+  return authInstance;
 }
 
 let messagingInstance: Messaging | null = null;

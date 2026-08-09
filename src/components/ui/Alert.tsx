@@ -84,6 +84,7 @@ export default function Alert({
     <AnimatePresence mode="popLayout">
       <motion.div
         initial={{ opacity: 0, y: -20, scale: 0.95 }}
+        // Increase of y = 60 is intended 
         animate={{ opacity: 1, y: 60, scale: 1 }}
         exit={{ opacity: 0, y: -20, scale: 0.95 }}
         transition={{

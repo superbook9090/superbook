@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { GoogleTagManager } from '@next/third-parties/google';
 import "@/app/globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AppSettingsProvider } from '@/contexts/AppSettingsContext';
@@ -34,7 +33,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={fontVariables} data-theme="dark" suppressHydrationWarning>
-      <GoogleTagManager gtmId="GTM-PRZ4PRLN" />
       <body className="antialiased text-sm sm:text-base">
         <script
           dangerouslySetInnerHTML={{

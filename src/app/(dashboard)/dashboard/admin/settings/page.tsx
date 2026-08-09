@@ -19,6 +19,7 @@ import {
   Sparkles,
   Shield,
   Users,
+  Phone,
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import ToggleSwitch from '@/components/ui/ToggleSwitch';
@@ -47,6 +48,7 @@ interface AppSettings {
     enableQuizSolutionAnalysis: boolean;
     restrictPublicCourseCreation?: boolean;
     enableEnrollmentManagement?: boolean;
+    enablePhoneAuth?: boolean;
   };
   platformConfig: {
     maintenanceMode: boolean;
@@ -78,6 +80,7 @@ export default function AdminSettingsPage() {
       enableQuizSolutionAnalysis: false,
       restrictPublicCourseCreation: false,
       enableEnrollmentManagement: true,
+      enablePhoneAuth: true,
     },
     platformConfig: {
       maintenanceMode: false,
@@ -102,6 +105,7 @@ export default function AdminSettingsPage() {
           enableQuizSolutionAnalysis: data.featureToggles.enableQuizSolutionAnalysis ?? false,
           restrictPublicCourseCreation: data.featureToggles.restrictPublicCourseCreation ?? false,
           enableEnrollmentManagement: data.featureToggles.enableEnrollmentManagement ?? true,
+          enablePhoneAuth: data.featureToggles.enablePhoneAuth ?? true,
         },
         platformConfig: {
           ...{
@@ -474,6 +478,30 @@ export default function AdminSettingsPage() {
                     })
                   }
                   label={t('adminSettings.enableEnrollmentManagement')}
+                />
+              </div>
+
+              <div className="flex items-center justify-between gap-4 p-4 bg-[var(--color-surface-muted)] rounded-xl">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <Phone className={`w-5 h-5 shrink-0 ${theme.text}`} />
+                  <div className="min-w-0">
+                    <p className="font-medium text-[var(--color-foreground)]">
+                      {t('adminSettings.enablePhoneAuth')}
+                    </p>
+                    <p className="text-sm text-[var(--color-muted-foreground)]">
+                      {t('adminSettings.enablePhoneAuthDesc')}
+                    </p>
+                  </div>
+                </div>
+                <ToggleSwitch
+                  checked={settings.featureToggles.enablePhoneAuth ?? true}
+                  onChange={(enablePhoneAuth) =>
+                    setSettings({
+                      ...settings,
+                      featureToggles: { ...settings.featureToggles, enablePhoneAuth },
+                    })
+                  }
+                  label={t('adminSettings.enablePhoneAuth')}
                 />
               </div>
             </>

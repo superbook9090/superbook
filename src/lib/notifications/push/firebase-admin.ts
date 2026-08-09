@@ -34,3 +34,9 @@ export function getAdminMessaging(): admin.messaging.Messaging | null {
   initializeFirebaseAdmin();
   return admin.apps.length > 0 ? admin.messaging() : null;
 }
+
+/** Lazily initialize Firebase Admin only when auth is actually used. */
+export function getAdminAuth(): admin.auth.Auth | null {
+  initializeFirebaseAdmin();
+  return admin.apps.length > 0 ? admin.auth() : null;
+}

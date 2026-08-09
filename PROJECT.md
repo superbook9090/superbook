@@ -31,6 +31,16 @@ Quiz-Do is a modern Learning Management System (LMS) built with Next.js 15, feat
 - **teacher**: Content creation (courses, quizzes, blogs), student analytics
 - **student**: Course enrollment, quiz taking, progress tracking
 
+### Phone Authentication (Firebase OTP)
+
+The platform supports Phone Authentication using Firebase Auth Client SDK and Firebase Admin SDK:
+- **Registration & Login**: Users can log in or register via their phone numbers. OTP code verification is processed inline using Firebase's invisible reCAPTCHA.
+- **NextAuth Integration**: NextAuth's `CredentialsProvider` accepts the verified Firebase ID Token, validates it server-side using the Firebase Admin SDK, and retrieves or registers the matching user in MongoDB.
+- **Mock Email Generation**: For phone-only registrations, a mock email address (`phone-[clean_number]@phone.quizdo.com`) is generated to satisfy database schema and application requirements.
+- **Linking Phone/Email/Password**: 
+  - Phone-registered users can add/link a real email address and set up a password from their profile dashboard page inline.
+  - Pre-existing accounts (registered via email or Google OAuth) can securely link a verified phone number to their account from their Profile page.
+
 ### Access Control
 
 All authorization checks are enforced at **API level** (backend), not frontend.
@@ -411,6 +421,24 @@ t('common.english') // "English" or "अंग्रेज़ी"
 ```
 
 ## 12. Recent Updates
+
+### Reusable Responsive Form Components & Global Integration (August 2026)
+
+- **Reusable Form Controls (`TextField` & `Dropdown`)**:
+  - Implemented `TextField` ([TextField.tsx](file:///Users/shashankgupta/Documents/Projects/Quizdo/super-book/src/components/ui/TextField.tsx)), a unified component for inputs and textareas supporting error states, helper texts, start/end icons, and custom password visibility toggling.
+  - Implemented `Dropdown` ([Dropdown.tsx](file:///Users/shashankgupta/Documents/Projects/Quizdo/super-book/src/components/ui/Dropdown.tsx)), a dual-mode responsive dropdown that renders a native select on mobile (`sm:hidden`) to leverage system-optimized pickers and a custom listbox animated with Framer Motion on desktop (`hidden sm:block`).
+  - Added support for rich label tags (like Lucide icons) inside input and dropdown headers using standard `aria-labelledby` linking.
+  - Resolved mobile viewport font-zoom behavior (iOS Safari zooms on focused inputs with font-size < 16px) by using `text-base` (`16px`) on mobile and `sm:text-sm` (`14px`) on desktop.
+  - Maintained accessibility standards with WCAG-compliant touch targets (`min-h-[44px]`).
+  - Resolved CSS precedence issues where global `.form-field` padding overrode Tailwind's utility class padding by utilizing inline style bindings on elements containing icons.
+
+- **Global Integration across Dashboards & Public Pages**:
+  - **Auth Forms**: Refactored `LoginForm`, `RegisterForm`, `ForgotPasswordForm`, `ResetPasswordForm`, and `ChangePasswordForm` to use `TextField`, removing redundant state variables (`showPassword` etc.) and imports.
+  - **Course Forms**: Refactored `CreateCourseForm` (details and private course code fields) to use `TextField`, and language options to use `Dropdown`. Refactored `JoinCourseByCode` input to use `TextField`.
+  - **Blog Editor**: Refactored details, topic, language, visibility, meta title, and meta description fields in `BlogEditorForm` to use `TextField` and `Dropdown`.
+  - **Quiz Forms**: Refactored `CreateQuizForm` (details and time limits to `TextField`, placement, course, chapter, and lesson options to `Dropdown`) and student course filter select to `Dropdown`.
+  - **Admin Panel Forms**: Refactored teacher limits, category, and organization select/input forms across user lists, settings, and notifications broadcast panels.
+  - **Contact Page**: Refactored `ContactPageClient` name, email, subject, and message fields to use `TextField`.
 
 ### Default Public Course Permissions & Admin Course Deletion Emails (August 2026)
 

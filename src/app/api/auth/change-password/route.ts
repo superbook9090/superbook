@@ -4,7 +4,7 @@ import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import User from '@/models/User';
 import bcrypt from 'bcryptjs';
-import { changePasswordSchema } from '@/lib/validation';
+import { changePasswordSchema, setPasswordSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { changePasswordLimiter, getRequestIp, rateLimitExceededMessage } from '@/lib/rateLimiter';
 
@@ -30,15 +30,6 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const validation = changePasswordSchema.safeParse(body);
-    if (!validation.success) {
-      return NextResponse.json(
-        { message: 'Invalid input', errors: validation.error.issues },
-        { status: 400 }
-      );
-    }
-
-    const { currentPassword, newPassword } = validation.data;
 
     await dbConnect();
     const user = await User.findById(session.user.id).select('+password provider isSuspended');
@@ -47,25 +38,45 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    if (!user.password) {
-      return NextResponse.json(
-        {
-          message:
-            'No password is set for this account. Use Forgot Password on the login page to set one via email.',
-        },
-        { status: 400 }
-      );
+    const hasPassword = Boolean(user.password);
+
+    if (!hasPassword) {
+      // Set Password Flow (for accounts with no password)
+      const validation = setPasswordSchema.safeParse(body);
+      if (!validation.success) {
+        return NextResponse.json(
+          { message: 'Invalid input', errors: validation.error.issues },
+          { status: 400 }
+        );
+      }
+
+      const { password } = validation.data;
+      const hashedPassword = await bcrypt.hash(password, 12);
+      await User.updateOne({ _id: user._id }, { $set: { password: hashedPassword } });
+
+      return NextResponse.json({ message: 'Password set successfully.' });
+    } else {
+      // Change Password Flow (for accounts with existing password)
+      const validation = changePasswordSchema.safeParse(body);
+      if (!validation.success) {
+        return NextResponse.json(
+          { message: 'Invalid input', errors: validation.error.issues },
+          { status: 400 }
+        );
+      }
+
+      const { currentPassword, newPassword } = validation.data;
+
+      const isValid = await user.comparePassword(currentPassword);
+      if (!isValid) {
+        return NextResponse.json({ message: 'Current password is incorrect' }, { status: 400 });
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 12);
+      await User.updateOne({ _id: user._id }, { $set: { password: hashedPassword } });
+
+      return NextResponse.json({ message: 'Password updated successfully.' });
     }
-
-    const isValid = await user.comparePassword(currentPassword);
-    if (!isValid) {
-      return NextResponse.json({ message: 'Current password is incorrect' }, { status: 400 });
-    }
-
-    const hashedPassword = await bcrypt.hash(newPassword, 12);
-    await User.updateOne({ _id: user._id }, { $set: { password: hashedPassword } });
-
-    return NextResponse.json({ message: 'Password updated successfully.' });
   } catch (error) {
     logApiError(error as Error, 'POST', '/api/auth/change-password', logContext);
     return NextResponse.json({ message: 'Something went wrong. Please try again.' }, { status: 500 });

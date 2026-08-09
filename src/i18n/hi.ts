@@ -852,6 +852,18 @@ export const hi = {
     nameUpdateSuccess: 'नाम सफलतापूर्वक अपडेट किया गया।',
     nameUpdateError: 'नाम अपडेट करने में विफल।',
     nameRequired: 'नाम आवश्यक है।',
+    phone: 'फ़ोन नंबर',
+    addPhone: 'फ़ोन नंबर लिंक करें',
+    phoneLinkedSuccess: 'फ़ोन नंबर सफलतापूर्वक लिंक हो गया।',
+    phoneAlreadyExists: 'फ़ोन नंबर पहले से ही किसी अन्य खाते से जुड़ा हुआ है।',
+    usernameModalTitle: 'उपयोगकर्ता नाम सेट करें',
+    usernameModalDesc: 'कृपया अपने खाते के लिए एक प्रदर्शन नाम चुनें।',
+    emailNotLinked: 'कोई ईमेल पता लिंक नहीं है',
+    addEmail: 'ईमेल पता लिंक करें',
+    enterEmail: 'ईमेल पता दर्ज करें',
+    emailRequired: 'ईमेल आवश्यक है।',
+    emailUpdatedSuccess: 'ईमेल पता सफलतापूर्वक जोड़ दिया गया है।',
+    usernameLabel: 'प्रदर्शन नाम',
   },
 
   // Progress
@@ -1451,6 +1463,8 @@ export const hi = {
     enableEnrollmentManagement: 'नामांकन प्रबंधन सक्षम करें',
     enableEnrollmentManagementDesc:
       'शिक्षकों और एडमिन को नामांकित छात्रों को देखने और किसी छात्र का नामांकन पाठ्यक्रम से हटाने की अनुमति दें (केवल सुपरएडमिन)',
+    enablePhoneAuth: 'मोबाइल नंबर लॉगिन/रजिस्टर सक्षम करें',
+    enablePhoneAuthDesc: 'उपयोगकर्ताओं को फायरबेस फोन ओटीपी सत्यापन के माध्यम से साइन इन और पंजीकरण करने की अनुमति दें',
     platformConfig: 'प्लेटफ़ॉर्म कॉन्फ़िगरेशन',
     maintenanceMode: 'रखरखाव मोड',
     maintenanceModeDesc: 'रखरखाव के लिए साइट अक्षम करें',
@@ -1567,6 +1581,14 @@ export const hi = {
     genericError: 'एक त्रुटि हुई। कृपया पुनः प्रयास करें।',
     signIn: 'साइन इन करें',
     resetSuccess: 'पासवर्ड अपडेट हो गया। कृपया नए पासवर्ड से साइन इन करें।',
+    continueWithPhone: 'फ़ोन के साथ जारी रखें',
+    enterPhone: 'फ़ोन नंबर दर्ज करें',
+    enterOtp: 'सत्यापन कोड दर्ज करें',
+    sendOtp: 'कोड भेजें',
+    verifyOtp: 'कोड सत्यापित करें',
+    otpSent: 'सत्यापन कोड {phone} पर भेजा गया है',
+    invalidOtp: 'अमान्य सत्यापन कोड। कृपया पुनः प्रयास करें।',
+    invalidPhone: 'अमान्य फ़ोन नंबर प्रारूप।',
   },
 
   password: {
@@ -1591,6 +1613,9 @@ export const hi = {
     noPasswordSet: 'इस खाते पर पासवर्ड सेट नहीं है। ईमेल से सेट करने के लिए लॉगिन पर Forgot Password का उपयोग करें।',
     genericError: 'कुछ गलत हो गया। कृपया पुनः प्रयास करें।',
     rateLimited: 'बहुत अधिक प्रयास। कृपया प्रतीक्षा करें और बाद में पुनः प्रयास करें।',
+    createPassword: 'पासवर्ड बनाएं',
+    setPasswordTitle: 'पासवर्ड बनाएं',
+    setPasswordDesc: 'ईमेल/क्रेडेंशियल्स के साथ साइन इन करने के लिए अपने खाते हेतु पासवर्ड सेट करें।',
   },
 
   // Register

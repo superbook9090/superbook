@@ -852,6 +852,18 @@ export const en = {
     nameUpdateSuccess: 'Name updated successfully.',
     nameUpdateError: 'Failed to update name.',
     nameRequired: 'Name is required.',
+    phone: 'Phone Number',
+    addPhone: 'Link Phone Number',
+    phoneLinkedSuccess: 'Phone number linked successfully.',
+    phoneAlreadyExists: 'Phone number is already associated with another account.',
+    usernameModalTitle: 'Set Username',
+    usernameModalDesc: 'Please choose a display name for your account.',
+    emailNotLinked: 'No email address linked',
+    addEmail: 'Link Email Address',
+    enterEmail: 'Enter Email Address',
+    emailRequired: 'Email is required.',
+    emailUpdatedSuccess: 'Email address added successfully.',
+    usernameLabel: 'Display Name',
   },
 
   // Progress
@@ -1451,6 +1463,8 @@ export const en = {
     enableEnrollmentManagement: 'Enable Enrollment Management',
     enableEnrollmentManagementDesc:
       'Allow teachers and admins to view enrolled students and remove a student\'s enrollment from a course (superadmin only)',
+    enablePhoneAuth: 'Enable Mobile Number Login/Register',
+    enablePhoneAuthDesc: 'Allow users to sign in and register using Firebase phone OTP verification',
     platformConfig: 'Platform Configuration',
     maintenanceMode: 'Maintenance Mode',
     maintenanceModeDesc: 'Disable site for maintenance',
@@ -1567,6 +1581,14 @@ export const en = {
     genericError: 'An error occurred. Please try again.',
     signIn: 'Sign in',
     resetSuccess: 'Password updated. Please sign in with your new password.',
+    continueWithPhone: 'Continue with Phone',
+    enterPhone: 'Enter Phone Number',
+    enterOtp: 'Enter Verification Code',
+    sendOtp: 'Send Code',
+    verifyOtp: 'Verify Code',
+    otpSent: 'Verification code sent to {phone}',
+    invalidOtp: 'Invalid verification code. Please try again.',
+    invalidPhone: 'Invalid phone number format.',
   },
 
   password: {
@@ -1591,6 +1613,9 @@ export const en = {
     noPasswordSet: 'No password is set on this account. Use Forgot Password on the login page to set one via email.',
     genericError: 'Something went wrong. Please try again.',
     rateLimited: 'Too many attempts. Please wait and try again later.',
+    createPassword: 'Create password',
+    setPasswordTitle: 'Create password',
+    setPasswordDesc: 'Set a password for your account to sign in with email/credentials.',
   },
 
   // Register

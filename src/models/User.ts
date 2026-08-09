@@ -5,13 +5,14 @@ export interface IUser extends Document {
   _id: mongoose.Types.ObjectId;
   name: string;
   email: string;
+  phone?: string;
   password?: string;
   role: 'student' | 'teacher' | 'admin' | 'superadmin';
   avatar?: string;
   isVerified: boolean;
   isSuspended: boolean;
   suspendedReason?: string;
-  provider?: 'credentials' | 'google';
+  provider?: 'credentials' | 'google' | 'phone';
   organizationId?: mongoose.Types.ObjectId | null;
   limits?: {
     courses: number;
@@ -27,13 +28,14 @@ const userSchema = new Schema<IUser>(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
+    phone: { type: String, unique: true, sparse: true },
     password: { type: String, required: false },
     role: { type: String, enum: ['student', 'teacher', 'admin', 'superadmin'], default: 'student' },
     avatar: String,
     isVerified: { type: Boolean, default: false },
     isSuspended: { type: Boolean, default: false },
     suspendedReason: String,
-    provider: { type: String, enum: ['credentials', 'google'], default: 'credentials' },
+    provider: { type: String, enum: ['credentials', 'google', 'phone'], default: 'credentials' },
     organizationId: { type: Schema.Types.ObjectId, ref: 'Organization', default: null },
     limits: {
       courses: { type: Number, default: undefined },

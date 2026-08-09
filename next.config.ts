@@ -22,6 +22,7 @@ const nextConfig = {
       bodySizeLimit: '2000mb',
     },
   },
+  outputFileTracingRoot: process.cwd(),
   // Enable compression
   compress: true,
   async redirects() {

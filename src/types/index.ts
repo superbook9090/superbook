@@ -340,6 +340,7 @@ export interface SessionUser {
   email?: string;
   image?: string;
   role?: string;
+  phone?: string;
   organizationId?: string;
   canUploadVideos?: boolean;
 }

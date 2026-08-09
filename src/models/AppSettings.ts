@@ -15,6 +15,7 @@ export interface IAppSettings extends Document {
     enableQuizSolutionAnalysis: boolean;
     restrictPublicCourseCreation?: boolean;
     enableEnrollmentManagement?: boolean;
+    enablePhoneAuth?: boolean;
   };
   platformConfig: {
     maintenanceMode: boolean;
@@ -73,6 +74,10 @@ const appSettingsSchema = new Schema<IAppSettings>(
         default: false,
       },
       enableEnrollmentManagement: {
+        type: Boolean,
+        default: true,
+      },
+      enablePhoneAuth: {
         type: Boolean,
         default: true,
       },

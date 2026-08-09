@@ -185,6 +185,15 @@ export async function PATCH(req: NextRequest) {
           { status: 400 }
         );
       }
+      if (
+        featureToggles.enablePhoneAuth !== undefined &&
+        typeof featureToggles.enablePhoneAuth !== 'boolean'
+      ) {
+        return NextResponse.json(
+          { message: 'enablePhoneAuth must be a boolean' },
+          { status: 400 }
+        );
+      }
 
       const existingToggles = settings.featureToggles ?? {};
       const mergedToggles = {
@@ -194,6 +203,7 @@ export async function PATCH(req: NextRequest) {
         enableCourses: featureToggles.enableCourses,
         enableAnalytics: featureToggles.enableAnalytics,
         enableClarity: featureToggles.enableClarity ?? existingToggles.enableClarity ?? true,
+        enablePhoneAuth: featureToggles.enablePhoneAuth ?? existingToggles.enablePhoneAuth ?? true,
         enableQuizSolutionAnalysis:
           isSuperAdmin(session.user.role) && featureToggles.enableQuizSolutionAnalysis !== undefined
             ? featureToggles.enableQuizSolutionAnalysis
