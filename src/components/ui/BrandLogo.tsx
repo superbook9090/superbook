@@ -42,7 +42,7 @@ export default function BrandLogo({
   const gradId = useId();
   return (
     <span className={`inline-flex items-center gap-2.5 ${className}`}>
-      <svg viewBox="0 0 48 48" className={`${markSize[size]} shrink-0`} role="img" aria-label="Quiz-Do">
+      <svg viewBox="0 0 48 48" className={`${markSize[size]} shrink-0`} role="img" aria-label="Quiz Do">
         {mono ? (
           <rect
             x="2.75"
@@ -79,7 +79,7 @@ export default function BrandLogo({
           className={`font-bold tracking-tight leading-none ${textSize[size]}`}
           style={{ fontFamily: 'var(--font-display)' }}
         >
-          Quiz-Do
+          Quiz Do
         </span>
       )}
     </span>

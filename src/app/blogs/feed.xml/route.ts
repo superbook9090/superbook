@@ -33,9 +33,9 @@ export async function GET() {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Quiz-Do Educational Blog</title>
+    <title>Quiz Do Educational Blog</title>
     <link>${siteUrl}/blogs</link>
-    <description>Study tips, exam preparation guides, and learning resources from Quiz-Do.</description>
+    <description>Study tips, exam preparation guides, and learning resources from Quiz Do.</description>
     <language>en-in</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
     <atom:link href="${siteUrl}/blogs/feed.xml" rel="self" type="application/rss+xml"/>

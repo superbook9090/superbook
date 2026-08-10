@@ -9,7 +9,7 @@ export const revalidate = 300;
 
 export const metadata: Metadata = createPageMetadata({
   title: 'Blogs',
-  description: 'Public Quiz-Do blogs for exam preparation, study strategies, subject explainers, and learning resources.',
+  description: 'Public Quiz Do blogs for exam preparation, study strategies, subject explainers, and learning resources.',
   path: '/blogs',
   keywords: ['education blog', 'exam preparation blog', 'study tips', 'quiz-do blogs'],
 });

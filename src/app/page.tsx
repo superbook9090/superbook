@@ -13,9 +13,10 @@ export const dynamic = 'force-static';
 export const metadata: Metadata = createPageMetadata({
   title: 'Free Quiz Maker Online | Create Quizzes, MCQs & Mock Tests',
   description:
-    'Quiz-Do is a free online quiz maker for teachers and students. Create quizzes, MCQ tests, mock exams, and test series in minutes. No credit card — start free today.',
+    'Quiz Do is a free online quiz maker for teachers and students. Create quizzes, MCQ tests, mock exams, and test series in minutes. No credit card — start free today.',
   path: '/',
   keywords: [
+    'quiz',
     'free quiz maker',
     'quiz maker',
     'online quiz maker',
@@ -26,6 +27,19 @@ export const metadata: Metadata = createPageMetadata({
     'MCQ quiz maker',
     'mock test maker',
     'quiz platform India',
+    'online testing platform',
+    'exam creation software',
+    'test maker',
+    'online assessment tool',
+    'free exam builder',
+    'create mock tests online',
+    'MCQ generator',
+    'test series platform',
+    'teacher assessment tools',
+    'student evaluation software',
+    'custom quiz builder',
+    'online exam system',
+    'digital assessment platform',
   ],
 });
 

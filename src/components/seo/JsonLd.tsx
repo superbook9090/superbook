@@ -20,7 +20,7 @@ export default function JsonLd({ includeWebSite = false }: JsonLdProps) {
       'Quiz Maker',
       'Free Quiz Maker',
       'Online Quiz Maker',
-      'Quiz-Do Free Quiz Maker',
+      'Quiz Do Free Quiz Maker',
     ],
     url: siteUrl,
     logo: `${siteUrl}/logo.svg`,
@@ -53,7 +53,7 @@ export default function JsonLd({ includeWebSite = false }: JsonLdProps) {
   const software = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
-    name: 'Quiz-Do Free Quiz Maker',
+    name: 'Quiz Do Free Quiz Maker',
     alternateName: ['Quiz Maker', 'Free Quiz Maker', 'Online Quiz Creator'],
     applicationCategory: 'EducationalApplication',
     operatingSystem: 'Web',

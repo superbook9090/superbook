@@ -6,7 +6,7 @@ import { createPageMetadata } from '@/lib/seo/metadata';
 export const metadata: Metadata = createPageMetadata({
   title: 'Contact Us — Education Platform Support',
   description:
-    'Contact the Quiz-Do team for LMS support, online course questions, partnership inquiries, and help with quizzes, student accounts, and teacher tools.',
+    'Contact the Quiz Do team for LMS support, online course questions, partnership inquiries, and help with quizzes, student accounts, and teacher tools.',
   path: ROUTES.contact,
   keywords: ['LMS support', 'education platform contact', 'online learning help', 'teacher support'],
 });

@@ -6,7 +6,7 @@ import { createPageMetadata } from '@/lib/seo/metadata';
 export const metadata: Metadata = createPageMetadata({
   title: 'Privacy Policy — Student & Learning Data',
   description:
-    'Read how Quiz-Do protects learner privacy on our education platform: account data, course progress, quiz results, and security practices for schools and students.',
+    'Read how Quiz Do protects learner privacy on our education platform: account data, course progress, quiz results, and security practices for schools and students.',
   path: ROUTES.privacy,
   keywords: ['education privacy policy', 'student data protection', 'LMS security', 'FERPA-ready practices'],
 });

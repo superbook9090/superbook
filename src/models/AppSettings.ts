@@ -85,7 +85,7 @@ const appSettingsSchema = new Schema<IAppSettings>(
     platformConfig: {
       siteName: {
         type: String,
-        default: 'Quiz-Do',
+        default: 'Quiz Do',
       },
       siteDescription: {
         type: String,

@@ -1,10 +1,11 @@
 /** Site-wide SEO configuration and education-domain keywords. */
 
-export const SITE_NAME = 'Quiz-Do';
-export const SITE_NAME_FULL = 'Quiz-Do — Free Online Quizzes & Learning Management System';
+export const SITE_NAME = 'Quiz Do';
+export const SITE_NAME_FULL = 'Quiz Do — Free Online Quizzes & Learning Management System';
 
 /** Primary education / EdTech keywords for meta tags and structured data. */
 export const EDUCATION_KEYWORDS = [
+  'quiz',
   'free quiz maker',
   'quiz maker',
   'quiz maker free',
@@ -44,13 +45,26 @@ export const EDUCATION_KEYWORDS = [
   'interactive learning',
   'education platform India',
   'Hindi English LMS',
+  'online testing platform',
+  'exam creation software',
+  'test maker',
+  'online assessment tool',
+  'free exam builder',
+  'create mock tests online',
+  'MCQ generator',
+  'test series platform',
+  'teacher assessment tools',
+  'student evaluation software',
+  'custom quiz builder',
+  'online exam system',
+  'digital assessment platform',
 ] as const;
 
 export const DEFAULT_DESCRIPTION =
-  'Quiz-Do is a free quiz maker online. Create quizzes, MCQ tests, mock exams, and courses for free. The online quiz maker trusted by teachers, students, and exam prep coaches in India.';
+  'Quiz Do is a free quiz maker online. Create quizzes, MCQ tests, mock exams, and courses for free. The online quiz maker trusted by teachers, students, and exam prep coaches in India.';
 
 export const DEFAULT_TITLE =
-  'Free Quiz Maker Online | Create Quizzes & Mock Tests — Quiz-Do';
+  'Free Quiz Maker Online | Create Quizzes & Mock Tests — Quiz Do';
 
 /** Resolve canonical site URL for metadata, sitemap, and JSON-LD. */
 export function getSiteUrl(): string {

@@ -38,7 +38,7 @@ export async function generateMetadata({
 
   return createPageMetadata({
     title: course.title,
-    description: course.description.slice(0, 160) || `Learn ${course.title} on Quiz-Do`,
+    description: course.description.slice(0, 160) || `Learn ${course.title} on Quiz Do`,
     path: buildPublicCoursePath(course.slug),
     keywords: [course.category, course.locale, 'online course', 'free course'],
   });
@@ -63,7 +63,7 @@ export default async function PublicCourseDetailPage({
     name: course.title,
     description: course.description,
     url: canonical,
-    provider: { '@type': 'Organization', name: 'Quiz-Do', url: getSiteUrl() },
+    provider: { '@type': 'Organization', name: 'Quiz Do', url: getSiteUrl() },
     offers: {
       '@type': 'Offer',
       price: course.price,

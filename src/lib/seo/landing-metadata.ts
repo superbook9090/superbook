@@ -8,7 +8,7 @@ export function buildSeoLandingMetadata(tool: SeoToolData, canonicalPath: string
     title: tool.title,
     description: tool.description,
     path: canonicalPath,
-    keywords: [tool.h1, tool.h2, 'Quiz-Do', 'education', 'online learning'],
+    keywords: [tool.h1, tool.h2, 'Quiz Do', 'education', 'online learning'],
   });
 
   return {
@@ -21,7 +21,7 @@ export function buildSeoLandingMetadata(tool: SeoToolData, canonicalPath: string
       title: tool.title,
       description: tool.description,
       url: `${getSiteUrl()}${canonicalPath}`,
-      siteName: 'Quiz-Do',
+      siteName: 'Quiz Do',
       images: ['/logo.svg'],
     },
     twitter: {

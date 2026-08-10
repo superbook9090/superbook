@@ -28,7 +28,7 @@ export const getSettingsWithDefaults = cache(async (): Promise<IAppSettings> => 
       enableEnrollmentManagement: true,
     },
     platformConfig: {
-      siteName: 'Quiz-Do',
+      siteName: 'Quiz Do',
       siteDescription: 'A comprehensive learning platform',
       maintenanceMode: false,
       allowRegistration: true,

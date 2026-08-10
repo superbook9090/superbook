@@ -38,7 +38,7 @@ export async function generateMetadata({
 
   return createPageMetadata({
     title: `${topic} — Educational Articles`,
-    description: `Read ${topic} articles on Quiz-Do. Study tips, exam preparation guides, and learning resources for students and teachers.`,
+    description: `Read ${topic} articles on Quiz Do. Study tips, exam preparation guides, and learning resources for students and teachers.`,
     path: `/blogs/category/${topicSlug}`,
     keywords: [topic, 'education blog', 'exam preparation', 'study tips'],
   });

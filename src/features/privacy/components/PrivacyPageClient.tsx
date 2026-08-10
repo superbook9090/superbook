@@ -77,7 +77,7 @@ export default function PrivacyPageClient() {
                   </h2>
                 </div>
                 <p className="text-[var(--color-muted-foreground)] leading-relaxed pl-2 sm:pl-16">
-                  {t('privacy.dataUseText') || 'We use the information we collect to provide, maintain, and improve our services, to develop new features, and to protect Quiz-Do and our users.'}
+                  {t('privacy.dataUseText') || 'We use the information we collect to provide, maintain, and improve our services, to develop new features, and to protect Quiz Do and our users.'}
                 </p>
               </section>
 

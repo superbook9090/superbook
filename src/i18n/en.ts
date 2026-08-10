@@ -3,7 +3,7 @@
 export const en = {
   metadata: {
     siteDescription:
-      'Quiz-Do is a free online quiz maker. Create MCQ quizzes, mock tests, test series, and courses for teachers and students in India.',
+      'Quiz Do is a free online quiz maker. Create MCQ quizzes, mock tests, test series, and courses for teachers and students in India.',
   },
 
   // Common
@@ -74,7 +74,7 @@ export const en = {
     dataCollection: 'Information We Collect',
     dataCollectionText: 'We collect information you provide directly to us when you create an account, update your profile, use the interactive features of our services, participate in quizzes or courses, request customer support, or otherwise communicate with us.',
     dataUse: 'How We Use Your Information',
-    dataUseText: 'We use the information we collect to provide, maintain, and improve our services, to develop new features, and to protect Quiz-Do and our users.',
+    dataUseText: 'We use the information we collect to provide, maintain, and improve our services, to develop new features, and to protect Quiz Do and our users.',
     dataSharing: 'Information Sharing',
     dataSharingText: 'We do not share your personal information with third parties except as described in this privacy policy or as required by law.',
     security: 'Security',
@@ -111,7 +111,7 @@ export const en = {
     title: 'Free Quiz Maker — Create Online Quizzes & Mock Tests',
     subtitle: 'The free online quiz maker for teachers, students, and coaching institutes',
     description:
-      'Create quizzes free with Quiz-Do. Build MCQ tests, timed mock exams, test series, and courses — then share with one link. Auto-grading, analytics, and Hindi & English support included.',
+      'Create quizzes free with Quiz Do. Build MCQ tests, timed mock exams, test series, and courses — then share with one link. Auto-grading, analytics, and Hindi & English support included.',
     badge: 'Free Quiz Maker · Online Tests · Courses & Analytics',
     login: 'Login',
     register: 'Create free account',
@@ -124,7 +124,7 @@ export const en = {
       languagesHint: 'Switch anytime',
     },
     howItWorks: {
-      title: 'How Quiz-Do works',
+      title: 'How Quiz Do works',
       subtitle: 'From sign-up to results in three straightforward steps',
       stepLabel: 'Step',
       step1Title: 'Create your account',
@@ -140,17 +140,17 @@ export const en = {
       button: 'Create free account',
     },
     howItWorksPage: {
-      title: 'How Quiz-Do Works',
+      title: 'How Quiz Do Works',
       subtitle: 'Understanding the complete platform workflow for all user types',
       deepDive: 'Deep dive into features',
       platformOverview: {
         title: '1. Platform Overview',
-        intro: 'Quiz-Do is a comprehensive Learning Management System (LMS) designed for schools, coaches, and self-paced learners. It bridges the gap between structured course delivery and interactive assessments.',
+        intro: 'Quiz Do is a comprehensive Learning Management System (LMS) designed for schools, coaches, and self-paced learners. It bridges the gap between structured course delivery and interactive assessments.',
         benefits: 'Students get a clear learning path with instant feedback on quizzes. Teachers get powerful tools to build curriculum, manage enrollments, and track analytics. Organizations can manage multiple teachers and students with data isolation.',
       },
       studentJourney: {
         title: '2. Student Journey',
-        desc: 'The complete lifecycle for a learner on Quiz-Do.',
+        desc: 'The complete lifecycle for a learner on Quiz Do.',
         steps: {
           register: 'Register/Login: Create a free student account to access the platform.',
           joinOrg: 'Join Organization (Optional): Enter an organization code if you belong to a specific school or coaching center.',
@@ -215,11 +215,11 @@ export const en = {
       },
       securityPrivacy: {
         title: '10. Security & Privacy',
-        desc: 'Quiz-Do ensures secure authentication, role-based access control, strict organization isolation, and private course protection to keep your data safe.',
+        desc: 'Quiz Do ensures secure authentication, role-based access control, strict organization isolation, and private course protection to keep your data safe.',
       }
     },
     features: {
-      title: 'What you can do on Quiz-Do',
+      title: 'What you can do on Quiz Do',
       subtitle: 'Real tools from our platform — not generic placeholders',
       structuredCourses: 'Structured courses',
       structuredCoursesDesc:
@@ -256,7 +256,7 @@ export const en = {
     about: {
       title: 'Built for teaching and learning online',
       description:
-        'Quiz-Do brings together course delivery, assessments, and reporting so you do not need separate tools for content, tests, and progress. It is designed for Indian learners and educators with English and Hindi support throughout the app.',
+        'Quiz Do brings together course delivery, assessments, and reporting so you do not need separate tools for content, tests, and progress. It is designed for Indian learners and educators with English and Hindi support throughout the app.',
       roleBasedAccess: 'Secure role-based access',
       roleBasedAccessDesc: 'Students, teachers, and admins each get their own dashboard and permissions.',
       realtimeAnalytics: 'Teacher & student insights',
@@ -272,7 +272,7 @@ export const en = {
     },
     footer: {
       tagline:
-        'Quiz-Do — online courses, quizzes, and progress tracking for students, teachers, and administrators.',
+        'Quiz Do — online courses, quizzes, and progress tracking for students, teachers, and administrators.',
       product: 'Explore',
       resources: 'Resources',
       getStarted: 'Account',
@@ -297,7 +297,7 @@ export const en = {
     seoResources: {
       title: 'Free Tools for Educators',
       subtitle:
-        'Create quizzes, courses, test series, and practice exams — all free on Quiz-Do. Built for teachers, coaching institutes, and competitive exam aspirants.',
+        'Create quizzes, courses, test series, and practice exams — all free on Quiz Do. Built for teachers, coaching institutes, and competitive exam aspirants.',
       allEducationTools: 'All Education Tools',
       educationalBlogs: 'Educational Blogs',
       freeOnlineCourses: 'Free Online Courses',
@@ -309,7 +309,7 @@ export const en = {
     quizMakerSeo: {
       title: 'Free Quiz Maker for Teachers, Students & Coaching Institutes',
       intro:
-        'Quiz-Do is a free online quiz maker and learning platform. Create interactive quizzes, MCQ tests, mock exams, and full test series — then share them with one link. Whether you need a free quiz maker for classroom assessments, competitive exam prep (UPTET, CTET, SSC), or self-study practice, Quiz-Do gives you everything in one place.',
+        'Quiz Do is a free online quiz maker and learning platform. Create interactive quizzes, MCQ tests, mock exams, and full test series — then share them with one link. Whether you need a free quiz maker for classroom assessments, competitive exam prep (UPTET, CTET, SSC), or self-study practice, Quiz Do gives you everything in one place.',
       cards: {
         onlineQuizMaker: {
           title: 'Online Quiz Maker',
@@ -341,20 +341,20 @@ export const en = {
         q1: {
           question: 'What is the best free quiz maker online?',
           answer:
-            'Quiz-Do is a free online quiz maker that lets teachers and students create MCQ quizzes, timed mock tests, and practice exams. Sign up free, build your quiz in minutes, and share it instantly — no credit card required.',
+            'Quiz Do is a free online quiz maker that lets teachers and students create MCQ quizzes, timed mock tests, and practice exams. Sign up free, build your quiz in minutes, and share it instantly — no credit card required.',
         },
         q2: {
           question: 'How do I create a quiz for free?',
           answer:
-            'Register on Quiz-Do, open the quiz builder, add your questions and answers, set a time limit if needed, and publish. Your quiz is ready to share via link or course enrollment.',
+            'Register on Quiz Do, open the quiz builder, add your questions and answers, set a time limit if needed, and publish. Your quiz is ready to share via link or course enrollment.',
         },
         q3: {
-          question: 'Can I use Quiz-Do as an online quiz maker for teachers?',
+          question: 'Can I use Quiz Do as an online quiz maker for teachers?',
           answer:
-            'Yes. Quiz-Do is built for teachers — create classroom quizzes, homework assignments, UPTET/CTET practice tests, and full test series with automatic grading and student analytics.',
+            'Yes. Quiz Do is built for teachers — create classroom quizzes, homework assignments, UPTET/CTET practice tests, and full test series with automatic grading and student analytics.',
         },
         q4: {
-          question: 'Is Quiz-Do free for students to take quizzes?',
+          question: 'Is Quiz Do free for students to take quizzes?',
           answer:
             'Yes. Students can register free, enroll in public courses, take practice quizzes, and track their scores and progress on a personal dashboard.',
         },
@@ -373,17 +373,17 @@ export const en = {
 
   seoTools: {
     common: {
-      badge: 'Quiz-Do Education Tools',
+      badge: 'Quiz Do Education Tools',
       whyChoose: 'Why Choose Our Tool',
       faqTitle: 'Frequently Asked Questions',
       ctaTitle: 'Ready to get started?',
-      ctaSubtitle: 'Join thousands of educators and students using Quiz-Do.',
+      ctaSubtitle: 'Join thousands of educators and students using Quiz Do.',
       exploreMore: 'Explore More Tools',
     },
     index: {
       title: 'Free Education Tools',
       subtitle:
-        'Quiz-Do offers a suite of free tools for teachers, students, and coaching institutes — from quiz creation to full course and test series building.',
+        'Quiz Do offers a suite of free tools for teachers, students, and coaching institutes — from quiz creation to full course and test series building.',
       popularTools: 'Popular Tools',
       allTools: 'All Tools',
       educationalBlogs: 'Educational Blogs →',
@@ -1593,7 +1593,7 @@ export const en = {
     title: 'Contact Us',
     subtitle: "Have questions or feedback? We're here to help! Reach out to us and we'll get back to you shortly.",
     heroTitle: 'Get in Touch',
-    heroSubtitle: 'Contact the Quiz-Do Team',
+    heroSubtitle: 'Contact the Quiz Do Team',
     responseTime: 'We generally respond to enquiries within 24 business hours.',
 
     // Form fields
@@ -1644,7 +1644,7 @@ export const en = {
       a1: 'Go to the Browse section in your Student Dashboard, select any course, and click "Enroll Now". It\'s completely free!',
       q2: 'How can I reset my password?',
       a2: 'You can update your profile information in the Profile settings tab, or use the password reset link on the login page.',
-      q3: 'Is Quiz-Do available in multiple languages?',
+      q3: 'Is Quiz Do available in multiple languages?',
       a3: 'Yes! We fully support both English and Hindi. You can switch languages at any time using the selector in the header.',
       q4: 'Can I create my own quizzes?',
       a4: 'If you are registered as a Teacher, you can create courses and quizzes. Students can take quizzes for the courses they are enrolled in.',

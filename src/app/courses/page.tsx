@@ -13,7 +13,7 @@ export const revalidate = 300;
 
 export const metadata: Metadata = createPageMetadata({
   title: 'Free Online Courses',
-  description: 'Browse free public courses on Quiz-Do. Structured lessons, chapters, quizzes, and progress tracking for students and competitive exam preparation.',
+  description: 'Browse free public courses on Quiz Do. Structured lessons, chapters, quizzes, and progress tracking for students and competitive exam preparation.',
   path: '/courses',
   keywords: ['free online courses', 'online learning', 'course catalog', 'exam preparation courses'],
 });
@@ -44,7 +44,7 @@ export default async function PublicCoursesPage() {
           <h1 className="text-4xl font-bold text-[var(--color-foreground)] mb-4">Free Online Courses</h1>
           <p className="text-lg text-[var(--color-muted-foreground)]">
             Explore public courses with structured lessons, embedded quizzes, and progress tracking.
-            Enroll free to start learning on Quiz-Do.
+            Enroll free to start learning on Quiz Do.
           </p>
         </header>
 
