@@ -8,6 +8,8 @@ import { useSettingsStore } from '@/store/useSettingsStore';
 import { getSafeCallbackUrl } from '@/lib/callbackUrl';
 import { roleThemes } from '@/lib/roleTheme';
 import { ROUTES } from '@/constants/routes';
+import { signIn } from 'next-auth/react';
+import { onWebViewMessage } from '@/lib/mobile/webviewBridge';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
@@ -18,7 +20,7 @@ import EmailRegisterForm from './EmailRegisterForm';
 import PhoneRegisterForm from './PhoneRegisterForm';
 
 function RegisterFormInner() {
-  const { status } = useSessionStore();
+  const { status, fetchSession } = useSessionStore();
   const allowTeacherRegistration = useSettingsStore(
     (s) => s.settings.platformConfig.allowTeacherRegistration ?? true
   );
@@ -30,6 +32,7 @@ function RegisterFormInner() {
   const theme = roleThemes.student;
   const [error, setError] = useState('');
   const [isPhoneFlow, setIsPhoneFlow] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Client-side guard for UX improvement
   useEffect(() => {
@@ -37,6 +40,41 @@ function RegisterFormInner() {
       router.replace(callbackUrl);
     }
   }, [status, router, callbackUrl]);
+
+  // Listen for Native Google Sign-In tokens
+  useEffect(() => {
+    const cleanup = onWebViewMessage(async (data) => {
+      if (data.action === 'GOOGLE_NATIVE_TOKEN' && data.token) {
+        setIsLoading(true);
+        setError('');
+        try {
+          const result = await signIn('credentials', {
+            redirect: false,
+            googleIdToken: data.token,
+          });
+
+          if (result?.error) {
+            setError(t('login.genericError'));
+            setIsLoading(false);
+            return;
+          }
+
+          await fetchSession(true);
+          await new Promise(resolve => setTimeout(resolve, 500));
+          router.push(callbackUrl);
+        } catch (error) {
+          setError(t('login.genericError'));
+          console.error('Native Google Register error:', error);
+          setIsLoading(false);
+        }
+      } else if (data.action === 'GOOGLE_NATIVE_TOKEN_ERROR' && data.error) {
+        setError(data.error);
+        setIsLoading(false);
+      }
+    });
+
+    return cleanup;
+  }, [router, fetchSession, t, callbackUrl]);
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
@@ -69,6 +107,12 @@ function RegisterFormInner() {
           >
             {/* Background Decorative Blob */}
             <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${theme.gradient} opacity-5 rounded-full blur-2xl -mr-16 -mt-16`} />
+
+            {isLoading && (
+              <div className="absolute inset-0 bg-[var(--card-solid)]/80 flex items-center justify-center z-50 rounded-2xl">
+                <Loader />
+              </div>
+            )}
 
             {/* Error Message */}
             {error && (

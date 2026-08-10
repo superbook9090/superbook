@@ -16,6 +16,7 @@ export type WebToNativeMessage =
 export type NativeToWebMessage =
   | { action: 'NATIVE_TOKEN_RECEIVED'; token: string }
   | { action: 'GOOGLE_NATIVE_TOKEN'; token: string }
+  | { action: 'GOOGLE_NATIVE_TOKEN_ERROR'; error: string }
   | { action: 'NATIVE_SHARE_RESULT'; success: boolean; dismissed?: boolean; error?: string }
   | {
       action: 'NATIVE_OPEN_LINK_RESULT';

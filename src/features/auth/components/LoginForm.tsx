@@ -8,6 +8,7 @@ import { useSessionStore } from '@/store/useSessionStore';
 import { getSafeCallbackUrl } from '@/lib/callbackUrl';
 import { roleThemes } from '@/lib/roleTheme';
 import { ROUTES } from '@/constants/routes';
+import { onWebViewMessage } from '@/lib/mobile/webviewBridge';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
@@ -41,14 +42,14 @@ function LoginFormInner() {
 
   // Listen for Native Google Sign-In tokens
   useEffect(() => {
-    const handleMessage = async (event: MessageEvent) => {
-      if (event.data && event.data.action === 'GOOGLE_NATIVE_TOKEN' && event.data.token) {
+    const cleanup = onWebViewMessage(async (data) => {
+      if (data.action === 'GOOGLE_NATIVE_TOKEN' && data.token) {
         setIsLoading(true);
         setError('');
         try {
           const result = await signIn('credentials', {
             redirect: false,
-            googleIdToken: event.data.token,
+            googleIdToken: data.token,
           });
 
           if (result?.error) {
@@ -65,11 +66,13 @@ function LoginFormInner() {
           console.error('Native Google Login error:', error);
           setIsLoading(false);
         }
+      } else if (data.action === 'GOOGLE_NATIVE_TOKEN_ERROR' && data.error) {
+        setError(data.error);
+        setIsLoading(false);
       }
-    };
+    });
 
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
+    return cleanup;
   }, [router, fetchSession, t, callbackUrl]);
 
   return (
