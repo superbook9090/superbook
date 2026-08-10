@@ -12,7 +12,7 @@ import { onWebViewMessage } from '@/lib/mobile/webviewBridge';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
-import Alert from '@/components/ui/Alert';
+import { useAlert } from '@/components/ui/AlertContainer';
 import { Loader } from '@/components/ui/Loader';
 import AuthBranding from './AuthBranding';
 import EmailLoginForm from './EmailLoginForm';
@@ -20,16 +20,13 @@ import PhoneLoginForm from './PhoneLoginForm';
 
 function LoginFormInner() {
   const searchParams = useSearchParams();
-  const resetSuccess = searchParams.get('reset') === 'success';
   const callbackUrl = getSafeCallbackUrl(searchParams.get('callbackUrl'));
   const { status, fetchSession } = useSessionStore();
   const router = useRouter();
   const { t } = useTranslation();
 
   const theme = roleThemes.student;
-  const [error, setError] = useState(
-    searchParams.get('error') === 'exists' ? t('login.phoneExists') : ''
-  );
+  const { addAlert } = useAlert();
   const [isLoading, setIsLoading] = useState(false);
   const [isPhoneFlow, setIsPhoneFlow] = useState(!!searchParams.get('phone'));
 
@@ -40,12 +37,21 @@ function LoginFormInner() {
     }
   }, [status, router, callbackUrl]);
 
+  // Handle URL errors and success messages
+  useEffect(() => {
+    if (searchParams.get('error') === 'exists') {
+      addAlert({ type: 'error', message: t('login.phoneExists') });
+    }
+    if (searchParams.get('reset') === 'success') {
+      addAlert({ type: 'success', message: t('password.forgotSuccess') });
+    }
+  }, [searchParams, t, addAlert]);
+
   // Listen for Native Google Sign-In tokens
   useEffect(() => {
     const cleanup = onWebViewMessage(async (data) => {
       if (data.action === 'GOOGLE_NATIVE_TOKEN' && data.token) {
         setIsLoading(true);
-        setError('');
         try {
           const result = await signIn('credentials', {
             redirect: false,
@@ -53,7 +59,7 @@ function LoginFormInner() {
           });
 
           if (result?.error) {
-            setError(t('login.genericError'));
+            addAlert({ type: 'error', message: t('login.genericError') });
             setIsLoading(false);
             return;
           }
@@ -62,18 +68,18 @@ function LoginFormInner() {
           await new Promise(resolve => setTimeout(resolve, 500));
           router.push(callbackUrl);
         } catch (error) {
-          setError(t('login.genericError'));
+          addAlert({ type: 'error', message: t('login.genericError') });
           console.error('Native Google Login error:', error);
           setIsLoading(false);
         }
       } else if (data.action === 'GOOGLE_NATIVE_TOKEN_ERROR' && data.error) {
-        setError(data.error);
+        addAlert({ type: 'error', message: data.error });
         setIsLoading(false);
       }
     });
 
     return cleanup;
-  }, [router, fetchSession, t, callbackUrl]);
+  }, [router, fetchSession, t, callbackUrl, addAlert]);
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
@@ -113,25 +119,6 @@ function LoginFormInner() {
               </div>
             )}
 
-            {/* Reset Success Message */}
-            {resetSuccess && (
-              <Alert
-                type="success"
-                message={t('password.forgotSuccess')}
-                className="relative top-0 right-0 left-0 translate-x-0 w-full mb-6 z-10"
-              />
-            )}
-
-            {/* Error Message */}
-            {error && (
-              <Alert
-                type="error"
-                message={error}
-                onClose={() => setError('')}
-                className="relative top-0 right-0 left-0 translate-x-0 w-full mb-6 z-10"
-              />
-            )}
-
             {/* Conditionally Render Phone or Email Login Flow */}
             {isPhoneFlow ? (
               <PhoneLoginForm
@@ -144,7 +131,6 @@ function LoginFormInner() {
                 theme={theme}
                 callbackUrl={callbackUrl}
                 onSelectPhoneFlow={() => setIsPhoneFlow(true)}
-                setError={setError}
               />
             )}
 

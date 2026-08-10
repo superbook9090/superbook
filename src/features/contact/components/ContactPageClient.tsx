@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import Header from '@/components/home/MarketingHeader';
 import Footer from '@/components/home/Footer';
 import { useTranslation } from '@/hooks/useTranslation';
-import Alert from '@/components/ui/Alert';
+import { useAlert } from '@/components/ui/AlertContainer';
 import { useSessionStore } from '@/store/useSessionStore';
 
 import { ContactHero } from './ContactHero';
@@ -39,7 +39,7 @@ export default function ContactPageClient() {
 
   // Submission & alert state
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [alertState, setAlertState] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const { addAlert } = useAlert();
 
   // Input change handler
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -115,7 +115,7 @@ export default function ContactPageClient() {
     const isMessageValid = validateField('message');
 
     if (!isNameValid || !isEmailValid || !isSubjectValid || !isMessageValid) {
-      setAlertState({ type: 'error', message: t('contact.form.error') });
+      addAlert({ type: 'error', message: t('contact.form.error') });
       return;
     }
 
@@ -133,7 +133,7 @@ export default function ContactPageClient() {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        setAlertState({ type: 'success', message: t('contact.form.success') });
+        addAlert({ type: 'success', message: t('contact.form.success') });
         // Reset form
         setForm({
           name: '',
@@ -148,10 +148,10 @@ export default function ContactPageClient() {
           message: false,
         });
       } else {
-        setAlertState({ type: 'error', message: data.error?.message || t('contact.form.error') });
+        addAlert({ type: 'error', message: data.error?.message || t('contact.form.error') });
       }
     } catch {
-      setAlertState({ type: 'error', message: t('contact.form.error') });
+      addAlert({ type: 'error', message: t('contact.form.error') });
     } finally {
       setIsSubmitting(false);
     }
@@ -203,14 +203,6 @@ export default function ContactPageClient() {
       <ContactFaq />
       <ContactCta />
       <Footer />
-
-      {alertState && (
-        <Alert
-          type={alertState.type}
-          message={alertState.message}
-          onClose={() => setAlertState(null)}
-        />
-      )}
     </div>
   );
 }

@@ -5,8 +5,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { BookOpen } from 'lucide-react';
-import Alert from '@/components/ui/Alert';
 import BackButton from '@/components/ui/BackButton';
+import { useAlert } from '@/components/ui/AlertContainer';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useCreateBlog } from '@/lib/react-query/useBlogQueries';
 import { ApiClientError } from '@/lib/api/http';
@@ -29,7 +29,7 @@ export default function CreateBlogPage() {
     metaDescription: '',
     isFeatured: false,
   });
-  const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+  const { addAlert } = useAlert();
 
   if (status === 'unauthenticated') {
     router.push(ROUTES.login);
@@ -38,7 +38,7 @@ export default function CreateBlogPage() {
 
   const submit = async (asDraft: boolean) => {
     if (!formData.title.trim() || !formData.topic || isBlogContentEmpty(formData.content)) {
-      setAlertState({ type: 'error', message: t('blog.fillAllFields') });
+      addAlert({ type: 'error', message: t('blog.fillAllFields') });
       return;
     }
 
@@ -50,16 +50,12 @@ export default function CreateBlogPage() {
       router.push(ROUTES.teacher.blogs);
     } catch (err) {
       const errorMsg = err instanceof ApiClientError ? err.message : t('blog.saveErrorGeneric');
-      setAlertState({ type: 'error', message: errorMsg });
+      addAlert({ type: 'error', message: errorMsg });
     }
   };
 
   return (
     <div className="max-w-4xl mx-auto">
-      {alertState && (
-        <Alert type={alertState.type} message={alertState.message} onClose={() => setAlertState(null)} />
-      )}
-
       <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
         <BackButton
           href={ROUTES.teacher.blogs}

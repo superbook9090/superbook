@@ -15,7 +15,7 @@ import {
   GraduationCap,
 } from 'lucide-react';
 import { PageSkeleton } from '@/components/ui/Skeleton';
-import Alert from '@/components/ui/Alert';
+import { useAlert } from '@/components/ui/AlertContainer';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useTranslation } from '@/hooks/useTranslation';
 import { formatDateTime } from '@/lib/dateUtils';
@@ -69,22 +69,22 @@ export default function AdminAnalyticsPage() {
   const router = useRouter();
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const { addAlert } = useAlert();
 
   const fetchStats = useCallback(async () => {
     try {
       const data = (await fetchAnalytics('admin')) as { stats?: AdminStats };
       setStats(data.stats || null);
     } catch (err) {
-      setMessage({
+      addAlert({
         type: 'error',
-        text: getApiErrorMessage(err, t('errors.errorLoadingAnalytics')),
+        message: getApiErrorMessage(err, t('errors.errorLoadingAnalytics')),
       });
       console.error('Analytics error:', err);
     } finally {
       setIsLoading(false);
     }
-  }, [t]);
+  }, [t, addAlert]);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -127,20 +127,6 @@ export default function AdminAnalyticsPage() {
           </Button>
         }
       />
-
-      {/* Alert */}
-      {message && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <Alert
-            type={message.type}
-            message={message.text}
-            onClose={() => setMessage(null)}
-          />
-        </motion.div>
-      )}
 
       {!stats ? (
         <div className="text-center py-16 bg-[var(--card-solid)] rounded-2xl shadow-sm">

@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { PageSkeleton } from '@/components/ui/Skeleton';
-import Alert from '@/components/ui/Alert';
+import { useAlert } from '@/components/ui/AlertContainer';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { fetchAdminSettings, patchAdminSettings } from '@/lib/api/adminSettings';
@@ -59,7 +59,7 @@ export default function AdminSettingsPage() {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const { addAlert } = useAlert();
   const canManageSolutionAnalysis = isSuperAdmin(session?.user?.role);
 
   const fetchSettings = useCallback(async () => {
@@ -86,11 +86,11 @@ export default function AdminSettingsPage() {
         },
       });
     } catch {
-      setMessage({ type: 'error', text: t('adminSettings.failedLoadSettings') });
+      addAlert({ type: 'error', message: t('adminSettings.failedLoadSettings') });
     } finally {
       setIsLoading(false);
     }
-  }, [t]);
+  }, [t, addAlert]);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -107,19 +107,18 @@ export default function AdminSettingsPage() {
 
   const handleSave = async () => {
     setIsSaving(true);
-    setMessage(null);
 
     try {
       await patchAdminSettings(settings);
-      setMessage({ type: 'success', text: t('adminSettings.settingsSaved') });
+      addAlert({ type: 'success', message: t('adminSettings.settingsSaved') });
 
       setValue(Date.now().toString());
       await fetchPublicSettings(true);
       window.dispatchEvent(new Event('settingsUpdated'));
     } catch (err) {
-      setMessage({
+      addAlert({
         type: 'error',
-        text:
+        message:
           err instanceof ApiClientError
             ? err.message
             : t('adminSettings.failedSaveSettings'),
@@ -149,20 +148,6 @@ export default function AdminSettingsPage() {
           <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">{t('adminSettings.description')}</p>
         </div>
       </motion.div>
-
-      {/* Alert */}
-      {message && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <Alert
-            type={message.type}
-            message={message.text}
-            onClose={() => setMessage(null)}
-          />
-        </motion.div>
-      )}
 
       
       {/* Teacher Content Limits */}

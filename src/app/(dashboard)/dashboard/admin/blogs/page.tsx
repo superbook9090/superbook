@@ -16,7 +16,7 @@ import {
 
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
-import Alert from '@/components/ui/Alert';
+import { useAlert } from '@/components/ui/AlertContainer';
 import Button from '@/components/ui/Button';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useDeleteBlog, useUpdateBlog, usePaginatedBlogs, type Blog } from '@/lib/react-query/useBlogQueries';
@@ -34,7 +34,7 @@ export default function AdminBlogsPage() {
   const router = useRouter();
   const { theme } = useRoleTheme();
   const { t } = useTranslation();
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const { addAlert } = useAlert();
   const [searchInput, setSearchInput] = useState('');
   const searchTerm = useDebouncedValue(searchInput, 300);
   const [page, setPage] = useState(1);
@@ -81,19 +81,19 @@ export default function AdminBlogsPage() {
   const handleTogglePublish = async (blogId: string, currentStatus: boolean) => {
     try {
       await updateBlog.mutateAsync({ blogId, data: { isPublished: !currentStatus } });
-      setMessage({ type: 'success', text: t('admin.blogUpdated') });
+      addAlert({ type: 'success', message: t('admin.blogUpdated') });
     } catch {
-      setMessage({ type: 'error', text: t('admin.failedUpdateBlog') });
+      addAlert({ type: 'error', message: t('admin.failedUpdateBlog') });
     }
   };
 
   const handleDelete = async (blogId: string) => {
     try {
       await deleteBlog.mutateAsync(blogId);
-      setMessage({ type: 'success', text: t('admin.blogDeleted') });
+      addAlert({ type: 'success', message: t('admin.blogDeleted') });
       setDeleteId(null);
     } catch {
-      setMessage({ type: 'error', text: t('admin.failedDeleteBlog') });
+      addAlert({ type: 'error', message: t('admin.failedDeleteBlog') });
     }
   };
 
@@ -119,20 +119,6 @@ export default function AdminBlogsPage() {
           <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">{t('admin.manageBlogsDesc')}</p>
         </div>
       </motion.div>
-
-      {/* Alert */}
-      {message && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <Alert
-            type={message.type}
-            message={message.text}
-            onClose={() => setMessage(null)}
-          />
-        </motion.div>
-      )}
 
       {/* Filters */}
       <motion.div

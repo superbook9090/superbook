@@ -11,7 +11,7 @@ import { isSuperAdmin } from '@/lib/roles';
 import { useFeature } from '@/contexts/AppSettingsContext';
 import { Award, Users, Trash2, Eye, EyeOff, Loader2 } from 'lucide-react';
 import Tooltip from '@/components/ui/Tooltip';
-import Alert from '@/components/ui/Alert';
+import { useAlert } from '@/components/ui/AlertContainer';
 import { LazyConfirmModal } from '@/lib/lazy';
 import CourseShareButton from '@/components/courses/CourseShareButton';
 import { usePublishCourse, useMarkCourseCompleted, useDeleteCourse } from '@/lib/react-query/hooks';
@@ -26,8 +26,7 @@ export default function CourseActionBar({ courseId }: { courseId: string }) {
   const isTeacher = session?.user?.role === 'teacher';
   const isEnrollmentManagementEnabled = useFeature('enableEnrollmentManagement');
   const queryClient = useQueryClient();
-
-  const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+  const { addAlert } = useAlert();
   
   // Modals state
   const [confirmDeleteCourse, setConfirmDeleteCourse] = useState<boolean>(false);
@@ -57,11 +56,11 @@ export default function CourseActionBar({ courseId }: { courseId: string }) {
     setIsPublishingAdmin(true);
     try {
       await adminPatchCourse(courseId, { isPublished: !course.isPublished });
-      setAlertState({ type: 'success', message: t('admin.courseUpdated') });
+      addAlert({ type: 'success', message: t('admin.courseUpdated') });
       refetch();
       queryClient.invalidateQueries({ queryKey: ['courses'] });
     } catch (err) {
-      setAlertState({ type: 'error', message: err instanceof Error ? err.message : t('admin.failedUpdateCourse') });
+      addAlert({ type: 'error', message: err instanceof Error ? err.message : t('admin.failedUpdateCourse') });
     } finally {
       setIsPublishingAdmin(false);
     }
@@ -69,19 +68,19 @@ export default function CourseActionBar({ courseId }: { courseId: string }) {
 
   const handleDeleteAdmin = async () => {
     if (!deleteReason.trim()) {
-      setAlertState({ type: 'error', message: 'Please provide a reason for deleting this course.' });
+      addAlert({ type: 'error', message: 'Please provide a reason for deleting this course.' });
       return;
     }
     setIsDeletingAdmin(true);
     try {
       await adminDeleteCourse(courseId, deleteReason.trim());
-      setAlertState({ type: 'success', message: 'Course deleted successfully.' });
+      addAlert({ type: 'success', message: 'Course deleted successfully.' });
       setConfirmDeleteCourse(false);
       setDeleteReason('');
       queryClient.invalidateQueries({ queryKey: ['courses'] });
       router.push(ROUTES.admin.courses);
     } catch (err) {
-      setAlertState({ type: 'error', message: err instanceof Error ? err.message : t('admin.failedDeleteCourse') });
+      addAlert({ type: 'error', message: err instanceof Error ? err.message : t('admin.failedDeleteCourse') });
     } finally {
       setIsDeletingAdmin(false);
     }
@@ -91,39 +90,39 @@ export default function CourseActionBar({ courseId }: { courseId: string }) {
   const handleTogglePublishTeacher = async () => {
     try {
       await publishCourseTeacher.mutateAsync({ courseId, isPublished: !course.isPublished });
-      setAlertState({
+      addAlert({
         type: 'success',
         message: !course.isPublished ? t('teacherCourses.coursePublished') : t('teacherCourses.courseUnpublished')
       });
       refetch();
     } catch {
-      setAlertState({ type: 'error', message: t('teacherCourses.publishError') });
+      addAlert({ type: 'error', message: t('teacherCourses.publishError') });
     }
   };
 
   const handleMarkCompleted = async (isCompleted: boolean) => {
     try {
       await markCourseCompleted.mutateAsync({ courseId, isCompleted });
-      setAlertState({
+      addAlert({
         type: 'success',
         message: isCompleted ? t('teacherCourses.courseMarkedCompleted') : t('teacherCourses.courseReopened')
       });
       setConfirmCompleteCourse(false);
       refetch();
     } catch {
-      setAlertState({ type: 'error', message: t('teacherCourses.completeError') });
+      addAlert({ type: 'error', message: t('teacherCourses.completeError') });
     }
   };
 
   const handleDeleteTeacher = async () => {
     try {
       await deleteCourseTeacher.mutateAsync(courseId);
-      setAlertState({ type: 'success', message: t('teacherCourses.courseDeleted') });
+      addAlert({ type: 'success', message: t('teacherCourses.courseDeleted') });
       setConfirmDeleteCourse(false);
       queryClient.invalidateQueries({ queryKey: ['courses'] });
       router.push(ROUTES.teacher.courses);
     } catch {
-      setAlertState({ type: 'error', message: t('teacherCourses.deleteError') });
+      addAlert({ type: 'error', message: t('teacherCourses.deleteError') });
     }
   };
 
@@ -133,14 +132,6 @@ export default function CourseActionBar({ courseId }: { courseId: string }) {
 
   return (
     <div className="flex flex-col gap-4">
-      {alertState && (
-        <Alert
-          type={alertState.type}
-          message={alertState.message}
-          onClose={() => setAlertState(null)}
-        />
-      )}
-
       <div className="flex flex-wrap items-center gap-2 p-2 bg-[var(--color-surface-muted)] rounded-xl border border-[var(--color-border)] w-fit">
         
         {/* Publish/Unpublish */}

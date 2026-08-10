@@ -12,7 +12,7 @@ import { ApiClientError } from '@/lib/api/http';
 import { getQuizById } from '@/lib/api/quizzes';
 import { Loader } from '@/components/ui/Loader';
 import { PageSkeleton } from '@/components/ui/Skeleton';
-import Alert from '@/components/ui/Alert';
+import { useAlert } from '@/components/ui/AlertContainer';
 import { motion } from 'framer-motion';
 import { HelpCircle, Clock, BookOpen, Play } from 'lucide-react';
 import BackButton from '@/components/ui/BackButton';
@@ -42,6 +42,7 @@ export default function QuizDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showStartConfirm, setShowStartConfirm] = useState(false);
+  const { addAlert } = useAlert();
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -76,9 +77,10 @@ export default function QuizDetailPage() {
       setShowStartConfirm(false);
       router.push(ROUTES.student.quizTake(data.attempt._id));
     } catch (e) {
-      setError(
-        e instanceof ApiClientError ? e.message : t('errors.errorStartingQuiz')
-      );
+      addAlert({
+        type: 'error',
+        message: e instanceof ApiClientError ? e.message : t('errors.errorStartingQuiz'),
+      });
     }
   };
 
@@ -97,8 +99,10 @@ export default function QuizDetailPage() {
 
   if (error) {
     return (
-      <div>
-        <Alert type="error" message={error} />
+      <div className="space-y-4">
+        <div className="p-4 rounded-xl bg-[var(--color-error)]/10 text-[var(--color-error)] border border-[var(--color-error)]/20 w-full">
+          {error}
+        </div>
         <BackButton
           href={ROUTES.student.quizzes}
           variant="outline"
@@ -111,11 +115,9 @@ export default function QuizDetailPage() {
   if (!quiz) {
     return (
       <div className="p-4 sm:p-6 max-w-7xl mx-auto">
-        <Alert
-          type="error"
-          message={t('errors.quizNotFound')}
-          className="relative top-0 right-0 left-0 translate-x-0 w-full z-10"
-        />
+        <div className="p-4 rounded-xl bg-[var(--color-error)]/10 text-[var(--color-error)] border border-[var(--color-error)]/20 w-full">
+          {t('errors.quizNotFound')}
+        </div>
       </div>
     );
   }

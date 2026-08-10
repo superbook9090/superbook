@@ -12,7 +12,7 @@ import { useSessionStore } from '@/store/useSessionStore';
 import { patchQuiz, deleteQuiz } from '@/lib/api/quizzes';
 import { invalidateAfterQuizChange, usePaginatedQuizzes, useTeacherCourses, type Quiz } from '@/lib/react-query/hooks';
 import { ApiClientError } from '@/lib/api/http';
-import Alert from '@/components/ui/Alert';
+import { useAlert } from '@/components/ui/AlertContainer';
 import Button from '@/components/ui/Button';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { Loader } from '@/components/ui/Loader';
@@ -39,7 +39,7 @@ export default function TeacherQuizzesPage() {
   const { data: coursesData, isLoading: isCoursesLoading } = useTeacherCourses(orgId);
   const courses = useMemo(() => coursesData ?? [], [coursesData]);
 
-  const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+  const { addAlert } = useAlert();
   const [searchInput, setSearchInput] = useState('');
   const searchTerm = useDebouncedValue(searchInput, 300);
   const [statusFilter, setStatusFilter] = useState<QuizStatusFilter>('all');
@@ -158,15 +158,16 @@ export default function TeacherQuizzesPage() {
     const quizId = toIdString(quiz._id);
     try {
       await patchQuiz(quizId, { isPublished: !quiz.isPublished });
+      addAlert({ type: 'success', message: t('teacherQuizzes.quizUpdated') || 'Quiz updated' });
       await invalidateAfterQuizChange(queryClient, getCourseId(quiz.course), orgId);
     } catch (err) {
-      setAlertState({
+      addAlert({
         type: 'error',
         message:
           err instanceof ApiClientError ? err.message : t('teacherQuizzes.errorUpdateQuiz'),
       });
     }
-  }, [queryClient, getCourseId, orgId, t]);
+  }, [queryClient, getCourseId, orgId, t, addAlert]);
 
   const confirmDelete = useCallback(async () => {
     if (!deleteTarget) return;
@@ -174,10 +175,11 @@ export default function TeacherQuizzesPage() {
     const quiz = quizzes.find((q) => toIdString(q._id) === deleteTarget.id);
     try {
       await deleteQuiz(deleteTarget.id);
+      addAlert({ type: 'success', message: t('teacherQuizzes.quizDeleted') || 'Quiz deleted' });
       await invalidateAfterQuizChange(queryClient, quiz ? getCourseId(quiz.course) : '', orgId);
       setDeleteTarget(null);
     } catch (err) {
-      setAlertState({
+      addAlert({
         type: 'error',
         message:
           err instanceof ApiClientError ? err.message : t('teacherQuizzes.errorDeleteQuiz'),
@@ -185,7 +187,13 @@ export default function TeacherQuizzesPage() {
     } finally {
       setIsDeleting(false);
     }
-  }, [deleteTarget, quizzes, queryClient, getCourseId, orgId, t]);
+  }, [deleteTarget, quizzes, queryClient, getCourseId, orgId, t, addAlert]);
+
+  useEffect(() => {
+    if (error) {
+      addAlert({ type: 'error', message: error });
+    }
+  }, [error, addAlert]);
 
   if (status === 'loading' || isCoursesLoading) {
     return <PageSkeleton />;
@@ -207,20 +215,10 @@ export default function TeacherQuizzesPage() {
         </Link>
       </div>
 
-      {alertState && (
-        <Alert
-          type={alertState.type}
-          message={alertState.message}
-          onClose={() => setAlertState(null)}
-        />
-      )}
-
       {error && (
-        <Alert
-          type="error"
-          message={error}
-          className="relative top-0 right-0 left-0 translate-x-0 w-full z-10"
-        />
+        <div className="p-4 rounded-xl bg-[var(--color-error)]/10 text-[var(--color-error)] border border-[var(--color-error)]/20 mb-4 inline-block w-full">
+          {error}
+        </div>
       )}
 
       {courses.length > 0 && (

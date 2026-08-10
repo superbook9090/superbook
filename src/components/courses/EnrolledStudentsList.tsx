@@ -6,8 +6,8 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Users, Mail, Calendar, Trash2 } from 'lucide-react';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
-import Alert from '@/components/ui/Alert';
 import Tooltip from '@/components/ui/Tooltip';
+import { useAlert } from '@/components/ui/AlertContainer';
 import Button from '@/components/ui/Button';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -30,7 +30,7 @@ export default function EnrolledStudentsList({
   const [students, setStudents] = useState<CourseStudentRow[]>([]);
   const [courseTitle, setCourseTitle] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const { addAlert } = useAlert();
   const [removeId, setRemoveId] = useState<string | null>(null);
   const [isRemoving, setIsRemoving] = useState(false);
 
@@ -44,11 +44,11 @@ export default function EnrolledStudentsList({
       setCourseTitle(course.title);
     } catch (err) {
       const text = err instanceof ApiClientError ? err.message : t('enrolledStudents.fetchError');
-      setMessage({ type: 'error', text });
+      addAlert({ type: 'error', message: text });
     } finally {
       setIsLoading(false);
     }
-  }, [courseId, t]);
+  }, [courseId, t, addAlert]);
 
   useEffect(() => {
     if (!isEnabled) {
@@ -63,10 +63,10 @@ export default function EnrolledStudentsList({
     try {
       await dropEnrollment(enrollmentId);
       setStudents((prev) => prev.filter((s) => s.enrollmentId !== enrollmentId));
-      setMessage({ type: 'success', text: t('enrolledStudents.removeSuccess') });
+      addAlert({ type: 'success', message: t('enrolledStudents.removeSuccess') });
     } catch (err) {
       const text = err instanceof ApiClientError ? err.message : t('enrolledStudents.removeError');
-      setMessage({ type: 'error', text });
+      addAlert({ type: 'error', message: text });
     } finally {
       setIsRemoving(false);
       setRemoveId(null);
@@ -104,12 +104,6 @@ export default function EnrolledStudentsList({
           </p>
         </div>
       </motion.div>
-
-      {message && (
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-          <Alert type={message.type} message={message.text} onClose={() => setMessage(null)} />
-        </motion.div>
-      )}
 
       {students.length === 0 ? (
         <div className="text-center py-16 bg-[var(--card-solid)] rounded-2xl shadow-sm">

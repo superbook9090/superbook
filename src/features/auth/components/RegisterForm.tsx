@@ -13,7 +13,7 @@ import { onWebViewMessage } from '@/lib/mobile/webviewBridge';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
-import Alert from '@/components/ui/Alert';
+import { useAlert } from '@/components/ui/AlertContainer';
 import { Loader } from '@/components/ui/Loader';
 import AuthBranding from './AuthBranding';
 import EmailRegisterForm from './EmailRegisterForm';
@@ -30,7 +30,7 @@ function RegisterFormInner() {
   const { t } = useTranslation();
 
   const theme = roleThemes.student;
-  const [error, setError] = useState('');
+  const { addAlert } = useAlert();
   const [isPhoneFlow, setIsPhoneFlow] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -46,7 +46,6 @@ function RegisterFormInner() {
     const cleanup = onWebViewMessage(async (data) => {
       if (data.action === 'GOOGLE_NATIVE_TOKEN' && data.token) {
         setIsLoading(true);
-        setError('');
         try {
           const result = await signIn('credentials', {
             redirect: false,
@@ -54,7 +53,7 @@ function RegisterFormInner() {
           });
 
           if (result?.error) {
-            setError(t('login.genericError'));
+            addAlert({ type: 'error', message: t('login.genericError') });
             setIsLoading(false);
             return;
           }
@@ -63,18 +62,18 @@ function RegisterFormInner() {
           await new Promise(resolve => setTimeout(resolve, 500));
           router.push(callbackUrl);
         } catch (error) {
-          setError(t('login.genericError'));
+          addAlert({ type: 'error', message: t('login.genericError') });
           console.error('Native Google Register error:', error);
           setIsLoading(false);
         }
       } else if (data.action === 'GOOGLE_NATIVE_TOKEN_ERROR' && data.error) {
-        setError(data.error);
+        addAlert({ type: 'error', message: data.error });
         setIsLoading(false);
       }
     });
 
     return cleanup;
-  }, [router, fetchSession, t, callbackUrl]);
+  }, [router, fetchSession, t, callbackUrl, addAlert]);
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
@@ -114,16 +113,6 @@ function RegisterFormInner() {
               </div>
             )}
 
-            {/* Error Message */}
-            {error && (
-              <Alert
-                type="error"
-                message={error}
-                onClose={() => setError('')}
-                className="relative top-0 right-0 left-0 translate-x-0 w-full mb-6 z-10"
-              />
-            )}
-
             {/* Conditionally Render Phone or Email Signup Flow */}
             {isPhoneFlow ? (
               <PhoneRegisterForm
@@ -137,7 +126,6 @@ function RegisterFormInner() {
                 theme={theme}
                 callbackUrl={callbackUrl}
                 onSelectPhoneFlow={() => setIsPhoneFlow(true)}
-                setError={setError}
                 allowTeacherRegistration={allowTeacherRegistration}
               />
             )}

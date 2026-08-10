@@ -13,8 +13,8 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { PageSkeleton } from '@/components/ui/Skeleton';
-import Alert from '@/components/ui/Alert';
 import Tooltip from '@/components/ui/Tooltip';
+import { useAlert } from '@/components/ui/AlertContainer';
 import Button from '@/components/ui/Button';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import { useRouter } from 'next/navigation';
@@ -57,7 +57,7 @@ export default function AdminUsersPage() {
     }
   }, [session, status, router]);
   const [isLoading, setIsLoading] = useState(true);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const { addAlert } = useAlert();
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebouncedValue(searchQuery, 300);
   const [roleFilter, setRoleFilter] = useState('all');
@@ -93,9 +93,9 @@ export default function AdminUsersPage() {
       setUsers((data.users || []) as User[]);
       setPagination(data.pagination || { total: 0, totalPages: 1 });
     } catch (err) {
-      setMessage({
+      addAlert({
         type: 'error',
-        text:
+        message:
           err instanceof ApiClientError
             ? err.message
             : t('adminSettings.errorLoadingUsers'),
@@ -103,7 +103,7 @@ export default function AdminUsersPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [debouncedSearch, roleFilter, page, t]);
+  }, [debouncedSearch, roleFilter, page, t, addAlert]);
 
   const fetchOrganizations = useCallback(async () => {
     try {
@@ -131,11 +131,11 @@ export default function AdminUsersPage() {
     try {
       await patchAdminUser({ userId, updates: { role: newRole } });
       setUsers(users.map((u) => (u._id === userId ? { ...u, role: newRole } : u)));
-      setMessage({ type: 'success', text: t('adminUsers.userRoleUpdatedSuccess') });
+      addAlert({ type: 'success', message: t('adminUsers.userRoleUpdatedSuccess') });
     } catch (err) {
-      setMessage({
+      addAlert({
         type: 'error',
-        text:
+        message:
           err instanceof ApiClientError
             ? err.message
             : t('adminSettings.errorUpdatingUser'),
@@ -151,11 +151,11 @@ export default function AdminUsersPage() {
       if (selectedUser && selectedUser._id === userId) {
         setSelectedUser({ ...selectedUser, canUploadVideos: newVal });
       }
-      setMessage({ type: 'success', text: t('adminUsers.videoPermissionUpdated') });
+      addAlert({ type: 'success', message: t('adminUsers.videoPermissionUpdated') });
     } catch (err) {
-      setMessage({
+      addAlert({
         type: 'error',
-        text:
+        message:
           err instanceof ApiClientError
             ? err.message
             : t('adminUsers.errorUpdatingVideoPermission'),
@@ -171,11 +171,11 @@ export default function AdminUsersPage() {
       if (selectedUser && selectedUser._id === userId) {
         setSelectedUser({ ...selectedUser, canCreatePublicCourses: newVal });
       }
-      setMessage({ type: 'success', text: t('adminUsers.publicCoursePermissionUpdated') });
+      addAlert({ type: 'success', message: t('adminUsers.publicCoursePermissionUpdated') });
     } catch (err) {
-      setMessage({
+      addAlert({
         type: 'error',
-        text:
+        message:
           err instanceof ApiClientError
             ? err.message
             : t('adminSettings.errorUpdatingUser'),
@@ -187,13 +187,13 @@ export default function AdminUsersPage() {
     try {
       await deleteAdminUser(userId);
       setUsers(users.filter((u) => u._id !== userId));
-      setMessage({ type: 'success', text: t('adminUsers.userDeletedSuccess') });
+      addAlert({ type: 'success', message: t('adminUsers.userDeletedSuccess') });
       setDeleteId(null);
       setShowDeleteDialog(false);
     } catch (err) {
-      setMessage({
+      addAlert({
         type: 'error',
-        text:
+        message:
           err instanceof ApiClientError
             ? err.message
             : t('adminSettings.errorDeletingUser'),
@@ -246,12 +246,12 @@ export default function AdminUsersPage() {
       setUsers(
         users.map((u) => (u._id === limitsUserId ? { ...u, limits: updates.limits } : u))
       );
-      setMessage({ type: 'success', text: t('adminUsers.userLimitsUpdated') });
+      addAlert({ type: 'success', message: t('adminUsers.userLimitsUpdated') });
       handleCloseLimits();
     } catch (err) {
-      setMessage({
+      addAlert({
         type: 'error',
-        text:
+        message:
           err instanceof ApiClientError
             ? err.message
             : t('adminUsers.failedUpdateLimits'),
@@ -273,12 +273,12 @@ export default function AdminUsersPage() {
       })) as Partial<User>;
 
       setUsers(users.map((u) => (u._id === orgAssignUserId ? { ...u, ...data } : u)));
-      setMessage({ type: 'success', text: t('adminUsers.userOrganizationUpdated') });
+      addAlert({ type: 'success', message: t('adminUsers.userOrganizationUpdated') });
       handleCloseOrgAssign();
     } catch (err) {
-      setMessage({
+      addAlert({
         type: 'error',
-        text:
+        message:
           err instanceof ApiClientError
             ? err.message
             : t('adminSettings.errorUpdatingOrganization'),
@@ -306,20 +306,6 @@ export default function AdminUsersPage() {
           <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">{t('admin.userDesc')}</p>
         </div>
       </motion.div>
-
-      {/* Alert */}
-      {message && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <Alert
-            type={message.type}
-            message={message.text}
-            onClose={() => setMessage(null)}
-          />
-        </motion.div>
-      )}
 
       {/* Filters */}
       <motion.div

@@ -1,7 +1,7 @@
 // src/app/(dashboard)/dashboard/teacher/page.tsx
 'use client';
 
-import { useState } from 'react';
+
 import Link from 'next/link';
 import { ROUTES } from '@/constants/routes';
 import { useSessionStore } from '@/store/useSessionStore';
@@ -23,8 +23,8 @@ import {
   GraduationCap,
   BarChart3
 } from 'lucide-react';
-import Alert from '@/components/ui/Alert';
 import { PageSkeleton } from '@/components/ui/Skeleton';
+import { useAlert } from '@/components/ui/AlertContainer';
 import StatCard from '@/components/ui/StatCard';
 import QuickActionCard from '@/components/ui/QuickActionCard';
 import { PageWrapper, ResponsiveGrid } from '@/components/layout';
@@ -64,7 +64,7 @@ type TeacherLimits = TeacherDashboardData['limits'];
 export default function TeacherDashboardPage() {
   const session = useSessionStore((s) => s.session) as { user?: { id: string; role: string; name: string } };
   const { t } = useTranslation();
-  const [limitAlert, setLimitAlert] = useState<{ type: 'courses' | 'quizzes' | 'blogs' } | null>(null);
+  const { addAlert } = useAlert();
   const enableCourses = useFeature('enableCourses');
   const enableQuizzes = useFeature('enableQuizzes');
   const enableBlogs = useFeature('enableBlogs');
@@ -142,12 +142,14 @@ export default function TeacherDashboardPage() {
 
   // Error state
   if (error) {
+    // We defer the alert to a useEffect if we strictly want to use useAlert, but since we are rendering
+    // we can just return a simple error text, and we will call addAlert in a generic way if needed.
+    // Actually, let's just show a simple error message inline without the Alert component.
     return (
       <PageWrapper>
-        <Alert
-          type="error"
-          message={error.message || t('errors.failedLoadDashboardData')}
-        />
+        <div className="p-4 rounded-xl bg-[var(--color-error)]/10 text-[var(--color-error)] border border-[var(--color-error)]/20">
+          {error.message || t('errors.failedLoadDashboardData')}
+        </div>
       </PageWrapper>
     );
   }
@@ -183,7 +185,7 @@ export default function TeacherDashboardPage() {
                   type="button"
                   whileHover={{ scale: 1 }}
                   whileTap={{ scale: 1 }}
-                  onClick={() => setLimitAlert({ type: 'courses' })}
+                  onClick={() => addAlert({ type: 'error', message: t('dashboard.limitReached').replace('{type}', 'courses').replace('{limit}', String(getLimit('courses'))) })}
                   className="inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base text-[var(--color-muted-foreground)] rounded-full font-semibold transition-all bg-[var(--color-surface-muted)] border border-[var(--color-border)] cursor-not-allowed"
                 >
                   <Plus className="w-5 h-5 mr-2" />
@@ -204,20 +206,6 @@ export default function TeacherDashboardPage() {
           </div>
         </div>
       </motion.div>
-
-      {/* Limit Alert */}
-      {limitAlert && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <Alert
-            type="error"
-            message={t('dashboard.limitReached').replace('{type}', limitAlert.type).replace('{limit}', String(getLimit(limitAlert.type)))}
-            onClose={() => setLimitAlert(null)}
-          />
-        </motion.div>
-      )}
 
       {/* Stats Cards - Modern Design */}
       <ResponsiveGrid variant="stats">

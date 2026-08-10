@@ -13,6 +13,7 @@ import { TextField } from '@/components/ui/TextField';
 import { Loader } from '@/components/ui/Loader';
 import { getDashboardHomePath } from '@/lib/roles';
 import { ROUTES } from '@/constants/routes';
+import { useAlert } from '@/components/ui/AlertContainer';
 
 declare global {
   interface Window {
@@ -31,12 +32,12 @@ interface EmailRegisterFormProps {
   };
   callbackUrl: string;
   onSelectPhoneFlow: () => void;
-  setError: (err: string) => void;
   allowTeacherRegistration: boolean;
 }
 
-export default function EmailRegisterForm({ theme, callbackUrl, onSelectPhoneFlow, setError, allowTeacherRegistration }: EmailRegisterFormProps) {
+export default function EmailRegisterForm({ theme, callbackUrl, onSelectPhoneFlow, allowTeacherRegistration }: EmailRegisterFormProps) {
   const { t } = useTranslation();
+  const { addAlert } = useAlert();
   const router = useRouter();
   const { fetchSession } = useSessionStore();
   const enablePhoneAuth = useSettingsStore(
@@ -87,15 +88,14 @@ export default function EmailRegisterForm({ theme, callbackUrl, onSelectPhoneFlo
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
 
     if (formData.password !== formData.confirmPassword) {
-      setError(t('register.passwordsDoNotMatch'));
+      addAlert({ type: 'error', message: t('register.passwordsDoNotMatch') });
       return;
     }
 
     if (formData.role === 'teacher' && !allowTeacherRegistration) {
-      setError(t('register.teacherRegistrationDisabled'));
+      addAlert({ type: 'error', message: t('register.teacherRegistrationDisabled') });
       return;
     }
 
@@ -118,7 +118,7 @@ export default function EmailRegisterForm({ theme, callbackUrl, onSelectPhoneFlo
       });
 
       if (result?.error) {
-        setError(t('login.genericError'));
+        addAlert({ type: 'error', message: t('login.genericError') });
         setIsLoading(false);
         return;
       }
@@ -133,7 +133,7 @@ export default function EmailRegisterForm({ theme, callbackUrl, onSelectPhoneFlo
       router.push(redirectTo);
     } catch (error) {
       const errMsg = error instanceof Error ? error.message : String(error);
-      setError(errMsg || t('register.genericError'));
+      addAlert({ type: 'error', message: errMsg || t('register.genericError') });
       console.error('Registration error:', error);
       setIsLoading(false);
     }

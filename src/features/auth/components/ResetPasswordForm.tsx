@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Lock, ArrowRight } from 'lucide-react';
 import PremiumLogo from '@/components/ui/PremiumLogo';
-import Alert from '@/components/ui/Alert';
+import { useAlert } from '@/components/ui/AlertContainer';
 import { Loader } from '@/components/ui/Loader';
 import { TextField } from '@/components/ui/TextField';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -24,20 +24,19 @@ function ResetPasswordFormInner() {
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
+  const { addAlert } = useAlert();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
 
     if (password !== confirmPassword) {
-      setError(t('register.passwordsDoNotMatch'));
+      addAlert({ type: 'error', message: t('register.passwordsDoNotMatch') });
       return;
     }
 
     if (!token) {
-      setError(t('password.invalidResetLink'));
+      addAlert({ type: 'error', message: t('password.invalidResetLink') });
       return;
     }
 
@@ -46,13 +45,14 @@ function ResetPasswordFormInner() {
       await resetPasswordWithToken({ token, password, confirmPassword });
       router.push(loginWithResetSuccess());
     } catch (err) {
-      setError(
-        err instanceof ApiClientError && err.status === 429
+      addAlert({
+        type: 'error',
+        message: err instanceof ApiClientError && err.status === 429
           ? t('password.rateLimited')
           : err instanceof ApiClientError
             ? err.message
             : t('password.genericError')
-      );
+      });
     } finally {
       setIsLoading(false);
     }
@@ -88,15 +88,6 @@ function ResetPasswordFormInner() {
         <p className="text-sm text-[var(--color-muted-foreground)] text-center mb-6">
           {t('password.resetDescription')}
         </p>
-
-        {error && (
-          <Alert
-            type="error"
-            message={error}
-            onClose={() => setError('')}
-            className="relative top-0 right-0 left-0 translate-x-0 w-full mb-4 z-10"
-          />
-        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <TextField

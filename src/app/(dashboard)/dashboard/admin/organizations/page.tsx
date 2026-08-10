@@ -14,10 +14,10 @@ import {
   Check,
   Users,
   BookOpen,
-  FileText,
   ClipboardList,
+  FileText
 } from 'lucide-react';
-import Alert from '@/components/ui/Alert';
+import { useAlert } from '@/components/ui/AlertContainer';
 import Tooltip from '@/components/ui/Tooltip';
 import Button from '@/components/ui/Button';
 import { useRouter } from 'next/navigation';
@@ -51,7 +51,7 @@ export default function OrganizationsPage() {
   const { session, status } = useSessionStore();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+  const { addAlert } = useAlert();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
@@ -84,11 +84,11 @@ export default function OrganizationsPage() {
     } catch (err) {
       const message =
         err instanceof ApiClientError ? err.message : t('organizations.failedFetchOrganizations');
-      setError(message);
+      addAlert({ type: 'error', message });
     } finally {
       setIsLoading(false);
     }
-  }, [t]);
+  }, [t, addAlert]);
 
   useEffect(() => {
     fetchOrganizations();
@@ -96,7 +96,6 @@ export default function OrganizationsPage() {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
 
     try {
       await createOrganization(formData);
@@ -106,7 +105,7 @@ export default function OrganizationsPage() {
     } catch (err) {
       const message =
         err instanceof ApiClientError ? err.message : t('organizations.failedCreateOrganization');
-      setError(message);
+      addAlert({ type: 'error', message });
     }
   };
 
@@ -123,7 +122,7 @@ export default function OrganizationsPage() {
     } catch (err) {
       const message =
         err instanceof ApiClientError ? err.message : t('organizations.failedUpdateOrganization');
-      setError(message);
+      addAlert({ type: 'error', message });
     }
   };
 
@@ -138,7 +137,7 @@ export default function OrganizationsPage() {
     } catch (err) {
       const message =
         err instanceof ApiClientError ? err.message : t('organizations.failedDeleteOrganization');
-      setError(message);
+      addAlert({ type: 'error', message });
     }
   };
 
@@ -188,15 +187,6 @@ export default function OrganizationsPage() {
           {t('organizations.createOrganization')}
         </Button>
       </div>
-
-      {/* Error Alert */}
-      {error && (
-        <Alert
-          type="error"
-          message={error}
-          onClose={() => setError('')}
-        />
-      )}
 
       {/* Organizations List */}
       <div className="bg-[var(--card-solid)] rounded-xl shadow-sm overflow-hidden">

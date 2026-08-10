@@ -6,8 +6,8 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { motion } from 'framer-motion';
 import { Video, User, BookOpen, Calendar, ExternalLink } from 'lucide-react';
 import { PageSkeleton } from '@/components/ui/Skeleton';
-import Alert from '@/components/ui/Alert';
 import Tooltip from '@/components/ui/Tooltip';
+import { useAlert } from '@/components/ui/AlertContainer';
 import DashboardListFilters, { FilterPanel } from '@/components/filters/DashboardListFilters';
 
 interface VideoLecture {
@@ -29,6 +29,7 @@ export default function AdminVideosPage() {
   const [videos, setVideos] = useState<VideoLecture[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { addAlert } = useAlert();
   const [searchQuery, setSearchQuery] = useState('');
 
   const clearFilters = () => setSearchQuery('');
@@ -50,6 +51,12 @@ export default function AdminVideosPage() {
     }
     fetchVideos();
   }, []);
+
+  useEffect(() => {
+    if (error) {
+      addAlert({ type: 'error', message: error });
+    }
+  }, [error, addAlert]);
 
   const filteredVideos = videos.filter((vid) => {
     const q = searchQuery.toLowerCase();
@@ -91,7 +98,11 @@ export default function AdminVideosPage() {
       </motion.div>
 
       {/* Alert */}
-      {error && <Alert type="error" message={error} onClose={() => setError(null)} />}
+      {error && (
+        <div className="p-4 rounded-xl bg-[var(--color-error)]/10 text-[var(--color-error)] border border-[var(--color-error)]/20 mb-4 w-full">
+          {error}
+        </div>
+      )}
 
       {/* Filters */}
       <motion.div

@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
-import Alert from '@/components/ui/Alert';
+import { useAlert } from '@/components/ui/AlertContainer';
 import Button from '@/components/ui/Button';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -34,7 +34,7 @@ export default function AdminCoursesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<PublishStatusFilter>('all');
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const { addAlert } = useAlert();
 
   const clearFilters = () => {
     setSearchQuery('');
@@ -48,11 +48,11 @@ export default function AdminCoursesPage() {
     } catch (err) {
       const text =
         err instanceof ApiClientError ? err.message : t('admin.failedFetchCourses');
-      setMessage({ type: 'error', text });
+      addAlert({ type: 'error', message: text });
     } finally {
       setIsLoading(false);
     }
-  }, [t]);
+  }, [t, addAlert]);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -94,20 +94,6 @@ export default function AdminCoursesPage() {
           <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">{t('admin.manageCoursesDesc')}</p>
         </div>
       </motion.div>
-
-      {/* Alert */}
-      {message && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <Alert
-            type={message.type}
-            message={message.text}
-            onClose={() => setMessage(null)}
-          />
-        </motion.div>
-      )}
 
       {/* Filters */}
       <motion.div

@@ -1,6 +1,8 @@
 // src/app/(dashboard)/dashboard/student/page.tsx
 'use client';
 
+import { useEffect } from 'react';
+
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
 import {
@@ -14,8 +16,8 @@ import {
   Activity,
   Clock
 } from 'lucide-react';
-import Alert from '@/components/ui/Alert';
 import { PageSkeleton } from '@/components/ui/Skeleton';
+import { useAlert } from '@/components/ui/AlertContainer';
 import { useSessionStore } from '@/store/useSessionStore';
 import StatCard from '@/components/ui/StatCard';
 import ActivityCard from '@/components/ui/ActivityCard';
@@ -64,6 +66,7 @@ export default function StudentDashboardPage() {
 
   // Single React Query call replaces multiple SWR calls
   const { data, isLoading, error } = useDashboard();
+  const { addAlert } = useAlert();
 
   // Type guard to ensure we have student data
   const dashboardData = data && isStudentDashboard(data) ? data : null;
@@ -119,14 +122,19 @@ export default function StudentDashboardPage() {
     .sort((a, b) => getActivityDate(b) - getActivityDate(a))
     .slice(0, 5);
 
+  useEffect(() => {
+    if (error) {
+      addAlert({ type: 'error', message: error.message || t('errors.failedLoadDashboardData') });
+    }
+  }, [error, addAlert, t]);
+
   // Error state
   if (error) {
     return (
       <PageWrapper>
-        <Alert
-          type="error"
-          message={error.message || t('errors.failedLoadDashboardData')}
-        />
+        <div className="p-4 rounded-xl bg-[var(--color-error)]/10 text-[var(--color-error)] border border-[var(--color-error)]/20">
+          {error.message || t('errors.failedLoadDashboardData')}
+        </div>
       </PageWrapper>
     );
   }

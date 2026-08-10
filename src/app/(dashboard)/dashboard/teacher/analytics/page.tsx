@@ -9,7 +9,7 @@ import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSessionStore } from '@/store/useSessionStore';
 import { PageSkeleton } from '@/components/ui/Skeleton';
-import Alert from '@/components/ui/Alert';
+import { useAlert } from '@/components/ui/AlertContainer';
 import Button from '@/components/ui/Button';
 import { fetchAnalytics } from '@/lib/api/analytics';
 import { getApiErrorMessage } from '@/lib/api/http';
@@ -300,6 +300,7 @@ export default function TeacherAnalyticsPage() {
   const { t } = useTranslation();
   const [stats, setStats] = useState<TeacherStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { addAlert } = useAlert();
   const [error, setError] = useState('');
 
   const fetchStats = useCallback(async () => {
@@ -325,6 +326,12 @@ export default function TeacherAnalyticsPage() {
     fetchStats();
   }, [session, status, router, fetchStats]);
 
+  useEffect(() => {
+    if (error) {
+      addAlert({ type: 'error', message: error });
+    }
+  }, [error, addAlert]);
+
   if (status === 'loading' || isLoading) {
     return <PageSkeleton />;
   }
@@ -333,11 +340,9 @@ export default function TeacherAnalyticsPage() {
     return (
       <div className="card-panel text-center py-10 px-4">
         {error && (
-          <Alert
-            type="error"
-            message={error}
-            onClose={() => setError('')}
-          />
+          <div className="p-4 rounded-xl bg-[var(--color-error)]/10 text-[var(--color-error)] border border-[var(--color-error)]/20 mb-4 inline-block">
+            {error}
+          </div>
         )}
         <Button onClick={fetchStats} className="btn-premium mt-4">
           {t('teacherAnalytics.retry')}

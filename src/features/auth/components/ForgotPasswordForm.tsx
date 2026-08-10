@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { Mail, ArrowRight } from 'lucide-react';
 import BackButton from '@/components/ui/BackButton';
 import PremiumLogo from '@/components/ui/PremiumLogo';
-import Alert from '@/components/ui/Alert';
+import { useAlert } from '@/components/ui/AlertContainer';
 import { Loader } from '@/components/ui/Loader';
 import { useTranslation } from '@/hooks/useTranslation';
 import { TextField } from '@/components/ui/TextField';
@@ -19,25 +19,25 @@ export default function ForgotPasswordForm() {
   const theme = roleThemes.student;
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const { addAlert } = useAlert();
   const [sent, setSent] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     setIsLoading(true);
 
     try {
       await requestForgotPassword(email.trim());
       setSent(true);
     } catch (err) {
-      setError(
-        err instanceof ApiClientError && err.status === 429
+      addAlert({
+        type: 'error',
+        message: err instanceof ApiClientError && err.status === 429
           ? t('password.rateLimited')
           : err instanceof ApiClientError
             ? err.message
             : t('password.genericError')
-      );
+      });
     } finally {
       setIsLoading(false);
     }
@@ -60,15 +60,6 @@ export default function ForgotPasswordForm() {
         <p className="text-sm text-[var(--color-muted-foreground)] text-center mb-6">
           {sent ? t('password.forgotSuccess') : t('password.forgotDescription')}
         </p>
-
-        {error && (
-          <Alert
-            type="error"
-            message={error}
-            onClose={() => setError('')}
-            className="relative top-0 right-0 left-0 translate-x-0 w-full mb-4 z-10"
-          />
-        )}
 
         {!sent ? (
           <form onSubmit={handleSubmit} className="space-y-4">

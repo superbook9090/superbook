@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import BackButton from '@/components/ui/BackButton';
-import Alert from '@/components/ui/Alert';
+import { useAlert } from '@/components/ui/AlertContainer';
 import { useSessionStore } from '@/store/useSessionStore';
 import { getBlogById, updateBlog, type BlogDocument } from '@/lib/api/blogs';
 import { ApiClientError } from '@/lib/api/http';
@@ -33,7 +33,7 @@ export default function EditBlogPage() {
     isFeatured: false,
   });
   const [isPublished, setIsPublished] = useState(true);
-  const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+  const { addAlert } = useAlert();
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -63,7 +63,7 @@ export default function EditBlogPage() {
       setIsPublished(blog.isPublished);
     } catch (err) {
       const errorMsg = err instanceof ApiClientError ? err.message : t('blog.failedToLoadBlog');
-      setAlertState({ type: 'error', message: errorMsg });
+      addAlert({ type: 'error', message: errorMsg });
     } finally {
       setIsLoading(false);
     }
@@ -73,7 +73,7 @@ export default function EditBlogPage() {
     setIsSaving(true);
 
     if (!formData.title.trim() || !formData.topic || isBlogContentEmpty(formData.content)) {
-      setAlertState({ type: 'error', message: t('blog.fillAllFields') });
+      addAlert({ type: 'error', message: t('blog.fillAllFields') });
       setIsSaving(false);
       return;
     }
@@ -93,7 +93,7 @@ export default function EditBlogPage() {
       router.push(ROUTES.teacher.blogs);
     } catch (err) {
       const errorMsg = err instanceof ApiClientError ? err.message : t('blog.saveErrorGeneric');
-      setAlertState({ type: 'error', message: errorMsg });
+      addAlert({ type: 'error', message: errorMsg });
     } finally {
       setIsSaving(false);
     }
@@ -109,10 +109,6 @@ export default function EditBlogPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      {alertState && (
-        <Alert type={alertState.type} message={alertState.message} onClose={() => setAlertState(null)} />
-      )}
-
       <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
         <BackButton
           href={ROUTES.teacher.blogs}

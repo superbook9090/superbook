@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useState, useRef, useEffect } from 'react';
+import { ReactNode, useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -21,7 +21,7 @@ export default function Tooltip({ label, children, position = 'top', className =
   const [coords, setCoords] = useState({ top: 0, left: 0 });
   const containerRef = useRef<HTMLSpanElement>(null);
 
-  const updatePosition = () => {
+  const updatePosition = useCallback(() => {
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
       setCoords({
@@ -29,7 +29,7 @@ export default function Tooltip({ label, children, position = 'top', className =
         left: rect.left + rect.width / 2,
       });
     }
-  };
+  }, [position]);
 
   useEffect(() => {
     if (isVisible) {
@@ -42,7 +42,7 @@ export default function Tooltip({ label, children, position = 'top', className =
         window.removeEventListener('resize', updatePosition);
       };
     }
-  }, [isVisible, position]);
+  }, [isVisible, updatePosition]);
 
   const bubblePlacement = position === 'top' ? '-translate-y-full -mt-2' : 'mt-2';
   

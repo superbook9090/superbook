@@ -2,14 +2,14 @@
 'use client';
 
 import { ROUTES } from '@/constants/routes';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
-import Alert from '@/components/ui/Alert';
+import { useAlert } from '@/components/ui/AlertContainer';
 import Button from '@/components/ui/Button';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { useTeacherCourses, type Course } from '@/lib/react-query/hooks';
@@ -20,7 +20,7 @@ export default function TeacherCoursesPage() {
   const router = useRouter();
   const { t } = useTranslation();
   const { theme } = useRoleTheme();
-  const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+  const { addAlert } = useAlert();
 
   // Get orgId from session
   const orgId = (session?.user as { organizationId?: string })?.organizationId || 'public';
@@ -33,20 +33,18 @@ export default function TeacherCoursesPage() {
     }
   }, [status, session, router]);
 
+  useEffect(() => {
+    if (error) {
+      addAlert({ type: 'error', message: String(error) });
+    }
+  }, [error, addAlert]);
+
   if (status === 'loading' || isLoading) {
     return <PageSkeleton />;
   }
 
   return (
     <>
-      {alertState && (
-        <Alert
-          type={alertState.type}
-          message={alertState.message}
-          onClose={() => setAlertState(null)}
-        />
-      )}
-
       <div>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="w-full sm:w-auto">
@@ -64,12 +62,9 @@ export default function TeacherCoursesPage() {
         </div>
 
         {error && (
-          <Alert
-            type="error"
-            message={String(error)}
-            onClose={() => setAlertState(null)}
-            className="relative top-0 right-0 left-0 translate-x-0 w-full mt-4 z-10"
-          />
+          <div className="p-4 rounded-xl bg-[var(--color-error)]/10 text-[var(--color-error)] border border-[var(--color-error)]/20 mb-4 mt-4 w-full">
+            {String(error)}
+          </div>
         )}
 
         <div className="mt-8">

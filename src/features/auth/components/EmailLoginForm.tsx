@@ -12,6 +12,7 @@ import { Mail, Lock, Phone, ArrowRight } from 'lucide-react';
 import { TextField } from '@/components/ui/TextField';
 import { Loader } from '@/components/ui/Loader';
 import { ROUTES } from '@/constants/routes';
+import { useAlert } from '@/components/ui/AlertContainer';
 
 declare global {
   interface Window {
@@ -30,11 +31,11 @@ interface EmailLoginFormProps {
   };
   callbackUrl: string;
   onSelectPhoneFlow: () => void;
-  setError: (err: string) => void;
 }
 
-export default function EmailLoginForm({ theme, callbackUrl, onSelectPhoneFlow, setError }: EmailLoginFormProps) {
+export default function EmailLoginForm({ theme, callbackUrl, onSelectPhoneFlow }: EmailLoginFormProps) {
   const { t } = useTranslation();
+  const { addAlert } = useAlert();
   const router = useRouter();
   const { fetchSession } = useSessionStore();
   const enablePhoneAuth = useSettingsStore(
@@ -57,7 +58,6 @@ export default function EmailLoginForm({ theme, callbackUrl, onSelectPhoneFlow, 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     setIsLoading(true);
 
     try {
@@ -68,7 +68,7 @@ export default function EmailLoginForm({ theme, callbackUrl, onSelectPhoneFlow, 
       });
 
       if (result?.error) {
-        setError(t('login.invalidCredentials'));
+        addAlert({ type: 'error', message: t('login.invalidCredentials') });
         setIsLoading(false);
         return;
       }
@@ -83,7 +83,7 @@ export default function EmailLoginForm({ theme, callbackUrl, onSelectPhoneFlow, 
       await new Promise(resolve => setTimeout(resolve, 500));
       router.push(callbackUrl);
     } catch (error) {
-      setError(t('login.genericError'));
+      addAlert({ type: 'error', message: t('login.genericError') });
       console.error('Login error:', error);
       setIsLoading(false);
     }

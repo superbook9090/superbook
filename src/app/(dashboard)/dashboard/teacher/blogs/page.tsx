@@ -17,8 +17,8 @@ import {
 } from 'lucide-react';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
-import Alert from '@/components/ui/Alert';
 import Tooltip from '@/components/ui/Tooltip';
+import { useAlert } from '@/components/ui/AlertContainer';
 import Button from '@/components/ui/Button';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -52,7 +52,7 @@ export default function TeacherBlogsPage() {
   const [languageFilter, setLanguageFilter] = useState<BlogLanguageFilter>('all');
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [alertState, setAlertState] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+  const { addAlert } = useAlert();
 
   const clearFilters = () => {
     setSearchInput('');
@@ -99,7 +99,7 @@ export default function TeacherBlogsPage() {
       setDeleteId(null);
     } catch (error) {
       console.error('Error deleting blog:', error);
-      setAlertState({ type: 'error', message: t('blog.failedDeleteBlog') });
+      addAlert({ type: 'error', message: t('blog.failedDeleteBlog') });
     }
   };
 
@@ -108,7 +108,7 @@ export default function TeacherBlogsPage() {
       await updateBlog.mutateAsync({ blogId: id, data: { isPublished: !currentStatus } });
     } catch (error) {
       console.error('Error updating blog:', error);
-      setAlertState({ type: 'error', message: t('blog.failedUpdateBlog') });
+      addAlert({ type: 'error', message: t('blog.failedUpdateBlog') });
     }
   };
 
@@ -138,14 +138,6 @@ export default function TeacherBlogsPage() {
           {t('blog.createBlog')}
         </Link>
       </motion.div>
-
-      {alertState && (
-        <Alert
-          type={alertState.type}
-          message={alertState.message}
-          onClose={() => setAlertState(null)}
-        />
-      )}
 
       {/* Filters */}
       <motion.div

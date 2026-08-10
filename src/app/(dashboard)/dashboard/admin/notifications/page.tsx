@@ -8,7 +8,7 @@ import { useSessionStore } from '@/store/useSessionStore';
 import { isAdmin, isSuperAdmin } from '@/lib/roles';
 import { sendAdminNotification } from '@/lib/api/notifications';
 import { ApiClientError } from '@/lib/api/http';
-import Alert from '@/components/ui/Alert';
+import { useAlert } from '@/components/ui/AlertContainer';
 import Button from '@/components/ui/Button';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import type { NotificationCategory } from '@/lib/notifications/push/notificationPayload';
@@ -36,7 +36,7 @@ export default function AdminNotificationsPage() {
   const [category, setCategory] = useState<NotificationCategory | ''>('');
   const [organizationId, setOrganizationId] = useState('');
   const [loading, setLoading] = useState(false);
-  const [alertState, setAlertState] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const { addAlert } = useAlert();
 
   const role = session?.user?.role;
   const canSend = isAdmin(role);
@@ -58,12 +58,11 @@ export default function AdminNotificationsPage() {
     if (!canSend || !category) return;
 
     if (!titleEn.trim() || !bodyEn.trim()) {
-      setAlertState({ type: 'error', message: t('admin.notifications.validationRequired') });
+      addAlert({ type: 'error', message: t('admin.notifications.validationRequired') });
       return;
     }
 
     setLoading(true);
-    setAlertState(null);
 
     try {
       const result = await sendAdminNotification({
@@ -74,9 +73,9 @@ export default function AdminNotificationsPage() {
       });
 
       if (result.delivered === 0) {
-        setAlertState({ type: 'error', message: t('admin.notifications.noRecipients') });
+        addAlert({ type: 'error', message: t('admin.notifications.noRecipients') });
       } else {
-        setAlertState({
+        addAlert({
           type: 'success',
           message: t('admin.notifications.sendSuccess', { count: result.delivered }),
         });
@@ -90,7 +89,7 @@ export default function AdminNotificationsPage() {
     } catch (err) {
       const message =
         err instanceof ApiClientError ? err.message : t('admin.notifications.unexpectedError');
-      setAlertState({ type: 'error', message: message || t('admin.notifications.sendFailed') });
+      addAlert({ type: 'error', message: message || t('admin.notifications.sendFailed') });
     } finally {
       setLoading(false);
     }
@@ -116,14 +115,6 @@ export default function AdminNotificationsPage() {
             {t('admin.notifications.description')}
           </p>
         </div>
-
-        {alertState && (
-          <Alert
-            type={alertState.type}
-            message={alertState.message}
-            onClose={() => setAlertState(null)}
-          />
-        )}
 
         <div className="bg-[var(--card-solid)] shadow rounded-2xl border border-[var(--border)]">
           <div className="px-4 py-5 sm:p-6">

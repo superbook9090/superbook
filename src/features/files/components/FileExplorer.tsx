@@ -14,8 +14,8 @@ import {
   Trash2,
   Upload,
 } from 'lucide-react';
-import Alert from '@/components/ui/Alert';
 import Tooltip from '@/components/ui/Tooltip';
+import { useAlert } from '@/components/ui/AlertContainer';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSessionStore } from '@/store/useSessionStore';
@@ -82,7 +82,7 @@ export default function FileExplorer() {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [contents, setContents] = useState<FolderContentsResponse>({ folders: [], files: [] });
   const [isLoading, setIsLoading] = useState(true);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const { addAlert } = useAlert();
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -94,19 +94,18 @@ export default function FileExplorer() {
 
   const loadContents = useCallback(async (pid: string | null) => {
     setIsLoading(true);
-    setMessage(null);
     try {
       const data = await listFolderContents(pid);
       setContents({ folders: (data.folders || []) as FolderNode[], files: (data.files || []) as FileNode[] });
     } catch (err) {
-      setMessage({
+      addAlert({
         type: 'error',
-        text: err instanceof ApiClientError ? err.message : t('common.error'),
+        message: err instanceof ApiClientError ? err.message : t('common.error'),
       });
     } finally {
       setIsLoading(false);
     }
-  }, [t]);
+  }, [t, addAlert]);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -147,15 +146,15 @@ export default function FileExplorer() {
 
     try {
       await createFileFolder({ name, parentId });
-      setMessage({ type: 'success', text: t('files.folderCreated') });
+      addAlert({ type: 'success', message: t('files.folderCreated') });
       await loadContents(parentId);
     } catch (e) {
-      setMessage({
+      addAlert({
         type: 'error',
-        text: e instanceof ApiClientError ? e.message : t('common.error'),
+        message: e instanceof ApiClientError ? e.message : t('common.error'),
       });
     }
-  }, [t, parentId, loadContents]);
+  }, [t, parentId, loadContents, addAlert]);
 
   const uploadPdf = useCallback(async (file: File) => {
     const fd = new FormData();
@@ -173,29 +172,29 @@ export default function FileExplorer() {
     if (!f) return;
     try {
       await uploadPdf(f);
-      setMessage({ type: 'success', text: t('files.uploaded') });
+      addAlert({ type: 'success', message: t('files.uploaded') });
       await loadContents(parentId);
     } catch (e) {
-      setMessage({
+      addAlert({
         type: 'error',
-        text: e instanceof ApiClientError ? e.message : t('common.error'),
+        message: e instanceof ApiClientError ? e.message : t('common.error'),
       });
     }
-  }, [uploadPdf, t, loadContents, parentId]);
+  }, [uploadPdf, t, loadContents, parentId, addAlert]);
 
   const handleDeleteNode = useCallback(async (id: string, name: string) => {
     if (!confirm(t('files.deleteConfirm', { name }))) return;
     try {
       await deleteFileNode(id);
-      setMessage({ type: 'success', text: t('files.deleted') });
+      addAlert({ type: 'success', message: t('files.deleted') });
       await loadContents(parentId);
     } catch (e) {
-      setMessage({
+      addAlert({
         type: 'error',
-        text: e instanceof ApiClientError ? e.message : t('common.error'),
+        message: e instanceof ApiClientError ? e.message : t('common.error'),
       });
     }
-  }, [t, loadContents, parentId]);
+  }, [t, loadContents, parentId, addAlert]);
 
   const handleRenameNode = useCallback(async (id: string, currentName: string) => {
     const name = prompt(t('files.renamePrompt'), currentName);
@@ -203,15 +202,15 @@ export default function FileExplorer() {
 
     try {
       await renameFileNode(id, name.trim());
-      setMessage({ type: 'success', text: t('files.renamed') });
+      addAlert({ type: 'success', message: t('files.renamed') });
       await loadContents(parentId);
     } catch (e) {
-      setMessage({
+      addAlert({
         type: 'error',
-        text: e instanceof ApiClientError ? e.message : t('common.error'),
+        message: e instanceof ApiClientError ? e.message : t('common.error'),
       });
     }
-  }, [t, loadContents, parentId]);
+  }, [t, loadContents, parentId, addAlert]);
 
   const handleViewFile = useCallback((file: FileNode) => {
     window.open(`/api/files/view/${file._id}`, '_blank', 'noopener,noreferrer');
@@ -268,12 +267,6 @@ export default function FileExplorer() {
 
   return (
     <div className="p-4 sm:p-6">
-      {message && (
-        <div className="mb-4">
-          <Alert type={message.type} message={message.text} />
-        </div>
-      )}
-
       <div className="glass rounded-2xl p-4 sm:p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">

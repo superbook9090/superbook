@@ -17,7 +17,7 @@ import {
 import { listCoursesAdmin } from '@/lib/api/courses';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
-import Alert from '@/components/ui/Alert';
+import { useAlert } from '@/components/ui/AlertContainer';
 import Tooltip from '@/components/ui/Tooltip';
 import Button from '@/components/ui/Button';
 import { useSessionStore } from '@/store/useSessionStore';
@@ -39,7 +39,7 @@ export default function AdminQuizzesPage() {
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const limit = 10;
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const { addAlert } = useAlert();
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebouncedValue(searchQuery, 300);
   const [filter, setFilter] = useState<PublishStatusFilter>('all');
@@ -98,25 +98,25 @@ export default function AdminQuizzesPage() {
   const handleTogglePublish = async (quizId: string, currentStatus: boolean) => {
     try {
       await patchQuiz(quizId, { isPublished: !currentStatus });
-      setMessage({ type: 'success', text: t('admin.quizUpdated') });
+      addAlert({ type: 'success', message: t('admin.quizUpdated') });
       refetch();
     } catch (err) {
       const text =
         err instanceof ApiClientError ? err.message : t('admin.failedUpdateQuiz');
-      setMessage({ type: 'error', text });
+      addAlert({ type: 'error', message: text });
     }
   };
 
   const handleDelete = async (quizId: string) => {
     try {
       await deleteQuiz(quizId);
-      setMessage({ type: 'success', text: t('admin.quizDeleted') });
+      addAlert({ type: 'success', message: t('admin.quizDeleted') });
       setDeleteId(null);
       refetch();
     } catch (err) {
       const text =
         err instanceof ApiClientError ? err.message : t('admin.failedDeleteQuiz');
-      setMessage({ type: 'error', text });
+      addAlert({ type: 'error', message: text });
     }
   };
 
@@ -142,20 +142,6 @@ export default function AdminQuizzesPage() {
           <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">{t('admin.manageQuizzesDesc')}</p>
         </div>
       </motion.div>
-
-      {/* Alert */}
-      {message && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <Alert
-            type={message.type}
-            message={message.text}
-            onClose={() => setMessage(null)}
-          />
-        </motion.div>
-      )}
 
       {/* Filters */}
       <motion.div

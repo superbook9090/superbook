@@ -11,6 +11,7 @@ import { motion } from 'framer-motion';
 import { Phone, ArrowRight, ArrowLeft, GraduationCap, School, Building2 } from 'lucide-react';
 import { TextField } from '@/components/ui/TextField';
 import { Loader } from '@/components/ui/Loader';
+import { useAlert } from '@/components/ui/AlertContainer';
 import { getDashboardHomePath } from '@/lib/roles';
 import { ROUTES } from '@/constants/routes';
 
@@ -35,7 +36,7 @@ export default function PhoneRegisterForm({ theme, callbackUrl, onBackToEmail, a
   const [otpCode, setOtpCode] = useState('');
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
-  const [phoneError, setPhoneError] = useState('');
+  const { addAlert } = useAlert();
   const [isLoading, setIsLoading] = useState(false);
 
   const roles = [
@@ -102,7 +103,6 @@ export default function PhoneRegisterForm({ theme, callbackUrl, onBackToEmail, a
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    setPhoneError('');
     setIsLoading(true);
 
     try {
@@ -122,7 +122,7 @@ export default function PhoneRegisterForm({ theme, callbackUrl, onBackToEmail, a
         if (formattedPhone.length === 10) {
           formattedPhone = '+91' + formattedPhone;
         } else {
-          setPhoneError(t('login.invalidPhone') || 'Please enter phone number with country code (e.g. +91...)');
+          addAlert({ type: 'error', message: t('login.invalidPhone') || 'Please enter phone number with country code (e.g. +91...)' });
           setIsLoading(false);
           return;
         }
@@ -152,7 +152,7 @@ export default function PhoneRegisterForm({ theme, callbackUrl, onBackToEmail, a
     } catch (err) {
       console.error('Error sending OTP:', err);
       const errMsg = err instanceof Error ? err.message : String(err);
-      setPhoneError(errMsg || t('login.genericError') || 'Failed to send OTP. Please try again.');
+      addAlert({ type: 'error', message: errMsg || t('login.genericError') || 'Failed to send OTP. Please try again.' });
       if (window.recaptchaVerifier) {
         try {
           window.recaptchaVerifier.clear();
@@ -166,7 +166,6 @@ export default function PhoneRegisterForm({ theme, callbackUrl, onBackToEmail, a
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    setPhoneError('');
     setIsLoading(true);
 
     try {
@@ -191,7 +190,7 @@ export default function PhoneRegisterForm({ theme, callbackUrl, onBackToEmail, a
       });
 
       if (result?.error) {
-        setPhoneError(t('login.invalidOtp') || 'Invalid code. Please try again.');
+        addAlert({ type: 'error', message: t('login.invalidOtp') || 'Invalid code. Please try again.' });
         setIsLoading(false);
         return;
       }
@@ -206,7 +205,7 @@ export default function PhoneRegisterForm({ theme, callbackUrl, onBackToEmail, a
       router.push(redirectTo);
     } catch (err) {
       console.error('Error verifying OTP:', err);
-      setPhoneError(t('login.invalidOtp') || 'Invalid verification code.');
+      addAlert({ type: 'error', message: t('login.invalidOtp') || 'Invalid verification code.' });
     } finally {
       setIsLoading(false);
     }
@@ -216,7 +215,6 @@ export default function PhoneRegisterForm({ theme, callbackUrl, onBackToEmail, a
     if (isOtpSent) {
       setIsOtpSent(false);
       setOtpCode('');
-      setPhoneError('');
     } else {
       onBackToEmail();
     }
@@ -224,12 +222,6 @@ export default function PhoneRegisterForm({ theme, callbackUrl, onBackToEmail, a
 
   return (
     <form onSubmit={isOtpSent ? handleVerifyOtp : handleSendOtp} className="space-y-4">
-      {phoneError && (
-        <div className="p-3 bg-[var(--color-error)]/10 border border-[var(--color-error)]/25 rounded-xl text-xs text-[var(--color-error)]">
-          {phoneError}
-        </div>
-      )}
-
       {/* Role Selection */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}

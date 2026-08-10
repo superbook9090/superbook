@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSessionStore } from '@/store/useSessionStore';
 import { PageSkeleton } from '@/components/ui/Skeleton';
-import Alert from '@/components/ui/Alert';
+import { useAlert } from '@/components/ui/AlertContainer';
 import { useCertificates } from '@/lib/react-query/hooks';
 import { Award } from 'lucide-react';
 
@@ -18,6 +18,7 @@ export default function StudentCertificatesPage() {
   const { t } = useTranslation();
 
   const { data: certificates = [], isLoading, error } = useCertificates();
+  const { addAlert } = useAlert();
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -25,6 +26,12 @@ export default function StudentCertificatesPage() {
       router.push(ROUTES.login);
     }
   }, [session, status, router]);
+
+  useEffect(() => {
+    if (error) {
+      addAlert({ type: 'error', message: String(error) });
+    }
+  }, [error, addAlert]);
 
   if (status === 'loading' || isLoading) {
     return <PageSkeleton />;
@@ -42,11 +49,9 @@ export default function StudentCertificatesPage() {
       </div>
 
       {error && (
-        <Alert
-          type="error"
-          message={String(error)}
-          className="relative top-0 right-0 left-0 translate-x-0 w-full mt-4 z-10"
-        />
+        <div className="p-4 rounded-xl bg-[var(--color-error)]/10 text-[var(--color-error)] border border-[var(--color-error)]/20 mt-4">
+          {String(error)}
+        </div>
       )}
 
       <div className="mt-8">
