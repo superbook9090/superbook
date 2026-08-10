@@ -3,7 +3,6 @@ import { ROUTES } from '@/constants/routes';
 
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter, useParams, useSearchParams, usePathname } from 'next/navigation';
-import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSessionStore } from '@/store/useSessionStore';
 import { PageSkeleton } from '@/components/ui/Skeleton';
@@ -17,15 +16,10 @@ import {
   useCourseCurriculum,
 } from '@/lib/react-query/hooks';
 import { 
-  Play,
-  CheckCircle, 
-  ChevronDown, 
   ChevronRight, 
   BookOpen, 
   PlayCircle, 
   Trophy, 
-  ArrowLeft,
-  Clock,
   Target,
   Info,
 } from 'lucide-react';
@@ -44,6 +38,12 @@ import {
 import { splitQuizzesByScope } from '@/lib/quiz/quizCourse';
 import type { CurriculumLesson } from '@/lib/curriculum/tree';
 import type { Quiz } from '@/lib/react-query/hooks';
+
+import { CourseHeader } from './_components/CourseHeader';
+import { OverviewTab } from './_components/OverviewTab';
+import { QuizzesTab } from './_components/QuizzesTab';
+import { CurriculumTab } from './_components/CurriculumTab';
+
 
 type TabType = 'curriculum' | 'overview' | 'quizzes' | 'leaderboard';
 
@@ -242,7 +242,7 @@ export default function CourseDetailPage() {
     openQuizConfirm(quiz, 'start');
   };
 
-  const renderChapterQuizzes = (quizzes: Array<{ _id: string; title: string; timeLimit: number; questionCount?: number }>) => {
+  const renderChapterQuizzes = (quizzes?: Array<{ _id: string; title: string; timeLimit: number; questionCount?: number }>) => {
     if (!quizzes?.length) return null;
     return quizzes.map((quiz) => {
       const statusInfo = getQuizStatus(quiz._id);
@@ -325,47 +325,19 @@ export default function CourseDetailPage() {
   return (
     <div className="space-y-6">
       
+      
       {/* Standardized Header Style */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="hero-banner"
-      >
-        <div className="space-y-4">
-          <button
-            onClick={() => router.push(ROUTES.student.courses)}
-            className="flex items-center gap-2 text-xs font-medium text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors group"
-          >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            {t('courses.backToCourses')}
-          </button>
-
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div className="space-y-2">
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-foreground)]">
-                {course.title}
-              </h1>
-              <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--color-muted-foreground)]">
-                <span className="px-2.5 py-0.5 bg-[var(--primary-soft)] text-[var(--primary)] rounded-lg text-xs font-medium">{course.category || t('courses.course')}</span>
-                <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> {allLessons.length} {t('dashboard.lessons')}</span>
-                <span className="flex items-center gap-1.5"><Target className="w-4 h-4" /> {courseQuizzes.length} {t('nav.quizzes')}</span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4 bg-[var(--card-solid)] p-4 rounded-xl border border-[var(--color-border)] shadow-[var(--shadow-sm)]">
-              <div className="text-right">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-muted)]">{t('courses.progress')}</p>
-                <p className="text-2xl font-bold leading-none mt-1 tabular-nums text-[var(--color-foreground)]">{enrollment.progress}%</p>
-              </div>
-              <div className="w-10 h-10 rounded-lg gradient-bg text-white flex items-center justify-center">
-                <CheckCircle className="w-6 h-6" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </motion.div>
+      <CourseHeader
+        courseTitle={course.title}
+        category={course.category || ''}
+        lessonsCount={allLessons.length}
+        quizzesCount={courseQuizzes.length}
+        progress={enrollment.progress}
+        t={t}
+      />
 
       {/* Tabs - Aligned with dashboard cards style */}
+
       <div className="rounded-2xl bg-[var(--card-solid)] border border-[var(--border)] shadow-sm overflow-hidden min-h-[500px] flex flex-col">
         
         {/* Tab Navigation */}
@@ -397,169 +369,40 @@ export default function CourseDetailPage() {
           
           {/* 1. CURRICULUM TAB */}
           {activeTab === 'curriculum' && (
-            <div className="max-w-4xl mx-auto space-y-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-[var(--color-foreground)]">{t('courses.courseContent')}</h2>
-                <Button 
-                  onClick={() => allLessons[0] && handleStartLesson(allLessons[0]._id)}
-                  variant="primary"
-                  className="flex items-center gap-2"
-                >
-                  <Play className="w-3.5 h-3.5 fill-current" />
-                  {enrollment.progress > 0 ? t('courses.continue') : t('courses.start')}
-                </Button>
-              </div>
-
-              <div className="space-y-4">
-                {curriculumWithQuizzes.map((chapter, idx) => (
-                  <div key={chapter._id} className="group/chapter">
-                    <div className={cn(
-                      "rounded-xl border transition-all duration-200",
-                      expandedChapters[chapter._id] ? "bg-[var(--card-solid)] border-[var(--student-primary)]/30 shadow-sm" : "bg-[var(--color-surface-muted)]/30 border-[var(--border)] hover:border-[var(--student-primary)]/20"
-                    )}>
-                      <button 
-                        onClick={() => toggleChapter(chapter._id)}
-                        className="w-full flex items-center justify-between p-4 sm:p-5 text-left"
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className={cn(
-                            "w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold transition-all",
-                            expandedChapters[chapter._id] ? "bg-[var(--student-primary)] text-white" : "bg-[var(--card-solid)] text-[var(--color-muted-foreground)] border border-[var(--border)]"
-                          )}>
-                            {idx + 1}
-                          </div>
-                          <h3 className="font-semibold text-[var(--color-foreground)]">{chapter.title}</h3>
-                        </div>
-                        <ChevronDown className={cn("w-4 h-4 transition-transform", expandedChapters[chapter._id] && "rotate-180")} />
-                      </button>
-
-                      {expandedChapters[chapter._id] && (
-                        <div className="border-t border-[var(--border)] divide-y divide-[var(--border)] bg-[var(--card-solid)] rounded-b-xl overflow-hidden">
-                          {chapter.lessons?.map(renderLessonRow)}
-                          {renderChapterQuizzes(chapter.quizzes)}
-                          {chapter.subChapters?.map((sub) => (
-                            <div key={sub._id} className="bg-[var(--color-surface-muted)]/40">
-                              <button
-                                type="button"
-                                onClick={() => toggleChapter(sub._id)}
-                                className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-[var(--color-surface-muted)] transition-colors"
-                              >
-                                <p className="text-sm font-semibold text-[var(--color-foreground)] pl-12">{sub.title}</p>
-                                <ChevronDown
-                                  className={cn(
-                                    'w-4 h-4 transition-transform',
-                                    expandedChapters[sub._id] && 'rotate-180'
-                                  )}
-                                />
-                              </button>
-                              {expandedChapters[sub._id] && (
-                                <div className="divide-y divide-[var(--border)] border-t border-[var(--border)]">
-                                  {sub.lessons?.map(renderLessonRow)}
-                                  {renderChapterQuizzes(sub.quizzes)}
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-
-                {courseLevelQuizzes.length > 0 && (
-                  <div className="rounded-xl border border-[var(--border)] bg-[var(--card-solid)] overflow-hidden">
-                    <div className="border-b border-[var(--border)] px-4 py-3 sm:px-5">
-                      <h3 className="font-semibold text-[var(--color-foreground)]">
-                        {t('courses.courseLevelQuizzes')}
-                      </h3>
-                    </div>
-                    <div className="divide-y divide-[var(--border)]">
-                      {courseLevelQuizzes.map((quiz) => {
-                        const statusInfo = getQuizStatus(quiz._id);
-                        return (
-                          <LazyCurriculumQuizRow
-                            key={quiz._id}
-                            title={quiz.title}
-                            timeLimit={quiz.timeLimit}
-                            questionCount={quiz.questionCount}
-                            status={statusInfo.status}
-                            score={statusInfo.attempt?.score}
-                            isLoading={startingQuizId === quiz._id || confirmQuiz?.quizId === quiz._id}
-                            onAction={() => handleCurriculumQuizAction(quiz)}
-                          />
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+            <CurriculumTab
+              curriculumWithQuizzes={curriculumWithQuizzes as unknown as import('./_components/CurriculumTab').ChapterWithQuizzes[]}
+              courseLevelQuizzes={courseLevelQuizzes}
+              expandedChapters={expandedChapters}
+              toggleChapter={toggleChapter}
+              renderLessonRow={renderLessonRow}
+              renderChapterQuizzes={renderChapterQuizzes}
+              allLessons={allLessons}
+              handleStartLesson={handleStartLesson}
+              enrollmentProgress={enrollment.progress}
+              t={t}
+            />
           )}
 
           {/* 2. OVERVIEW TAB */}
           {activeTab === 'overview' && (
-            <div className="max-w-4xl mx-auto space-y-8">
-              <div className="space-y-4">
-                <h2 className="text-lg font-bold text-[var(--color-foreground)]">{t('common.overview')}</h2>
-                <p className="text-[var(--color-muted-foreground)] leading-relaxed">
-                  {course.description || t('courses.noDescription')}
-                </p>
-              </div>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-5 rounded-2xl bg-[var(--primary-soft)]/50 border border-[var(--primary-border)]/50">
-                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-[var(--primary)] mb-1">{t('courses.category')}</h4>
-                  <p className="text-base font-bold text-[var(--primary-dark)]">{course.category || 'General'}</p>
-                </div>
-                <div className="p-5 rounded-2xl bg-[var(--color-success-light)] border border-[var(--color-success)]/20">
-                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-success)] mb-1">{t('dashboard.progress')}</h4>
-                  <p className="text-base font-bold text-[var(--color-foreground)]">{enrollment.progress}% {t('dashboard.completed')}</p>
-                </div>
-              </div>
-            </div>
+            <OverviewTab
+              description={course.description || ''}
+              category={course.category || ''}
+              progress={enrollment.progress}
+              t={t}
+            />
           )}
 
           {/* 3. QUIZZES TAB */}
           {activeTab === 'quizzes' && (
-            <div className="mx-auto w-full max-w-6xl space-y-6">
-              <h2 className="text-lg font-bold text-[var(--color-foreground)]">{t('nav.quizzes')}</h2>
-              {courseQuizzes.length === 0 ? (
-                <div className="py-16 text-center text-sm opacity-60">{t('courses.noQuizzes')}</div>
-              ) : (
-                <div className="space-y-8">
-                  {courseLevelQuizzes.length > 0 && (
-                    <div>
-                      <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-[var(--color-muted-foreground)]">
-                        {t('courses.courseLevelQuizzes')}
-                      </h3>
-                      <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6">
-                        {courseLevelQuizzes.map(renderQuizCard)}
-                      </div>
-                    </div>
-                  )}
-                  {chapterScopedQuizzes.length > 0 && (
-                    <div>
-                      <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-[var(--color-muted-foreground)]">
-                        {t('courses.chapterQuizzes')}
-                      </h3>
-                      <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6">
-                        {chapterScopedQuizzes.map(renderQuizCard)}
-                      </div>
-                    </div>
-                  )}
-                  {lessonScopedQuizzes.length > 0 && (
-                    <div>
-                      <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-[var(--color-muted-foreground)]">
-                        {t('courses.lessonQuizzes')}
-                      </h3>
-                      <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6">
-                        {lessonScopedQuizzes.map(renderQuizCard)}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+            <QuizzesTab
+              courseQuizzes={courseQuizzes}
+              courseLevelQuizzes={courseLevelQuizzes}
+              chapterScopedQuizzes={chapterScopedQuizzes}
+              lessonScopedQuizzes={lessonScopedQuizzes}
+              renderQuizCard={renderQuizCard}
+              t={t}
+            />
           )}
 
           {/* 4. LEADERBOARD TAB */}
@@ -579,7 +422,7 @@ export default function CourseDetailPage() {
               </div>
             </div>
           )}
-
+          
         </div>
       </div>
 

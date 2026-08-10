@@ -14,35 +14,18 @@ import { ApiClientError } from '@/lib/api/http';
 import { useQuizSecurity } from '@/hooks/useQuizSecurity';
 import { LazyConfirmModal } from '@/lib/lazy';
 import { useSessionStore } from '@/store/useSessionStore';
-import { LazyQuizQuestionProgress } from '@/lib/lazy';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import Button from '@/components/ui/Button';
+
+import { QuizTakeHeader } from './_components/QuizTakeHeader';
+import { QuizQuestionCard } from './_components/QuizQuestionCard';
+import { QuizNavigation } from './_components/QuizNavigation';
+import type { Question, Attempt } from './_components/types';
+
 import {
   computeQuizTimeRemainingSeconds,
   computeQuizTimeTakenSeconds,
 } from '@/lib/quiz/attemptTime';
-
-interface Question {
-  _id: string;
-  order?: number;
-  question: string;
-  options: string[];
-}
-
-interface Attempt {
-  _id: string;
-  quiz: {
-    _id: string;
-    title: string;
-    timeLimit: number;
-  };
-  /** Loaded separately from quiz document (GET ?attemptId= or start response). */
-  questions: Question[];
-  status: string;
-  startedAt: string;
-  attemptNumber: number;
-  violationCount: number;
-}
 
 export default function TakeQuizPage() {
   const session = useSessionStore((s) => s.session);
@@ -388,7 +371,7 @@ export default function TakeQuizPage() {
 
   const questions = attempt.questions || [];
   const currentQ = questions[currentQuestion];
-  const currentQid = currentQ?._id;
+  
   const questionIds = questions.map((q) => q._id);
   const answeredIds = new Set(questionIds.filter((id) => answers[id] !== undefined));
 
@@ -412,106 +395,37 @@ export default function TakeQuizPage() {
 
 
       {/* Header */}
-      <div className="bg-[var(--card-solid)] rounded-2xl border border-[var(--color-border)] shadow-sm p-4 sm:p-6 mb-4 sm:mb-6">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
-          <div className="min-w-0">
-            <h1 className="text-base sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)] line-clamp-2">
-              {attempt.quiz.title}
-            </h1>
-          </div>
-          <div
-            className={`shrink-0 rounded-xl border px-4 py-2 text-right ${
-              timeRemaining < 60
-                ? 'border-[var(--error)]/30 bg-[var(--error-light)] text-[var(--error)]'
-                : 'border-[var(--color-border)] bg-[var(--color-surface-muted)]/50 text-[var(--color-foreground)]'
-            }`}
-          >
-            <p className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--color-muted-foreground)]">
-              {t('quiz.timeRemaining')}
-            </p>
-            <p className="text-xl sm:text-2xl font-bold font-mono tabular-nums">{formatTime(timeRemaining)}</p>
-          </div>
-        </div>
-
-        <LazyQuizQuestionProgress
-          total={questions.length}
-          currentIndex={currentQuestion}
-          answeredIds={answeredIds}
-          questionIds={questionIds}
-          onSelect={setCurrentQuestion}
-        />
-      </div>
-
+      <QuizTakeHeader
+        attempt={attempt as unknown as Attempt}
+        timeRemaining={timeRemaining}
+        formatTime={formatTime}
+        questions={questions as unknown as Question[]}
+        currentQuestion={currentQuestion}
+        answeredIds={answeredIds}
+        questionIds={questionIds}
+        setCurrentQuestion={setCurrentQuestion}
+        t={t}
+      />
+      
       {/* Question */}
-      <div className="bg-[var(--card-solid)] rounded-2xl border border-[var(--color-border)] shadow-sm p-4 sm:p-6 mb-4 sm:mb-6">
-        <div className="flex items-start gap-3 mb-4">
-          <span className="shrink-0 inline-flex items-center justify-center min-w-[2rem] h-8 px-2 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-sm font-bold">
-            {currentQuestion + 1}
-          </span>
-          <h3 className="text-base sm:text-lg font-medium text-[var(--color-foreground)]">
-            {currentQ?.question}
-          </h3>
-        </div>
-
-        <div className="space-y-3">
-          {(currentQ?.options || []).map((option, index) => (
-            <button
-              key={index}
-              onClick={() => currentQid && handleAnswer(currentQid, index)}
-              className={`w-full text-left p-4 min-h-[44px] rounded-lg border-2 transition-all ${
-                currentQid && answers[currentQid] === index
-                  ? 'border-[var(--student-primary)] bg-[var(--student-primary)]/10'
-                  : 'border-[var(--border)] hover:border-[var(--student-primary)]/50'
-              }`}
-            >
-              <div className="flex items-center">
-                <span
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium mr-3 ${
-                    currentQid && answers[currentQid] === index
-                      ? `bg-gradient-to-r ${theme.gradient} text-white`
-                      : 'bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)]'
-                  }`}
-                >
-                  {String.fromCharCode(65 + index)}
-                </span>
-                <span className="text-[var(--color-foreground)]">{option}</span>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
-
+      <QuizQuestionCard
+        currentQuestionIndex={currentQuestion}
+        currentQ={currentQ as unknown as Question}
+        answers={answers}
+        handleAnswer={handleAnswer}
+        theme={theme}
+      />
+      
       {/* Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-[var(--color-border)] bg-[var(--card-solid)]/95 backdrop-blur-sm p-3 sm:p-0 sm:static sm:bg-transparent sm:border-0 sm:backdrop-blur-none">
-        <div className="max-w-4xl mx-auto flex justify-between items-center gap-2">
-        <Button
-          onClick={() => setCurrentQuestion((prev) => Math.max(0, prev - 1))}
-          disabled={currentQuestion === 0}
-          variant="outline"
-        >
-          {t('common.previous')}
-        </Button>
-
-        {currentQuestion < questions.length - 1 ? (
-          <Button
-            onClick={() => setCurrentQuestion((prev) => Math.min(questions.length - 1, prev + 1))}
-            variant="primary"
-          >
-            {t('common.next')}
-          </Button>
-        ) : (
-          <Button
-            onClick={() => handleSubmit()}
-            disabled={submitQuizMutation.isPending}
-            isLoading={submitQuizMutation.isPending}
-            variant="primary"
-          >
-            {t('quiz.submit')}
-          </Button>
-        )}
-        </div>
-      </div>
-
+      <QuizNavigation
+        currentQuestion={currentQuestion}
+        totalQuestions={questions.length}
+        setCurrentQuestion={setCurrentQuestion}
+        handleSubmit={handleSubmit}
+        isSubmitting={submitQuizMutation.isPending}
+        t={t}
+      />
+      
       {/* Warning if time is low */}
       {timeRemaining < 300 && (
         <div className="mt-4 bg-[var(--error-light)] border-l-4 border-[var(--error)] p-4">
