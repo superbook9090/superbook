@@ -128,6 +128,24 @@ export default function PhoneRegisterForm({ theme, callbackUrl, onBackToEmail, a
         }
       }
 
+      // Check if phone already exists
+      try {
+        const res = await fetch('/api/auth/check-phone', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone: formattedPhone }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.exists) {
+            router.push(`/login?phone=${encodeURIComponent(formattedPhone)}&error=exists`);
+            return;
+          }
+        }
+      } catch (err) {
+        console.error('Error checking phone:', err);
+      }
+
       const confirmResult = await signInWithPhoneNumber(auth, formattedPhone, verifier);
       setConfirmationResult(confirmResult);
       setIsOtpSent(true);
@@ -271,17 +289,15 @@ export default function PhoneRegisterForm({ theme, callbackUrl, onBackToEmail, a
             fullWidth
           />
 
-          {role === 'teacher' && (
-            <TextField
-              label={`${t('register.inviteCode')} (${t('register.optional')})`}
-              type="text"
-              value={inviteCode}
-              onChange={(e) => setInviteCode(e.target.value)}
-              placeholder="Enter invite code (optional)"
-              startIcon={<Building2 className="w-5 h-5 text-[var(--color-muted)]" />}
-              fullWidth
-            />
-          )}
+          <TextField
+            label={`${t('register.inviteCode')} (${t('register.optional')})`}
+            type="text"
+            value={inviteCode}
+            onChange={(e) => setInviteCode(e.target.value)}
+            placeholder={t('register.enterInviteCode') || "Enter invite code (optional)"}
+            startIcon={<Building2 className="w-5 h-5 text-[var(--color-muted)]" />}
+            fullWidth
+          />
 
           <div id="recaptcha-container" className="my-2"></div>
 

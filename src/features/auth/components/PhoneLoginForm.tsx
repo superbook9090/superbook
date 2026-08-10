@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { useSessionStore } from '@/store/useSessionStore';
 import { getFirebaseAuth } from '@/lib/notifications/push/firebase';
@@ -24,9 +24,10 @@ interface PhoneLoginFormProps {
 export default function PhoneLoginForm({ theme, callbackUrl, onBackToEmail }: PhoneLoginFormProps) {
   const { t } = useTranslation();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { fetchSession } = useSessionStore();
 
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState(searchParams.get('phone') || '');
   const [otpCode, setOtpCode] = useState('');
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);

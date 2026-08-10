@@ -11,6 +11,7 @@ import { Session } from 'next-auth';
 import ProfileNameSection from './profile/ProfileNameSection';
 import ProfileEmailSection from './profile/ProfileEmailSection';
 import ProfilePhoneSection from './profile/ProfilePhoneSection';
+import ProfileOrganizationSection from './profile/ProfileOrganizationSection';
 
 interface ProfileProps {
   session: Session;
@@ -49,6 +50,7 @@ export default function Profile({ session, descriptionKey = 'manageAccount' }: P
             <ProfileNameSection session={session} />
             <ProfileEmailSection session={session} />
             <ProfilePhoneSection session={session} />
+            <ProfileOrganizationSection session={session} />
             <div>
               <label className="block text-sm font-medium text-[var(--color-muted-foreground)]">{t('profile.role')}</label>
               <p className="mt-1 text-sm sm:text-base text-[var(--color-foreground)] capitalize break-words">

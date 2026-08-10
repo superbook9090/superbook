@@ -36,18 +36,17 @@ export function QuizRankPredictor({
         {t('quizResult.rankPredictor')}
       </h2>
 
-      <div className="relative px-2 pb-2">
-        <div
-          className="absolute -top-1 z-10 -translate-x-1/2"
-          style={{ left: `${position}%` }}
-        >
-          <div className="rounded-lg bg-[var(--color-foreground)] text-[var(--color-background)] px-3 py-1.5 text-xs sm:text-sm font-semibold whitespace-nowrap shadow-md">
-            {t('quizResult.rankLabel', { rank })}
+      <div className="relative px-4 sm:px-8 pb-2">
+        <div className="mt-12 border-t-2 border-[var(--color-border)] relative h-6">
+          <div
+            className="absolute bottom-full mb-1 z-10 -translate-x-1/2 flex flex-col items-center"
+            style={{ left: `${position}%` }}
+          >
+            <div className="rounded-lg bg-[var(--color-foreground)] text-[var(--color-background)] px-3 py-1.5 text-xs sm:text-sm font-semibold whitespace-nowrap shadow-md">
+              {t('quizResult.rankLabel', { rank })}
+            </div>
+            <div className="h-0 w-0 border-x-[6px] border-x-transparent border-t-[8px] border-t-[var(--color-foreground)]" />
           </div>
-          <div className="mx-auto h-0 w-0 border-x-[6px] border-x-transparent border-t-[8px] border-t-[var(--color-foreground)]" />
-        </div>
-
-        <div className="mt-8 border-t-2 border-[var(--color-border)] relative h-6">
           {ticks.map((tick) => {
             const tickPos = ((tick - scoreScale.min) / range) * 100;
             return (

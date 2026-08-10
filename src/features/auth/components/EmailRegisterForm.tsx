@@ -243,7 +243,7 @@ export default function EmailRegisterForm({ theme, callbackUrl, onSelectPhoneFlo
             required
             value={formData.password}
             onChange={handleChange}
-            placeholder="Min 8 characters"
+          placeholder={t('register.min8Chars') || "Min 8 characters"}
             startIcon={<Lock className="w-5 h-5 text-[var(--color-muted)]" />}
             fullWidth
           />
@@ -261,32 +261,30 @@ export default function EmailRegisterForm({ theme, callbackUrl, onSelectPhoneFlo
             required
             value={formData.confirmPassword}
             onChange={handleChange}
-            placeholder="Confirm password"
+            placeholder={t('register.confirmPassword')}
             startIcon={<Lock className="w-5 h-5 text-[var(--color-muted)]" />}
             fullWidth
           />
         </motion.div>
       </div>
 
-      {/* Invite Code (Optional for teacher registration) */}
-      {formData.role === 'teacher' && (
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.6 }}
-        >
-          <TextField
-            label={`${t('register.inviteCode')} (${t('register.optional')})`}
-            type="text"
-            name="inviteCode"
-            value={formData.inviteCode}
-            onChange={handleChange}
-            placeholder="Enter invite code (optional)"
-            startIcon={<Building2 className="w-5 h-5 text-[var(--color-muted)]" />}
-            fullWidth
-          />
-        </motion.div>
-      )}
+      {/* Invite Code (Optional) */}
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.6 }}
+      >
+        <TextField
+          label={`${t('register.inviteCode')} (${t('register.optional')})`}
+          type="text"
+          name="inviteCode"
+          value={formData.inviteCode}
+          onChange={handleChange}
+          placeholder={t('register.enterInviteCode') || "Enter invite code (optional)"}
+          startIcon={<Building2 className="w-5 h-5 text-[var(--color-muted)]" />}
+          fullWidth
+        />
+      </motion.div>
 
       {/* Submit Button */}
       <motion.div

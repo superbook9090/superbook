@@ -12,6 +12,10 @@ export function registerAccount(body: RegisterInput): Promise<unknown> {
   return apiJson('/api/auth/register', { method: 'POST', body });
 }
 
+export function addOrganization(body: { inviteCode: string }): Promise<{ message: string; organizationId: string; organizationName: string }> {
+  return apiJson('/api/auth/add-organization', { method: 'POST', body });
+}
+
 export function requestForgotPassword(email: string): Promise<{ message: string }> {
   return apiJson('/api/auth/forgot-password', { method: 'POST', body: { email } });
 }
@@ -39,6 +43,7 @@ export type AccountInfo = {
   canChangePassword: boolean;
   /** False when the teacher may only create private (course-code) courses. */
   canCreatePublicCourses: boolean;
+  organizationName: string | null;
 };
 
 export function fetchAccountInfo(): Promise<AccountInfo> {

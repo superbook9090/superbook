@@ -17,10 +17,19 @@ export async function GET() {
     }
 
     await dbConnect();
-    const user = await User.findById(session.user.id).select('password provider');
+    const user = await User.findById(session.user.id).select('password provider organizationId');
 
     if (!user) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
+    }
+
+    let organizationName = null;
+    if (user.organizationId) {
+      const Organization = (await import('@/models/Organization')).default;
+      const org = await Organization.findById(user.organizationId).select('name');
+      if (org) {
+        organizationName = org.name;
+      }
     }
 
     return NextResponse.json({
@@ -31,6 +40,7 @@ export async function GET() {
         session.user.id,
         session.user.role
       ),
+      organizationName,
     });
   } catch (error) {
     logApiError(error as Error, 'GET', '/api/auth/account', logContext);

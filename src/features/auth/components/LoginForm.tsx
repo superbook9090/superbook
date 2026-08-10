@@ -26,9 +26,11 @@ function LoginFormInner() {
   const { t } = useTranslation();
 
   const theme = roleThemes.student;
-  const [error, setError] = useState('');
+  const [error, setError] = useState(
+    searchParams.get('error') === 'exists' ? t('login.phoneExists') : ''
+  );
   const [isLoading, setIsLoading] = useState(false);
-  const [isPhoneFlow, setIsPhoneFlow] = useState(false);
+  const [isPhoneFlow, setIsPhoneFlow] = useState(!!searchParams.get('phone'));
 
   // Client-side guard for UX improvement
   useEffect(() => {

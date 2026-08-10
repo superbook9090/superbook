@@ -10,6 +10,7 @@ export const hi = {
   // Common
   common: {
     reset: 'रीसेट करें',
+    none: 'कोई नहीं',
     loading: 'लोड हो रहा है...',
     error: 'त्रुटि',
     success: 'सफलता',
@@ -864,6 +865,14 @@ export const hi = {
     emailRequired: 'ईमेल आवश्यक है।',
     emailUpdatedSuccess: 'ईमेल पता सफलतापूर्वक जोड़ दिया गया है।',
     usernameLabel: 'प्रदर्शन नाम',
+    organization: 'संगठन',
+    orgJoined: 'एक संगठन में शामिल हुए',
+    noOrganization: 'कोई संगठन लिंक नहीं है',
+    addOrganization: 'संगठन से जुड़ें',
+    enterInviteCode: 'आमंत्रण कोड दर्ज करें',
+    joinOrganization: 'शामिल हों',
+    orgJoinedSuccess: 'संगठन में सफलतापूर्वक शामिल हो गए।',
+    orgJoinError: 'संगठन में शामिल होने में विफल।',
   },
 
   // Progress
@@ -1511,6 +1520,16 @@ export const hi = {
     videoUploadPermissionDesc: 'शिक्षक को असूचीबद्ध यूट्यूब वीडियो व्याख्यान अपलोड करने की अनुमति दें।',
     videoPermissionUpdated: 'वीडियो अपलोड करने की अनुमति सफलतापूर्वक अपडेट की गई',
     errorUpdatingVideoPermission: 'वीडियो अपलोड करने की अनुमति अपडेट करने में विफल',
+    changeRole: 'भूमिका बदलें',
+    teacherLimits: 'शिक्षक सीमाएं',
+    unlimited: 'असीमित',
+    superAdminCannotDelete: 'सुपर एडमिन खाते हटाए नहीं जा सकते',
+    tapForDetails: 'विवरण के लिए टैप करें',
+    viewDetails: 'विवरण देखें',
+    canCreatePublicCoursesDesc: 'शिक्षक को सार्वजनिक पाठ्यक्रम बनाने की अनुमति दें (पाठ्यक्रम कोड की आवश्यकता के बिना)।',
+    courses: 'पाठ्यक्रम',
+    quizzes: 'क्विज़',
+    blogs: 'ब्लॉग',
   },
 
   // Organization Management
@@ -1588,6 +1607,7 @@ export const hi = {
     verifyOtp: 'कोड सत्यापित करें',
     otpSent: 'सत्यापन कोड {phone} पर भेजा गया है',
     invalidOtp: 'अमान्य सत्यापन कोड। कृपया पुनः प्रयास करें।',
+    phoneExists: 'फ़ोन नंबर पहले से पंजीकृत है। कृपया लॉग इन करें।',
     invalidPhone: 'अमान्य फ़ोन नंबर प्रारूप।',
   },
 
@@ -1628,6 +1648,12 @@ export const hi = {
     iWantTo: 'मैं चाहता हूं',
     iWantToLearn: 'सीखना चाहता हूं',
     iWantToTeach: 'पढ़ाना चाहता हूं',
+    student: 'छात्र',
+    studentDesc: 'कोर्स में दाखिला लें और क्विज़ दें',
+    teacher: 'शिक्षक',
+    teacherDesc: 'कोर्स बनाएं और छात्रों का प्रबंधन करें',
+    enterInviteCode: 'आमंत्रण कोड दर्ज करें (वैकल्पिक)',
+    min8Chars: 'न्यूनतम 8 वर्ण',
     fullName: 'पूरा नाम',
     emailAddress: 'ईमेल पता',
     password: 'पासवर्ड',

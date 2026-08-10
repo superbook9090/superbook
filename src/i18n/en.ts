@@ -10,6 +10,7 @@ export const en = {
   // Common
   common: {
     reset: "Reset",
+    none: 'None',
     loading: 'Loading...',
     error: 'Error',
     success: 'Success',
@@ -864,6 +865,14 @@ export const en = {
     emailRequired: 'Email is required.',
     emailUpdatedSuccess: 'Email address added successfully.',
     usernameLabel: 'Display Name',
+    organization: 'Organization',
+    orgJoined: 'Joined an Organization',
+    noOrganization: 'No organization linked',
+    addOrganization: 'Join Organization',
+    enterInviteCode: 'Enter Invite Code',
+    joinOrganization: 'Join',
+    orgJoinedSuccess: 'Successfully joined organization.',
+    orgJoinError: 'Failed to join organization.',
   },
 
   // Progress
@@ -1511,6 +1520,16 @@ export const en = {
     videoUploadPermissionDesc: 'Allow teacher to upload unlisted YouTube video lectures.',
     videoPermissionUpdated: 'Video upload permission updated successfully',
     errorUpdatingVideoPermission: 'Failed to update video upload permission',
+    changeRole: 'Change Role',
+    teacherLimits: 'Teacher Limits',
+    unlimited: 'Unlimited',
+    superAdminCannotDelete: 'Super admin accounts cannot be deleted',
+    tapForDetails: 'Tap for details',
+    viewDetails: 'View Details',
+    canCreatePublicCoursesDesc: 'Allow teacher to create public courses (without requiring a course code).',
+    courses: 'Courses',
+    quizzes: 'Quizzes',
+    blogs: 'Blogs',
   },
 
   // Organization Management
@@ -1588,6 +1607,7 @@ export const en = {
     verifyOtp: 'Verify Code',
     otpSent: 'Verification code sent to {phone}',
     invalidOtp: 'Invalid verification code. Please try again.',
+    phoneExists: 'Phone number already registered. Please log in.',
     invalidPhone: 'Invalid phone number format.',
   },
 
@@ -1628,6 +1648,12 @@ export const en = {
     iWantTo: 'I want to',
     iWantToLearn: 'I want to learn',
     iWantToTeach: 'I want to teach',
+    student: 'Student',
+    studentDesc: 'Enroll in courses and take quizzes',
+    teacher: 'Teacher',
+    teacherDesc: 'Create courses and manage students',
+    enterInviteCode: 'Enter invite code (optional)',
+    min8Chars: 'Min 8 characters',
     fullName: 'Full Name',
     emailAddress: 'Email Address',
     password: 'Password',
