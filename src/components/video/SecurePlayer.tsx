@@ -157,7 +157,7 @@ export default function SecurePlayer({
 
   if (hasError) {
     return (
-      <div className="aspect-video w-full rounded-2xl bg-[var(--color-surface-muted)] border border-[var(--border)] flex flex-col items-center justify-center text-center p-6 space-y-3">
+      <div className="aspect-video w-full rounded-2xl bg-[var(--color-surface-muted)] border border-[var(--border)] flex flex-col items-center justify-center text-center card-body gap-3">
         <AlertCircle className="w-12 h-12 text-[var(--error)] animate-bounce" />
         <h3 className="text-base font-semibold text-[var(--color-foreground)]">{t('courses.playbackError')}</h3>
         <p className="text-xs text-[var(--color-muted-foreground)] max-w-sm">

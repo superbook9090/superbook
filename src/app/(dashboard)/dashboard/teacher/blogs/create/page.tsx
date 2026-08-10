@@ -87,7 +87,7 @@ export default function CreateBlogPage() {
           <BookOpen className="w-3.5 h-3.5 mr-1.5" />
           {t('createBlogPage.tipsTitle')}
         </h4>
-        <ul className="text-xs text-[var(--success)] space-y-0.5">
+        <ul className="text-xs text-[var(--success)] flex flex-col gap-0.5">
           <li>{t('createBlogPage.tipTitle')}</li>
           <li>{t('createBlogPage.tipSections')}</li>
           <li>{t('createBlogPage.tipLists')}</li>

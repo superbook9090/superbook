@@ -148,7 +148,7 @@ export default function EmailRegisterForm({ theme, callbackUrl, onSelectPhoneFlo
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       {/* Role Selection */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}

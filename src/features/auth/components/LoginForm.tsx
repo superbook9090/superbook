@@ -108,7 +108,7 @@ function LoginFormInner() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="p-8 bg-[var(--card-solid)] rounded-2xl border border-[var(--color-border)] shadow-xl relative overflow-hidden"
+            className="card-body bg-[var(--card-solid)] rounded-2xl border border-[var(--color-border)] shadow-xl relative overflow-hidden"
           >
             {/* Background Decorative Blob */}
             <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${theme.gradient} opacity-5 rounded-full blur-2xl -mr-16 -mt-16`} />

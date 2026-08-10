@@ -19,12 +19,12 @@ export function QuizzesTab({
   t,
 }: Props) {
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6">
+    <div className="mx-auto w-full max-w-6xl stack-page">
       <h2 className="text-lg font-bold text-[var(--color-foreground)]">{t('nav.quizzes')}</h2>
       {courseQuizzes.length === 0 ? (
         <div className="py-16 text-center text-sm opacity-60">{t('courses.noQuizzes')}</div>
       ) : (
-        <div className="space-y-8">
+        <div className="stack-page">
           {courseLevelQuizzes.length > 0 && (
             <div>
               <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-[var(--color-muted-foreground)]">

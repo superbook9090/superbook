@@ -99,7 +99,7 @@ export default function QuizDetailPage() {
 
   if (error) {
     return (
-      <div className="space-y-4">
+      <div className="stack-page--compact">
         <div className="p-4 rounded-xl bg-[var(--color-error)]/10 text-[var(--color-error)] border border-[var(--color-error)]/20 w-full">
           {error}
         </div>
@@ -114,7 +114,7 @@ export default function QuizDetailPage() {
 
   if (!quiz) {
     return (
-      <div className="p-4 sm:p-6 max-w-7xl mx-auto">
+      <div className="page-shell">
         <div className="p-4 rounded-xl bg-[var(--color-error)]/10 text-[var(--color-error)] border border-[var(--color-error)]/20 w-full">
           {t('errors.quizNotFound')}
         </div>
@@ -123,7 +123,7 @@ export default function QuizDetailPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="stack-page">
       {/* Back Button */}
       <BackButton
         href={ROUTES.student.quizzes}

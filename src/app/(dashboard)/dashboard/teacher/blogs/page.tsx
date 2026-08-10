@@ -119,7 +119,7 @@ export default function TeacherBlogsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="stack-page">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -188,7 +188,7 @@ export default function TeacherBlogsPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className={`space-y-4 ${isFetching ? 'opacity-60 pointer-events-none' : ''}`}
+        className={`flex flex-col gap-4 ${isFetching ? 'opacity-60 pointer-events-none' : ''}`}
       >
         {filteredBlogs.length === 0 ? (
           <div className="text-center py-16 px-4 bg-[var(--card-solid)] rounded-2xl shadow-sm">
@@ -218,7 +218,7 @@ export default function TeacherBlogsPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 * index }}
-              className="bg-[var(--card-solid)] rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow"
+              className="card-surface card-body hover:shadow-md transition-shadow"
             >
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                 <div className="flex-1 min-w-0">

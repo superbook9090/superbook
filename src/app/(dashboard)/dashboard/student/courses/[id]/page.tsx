@@ -323,7 +323,7 @@ export default function CourseDetailPage() {
   const { course } = enrollment;
 
   return (
-    <div className="space-y-6">
+    <div className="stack-page">
       
       
       {/* Standardized Header Style */}
@@ -365,7 +365,7 @@ export default function CourseDetailPage() {
         </div>
 
         {/* Tab Content Area */}
-        <div className="flex-1 p-6 sm:p-8">
+        <div className="flex-1 card-body">
           
           {/* 1. CURRICULUM TAB */}
           {activeTab === 'curriculum' && (
@@ -407,7 +407,7 @@ export default function CourseDetailPage() {
 
           {/* 4. LEADERBOARD TAB */}
           {activeTab === 'leaderboard' && (
-            <div className="max-w-4xl mx-auto space-y-6">
+            <div className="max-w-4xl mx-auto stack-page">
               <div className="flex items-center justify-between mb-2">
                 <h2 className="text-lg font-bold text-[var(--color-foreground)]">{t('courses.leaderboard')}</h2>
                 <Trophy className="w-6 h-6 text-[var(--color-warning)]" />

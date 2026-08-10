@@ -8,12 +8,14 @@ This document outlines the standard rules, coding practices, and design guidelin
 - **Strict TypeScript**: Use strict TypeScript. Avoid using `any`, `@ts-ignore`, or bypassing type checks. Define explicit interfaces or types for component props and state.
 - **Functional Components**: Use functional React components with hooks. Avoid class-based components.
 - **Single Responsibility Principle**: Each component should do one thing well. If a component handles too much state or UI logic, break it down.
+- **Reusable Components**: Use reusable components whenever possible.
 - **Exports**: Prefer named exports for components and utilities to ensure consistent naming during imports, except for Next.js specific files (like `page.tsx` or `layout.tsx`) which require default exports.
 
 ## 2. Design & Styling Rules
 
 - **Mobile-Centric Design**: Always design for mobile screens first. Build the base layout for smaller screens and use responsive breakpoints (e.g., `sm:`, `md:`, `lg:`) to adapt the UI for tablets and desktops.
 - **Global CSS**: Rely on global CSS (`src/app/globals.css`) for design tokens, typography, colors, and shared utility classes (`.card-panel`, `.stack-page`, etc.). This ensures a unified design system across the application.
+- **Styling & Fonts**: Use global css and fonts design patterns for styling.
 - **Avoid Inline Styles**: Do not use inline `style={{ ... }}` unless calculating dynamic values (like a progress bar percentage). Use Tailwind classes or global CSS classes instead.
 - **Touch Accessibility**: Ensure all interactive elements (buttons, links, inputs) have adequate touch targets (minimum 44x44 pixels) for mobile users.
 

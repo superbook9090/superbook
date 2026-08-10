@@ -38,7 +38,7 @@ export function CurriculumTab({
   t,
 }: Props) {
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto stack-page">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-bold text-[var(--color-foreground)]">{t('courses.courseContent')}</h2>
         <Button 
@@ -51,7 +51,7 @@ export function CurriculumTab({
         </Button>
       </div>
 
-      <div className="space-y-4">
+      <div className="stack-page--compact">
         {curriculumWithQuizzes.map((chapter, idx) => (
           <div key={chapter._id} className="group/chapter">
             <div className={cn(

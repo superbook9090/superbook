@@ -39,7 +39,7 @@ export default function JoinCourseByCode() {
   };
 
   return (
-    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--card-solid)] p-4 sm:p-6 shadow-sm">
+    <div className="card-surface card-body">
       <div className="mb-4 flex items-start gap-3">
         <div
           className={cn(

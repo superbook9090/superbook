@@ -133,7 +133,7 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 overflow-x-hidden">
+    <div className="max-w-4xl mx-auto stack-page overflow-x-hidden">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}

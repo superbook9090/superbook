@@ -159,9 +159,9 @@ export default function OrganizationsPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
+      <div className="flex flex-col gap-6">
         <div className="w-32 h-8 bg-[var(--color-surface-muted)] rounded-lg animate-pulse mb-4" />
-        <div className="space-y-3">
+        <div className="flex flex-col gap-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-20 bg-[var(--color-surface-muted)] rounded-lg animate-pulse" />
           ))}
@@ -171,7 +171,7 @@ export default function OrganizationsPage() {
   }
 
   return (
-    <div className="space-y-6 overflow-x-hidden">
+    <div className="stack-page overflow-x-hidden">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -337,7 +337,7 @@ export default function OrganizationsPage() {
               </Tooltip>
             </div>
 
-            <form onSubmit={handleCreate} className="space-y-4">
+            <form onSubmit={handleCreate} className="flex flex-col gap-4">
               <div>
                 <label className="block text-sm font-medium text-[var(--color-foreground)] mb-1">
                   {t('organizations.organizationName')}
@@ -421,7 +421,7 @@ export default function OrganizationsPage() {
               </Tooltip>
             </div>
 
-            <form onSubmit={handleUpdate} className="space-y-4">
+            <form onSubmit={handleUpdate} className="flex flex-col gap-4">
               <div>
                 <label className="block text-sm font-medium text-[var(--color-foreground)] mb-1">
                   {t('organizations.organizationName')}

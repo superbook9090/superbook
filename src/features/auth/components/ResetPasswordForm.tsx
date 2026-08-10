@@ -61,7 +61,7 @@ function ResetPasswordFormInner() {
   if (!token) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-[var(--card-solid)]/70 backdrop-blur-md border border-[var(--border)] rounded-3xl shadow-[var(--shadow-md)] p-8 text-center">
+        <div className="max-w-md w-full bg-[var(--card-solid)]/70 backdrop-blur-md border border-[var(--border)] rounded-3xl shadow-[var(--shadow-md)] card-body text-center">
           <p className="text-[var(--color-error)] mb-4">{t('password.invalidResetLink')}</p>
           <Link href={ROUTES.forgotPassword} className="text-[var(--student-primary)] font-medium hover:underline">
             {t('password.requestNewLink')}
@@ -72,11 +72,11 @@ function ResetPasswordFormInner() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md bg-[var(--card-solid)]/70 backdrop-blur-md border border-[var(--border)] rounded-3xl shadow-[var(--shadow-md)] p-8 sm:p-10"
+        className="w-full max-w-md bg-[var(--card-solid)]/70 backdrop-blur-md border border-[var(--border)] rounded-3xl shadow-[var(--shadow-md)] card-body"
       >
         <div className="flex justify-center mb-6">
           <PremiumLogo variant="default" size="md" theme="student" />
@@ -89,7 +89,7 @@ function ResetPasswordFormInner() {
           {t('password.resetDescription')}
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <TextField
             label={t('password.newPassword')}
             type="password"

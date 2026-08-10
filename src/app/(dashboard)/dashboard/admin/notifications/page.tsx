@@ -117,8 +117,8 @@ export default function AdminNotificationsPage() {
         </div>
 
         <div className="bg-[var(--card-solid)] shadow rounded-2xl border border-[var(--border)]">
-          <div className="px-4 py-5 sm:p-6">
-            <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="card-body">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <TextField
                 id="titleEn"
                 label={t('admin.notifications.titleEn')}

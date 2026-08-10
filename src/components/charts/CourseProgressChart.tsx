@@ -82,7 +82,7 @@ export default function CourseProgressChart({
 
   if (!processedData || processedData.length === 0) {
     return (
-        <div className="bg-[var(--card-solid)] rounded-2xl p-5 shadow-sm h-[300px] flex flex-col items-center justify-center">
+        <div className="card-surface card-body h-[300px] flex flex-col items-center justify-center">
         <BookOpen className="w-12 h-12 text-[var(--color-muted)] mb-3" />
         <p className="text-[var(--color-muted-foreground)] text-center">{t('charts.noCourseData')}</p>
         <p className="text-[var(--color-muted)] text-sm text-center mt-1">{t('charts.enrollToTrackProgress')}</p>
@@ -91,7 +91,7 @@ export default function CourseProgressChart({
   }
 
   return (
-    <div className="bg-[var(--card-solid)] rounded-2xl p-5 shadow-sm">
+    <div className="card-surface card-body">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-[var(--color-foreground)]">{resolvedTitle}</h3>
         <div className="flex items-center gap-2 text-sm text-[var(--color-muted-foreground)]">
@@ -106,10 +106,10 @@ export default function CourseProgressChart({
           margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
           layout="horizontal"
         >
-          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
           <XAxis 
             type="number"
-            stroke="#9ca3af"
+            stroke="var(--color-muted-foreground)"
             fontSize={12}
             tickLine={false}
             axisLine={false}
@@ -118,7 +118,7 @@ export default function CourseProgressChart({
           <YAxis 
             type="category"
             dataKey="displayName"
-            stroke="#9ca3af"
+            stroke="var(--color-muted-foreground)"
             fontSize={12}
             tickLine={false}
             axisLine={false}

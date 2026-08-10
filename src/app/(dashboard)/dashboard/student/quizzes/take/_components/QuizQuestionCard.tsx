@@ -19,7 +19,7 @@ export function QuizQuestionCard({
   const currentQid = currentQ?._id;
 
   return (
-    <div className="bg-[var(--card-solid)] rounded-2xl border border-[var(--color-border)] shadow-sm p-4 sm:p-6 mb-4 sm:mb-6">
+    <div className="card-surface card-body mb-4 sm:mb-6">
       <div className="flex items-start gap-3 mb-4">
         <span className="shrink-0 inline-flex items-center justify-center min-w-[2rem] h-8 px-2 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-sm font-bold">
           {currentQuestionIndex + 1}
@@ -29,7 +29,7 @@ export function QuizQuestionCard({
         </h3>
       </div>
 
-      <div className="space-y-3">
+      <div className="flex flex-col gap-3">
         {(currentQ?.options || []).map((option, index) => (
           <button
             key={index}

@@ -46,7 +46,7 @@ export function OrganizationAssignModal({
             </button>
           </Tooltip>
         </div>
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
           <Dropdown
             label={t('adminUsers.selectOrganization')}
             value={selectedOrganizationId || ''}

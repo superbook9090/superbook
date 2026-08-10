@@ -46,7 +46,7 @@ export function UsersMobileList({ users, organizations, handleOpenUserDetail }: 
             <span className="text-xs px-2 py-1 bg-[var(--info-light)] text-[var(--info)] rounded-full capitalize">{user.role}</span>
           </div>
 
-          <div className="space-y-3">
+          <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
               <span className="text-xs text-[var(--color-muted-foreground)]">{t('adminUsers.organization')}</span>
               <div className="flex items-center gap-2">

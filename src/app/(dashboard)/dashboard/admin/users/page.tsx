@@ -291,7 +291,7 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="space-y-6 overflow-x-hidden">
+    <div className="stack-page overflow-x-hidden">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}

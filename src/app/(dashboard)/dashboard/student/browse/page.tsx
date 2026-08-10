@@ -99,7 +99,7 @@ export default function BrowseCoursesPage() {
         animate={{ opacity: 1, y: 0 }}
         className="hero-banner"
       >
-        <div className="space-y-4">
+        <div className="stack-page--compact">
           <BackButton
             href={ROUTES.student.courses}
             label={t('courses.backToCourses')}
@@ -107,14 +107,14 @@ export default function BrowseCoursesPage() {
           />
 
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               <h1 className="heading-xl">{t('courses.browseCourses')}</h1>
               <p className="text-[var(--color-muted-foreground)] text-sm sm:text-base max-w-xl">
                 {t('courses.browseDesc')}
               </p>
             </div>
 
-            <div className="flex items-center gap-4 bg-[var(--card-solid)] p-4 rounded-xl border border-[var(--color-border)] shadow-[var(--shadow-sm)] min-w-[180px]">
+            <div className="flex items-center gap-4 card-surface card-body min-w-[180px]">
               <div className="text-right flex-1">
                 <p className="text-[10px] font-black uppercase tracking-widest text-[var(--color-muted)]">{t('courses.availableCourses')}</p>
                 <p className="text-2xl font-black leading-none mt-1 tabular-nums text-[var(--color-foreground)]">{availableCourses.length}</p>

@@ -31,7 +31,7 @@ export function LimitsModal({
         className="bg-[var(--card-solid)] rounded-2xl p-6 w-full max-w-md shadow-2xl"
       >
         <h3 className="text-lg font-semibold text-[var(--color-foreground)] mb-4">{t('adminUsers.editTeacherLimits')}</h3>
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
           <TextField
             label={t('adminUsers.coursesLimit')}
             type="number"

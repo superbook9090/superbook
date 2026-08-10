@@ -79,7 +79,7 @@ export default function AdminCoursesPage() {
   }
 
   return (
-    <div className="space-y-6 overflow-x-hidden">
+    <div className="stack-page overflow-x-hidden">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -194,7 +194,7 @@ export default function AdminCoursesPage() {
                   </p>
 
                   {/* Meta */}
-                  <div className="space-y-2 mb-4 mt-auto">
+                  <div className="flex flex-col gap-2 mb-4 mt-auto">
                     <div className="flex items-center text-sm text-[var(--color-muted-foreground)]">
                       <Users className="w-4 h-4 mr-2" />
                       {course.instructor?.name || t('admin.unknownInstructor')}

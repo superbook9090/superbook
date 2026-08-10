@@ -222,7 +222,7 @@ function AnalyticsView({ stats }: { stats: TeacherStats }) {
             {/* mobile: stacked rows */}
             <ul className="md:hidden divide-y divide-[var(--border)]">
               {stats.courses?.map((course) => (
-                <li key={course._id} className="p-4 space-y-3">
+                <li key={course._id} className="card-body flex flex-col gap-3">
                   <div className="flex items-start justify-between gap-3">
                     <p className="text-sm font-semibold text-[var(--color-foreground)] min-w-0 break-words">{course.title}</p>
                     <VisibilityChip

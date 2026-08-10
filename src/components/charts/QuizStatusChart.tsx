@@ -82,15 +82,15 @@ export default function QuizStatusChart({
       const data = payload[0].payload;
       const percentage = ((data.value / totalQuizzes) * 100).toFixed(1);
       return (
-        <div className="bg-[var(--card-solid)] p-3 rounded-lg shadow-lg border border-[var(--color-border)]">
-          <div className="flex items-center gap-2 mb-1">
+        <div className="bg-[var(--card-solid)] p-2 sm:p-3 rounded-lg shadow-lg border border-[var(--color-border)]">
+          <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
             {data.icon}
-            <p className="text-sm font-medium text-[var(--color-foreground)] capitalize">{data.name}</p>
+            <p className="text-xs sm:text-sm font-medium text-[var(--color-foreground)] capitalize">{data.name}</p>
           </div>
-          <p className="text-lg font-bold" style={{ color: data.color }}>
+          <p className="text-base sm:text-lg font-bold" style={{ color: data.color }}>
             {t('charts.quizzesCount', { count: data.value })}
           </p>
-          <p className="text-sm text-[var(--color-muted-foreground)]">{t('charts.percentOfTotal', { percent: percentage })}</p>
+          <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)]">{t('charts.percentOfTotal', { percent: percentage })}</p>
         </div>
       );
     }
@@ -136,54 +136,56 @@ const renderCustomizedLabel = (props: CustomLabelProps) => {
 
   if (!processedData || processedData.length === 0) {
     return (
-      <div className="bg-[var(--card-solid)] rounded-2xl p-5 shadow-sm h-[300px] flex flex-col items-center justify-center">
-        <PieChartIcon className="w-12 h-12 text-[var(--color-muted)] mb-3" />
-        <p className="text-[var(--color-muted-foreground)] text-center">{t('charts.noQuizData')}</p>
-        <p className="text-[var(--color-muted)] text-sm text-center mt-1">{t('charts.takeQuizzesToSeeEngagement')}</p>
+      <div className="card-surface card-body h-[250px] sm:h-[300px] flex flex-col items-center justify-center p-4">
+        <PieChartIcon className="w-10 h-10 sm:w-12 sm:h-12 text-[var(--color-muted)] mb-2 sm:mb-3" />
+        <p className="text-[var(--color-muted-foreground)] text-sm sm:text-base text-center">{t('charts.noQuizData')}</p>
+        <p className="text-[var(--color-muted)] text-xs sm:text-sm text-center mt-1">{t('charts.takeQuizzesToSeeEngagement')}</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-[var(--card-solid)] rounded-2xl p-5 shadow-sm">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-[var(--color-foreground)]">{resolvedTitle}</h3>
-        <div className="text-sm text-[var(--color-muted-foreground)]">
+    <div className="card-surface card-body">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+        <h3 className="text-base sm:text-lg font-semibold text-[var(--color-foreground)]">{resolvedTitle}</h3>
+        <div className="text-xs sm:text-sm text-[var(--color-muted-foreground)]">
           {t('charts.totalQuizzes', { count: totalQuizzes })}
         </div>
       </div>
       
-      <ResponsiveContainer width="100%" height={height}>
-        <PieChart>
-          <Pie
-            data={processedData}
-            cx="50%"
-            cy="50%"
-            labelLine={false}
-            label={renderCustomizedLabel}
-            outerRadius={100}
-            fill="#8884d8"
-            dataKey="value"
-          >
-            {processedData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color} />
-            ))}
-          </Pie>
-          <Tooltip content={<CustomTooltip />} />
-          <Legend 
-            verticalAlign="bottom" 
-            height={36}
-            formatter={(value, entry: LegendEntryProps) => (
-              <div className="flex items-center gap-2">
-                <span style={{ color: entry.color }}>
-                  {entry.payload && 'icon' in entry.payload ? entry.payload.icon : null}
-                </span>
-                <span className="capitalize">{value}</span>
-              </div>
-            )}
-          />
-        </PieChart>
-      </ResponsiveContainer>
+      <div className={`w-full ${height === 300 ? 'h-[250px] sm:h-[300px]' : ''}`} style={{ height: height === 300 ? undefined : height }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={processedData}
+              cx="50%"
+              cy="50%"
+              labelLine={false}
+              label={renderCustomizedLabel}
+              outerRadius={100}
+              fill="#8884d8"
+              dataKey="value"
+            >
+              {processedData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Pie>
+            <Tooltip content={<CustomTooltip />} />
+            <Legend 
+              verticalAlign="bottom" 
+              height={36}
+              formatter={(value, entry: LegendEntryProps) => (
+                <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                  <span style={{ color: entry.color }}>
+                    {entry.payload && 'icon' in entry.payload ? entry.payload.icon : null}
+                  </span>
+                  <span className="capitalize">{value}</span>
+                </div>
+              )}
+            />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 }

@@ -77,7 +77,7 @@ export default function AdminVideosPage() {
   if (isLoading) return <PageSkeleton />;
 
   return (
-    <div className="space-y-6 overflow-x-hidden">
+    <div className="stack-page overflow-x-hidden">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -165,7 +165,7 @@ export default function AdminVideosPage() {
               </div>
 
               {/* Body details */}
-              <div className="p-4 flex-1 flex flex-col justify-between space-y-4">
+              <div className="card-body flex-1 flex flex-col justify-between gap-4">
                 <div>
                   <h3 className="font-semibold text-[var(--color-foreground)] line-clamp-1">
                     {vid.title}
@@ -176,7 +176,7 @@ export default function AdminVideosPage() {
                   </p>
                 </div>
 
-                <div className="pt-3 border-t border-[var(--border)] space-y-2">
+                <div className="pt-3 border-t border-[var(--border)] flex flex-col gap-2">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-[var(--color-muted-foreground)] flex items-center gap-1">
                       <User className="w-3.5 h-3.5" /> Instructor

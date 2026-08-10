@@ -133,7 +133,7 @@ export default function BlogDetailPage() {
         className="bg-[var(--card-solid)] rounded-2xl shadow-sm overflow-hidden"
       >
         {/* Header */}
-        <div className="p-4 sm:p-6 lg:p-8 border-b border-[var(--border)]">
+        <div className="card-body border-b border-[var(--border)]">
           <div className="flex items-center gap-3 mb-4">
             <Badge variant="primary" size="md">
               <Hash className="w-3 h-3 mr-1" />
@@ -158,7 +158,7 @@ export default function BlogDetailPage() {
         </div>
 
         {/* Content */}
-        <div className="p-4 sm:p-6 lg:p-8">
+        <div className="card-body">
           <div
             className="prose prose-sm sm:prose-base prose-teal max-w-none text-[var(--color-foreground)] prose-headings:font-semibold prose-headings:text-[var(--color-foreground)] prose-p:text-[var(--color-muted-foreground)] prose-p:leading-relaxed prose-a:text-[var(--student-primary)] prose-a:no-underline hover:prose-a:underline prose-blockquote:border-l-4 prose-blockquote:border-[var(--border)] prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-[var(--color-muted-foreground)] prose-ul:list-disc prose-ol:list-decimal prose-li:text-[var(--color-muted-foreground)] prose-img:rounded-lg prose-img:shadow-sm"
             dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(blog.content) }}
@@ -166,7 +166,7 @@ export default function BlogDetailPage() {
         </div>
 
         {/* Actions */}
-        <div className="p-4 sm:p-6 lg:p-8 bg-[var(--color-surface-muted)] border-t border-[var(--border)]">
+        <div className="card-body bg-[var(--color-surface-muted)] border-t border-[var(--border)]">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <Button
               type="button"

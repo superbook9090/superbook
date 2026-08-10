@@ -100,7 +100,7 @@ export default function EmailLoginForm({ theme, callbackUrl, onSelectPhoneFlow }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       {/* Email Input */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}

@@ -200,7 +200,7 @@ export default function TeacherQuizzesPage() {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="stack-page">
       {/* Header - Mobile optimized */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div className="w-full sm:w-auto">
@@ -286,11 +286,11 @@ export default function TeacherQuizzesPage() {
         ) : (
           <>
             {/* Mobile Cards View */}
-            <div className={`md:hidden space-y-3 ${isFetching ? 'opacity-60 pointer-events-none' : ''}`}>
+            <div className={`md:hidden flex flex-col gap-3 ${isFetching ? 'opacity-60 pointer-events-none' : ''}`}>
               {quizzes.map((quiz) => {
                 const quizId = toIdString(quiz._id);
                 return (
-                <div key={quizId} className="bg-[var(--card-solid)] shadow rounded-lg p-4 space-y-3">
+                <div key={quizId} className="card-surface card-body flex flex-col gap-3">
                   <div className="flex justify-between items-start">
                     <div className="flex-1 min-w-0">
                       <h3 className="text-base font-semibold text-[var(--color-foreground)] truncate">{quiz.title}</h3>

@@ -102,7 +102,7 @@ export default function HeaderStatic({ forceScrolled = false }: { forceScrolled?
                 <line x1="4" x2="20" y1="18" y2="18" />
               </svg>
             </summary>
-            <div className="absolute right-0 top-full mt-2 w-56 rounded-xl bg-[var(--card-solid)] shadow-lg border border-[var(--border)] p-4 space-y-3">
+            <div className="absolute right-0 top-full mt-2 w-56 rounded-xl bg-[var(--card-solid)] shadow-lg border border-[var(--border)] card-body flex flex-col gap-3">
               {enableBlogs && (
                 <Link
                   href={ROUTES.blogs}

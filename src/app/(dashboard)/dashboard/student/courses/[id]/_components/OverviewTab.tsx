@@ -9,8 +9,8 @@ type Props = {
 
 export function OverviewTab({ description, category, progress, t }: Props) {
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      <div className="space-y-4">
+    <div className="max-w-4xl mx-auto stack-page">
+      <div className="stack-page--compact">
         <h2 className="text-lg font-bold text-[var(--color-foreground)]">{t('common.overview')}</h2>
         <p className="text-[var(--color-muted-foreground)] leading-relaxed">
           {description || t('courses.noDescription')}

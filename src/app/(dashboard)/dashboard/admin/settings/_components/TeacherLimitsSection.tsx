@@ -26,7 +26,7 @@ export function TeacherLimitsSection({ settings, setSettings, theme }: Props) {
         {t('adminSettings.teacherLimits')}
       </h2>
 
-      <div className="space-y-6">
+      <div className="flex flex-col gap-6">
         {/* Courses Limit */}
         <div className="flex items-start gap-4">
           <div className={`p-3 ${theme.activeBg} rounded-xl flex-shrink-0`}>

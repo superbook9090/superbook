@@ -26,7 +26,7 @@ export function QuizTakeHeader({
   t,
 }: Props) {
   return (
-    <div className="bg-[var(--card-solid)] rounded-2xl border border-[var(--color-border)] shadow-sm p-4 sm:p-6 mb-4 sm:mb-6">
+    <div className="card-surface card-body mb-4 sm:mb-6">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
         <div className="min-w-0">
           <h1 className="text-base sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)] line-clamp-2">

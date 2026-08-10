@@ -76,7 +76,7 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div className="space-y-6 overflow-x-hidden">
+    <div className="stack-page overflow-x-hidden">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -101,7 +101,7 @@ export default function AdminDashboardPage() {
           <Link
             key={href}
             href={href}
-            className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-4 sm:p-6 hover:shadow-lg transition-all group w-full"
+            className="card-surface card-body hover:shadow-lg transition-all group w-full"
           >
             <div className="flex items-center">
               <div className={`p-3 rounded-full transition-colors ${iconClass}`}>

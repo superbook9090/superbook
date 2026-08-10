@@ -389,7 +389,7 @@ export default function StudentProgressPage() {
                 {selectedCourse === item.enrollment._id && item.attempts?.length > 0 && (
                   <div className="border-t border-[var(--border)] bg-[var(--color-surface-muted)] px-6 py-4">
                     <h4 className="text-sm font-semibold text-[var(--color-foreground)] mb-3">{t('progress.quizAttempts')}</h4>
-                    <div className="space-y-2">
+                    <div className="flex flex-col gap-2">
                       {item.attempts?.map((attempt) => (
                         <div
                           key={attempt._id}

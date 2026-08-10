@@ -29,7 +29,7 @@ export function CourseHeader({
       animate={{ opacity: 1, y: 0 }}
       className="hero-banner"
     >
-      <div className="space-y-4">
+      <div className="stack-page--compact">
         <button
           onClick={() => router.push(ROUTES.student.courses)}
           className="flex items-center gap-2 text-xs font-medium text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors group"
@@ -39,7 +39,7 @@ export function CourseHeader({
         </button>
 
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-foreground)]">
               {courseTitle}
             </h1>
@@ -56,7 +56,7 @@ export function CourseHeader({
             </div>
           </div>
 
-          <div className="flex items-center gap-4 bg-[var(--card-solid)] p-4 rounded-xl border border-[var(--color-border)] shadow-[var(--shadow-sm)]">
+          <div className="flex items-center gap-4 card-surface card-body">
             <div className="text-right">
               <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
                 {t('courses.progress')}

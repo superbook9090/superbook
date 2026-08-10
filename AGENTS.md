@@ -94,6 +94,8 @@ There is an existing `.env` file in the repo. Do not print secrets into chat.
 
 ## Working Conventions
 
+- Use reusable components whenever possible.
+- Use global css, fonts design pattern for styling.
 - Prefer narrow, localized edits. This repo may have user changes in flight.
 - Do not revert unrelated changes.
 - Keep authorization checks at the API layer. Frontend guards are secondary.

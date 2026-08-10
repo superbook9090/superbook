@@ -109,7 +109,7 @@ export function UserDetailModal({
           </div>
 
           {/* Operations */}
-          <div className="space-y-4">
+          <div className="flex flex-col gap-4">
             {/* Change Role */}
             <Dropdown
               label={t('adminUsers.changeRole')}

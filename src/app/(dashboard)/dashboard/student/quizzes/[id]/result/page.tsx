@@ -233,7 +233,7 @@ export default function QuizResultPage() {
         </>
       )}
 
-      <div className="bg-[var(--card-solid)] rounded-2xl border border-[var(--color-border)] p-4 sm:p-5">
+      <div className="card-surface card-body">
         <h2 className="text-base sm:text-lg font-semibold text-[var(--color-foreground)] mb-3">
           {t('quizResult.solutions')}
         </h2>
@@ -244,7 +244,7 @@ export default function QuizResultPage() {
           counts={solutionCounts}
         />
 
-        <div className="mt-4 space-y-3">
+        <div className="mt-4 flex flex-col gap-3">
           {filteredQuestions.length === 0 ? (
             <p className="text-sm text-[var(--color-muted-foreground)] text-center py-6">
               {t('quizResult.noFilteredQuestions')}
@@ -278,7 +278,7 @@ export default function QuizResultPage() {
                     </p>
                   </div>
 
-                  <div className="p-3 space-y-2">
+                  <div className="p-3 flex flex-col gap-2">
                     {question.options?.map((option, optIndex) => {
                       const isSelected = selectedOption === optIndex;
                       const isCorrectOption = safeNumber(question.correctAnswer, -1) === optIndex;

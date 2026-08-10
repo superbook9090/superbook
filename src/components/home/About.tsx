@@ -112,7 +112,7 @@ export default function About() {
             className="relative"
           >
             <div className="relative glass rounded-3xl p-8">
-              <div className="space-y-4">
+              <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-3 border-b border-[var(--color-border)] pb-4">
                   <div className="w-10 h-10 bg-[var(--primary-soft)] rounded-xl flex items-center justify-center">
                     <DashboardGlyph className="w-5 h-5 text-[var(--primary)]" />
@@ -141,7 +141,7 @@ export default function About() {
                     </div>
                   ))}
                 </div>
-                <div className="rounded-xl bg-[var(--color-surface-muted)] p-4 space-y-2">
+                <div className="rounded-xl bg-[var(--color-surface-muted)] card-body flex flex-col gap-2">
                   <div className="h-2 bg-[var(--color-surface-muted-strong)] rounded-full w-4/5" />
                   <div className="h-2 bg-[var(--color-surface-muted-strong)] rounded-full w-3/5" />
                   <div className="h-2 bg-[var(--color-surface-muted-strong)] rounded-full w-2/3" />

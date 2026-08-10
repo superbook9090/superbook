@@ -100,7 +100,7 @@ export default function ChangePasswordForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
       {hasPassword && (
         <TextField

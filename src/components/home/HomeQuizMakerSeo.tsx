@@ -112,7 +112,7 @@ export default function HomeQuizMakerSeo() {
         <h3 className="text-xl font-bold text-[var(--color-foreground)] mb-4">
           {t('seoTools.common.faqTitle')}
         </h3>
-        <dl className="space-y-4">
+        <dl className="flex flex-col gap-4">
           {FAQ_KEYS.map((key) => (
             <div key={key} className="rounded-xl border border-[var(--border)] p-5">
               <dt className="font-semibold text-[var(--color-foreground)] mb-2">
