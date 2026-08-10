@@ -222,7 +222,7 @@ export default function StudentQuizzesPage() {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6">
+            <div className="grid grid-cols-1 items-start gap-[var(--card-gap)] sm:grid-cols-2 lg:grid-cols-3">
               {availableQuizzes.map((quiz: Quiz) => (
                 <div key={quiz._id} className="min-w-0">
                   <LazyQuizCard
@@ -241,7 +241,7 @@ export default function StudentQuizzesPage() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6">
+          <div className="grid grid-cols-1 gap-[var(--card-gap)] sm:grid-cols-2 lg:grid-cols-3">
             {completedAttempts.map((attempt: QuizAttempt) => (
               <div key={attempt._id} className="h-full min-w-0">
                 <LazyQuizCard

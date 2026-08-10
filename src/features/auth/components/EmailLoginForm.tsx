@@ -100,7 +100,7 @@ export default function EmailLoginForm({ theme, callbackUrl, onSelectPhoneFlow }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       {/* Email Input */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}
@@ -144,7 +144,7 @@ export default function EmailLoginForm({ theme, callbackUrl, onSelectPhoneFlow }
         transition={{ delay: 0.4 }}
         className="flex items-center justify-between"
       >
-        <label className="flex items-center cursor-pointer">
+        <label className="flex items-center min-h-[44px] cursor-pointer group">
           <input
             type="checkbox"
             checked={rememberMe}
@@ -155,7 +155,7 @@ export default function EmailLoginForm({ theme, callbackUrl, onSelectPhoneFlow }
         </label>
         <Link
           href={ROUTES.forgotPassword}
-          className={`text-sm font-medium ${theme.text} hover:text-[var(--color-foreground)] transition-colors`}
+          className={`inline-flex items-center min-h-[44px] text-sm font-medium ${theme.text} hover:text-[var(--color-foreground)] transition-colors`}
         >
           {t('login.forgotPassword')}
         </Link>
@@ -186,7 +186,7 @@ export default function EmailLoginForm({ theme, callbackUrl, onSelectPhoneFlow }
       </motion.div>
 
       {/* Divider */}
-      <div className="relative my-8">
+      <div className="relative my-[var(--card-gap)]">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-[var(--color-border)]" />
         </div>

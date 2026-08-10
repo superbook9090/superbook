@@ -81,7 +81,7 @@ export default function TeacherCoursesPage() {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[var(--card-gap)]">
               {courses.map((course: Course) => (
                 <div
                   key={course._id}
@@ -101,7 +101,7 @@ export default function TeacherCoursesPage() {
                       <span className="text-white text-4xl">📚</span>
                     </div>
                   )}
-                  <div className="p-6">
+                  <div className="card-body">
                     <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
                       <div className="flex items-center gap-2">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${course.isPublished

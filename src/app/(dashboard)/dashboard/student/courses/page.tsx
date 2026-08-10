@@ -125,7 +125,7 @@ export default function StudentCoursesPage() {
         animate={{ opacity: 1, y: 0 }}
         className="hero-banner"
       >
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-[var(--card-gap)]">
           <div>
             <h1 className="heading-xl mb-2">{t('courses.myCourses')}</h1>
             <p className="text-[var(--color-muted-foreground)] text-sm sm:text-base">

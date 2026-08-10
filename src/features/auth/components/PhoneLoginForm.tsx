@@ -165,12 +165,12 @@ export default function PhoneLoginForm({ theme, callbackUrl, onBackToEmail }: Ph
   };
 
   return (
-    <form onSubmit={isOtpSent ? handleVerifyOtp : handleSendOtp} className="flex flex-col gap-5">
+    <form onSubmit={isOtpSent ? handleVerifyOtp : handleSendOtp} className="flex flex-col gap-4">
       {!isOtpSent ? (
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="flex flex-col gap-5"
+          className="flex flex-col gap-4"
         >
           <TextField
             label={t('login.enterPhone') || 'Phone Number'}
@@ -206,7 +206,7 @@ export default function PhoneLoginForm({ theme, callbackUrl, onBackToEmail }: Ph
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="flex flex-col gap-5"
+          className="flex flex-col gap-4"
         >
           <p className="text-sm text-[var(--color-muted-foreground)]">
             {t('login.otpSent', { phone: phoneNumber }) || `Code sent to ${phoneNumber}`}

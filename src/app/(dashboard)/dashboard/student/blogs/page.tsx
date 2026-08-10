@@ -193,7 +193,7 @@ export default function StudentBlogsPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className={`grid grid-cols-1 md:grid-cols-2 gap-6 ${isFetching ? 'opacity-60 pointer-events-none' : ''}`}
+        className={`grid grid-cols-1 md:grid-cols-2 gap-[var(--card-gap)] ${isFetching ? 'opacity-60 pointer-events-none' : ''}`}
       >
         {filteredBlogs.length === 0 ? (
           <div className="col-span-full text-center py-16 card-panel">
@@ -226,7 +226,7 @@ export default function StudentBlogsPage() {
                 transition={{ delay: 0.1 * index }}
                 className="bg-[var(--card-solid)] rounded-2xl border border-[var(--color-border)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5 transition-all overflow-hidden group"
               >
-                <div className="p-6">
+                <div className="card-body">
                   {/* Topic Badge */}
                   <div className="flex items-center justify-between mb-3">
                     <Badge variant="primary" size="sm">

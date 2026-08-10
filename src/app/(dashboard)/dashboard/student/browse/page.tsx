@@ -106,7 +106,7 @@ export default function BrowseCoursesPage() {
             className="text-xs font-black uppercase tracking-widest text-[var(--color-muted)] hover:text-[var(--color-foreground)]"
           />
 
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-[var(--card-gap)]">
             <div className="flex flex-col gap-2">
               <h1 className="heading-xl">{t('courses.browseCourses')}</h1>
               <p className="text-[var(--color-muted-foreground)] text-sm sm:text-base max-w-xl">

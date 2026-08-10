@@ -81,7 +81,7 @@ function RegisterFormInner() {
       <AuthBranding />
 
       {/* Right Side - Form */}
-      <div className="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-20 xl:px-24 bg-[var(--color-background)]">
+      <div className="flex-1 flex flex-col justify-center py-4 lg:py-12 px-[var(--gutter-x)] lg:px-20 xl:px-24 bg-[var(--color-background)]">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -89,8 +89,8 @@ function RegisterFormInner() {
           className="mx-auto w-full max-w-md"
         >
           {/* Header */}
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-[var(--color-foreground)] tracking-tight mb-2">
+          <div className="mb-[var(--section-gap)] text-center">
+            <h1 className="heading-xl tracking-tight mb-2">
               {t('register.createAccount')}
             </h1>
             <p className="text-[var(--color-muted-foreground)]">
@@ -132,7 +132,7 @@ function RegisterFormInner() {
 
             {/* Login Link */}
             {!isPhoneFlow && (
-              <p className="mt-8 text-center text-sm text-[var(--color-muted-foreground)]">
+              <p className="mt-[var(--section-gap)] text-center text-sm text-[var(--color-muted-foreground)]">
                 {t('register.alreadyHaveAccount')}{' '}
                 <Link
                   href={
@@ -140,7 +140,7 @@ function RegisterFormInner() {
                       ? ROUTES.login
                       : `${ROUTES.login}?callbackUrl=${encodeURIComponent(callbackUrl)}`
                   }
-                  className={`font-semibold ${theme.text} hover:text-[var(--color-foreground)] transition-colors`}
+                  className={`min-h-[44px] font-semibold ${theme.text} hover:text-[var(--color-foreground)] transition-colors`}
                 >
                   {t('register.signIn')}
                 </Link>

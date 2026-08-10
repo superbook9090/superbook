@@ -50,14 +50,14 @@ export default function ForgotPasswordForm() {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md bg-[var(--card-solid)]/70 backdrop-blur-md border border-[var(--border)] rounded-3xl shadow-[var(--shadow-md)] card-body"
       >
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center mb-[var(--section-gap)]">
           <PremiumLogo variant="default" size="md" theme="student" />
         </div>
 
-        <h1 className="text-2xl font-bold text-[var(--color-foreground)] text-center mb-2">
+        <h1 className="heading-lg text-center mb-2">
           {t('password.forgotTitle')}
         </h1>
-        <p className="text-sm text-[var(--color-muted-foreground)] text-center mb-6">
+        <p className="text-sm text-[var(--color-muted-foreground)] text-center mb-[var(--section-gap)]">
           {sent ? t('password.forgotSuccess') : t('password.forgotDescription')}
         </p>
 
@@ -76,7 +76,7 @@ export default function ForgotPasswordForm() {
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-full flex items-center justify-center py-3.5 bg-gradient-to-r ${theme.gradient} text-white font-semibold rounded-xl disabled:opacity-60`}
+              className={`w-full flex items-center justify-center min-h-[44px] py-3.5 bg-gradient-to-r ${theme.gradient} text-white font-semibold rounded-xl disabled:opacity-60`}
             >
               {isLoading ? <Loader size="sm" /> : (
                 <>
@@ -91,7 +91,7 @@ export default function ForgotPasswordForm() {
         <BackButton
           href={ROUTES.login}
           label={t('password.backToLogin')}
-          className="mt-6 w-full justify-center text-[var(--student-primary)] hover:underline"
+          className="mt-[var(--section-gap)] w-full justify-center text-[var(--student-primary)] hover:underline"
         />
       </motion.div>
     </div>

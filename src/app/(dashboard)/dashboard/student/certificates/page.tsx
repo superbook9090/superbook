@@ -64,7 +64,7 @@ export default function StudentCertificatesPage() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[var(--card-gap)]">
             {certificates.map((certificate) => (
               <Link
                 key={certificate._id}
@@ -72,7 +72,7 @@ export default function StudentCertificatesPage() {
                 className="block bg-[var(--card-solid)] rounded-2xl border border-[var(--color-border)] shadow-[var(--shadow-sm)] overflow-hidden hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5 transition-all"
               >
                 <div className="h-[3px]" style={{ background: 'var(--primary-gradient)' }} aria-hidden />
-                <div className="p-6">
+                <div className="card-body">
                   <div className="flex items-start gap-3">
                     <div className="p-2 rounded-full bg-[var(--primary-soft)] text-[var(--primary)]">
                       <Award className="w-6 h-6" />

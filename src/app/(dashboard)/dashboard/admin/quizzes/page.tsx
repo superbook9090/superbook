@@ -211,7 +211,7 @@ export default function AdminQuizzesPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[var(--card-gap)]"
       >
         {quizzes.length === 0 ? (
           <div className="col-span-full text-center py-16 bg-[var(--card-solid)] rounded-2xl shadow-sm">
@@ -228,7 +228,7 @@ export default function AdminQuizzesPage() {
               transition={{ delay: 0.1 * index }}
               className="bg-[var(--card-solid)] rounded-2xl shadow-sm hover:shadow-lg transition-shadow overflow-hidden group"
             >
-              <div className="p-6">
+              <div className="card-body">
                 {/* Header */}
                 <div className="flex items-start justify-between mb-4">
                   <div className="p-3 rounded-xl bg-gradient-to-br from-[var(--primary)] to-[var(--primary-accent)] text-white">

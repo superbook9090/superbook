@@ -147,7 +147,7 @@ export default function AdminCoursesPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[var(--card-gap)]"
       >
         {filteredCourses.length === 0 ? (
           <div className="col-span-full text-center py-16 bg-[var(--card-solid)] rounded-2xl shadow-sm">

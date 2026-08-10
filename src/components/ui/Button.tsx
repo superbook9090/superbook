@@ -33,6 +33,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       'relative inline-flex items-center justify-center font-semibold transition-all duration-200',
       'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
       'disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none',
+      'min-h-[44px]', // Mobile touch target rule
       fullWidth && 'w-full'
     );
 

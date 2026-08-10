@@ -63,7 +63,7 @@ function ResetPasswordFormInner() {
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-[var(--card-solid)]/70 backdrop-blur-md border border-[var(--border)] rounded-3xl shadow-[var(--shadow-md)] card-body text-center">
           <p className="text-[var(--color-error)] mb-4">{t('password.invalidResetLink')}</p>
-          <Link href={ROUTES.forgotPassword} className="text-[var(--student-primary)] font-medium hover:underline">
+          <Link href={ROUTES.forgotPassword} className="inline-flex min-h-[44px] items-center text-[var(--student-primary)] font-medium hover:underline">
             {t('password.requestNewLink')}
           </Link>
         </div>
@@ -78,14 +78,14 @@ function ResetPasswordFormInner() {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md bg-[var(--card-solid)]/70 backdrop-blur-md border border-[var(--border)] rounded-3xl shadow-[var(--shadow-md)] card-body"
       >
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center mb-[var(--section-gap)]">
           <PremiumLogo variant="default" size="md" theme="student" />
         </div>
 
-        <h1 className="text-2xl font-bold text-[var(--color-foreground)] text-center mb-2">
+        <h1 className="heading-lg text-center mb-2">
           {t('password.resetTitle')}
         </h1>
-        <p className="text-sm text-[var(--color-muted-foreground)] text-center mb-6">
+        <p className="text-sm text-[var(--color-muted-foreground)] text-center mb-[var(--section-gap)]">
           {t('password.resetDescription')}
         </p>
 
