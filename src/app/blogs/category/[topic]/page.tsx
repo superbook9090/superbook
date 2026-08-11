@@ -72,7 +72,12 @@ export default async function BlogCategoryPage({
 
   return (
     <main className="page-shell">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <script
+        id={`jsonld-blog-category-breadcrumb-${topicSlug}`}
+        type="application/ld+json"
+        suppressHydrationWarning
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <header className="mb-8">
         <nav className="text-sm text-[var(--color-muted-foreground)] mb-4">
           <Link href="/blogs" className="hover:text-[var(--color-primary)]">Blogs</Link>

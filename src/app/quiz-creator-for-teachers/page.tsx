@@ -8,6 +8,7 @@ const route = getSeoLandingByPath(PATH)!;
 const tool = resolveSeoTool(route.toolSlug)!;
 
 export const dynamic = 'force-static';
+export const revalidate = 3600;
 
 export const metadata: Metadata = buildSeoLandingMetadata(tool, PATH);
 

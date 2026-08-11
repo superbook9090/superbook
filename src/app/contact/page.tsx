@@ -3,6 +3,8 @@ import { LazyContactPage } from '@/lib/lazy';
 import { ROUTES } from '@/constants/routes';
 import { createPageMetadata } from '@/lib/seo/metadata';
 
+export const dynamic = 'force-static';
+
 export const metadata: Metadata = createPageMetadata({
   title: 'Contact Us — Education Platform Support',
   description:

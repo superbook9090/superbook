@@ -40,6 +40,7 @@ export const ROUTES = {
     certificate: (id: string) => `/dashboard/student/certificates/${id}`,
     profile: '/dashboard/student/profile',
     notifications: '/dashboard/student/notifications',
+    notes: '/dashboard/student/notes',
   },
   teacher: {
     root: '/dashboard/teacher',
@@ -55,6 +56,7 @@ export const ROUTES = {
     blogEdit: (id: string) => `/dashboard/teacher/blogs/edit/${id}`,
     analytics: '/dashboard/teacher/analytics',
     profile: '/dashboard/teacher/profile',
+    notes: '/dashboard/teacher/notes',
   },
   admin: {
     root: '/dashboard/admin',
@@ -70,6 +72,7 @@ export const ROUTES = {
     settings: '/dashboard/admin/settings',
     profile: '/dashboard/admin/profile',
     videos: '/dashboard/admin/videos',
+    notes: '/dashboard/admin/notes',
   },
 } as const;
 

@@ -22,6 +22,7 @@ import './NotificationPreference';
 import './UserNotification';
 import './PasswordResetToken';
 import './Certificate';
+import './Note';
 
 export { default as User } from './User';
 export { default as Organization } from './Organization';
@@ -44,3 +45,4 @@ export { default as NotificationPreference } from './NotificationPreference';
 export { default as UserNotification } from './UserNotification';
 export { default as PasswordResetToken } from './PasswordResetToken';
 export { default as Certificate } from './Certificate';
+export { default as Note } from './Note';

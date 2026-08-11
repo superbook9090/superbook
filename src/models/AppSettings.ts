@@ -6,6 +6,10 @@ export interface IAppSettings extends Document {
     quizzes: number;
     blogs: number;
   };
+  notesLimits?: {
+    maxPagesPerUser: number;
+    maxWordsPerPage: number;
+  };
   featureToggles: {
     enableBlogs: boolean;
     enableQuizzes: boolean;
@@ -42,6 +46,18 @@ const appSettingsSchema = new Schema<IAppSettings>(
         type: Number,
         default: 2,
         min: 1,
+      },
+    },
+    notesLimits: {
+      maxPagesPerUser: {
+        type: Number,
+        default: 5,
+        min: 1,
+      },
+      maxWordsPerPage: {
+        type: Number,
+        default: 1000,
+        min: 50,
       },
     },
     featureToggles: {

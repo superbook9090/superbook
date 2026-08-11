@@ -3,6 +3,7 @@ import { createPageMetadata } from '@/lib/seo/metadata';
 import ToolsIndexClient from './ToolsIndexClient';
 
 export const dynamic = 'force-static';
+export const revalidate = 3600;
 
 export const metadata: Metadata = createPageMetadata({
   title: 'Free Education Tools — Quiz Maker, Course Builder & More',

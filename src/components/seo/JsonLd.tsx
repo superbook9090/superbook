@@ -104,7 +104,9 @@ export default function JsonLd({ includeWebSite = false }: JsonLdProps) {
 
   return (
     <script
+      id="jsonld-website-org"
       type="application/ld+json"
+      suppressHydrationWarning
       dangerouslySetInnerHTML={{ __html: JSON.stringify(payload) }}
     />
   );

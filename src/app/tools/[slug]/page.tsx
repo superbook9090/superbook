@@ -5,6 +5,9 @@ import SeoLandingPage from '@/components/seo/SeoLandingPage';
 import { buildSeoLandingMetadata } from '@/lib/seo/landing-metadata';
 import { getCanonicalSeoPath, getSeoLandingByPath } from '@/lib/seo/landing-routes';
 
+export const dynamic = 'force-static';
+export const revalidate = 3600;
+
 export async function generateStaticParams() {
   return Object.keys(SEO_TOOLS_DATA).map((slug) => ({
     slug,

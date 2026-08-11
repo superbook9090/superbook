@@ -9,6 +9,7 @@ import SeoResources from '@/components/home/SeoResources';
 import { createPageMetadata } from '@/lib/seo/metadata';
 
 export const dynamic = 'force-static';
+export const revalidate = 3600;
 
 export const metadata: Metadata = createPageMetadata({
   title: 'Free Quiz Maker Online | Create Quizzes, MCQs & Mock Tests',

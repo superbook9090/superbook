@@ -137,12 +137,27 @@ export const unregisterDeviceSchema = z.object({
   deviceToken: z.string().min(1, 'Device token is required'),
 });
 
+// Note validation schemas
+export const createNoteSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(150, 'Title must be 150 characters or less'),
+  content: z.string().min(1, 'Content is required'),
+  color: z.enum(['blue', 'amber', 'emerald', 'rose', 'purple', 'slate']).optional(),
+  isPinned: z.boolean().optional(),
+  tags: z.array(z.string().max(30)).optional(),
+});
+
+export const updateNoteSchema = createNoteSchema.partial();
+
 // Admin settings validation schemas
 export const updateSettingsSchema = z.object({
   teacherLimits: z.object({
     courses: z.number().int().min(1, 'Courses limit must be at least 1'),
     quizzes: z.number().int().min(1, 'Quizzes limit must be at least 1'),
     blogs: z.number().int().min(1, 'Blogs limit must be at least 1'),
+  }).optional(),
+  notesLimits: z.object({
+    maxPagesPerUser: z.number().int().min(1, 'Max pages limit must be at least 1'),
+    maxWordsPerPage: z.number().int().min(50, 'Max words limit must be at least 50'),
   }).optional(),
   featureToggles: z.object({
     enableBlogs: z.boolean(),

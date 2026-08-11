@@ -44,7 +44,12 @@ export default function HomeQuizMakerSeo() {
 
   return (
     <section className="py-16 bg-[var(--card-solid)] border-t border-[var(--border)]" aria-labelledby="quiz-maker-heading">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script
+        id="jsonld-home-faq"
+        type="application/ld+json"
+        suppressHydrationWarning
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 id="quiz-maker-heading" className="text-3xl font-bold text-[var(--color-foreground)] mb-4">
           {t('home.quizMakerSeo.title')}

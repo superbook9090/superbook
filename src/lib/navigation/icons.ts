@@ -16,6 +16,7 @@ import {
   Heart,
   Newspaper,
   Award,
+  Notebook,
 } from 'lucide-react';
 import type { NavIconName } from '@/constants/navigation';
 
@@ -36,6 +37,7 @@ export const NAV_ICON_MAP: Record<NavIconName, LucideIcon> = {
   Heart,
   Newspaper,
   Award,
+  Notebook,
 };
 
 export function getNavIcon(name: NavIconName): LucideIcon {

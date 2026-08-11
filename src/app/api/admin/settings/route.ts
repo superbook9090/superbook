@@ -90,7 +90,7 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    const { teacherLimits, featureToggles, platformConfig } = validationResult.data;
+    const { teacherLimits, notesLimits, featureToggles, platformConfig } = validationResult.data;
 
     await dbConnect();
 
@@ -121,6 +121,23 @@ export async function PATCH(req: NextRequest) {
         );
       }
       settings.teacherLimits = teacherLimits;
+    }
+
+    // Update notes limits if provided
+    if (notesLimits) {
+      if (typeof notesLimits.maxPagesPerUser !== 'number' || notesLimits.maxPagesPerUser < 1) {
+        return NextResponse.json(
+          { message: 'maxPagesPerUser must be at least 1' },
+          { status: 400 }
+        );
+      }
+      if (typeof notesLimits.maxWordsPerPage !== 'number' || notesLimits.maxWordsPerPage < 50) {
+        return NextResponse.json(
+          { message: 'maxWordsPerPage must be at least 50' },
+          { status: 400 }
+        );
+      }
+      settings.notesLimits = notesLimits;
     }
 
     // Update feature toggles if provided

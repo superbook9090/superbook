@@ -4,6 +4,10 @@ export interface AppSettings {
     quizzes: number;
     blogs: number;
   };
+  notesLimits?: {
+    maxPagesPerUser: number;
+    maxWordsPerPage: number;
+  };
   featureToggles: {
     enableBlogs: boolean;
     enableQuizzes: boolean;

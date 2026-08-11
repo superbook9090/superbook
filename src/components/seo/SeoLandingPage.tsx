@@ -19,11 +19,15 @@ export default function SeoLandingPage({ route }: SeoLandingPageProps) {
   return (
     <>
       <script
+        id={`jsonld-faq-${route.toolSlug}`}
         type="application/ld+json"
+        suppressHydrationWarning
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       <script
+        id={`jsonld-breadcrumb-${route.toolSlug}`}
         type="application/ld+json"
+        suppressHydrationWarning
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <ToolClient toolSlug={route.toolSlug} />

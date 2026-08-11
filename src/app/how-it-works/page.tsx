@@ -3,6 +3,9 @@ import { createPageMetadata } from '@/lib/seo/metadata';
 import HowItWorksClient from './HowItWorksClient';
 import { ROUTES } from '@/constants/routes';
 
+export const dynamic = 'force-static';
+export const revalidate = 3600;
+
 export const metadata: Metadata = createPageMetadata({
   title: 'How Quiz Do Works — Create Quizzes & Online Courses',
   description:

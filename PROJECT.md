@@ -299,6 +299,7 @@ src/
 │       ├── courses/         # Course management
 │       ├── quizzes/         # Quiz management
 │       ├── blogs/           # Blog management
+│       ├── notes/           # Personal notes management & limits validation
 │       ├── enrollments/     # Enrollment tracking (+ join-by-code)
 │       ├── notifications/   # Push + in-app notification APIs
 │       ├── quiz-attempts/   # Quiz results
@@ -319,7 +320,8 @@ src/
 ├── features/                # Feature-specific components
 │   ├── courses/
 │   ├── quizzes/
-│   └── blogs/
+│   ├── blogs/
+│   └── notes/               # Note cards, modal editor, limit banners
 ├── hooks/                   # Custom React hooks
 ├── i18n/                    # Translation files (en, hi)
 │   └── seo-tools/           # Hindi SEO tool landing page copy
@@ -352,6 +354,7 @@ src/
 │   ├── NotificationPreference.ts
 │   ├── UserNotification.ts
 │   ├── AppSettings.ts
+│   ├── Note.ts
 │   ├── File.ts
 │   └── Progress.ts
 └── store/                   # Zustand stores
@@ -1419,6 +1422,30 @@ interface IFileNode {
 
 ---
 
+### Note Schema
+
+**Collection**: `notes`
+
+```typescript
+interface INote {
+  _id: ObjectId;
+  userId: ObjectId;               // Reference to User (indexed)
+  title: string;                  // Note title (max 150 chars)
+  content: string;                // Note content body
+  wordCount: number;              // Calculated word count
+  color?: string;                 // Color badge theme (e.g. 'blue', 'purple')
+  isPinned?: boolean;             // Pinned status (default: false)
+  tags?: string[];                // Array of custom tags
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+**Indexes**:
+- `userId: 1, isPinned: -1, updatedAt: -1` (compound index for user queries sorted by pinned status and update time)
+
+---
+
 ### AppSettings Schema
 
 **Collection**: `appsettings`
@@ -1430,6 +1457,10 @@ interface IAppSettings {
     courses: number;              // Max courses per teacher (default: 5)
     quizzes: number;              // Max quizzes per teacher (default: 10)
     blogs: number;                // Max blogs per teacher (default: 2)
+  };
+  notesLimits?: {
+    maxPagesPerUser: number;      // Max note pages per user (default: 5)
+    maxWordsPerPage: number;      // Max words per note page (default: 1000)
   };
   featureToggles: {
     enableBlogs: boolean;         // Enable blog feature
@@ -1472,6 +1503,20 @@ interface IAppSettings {
   - `500/502/503`: Internal server errors.
   - Network disconnection / fetch failures.
 - **UI Alerts**: Integrated with the reusable `<Alert type="error" message={...} onClose={...} />` component across analytics dashboards and application pages for instant visual feedback.
+
+#### Personal Notes & Notes Limits System
+- **Notes Feature Overview**: Users (students, teachers, admins) can create, edit, pin, tag, search, and delete personal notes directly from their role dashboards (`/dashboard/student/notes`, `/dashboard/teacher/notes`, `/dashboard/admin/notes`). Quick note-taking is also embedded within student course lesson views (`/dashboard/student/courses/[id]/lessons/[lessonId]`).
+- **REST Endpoints**:
+  - `GET /api/notes`: Fetches all notes for the authenticated user, sorted by `isPinned` (descending) and `updatedAt` (descending). Returns active notes along with system note page limit (`maxPagesPerUser`) and word limit (`maxWordsPerPage`).
+  - `POST /api/notes`: Creates a new note. Validates user note page limits (`currentNotesCount >= maxPagesPerUser`) and content length (`wordCount > maxWordsPerPage`).
+  - `GET /api/notes/[id]`: Retrieves a single note owned by the authenticated user.
+  - `PUT /api/notes/[id]`: Updates title, content, color, pinned status, or tags of an existing note. Re-calculates word count and enforces word limit rules.
+  - `DELETE /api/notes/[id]`: Deletes a note by ID.
+- **Admin Configuration**:
+  - Superadmins and Admins can configure global note limits (`notesLimits.maxPagesPerUser` default: 5 pages, `notesLimits.maxWordsPerPage` default: 1000 words) via the Admin Settings page (`/dashboard/admin/settings` -> `NotesLimitsSection`) or `PUT /api/admin/settings`.
+- **UI Components & Custom Hook**:
+  - `useNotes.ts` custom hook for state management, limit checks, and API operations.
+  - `NotesPage.tsx`, `NoteCard.tsx`, `NoteEditorModal.tsx`, `NotesLimitBanner.tsx`, `NoteDeleteDialog.tsx` under `src/features/notes/components/`.
 
 **Constraints**:
 - Only one document allowed in collection (enforced by pre-save hook)

@@ -21,6 +21,7 @@ import { isSuperAdmin } from '@/lib/roles';
 import { useSettingsStore } from '@/store/useSettingsStore';
 
 import { TeacherLimitsSection } from './_components/TeacherLimitsSection';
+import { NotesLimitsSection } from './_components/NotesLimitsSection';
 import { FeatureTogglesSection } from './_components/FeatureTogglesSection';
 import { PlatformConfigSection } from './_components/PlatformConfigSection';
 import type { AppSettings } from './_components/types';
@@ -155,6 +156,13 @@ export default function AdminSettingsPage() {
         settings={settings} 
         setSettings={setSettings} 
         theme={theme} 
+      />
+
+      {/* Notes Limits */}
+      <NotesLimitsSection
+        settings={settings}
+        setSettings={setSettings}
+        theme={theme}
       />
 
       {/* Feature Toggles */}
