@@ -17,6 +17,7 @@ function topicFromSlug(slug: string, topics: string[]): string | null {
   return match ?? null;
 }
 
+export const dynamic = 'force-static';
 export const revalidate = 300;
 
 export async function generateStaticParams() {

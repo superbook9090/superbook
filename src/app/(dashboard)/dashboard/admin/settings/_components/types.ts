@@ -18,6 +18,7 @@ export interface AppSettings {
     restrictPublicCourseCreation?: boolean;
     enableEnrollmentManagement?: boolean;
     enablePhoneAuth?: boolean;
+    enableNotes?: boolean;
   };
   platformConfig: {
     maintenanceMode: boolean;

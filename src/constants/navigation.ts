@@ -21,7 +21,7 @@ export type NavIconName =
   | 'Award'
   | 'Notebook';
 
-export type NavFeatureFlag = 'enableBlogs' | 'enableQuizzes' | 'enableCourses' | 'enableAnalytics';
+export type NavFeatureFlag = 'enableBlogs' | 'enableQuizzes' | 'enableCourses' | 'enableAnalytics' | 'enableNotes';
 
 export interface DashboardNavItem {
   /** i18n key, e.g. `common.dashboard` */
@@ -37,7 +37,7 @@ export const STUDENT_NAV: DashboardNavItem[] = [
   { nameKey: 'common.myCourses', href: ROUTES.student.courses, icon: 'BookOpen', feature: 'enableCourses' },
   { nameKey: 'common.browse', href: ROUTES.student.browse, icon: 'Search', feature: 'enableCourses' },
   { nameKey: 'common.files', href: ROUTES.student.files, icon: 'Folder' },
-  { nameKey: 'common.notes', href: ROUTES.student.notes, icon: 'Notebook' },
+  { nameKey: 'common.notes', href: ROUTES.student.notes, icon: 'Notebook', feature: 'enableNotes' },
   { nameKey: 'common.blogs', href: ROUTES.student.blogs, icon: 'Newspaper', feature: 'enableBlogs' },
   { nameKey: 'common.favorites', href: ROUTES.student.favorites, icon: 'Heart', feature: 'enableBlogs' },
   { nameKey: 'common.quizzes', href: ROUTES.student.quizzes, icon: 'HelpCircle', feature: 'enableQuizzes' },
@@ -52,7 +52,7 @@ export const TEACHER_NAV: DashboardNavItem[] = [
   { nameKey: 'common.myCourses', href: ROUTES.teacher.courses, icon: 'BookOpen', feature: 'enableCourses' },
   { nameKey: 'common.quizzes', href: ROUTES.teacher.quizzes, icon: 'HelpCircle', feature: 'enableQuizzes' },
   { nameKey: 'common.blogs', href: ROUTES.teacher.blogs, icon: 'Newspaper', feature: 'enableBlogs' },
-  { nameKey: 'common.notes', href: ROUTES.teacher.notes, icon: 'Notebook' },
+  { nameKey: 'common.notes', href: ROUTES.teacher.notes, icon: 'Notebook', feature: 'enableNotes' },
   { nameKey: 'common.analytics', href: ROUTES.teacher.analytics, icon: 'BarChart3', feature: 'enableAnalytics' },
   { nameKey: 'common.profile', href: ROUTES.teacher.profile, icon: 'User' },
   { nameKey: 'contact.title', href: ROUTES.contact, icon: 'Mail' },
@@ -65,7 +65,7 @@ export const ADMIN_NAV: DashboardNavItem[] = [
   { nameKey: 'common.allQuizzes', href: ROUTES.admin.quizzes, icon: 'HelpCircle', feature: 'enableQuizzes' },
   { nameKey: 'common.allBlogs', href: ROUTES.admin.blogs, icon: 'Newspaper', feature: 'enableBlogs' },
   { nameKey: 'common.files', href: ROUTES.admin.files, icon: 'Folder', superadminOnly: true },
-  { nameKey: 'common.notes', href: ROUTES.admin.notes, icon: 'Notebook' },
+  { nameKey: 'common.notes', href: ROUTES.admin.notes, icon: 'Notebook', feature: 'enableNotes' },
   { nameKey: 'common.analytics', href: ROUTES.admin.analytics, icon: 'BarChart3', feature: 'enableAnalytics' },
   { nameKey: 'common.notifications', href: ROUTES.admin.notifications, icon: 'Bell', superadminOnly: true },
   { nameKey: 'common.settings', href: ROUTES.admin.settings, icon: 'User' },

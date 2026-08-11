@@ -1331,6 +1331,8 @@ export const en = {
     enableQuizzesDesc: 'Allow teachers to create quizzes',
     enableCourses: 'Enable Courses',
     enableCoursesDesc: 'Allow teachers to create courses',
+    enableNotes: 'Enable Personal Notes',
+    enableNotesDesc: 'Allow users to create, edit, and keep personal study notes',
     enableAnalytics: 'Enable Analytics',
     enableAnalyticsDesc: 'Enable analytics dashboard for teachers',
     enableClarity: 'Enable Microsoft Clarity',

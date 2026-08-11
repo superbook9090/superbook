@@ -5,6 +5,7 @@ import { listPublicBlogs, listPublicBlogTopics } from '@/lib/blogs/public';
 import PublicBlogsClient from '@/features/blogs/components/PublicBlogsClient';
 import { ensureFeatureEnabled } from '@/lib/settingsHelpers';
 
+export const dynamic = 'force-static';
 export const revalidate = 300;
 
 export const metadata: Metadata = createPageMetadata({

@@ -13,6 +13,7 @@ interface FeatureToggles {
   enableQuizSolutionAnalysis: boolean;
   restrictPublicCourseCreation?: boolean;
   enableEnrollmentManagement?: boolean;
+  enableNotes?: boolean;
 }
 
 interface TeacherLimits {

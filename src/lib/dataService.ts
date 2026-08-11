@@ -26,6 +26,7 @@ export const getSettingsWithDefaults = cache(async (): Promise<IAppSettings> => 
       enableQuizSolutionAnalysis: false,
       restrictPublicCourseCreation: false,
       enableEnrollmentManagement: true,
+      enableNotes: true,
     },
     platformConfig: {
       siteName: 'Quiz Do',

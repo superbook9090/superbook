@@ -7,11 +7,15 @@ import AppSettings, { IAppSettings } from '@/models/AppSettings';
 import { createNoteSchema } from '@/lib/validation';
 import { countWords } from '@/lib/wordCount';
 import { logApiError, type LogContext } from '@/lib/logger';
+import { requireFeature } from '@/lib/settingsHelpers';
 
 export async function GET() {
   const logContext: LogContext = { method: 'GET', path: '/api/notes' };
 
   try {
+    const featureError = await requireFeature('enableNotes');
+    if (featureError) return featureError;
+
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
@@ -50,6 +54,9 @@ export async function POST(req: NextRequest) {
   const logContext: LogContext = { method: 'POST', path: '/api/notes' };
 
   try {
+    const featureError = await requireFeature('enableNotes');
+    if (featureError) return featureError;
+
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });

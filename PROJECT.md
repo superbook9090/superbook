@@ -1512,8 +1512,9 @@ interface IAppSettings {
   - `GET /api/notes/[id]`: Retrieves a single note owned by the authenticated user.
   - `PUT /api/notes/[id]`: Updates title, content, color, pinned status, or tags of an existing note. Re-calculates word count and enforces word limit rules.
   - `DELETE /api/notes/[id]`: Deletes a note by ID.
-- **Admin Configuration**:
-  - Superadmins and Admins can configure global note limits (`notesLimits.maxPagesPerUser` default: 5 pages, `notesLimits.maxWordsPerPage` default: 1000 words) via the Admin Settings page (`/dashboard/admin/settings` -> `NotesLimitsSection`) or `PUT /api/admin/settings`.
+- **Admin Configuration & Feature Toggle**:
+  - **Feature Toggle (`enableNotes`)**: Superadmins and Admins can toggle `enableNotes` on/off live via `/dashboard/admin/settings` (`FeatureTogglesSection.tsx`). When disabled, notes navigation links hide from all dashboards, direct page access redirects to home (`ensureFeatureEnabled`), and note REST APIs return `403 Forbidden` (`requireFeature`).
+  - **Notes Limits**: Superadmins and Admins can configure global note limits (`notesLimits.maxPagesPerUser` default: 5 pages, `notesLimits.maxWordsPerPage` default: 1000 words) via `/dashboard/admin/settings` -> `NotesLimitsSection` or `PUT /api/admin/settings`.
 - **UI Components & Custom Hook**:
   - `useNotes.ts` custom hook for state management, limit checks, and API operations.
   - `NotesPage.tsx`, `NoteCard.tsx`, `NoteEditorModal.tsx`, `NotesLimitBanner.tsx`, `NoteDeleteDialog.tsx` under `src/features/notes/components/`.

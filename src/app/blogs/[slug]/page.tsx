@@ -9,6 +9,7 @@ import { createPageMetadata } from '@/lib/seo/metadata';
 import { getSiteUrl } from '@/lib/seo/config';
 import { ensureFeatureEnabled } from '@/lib/settingsHelpers';
 
+export const dynamic = 'force-static';
 export const revalidate = 300;
 export const dynamicParams = true; // slugs not in generateStaticParams are rendered on first visit and cached
 

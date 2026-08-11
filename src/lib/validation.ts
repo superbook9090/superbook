@@ -169,6 +169,7 @@ export const updateSettingsSchema = z.object({
     restrictPublicCourseCreation: z.boolean().optional(),
     enableEnrollmentManagement: z.boolean().optional(),
     enablePhoneAuth: z.boolean().optional(),
+    enableNotes: z.boolean().optional(),
   }).optional(),
   platformConfig: z.object({
     siteName: z.string().max(100).optional(),

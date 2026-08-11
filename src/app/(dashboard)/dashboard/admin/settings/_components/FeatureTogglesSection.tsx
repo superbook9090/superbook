@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ToggleLeft, BookOpen, FileText, GraduationCap, Settings, Sparkles, Shield, Users, Phone } from 'lucide-react';
+import { ToggleLeft, BookOpen, FileText, GraduationCap, Settings, Sparkles, Shield, Users, Phone, Notebook } from 'lucide-react';
 import ToggleSwitch from '@/components/ui/ToggleSwitch';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { AppSettings } from './types';
@@ -88,6 +88,27 @@ export function FeatureTogglesSection({ settings, setSettings, theme, canManageS
               })
             }
             label={t('adminSettings.enableCourses')}
+          />
+        </div>
+
+        {/* Enable Notes */}
+        <div className="flex items-center justify-between gap-4 p-4 bg-[var(--color-surface-muted)] rounded-xl">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <Notebook className={`w-5 h-5 shrink-0 ${theme.text}`} />
+            <div className="min-w-0">
+              <p className="font-medium text-[var(--color-foreground)]">{t('adminSettings.enableNotes')}</p>
+              <p className="text-sm text-[var(--color-muted-foreground)]">{t('adminSettings.enableNotesDesc')}</p>
+            </div>
+          </div>
+          <ToggleSwitch
+            checked={settings.featureToggles.enableNotes ?? true}
+            onChange={(enableNotes) =>
+              setSettings({
+                ...settings,
+                featureToggles: { ...settings.featureToggles, enableNotes },
+              })
+            }
+            label={t('adminSettings.enableNotes')}
           />
         </div>
 

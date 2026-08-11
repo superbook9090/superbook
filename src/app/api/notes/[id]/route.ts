@@ -7,6 +7,7 @@ import AppSettings, { IAppSettings } from '@/models/AppSettings';
 import { updateNoteSchema } from '@/lib/validation';
 import { countWords } from '@/lib/wordCount';
 import { logApiError, type LogContext } from '@/lib/logger';
+import { requireFeature } from '@/lib/settingsHelpers';
 
 export async function GET(
   _req: NextRequest,
@@ -16,6 +17,9 @@ export async function GET(
   const logContext: LogContext = { method: 'GET', path: `/api/notes/${id}` };
 
   try {
+    const featureError = await requireFeature('enableNotes');
+    if (featureError) return featureError;
+
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
@@ -47,6 +51,9 @@ export async function PATCH(
   const logContext: LogContext = { method: 'PATCH', path: `/api/notes/${id}` };
 
   try {
+    const featureError = await requireFeature('enableNotes');
+    if (featureError) return featureError;
+
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
@@ -116,6 +123,9 @@ export async function DELETE(
   const logContext: LogContext = { method: 'DELETE', path: `/api/notes/${id}` };
 
   try {
+    const featureError = await requireFeature('enableNotes');
+    if (featureError) return featureError;
+
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });

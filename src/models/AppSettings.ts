@@ -20,6 +20,7 @@ export interface IAppSettings extends Document {
     restrictPublicCourseCreation?: boolean;
     enableEnrollmentManagement?: boolean;
     enablePhoneAuth?: boolean;
+    enableNotes?: boolean;
   };
   platformConfig: {
     maintenanceMode: boolean;
@@ -94,6 +95,10 @@ const appSettingsSchema = new Schema<IAppSettings>(
         default: true,
       },
       enablePhoneAuth: {
+        type: Boolean,
+        default: true,
+      },
+      enableNotes: {
         type: Boolean,
         default: true,
       },

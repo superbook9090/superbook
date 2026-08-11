@@ -20,6 +20,9 @@ const DASHBOARD_FEATURE_ROUTES: FeatureRouteRule[] = [
   { prefix: ROUTES.teacher.quizzes, feature: 'enableQuizzes' },
   { prefix: ROUTES.admin.quizzes, feature: 'enableQuizzes' },
   { prefix: '/dashboard/quizzes', feature: 'enableQuizzes' },
+  { prefix: ROUTES.student.notes, feature: 'enableNotes' },
+  { prefix: ROUTES.teacher.notes, feature: 'enableNotes' },
+  { prefix: ROUTES.admin.notes, feature: 'enableNotes' },
   { prefix: ROUTES.teacher.analytics, feature: 'enableAnalytics' },
   { prefix: ROUTES.admin.analytics, feature: 'enableAnalytics' },
 ];

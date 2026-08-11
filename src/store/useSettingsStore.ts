@@ -9,7 +9,8 @@ export type FeatureToggleKey =
   | 'enableClarity'
   | 'enableQuizSolutionAnalysis'
   | 'enableEnrollmentManagement'
-  | 'enablePhoneAuth';
+  | 'enablePhoneAuth'
+  | 'enableNotes';
 
 export type TeacherLimitKey = 'courses' | 'quizzes' | 'blogs';
 
@@ -43,6 +44,7 @@ export const defaultPublicAppSettings: PublicAppSettings = {
     enableQuizSolutionAnalysis: false,
     enableEnrollmentManagement: true,
     enablePhoneAuth: true,
+    enableNotes: true,
   },
   platformConfig: {
     maintenanceMode: false,
