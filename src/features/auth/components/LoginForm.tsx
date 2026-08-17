@@ -82,7 +82,7 @@ function LoginFormInner() {
   }, [router, fetchSession, t, callbackUrl, addAlert]);
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row">
+    <div className="flex-1 flex flex-col lg:flex-row">
       {/* Left Side - Branding (Shared Component) */}
       <AuthBranding />
 
@@ -159,7 +159,7 @@ function LoginFormInner() {
 
 export default function LoginForm() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader /></div>}>
+    <Suspense fallback={<div className="flex-1 flex items-center justify-center"><Loader /></div>}>
       <LoginFormInner />
     </Suspense>
   );

@@ -60,7 +60,7 @@ function ResetPasswordFormInner() {
 
   if (!token) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="flex-1 flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-[var(--card-solid)]/70 backdrop-blur-md border border-[var(--border)] rounded-3xl shadow-[var(--shadow-md)] card-body text-center">
           <p className="text-[var(--color-error)] mb-4">{t('password.invalidResetLink')}</p>
           <Link href={ROUTES.forgotPassword} className="inline-flex min-h-[44px] items-center text-[var(--student-primary)] font-medium hover:underline">
@@ -72,7 +72,7 @@ function ResetPasswordFormInner() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="flex-1 flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -130,7 +130,7 @@ function ResetPasswordFormInner() {
 
 export default function ResetPasswordForm() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader /></div>}>
+    <Suspense fallback={<div className="flex-1 flex items-center justify-center"><Loader /></div>}>
       <ResetPasswordFormInner />
     </Suspense>
   );

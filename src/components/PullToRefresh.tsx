@@ -83,7 +83,7 @@ export default function PullToRefresh({ children }: PullToRefreshProps) {
       window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [isPulling, showConfirm, pathname, isRefreshing]);
+  }, [isPulling, showConfirm, pathname, isRefreshing, isEnabled]);
 
   const handleConfirm = () => {
     setShowConfirm(false);
