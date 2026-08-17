@@ -10,6 +10,9 @@ export type FeatureToggleKey =
   | 'enableQuizSolutionAnalysis'
   | 'enableEnrollmentManagement'
   | 'enablePhoneAuth'
+  | 'enablePullToRefresh'
+  | 'enableGoogleAuthApp'
+  | 'enableGoogleAuthWeb'
   | 'enableNotes';
 
 export type TeacherLimitKey = 'courses' | 'quizzes' | 'blogs';
@@ -44,6 +47,9 @@ export const defaultPublicAppSettings: PublicAppSettings = {
     enableQuizSolutionAnalysis: false,
     enableEnrollmentManagement: true,
     enablePhoneAuth: true,
+    enablePullToRefresh: true,
+    enableGoogleAuthApp: true,
+    enableGoogleAuthWeb: true,
     enableNotes: true,
   },
   platformConfig: {

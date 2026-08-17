@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ToggleLeft, BookOpen, FileText, GraduationCap, Settings, Sparkles, Shield, Users, Phone, Notebook } from 'lucide-react';
+import { ToggleLeft, BookOpen, FileText, GraduationCap, Settings, Sparkles, Shield, Users, Phone, Notebook, RefreshCw, Smartphone, Globe } from 'lucide-react';
 import ToggleSwitch from '@/components/ui/ToggleSwitch';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { AppSettings } from './types';
@@ -249,6 +249,78 @@ export function FeatureTogglesSection({ settings, setSettings, theme, canManageS
                   })
                 }
                 label={t('adminSettings.enablePhoneAuth')}
+              />
+            </div>
+
+            <div className="flex items-center justify-between gap-4 p-4 bg-[var(--color-surface-muted)] rounded-xl">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <RefreshCw className={`w-5 h-5 shrink-0 ${theme.text}`} />
+                <div className="min-w-0">
+                  <p className="font-medium text-[var(--color-foreground)]">
+                    {t('adminSettings.enablePullToRefresh')}
+                  </p>
+                  <p className="text-sm text-[var(--color-muted-foreground)]">
+                    {t('adminSettings.enablePullToRefreshDesc')}
+                  </p>
+                </div>
+              </div>
+              <ToggleSwitch
+                checked={settings.featureToggles.enablePullToRefresh ?? true}
+                onChange={(enablePullToRefresh) =>
+                  setSettings({
+                    ...settings,
+                    featureToggles: { ...settings.featureToggles, enablePullToRefresh },
+                  })
+                }
+                label={t('adminSettings.enablePullToRefresh')}
+              />
+            </div>
+
+            <div className="flex items-center justify-between gap-4 p-4 bg-[var(--color-surface-muted)] rounded-xl">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <Smartphone className={`w-5 h-5 shrink-0 ${theme.text}`} />
+                <div className="min-w-0">
+                  <p className="font-medium text-[var(--color-foreground)]">
+                    {t('adminSettings.enableGoogleAuthApp')}
+                  </p>
+                  <p className="text-sm text-[var(--color-muted-foreground)]">
+                    {t('adminSettings.enableGoogleAuthAppDesc')}
+                  </p>
+                </div>
+              </div>
+              <ToggleSwitch
+                checked={settings.featureToggles.enableGoogleAuthApp ?? true}
+                onChange={(enableGoogleAuthApp) =>
+                  setSettings({
+                    ...settings,
+                    featureToggles: { ...settings.featureToggles, enableGoogleAuthApp },
+                  })
+                }
+                label={t('adminSettings.enableGoogleAuthApp')}
+              />
+            </div>
+
+            <div className="flex items-center justify-between gap-4 p-4 bg-[var(--color-surface-muted)] rounded-xl">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <Globe className={`w-5 h-5 shrink-0 ${theme.text}`} />
+                <div className="min-w-0">
+                  <p className="font-medium text-[var(--color-foreground)]">
+                    {t('adminSettings.enableGoogleAuthWeb')}
+                  </p>
+                  <p className="text-sm text-[var(--color-muted-foreground)]">
+                    {t('adminSettings.enableGoogleAuthWebDesc')}
+                  </p>
+                </div>
+              </div>
+              <ToggleSwitch
+                checked={settings.featureToggles.enableGoogleAuthWeb ?? true}
+                onChange={(enableGoogleAuthWeb) =>
+                  setSettings({
+                    ...settings,
+                    featureToggles: { ...settings.featureToggles, enableGoogleAuthWeb },
+                  })
+                }
+                label={t('adminSettings.enableGoogleAuthWeb')}
               />
             </div>
           </>

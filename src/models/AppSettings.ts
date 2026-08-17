@@ -20,6 +20,9 @@ export interface IAppSettings extends Document {
     restrictPublicCourseCreation?: boolean;
     enableEnrollmentManagement?: boolean;
     enablePhoneAuth?: boolean;
+    enablePullToRefresh?: boolean;
+    enableGoogleAuthApp?: boolean;
+    enableGoogleAuthWeb?: boolean;
     enableNotes?: boolean;
   };
   platformConfig: {
@@ -95,6 +98,18 @@ const appSettingsSchema = new Schema<IAppSettings>(
         default: true,
       },
       enablePhoneAuth: {
+        type: Boolean,
+        default: true,
+      },
+      enablePullToRefresh: {
+        type: Boolean,
+        default: true,
+      },
+      enableGoogleAuthApp: {
+        type: Boolean,
+        default: true,
+      },
+      enableGoogleAuthWeb: {
         type: Boolean,
         default: true,
       },

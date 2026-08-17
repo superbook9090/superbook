@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import { useTranslation } from "@/hooks/useTranslation";
 import { usePathname } from "next/navigation";
+import { useFeature } from "@/contexts/AppSettingsContext";
 
 interface PullToRefreshProps {
   children: React.ReactNode;
@@ -18,10 +19,13 @@ export default function PullToRefresh({ children }: PullToRefreshProps) {
   const currentY = useRef<number>(0);
   const { t } = useTranslation();
   const pathname = usePathname();
+  const isEnabled = useFeature('enablePullToRefresh');
 
   const PULL_THRESHOLD = 80;
 
   useEffect(() => {
+    if (!isEnabled) return;
+
     const isRefreshDisabled = pathname ? ['/create', '/edit', '/take'].some(route => pathname.includes(route)) : false;
     
     if (isRefreshDisabled) {
@@ -90,6 +94,10 @@ export default function PullToRefresh({ children }: PullToRefreshProps) {
   const handleCancel = () => {
     setShowConfirm(false);
   };
+
+  if (!isEnabled) {
+    return <>{children}</>;
+  }
 
   return (
     <>

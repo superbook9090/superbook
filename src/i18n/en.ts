@@ -1337,6 +1337,12 @@ export const en = {
     enableAnalyticsDesc: 'Enable analytics dashboard for teachers',
     enableClarity: 'Enable Microsoft Clarity',
     enableClarityDesc: 'Enable Microsoft Clarity session replay and analytics tracking',
+    enablePullToRefresh: 'Enable Pull to Refresh',
+    enablePullToRefreshDesc: 'Allow mobile users to pull down to refresh the page',
+    enableGoogleAuthApp: 'Enable Google Auth (Android App)',
+    enableGoogleAuthAppDesc: 'Allow users to login/register with Google on the Android app',
+    enableGoogleAuthWeb: 'Enable Google Auth (Website)',
+    enableGoogleAuthWebDesc: 'Allow users to login/register with Google on the website',
     enableQuizSolutionAnalysis: 'Enable Quiz Solution Analysis',
     enableQuizSolutionAnalysisDesc:
       'Allow students to get AI-powered short explanations on quiz result pages (superadmin only)',

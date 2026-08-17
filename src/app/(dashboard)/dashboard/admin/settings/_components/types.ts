@@ -18,6 +18,9 @@ export interface AppSettings {
     restrictPublicCourseCreation?: boolean;
     enableEnrollmentManagement?: boolean;
     enablePhoneAuth?: boolean;
+    enablePullToRefresh?: boolean;
+    enableGoogleAuthApp?: boolean;
+    enableGoogleAuthWeb?: boolean;
     enableNotes?: boolean;
   };
   platformConfig: {
