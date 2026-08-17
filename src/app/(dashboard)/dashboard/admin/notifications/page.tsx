@@ -14,6 +14,7 @@ import { PageSkeleton } from '@/components/ui/Skeleton';
 import type { NotificationCategory } from '@/lib/notifications/push/notificationPayload';
 import { TextField } from '@/components/ui/TextField';
 import { Dropdown } from '@/components/ui/Dropdown';
+import { PageWrapper, PageHeader } from '@/components/layout';
 
 const CATEGORIES: NotificationCategory[] = [
   'lessons',
@@ -103,21 +104,15 @@ export default function AdminNotificationsPage() {
     return null;
   }
 
-
   return (
-    
-      <div className="max-w-2xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">
-            {t('admin.notifications.title')}
-          </h1>
-          <p className="mt-2 text-sm sm:text-base text-[var(--color-muted-foreground)]">
-            {t('admin.notifications.description')}
-          </p>
-        </div>
+    <PageWrapper className="max-w-2xl">
+      <PageHeader
+        title={t('admin.notifications.title')}
+        description={t('admin.notifications.description')}
+      />
 
-        <div className="bg-[var(--card-solid)] shadow rounded-2xl border border-[var(--border)]">
-          <div className="card-body">
+      <div className="bg-[var(--card-solid)] shadow rounded-2xl border border-[var(--border)]">
+        <div className="card-body">
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <TextField
                 id="titleEn"
@@ -195,7 +190,6 @@ export default function AdminNotificationsPage() {
             </form>
           </div>
         </div>
-      </div>
-    
+    </PageWrapper>
   );
 }

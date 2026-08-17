@@ -20,16 +20,16 @@ export function FeatureTogglesSection({ settings, setSettings, theme, canManageS
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
-      className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 sm:p-8"
+      className="bg-[var(--card-solid)] rounded-xl shadow-sm p-4 sm:p-5 border border-[var(--border)]"
     >
-      <h2 className="text-lg font-semibold text-[var(--color-foreground)] mb-6 flex items-center gap-2">
+      <h2 className="text-base sm:text-lg font-semibold text-[var(--color-foreground)] mb-4 flex items-center gap-2">
         <ToggleLeft className="w-5 h-5" />
         {t('adminSettings.featureToggles')}
       </h2>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2.5 sm:gap-3">
         {/* Enable Blogs */}
-        <div className="flex items-center justify-between gap-4 p-4 bg-[var(--color-surface-muted)] rounded-xl">
+        <div className="flex items-center justify-between gap-3 p-3 sm:p-3.5 bg-[var(--color-surface-muted)] rounded-lg">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <BookOpen className={`w-5 h-5 shrink-0 ${theme.text}`} />
             <div className="min-w-0">
@@ -50,7 +50,7 @@ export function FeatureTogglesSection({ settings, setSettings, theme, canManageS
         </div>
 
         {/* Enable Quizzes */}
-        <div className="flex items-center justify-between gap-4 p-4 bg-[var(--color-surface-muted)] rounded-xl">
+        <div className="flex items-center justify-between gap-3 p-3 sm:p-3.5 bg-[var(--color-surface-muted)] rounded-lg">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <FileText className={`w-5 h-5 shrink-0 ${theme.text}`} />
             <div className="min-w-0">
@@ -71,7 +71,7 @@ export function FeatureTogglesSection({ settings, setSettings, theme, canManageS
         </div>
 
         {/* Enable Courses */}
-        <div className="flex items-center justify-between gap-4 p-4 bg-[var(--color-surface-muted)] rounded-xl">
+        <div className="flex items-center justify-between gap-3 p-3 sm:p-3.5 bg-[var(--color-surface-muted)] rounded-lg">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <GraduationCap className={`w-5 h-5 shrink-0 ${theme.text}`} />
             <div className="min-w-0">
@@ -92,7 +92,7 @@ export function FeatureTogglesSection({ settings, setSettings, theme, canManageS
         </div>
 
         {/* Enable Notes */}
-        <div className="flex items-center justify-between gap-4 p-4 bg-[var(--color-surface-muted)] rounded-xl">
+        <div className="flex items-center justify-between gap-3 p-3 sm:p-3.5 bg-[var(--color-surface-muted)] rounded-lg">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <Notebook className={`w-5 h-5 shrink-0 ${theme.text}`} />
             <div className="min-w-0">
@@ -113,7 +113,7 @@ export function FeatureTogglesSection({ settings, setSettings, theme, canManageS
         </div>
 
         {/* Enable Analytics */}
-        <div className="flex items-center justify-between gap-4 p-4 bg-[var(--color-surface-muted)] rounded-xl">
+        <div className="flex items-center justify-between gap-3 p-3 sm:p-3.5 bg-[var(--color-surface-muted)] rounded-lg">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <Settings className={`w-5 h-5 shrink-0 ${theme.text}`} />
             <div className="min-w-0">
@@ -134,7 +134,7 @@ export function FeatureTogglesSection({ settings, setSettings, theme, canManageS
         </div>
 
         {/* Enable Microsoft Clarity */}
-        <div className="flex items-center justify-between gap-4 p-4 bg-[var(--color-surface-muted)] rounded-xl">
+        <div className="flex items-center justify-between gap-3 p-3 sm:p-3.5 bg-[var(--color-surface-muted)] rounded-lg">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <Settings className={`w-5 h-5 shrink-0 ${theme.text}`} />
             <div className="min-w-0">
@@ -156,7 +156,7 @@ export function FeatureTogglesSection({ settings, setSettings, theme, canManageS
 
         {canManageSolutionAnalysis && (
           <>
-            <div className="flex items-center justify-between gap-4 p-4 bg-[var(--color-surface-muted)] rounded-xl">
+            <div className="flex items-center justify-between gap-3 p-3 sm:p-3.5 bg-[var(--color-surface-muted)] rounded-lg">
               <div className="flex items-center gap-3 min-w-0 flex-1">
                 <Sparkles className={`w-5 h-5 shrink-0 ${theme.text}`} />
                 <div className="min-w-0">
@@ -180,7 +180,7 @@ export function FeatureTogglesSection({ settings, setSettings, theme, canManageS
               />
             </div>
 
-            <div className="flex items-center justify-between gap-4 p-4 bg-[var(--color-surface-muted)] rounded-xl">
+            <div className="flex items-center justify-between gap-3 p-3 sm:p-3.5 bg-[var(--color-surface-muted)] rounded-lg">
               <div className="flex items-center gap-3 min-w-0 flex-1">
                 <Shield className={`w-5 h-5 shrink-0 ${theme.text}`} />
                 <div className="min-w-0">
@@ -204,7 +204,7 @@ export function FeatureTogglesSection({ settings, setSettings, theme, canManageS
               />
             </div>
 
-            <div className="flex items-center justify-between gap-4 p-4 bg-[var(--color-surface-muted)] rounded-xl">
+            <div className="flex items-center justify-between gap-3 p-3 sm:p-3.5 bg-[var(--color-surface-muted)] rounded-lg">
               <div className="flex items-center gap-3 min-w-0 flex-1">
                 <Users className={`w-5 h-5 shrink-0 ${theme.text}`} />
                 <div className="min-w-0">
@@ -228,7 +228,7 @@ export function FeatureTogglesSection({ settings, setSettings, theme, canManageS
               />
             </div>
 
-            <div className="flex items-center justify-between gap-4 p-4 bg-[var(--color-surface-muted)] rounded-xl">
+            <div className="flex items-center justify-between gap-3 p-3 sm:p-3.5 bg-[var(--color-surface-muted)] rounded-lg">
               <div className="flex items-center gap-3 min-w-0 flex-1">
                 <Phone className={`w-5 h-5 shrink-0 ${theme.text}`} />
                 <div className="min-w-0">
@@ -252,7 +252,7 @@ export function FeatureTogglesSection({ settings, setSettings, theme, canManageS
               />
             </div>
 
-            <div className="flex items-center justify-between gap-4 p-4 bg-[var(--color-surface-muted)] rounded-xl">
+            <div className="flex items-center justify-between gap-3 p-3 sm:p-3.5 bg-[var(--color-surface-muted)] rounded-lg">
               <div className="flex items-center gap-3 min-w-0 flex-1">
                 <RefreshCw className={`w-5 h-5 shrink-0 ${theme.text}`} />
                 <div className="min-w-0">
@@ -276,7 +276,7 @@ export function FeatureTogglesSection({ settings, setSettings, theme, canManageS
               />
             </div>
 
-            <div className="flex items-center justify-between gap-4 p-4 bg-[var(--color-surface-muted)] rounded-xl">
+            <div className="flex items-center justify-between gap-3 p-3 sm:p-3.5 bg-[var(--color-surface-muted)] rounded-lg">
               <div className="flex items-center gap-3 min-w-0 flex-1">
                 <Smartphone className={`w-5 h-5 shrink-0 ${theme.text}`} />
                 <div className="min-w-0">
@@ -300,7 +300,7 @@ export function FeatureTogglesSection({ settings, setSettings, theme, canManageS
               />
             </div>
 
-            <div className="flex items-center justify-between gap-4 p-4 bg-[var(--color-surface-muted)] rounded-xl">
+            <div className="flex items-center justify-between gap-3 p-3 sm:p-3.5 bg-[var(--color-surface-muted)] rounded-lg">
               <div className="flex items-center gap-3 min-w-0 flex-1">
                 <Globe className={`w-5 h-5 shrink-0 ${theme.text}`} />
                 <div className="min-w-0">

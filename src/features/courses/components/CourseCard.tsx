@@ -65,12 +65,12 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
 
   return (
     <motion.div
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.3 }}
-      className="group h-full flex flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--card-solid)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-shadow duration-300"
+      whileHover={{ y: -3 }}
+      transition={{ duration: 0.25 }}
+      className="group h-full flex flex-col overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--card-solid)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-shadow duration-300"
     >
       {/* Thumbnail */}
-      <div className="relative h-48 overflow-hidden">
+      <div className="relative h-36 sm:h-40 overflow-hidden">
         {(courseData.thumbnail || courseData.thumbnailUrl) ? (
           <>
             <Image
@@ -83,13 +83,13 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
           </>
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-[var(--primary-soft)] border-b border-[var(--color-border)]">
-            <BookOpen className="w-12 h-12 text-[var(--primary)] opacity-70" />
+            <BookOpen className="w-10 h-10 text-[var(--primary)] opacity-70" />
           </div>
         )}
         
         {/* Category Badge */}
         {courseData.category && (
-          <div className="absolute top-4 left-4">
+          <div className="absolute top-3 left-3">
             <Badge variant="primary" size="sm" icon={<Tag className="w-3 h-3" />}>
               {courseData.category}
             </Badge>
@@ -98,8 +98,8 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
 
         {/* Price Badge */}
         {type === 'available' && (
-          <div className="absolute top-4 right-4">
-            <span className="px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full text-[10px] font-black uppercase tracking-widest text-gray-900 shadow-sm">
+          <div className="absolute top-3 right-3">
+            <span className="px-2.5 py-1 bg-white/95 dark:bg-black/80 backdrop-blur-sm rounded-full text-[11px] font-bold uppercase tracking-wider text-[var(--color-foreground)] shadow-sm">
               {courseData.price === 0 ? t('courses.free') : `$${courseData.price}`}
             </span>
           </div>
@@ -107,29 +107,29 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
       </div>
 
       {/* Content */}
-      <div className="p-3 sm:p-5 flex-1 flex flex-col">
-        <h3 className="heading-md mb-2 line-clamp-1">
+      <div className="p-3.5 sm:p-4 flex-1 flex flex-col">
+        <h3 className="text-sm sm:text-base font-bold text-[var(--color-foreground)] mb-1 line-clamp-1">
           {courseData.title}
         </h3>
-        <p className="text-body text-sm mb-4 line-clamp-2 min-h-[40px]">
+        <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] mb-2.5 line-clamp-2 min-h-[32px]">
           {courseData.description || t('courses.noDescription')}
         </p>
 
-        <div className="mt-auto space-y-4">
+        <div className="mt-auto space-y-2.5">
           {/* Instructor */}
-          <div className="flex items-center gap-2 text-xs font-bold text-[var(--color-muted-foreground)]">
-            <div className="gradient-bg w-6 h-6 rounded-lg flex items-center justify-center shadow-[var(--shadow-sm)]">
+          <div className="flex items-center gap-2 text-xs font-medium text-[var(--color-muted-foreground)]">
+            <div className="gradient-bg w-5 h-5 rounded-md flex items-center justify-center shadow-[var(--shadow-sm)] shrink-0">
               <User className="w-3 h-3 text-white" />
             </div>
-            <span>{courseData.instructor?.name || t('courses.unknown')}</span>
+            <span className="truncate">{courseData.instructor?.name || t('courses.unknown')}</span>
           </div>
 
           {/* Progress (for enrolled courses) */}
           {type === 'enrolled' && enrollment && (
-            <div className="p-3.5 bg-[var(--color-surface-muted)] rounded-xl border border-[var(--border)]">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-black uppercase tracking-widest text-[var(--color-muted-foreground)]">{t('courses.progress')}</span>
-                <span className="text-xs font-black tabular-nums text-[var(--primary)]">{enrollment.progress}%</span>
+            <div className="p-2.5 bg-[var(--color-surface-muted)] rounded-lg border border-[var(--border)]">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-muted-foreground)]">{t('courses.progress')}</span>
+                <span className="text-xs font-bold tabular-nums text-[var(--primary)]">{enrollment.progress}%</span>
               </div>
               <div className="w-full bg-[var(--color-surface-muted-strong)] rounded-full h-1.5 overflow-hidden">
                 <motion.div
@@ -142,20 +142,20 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
           )}
 
           {/* Actions */}
-          <div className="flex gap-2 pt-2">
+          <div className="flex gap-2 pt-1">
             {type === 'available' ? (
               <>
                 <button
                   onClick={handleEnroll}
                   disabled={isLoading}
-                  className="btn-premium flex-1 group/btn"
+                  className="btn-premium flex-1 group/btn min-h-[38px] text-xs sm:text-sm"
                 >
                   {isLoading ? (
                     <Loader size="sm" />
                   ) : (
                     <>
                       {t('courses.enrollNow')}
-                      <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                      <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
                     </>
                   )}
                 </button>
@@ -165,14 +165,14 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
               <>
                 <button
                   onClick={handleContinue}
-                  className="btn-premium flex-1 group/btn"
+                  className="btn-premium flex-1 group/btn min-h-[38px] text-xs sm:text-sm"
                 >
                   {enrollment?.progress === 0 ? (
-                    <><Play className="w-4 h-4 fill-current" /> {t('courses.start')}</>
+                    <><Play className="w-3.5 h-3.5 fill-current" /> {t('courses.start')}</>
                   ) : enrollment?.progress === 100 ? (
-                    <><RotateCcw className="w-4 h-4" /> {t('courses.review')}</>
+                    <><RotateCcw className="w-3.5 h-3.5" /> {t('courses.review')}</>
                   ) : (
-                    <><ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" /> {t('courses.continue')}</>
+                    <><ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" /> {t('courses.continue')}</>
                   )}
                 </button>
                 <CourseShareButton course={courseData} />
@@ -180,10 +180,10 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
                   <button
                     onClick={handleDrop}
                     disabled={isLoading}
-                    className="p-3 border border-[var(--color-error)]/25 text-[var(--color-error)] rounded-xl hover:bg-[var(--color-error-light)] transition-all disabled:opacity-50"
+                    className="p-2 min-h-[38px] min-w-[38px] flex items-center justify-center border border-[var(--color-error)]/25 text-[var(--color-error)] rounded-lg hover:bg-[var(--color-error-light)] transition-all disabled:opacity-50"
                     aria-label={t('courses.dropCourse')}
                   >
-                    {isLoading ? <Loader size="sm" /> : <Trash2 className="w-5 h-5" />}
+                    {isLoading ? <Loader size="sm" /> : <Trash2 className="w-4 h-4" />}
                   </button>
                 </Tooltip>
               </>

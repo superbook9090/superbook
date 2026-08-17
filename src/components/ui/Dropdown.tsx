@@ -58,16 +58,18 @@ export const Dropdown: React.FC<DropdownProps> = ({
 
   // Close custom dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
     }
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
     };
   }, [isOpen]);
 
@@ -78,13 +80,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
     setIsOpen(false);
   };
 
-  const handleNativeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    if (onChange) {
-      onChange(event.target.value);
-    }
-  };
-
-  // Keyboard navigation for desktop mode
+  // Keyboard navigation
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (disabled) return;
 
@@ -126,11 +122,11 @@ export const Dropdown: React.FC<DropdownProps> = ({
   };
 
   const baseInputStyles = cn(
-    'form-field text-base sm:text-sm transition-all duration-150 block w-full rounded-xl select-none text-left',
+    'form-field text-xs sm:text-sm transition-all duration-150 block w-full rounded-xl select-none text-left',
     'border-[var(--color-border)] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] placeholder-[var(--color-muted)]',
     'focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/10',
-    startIcon && 'pl-11',
-    'pr-11',
+    startIcon && 'pl-10',
+    'pr-10',
     error && 'border-[var(--color-error)] focus:border-[var(--color-error)] focus:ring-[var(--color-error)]/10',
     disabled && 'opacity-50 cursor-not-allowed bg-[var(--color-surface-muted-strong)]'
   );
@@ -138,70 +134,21 @@ export const Dropdown: React.FC<DropdownProps> = ({
   return (
     <div
       ref={containerRef}
-      className={cn('flex flex-col gap-1.5 w-full relative', containerClassName)}
+      className={cn('flex flex-col gap-1 w-full relative', containerClassName)}
     >
       {label && (
         <label
           id={labelId}
-          htmlFor={dropdownId}
-          className="block text-sm font-medium text-[var(--color-foreground)] select-none"
+          htmlFor={`${dropdownId}-btn`}
+          className="block text-xs font-semibold text-[var(--color-foreground)] select-none"
         >
           {label}
           {required && <span className="text-[var(--color-error)] ml-0.5">*</span>}
         </label>
       )}
 
-      {/* --------------------
-          MOBILE NATIVE SELECT
-          -------------------- */}
-      <div className="relative flex items-center min-h-[44px] sm:hidden w-full">
-        {startIcon && (
-          <div className="absolute left-3.5 text-[var(--color-muted)] flex items-center pointer-events-none select-none">
-            {startIcon}
-          </div>
-        )}
-        <select
-          id={dropdownId}
-          name={name}
-          value={value || ''}
-          onChange={handleNativeChange}
-          disabled={disabled}
-          required={required}
-          aria-invalid={!!error}
-          aria-describedby={
-            error ? errorTextId : helperText ? helperTextId : undefined
-          }
-          className={cn(
-            baseInputStyles,
-            'appearance-none py-2.5 cursor-pointer',
-            !value && 'text-[var(--color-muted)]',
-            className
-          )}
-          style={{
-            paddingLeft: startIcon ? '2.75rem' : undefined,
-            paddingRight: '2.75rem',
-          }}
-        >
-          {placeholder && (
-            <option value="" disabled>
-              {placeholder}
-            </option>
-          )}
-          {options.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-        <div className="absolute right-3.5 text-[var(--color-muted)] pointer-events-none flex items-center select-none">
-          <ChevronDown className="w-5 h-5 shrink-0" />
-        </div>
-      </div>
-
-      {/* --------------------
-          DESKTOP CUSTOM SELECT
-          -------------------- */}
-      <div className="relative hidden sm:block w-full">
+      {/* Unified Custom Dropdown */}
+      <div className="relative w-full">
         <button
           type="button"
           id={`${dropdownId}-btn`}
@@ -216,13 +163,13 @@ export const Dropdown: React.FC<DropdownProps> = ({
           disabled={disabled}
           className={cn(
             baseInputStyles,
-            'flex items-center justify-between cursor-pointer py-2.5',
+            'flex items-center justify-between cursor-pointer py-2 min-h-[38px]',
             !selectedOption && 'text-[var(--color-muted)]',
             className
           )}
           style={{
-            paddingLeft: startIcon ? '2.75rem' : undefined,
-            paddingRight: '2.75rem',
+            paddingLeft: startIcon ? '2.5rem' : undefined,
+            paddingRight: '2.5rem',
           }}
         >
           <div className="flex items-center gap-2 truncate">
@@ -261,11 +208,11 @@ export const Dropdown: React.FC<DropdownProps> = ({
         <AnimatePresence>
           {isOpen && (
             <motion.div
-              initial={{ opacity: 0, y: -8, scale: 0.95 }}
+              initial={{ opacity: 0, y: -6, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -8, scale: 0.95 }}
-              transition={{ duration: 0.1 }}
-              className="absolute z-30 mt-2 w-full bg-[var(--card-solid)] border border-[var(--color-border)] rounded-xl shadow-lg overflow-hidden py-1"
+              exit={{ opacity: 0, y: -6, scale: 0.98 }}
+              transition={{ duration: 0.12 }}
+              className="absolute z-50 top-full left-0 mt-1.5 w-full min-w-[200px] bg-[var(--card-solid)] border border-[var(--color-border)] rounded-xl shadow-xl overflow-hidden py-1"
             >
               <ul
                 role="listbox"
@@ -282,9 +229,9 @@ export const Dropdown: React.FC<DropdownProps> = ({
                       aria-selected={isSelected}
                       onClick={() => handleSelect(String(option.value))}
                       className={cn(
-                        'flex items-center justify-between px-4 py-2.5 text-sm font-medium transition-colors cursor-pointer select-none',
+                        'flex items-center justify-between px-3.5 py-2 text-xs sm:text-sm font-medium transition-colors cursor-pointer select-none',
                         isSelected
-                          ? 'bg-[var(--color-accent)] text-[var(--color-primary)]'
+                          ? 'bg-[var(--color-accent)] text-[var(--color-primary)] font-semibold'
                           : 'text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted)]'
                       )}
                     >
@@ -292,7 +239,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
                         {option.icon}
                         {option.label}
                       </span>
-                      {isSelected && <Check className="w-4 h-4 text-[var(--color-primary)] shrink-0 ml-2" />}
+                      {isSelected && <Check className="w-3.5 h-3.5 text-[var(--color-primary)] shrink-0 ml-2" />}
                     </li>
                   );
                 })}

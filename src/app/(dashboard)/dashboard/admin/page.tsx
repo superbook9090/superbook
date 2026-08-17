@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
 import { ROUTES } from '@/constants/routes';
 import {
@@ -14,6 +13,7 @@ import {
 import { useSessionStore } from '@/store/useSessionStore';
 import { useFeature } from '@/contexts/AppSettingsContext';
 import type { FeatureToggleKey } from '@/store/useSettingsStore';
+import { PageWrapper, PageHeader, ResponsiveGrid } from '@/components/layout';
 
 const adminQuickLinks = [
   {
@@ -76,45 +76,38 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div className="stack-page overflow-x-hidden">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center gap-3"
-      >
-        <div className="p-3 bg-[var(--primary-soft)] rounded-xl">
-          <SettingsIcon className="w-6 h-6 text-[var(--primary)]" />
-        </div>
-        <div>
-          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">{t('admin.adminDashboard')}</h1>
-          <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">{t('admin.adminDesc')}</p>
-        </div>
-      </motion.div>
+    <PageWrapper>
+      <PageHeader
+        title={
+          <span className="flex items-center gap-3">
+            <span className="p-2.5 bg-[var(--primary-soft)] rounded-xl text-[var(--primary)] shrink-0 inline-flex">
+              <SettingsIcon className="w-6 h-6" />
+            </span>
+            <span>{t('admin.adminDashboard')}</span>
+          </span>
+        }
+        description={t('admin.adminDesc')}
+      />
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
-      >
+      <ResponsiveGrid variant="cards">
         {visibleLinks.map(({ href, icon: Icon, labelKey, titleKey, iconClass }) => (
           <Link
             key={href}
             href={href}
-            className="card-surface card-body hover:shadow-lg transition-all group w-full"
+            className="card-surface card-body hover:shadow-md transition-all group w-full hover:-translate-y-0.5 rounded-xl"
           >
             <div className="flex items-center">
-              <div className={`p-3 rounded-full transition-colors ${iconClass}`}>
-                <Icon className="w-6 h-6" />
+              <div className={`p-2 sm:p-2.5 rounded-lg transition-colors shrink-0 ${iconClass}`}>
+                <Icon className="w-5 h-5" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-[var(--color-muted-foreground)]">{t(labelKey)}</p>
-                <p className="text-lg font-semibold text-[var(--color-foreground)]">{t(titleKey)}</p>
+              <div className="ml-2.5 sm:ml-3 min-w-0 flex-1">
+                <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-[var(--color-muted)] truncate">{t(labelKey)}</p>
+                <p className="text-sm sm:text-base font-bold text-[var(--color-foreground)] truncate mt-0.5">{t(titleKey)}</p>
               </div>
             </div>
           </Link>
         ))}
-      </motion.div>
-    </div>
+      </ResponsiveGrid>
+    </PageWrapper>
   );
 }

@@ -60,7 +60,7 @@ export default function QuickActionCard({
 }: QuickActionCardProps) {
   const config = colorConfig[color];
 
-  const cardClassName = `flex items-center justify-center sm:justify-start w-full min-h-[44px] p-2 sm:p-4 rounded-xl border transition-all group ${
+  const cardClassName = `flex items-center justify-start w-full min-h-[44px] p-2.5 sm:p-3 rounded-xl border transition-all group ${
     disabled
       ? 'bg-[var(--color-surface-muted)] border-[var(--color-border)] cursor-not-allowed'
       : 'bg-[var(--card-solid)] border-[var(--color-border)] hover:border-[var(--primary-border)] hover:shadow-[var(--shadow-md)]'
@@ -77,23 +77,23 @@ export default function QuickActionCard({
   const cardContent = (
     <>
       <div
-        className={`p-2 sm:p-3 rounded-lg transition-colors ${
+        className={`p-2 rounded-lg transition-colors shrink-0 ${
           disabled
             ? 'bg-[var(--color-surface-muted-strong)] text-[var(--color-muted-foreground)]'
             : `${config.iconBg} ${config.text}`
         }`}
       >
-        <Icon className="w-5 h-5" />
+        <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
       </div>
-      <div className="ml-3 text-left">
+      <div className="ml-2.5 sm:ml-3 text-left min-w-0 flex-1">
         <div
-          className={`font-semibold text-sm sm:text-base ${
+          className={`font-semibold text-xs sm:text-sm truncate ${
             disabled ? 'text-[var(--color-muted-foreground)]' : 'text-[var(--color-foreground)]'
           }`}
         >
           {title}
         </div>
-        <div className="text-xs text-[var(--color-muted-foreground)]">{description}</div>
+        <div className="text-[11px] sm:text-xs text-[var(--color-muted-foreground)] truncate mt-0.5">{description}</div>
       </div>
     </>
   );

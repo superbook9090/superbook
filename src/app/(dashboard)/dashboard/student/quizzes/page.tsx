@@ -6,21 +6,21 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
-import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useAlert } from '@/components/ui/AlertContainer';
 import { LazyQuizCard } from '@/lib/lazy';
 import { useSessionStore } from '@/store/useSessionStore';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { useStartQuizAttempt, useEnrollments, useQuizAttempts, useQuizzes, type QuizAttempt, type Quiz } from '@/lib/react-query/hooks';
+import { BookOpen } from 'lucide-react';
 import { ApiClientError } from '@/lib/api/http';
 import { Dropdown } from '@/components/ui/Dropdown';
+import { PageWrapper, PageHeader, ResponsiveGrid } from '@/components/layout';
 
 export default function StudentQuizzesPage() {
   const session = useSessionStore((s) => s.session);
   const status = useSessionStore((s) => s.status);
   const router = useRouter();
   const { t } = useTranslation();
-  const { theme } = useRoleTheme();
   const { addAlert } = useAlert();
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -146,83 +146,80 @@ export default function StudentQuizzesPage() {
   }
 
   return (
-    <div>
-      <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)] truncate">{t('quiz.myQuizzes')}</h1>
-      <p className="mt-2 text-sm sm:text-base text-[var(--color-muted-foreground)]">
-        {t('quiz.quizzesDesc')}
-      </p>
+    <PageWrapper>
+      <PageHeader
+        title={t('quiz.myQuizzes')}
+        description={t('quiz.quizzesDesc')}
+      />
 
-      {/* Course filter */}
-      {enrollments.length > 0 && (
-        <div className="mt-4 max-w-xs">
-          <Dropdown
-            id="course-filter"
-            label={`${t('teacherQuizzes.tableCourse')}:`}
-            value={selectedCourse}
-            onChange={(val) => setSelectedCourse(val)}
-            options={[
-              { value: 'all', label: t('teacherQuizzes.allCourses') },
-              ...enrollments
-                .map((enrollment) => {
-                  const course =
-                    typeof enrollment.course === 'object' && enrollment.course !== null
-                      ? enrollment.course
-                      : null;
-                  if (!course) return null;
-                  return {
-                    value: course._id.toString(),
-                    label: course.title,
-                  };
-                })
-                .filter((item): item is { value: string; label: string } => item !== null),
-            ]}
-            placeholder=""
-          />
-        </div>
-      )}
-
-      {/* Tabs */}
-      <div className="mt-6 border-b border-[var(--border)]">
-        <nav className="-mb-px flex space-x-4 sm:space-x-8 overflow-x-auto">
+      {/* Tabs and Course Filter */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-[var(--border)] pb-2 sm:pb-0">
+        <nav className="-mb-px flex space-x-3 sm:space-x-8 overflow-x-auto">
           <button
             onClick={() => handleTabChange('available')}
             className={`${activeTab === 'available'
-              ? 'border-[var(--success)] text-[var(--success)]'
-              : 'border-transparent text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:border-[var(--border)]'
-              } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm min-h-[44px] flex items-center`}
+              ? 'border-[var(--primary)] text-[var(--primary)] font-bold'
+              : 'border-transparent text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:border-[var(--border)] font-medium'
+              } whitespace-nowrap py-2.5 px-1 border-b-2 text-sm sm:text-base min-h-[40px] flex items-center transition-colors`}
           >
             {t('quiz.available')} ({availableQuizzes.length})
           </button>
           <button
             onClick={() => handleTabChange('completed')}
             className={`${activeTab === 'completed'
-              ? 'border-[var(--success)] text-[var(--success)]'
-              : 'border-transparent text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:border-[var(--border)]'
-              } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm min-h-[44px] flex items-center`}
+              ? 'border-[var(--primary)] text-[var(--primary)] font-bold'
+              : 'border-transparent text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:border-[var(--border)] font-medium'
+              } whitespace-nowrap py-2.5 px-1 border-b-2 text-sm sm:text-base min-h-[40px] flex items-center transition-colors`}
           >
             {t('quiz.completed')} ({completedAttempts.length})
           </button>
         </nav>
+
+        {enrollments.length > 0 && (
+          <div className="w-full sm:w-64 pb-1 sm:pb-2">
+            <Dropdown
+              id="course-filter"
+              startIcon={<BookOpen className="w-4 h-4" />}
+              value={selectedCourse}
+              onChange={(val) => setSelectedCourse(val)}
+              options={[
+                { value: 'all', label: t('teacherQuizzes.allCourses') },
+                ...enrollments
+                  .map((enrollment) => {
+                    const course =
+                      typeof enrollment.course === 'object' && enrollment.course !== null
+                        ? enrollment.course
+                        : null;
+                    if (!course) return null;
+                    return {
+                      value: course._id.toString(),
+                      label: course.title,
+                    };
+                  })
+                  .filter((item): item is { value: string; label: string } => item !== null),
+              ]}
+              placeholder={t('teacherQuizzes.allCourses')}
+            />
+          </div>
+        )}
       </div>
 
-      <div className="mt-6">
+      <div>
         {activeTab === 'available' ? (
           availableQuizzes.length === 0 ? (
-            <div className="bg-[var(--background)] overflow-hidden shadow rounded-lg">
-              <div className="px-4 py-8 sm:p-6 text-center">
-                <p className="text-[var(--color-muted-foreground)] mb-4">
-                  {t('quiz.enrollCourse')}
-                </p>
-                <Link
-                  href={ROUTES.student.browse}
-                  className={`inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] px-4 py-3 sm:px-6 sm:py-2.5 text-sm sm:text-base font-medium rounded-xl text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 transition-opacity`}
-                >
-                  {t('courses.browseMore')}
-                </Link>
-              </div>
+            <div className="card-surface p-6 sm:p-10 text-center">
+              <p className="text-[var(--color-muted-foreground)] mb-4">
+                {t('quiz.enrollCourse')}
+              </p>
+              <Link
+                href={ROUTES.student.browse}
+                className="btn-premium w-full sm:w-auto min-h-[44px]"
+              >
+                {t('courses.browseMore')}
+              </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 items-start gap-[var(--card-gap)] sm:grid-cols-2 lg:grid-cols-3">
+            <ResponsiveGrid variant="dense">
               {availableQuizzes.map((quiz: Quiz) => (
                 <div key={quiz._id} className="min-w-0">
                   <LazyQuizCard
@@ -232,16 +229,14 @@ export default function StudentQuizzesPage() {
                   />
                 </div>
               ))}
-            </div>
+            </ResponsiveGrid>
           )
         ) : completedAttempts.length === 0 ? (
-          <div className="bg-[var(--card-solid)] overflow-hidden shadow rounded-lg">
-            <div className="px-4 py-8 sm:p-6 text-center">
-              <p className="text-[var(--color-muted-foreground)]">{t('quiz.noCompleted')}</p>
-            </div>
+          <div className="card-surface p-6 sm:p-10 text-center">
+            <p className="text-[var(--color-muted-foreground)]">{t('quiz.noCompleted')}</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-[var(--card-gap)] sm:grid-cols-2 lg:grid-cols-3">
+          <ResponsiveGrid variant="dense">
             {completedAttempts.map((attempt: QuizAttempt) => (
               <div key={attempt._id} className="h-full min-w-0">
                 <LazyQuizCard
@@ -252,9 +247,9 @@ export default function StudentQuizzesPage() {
                 />
               </div>
             ))}
-          </div>
+          </ResponsiveGrid>
         )}
       </div>
-    </div>
+    </PageWrapper>
   );
 }

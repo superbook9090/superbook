@@ -77,18 +77,17 @@ export default function HeaderStatic({ forceScrolled = false }: { forceScrolled?
             </Link>
           </div>
 
-          <div className="md:hidden flex items-center gap-2">
-            <ThemeToggle />
+          <div className="md:hidden flex items-center">
             <details className="relative group">
             <summary
               id="mobile-menu-toggle"
               aria-label={t('home.header.openMenu')}
-              className="list-none p-2 rounded-lg transition-colors cursor-pointer [&::-webkit-details-marker]:hidden text-[var(--foreground)] hover:bg-[var(--surface-muted)]"
+              className="list-none inline-flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--card-solid)] text-[var(--foreground)] hover:bg-[var(--surface-muted)] transition-colors cursor-pointer [&::-webkit-details-marker]:hidden shadow-sm"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
+                width="18"
+                height="18"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -102,12 +101,16 @@ export default function HeaderStatic({ forceScrolled = false }: { forceScrolled?
                 <line x1="4" x2="20" y1="18" y2="18" />
               </svg>
             </summary>
-            <div className="absolute right-0 top-full mt-2 w-56 rounded-xl bg-[var(--card-solid)] shadow-lg border border-[var(--border)] card-body flex flex-col gap-3">
+            <div className="absolute right-0 top-full mt-1.5 w-56 rounded-xl bg-[var(--card-solid)]/95 backdrop-blur-md shadow-xl border border-[var(--border)] p-2.5 flex flex-col gap-2 z-50">
+              <div className="flex items-center justify-between pb-2 border-b border-[var(--border)]">
+                <span className="text-xs font-semibold text-[var(--muted)]">Theme</span>
+                <ThemeToggle />
+              </div>
               {enableBlogs && (
                 <Link
                   href={ROUTES.blogs}
                   data-i18n-key="common.blogs"
-                  className="block w-full py-2.5 text-center text-[var(--foreground)] font-medium border border-[var(--border)] rounded-xl hover:bg-[var(--surface-muted)]"
+                  className="flex items-center justify-center min-h-[38px] w-full px-3 py-1.5 text-center text-xs sm:text-sm text-[var(--foreground)] font-medium border border-[var(--border)] rounded-lg hover:bg-[var(--surface-muted)] transition-colors"
                 >
                   {t('common.blogs')}
                 </Link>
@@ -115,21 +118,21 @@ export default function HeaderStatic({ forceScrolled = false }: { forceScrolled?
               <Link
                 href={ROUTES.login}
                 data-i18n-key="home.login"
-                className="block w-full py-2.5 text-center text-[var(--foreground)] font-medium border border-[var(--border)] rounded-xl hover:bg-[var(--surface-muted)]"
+                className="flex items-center justify-center min-h-[38px] w-full px-3 py-1.5 text-center text-xs sm:text-sm text-[var(--foreground)] font-medium border border-[var(--border)] rounded-lg hover:bg-[var(--surface-muted)] transition-colors"
               >
                 {t('home.login')}
               </Link>
               <Link
                 href={ROUTES.register}
                 data-i18n-key="home.register"
-                className={`block w-full py-2.5 text-center text-white font-semibold bg-gradient-to-r ${theme.gradient} rounded-xl`}
+                className={`flex items-center justify-center min-h-[38px] w-full px-3 py-1.5 text-center text-xs sm:text-sm text-white font-semibold bg-gradient-to-r ${theme.gradient} rounded-lg shadow-sm hover:opacity-95 transition-opacity`}
               >
                 {t('home.register')}
               </Link>
               <button
                 id="lang-toggle-mobile"
                 type="button"
-                className="block w-full py-2.5 text-center text-[var(--muted)] font-medium border border-[var(--border)] rounded-xl hover:bg-[var(--surface-muted)]"
+                className="flex items-center justify-center min-h-[38px] w-full px-3 py-1.5 text-center text-xs sm:text-sm text-[var(--muted)] font-medium border border-[var(--border)] rounded-lg hover:bg-[var(--surface-muted)] transition-colors"
               >
                 {t('common.switchToHindi')}
               </button>

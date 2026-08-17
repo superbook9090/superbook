@@ -8,7 +8,7 @@ import { useSessionStore } from '@/store/useSessionStore';
 import { getFirebaseAuth } from '@/lib/notifications/push/firebase';
 import { RecaptchaVerifier, signInWithPhoneNumber, type ConfirmationResult } from 'firebase/auth';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, ArrowLeft, Phone, ShieldCheck, Edit2 } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Edit2 } from 'lucide-react';
 
 import { Loader } from '@/components/ui/Loader';
 import { useAlert } from '@/components/ui/AlertContainer';

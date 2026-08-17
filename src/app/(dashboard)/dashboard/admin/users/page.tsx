@@ -35,6 +35,7 @@ import { UserDetailModal } from './_components/UserDetailModal';
 import { LimitsModal } from './_components/LimitsModal';
 import { OrganizationAssignModal } from './_components/OrganizationAssignModal';
 import type { User } from './_components/types';
+import { PageWrapper, PageHeader } from '@/components/layout';
 
 export default function AdminUsersPage() {
   const { session, status } = useSessionStore();
@@ -291,28 +292,22 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="stack-page overflow-x-hidden">
+    <PageWrapper>
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center gap-3"
-      >
-        <div className="p-3 bg-[var(--info-light)] rounded-xl">
-          <Users className="w-6 h-6 text-[var(--info)]" />
-        </div>
-        <div>
-          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">{t('admin.userManagement')}</h1>
-          <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">{t('admin.userDesc')}</p>
-        </div>
-      </motion.div>
+      <PageHeader
+        title={
+          <span className="flex items-center gap-3">
+            <span className="p-2.5 bg-[var(--info-light)] rounded-xl text-[var(--info)] shrink-0 inline-flex">
+              <Users className="w-6 h-6" />
+            </span>
+            <span>{t('admin.userManagement')}</span>
+          </span>
+        }
+        description={t('admin.userDesc')}
+      />
 
       {/* Filters */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-      >
+      <div>
         <FilterPanel>
           <DashboardListFilters
             searchQuery={searchQuery}
@@ -336,7 +331,7 @@ export default function AdminUsersPage() {
             ]}
           />
         </FilterPanel>
-      </motion.div>
+      </div>
 
       {/* Users Table - Desktop */}
       <UsersTable
@@ -447,6 +442,6 @@ export default function AdminUsersPage() {
           handleDeleteClick={handleDeleteClick}
         />
       )}
-    </div>
+    </PageWrapper>
   );
 }

@@ -56,7 +56,7 @@ export function NotesHeader({
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder={t('notes.searchPlaceholder')}
-            className="form-field w-full pl-10 pr-4 py-2.5 bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-xl text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/10 text-[var(--color-foreground)] placeholder-[var(--color-muted)] transition-all min-h-[44px]"
+            className="form-field w-full pl-10 pr-4 py-2.5 bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-xl text-base sm:text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/10 text-[var(--color-foreground)] placeholder-[var(--color-muted)] transition-all min-h-[44px]"
           />
         </div>
 

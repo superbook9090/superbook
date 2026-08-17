@@ -84,21 +84,21 @@ export function NoteEditorModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="relative w-full max-w-2xl bg-[var(--card-solid)] border border-[var(--color-border)] rounded-2xl shadow-xl flex flex-col max-h-[90vh] overflow-hidden">
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)]">
-          <h3 className="font-semibold text-lg text-[var(--color-foreground)]">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-[var(--color-border)]">
+          <h3 className="font-bold text-base sm:text-lg text-[var(--color-foreground)]">
             {note ? t('notes.editNote') : t('notes.addNote')}
           </h3>
           <button
             type="button"
             onClick={onClose}
-            className="p-2 text-[var(--color-muted)] hover:text-[var(--color-foreground)] rounded-lg hover:bg-[var(--color-surface-muted)] min-h-[44px] min-w-[44px] flex items-center justify-center"
+            className="p-2 text-[var(--color-muted)] hover:text-[var(--color-foreground)] rounded-lg hover:bg-[var(--color-surface-muted)] min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Modal Body */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-5">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-5">
           {errorMsg ? (
             <div className="flex items-center gap-2 p-3 text-sm text-[var(--color-error)] bg-[var(--color-error-light)] border border-[var(--color-error)]/20 rounded-xl">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />

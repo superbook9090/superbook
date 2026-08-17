@@ -152,13 +152,13 @@ export default function StudentDashboardPage() {
         className="hero-banner"
       >
         <div>
-          <h1 className="heading-xl mb-2 truncate">
+          <h1 className="heading-xl mb-2">
             {t('dashboard.welcomeBack')},{' '}
             <span className="gradient-text">
               {session?.user?.name ? session.user.name.charAt(0).toUpperCase() + session.user.name.slice(1) : session?.user?.name}
             </span>!
           </h1>
-          <p className="text-[var(--color-muted-foreground)] text-sm sm:text-base truncate">
+          <p className="text-[var(--color-muted-foreground)] text-sm sm:text-base">
             {t('dashboard.continueLearning').replace('{count}', String(stats.enrolledCount))}
           </p>
         </div>

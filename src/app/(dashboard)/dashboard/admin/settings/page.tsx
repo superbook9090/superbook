@@ -25,7 +25,7 @@ import { NotesLimitsSection } from './_components/NotesLimitsSection';
 import { FeatureTogglesSection } from './_components/FeatureTogglesSection';
 import { PlatformConfigSection } from './_components/PlatformConfigSection';
 import type { AppSettings } from './_components/types';
-
+import { PageWrapper, PageHeader } from '@/components/layout';
 
 export default function AdminSettingsPage() {
   const { session, status } = useSessionStore();
@@ -100,21 +100,22 @@ export default function AdminSettingsPage() {
       return;
     }
 
-    if (status === 'authenticated') {
-      // Role-based redirect handled in /dashboard/page.tsx
-      fetchSettings();
+    if (!isSuperAdmin(session.user?.role) && session.user?.role !== 'admin') {
+      router.push(ROUTES.dashboard);
+      return;
     }
-  }, [status, session, fetchSettings, router]);
+
+    fetchSettings();
+  }, [session, status, router, fetchSettings]);
 
   const handleSave = async () => {
     setIsSaving(true);
 
     try {
       await patchAdminSettings(settings);
+      setValue(new Date().toISOString());
+      await fetchPublicSettings();
       addAlert({ type: 'success', message: t('adminSettings.settingsSaved') });
-
-      setValue(Date.now().toString());
-      await fetchPublicSettings(true);
       window.dispatchEvent(new Event('settingsUpdated'));
     } catch (err) {
       addAlert({
@@ -134,21 +135,19 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto stack-page overflow-x-hidden">
+    <PageWrapper className="max-w-4xl">
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center gap-3"
-      >
-        <div className={`p-3 ${theme.activeBg} rounded-xl`}>
-          <Settings className={`w-6 h-6 ${theme.text}`} />
-        </div>
-        <div>
-          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">{t('adminSettings.title')}</h1>
-          <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">{t('adminSettings.description')}</p>
-        </div>
-      </motion.div>
+      <PageHeader
+        title={
+          <span className="flex items-center gap-3">
+            <span className={`p-2.5 ${theme.activeBg} rounded-xl shrink-0 inline-flex`}>
+              <Settings className={`w-6 h-6 ${theme.text}`} />
+            </span>
+            <span>{t('adminSettings.title')}</span>
+          </span>
+        }
+        description={t('adminSettings.description')}
+      />
 
       
       {/* Teacher Content Limits */}
@@ -198,6 +197,6 @@ export default function AdminSettingsPage() {
           {isSaving ? t('adminSettings.saving') : t('adminSettings.saveSettings')}
         </Button>
       </motion.div>
-    </div>
+    </PageWrapper>
   );
 }

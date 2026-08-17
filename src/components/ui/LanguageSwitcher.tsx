@@ -39,12 +39,12 @@ export default function LanguageSwitcher({
         aria-expanded={isOpen}
         aria-label={t('language.selectLanguage')}
         className={cn(
-          'flex items-center gap-2 bg-[var(--card-solid)] border border-[var(--color-border)] rounded-lg font-medium text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted)] hover:border-[var(--color-muted)] transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent shadow-sm',
-          compact ? 'px-2.5 py-1.5 text-xs' : 'px-3 py-2 text-sm',
+          'inline-flex items-center gap-1.5 bg-[var(--card-solid)] border border-[var(--border)] rounded-lg font-medium text-[var(--foreground)] hover:bg-[var(--surface-muted)] transition-all focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 shadow-sm shrink-0',
+          compact ? 'h-8.5 px-2.5 text-xs' : 'h-8.5 sm:h-9 px-2.5 sm:px-3 text-xs sm:text-sm',
           className
         )}
       >
-        <Globe className={cn('text-[var(--color-muted)]', compact ? 'w-3.5 h-3.5' : 'w-4 h-4')} />
+        <Globe className="w-4 h-4 text-[var(--muted)] shrink-0" />
         {alwaysShowLabel ? (
           <span>{selectedLanguage.name}</span>
         ) : (
@@ -55,8 +55,7 @@ export default function LanguageSwitcher({
         )}
         <ChevronDown
           className={cn(
-            'text-[var(--color-muted-foreground)] transition-transform',
-            compact ? 'w-3.5 h-3.5' : 'w-4 h-4',
+            'w-3.5 h-3.5 text-[var(--muted)] transition-transform shrink-0',
             isOpen && 'rotate-180'
           )}
         />
@@ -65,10 +64,10 @@ export default function LanguageSwitcher({
       {isOpen && (
         <>
           <div
-            className="fixed inset-0 z-10"
+            className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute right-0 mt-2 w-48 bg-[var(--card-solid)] border border-[var(--color-border)] rounded-lg shadow-lg z-20 overflow-hidden">
+          <div className="absolute right-0 top-full mt-1.5 w-44 bg-[var(--card-solid)] border border-[var(--color-border)] rounded-xl shadow-lg z-50 overflow-hidden py-1">
             {languages.map((language) => (
               <button
                 key={language.code}
@@ -76,7 +75,7 @@ export default function LanguageSwitcher({
                   setLang(language.code as 'en' | 'hi');
                   setIsOpen(false);
                 }}
-                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${
+                className={`w-full flex items-center gap-2.5 px-3.5 py-2 text-xs sm:text-sm font-medium transition-colors ${
                   lang === language.code
                     ? 'bg-[var(--color-accent)] text-[var(--color-primary)]'
                     : 'text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted)]'

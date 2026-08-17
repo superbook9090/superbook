@@ -96,7 +96,7 @@ export default function DashboardListFilters({
         value={searchQuery}
         onChange={(e) => onSearchChange(e.target.value)}
         aria-label={searchPlaceholder ?? t('common.search')}
-        className="w-full bg-[var(--card-solid)] border border-[var(--border)] rounded-xl pl-9 md:pl-12 pr-3 md:pr-6 py-2.5 md:py-3.5 min-h-[40px] md:min-h-[44px] text-sm font-semibold md:font-bold focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] outline-none transition-all shadow-sm"
+        className="w-full bg-[var(--card-solid)] border border-[var(--border)] rounded-xl pl-9 md:pl-12 pr-3 md:pr-6 py-2.5 md:py-3.5 min-h-[42px] md:min-h-[44px] text-base md:text-sm font-medium md:font-bold focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] outline-none transition-all shadow-sm"
       />
     </div>
   );

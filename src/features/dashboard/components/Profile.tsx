@@ -12,6 +12,7 @@ import ProfileNameSection from './profile/ProfileNameSection';
 import ProfileEmailSection from './profile/ProfileEmailSection';
 import ProfilePhoneSection from './profile/ProfilePhoneSection';
 import ProfileOrganizationSection from './profile/ProfileOrganizationSection';
+import { PageWrapper, PageHeader } from '@/components/layout';
 
 interface ProfileProps {
   session: Session;
@@ -38,22 +39,22 @@ export default function Profile({ session, descriptionKey = 'manageAccount' }: P
   }, []);
 
   return (
-    <div>
-      <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-foreground)]">{t('profile.myProfile')}</h1>
-      <p className="mt-2 text-sm sm:text-base text-[var(--color-muted-foreground)]">
-        {t(`profile.${descriptionKey}`)}
-      </p>
+    <PageWrapper>
+      <PageHeader
+        title={t('profile.myProfile')}
+        description={t(`profile.${descriptionKey}`)}
+      />
 
-      <div className="mt-6 sm:mt-8 card-surface">
+      <div className="card-surface">
         <div className="card-body">
-          <div className="space-y-6 sm:space-y-8">
+          <div className="space-y-3.5 sm:space-y-4">
             <ProfileNameSection session={session} />
             <ProfileEmailSection session={session} />
             <ProfilePhoneSection session={session} />
             <ProfileOrganizationSection session={session} />
             <div>
-              <label className="block text-sm font-medium text-[var(--color-muted-foreground)]">{t('profile.role')}</label>
-              <p className="mt-1 text-sm sm:text-base text-[var(--color-foreground)] capitalize break-words">
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--color-muted)]">{t('profile.role')}</label>
+              <p className="mt-0.5 text-sm sm:text-base font-medium text-[var(--color-foreground)] capitalize break-words">
                 {session.user?.role}
               </p>
             </div>
@@ -61,12 +62,12 @@ export default function Profile({ session, descriptionKey = 'manageAccount' }: P
         </div>
       </div>
 
-      <div className="mt-6 sm:mt-8 card-surface">
+      <div className="card-surface">
         <div className="card-body border-b border-[var(--color-border)]">
-          <h2 className="text-base sm:text-lg font-semibold text-[var(--color-foreground)]">
+          <h2 className="text-sm sm:text-base font-semibold text-[var(--color-foreground)]">
             {hasPassword ? t('password.changePasswordTitle') : (t('password.setPasswordTitle') || 'Create Password')}
           </h2>
-          <p className="mt-1 text-xs sm:text-sm text-[var(--color-muted-foreground)]">
+          <p className="mt-0.5 text-xs text-[var(--color-muted-foreground)]">
             {hasPassword ? t('password.changePasswordDesc') : (t('password.setPasswordDesc') || 'Set a password for your account to sign in with email/credentials.')}
           </p>
         </div>
@@ -74,20 +75,21 @@ export default function Profile({ session, descriptionKey = 'manageAccount' }: P
           {!showPasswordForm ? (
             <Button
               onClick={() => setShowPasswordForm(true)}
+              className="min-h-[38px] text-xs sm:text-sm"
             >
               {hasPassword ? t('password.changePasswordTitle') : (t('password.setPasswordTitle') || 'Create Password')}
             </Button>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               <ChangePasswordForm />
             </div>
           )}
         </div>
       </div>
 
-      <div className="mt-6 sm:mt-8 flex justify-start">
+      <div className="flex justify-start">
         <LogoutButton variant="profile" />
       </div>
-    </div>
+    </PageWrapper>
   );
 }

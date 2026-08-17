@@ -73,24 +73,24 @@ export default function StatCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
-      className="rounded-2xl bg-[var(--card-solid)] border border-[var(--color-border)] card-body shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5 transition-all duration-300"
+      className="rounded-xl bg-[var(--card-solid)] border border-[var(--color-border)] card-body shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5 transition-all duration-300"
     >
-      <div className="flex items-start justify-between gap-3 mb-4">
-        <div className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[var(--color-muted)] pt-1">
+      <div className="flex items-start justify-between gap-2.5 mb-2">
+        <div className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-[var(--color-muted)] pt-0.5">
           {label}
         </div>
-        <div className={`p-2 sm:p-2.5 rounded-xl ${config.bg} ${config.text} flex-shrink-0`}>
-          <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+        <div className={`p-1.5 sm:p-2 rounded-lg ${config.bg} ${config.text} shrink-0`}>
+          <Icon className="w-4 h-4" />
         </div>
       </div>
-      <div className="text-2xl sm:text-3xl font-bold tracking-tight tabular-nums font-[family-name:var(--font-display)] text-[var(--color-foreground)]">
+      <div className="text-xl sm:text-2xl font-bold tracking-tight tabular-nums font-[family-name:var(--font-display)] text-[var(--color-foreground)]">
         {value}{suffix}
       </div>
       {description && (
-        <div className="text-xs text-[var(--color-muted-foreground)] mt-1">{description}</div>
+        <div className="text-xs text-[var(--color-muted-foreground)] mt-0.5">{description}</div>
       )}
       {showProgress && progress !== undefined && (
-        <div className="w-full bg-[var(--color-surface-muted-strong)] rounded-full h-1.5 mt-3">
+        <div className="w-full bg-[var(--color-surface-muted-strong)] rounded-full h-1.5 mt-2">
           <div
             className="h-1.5 rounded-full transition-all"
             style={{ width: `${Math.min(progress, 100)}%`, background: config.bar }}

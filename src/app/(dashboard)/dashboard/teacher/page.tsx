@@ -168,13 +168,13 @@ export default function TeacherDashboardPage() {
       >
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="w-full sm:w-auto">
-            <h1 className="heading-xl mb-2 truncate">
+            <h1 className="heading-xl mb-2">
               {t('dashboard.welcomeBack')},{' '}
               <span className="gradient-text">
                 {session?.user?.name ? session.user.name.charAt(0).toUpperCase() + session.user.name.slice(1) : session?.user?.name}
               </span>!
             </h1>
-            <p className="text-[var(--color-muted-foreground)] text-sm sm:text-base truncate">
+            <p className="text-[var(--color-muted-foreground)] text-sm sm:text-base">
               {t('dashboard.manageContent')}
             </p>
           </div>

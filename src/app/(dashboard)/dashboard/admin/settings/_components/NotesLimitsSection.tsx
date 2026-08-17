@@ -24,18 +24,18 @@ export function NotesLimitsSection({ settings, setSettings, theme }: Props) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.15 }}
-      className="bg-[var(--card-solid)] rounded-2xl shadow-sm p-6 sm:p-8"
+      className="bg-[var(--card-solid)] rounded-xl shadow-sm p-4 sm:p-5 border border-[var(--border)]"
     >
-      <h2 className="text-lg font-semibold text-[var(--color-foreground)] mb-6 flex items-center gap-2">
+      <h2 className="text-base sm:text-lg font-semibold text-[var(--color-foreground)] mb-4 flex items-center gap-2">
         <Notebook className="w-5 h-5" />
         {t('adminSettings.notesLimits')}
       </h2>
 
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-3.5 sm:gap-4">
         {/* Max Pages Per User */}
-        <div className="flex items-start gap-4">
-          <div className={`p-3 ${theme.activeBg} rounded-xl flex-shrink-0`}>
-            <Notebook className={`w-5 h-5 ${theme.text}`} />
+        <div className="flex items-start gap-3">
+          <div className={`p-2 sm:p-2.5 ${theme.activeBg} rounded-lg shrink-0 mt-1`}>
+            <Notebook className={`w-4 h-4 sm:w-5 sm:h-5 ${theme.text}`} />
           </div>
           <div className="flex-1">
             <TextField
@@ -59,9 +59,9 @@ export function NotesLimitsSection({ settings, setSettings, theme }: Props) {
         </div>
 
         {/* Max Words Per Page */}
-        <div className="flex items-start gap-4">
-          <div className={`p-3 ${theme.activeBg} rounded-xl flex-shrink-0`}>
-            <FileText className={`w-5 h-5 ${theme.text}`} />
+        <div className="flex items-start gap-3">
+          <div className={`p-2 sm:p-2.5 ${theme.activeBg} rounded-lg shrink-0 mt-1`}>
+            <FileText className={`w-4 h-4 sm:w-5 sm:h-5 ${theme.text}`} />
           </div>
           <div className="flex-1">
             <TextField
