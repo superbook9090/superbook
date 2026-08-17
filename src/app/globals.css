@@ -1216,13 +1216,12 @@ body.quiz-fullscreen nav {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  min-height: var(--mobile-header-height);
+  height: var(--mobile-header-height);
   padding-inline: var(--gutter-x);
-  padding-block: var(--space-3);
 }
 
 .mobile-header-spacer {
-  height: calc(var(--mobile-header-height) + var(--mobile-header-gap));
+  height: calc(var(--mobile-header-height) + var(--mobile-header-gap) + env(safe-area-inset-top, 0px));
   flex-shrink: 0;
 }
 
