@@ -14,6 +14,7 @@ import { getAccessFilter } from '@/lib/accessControl';
 import { getCachedData, setCachedData, invalidatePattern } from '@/lib/redis';
 import { setQuizQuestions } from '@/domain/learning/quizContent';
 import { resolveQuizPlacement } from '@/lib/quiz/quizPlacement';
+import { isStaffRole } from '@/lib/roles';
 
 // GET /api/quizzes - Get all quizzes (with optional filtering)
 export async function GET(request: NextRequest) {
@@ -223,9 +224,9 @@ export async function POST(request: NextRequest) {
     if (featureCheck) return featureCheck;
 
     // Only teachers and admins can create quizzes
-    if (session.user?.role !== 'teacher' && session.user?.role !== 'admin') {
+    if (!isStaffRole(session.user?.role)) {
       return NextResponse.json(
-        { message: 'Only teachers can create quizzes' },
+        { message: 'Only teachers and admins can create quizzes' },
         { status: 403 }
       );
     }

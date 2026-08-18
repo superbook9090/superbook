@@ -1,3 +1,5 @@
+export type SettingsTab = 'all' | 'features' | 'teacher_limits' | 'notes_limits' | 'platform';
+
 export interface AppSettings {
   teacherLimits: {
     courses: number;
@@ -24,9 +26,22 @@ export interface AppSettings {
     enableNotes?: boolean;
   };
   platformConfig: {
+    siteName?: string;
+    siteDescription?: string;
     maintenanceMode: boolean;
     allowRegistration: boolean;
     allowTeacherRegistration: boolean;
     defaultLanguage: 'en' | 'hi';
   };
 }
+
+export interface SettingsStats {
+  totalFeatures: number;
+  activeFeatures: number;
+  maintenanceMode: boolean;
+  allowRegistration: boolean;
+  allowTeacherRegistration: boolean;
+  defaultLanguage: 'en' | 'hi';
+  pendingChangesCount: number;
+}
+

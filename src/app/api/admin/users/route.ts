@@ -64,6 +64,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const role = searchParams.get('role');
     const search = searchParams.get('search');
+    const organizationIdParam = searchParams.get('organizationId');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const skip = (page - 1) * limit;
@@ -72,7 +73,7 @@ export async function GET(request: NextRequest) {
     const query: QueryFilter = {};
 
     // STRICT ORGANIZATION FILTERING:
-    // - Super admins can see ALL users (no filter)
+    // - Super admins can see ALL users (no filter) unless explicitly filtered
     // - Public admins (without organizationId) can see ONLY public users (users without organizationId)
     // - Organizational admins (with organizationId) can see ONLY users from their organization
     let orgFilter: QueryFilter = {};
@@ -85,8 +86,14 @@ export async function GET(request: NextRequest) {
         // Organizational admin sees only users from their organization
         orgFilter = { organizationId: authResult.organizationId };
       }
+    } else if (organizationIdParam) {
+      // Super admin optional organization filter
+      if (organizationIdParam === 'null' || organizationIdParam === 'none') {
+        orgFilter = { organizationId: null };
+      } else if (validateObjectId(organizationIdParam)) {
+        orgFilter = { organizationId: organizationIdParam };
+      }
     }
-    // Super admin: no organization filter (can see all users)
 
     if (role) query.role = role;
 
@@ -112,14 +119,42 @@ export async function GET(request: NextRequest) {
       Object.assign(query, orgFilter);
     }
 
-    const users = await User.find(query)
-      .select('-password')
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean();
+    const [users, total, statsAgg, suspendedCount] = await Promise.all([
+      User.find(query)
+        .select('-password')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      User.countDocuments(query),
+      User.aggregate([
+        { $match: orgFilter },
+        {
+          $group: {
+            _id: '$role',
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+      User.countDocuments({ ...orgFilter, isSuspended: true }),
+    ]);
 
-    const total = await User.countDocuments(query);
+    const stats = {
+      total: 0,
+      students: 0,
+      teachers: 0,
+      admins: 0,
+      superadmins: 0,
+      suspended: suspendedCount,
+    };
+
+    statsAgg.forEach((item: { _id: string; count: number }) => {
+      stats.total += item.count;
+      if (item._id === 'student') stats.students = item.count;
+      else if (item._id === 'teacher') stats.teachers = item.count;
+      else if (item._id === 'admin') stats.admins = item.count;
+      else if (item._id === 'superadmin') stats.superadmins = item.count;
+    });
 
     return NextResponse.json(
       {
@@ -130,6 +165,7 @@ export async function GET(request: NextRequest) {
           total,
           totalPages: Math.ceil(total / limit),
         },
+        stats,
       },
       { status: 200 }
     );

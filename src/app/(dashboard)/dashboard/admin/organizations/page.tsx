@@ -1,487 +1,329 @@
 'use client';
-import { ROUTES } from '@/constants/routes';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useTranslation } from '@/hooks/useTranslation';
-import { motion } from 'framer-motion';
+import React from 'react';
 import {
   Building2,
   Plus,
-  Edit,
-  Trash2,
-  Copy,
-  X,
-  Check,
-  Users,
-  BookOpen,
-  ClipboardList,
-  FileText
+  RefreshCw,
+  LayoutGrid,
+  List,
+  CheckCircle2,
+  SlidersHorizontal,
 } from 'lucide-react';
-import { useAlert } from '@/components/ui/AlertContainer';
-import Tooltip from '@/components/ui/Tooltip';
+import { useTranslation } from '@/hooks/useTranslation';
+import { PageWrapper, PageHeader, EmptyState } from '@/components/layout';
+import { PageSkeleton } from '@/components/ui/Skeleton';
 import Button from '@/components/ui/Button';
-import { useRouter } from 'next/navigation';
-import { useSessionStore } from '@/store/useSessionStore';
-import { isSuperAdmin } from '@/lib/roles';
-import {
-  listOrganizations,
-  createOrganization,
-  updateOrganization,
-  deleteOrganization,
-} from '@/lib/api/organizations';
-import { ApiClientError } from '@/lib/api/http';
-
-interface Organization {
-  _id: string;
-  name: string;
-  code: string;
-  inviteCode: string;
-  description?: string;
-  isActive: boolean;
-  userCount: number;
-  courseCount: number;
-  blogCount: number;
-  quizCount: number;
-  createdAt: string;
-}
+import ConfirmModal from '@/components/ui/ConfirmModal';
+import Tooltip from '@/components/ui/Tooltip';
+import DashboardListFilters, { FilterPanel } from '@/components/filters/DashboardListFilters';
+import { useAdminOrganizations } from './_hooks/useAdminOrganizations';
+import { OrganizationsStats } from './_components/OrganizationsStats';
+import { OrganizationCard } from './_components/OrganizationCard';
+import { OrganizationsTable } from './_components/OrganizationsTable';
+import { OrganizationsMobileList } from './_components/OrganizationsMobileList';
+import { OrganizationFormModal } from './_components/OrganizationFormModal';
+import { OrganizationDetailModal } from './_components/OrganizationDetailModal';
+import type { OrgSortOption, OrgStatusFilter } from './_components/types';
 
 export default function OrganizationsPage() {
   const { t } = useTranslation();
-  const router = useRouter();
-  const { session, status } = useSessionStore();
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const { addAlert } = useAlert();
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
-  const [copiedCode, setCopiedCode] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    isActive: true,
-  });
+  const {
+    status,
+    filteredOrganizations,
+    stats,
+    isLoading,
+    isSubmitting,
+    searchQuery,
+    setSearchQuery,
+    statusFilter,
+    setStatusFilter,
+    sortOption,
+    setSortOption,
+    viewMode,
+    setViewMode,
+    showCreateModal,
+    setShowCreateModal,
+    showEditModal,
+    setShowEditModal,
+    showDetailModal,
+    setShowDetailModal,
+    showDeleteDialog,
+    setShowDeleteDialog,
+    selectedOrg,
+    deleteTargetOrg,
+    copiedCode,
+    formData,
+    setFormData,
+    fetchOrganizations,
+    copyToClipboard,
+    openCreateModal,
+    openEditModal,
+    openDetailModal,
+    confirmDelete,
+    handleCreate,
+    handleUpdate,
+    handleToggleActive,
+    handleDelete,
+  } = useAdminOrganizations();
 
-  // Frontend role guard (secondary security layer)
-  useEffect(() => {
-    if (status === 'loading') return;
-
-    if (!session) {
-      router.push(ROUTES.login);
-      return;
-    }
-
-    if (!isSuperAdmin(session.user?.role)) {
-      router.push(ROUTES.dashboard);
-      return;
-    }
-  }, [session, status, router]);
-
-  const fetchOrganizations = useCallback(async () => {
-    try {
-      const data = await listOrganizations();
-      setOrganizations(data.organizations as Organization[]);
-    } catch (err) {
-      const message =
-        err instanceof ApiClientError ? err.message : t('organizations.failedFetchOrganizations');
-      addAlert({ type: 'error', message });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [t, addAlert]);
-
-  useEffect(() => {
-    fetchOrganizations();
-  }, [fetchOrganizations]);
-
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      await createOrganization(formData);
-      setShowCreateModal(false);
-      setFormData({ name: '', description: '', isActive: true });
-      fetchOrganizations();
-    } catch (err) {
-      const message =
-        err instanceof ApiClientError ? err.message : t('organizations.failedCreateOrganization');
-      addAlert({ type: 'error', message });
-    }
-  };
-
-  const handleUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedOrg) return;
-
-    try {
-      await updateOrganization(selectedOrg._id, formData);
-      setShowEditModal(false);
-      setSelectedOrg(null);
-      setFormData({ name: '', description: '', isActive: true });
-      fetchOrganizations();
-    } catch (err) {
-      const message =
-        err instanceof ApiClientError ? err.message : t('organizations.failedUpdateOrganization');
-      addAlert({ type: 'error', message });
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm(t('organizations.deleteConfirm'))) {
-      return;
-    }
-
-    try {
-      await deleteOrganization(id);
-      fetchOrganizations();
-    } catch (err) {
-      const message =
-        err instanceof ApiClientError ? err.message : t('organizations.failedDeleteOrganization');
-      addAlert({ type: 'error', message });
-    }
-  };
-
-  const openEditModal = (org: Organization) => {
-    setSelectedOrg(org);
-    setFormData({
-      name: org.name,
-      description: org.description || '',
-      isActive: org.isActive,
-    });
-    setShowEditModal(true);
-  };
-
-  const copyToClipboard = (code: string, type: 'code' | 'inviteCode') => {
-    navigator.clipboard.writeText(code);
-    setCopiedCode(`${type}-${code}`);
-    setTimeout(() => setCopiedCode(null), 2000);
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex flex-col gap-6">
-        <div className="w-32 h-8 bg-[var(--color-surface-muted)] rounded-lg animate-pulse mb-4" />
-        <div className="flex flex-col gap-3">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-20 bg-[var(--color-surface-muted)] rounded-lg animate-pulse" />
-          ))}
-        </div>
-      </div>
-    );
+  if (status === 'loading' || (isLoading && stats.total === 0)) {
+    return <PageSkeleton />;
   }
 
-  return (
-    <div className="stack-page overflow-x-hidden">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">{t('organizations.title')}</h1>
-          <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">{t('organizations.description')}</p>
-        </div>
-        <Button
-          onClick={() => setShowCreateModal(true)}
-          variant="primary"
-          className="w-full sm:w-auto flex items-center justify-center gap-2"
-        >
-          <Plus className="w-5 h-5" />
-          {t('organizations.createOrganization')}
-        </Button>
-      </div>
+  const filterChips = [
+    {
+      label: t('organizations.status'),
+      icon: <CheckCircle2 className="w-3.5 h-3.5" aria-hidden />,
+      value: statusFilter,
+      onChange: (val: string) => setStatusFilter(val as OrgStatusFilter),
+      neutralValue: 'all',
+      options: [
+        { id: 'all', label: t('organizations.allStatus') || 'All Status' },
+        { id: 'active', label: t('organizations.activeStatus') || 'Active' },
+        { id: 'inactive', label: t('organizations.inactiveStatus') || 'Inactive' },
+      ],
+    },
+    {
+      label: t('organizations.sortBy'),
+      icon: <SlidersHorizontal className="w-3.5 h-3.5" aria-hidden />,
+      value: sortOption,
+      onChange: (val: string) => setSortOption(val as OrgSortOption),
+      neutralValue: 'newest',
+      options: [
+        { id: 'newest', label: t('organizations.sortNewest') || 'Newest' },
+        { id: 'name', label: t('organizations.sortName') || 'Name (A-Z)' },
+        { id: 'users', label: t('organizations.sortUsers') || 'Most Users' },
+        { id: 'courses', label: t('organizations.sortCourses') || 'Most Content' },
+      ],
+    },
+  ];
 
-      {/* Organizations List */}
-      <div className="bg-[var(--card-solid)] rounded-xl shadow-sm overflow-hidden">
-        {organizations.length === 0 ? (
-          <div className="p-12 text-center">
-            <Building2 className="w-16 h-16 mx-auto text-[var(--color-muted-foreground)] mb-4" />
-            <h3 className="text-lg font-semibold text-[var(--color-foreground)] mb-2">{t('organizations.noOrganizations')}</h3>
-            <p className="text-[var(--color-muted-foreground)] mb-4">{t('organizations.noOrganizationsDesc')}</p>
+  const handleResetFilters = () => {
+    setSearchQuery('');
+    setStatusFilter('all');
+    setSortOption('newest');
+  };
+
+  return (
+    <PageWrapper>
+      {/* Header */}
+      <PageHeader
+        title={
+          <span className="flex items-center gap-3">
+            <span className="p-2.5 bg-[var(--primary)]/10 text-[var(--primary)] rounded-xl shrink-0 inline-flex shadow-xs">
+              <Building2 className="w-6 h-6" />
+            </span>
+            <span>{t('organizations.title')}</span>
+          </span>
+        }
+        description={t('organizations.description')}
+        actions={
+          <div className="flex items-center gap-2">
+            <Tooltip label={t('analytics.refresh') || 'Refresh'}>
+              <Button
+                onClick={() => fetchOrganizations()}
+                variant="secondary"
+                size="sm"
+                className="flex items-center gap-2"
+                aria-label="Refresh"
+              >
+                <RefreshCw className="w-4 h-4" />
+                <span className="hidden sm:inline">{t('analytics.refresh') || 'Refresh'}</span>
+              </Button>
+            </Tooltip>
             <Button
-              onClick={() => setShowCreateModal(true)}
+              onClick={openCreateModal}
               variant="primary"
-              className="inline-flex items-center gap-2"
+              size="sm"
+              className="flex items-center gap-2"
             >
-              <Plus className="w-5 h-5" />
-              {t('organizations.createOrganization')}
+              <Plus className="w-4 h-4" />
+              <span>{t('organizations.createOrganization')}</span>
             </Button>
           </div>
-        ) : (
-          <div className="divide-y divide-[var(--border)]">
-            {organizations.map((org) => (
-              <motion.div
-                key={org._id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="p-6 hover:bg-[var(--color-surface-muted)] transition-colors"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold text-[var(--color-foreground)]">{org.name}</h3>
-                      {!org.isActive && (
-                        <span className="px-2 py-1 text-xs font-medium bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)] rounded-full">
-                          {t('organizations.inactive')}
-                        </span>
-                      )}
-                    </div>
-                    {org.description && (
-                      <p className="text-[var(--color-muted-foreground)] text-sm mb-3">{org.description}</p>
-                    )}
+        }
+      />
 
-                    {/* Codes */}
-                    <div className="flex flex-wrap gap-4 mb-4">
-                      <div className="flex items-center gap-2 bg-[var(--color-surface-muted)] px-3 py-1.5 rounded-lg">
-                        <span className="text-xs text-[var(--color-muted-foreground)]">{t('organizations.code')}:</span>
-                        <code className="text-sm font-mono text-[var(--color-foreground)]">{org.code}</code>
-                        <Tooltip label={copiedCode === `code-${org.code}` ? t('organizations.codeCopied') : t('organizations.copyCode')}>
-                          <button
-                            onClick={() => copyToClipboard(org.code, 'code')}
-                            aria-label={copiedCode === `code-${org.code}` ? t('organizations.codeCopied') : t('organizations.copyCode')}
-                            className="text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors"
-                          >
-                            {copiedCode === `code-${org.code}` ? (
-                              <Check className="w-4 h-4 text-[var(--success)]" />
-                            ) : (
-                              <Copy className="w-4 h-4" />
-                            )}
-                          </button>
-                        </Tooltip>
-                      </div>
-                      <div className="flex items-center gap-2 bg-[var(--info-light)] px-3 py-1.5 rounded-lg">
-                        <span className="text-xs text-[var(--info)]">{t('organizations.inviteCode')}:</span>
-                        <code className="text-sm font-mono text-[var(--info)]">{org.inviteCode}</code>
-                        <Tooltip label={copiedCode === `inviteCode-${org.inviteCode}` ? t('organizations.codeCopied') : t('organizations.copyCode')}>
-                          <button
-                            onClick={() => copyToClipboard(org.inviteCode, 'inviteCode')}
-                            aria-label={copiedCode === `inviteCode-${org.inviteCode}` ? t('organizations.codeCopied') : t('organizations.copyCode')}
-                            className="text-[var(--info)] hover:text-[var(--info)]/80 transition-colors"
-                          >
-                            {copiedCode === `inviteCode-${org.inviteCode}` ? (
-                              <Check className="w-4 h-4 text-[var(--success)]" />
-                            ) : (
-                              <Copy className="w-4 h-4" />
-                            )}
-                          </button>
-                        </Tooltip>
-                      </div>
-                    </div>
+      {/* Top Executive Stats */}
+      <OrganizationsStats stats={stats} isLoading={isLoading} />
 
-                    {/* Stats */}
-                    <div className="flex flex-wrap gap-6">
-                      <div className="flex items-center gap-2 text-sm text-[var(--color-muted-foreground)]">
-                        <Users className="w-4 h-4" />
-                        <span>{org.userCount} {t('organizations.users')}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-[var(--color-muted-foreground)]">
-                        <BookOpen className="w-4 h-4" />
-                        <span>{org.courseCount} {t('organizations.courses')}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-[var(--color-muted-foreground)]">
-                        <FileText className="w-4 h-4" />
-                        <span>{org.blogCount} {t('organizations.blogs')}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-[var(--color-muted-foreground)]">
-                        <ClipboardList className="w-4 h-4" />
-                        <span>{org.quizCount} {t('organizations.quizzes')}</span>
-                      </div>
-                    </div>
-                  </div>
+      {/* Filters, Search & View Switcher */}
+      <FilterPanel>
+        <DashboardListFilters
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          onClear={handleResetFilters}
+          searchPlaceholder={t('organizations.searchPlaceholder')}
+          chipGroups={filterChips}
+          headerAside={
+            <div className="hidden md:flex items-center gap-1 bg-[var(--color-surface-muted)] p-1 rounded-xl border border-[var(--border)]">
+              <Tooltip label={t('organizations.gridView')}>
+                <button
+                  type="button"
+                  onClick={() => setViewMode('grid')}
+                  aria-pressed={viewMode === 'grid'}
+                  aria-label={t('organizations.gridView')}
+                  className={`p-2 rounded-lg transition-colors ${
+                    viewMode === 'grid'
+                      ? 'bg-[var(--card-solid)] text-[var(--primary)] shadow-xs'
+                      : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]'
+                  }`}
+                >
+                  <LayoutGrid className="w-4 h-4" />
+                </button>
+              </Tooltip>
+              <Tooltip label={t('organizations.tableView')}>
+                <button
+                  type="button"
+                  onClick={() => setViewMode('table')}
+                  aria-pressed={viewMode === 'table'}
+                  aria-label={t('organizations.tableView')}
+                  className={`p-2 rounded-lg transition-colors ${
+                    viewMode === 'table'
+                      ? 'bg-[var(--card-solid)] text-[var(--primary)] shadow-xs'
+                      : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]'
+                  }`}
+                >
+                  <List className="w-4 h-4" />
+                </button>
+              </Tooltip>
+            </div>
+          }
+        />
+      </FilterPanel>
 
-                  {/* Actions */}
-                  <div className="flex items-center gap-2 sm:ml-4 mt-4 sm:mt-0">
-                    <Tooltip label={t('common.edit')}>
-                      <Button
-                        onClick={() => openEditModal(org)}
-                        aria-label={t('common.edit')}
-                        variant="secondary"
-                        className="p-2 rounded-lg"
-                      >
-                        <Edit className="w-5 h-5" />
-                      </Button>
-                    </Tooltip>
-                    <Tooltip label={t('common.delete')}>
-                      <Button
-                        onClick={() => handleDelete(org._id)}
-                        aria-label={t('common.delete')}
-                        variant="danger"
-                        className="p-2 rounded-lg"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </Button>
-                    </Tooltip>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        )}
-      </div>
+      {/* Organization List / Grid / Empty State */}
+      {filteredOrganizations.length === 0 ? (
+        <EmptyState
+          title={
+            stats.total === 0
+              ? t('organizations.noOrganizations')
+              : t('organizations.noFilteredResults') || 'No matching organizations'
+          }
+          description={
+            stats.total === 0
+              ? t('organizations.noOrganizationsDesc')
+              : t('organizations.noFilteredResultsDesc') || 'Try adjusting your search query or status filter.'
+          }
+          action={
+            stats.total === 0 ? (
+              <Button onClick={openCreateModal} variant="primary" className="flex items-center gap-2">
+                <Plus className="w-4 h-4" />
+                {t('organizations.createOrganization')}
+              </Button>
+            ) : (
+              <Button onClick={handleResetFilters} variant="secondary">
+                {t('common.reset') || 'Reset Filters'}
+              </Button>
+            )
+          }
+        />
+      ) : (
+        <>
+          {/* Desktop Table View */}
+          {viewMode === 'table' && (
+            <div className="hidden md:block">
+              <OrganizationsTable
+                organizations={filteredOrganizations}
+                copiedCode={copiedCode}
+                onCopy={copyToClipboard}
+                onOpenDetail={openDetailModal}
+                onOpenEdit={openEditModal}
+                onToggleActive={handleToggleActive}
+                onDelete={confirmDelete}
+              />
+            </div>
+          )}
+
+          {/* Desktop Grid View */}
+          {viewMode === 'grid' && (
+            <div className="hidden md:grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {filteredOrganizations.map((org, index) => (
+                <OrganizationCard
+                  key={org._id}
+                  organization={org}
+                  index={index}
+                  copiedCode={copiedCode}
+                  onCopy={copyToClipboard}
+                  onOpenDetail={openDetailModal}
+                  onOpenEdit={openEditModal}
+                  onToggleActive={handleToggleActive}
+                  onDelete={confirmDelete}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Mobile Optimized View */}
+          <OrganizationsMobileList
+            organizations={filteredOrganizations}
+            copiedCode={copiedCode}
+            onCopy={copyToClipboard}
+            onOpenDetail={openDetailModal}
+            onOpenEdit={openEditModal}
+            onToggleActive={handleToggleActive}
+            onDelete={confirmDelete}
+          />
+        </>
+      )}
 
       {/* Create Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-[var(--card-solid)] rounded-xl shadow-xl max-w-md w-full p-6"
-          >
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-[var(--color-foreground)]">{t('organizations.createOrganization')}</h2>
-              <Tooltip label={t('common.close')} position="bottom">
-                <button
-                  onClick={() => setShowCreateModal(false)}
-                  aria-label={t('common.close')}
-                  className="text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </Tooltip>
-            </div>
-
-            <form onSubmit={handleCreate} className="flex flex-col gap-4">
-              <div>
-                <label className="block text-sm font-medium text-[var(--color-foreground)] mb-1">
-                  {t('organizations.organizationName')}
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-2 min-h-[44px] border border-[var(--border)] text-[var(--color-foreground)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
-                  placeholder={t('organizations.namePlaceholder')}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-[var(--color-foreground)] mb-1">
-                  {t('organizations.descriptionOptional')}
-                </label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-4 py-2 border border-[var(--border)] text-[var(--color-foreground)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
-                  placeholder={t('organizations.briefDescription')}
-                  rows={3}
-                />
-              </div>
-
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="isActive"
-                  checked={formData.isActive}
-                  onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                  className="w-4 h-4 text-[var(--primary)] border-[var(--border)] rounded focus:ring-[var(--primary)]"
-                />
-                <label htmlFor="isActive" className="text-sm text-[var(--color-foreground)]">
-                  {t('organizations.active')}
-                </label>
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <Button
-                  type="button"
-                  onClick={() => setShowCreateModal(false)}
-                  variant="secondary"
-                  className="flex-1"
-                >
-                  {t('organizations.cancel')}
-                </Button>
-                <Button
-                  type="submit"
-                  variant="primary"
-                  className="flex-1"
-                >
-                  {t('organizations.create')}
-                </Button>
-              </div>
-            </form>
-          </motion.div>
-        </div>
-      )}
+      <OrganizationFormModal
+        isOpen={showCreateModal}
+        isEdit={false}
+        selectedOrg={null}
+        formData={formData}
+        setFormData={setFormData}
+        isSubmitting={isSubmitting}
+        copiedCode={copiedCode}
+        onCopy={copyToClipboard}
+        onSubmit={handleCreate}
+        onClose={() => setShowCreateModal(false)}
+      />
 
       {/* Edit Modal */}
-      {showEditModal && selectedOrg && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-[var(--card-solid)] rounded-xl shadow-xl max-w-md w-full p-6"
-          >
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-[var(--color-foreground)]">{t('organizations.editOrganization')}</h2>
-              <Tooltip label={t('common.close')} position="bottom">
-                <button
-                  onClick={() => setShowEditModal(false)}
-                  aria-label={t('common.close')}
-                  className="text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </Tooltip>
-            </div>
+      <OrganizationFormModal
+        isOpen={showEditModal}
+        isEdit={true}
+        selectedOrg={selectedOrg}
+        formData={formData}
+        setFormData={setFormData}
+        isSubmitting={isSubmitting}
+        copiedCode={copiedCode}
+        onCopy={copyToClipboard}
+        onSubmit={handleUpdate}
+        onClose={() => setShowEditModal(false)}
+      />
 
-            <form onSubmit={handleUpdate} className="flex flex-col gap-4">
-              <div>
-                <label className="block text-sm font-medium text-[var(--color-foreground)] mb-1">
-                  {t('organizations.organizationName')}
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-2 min-h-[44px] border border-[var(--border)] text-[var(--color-foreground)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
-                  placeholder={t('organizations.namePlaceholder')}
-                />
-              </div>
+      {/* Detail Modal */}
+      <OrganizationDetailModal
+        isOpen={showDetailModal}
+        organization={selectedOrg}
+        copiedCode={copiedCode}
+        onCopy={copyToClipboard}
+        onOpenEdit={openEditModal}
+        onToggleActive={handleToggleActive}
+        onDelete={confirmDelete}
+        onClose={() => setShowDetailModal(false)}
+      />
 
-              <div>
-                <label className="block text-sm font-medium text-[var(--color-foreground)] mb-1">
-                  {t('organizations.descriptionOptional')}
-                </label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-4 py-2 border border-[var(--border)] text-[var(--color-foreground)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
-                  rows={3}
-                />
-              </div>
-
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="isActive"
-                  checked={formData.isActive}
-                  onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                  className="w-4 h-4 text-[var(--primary)] border-[var(--border)] rounded focus:ring-[var(--primary)]"
-                />
-                <label htmlFor="isActive" className="text-sm text-[var(--color-foreground)]">
-                  {t('organizations.active')}
-                </label>
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <Button
-                  type="button"
-                  onClick={() => setShowEditModal(false)}
-                  variant="secondary"
-                  className="flex-1"
-                >
-                  {t('organizations.cancel')}
-                </Button>
-                <Button
-                  type="submit"
-                  variant="primary"
-                  className="flex-1"
-                >
-                  {t('organizations.update')}
-                </Button>
-              </div>
-            </form>
-          </motion.div>
-        </div>
-      )}
-    </div>
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showDeleteDialog}
+        title={t('organizations.deleteOrgTitle') || 'Delete Organization'}
+        message={
+          deleteTargetOrg
+            ? t('organizations.deleteOrgConfirm')
+            : t('organizations.deleteConfirm')
+        }
+        confirmText={t('admin.delete') || 'Delete'}
+        cancelText={t('common.cancel') || 'Cancel'}
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteDialog(false)}
+        type="danger"
+        isLoading={isSubmitting}
+      />
+    </PageWrapper>
   );
 }

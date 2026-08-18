@@ -1,12 +1,15 @@
 import dbConnect from '@/lib/db';
 import '@/models';
 import User from '@/models/User';
+import Enrollment from '@/models/Enrollment';
 import NotificationToken from '@/models/NotificationToken';
 import NotificationPreference from '@/models/NotificationPreference';
 import UserNotification from '@/models/UserNotification';
 import { sendPushNotification } from '@/lib/notifications/push/sendPushNotification';
 import type { NotificationCategory, PushNotificationPayload } from '@/lib/notifications/push/notificationPayload';
 import mongoose from 'mongoose';
+
+export type BroadcastTargetAudience = 'all' | 'students' | 'teachers' | 'course_enrolled';
 
 export type SendBroadcastInput = {
   title: { en: string; hi?: string };
@@ -148,16 +151,53 @@ export async function updateNotificationPreferences(userId: string, updates: Rec
   ).lean();
 }
 
-/** Resolve user ids for admin broadcast (students + teachers in scope). */
+/** Resolve user ids for admin broadcast (students, teachers, course enrolled, or all). */
 export async function resolveBroadcastRecipientIds(
   senderRole: 'admin' | 'superadmin',
   senderOrgId: string | null | undefined,
-  targetOrgId?: string
+  targetOrgId?: string,
+  targetAudience: BroadcastTargetAudience = 'all',
+  targetCourseId?: string
 ): Promise<string[]> {
   await dbConnect();
 
+  // 1. If targeting students enrolled in a specific course
+  if (targetAudience === 'course_enrolled' && targetCourseId) {
+    const enrollments = await Enrollment.find({
+      course: new mongoose.Types.ObjectId(targetCourseId),
+      status: { $in: ['active', 'completed'] },
+    })
+      .select('student')
+      .lean();
+
+    const studentIds = enrollments.map((e) => e.student);
+    if (studentIds.length === 0) return [];
+
+    const userQuery: Record<string, unknown> = {
+      _id: { $in: studentIds },
+    };
+
+    if (senderRole === 'admin') {
+      if (!senderOrgId) return [];
+      userQuery.organizationId = new mongoose.Types.ObjectId(senderOrgId);
+    } else if (targetOrgId) {
+      userQuery.organizationId = new mongoose.Types.ObjectId(targetOrgId);
+    }
+
+    const users = await User.find(userQuery).select('_id').lean();
+    return users.map((u) => String(u._id));
+  }
+
+  // 2. Audience role filter
+  let roleFilter: string[] = ['student', 'teacher'];
+  if (targetAudience === 'students') {
+    roleFilter = ['student'];
+  } else if (targetAudience === 'teachers') {
+    roleFilter = ['teacher'];
+  }
+
   const query: Record<string, unknown> = {
-    role: { $in: ['student', 'teacher'] },
+    role: { $in: roleFilter },
   };
 
   if (senderRole === 'admin') {

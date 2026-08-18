@@ -14,6 +14,7 @@ import { deleteQuizzesAndQuestions } from '@/lib/cascade/deleteRelated';
 import { resolveQuizPlacement } from '@/lib/quiz/quizPlacement';
 import { invalidatePattern } from '@/lib/redis';
 import { requireFeature } from '@/lib/settingsHelpers';
+import { isStaffRole } from '@/lib/roles';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const logContext: LogContext = { method: 'GET', path: '/api/quizzes/[id]' };
@@ -95,8 +96,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
-    if (session.user?.role !== 'teacher' && session.user?.role !== 'admin') {
-      return NextResponse.json({ message: 'Only teachers can update quizzes' }, { status: 403 });
+    if (!isStaffRole(session.user?.role)) {
+      return NextResponse.json({ message: 'Only teachers and admins can update quizzes' }, { status: 403 });
     }
     if (session.user) logContext.userId = session.user.id;
 
@@ -208,8 +209,8 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
-    if (session.user?.role !== 'teacher' && session.user?.role !== 'admin') {
-      return NextResponse.json({ message: 'Only teachers can delete quizzes' }, { status: 403 });
+    if (!isStaffRole(session.user?.role)) {
+      return NextResponse.json({ message: 'Only teachers and admins can delete quizzes' }, { status: 403 });
     }
     if (session.user) logContext.userId = session.user.id;
 

@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import mongoose from 'mongoose';
-import { User, Course, Quiz, Enrollment, QuizAttempt } from '@/models';
+import { User, Course, Quiz, Enrollment, QuizAttempt, Blog } from '@/models';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { requireFeature } from '@/lib/settingsHelpers';
 
@@ -74,6 +74,10 @@ async function getAdminStats(organizationId?: string | null, isSuperAdmin: boole
   startOfMonth.setDate(1);
   startOfMonth.setHours(0, 0, 0, 0);
 
+  const fourteenDaysAgo = new Date();
+  fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 13);
+  fourteenDaysAgo.setHours(0, 0, 0, 0);
+
   const [
     totalUsers,
     students,
@@ -84,6 +88,12 @@ async function getAdminStats(organizationId?: string | null, isSuperAdmin: boole
     publishedCourses,
     totalQuizzes,
     publishedQuizzes,
+    totalBlogs,
+    publishedBlogs,
+    orgUserIds,
+    orgQuizIds,
+    userDailyTrends,
+    topEnrolledCourses,
   ] = await Promise.all([
     User.countDocuments(orgFilter),
     User.countDocuments({ ...orgFilter, role: 'student' }),
@@ -97,12 +107,43 @@ async function getAdminStats(organizationId?: string | null, isSuperAdmin: boole
     Course.countDocuments({ ...orgFilter, isPublished: true }),
     Quiz.countDocuments(orgFilter),
     Quiz.countDocuments({ ...orgFilter, isPublished: true }),
-  ]);
-
-  const [orgUserIds, orgQuizIds] = await Promise.all([
+    Blog.countDocuments(orgFilter),
+    Blog.countDocuments({ ...orgFilter, isPublished: true }),
     User.find(orgFilter).select('_id').lean(),
     Quiz.find(orgFilter).select('_id').lean(),
+    User.aggregate([
+      { $match: { ...orgFilter, createdAt: { $gte: fourteenDaysAgo } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+          count: { $sum: 1 },
+        },
+      },
+    ]),
+    Course.aggregate([
+      { $match: orgFilter },
+      {
+        $lookup: {
+          from: 'enrollments',
+          localField: '_id',
+          foreignField: 'course',
+          as: 'enrollments',
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          title: 1,
+          isPublished: 1,
+          category: 1,
+          studentsCount: { $size: '$enrollments' },
+        },
+      },
+      { $sort: { studentsCount: -1 } },
+      { $limit: 5 },
+    ]),
   ]);
+
   const userIds = orgUserIds.map((u) => u._id);
   const quizIds = orgQuizIds.map((q) => q._id);
 
@@ -112,7 +153,10 @@ async function getAdminStats(organizationId?: string | null, isSuperAdmin: boole
     completedEnrollments,
     totalAttempts,
     scoreStats,
+    enrollmentDailyTrends,
+    quizAttemptDailyTrends,
     recentEnrollments,
+    recentQuizAttempts,
   ] = await Promise.all([
     Enrollment.countDocuments({ student: { $in: userIds } }),
     Enrollment.countDocuments({ student: { $in: userIds }, status: 'active' }),
@@ -132,13 +176,80 @@ async function getAdminStats(organizationId?: string | null, isSuperAdmin: boole
           },
         ])
       : Promise.resolve([]),
+    Enrollment.aggregate([
+      { $match: { student: { $in: userIds }, createdAt: { $gte: fourteenDaysAgo } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+          count: { $sum: 1 },
+        },
+      },
+    ]),
+    quizIds.length
+      ? QuizAttempt.aggregate([
+          { $match: { quiz: { $in: quizIds }, status: 'completed', createdAt: { $gte: fourteenDaysAgo } } },
+          {
+            $group: {
+              _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+              count: { $sum: 1 },
+            },
+          },
+        ])
+      : Promise.resolve([]),
     Enrollment.find({ student: { $in: userIds } })
       .sort({ createdAt: -1 })
-      .limit(5)
-      .populate('student', 'name')
+      .limit(6)
+      .populate('student', 'name email')
       .populate('course', 'title')
       .lean(),
+    quizIds.length
+      ? QuizAttempt.find({ quiz: { $in: quizIds }, status: 'completed' })
+          .sort({ createdAt: -1 })
+          .limit(6)
+          .populate('student', 'name email')
+          .populate('quiz', 'title')
+          .lean()
+      : Promise.resolve([]),
   ]);
+
+  // Build 14-day trend timeline
+  const trendDays: { date: string; signups: number; enrollments: number; attempts: number }[] = [];
+  const userTrendMap = new Map((userDailyTrends || []).map((u: { _id: string; count: number }) => [u._id, u.count]));
+  const enrollmentTrendMap = new Map((enrollmentDailyTrends || []).map((e: { _id: string; count: number }) => [e._id, e.count]));
+  const attemptTrendMap = new Map((quizAttemptDailyTrends || []).map((a: { _id: string; count: number }) => [a._id, a.count]));
+
+  for (let i = 0; i < 14; i++) {
+    const d = new Date(fourteenDaysAgo);
+    d.setDate(d.getDate() + i);
+    const dateStr = d.toISOString().split('T')[0];
+    trendDays.push({
+      date: dateStr,
+      signups: userTrendMap.get(dateStr) || 0,
+      enrollments: enrollmentTrendMap.get(dateStr) || 0,
+      attempts: attemptTrendMap.get(dateStr) || 0,
+    });
+  }
+
+  // Combine and sort recent activity
+  const recentActivity = [
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ...recentEnrollments.map((e: any) => ({
+      type: 'enrollment' as const,
+      user: e.student?.name || e.student?.email || 'Student',
+      item: e.course?.title || 'Course',
+      date: e.createdAt,
+    })),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ...recentQuizAttempts.map((q: any) => ({
+      type: 'quiz_attempt' as const,
+      user: q.student?.name || q.student?.email || 'Student',
+      item: q.quiz?.title || 'Quiz',
+      score: q.score,
+      date: q.createdAt,
+    })),
+  ]
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 8);
 
   return {
     users: {
@@ -164,13 +275,19 @@ async function getAdminStats(organizationId?: string | null, isSuperAdmin: boole
       averageScore: scoreStats.length > 0 ? Math.round(scoreStats[0].avgScore) : 0,
       highestScore: scoreStats.length > 0 ? scoreStats[0].highestScore : 0,
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    recentActivity: recentEnrollments.map((e: any) => ({
-      type: 'enrollment',
-      user: e.student?.name,
-      course: e.course?.title,
-      date: e.createdAt,
+    blogs: {
+      total: totalBlogs,
+      published: publishedBlogs,
+    },
+    trends: trendDays,
+    topCourses: topEnrolledCourses.map((c: { _id: unknown; title: string; isPublished: boolean; category?: string; studentsCount: number }) => ({
+      _id: String(c._id),
+      title: c.title,
+      isPublished: c.isPublished,
+      category: c.category || 'General',
+      studentsCount: c.studentsCount || 0,
     })),
+    recentActivity,
   };
 }
 

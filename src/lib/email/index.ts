@@ -606,3 +606,84 @@ export async function sendCourseDeletionEmail(params: {
     return false;
   }
 }
+
+function directUserEmailHtml(params: {
+  recipientName: string;
+  subject: string;
+  message: string;
+  senderName?: string;
+}): string {
+  const safeName = params.recipientName.replace(/[<>]/g, '');
+  const safeSubject = params.subject.replace(/[<>]/g, '');
+  const safeMessage = params.message.replace(/[<>]/g, '');
+
+  return `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${safeSubject}</title>
+  </head>
+  <body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background-color:#f8fafc;color:#1e293b;">
+    <div style="width:100%;background-color:#f8fafc;padding:40px 0;">
+      <div style="max-width:600px;margin:0 auto;background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);border:1px solid #e2e8f0;">
+        <div style="background:linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);padding:28px 24px;text-align:center;">
+          <div style="font-size:22px;font-weight:800;color:#ffffff;letter-spacing:1px;margin:0 0 4px 0;">Quiz Do</div>
+          <div style="font-size:13px;font-weight:600;color:#e0e7ff;letter-spacing:1px;margin:0;">Official Platform Message</div>
+        </div>
+        <div style="padding:32px 24px;">
+          <h3 style="font-size:17px;font-weight:700;color:#0f172a;margin:0 0 16px 0;">Hello ${safeName},</h3>
+          <div style="background-color:#f8fafc;border-left:4px solid #4f46e5;border-radius:8px;padding:20px;margin-bottom:24px;border-top:1px solid #edf2f7;border-right:1px solid #edf2f7;border-bottom:1px solid #edf2f7;">
+            <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#4338ca;margin-bottom:8px;">${safeSubject}</div>
+            <p style="margin:0;font-size:14px;line-height:1.6;color:#334155;white-space:pre-wrap;">${safeMessage}</p>
+          </div>
+          <p style="font-size:14px;line-height:1.6;color:#475569;margin:0 0 8px 0;">
+            Best regards,<br>
+            <strong>${params.senderName ? params.senderName : 'The Quiz Do Administration Team'}</strong>
+          </p>
+        </div>
+        <div style="background-color:#f1f5f9;padding:20px 24px;text-align:center;border-top:1px solid #e2e8f0;">
+          <p style="font-size:12px;color:#64748b;margin:0;line-height:1.5;">
+            © ${new Date().getFullYear()} <strong>Quiz Do</strong>. All rights reserved.
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+  </html>`;
+}
+
+export async function sendDirectUserEmail(params: {
+  to: string;
+  recipientName: string;
+  subject: string;
+  message: string;
+  senderName?: string;
+  replyTo?: string;
+}): Promise<boolean> {
+  try {
+    const transporter = getTransporter();
+    const safeRecipientName = params.recipientName.replace(/[<>]/g, '');
+    const safeSubject = params.subject.replace(/[<>]/g, '');
+    const safeMessage = params.message.replace(/[<>]/g, '');
+
+    await transporter.sendMail({
+      from: `"${smtpFromName}" <${smtpFromEmail}>`,
+      to: params.to,
+      replyTo: params.replyTo || smtpFromEmail,
+      subject: safeSubject,
+      text: `Hello ${safeRecipientName},\n\n${safeMessage}\n\nBest regards,\n${params.senderName || 'Quiz Do Team'}`,
+      html: directUserEmailHtml({
+        recipientName: safeRecipientName,
+        subject: safeSubject,
+        message: safeMessage,
+        senderName: params.senderName,
+      }),
+    });
+    return true;
+  } catch (error) {
+    logApiError(error as Error, 'sendMail', '/lib/email/index.ts', { method: 'SMTP_DIRECT_USER_EMAIL' });
+    throw error;
+  }
+}

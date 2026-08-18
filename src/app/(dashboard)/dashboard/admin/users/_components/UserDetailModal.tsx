@@ -1,282 +1,223 @@
-import React from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Mail, Trash2, X } from 'lucide-react';
+import { X, Copy, Check, CheckCircle2, Shield } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import Tooltip from '@/components/ui/Tooltip';
-import Button from '@/components/ui/Button';
-import { Dropdown } from '@/components/ui/Dropdown';
-import { TextField } from '@/components/ui/TextField';
 import type { User } from './types';
+import { UserProfileInfoSection } from './UserProfileInfoSection';
+import { UserRoleOrgSection } from './UserRoleOrgSection';
+import { UserTeacherPermissionsSection } from './UserTeacherPermissionsSection';
+import { UserModerationSection } from './UserModerationSection';
+import { SendEmailModal } from './SendEmailModal';
 
 type Props = {
   selectedUser: User;
-  session: { user?: { id?: string; role?: string; } | null } | null;
+  session: { user?: { id?: string; role?: string } | null } | null;
   organizations: Array<{ _id: string; name: string }>;
   handleCloseUserDetail: () => void;
   handleRoleChange: (userId: string, newRole: string) => void;
-  setOrgAssignUserId: (id: string | null) => void;
-  setSelectedOrganizationId: (id: string | null) => void;
-  handleSaveOrgAssign: () => void;
+  handleSaveOrgAssign: (userId: string, orgId: string | null) => Promise<void>;
   handleToggleVideoUpload: (userId: string, currentVal: boolean) => void;
   handleTogglePublicCoursePermission: (userId: string, currentVal: boolean) => void;
-  limitsUserId: string | null;
-  setLimitsUserId: (id: string | null) => void;
-  limitsForm: { courses: string; quizzes: string; blogs: string };
-  setLimitsForm: (form: { courses: string; quizzes: string; blogs: string }) => void;
-  handleSaveLimits: () => void;
+  handleSaveLimits: (userId: string, limits: { courses?: number; quizzes?: number; blogs?: number }) => Promise<void>;
+  handleToggleSuspend: (userId: string, isSuspended: boolean) => Promise<void>;
   handleDeleteClick: (userId: string) => void;
 };
 
 export function UserDetailModal({
-  selectedUser,
-  session,
-  organizations,
-  handleCloseUserDetail,
-  handleRoleChange,
-  setOrgAssignUserId,
-  setSelectedOrganizationId,
-  handleSaveOrgAssign,
-  handleToggleVideoUpload,
-  handleTogglePublicCoursePermission,
-  limitsUserId,
-  setLimitsUserId,
-  limitsForm,
-  setLimitsForm,
-  handleSaveLimits,
-  handleDeleteClick,
+  selectedUser, session, organizations, handleCloseUserDetail, handleRoleChange,
+  handleSaveOrgAssign, handleToggleVideoUpload, handleTogglePublicCoursePermission,
+  handleSaveLimits, handleToggleSuspend, handleDeleteClick,
 }: Props) {
   const { t } = useTranslation();
+  const [copiedId, setCopiedId] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(selectedUser.organizationId ?? null);
+  const [limitsForm, setLimitsForm] = useState({
+    courses: selectedUser.limits?.courses ? String(selectedUser.limits.courses) : '',
+    quizzes: selectedUser.limits?.quizzes ? String(selectedUser.limits.quizzes) : '',
+    blogs: selectedUser.limits?.blogs ? String(selectedUser.limits.blogs) : '',
+  });
+  const [isSavingOrg, setIsSavingOrg] = useState(false);
+  const [isSavingLimits, setIsSavingLimits] = useState(false);
+  const [isSuspending, setIsSuspending] = useState(false);
+
+  useEffect(() => {
+    setSelectedOrgId(selectedUser.organizationId ?? null);
+    setLimitsForm({
+      courses: selectedUser.limits?.courses ? String(selectedUser.limits.courses) : '',
+      quizzes: selectedUser.limits?.quizzes ? String(selectedUser.limits.quizzes) : '',
+      blogs: selectedUser.limits?.blogs ? String(selectedUser.limits.blogs) : '',
+    });
+  }, [selectedUser]);
+
+  const copyUserId = () => {
+    navigator.clipboard.writeText(selectedUser._id);
+    setCopiedId(true);
+    setTimeout(() => setCopiedId(false), 2000);
+  };
+
+  const onSaveOrg = async () => {
+    setIsSavingOrg(true);
+    try {
+      await handleSaveOrgAssign(selectedUser._id, selectedOrgId);
+    } finally {
+      setIsSavingOrg(false);
+    }
+  };
+
+  const onSaveLimits = async () => {
+    setIsSavingLimits(true);
+    try {
+      const parsed: { courses?: number; quizzes?: number; blogs?: number } = {};
+      if (limitsForm.courses) parsed.courses = parseInt(limitsForm.courses, 10);
+      if (limitsForm.quizzes) parsed.quizzes = parseInt(limitsForm.quizzes, 10);
+      if (limitsForm.blogs) parsed.blogs = parseInt(limitsForm.blogs, 10);
+      await handleSaveLimits(selectedUser._id, parsed);
+    } finally {
+      setIsSavingLimits(false);
+    }
+  };
+
+  const onToggleSuspend = async (isSuspended: boolean) => {
+    setIsSuspending(true);
+    try {
+      await handleToggleSuspend(selectedUser._id, isSuspended);
+    } finally {
+      setIsSuspending(false);
+    }
+  };
+
+  const initials = selectedUser.name
+    ? selectedUser.name
+        .split(' ')
+        .map((n) => n[0])
+        .slice(0, 2)
+        .join('')
+        .toUpperCase()
+    : 'U';
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
       onClick={handleCloseUserDetail}
     >
       <motion.div
-        initial={{ scale: 0.95, opacity: 0, y: 10 }}
+        initial={{ scale: 0.96, opacity: 0, y: 15 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
-        exit={{ scale: 0.95, opacity: 0, y: 10 }}
-        className="bg-[var(--card-solid)] rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+        exit={{ scale: 0.96, opacity: 0, y: 15 }}
+        transition={{ duration: 0.2 }}
+        className="bg-[var(--card-solid)] border border-[var(--border)] rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] overflow-y-auto flex flex-col my-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-6">
-          {/* Header */}
-          <div className="flex items-start justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-full bg-[var(--info-light)] text-[var(--info)]">
-                <Shield className="w-6 h-6" />
+        {/* Header */}
+        <div className="p-5 sm:p-6 border-b border-[var(--border)] sticky top-0 bg-[var(--card-solid)]/95 backdrop-blur-md z-10">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-tr from-[var(--primary)] to-[var(--student-accent)] text-white flex items-center justify-center font-black text-lg sm:text-xl shadow-md shrink-0">
+                {initials}
               </div>
-              <div>
-                <h3 className="text-xl font-semibold text-[var(--color-foreground)]">{selectedUser.name}</h3>
-                <p className="text-sm text-[var(--color-muted-foreground)] flex items-center">
-                  <Mail className="w-4 h-4 mr-1" />
-                  {selectedUser.email}
-                </p>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="text-base sm:text-lg font-bold text-[var(--color-foreground)] truncate">
+                    {selectedUser.name}
+                  </h3>
+                  {selectedUser.isVerified && (
+                    <Tooltip label={t('adminUsers.verified') || 'Verified Account'}>
+                      <CheckCircle2 className="w-4 h-4 text-[var(--success)] shrink-0" />
+                    </Tooltip>
+                  )}
+                  <span className="px-2 py-0.5 text-[11px] font-bold rounded-full bg-[var(--primary-soft)] text-[var(--primary)] capitalize">
+                    {selectedUser.role}
+                  </span>
+                  {selectedUser.isSuspended && (
+                    <span className="px-2 py-0.5 text-[11px] font-bold rounded-full bg-[var(--error-light)] text-[var(--error)]">
+                      {t('adminUsers.suspended') || 'Suspended'}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2 mt-1">
+                  <button
+                    onClick={copyUserId}
+                    className="flex items-center gap-1.5 bg-[var(--color-surface-muted)] hover:bg-[var(--color-surface-muted-strong)] px-2 py-0.5 rounded-md transition-colors font-mono text-[11px] text-[var(--color-muted-foreground)]"
+                    title={t('adminUsers.copyUserId') || 'Copy User ID'}
+                  >
+                    <Shield className="w-3 h-3 text-[var(--info)] shrink-0" />
+                    <span>ID: {selectedUser._id}</span>
+                    {copiedId ? <Check className="w-3 h-3 text-[var(--success)]" /> : <Copy className="w-3 h-3" />}
+                  </button>
+                </div>
               </div>
             </div>
+
             <Tooltip label={t('common.close')} position="bottom">
               <button
                 onClick={handleCloseUserDetail}
                 aria-label={t('common.close')}
-                className="p-2 hover:bg-[var(--color-surface-muted)] rounded-lg transition-colors"
+                className="p-2 hover:bg-[var(--color-surface-muted)] rounded-xl transition-colors text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] shrink-0"
               >
-                <X className="w-5 h-5 text-[var(--color-muted-foreground)]" />
+                <X className="w-5 h-5" />
               </button>
             </Tooltip>
           </div>
-
-          {/* User Info */}
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="p-4 bg-[var(--color-surface-muted)]/30 rounded-xl">
-              <p className="text-xs text-[var(--color-muted-foreground)] mb-1">{t('admin.role')}</p>
-              <p className="text-sm font-medium text-[var(--color-foreground)] capitalize">{selectedUser.role}</p>
-            </div>
-            <div className="p-4 bg-[var(--color-surface-muted)]/30 rounded-xl">
-              <p className="text-xs text-[var(--color-muted-foreground)] mb-1">{t('admin.joined')}</p>
-              <p className="text-sm font-medium text-[var(--color-foreground)]">{new Date(selectedUser.createdAt).toLocaleDateString()}</p>
-            </div>
-            <div className="p-4 bg-[var(--color-surface-muted)]/30 rounded-xl col-span-2">
-              <p className="text-xs text-[var(--color-muted-foreground)] mb-1">{t('adminUsers.organization')}</p>
-              <p className="text-sm font-medium text-[var(--color-foreground)]">
-                {selectedUser.organizationId
-                  ? organizations.find(org => org._id === selectedUser.organizationId)?.name || selectedUser.organizationId
-                  : t('common.none')}
-              </p>
-            </div>
-          </div>
-
-          {/* Operations */}
-          <div className="flex flex-col gap-4">
-            {/* Change Role */}
-            <Dropdown
-              label={t('adminUsers.changeRole')}
-              value={selectedUser.role}
-              onChange={(val) => handleRoleChange(selectedUser._id, val || selectedUser.role)}
-              disabled={selectedUser._id === session?.user?.id}
-              options={[
-                { value: 'student', label: t('roles.student') },
-                { value: 'teacher', label: t('roles.teacher') },
-                { value: 'admin', label: t('roles.admin') },
-              ]}
-              placeholder=""
-            />
-
-            {/* Assign Organization */}
-            <div>
-              <div className="flex gap-2 items-end">
-                <Dropdown
-                  label={t('adminUsers.assignOrganization')}
-                  value={selectedUser.organizationId || ''}
-                  onChange={(val) => {
-                    setOrgAssignUserId(selectedUser._id);
-                    setSelectedOrganizationId(val || null);
-                  }}
-                  options={[
-                    { value: '', label: t('common.none') },
-                    ...organizations.map((org) => ({ value: org._id, label: org.name })),
-                  ]}
-                  placeholder=""
-                  containerClassName="flex-1"
-                />
-                <Button
-                  onClick={() => handleSaveOrgAssign()}
-                  variant="primary"
-                  className="px-4 py-2.5"
-                >
-                  {t('common.save')}
-                </Button>
-              </div>
-            </div>
-
-            {/* Video Upload Permission */}
-            {selectedUser.role === 'teacher' && (
-              <div className="flex items-center justify-between p-4 bg-[var(--color-surface-muted)]/30 rounded-xl">
-                <div>
-                  <p className="text-sm font-medium text-[var(--color-foreground)]">
-                    {t('adminUsers.videoUploadPermission') || 'Video Upload Permission'}
-                  </p>
-                  <p className="text-xs text-[var(--color-muted-foreground)] mt-0.5">
-                    {t('adminUsers.videoUploadPermissionDesc') || 'Allow teacher to upload unlisted YouTube video lectures.'}
-                  </p>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={selectedUser.canUploadVideos || false}
-                    onChange={() => handleToggleVideoUpload(selectedUser._id, selectedUser.canUploadVideos || false)}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-[var(--color-surface-muted-strong)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[var(--color-border)] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--primary)]"></div>
-                </label>
-              </div>
-            )}
-
-            {selectedUser.role === 'teacher' && (
-              <div className="flex items-center justify-between p-4 bg-[var(--color-surface-muted)]/30 rounded-xl">
-                <div>
-                  <p className="text-sm font-medium text-[var(--color-foreground)]">
-                    {t('adminUsers.canCreatePublicCourses')}
-                  </p>
-                  <p className="text-xs text-[var(--color-muted-foreground)] mt-0.5">
-                    {t('adminUsers.canCreatePublicCoursesDesc')}
-                  </p>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={Boolean(selectedUser.canCreatePublicCourses)}
-                    onChange={() =>
-                      handleTogglePublicCoursePermission(
-                        selectedUser._id,
-                        Boolean(selectedUser.canCreatePublicCourses)
-                      )
-                    }
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-[var(--color-surface-muted-strong)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[var(--color-border)] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--primary)]"></div>
-                </label>
-              </div>
-            )}
-
-            {/* Teacher Limits */}
-            {selectedUser.role === 'teacher' && (
-              <div>
-                <label className="block text-sm font-medium text-[var(--color-foreground)] mb-2">{t('adminUsers.teacherLimits')}</label>
-                <div className="grid grid-cols-3 gap-2">
-                  <TextField
-                    label={t('adminUsers.courses')}
-                    type="number"
-                    min="1"
-                    value={limitsUserId === selectedUser._id ? limitsForm.courses : selectedUser.limits?.courses || ''}
-                    onChange={(e) => {
-                      setLimitsUserId(selectedUser._id);
-                      setLimitsForm({ ...limitsForm, courses: e.target.value });
-                    }}
-                    placeholder={t('adminUsers.unlimited')}
-                    fullWidth
-                  />
-                  <TextField
-                    label={t('adminUsers.quizzes')}
-                    type="number"
-                    min="1"
-                    value={limitsUserId === selectedUser._id ? limitsForm.quizzes : selectedUser.limits?.quizzes || ''}
-                    onChange={(e) => {
-                      setLimitsUserId(selectedUser._id);
-                      setLimitsForm({ ...limitsForm, quizzes: e.target.value });
-                    }}
-                    placeholder={t('adminUsers.unlimited')}
-                    fullWidth
-                  />
-                  <TextField
-                    label={t('adminUsers.blogs')}
-                    type="number"
-                    min="1"
-                    value={limitsUserId === selectedUser._id ? limitsForm.blogs : selectedUser.limits?.blogs || ''}
-                    onChange={(e) => {
-                      setLimitsUserId(selectedUser._id);
-                      setLimitsForm({ ...limitsForm, blogs: e.target.value });
-                    }}
-                    placeholder={t('adminUsers.unlimited')}
-                    fullWidth
-                  />
-                </div>
-                {(limitsForm.courses || limitsForm.quizzes || limitsForm.blogs) && (
-                  <Button
-                    onClick={() => handleSaveLimits()}
-                    variant="primary"
-                    fullWidth
-                    className="mt-2"
-                  >
-                    {t('adminUsers.saveLimits')}
-                  </Button>
-                )}
-              </div>
-            )}
-
-            {/* Delete User */}
-            <div className="pt-4 border-t border-[var(--border)]">
-              <Button
-                onClick={() => {
-                  handleCloseUserDetail();
-                  handleDeleteClick(selectedUser._id);
-                }}
-                disabled={selectedUser._id === session?.user?.id || selectedUser.role === 'superadmin'}
-                variant="danger"
-                fullWidth
-                className="flex items-center justify-center gap-2"
-              >
-                <Trash2 className="w-4 h-4" />
-                {t('admin.delete')}
-              </Button>
-              {selectedUser.role === 'superadmin' && (
-                <p className="text-xs text-[var(--color-muted-foreground)] mt-2 text-center">{t('adminUsers.superAdminCannotDelete')}</p>
-              )}
-            </div>
-          </div>
         </div>
+
+        {/* Modal Body */}
+        <div className="p-5 sm:p-6 flex flex-col gap-4">
+          {/* User Profile Overview & Contact Info */}
+          <UserProfileInfoSection
+            user={selectedUser}
+            organizations={organizations}
+            onSendEmailClick={() => setShowEmailModal(true)}
+          />
+
+          {/* Role & Org Section */}
+          <UserRoleOrgSection
+            user={selectedUser}
+            currentUserId={session?.user?.id}
+            organizations={organizations}
+            selectedOrgId={selectedOrgId}
+            onRoleChange={(newRole) => handleRoleChange(selectedUser._id, newRole)}
+            onOrgSelect={setSelectedOrgId}
+            onSaveOrg={onSaveOrg}
+            isSavingOrg={isSavingOrg}
+          />
+
+          {/* Teacher Capabilities & Quotas */}
+          <UserTeacherPermissionsSection
+            user={selectedUser}
+            onToggleVideo={(val) => handleToggleVideoUpload(selectedUser._id, val)}
+            onTogglePublicCourse={(val) => handleTogglePublicCoursePermission(selectedUser._id, val)}
+            limitsForm={limitsForm}
+            onLimitsChange={(field, val) => setLimitsForm((prev) => ({ ...prev, [field]: val }))}
+            onSaveLimits={onSaveLimits}
+            isSavingLimits={isSavingLimits}
+          />
+
+          {/* Moderation & Danger Zone */}
+          <UserModerationSection
+            user={selectedUser}
+            currentUserId={session?.user?.id}
+            currentUserRole={session?.user?.role}
+            onToggleSuspend={onToggleSuspend}
+            onDeleteClick={handleDeleteClick}
+            isSuspending={isSuspending}
+          />
+        </div>
+
+        {/* Send Direct Email Modal */}
+        {showEmailModal && (
+          <SendEmailModal
+            user={selectedUser}
+            onClose={() => setShowEmailModal(false)}
+          />
+        )}
       </motion.div>
     </motion.div>
   );

@@ -13,9 +13,10 @@ import { ApiClientError } from '@/lib/api/http';
 import { useTranslation } from '@/hooks/useTranslation';
 import { isBlogContentEmpty, type BlogFormData } from '@/features/blogs/components/BlogEditorForm';
 import { LazyBlogEditorForm } from '@/lib/lazy';
+import { isAdmin, isStaffRole } from '@/lib/roles';
 
 export default function CreateBlogPage() {
-  const { status } = useSessionStore();
+  const { session, status } = useSessionStore();
   const { t } = useTranslation();
   const router = useRouter();
   const createBlogMutation = useCreateBlog();
@@ -36,6 +37,14 @@ export default function CreateBlogPage() {
     return null;
   }
 
+  if (status === 'authenticated' && !isStaffRole(session?.user?.role)) {
+    router.push(ROUTES.student.root);
+    return null;
+  }
+
+  const isUserAdmin = isAdmin(session?.user?.role);
+  const blogsHome = isUserAdmin ? ROUTES.admin.blogs : ROUTES.teacher.blogs;
+
   const submit = async (asDraft: boolean) => {
     if (!formData.title.trim() || !formData.topic || isBlogContentEmpty(formData.content)) {
       addAlert({ type: 'error', message: t('blog.fillAllFields') });
@@ -47,7 +56,7 @@ export default function CreateBlogPage() {
         ...formData,
         isPublished: !asDraft,
       });
-      router.push(ROUTES.teacher.blogs);
+      router.push(blogsHome);
     } catch (err) {
       const errorMsg = err instanceof ApiClientError ? err.message : t('blog.saveErrorGeneric');
       addAlert({ type: 'error', message: errorMsg });
@@ -58,7 +67,7 @@ export default function CreateBlogPage() {
     <div className="max-w-4xl mx-auto">
       <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
         <BackButton
-          href={ROUTES.teacher.blogs}
+          href={blogsHome}
           label={t('blog.backToBlogs')}
           className="text-[var(--teacher-primary)] hover:text-[var(--teacher-primary)]/80 mb-3"
         />

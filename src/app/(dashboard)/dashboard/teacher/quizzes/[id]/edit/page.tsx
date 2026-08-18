@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
 import { LazyCreateQuizPageContent } from '@/lib/lazy';
+import { isStaffRole } from '@/lib/roles';
 
 export default async function EditQuizPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
@@ -11,7 +12,7 @@ export default async function EditQuizPage({ params }: { params: Promise<{ id: s
     redirect(ROUTES.login);
   }
 
-  if (session.user?.role !== 'teacher' && session.user?.role !== 'admin') {
+  if (!isStaffRole(session.user?.role)) {
     redirect(ROUTES.student.root);
   }
 

@@ -12,9 +12,10 @@ import { ApiClientError } from '@/lib/api/http';
 import { useTranslation } from '@/hooks/useTranslation';
 import { isBlogContentEmpty, type BlogFormData } from '@/features/blogs/components/BlogEditorForm';
 import { LazyBlogEditorForm } from '@/lib/lazy';
+import { isAdmin } from '@/lib/roles';
 
 export default function EditBlogPage() {
-  const { status } = useSessionStore();
+  const { session, status } = useSessionStore();
   const { t } = useTranslation();
   const router = useRouter();
   const params = useParams();
@@ -69,6 +70,9 @@ export default function EditBlogPage() {
     }
   };
 
+  const isUserAdmin = isAdmin(session?.user?.role);
+  const blogsHome = isUserAdmin ? ROUTES.admin.blogs : ROUTES.teacher.blogs;
+
   const submit = async (saveAsDraft: boolean) => {
     setIsSaving(true);
 
@@ -90,7 +94,7 @@ export default function EditBlogPage() {
         isFeatured: formData.isFeatured,
         isPublished: !saveAsDraft,
       });
-      router.push(ROUTES.teacher.blogs);
+      router.push(blogsHome);
     } catch (err) {
       const errorMsg = err instanceof ApiClientError ? err.message : t('blog.saveErrorGeneric');
       addAlert({ type: 'error', message: errorMsg });
@@ -111,7 +115,7 @@ export default function EditBlogPage() {
     <div className="max-w-4xl mx-auto">
       <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
         <BackButton
-          href={ROUTES.teacher.blogs}
+          href={blogsHome}
           label={t('blog.backToBlogs')}
           className="text-[var(--teacher-primary)] hover:text-[var(--teacher-primary)]/80 mb-3"
         />

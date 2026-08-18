@@ -114,6 +114,8 @@ const notificationCategorySchema = z.enum([
   'system',
 ]);
 
+export const targetAudienceSchema = z.enum(['all', 'students', 'teachers', 'course_enrolled']);
+
 export const sendNotificationSchema = z.object({
   title: z.object({
     en: z.string().min(1, 'English title is required').max(200),
@@ -126,6 +128,8 @@ export const sendNotificationSchema = z.object({
   data: z.record(z.string(), z.string()).optional(),
   category: notificationCategorySchema,
   organizationId: objectIdSchema.optional(),
+  targetAudience: targetAudienceSchema.optional().default('all'),
+  targetCourseId: objectIdSchema.optional(),
 });
 
 export const registerDeviceSchema = z.object({

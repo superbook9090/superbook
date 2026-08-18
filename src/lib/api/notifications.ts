@@ -40,12 +40,16 @@ export type RegisterDeviceInput = {
   platform: 'android' | 'ios' | 'web';
 };
 
+export type BroadcastTargetAudience = 'all' | 'students' | 'teachers' | 'course_enrolled';
+
 export type SendNotificationInput = {
   title: { en: string; hi?: string };
   body: { en: string; hi?: string };
   data?: Record<string, string>;
   category: NotificationCategory;
   organizationId?: string;
+  targetAudience?: BroadcastTargetAudience;
+  targetCourseId?: string;
 };
 
 export type SendNotificationResult = {
@@ -98,3 +102,31 @@ export async function sendAdminNotification(input: SendNotificationInput): Promi
   const { data } = await apiJsonData<SendNotificationResult>(SEND, { method: 'POST', body: input });
   return data;
 }
+
+export interface AdminBroadcastLogItem {
+  id: string;
+  title: { en: string; hi?: string };
+  body: { en: string; hi?: string };
+  category: NotificationCategory;
+  data?: Record<string, string>;
+  createdAt: string;
+  recipientsCount: number;
+}
+
+export interface AdminNotificationStatsData {
+  activeDevicesCount: number;
+  platformBreakdown: { android: number; ios: number; web: number };
+  totalBroadcastsDelivered: number;
+  categoryBreakdown: Record<string, number>;
+  recentBroadcasts: AdminBroadcastLogItem[];
+  organizations: Array<{ id: string; name: string; inviteCode?: string }>;
+  courses: Array<{ id: string; title: string; enrolledCount?: number; organizationId?: string }>;
+}
+
+export async function fetchAdminNotificationCenterData(): Promise<AdminNotificationStatsData> {
+  const { data } = await apiJsonData<AdminNotificationStatsData>('/api/admin/notifications', {
+    method: 'GET',
+  });
+  return data;
+}
+

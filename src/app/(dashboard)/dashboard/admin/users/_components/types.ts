@@ -1,19 +1,37 @@
+export interface UserLimits {
+  courses?: number;
+  quizzes?: number;
+  blogs?: number;
+}
+
 export interface User {
   _id: string;
   name: string;
   email: string;
-  role: string;
-  createdAt: string;
+  phone?: string;
+  role: 'student' | 'teacher' | 'admin' | 'superadmin' | string;
+  avatar?: string;
+  isVerified?: boolean;
+  isSuspended?: boolean;
+  suspendedReason?: string;
+  provider?: 'credentials' | 'google' | 'phone' | string;
   organizationId?: string | null;
   organization?: {
     _id: string;
     name: string;
   } | null;
-  limits?: {
-    courses: number;
-    quizzes: number;
-    blogs: number;
-  };
+  limits?: UserLimits;
   canUploadVideos?: boolean;
   canCreatePublicCourses?: boolean;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface UserStats {
+  total: number;
+  students: number;
+  teachers: number;
+  admins: number;
+  superadmins: number;
+  suspended: number;
 }

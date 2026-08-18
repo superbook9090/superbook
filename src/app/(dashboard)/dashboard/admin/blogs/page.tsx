@@ -4,6 +4,7 @@ import { ROUTES } from '@/constants/routes';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import {
   BookOpen,
@@ -12,11 +13,14 @@ import {
   EyeOff,
   Calendar,
   User,
+  Edit2,
+  Plus,
 } from 'lucide-react';
 
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
 import { useAlert } from '@/components/ui/AlertContainer';
+import Tooltip from '@/components/ui/Tooltip';
 import Button from '@/components/ui/Button';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useDeleteBlog, useUpdateBlog, usePaginatedBlogs, type Blog } from '@/lib/react-query/useBlogQueries';
@@ -109,15 +113,27 @@ export default function AdminBlogsPage() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center gap-3"
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
       >
-        <div className="p-3 bg-[var(--info-light)] rounded-xl">
-          <BookOpen className="w-6 h-6 text-[var(--info)]" />
+        <div className="flex items-center gap-3">
+          <div className="p-3 bg-[var(--info-light)] rounded-xl">
+            <BookOpen className="w-6 h-6 text-[var(--info)]" />
+          </div>
+          <div>
+            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">{t('admin.manageBlogs')}</h1>
+            <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">{t('admin.manageBlogsDesc')}</p>
+          </div>
         </div>
-        <div className="flex-1">
-          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">{t('admin.manageBlogs')}</h1>
-          <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">{t('admin.manageBlogsDesc')}</p>
-        </div>
+        <Link href={ROUTES.teacher.blogCreate} className="w-full sm:w-auto">
+          <Button
+            type="button"
+            variant="primary"
+            className="flex items-center justify-center gap-2 w-full sm:w-auto"
+          >
+            <Plus className="w-4 h-4" />
+            {t('blog.createBlog')}
+          </Button>
+        </Link>
       </motion.div>
 
       {/* Filters */}
@@ -235,6 +251,17 @@ export default function AdminBlogsPage() {
 
                 {/* Actions */}
                 <div className="flex gap-2 pt-4 border-t border-[var(--border)]">
+                  <Link href={ROUTES.teacher.blogEdit(blog._id)} className="flex-1">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="w-full flex items-center justify-center gap-2"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                      <span className="hidden sm:inline">{t('common.edit')}</span>
+                      <span className="sm:hidden">{t('common.edit')}</span>
+                    </Button>
+                  </Link>
                   <Button
                     type="button"
                     variant={blog.isPublished ? 'primary' : 'secondary'}
@@ -255,17 +282,19 @@ export default function AdminBlogsPage() {
                       </>
                     )}
                   </Button>
-                  <Button
-                    type="button"
-                    variant="danger"
-                    onClick={() => {
-                      setDeleteId(blog._id);
-                    }}
-                    className="flex-1 flex items-center justify-center gap-2"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    {t('common.delete')}
-                  </Button>
+                  <Tooltip label={t('common.delete')}>
+                    <Button
+                      type="button"
+                      variant="danger"
+                      onClick={() => {
+                        setDeleteId(blog._id);
+                      }}
+                      aria-label={t('common.delete')}
+                      className="px-3 py-2 rounded-lg"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </Tooltip>
                 </div>
               </div>
 

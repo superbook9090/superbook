@@ -1,13 +1,21 @@
 import { apiFormJson, apiJson } from '@/lib/api/http';
 
-export type FolderContentsResponse = {
-  folders: unknown[];
-  files: unknown[];
+export type FolderContentsResponse<TFolder = unknown, TFile = unknown> = {
+  folders: TFolder[];
+  files: TFile[];
+  pagination?: {
+    page: number;
+    limit: number;
+    foldersTotal: number;
+    filesTotal: number;
+  };
 };
 
-export function listFolderContents(parentId: string | null): Promise<FolderContentsResponse> {
+export function listFolderContents<TFolder = unknown, TFile = unknown>(
+  parentId: string | null
+): Promise<FolderContentsResponse<TFolder, TFile>> {
   const url = parentId ? `/api/files?parentId=${encodeURIComponent(parentId)}` : '/api/files';
-  return apiJson<FolderContentsResponse>(url, { method: 'GET' });
+  return apiJson<FolderContentsResponse<TFolder, TFile>>(url, { method: 'GET' });
 }
 
 export function createFileFolder(body: { name: string; parentId: string | null }): Promise<unknown> {

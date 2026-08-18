@@ -15,6 +15,7 @@ import { revalidateTag } from 'next/cache';
 import { parseOffsetPagination } from '@/lib/server/pagination';
 import { blogTopicValues, type BlogTopicKey } from '@/i18n/config';
 import { slugifyBlogTitle } from '@/lib/blogs/public';
+import { isStaffRole } from '@/lib/roles';
 
 export const dynamic = 'force-dynamic';
 
@@ -298,9 +299,9 @@ export async function POST(req: NextRequest) {
     const featureCheck = await requireFeature('enableBlogs');
     if (featureCheck) return featureCheck;
 
-    if (session.user.role !== 'teacher' && session.user.role !== 'admin') {
+    if (!isStaffRole(session.user.role)) {
       logFailedRequest(403, 'POST', '/api/blogs', logContext);
-      return NextResponse.json({ message: 'Only teachers can create blogs' }, { status: 403 });
+      return NextResponse.json({ message: 'Only teachers and admins can create blogs' }, { status: 403 });
     }
 
     const body = await req.json();

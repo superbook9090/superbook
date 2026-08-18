@@ -43,7 +43,15 @@ export async function POST(req: NextRequest) {
       return jsonApiError('VALIDATION', 'Invalid input', 400);
     }
 
-    const { title, body: messageBody, data, category, organizationId } = parsed.data;
+    const {
+      title,
+      body: messageBody,
+      data,
+      category,
+      organizationId,
+      targetAudience,
+      targetCourseId,
+    } = parsed.data;
 
     if (organizationId && !isSuperAdmin(role)) {
       return jsonApiError('FORBIDDEN', 'Only superadmin can target a specific organization', 403);
@@ -56,7 +64,9 @@ export async function POST(req: NextRequest) {
     const userIds = await resolveBroadcastRecipientIds(
       isSuperAdmin(role) ? 'superadmin' : 'admin',
       user.organizationId ?? undefined,
-      organizationId
+      organizationId,
+      targetAudience,
+      targetCourseId
     );
 
     if (userIds.length === 0) {

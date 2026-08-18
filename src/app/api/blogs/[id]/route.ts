@@ -12,6 +12,7 @@ import { validateContentAccess } from '@/lib/accessControl';
 import { invalidatePattern } from '@/lib/redis';
 import { revalidateTag } from 'next/cache';
 import { slugifyBlogTitle } from '@/lib/blogs/public';
+import { isAdmin } from '@/lib/roles';
 
 function publicBlogAccessAllowed(blog: {
   visibility?: 'public' | 'organization' | null;
@@ -107,7 +108,7 @@ export async function GET(
     }
 
     if (!blog.isPublished) {
-      if (!session || (session.user.id !== blog.author._id.toString() && session.user.role !== 'admin')) {
+      if (!session || (session.user.id !== blog.author._id.toString() && !isAdmin(session.user.role))) {
         return NextResponse.json(
           { message: 'Blog not found' },
           { status: 404 }
@@ -172,7 +173,7 @@ export async function PATCH(
     logContext.userId = session.user.id;
 
     // Check ownership
-    if (blog.author.toString() !== session.user.id && session.user.role !== 'admin') {
+    if (blog.author.toString() !== session.user.id && !isAdmin(session.user.role)) {
       return NextResponse.json(
         { message: 'You can only edit your own blogs' },
         { status: 403 }
@@ -304,7 +305,7 @@ export async function DELETE(
     logContext.userId = session.user.id;
 
     // Check ownership
-    if (blog.author.toString() !== session.user.id && session.user.role !== 'admin') {
+    if (blog.author.toString() !== session.user.id && !isAdmin(session.user.role)) {
       return NextResponse.json(
         { message: 'You can only delete your own blogs' },
         { status: 403 }

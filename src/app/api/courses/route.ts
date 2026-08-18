@@ -18,6 +18,7 @@ import {
   resolveCourseCodeForSave,
   sanitizeCourseResponse,
 } from '@/lib/courseAccess';
+import { isStaffRole } from '@/lib/roles';
 
 // Configure Next.js caching for this route
 export const dynamic = 'force-dynamic';
@@ -199,13 +200,9 @@ export async function POST(request: NextRequest) {
     if (featureCheck) return featureCheck;
 
     // Only teachers and admins can create courses
-    if (
-      session.user?.role !== 'teacher' &&
-      session.user?.role !== 'admin' &&
-      session.user?.role !== 'superadmin'
-    ) {
+    if (!isStaffRole(session.user?.role)) {
       return NextResponse.json(
-        { message: 'Only teachers can create courses' },
+        { message: 'Only teachers and admins can create courses' },
         { status: 403 }
       );
     }

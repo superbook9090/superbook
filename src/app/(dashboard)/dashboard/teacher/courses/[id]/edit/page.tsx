@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
 import { LazyEditCoursePageContent } from '@/lib/lazy';
+import { isStaffRole } from '@/lib/roles';
 
 export default async function EditCoursePage({ params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
@@ -11,11 +12,7 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
     redirect(ROUTES.login);
   }
 
-  if (
-    session.user?.role !== 'teacher' &&
-    session.user?.role !== 'admin' &&
-    session.user?.role !== 'superadmin'
-  ) {
+  if (!isStaffRole(session.user?.role)) {
     redirect(ROUTES.student.root);
   }
 
