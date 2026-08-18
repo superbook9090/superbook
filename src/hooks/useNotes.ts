@@ -1,37 +1,55 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import type { NoteItem, NoteColor, NoteSortOption, NoteViewMode } from '@/features/notes/types';
+import { computeNotesStats, filterAndSortNotes } from '@/features/notes/utils';
 
-export interface NoteItem {
-  _id: string;
-  userId: string;
-  title: string;
-  content: string;
-  wordCount: number;
-  color: 'blue' | 'amber' | 'emerald' | 'rose' | 'purple' | 'slate';
-  isPinned: boolean;
-  tags: string[];
-  createdAt: string;
-  updatedAt: string;
-}
+export type { NoteItem, NoteColor, NoteSortOption, NoteViewMode };
+
+const VIEW_MODE_STORAGE_KEY = 'quizdo_notes_view_mode';
 
 export function useNotes() {
-  const [notes, setNotes] = useState<NoteItem[]>([]);
+  const [rawNotes, setRawNotes] = useState<NoteItem[]>([]);
   const [limit, setLimit] = useState<number>(5);
   const [maxWordsPerPage, setMaxWordsPerPage] = useState<number>(1000);
   const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Filters & State
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [selectedCategory, setSelectedCategory] = useState<NoteColor | 'all'>('all');
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [showPinnedOnly, setShowPinnedOnly] = useState<boolean>(false);
+  const [sortBy, setSortBy] = useState<NoteSortOption>('updatedAt-desc');
+  const [viewMode, setViewModeState] = useState<NoteViewMode>('grid');
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(VIEW_MODE_STORAGE_KEY);
+      if (saved === 'grid' || saved === 'list') {
+        setViewModeState(saved);
+      }
+    } catch {
+      // Ignore storage errors
+    }
+  }, []);
+
+  const setViewMode = useCallback((mode: NoteViewMode) => {
+    setViewModeState(mode);
+    try {
+      localStorage.setItem(VIEW_MODE_STORAGE_KEY, mode);
+    } catch {
+      // Ignore storage errors
+    }
+  }, []);
 
   const fetchNotes = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const res = await fetch('/api/notes');
-      if (!res.ok) {
-        throw new Error('Failed to fetch notes');
-      }
+      if (!res.ok) throw new Error('Failed to fetch notes');
       const data = await res.json();
-      setNotes(data.notes || []);
+      setRawNotes(data.notes || []);
       setLimit(data.limit ?? 5);
       setMaxWordsPerPage(data.maxWordsPerPage ?? 1000);
     } catch (err: unknown) {
@@ -47,7 +65,7 @@ export function useNotes() {
   }, [fetchNotes]);
 
   const createNote = useCallback(
-    async (payload: { title: string; content: string; color?: string; tags?: string[] }) => {
+    async (payload: { title: string; content: string; color?: NoteColor; tags?: string[]; isPinned?: boolean }) => {
       setSaving(true);
       setError(null);
       try {
@@ -57,9 +75,7 @@ export function useNotes() {
           body: JSON.stringify(payload),
         });
         const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.message || 'Failed to create note');
-        }
+        if (!res.ok) throw new Error(data.message || 'Failed to create note');
         await fetchNotes();
         return { success: true, note: data };
       } catch (err: unknown) {
@@ -76,7 +92,7 @@ export function useNotes() {
   const updateNote = useCallback(
     async (
       id: string,
-      payload: Partial<{ title: string; content: string; color: string; isPinned: boolean; tags: string[] }>
+      payload: Partial<{ title: string; content: string; color: NoteColor; isPinned: boolean; tags: string[] }>
     ) => {
       setSaving(true);
       setError(null);
@@ -87,10 +103,8 @@ export function useNotes() {
           body: JSON.stringify(payload),
         });
         const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.message || 'Failed to update note');
-        }
-        setNotes((prev) => prev.map((n) => (n._id === id ? { ...n, ...data } : n)));
+        if (!res.ok) throw new Error(data.message || 'Failed to update note');
+        setRawNotes((prev) => prev.map((n) => (n._id === id ? { ...n, ...data } : n)));
         return { success: true, note: data };
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : 'Failed to update note';
@@ -109,10 +123,8 @@ export function useNotes() {
     try {
       const res = await fetch(`/api/notes/${id}`, { method: 'DELETE' });
       const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || 'Failed to delete note');
-      }
-      setNotes((prev) => prev.filter((n) => n._id !== id));
+      if (!res.ok) throw new Error(data.message || 'Failed to delete note');
+      setRawNotes((prev) => prev.filter((n) => n._id !== id));
       return { success: true };
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to delete note';
@@ -124,41 +136,75 @@ export function useNotes() {
   }, []);
 
   const togglePin = useCallback(
-    async (note: NoteItem) => {
-      return updateNote(note._id, { isPinned: !note.isPinned });
-    },
+    async (note: NoteItem) => updateNote(note._id, { isPinned: !note.isPinned }),
     [updateNote]
   );
 
-  const filteredNotes = useMemo(() => {
-    if (!searchQuery.trim()) return notes;
-    const q = searchQuery.toLowerCase();
-    return notes.filter(
-      (n) =>
-        n.title.toLowerCase().includes(q) ||
-        n.content.toLowerCase().includes(q) ||
-        n.tags?.some((t) => t.toLowerCase().includes(q))
-    );
-  }, [notes, searchQuery]);
+  const duplicateNote = useCallback(
+    async (note: NoteItem) => {
+      return createNote({
+        title: `${note.title} (Copy)`,
+        content: note.content,
+        color: note.color,
+        tags: note.tags ? [...note.tags] : [],
+        isPinned: false,
+      });
+    },
+    [createNote]
+  );
 
-  const isLimitReached = notes.length >= limit;
+  const clearFilters = useCallback(() => {
+    setSearchQuery('');
+    setSelectedCategory('all');
+    setSelectedTag(null);
+    setShowPinnedOnly(false);
+  }, []);
+
+  const stats = useMemo(() => computeNotesStats(rawNotes), [rawNotes]);
+
+  const filteredNotes = useMemo(
+    () =>
+      filterAndSortNotes(rawNotes, {
+        searchQuery,
+        selectedCategory,
+        selectedTag,
+        showPinnedOnly,
+        sortBy,
+      }),
+    [rawNotes, searchQuery, selectedCategory, selectedTag, showPinnedOnly, sortBy]
+  );
 
   return {
     notes: filteredNotes,
-    allNotesCount: notes.length,
+    rawNotes,
+    allNotesCount: rawNotes.length,
     limit,
     maxWordsPerPage,
-    isLimitReached,
+    isLimitReached: rawNotes.length >= limit,
+    isFiltered: Boolean(searchQuery.trim() || selectedCategory !== 'all' || selectedTag || showPinnedOnly),
     loading,
     saving,
     error,
     searchQuery,
     setSearchQuery,
+    selectedCategory,
+    setSelectedCategory,
+    selectedTag,
+    setSelectedTag,
+    showPinnedOnly,
+    setShowPinnedOnly,
+    sortBy,
+    setSortBy,
+    viewMode,
+    setViewMode,
+    stats,
+    clearFilters,
     fetchNotes,
     createNote,
     updateNote,
     deleteNote,
     togglePin,
+    duplicateNote,
     setError,
   };
 }

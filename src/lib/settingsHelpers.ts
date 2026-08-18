@@ -26,9 +26,29 @@ interface TeacherLimits {
   blogs: number;
 }
 
+const DEFAULT_FEATURE_TOGGLES: Partial<Record<keyof FeatureToggles, boolean>> = {
+  enableBlogs: true,
+  enableQuizzes: true,
+  enableCourses: true,
+  enableAnalytics: true,
+  enableClarity: true,
+  enableQuizSolutionAnalysis: false,
+  restrictPublicCourseCreation: false,
+  enableEnrollmentManagement: true,
+  enablePhoneAuth: true,
+  enablePullToRefresh: true,
+  enableGoogleAuthApp: true,
+  enableGoogleAuthWeb: true,
+  enableNotes: true,
+};
+
 export async function isFeatureEnabled(feature: keyof FeatureToggles): Promise<boolean> {
   const settings = await getSettingsWithDefaults();
-  return Boolean(settings?.featureToggles?.[feature]);
+  const toggleValue = settings?.featureToggles?.[feature];
+  if (typeof toggleValue === 'boolean') {
+    return toggleValue;
+  }
+  return DEFAULT_FEATURE_TOGGLES[feature] ?? true;
 }
 
 /** Server component helper — redirects to home when a feature is disabled. */
@@ -42,8 +62,8 @@ export async function ensureFeatureEnabled(feature: keyof FeatureToggles): Promi
  * Check if a feature is enabled and return 403 if disabled
  */
 export async function requireFeature(feature: keyof FeatureToggles): Promise<NextResponse | null> {
-  const settings = await getSettingsWithDefaults();
-  if (!settings?.featureToggles?.[feature]) {
+  const enabled = await isFeatureEnabled(feature);
+  if (!enabled) {
     return NextResponse.json(
       { message: `${feature} feature is disabled by admin` },
       { status: 403 }

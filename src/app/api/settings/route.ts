@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
-import AppSettings from '@/models/AppSettings';
+import AppSettings, { type IAppSettings } from '@/models/AppSettings';
 import { logInfo, logApiError, type LogContext } from '@/lib/logger';
 import { getCachedData, setCachedData } from '@/lib/redis';
 
@@ -29,41 +29,44 @@ export async function GET() {
 
     await dbConnect();
 
-    const settings = await AppSettings.findOne().lean();
+    const settings = (await AppSettings.findOne().lean()) as unknown as IAppSettings | null;
+
+    const defaultSettings = {
+      teacherLimits: {
+        courses: 5,
+        quizzes: 10,
+        blogs: 2,
+      },
+      notesLimits: {
+        maxPagesPerUser: 5,
+        maxWordsPerPage: 1000,
+      },
+      featureToggles: {
+        enableBlogs: true,
+        enableQuizzes: true,
+        enableCourses: true,
+        enableAnalytics: true,
+        enableClarity: true,
+        enableQuizSolutionAnalysis: false,
+        restrictPublicCourseCreation: false,
+        enableEnrollmentManagement: true,
+        enablePhoneAuth: true,
+        enablePullToRefresh: true,
+        enableGoogleAuthApp: true,
+        enableGoogleAuthWeb: true,
+        enableNotes: true,
+      },
+      platformConfig: {
+        siteName: 'Quiz Do',
+        siteDescription: 'Learning Management System',
+        maintenanceMode: false,
+        allowRegistration: true,
+        allowTeacherRegistration: true,
+        defaultLanguage: 'en',
+      },
+    };
 
     if (!settings) {
-      // Return default settings if none exist
-      const defaultSettings = {
-        teacherLimits: {
-          courses: 5,
-          quizzes: 10,
-          blogs: 2,
-        },
-        featureToggles: {
-          enableBlogs: true,
-          enableQuizzes: true,
-          enableCourses: true,
-          enableAnalytics: true,
-          enableClarity: true,
-          enableQuizSolutionAnalysis: false,
-          restrictPublicCourseCreation: false,
-          enableEnrollmentManagement: true,
-          enablePhoneAuth: true,
-          enablePullToRefresh: true,
-          enableGoogleAuthApp: true,
-          enableGoogleAuthWeb: true,
-          enableNotes: true,
-        },
-        platformConfig: {
-          siteName: 'Quiz Do',
-          siteDescription: 'Learning Management System',
-          maintenanceMode: false,
-          allowRegistration: true,
-          allowTeacherRegistration: true,
-          defaultLanguage: 'en',
-        },
-      };
-
       // Cache default settings
       await setCachedData(cacheKey, defaultSettings, 300); // 5 minutes
       logInfo(`Redis Cache SET: ${cacheKey}`, logContext);
@@ -75,11 +78,32 @@ export async function GET() {
       });
     }
 
+    const mergedSettings = {
+      ...defaultSettings,
+      ...settings,
+      teacherLimits: {
+        ...defaultSettings.teacherLimits,
+        ...(settings.teacherLimits || {}),
+      },
+      notesLimits: {
+        ...defaultSettings.notesLimits,
+        ...(settings.notesLimits || {}),
+      },
+      featureToggles: {
+        ...defaultSettings.featureToggles,
+        ...(settings.featureToggles || {}),
+      },
+      platformConfig: {
+        ...defaultSettings.platformConfig,
+        ...(settings.platformConfig || {}),
+      },
+    };
+
     // Cache the settings
-    await setCachedData(cacheKey, settings, 300); // 5 minutes
+    await setCachedData(cacheKey, mergedSettings, 300); // 5 minutes
     logInfo(`Redis Cache SET: ${cacheKey}`, logContext);
 
-    return NextResponse.json(settings, {
+    return NextResponse.json(mergedSettings, {
       headers: {
         'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
       },
