@@ -8,6 +8,7 @@ export type FeatureToggleKey =
   | 'enableAnalytics'
   | 'enableClarity'
   | 'enableQuizSolutionAnalysis'
+  | 'restrictPublicCourseCreation'
   | 'enableEnrollmentManagement'
   | 'enablePhoneAuth'
   | 'enablePullToRefresh'
@@ -45,6 +46,7 @@ export const defaultPublicAppSettings: PublicAppSettings = {
     enableAnalytics: true,
     enableClarity: true,
     enableQuizSolutionAnalysis: false,
+    restrictPublicCourseCreation: false,
     enableEnrollmentManagement: true,
     enablePhoneAuth: true,
     enablePullToRefresh: true,

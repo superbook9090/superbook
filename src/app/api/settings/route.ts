@@ -48,6 +48,11 @@ export async function GET() {
           enableQuizSolutionAnalysis: false,
           restrictPublicCourseCreation: false,
           enableEnrollmentManagement: true,
+          enablePhoneAuth: true,
+          enablePullToRefresh: true,
+          enableGoogleAuthApp: true,
+          enableGoogleAuthWeb: true,
+          enableNotes: true,
         },
         platformConfig: {
           siteName: 'Quiz Do',

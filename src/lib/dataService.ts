@@ -26,6 +26,10 @@ export const getSettingsWithDefaults = cache(async (): Promise<IAppSettings> => 
       enableQuizSolutionAnalysis: false,
       restrictPublicCourseCreation: false,
       enableEnrollmentManagement: true,
+      enablePhoneAuth: true,
+      enablePullToRefresh: true,
+      enableGoogleAuthApp: true,
+      enableGoogleAuthWeb: true,
       enableNotes: true,
     },
     platformConfig: {

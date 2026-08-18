@@ -50,6 +50,10 @@ export default function AdminSettingsPage() {
       restrictPublicCourseCreation: false,
       enableEnrollmentManagement: true,
       enablePhoneAuth: true,
+      enablePullToRefresh: true,
+      enableGoogleAuthApp: true,
+      enableGoogleAuthWeb: true,
+      enableNotes: true,
     },
     platformConfig: {
       maintenanceMode: false,
@@ -70,11 +74,19 @@ export default function AdminSettingsPage() {
         ...data,
         featureToggles: {
           ...data.featureToggles,
+          enableBlogs: data.featureToggles.enableBlogs ?? true,
+          enableQuizzes: data.featureToggles.enableQuizzes ?? true,
+          enableCourses: data.featureToggles.enableCourses ?? true,
+          enableAnalytics: data.featureToggles.enableAnalytics ?? true,
           enableClarity: data.featureToggles.enableClarity ?? true,
           enableQuizSolutionAnalysis: data.featureToggles.enableQuizSolutionAnalysis ?? false,
           restrictPublicCourseCreation: data.featureToggles.restrictPublicCourseCreation ?? false,
           enableEnrollmentManagement: data.featureToggles.enableEnrollmentManagement ?? true,
           enablePhoneAuth: data.featureToggles.enablePhoneAuth ?? true,
+          enablePullToRefresh: data.featureToggles.enablePullToRefresh ?? true,
+          enableGoogleAuthApp: data.featureToggles.enableGoogleAuthApp ?? true,
+          enableGoogleAuthWeb: data.featureToggles.enableGoogleAuthWeb ?? true,
+          enableNotes: data.featureToggles.enableNotes ?? true,
         },
         platformConfig: {
           ...{
@@ -114,7 +126,7 @@ export default function AdminSettingsPage() {
     try {
       await patchAdminSettings(settings);
       setValue(new Date().toISOString());
-      await fetchPublicSettings();
+      await fetchPublicSettings(true);
       addAlert({ type: 'success', message: t('adminSettings.settingsSaved') });
       window.dispatchEvent(new Event('settingsUpdated'));
     } catch (err) {

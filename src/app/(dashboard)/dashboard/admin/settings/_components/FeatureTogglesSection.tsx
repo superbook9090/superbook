@@ -38,7 +38,7 @@ export function FeatureTogglesSection({ settings, setSettings, theme, canManageS
             </div>
           </div>
           <ToggleSwitch
-            checked={settings.featureToggles.enableBlogs}
+            checked={settings.featureToggles.enableBlogs ?? true}
             onChange={(enableBlogs) =>
               setSettings({
                 ...settings,
@@ -59,7 +59,7 @@ export function FeatureTogglesSection({ settings, setSettings, theme, canManageS
             </div>
           </div>
           <ToggleSwitch
-            checked={settings.featureToggles.enableQuizzes}
+            checked={settings.featureToggles.enableQuizzes ?? true}
             onChange={(enableQuizzes) =>
               setSettings({
                 ...settings,
@@ -80,7 +80,7 @@ export function FeatureTogglesSection({ settings, setSettings, theme, canManageS
             </div>
           </div>
           <ToggleSwitch
-            checked={settings.featureToggles.enableCourses}
+            checked={settings.featureToggles.enableCourses ?? true}
             onChange={(enableCourses) =>
               setSettings({
                 ...settings,
@@ -122,7 +122,7 @@ export function FeatureTogglesSection({ settings, setSettings, theme, canManageS
             </div>
           </div>
           <ToggleSwitch
-            checked={settings.featureToggles.enableAnalytics}
+            checked={settings.featureToggles.enableAnalytics ?? true}
             onChange={(enableAnalytics) =>
               setSettings({
                 ...settings,
@@ -143,7 +143,7 @@ export function FeatureTogglesSection({ settings, setSettings, theme, canManageS
             </div>
           </div>
           <ToggleSwitch
-            checked={settings.featureToggles.enableClarity}
+            checked={settings.featureToggles.enableClarity ?? true}
             onChange={(enableClarity) =>
               setSettings({
                 ...settings,
@@ -169,7 +169,7 @@ export function FeatureTogglesSection({ settings, setSettings, theme, canManageS
                 </div>
               </div>
               <ToggleSwitch
-                checked={settings.featureToggles.enableQuizSolutionAnalysis}
+                checked={settings.featureToggles.enableQuizSolutionAnalysis ?? false}
                 onChange={(enableQuizSolutionAnalysis) =>
                   setSettings({
                     ...settings,

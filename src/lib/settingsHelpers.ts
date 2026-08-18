@@ -13,6 +13,10 @@ interface FeatureToggles {
   enableQuizSolutionAnalysis: boolean;
   restrictPublicCourseCreation?: boolean;
   enableEnrollmentManagement?: boolean;
+  enablePhoneAuth?: boolean;
+  enablePullToRefresh?: boolean;
+  enableGoogleAuthApp?: boolean;
+  enableGoogleAuthWeb?: boolean;
   enableNotes?: boolean;
 }
 

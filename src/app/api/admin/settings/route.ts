@@ -5,6 +5,7 @@ import dbConnect from '@/lib/db';
 import AppSettings from '@/models/AppSettings';
 import { updateSettingsSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
+import { deleteCachedData } from '@/lib/redis';
 import { revalidatePath } from 'next/cache';
 import { isSuperAdmin } from '@/lib/roles';
 
@@ -142,97 +143,42 @@ export async function PATCH(req: NextRequest) {
 
     // Update feature toggles if provided
     if (featureToggles) {
-      if (typeof featureToggles.enableBlogs !== 'boolean') {
-        return NextResponse.json(
-          { message: 'enableBlogs must be a boolean' },
-          { status: 400 }
-        );
-      }
-      if (typeof featureToggles.enableQuizzes !== 'boolean') {
-        return NextResponse.json(
-          { message: 'enableQuizzes must be a boolean' },
-          { status: 400 }
-        );
-      }
-      if (typeof featureToggles.enableCourses !== 'boolean') {
-        return NextResponse.json(
-          { message: 'enableCourses must be a boolean' },
-          { status: 400 }
-        );
-      }
-      if (typeof featureToggles.enableAnalytics !== 'boolean') {
-        return NextResponse.json(
-          { message: 'enableAnalytics must be a boolean' },
-          { status: 400 }
-        );
-      }
-      if (
-        featureToggles.enableClarity !== undefined &&
-        typeof featureToggles.enableClarity !== 'boolean'
-      ) {
-        return NextResponse.json(
-          { message: 'enableClarity must be a boolean' },
-          { status: 400 }
-        );
-      }
-      if (
-        featureToggles.enableQuizSolutionAnalysis !== undefined &&
-        typeof featureToggles.enableQuizSolutionAnalysis !== 'boolean'
-      ) {
-        return NextResponse.json(
-          { message: 'enableQuizSolutionAnalysis must be a boolean' },
-          { status: 400 }
-        );
-      }
-      if (
-        featureToggles.restrictPublicCourseCreation !== undefined &&
-        typeof featureToggles.restrictPublicCourseCreation !== 'boolean'
-      ) {
-        return NextResponse.json(
-          { message: 'restrictPublicCourseCreation must be a boolean' },
-          { status: 400 }
-        );
-      }
-      if (
-        featureToggles.enableEnrollmentManagement !== undefined &&
-        typeof featureToggles.enableEnrollmentManagement !== 'boolean'
-      ) {
-        return NextResponse.json(
-          { message: 'enableEnrollmentManagement must be a boolean' },
-          { status: 400 }
-        );
-      }
-      if (
-        featureToggles.enablePhoneAuth !== undefined &&
-        typeof featureToggles.enablePhoneAuth !== 'boolean'
-      ) {
-        return NextResponse.json(
-          { message: 'enablePhoneAuth must be a boolean' },
-          { status: 400 }
-        );
-      }
-
       const existingToggles = settings.featureToggles ?? {};
+      const isSuper = isSuperAdmin(session.user.role);
+
       const mergedToggles = {
         ...existingToggles,
-        enableBlogs: featureToggles.enableBlogs,
-        enableQuizzes: featureToggles.enableQuizzes,
-        enableCourses: featureToggles.enableCourses,
-        enableAnalytics: featureToggles.enableAnalytics,
+        enableBlogs: featureToggles.enableBlogs ?? existingToggles.enableBlogs ?? true,
+        enableQuizzes: featureToggles.enableQuizzes ?? existingToggles.enableQuizzes ?? true,
+        enableCourses: featureToggles.enableCourses ?? existingToggles.enableCourses ?? true,
+        enableAnalytics: featureToggles.enableAnalytics ?? existingToggles.enableAnalytics ?? true,
         enableClarity: featureToggles.enableClarity ?? existingToggles.enableClarity ?? true,
         enablePhoneAuth: featureToggles.enablePhoneAuth ?? existingToggles.enablePhoneAuth ?? true,
+        enableNotes: featureToggles.enableNotes ?? existingToggles.enableNotes ?? true,
         enableQuizSolutionAnalysis:
-          isSuperAdmin(session.user.role) && featureToggles.enableQuizSolutionAnalysis !== undefined
+          isSuper && featureToggles.enableQuizSolutionAnalysis !== undefined
             ? featureToggles.enableQuizSolutionAnalysis
             : (existingToggles.enableQuizSolutionAnalysis ?? false),
         restrictPublicCourseCreation:
-          isSuperAdmin(session.user.role) && featureToggles.restrictPublicCourseCreation !== undefined
+          isSuper && featureToggles.restrictPublicCourseCreation !== undefined
             ? featureToggles.restrictPublicCourseCreation
             : (existingToggles.restrictPublicCourseCreation ?? false),
         enableEnrollmentManagement:
-          isSuperAdmin(session.user.role) && featureToggles.enableEnrollmentManagement !== undefined
+          isSuper && featureToggles.enableEnrollmentManagement !== undefined
             ? featureToggles.enableEnrollmentManagement
             : (existingToggles.enableEnrollmentManagement ?? true),
+        enablePullToRefresh:
+          isSuper && featureToggles.enablePullToRefresh !== undefined
+            ? featureToggles.enablePullToRefresh
+            : (existingToggles.enablePullToRefresh ?? true),
+        enableGoogleAuthApp:
+          isSuper && featureToggles.enableGoogleAuthApp !== undefined
+            ? featureToggles.enableGoogleAuthApp
+            : (existingToggles.enableGoogleAuthApp ?? true),
+        enableGoogleAuthWeb:
+          isSuper && featureToggles.enableGoogleAuthWeb !== undefined
+            ? featureToggles.enableGoogleAuthWeb
+            : (existingToggles.enableGoogleAuthWeb ?? true),
       };
 
       settings.featureToggles = mergedToggles;
@@ -284,7 +230,8 @@ export async function PATCH(req: NextRequest) {
 
     await settings.save();
 
-    // Revalidate cache after updating settings
+    // Invalidate Redis cache and Next.js path cache after updating settings
+    await deleteCachedData('app:settings');
     revalidatePath('/api/settings');
     revalidatePath('/api/admin/settings');
 
