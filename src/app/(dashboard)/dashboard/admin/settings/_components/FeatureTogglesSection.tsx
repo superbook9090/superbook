@@ -71,10 +71,10 @@ export function FeatureTogglesSection({
       titleKey: 'adminSettings.categoryAuth',
       descKey: 'adminSettings.categoryAuthDesc',
       items: [
-        { key: 'enablePhoneAuth', labelKey: 'adminSettings.enablePhoneAuth', descKey: 'adminSettings.enablePhoneAuthDesc', icon: Phone, iconBg: 'bg-emerald-500/10', iconColor: 'text-emerald-500' },
-        { key: 'enableGoogleAuthWeb', labelKey: 'adminSettings.enableGoogleAuthWeb', descKey: 'adminSettings.enableGoogleAuthWebDesc', icon: Globe, iconBg: 'bg-blue-500/10', iconColor: 'text-blue-500' },
-        { key: 'enableGoogleAuthApp', labelKey: 'adminSettings.enableGoogleAuthApp', descKey: 'adminSettings.enableGoogleAuthAppDesc', icon: Smartphone, iconBg: 'bg-indigo-500/10', iconColor: 'text-indigo-500' },
-        { key: 'restrictPublicCourseCreation', labelKey: 'adminSettings.restrictPublicCourseCreation', descKey: 'adminSettings.restrictPublicCourseCreationDesc', icon: Shield, iconBg: 'bg-purple-500/10', iconColor: 'text-purple-500', isSuperAdminOnly: true },
+        { key: 'enablePhoneAuth', labelKey: 'adminSettings.enablePhoneAuth', descKey: 'adminSettings.enablePhoneAuthDesc', icon: Phone, iconBg: 'bg-[var(--success-light)]', iconColor: 'text-[var(--success)]' },
+        { key: 'enableGoogleAuthWeb', labelKey: 'adminSettings.enableGoogleAuthWeb', descKey: 'adminSettings.enableGoogleAuthWebDesc', icon: Globe, iconBg: 'bg-[var(--info-light)]', iconColor: 'text-[var(--info)]' },
+        { key: 'enableGoogleAuthApp', labelKey: 'adminSettings.enableGoogleAuthApp', descKey: 'adminSettings.enableGoogleAuthAppDesc', icon: Smartphone, iconBg: 'bg-[var(--primary-soft)]', iconColor: 'text-[var(--primary)]' },
+        { key: 'restrictPublicCourseCreation', labelKey: 'adminSettings.restrictPublicCourseCreation', descKey: 'adminSettings.restrictPublicCourseCreationDesc', icon: Shield, iconBg: 'bg-[var(--teacher-soft)]', iconColor: 'text-[var(--teacher-primary)]', isSuperAdminOnly: true },
       ],
     },
     {
@@ -82,8 +82,8 @@ export function FeatureTogglesSection({
       titleKey: 'adminSettings.categoryAnalytics',
       descKey: 'adminSettings.categoryAnalyticsDesc',
       items: [
-        { key: 'enableAnalytics', labelKey: 'adminSettings.enableAnalytics', descKey: 'adminSettings.enableAnalyticsDesc', icon: BarChart3, iconBg: 'bg-teal-500/10', iconColor: 'text-teal-500' },
-        { key: 'enableClarity', labelKey: 'adminSettings.enableClarity', descKey: 'adminSettings.enableClarityDesc', icon: Activity, iconBg: 'bg-amber-500/10', iconColor: 'text-amber-500' },
+        { key: 'enableAnalytics', labelKey: 'adminSettings.enableAnalytics', descKey: 'adminSettings.enableAnalyticsDesc', icon: BarChart3, iconBg: 'bg-[var(--info-light)]', iconColor: 'text-[var(--info)]' },
+        { key: 'enableClarity', labelKey: 'adminSettings.enableClarity', descKey: 'adminSettings.enableClarityDesc', icon: Activity, iconBg: 'bg-[var(--warning-light)]', iconColor: 'text-[var(--warning)]' },
       ],
     },
     {
@@ -91,8 +91,8 @@ export function FeatureTogglesSection({
       titleKey: 'adminSettings.categoryPlatform',
       descKey: 'adminSettings.categoryPlatformDesc',
       items: [
-        { key: 'enablePullToRefresh', labelKey: 'adminSettings.enablePullToRefresh', descKey: 'adminSettings.enablePullToRefreshDesc', icon: RefreshCw, iconBg: 'bg-sky-500/10', iconColor: 'text-sky-500' },
-        { key: 'enableEnrollmentManagement', labelKey: 'adminSettings.enableEnrollmentManagement', descKey: 'adminSettings.enableEnrollmentManagementDesc', icon: Users, iconBg: 'bg-violet-500/10', iconColor: 'text-violet-500', isSuperAdminOnly: true },
+        { key: 'enablePullToRefresh', labelKey: 'adminSettings.enablePullToRefresh', descKey: 'adminSettings.enablePullToRefreshDesc', icon: RefreshCw, iconBg: 'bg-[var(--info-light)]', iconColor: 'text-[var(--info)]' },
+        { key: 'enableEnrollmentManagement', labelKey: 'adminSettings.enableEnrollmentManagement', descKey: 'adminSettings.enableEnrollmentManagementDesc', icon: Users, iconBg: 'bg-[var(--primary-soft)]', iconColor: 'text-[var(--primary)]', isSuperAdminOnly: true },
       ],
     },
     {
@@ -100,7 +100,7 @@ export function FeatureTogglesSection({
       titleKey: 'adminSettings.categoryAi',
       descKey: 'adminSettings.categoryAiDesc',
       items: [
-        { key: 'enableQuizSolutionAnalysis', labelKey: 'adminSettings.enableQuizSolutionAnalysis', descKey: 'adminSettings.enableQuizSolutionAnalysisDesc', icon: Sparkles, iconBg: 'bg-gradient-to-br from-amber-500/20 to-purple-500/20', iconColor: 'text-amber-500', isSuperAdminOnly: true, isAiFeature: true },
+        { key: 'enableQuizSolutionAnalysis', labelKey: 'adminSettings.enableQuizSolutionAnalysis', descKey: 'adminSettings.enableQuizSolutionAnalysisDesc', icon: Sparkles, iconBg: 'bg-[var(--primary-soft)]', iconColor: 'text-[var(--primary)]', isSuperAdminOnly: true, isAiFeature: true },
       ],
     },
   ];
@@ -170,12 +170,12 @@ export function FeatureTogglesSection({
                           {t(item.labelKey)}
                         </span>
                         {item.isSuperAdminOnly && (
-                          <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-purple-500/10 text-purple-600 border border-purple-500/20">
+                          <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-[var(--teacher-soft)] text-[var(--teacher-primary)] border border-[var(--teacher-border)]">
                             {t('adminSettings.superadminOnly')}
                           </span>
                         )}
                         {item.isAiFeature && (
-                          <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-amber-500/10 text-amber-600 border border-amber-500/20 flex items-center gap-1">
+                          <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-[var(--warning-light)] text-[var(--warning)] border border-[var(--warning)]/20 flex items-center gap-1">
                             <Sparkles className="w-2.5 h-2.5" />
                             {t('adminSettings.aiFeature')}
                           </span>

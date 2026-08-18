@@ -192,8 +192,8 @@ export function NotesFilterBar({
                   onClick={() => onSelectTag(isSelected ? null : tag)}
                   className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1 border min-h-[32px] cursor-pointer ${
                     isSelected
-                      ? 'bg-purple-600 text-white border-purple-600 shadow-xs'
-                      : 'bg-[var(--card-solid)] text-[var(--color-foreground)] border-[var(--color-border)] hover:border-purple-400'
+                      ? 'bg-[var(--primary)] text-white border-[var(--primary)] shadow-xs'
+                      : 'bg-[var(--card-solid)] text-[var(--color-foreground)] border-[var(--color-border)] hover:border-[var(--primary)]'
                   }`}
                 >
                   <span>#{tag}</span>

@@ -425,6 +425,24 @@ t('common.english') // "English" or "अंग्रेज़ी"
 
 ## 12. Recent Updates
 
+### Universal Multi-Role Profile Redesign (August 2026)
+
+- **Role-Adaptive Profile Architecture (`Profile.tsx` & `src/features/dashboard/components/profile/`)**:
+  - Re-architected the user profile experience across all roles (`student`, `teacher`, `admin`, `superadmin`) into a modular, responsive command center complying with the `< 250 LOC` file rule.
+  - **Executive Role-Adaptive Hero Banner (`ProfileHero.tsx`)**:
+    - Features role-specific gradient accents and icons (Student: Emerald / GraduationCap; Teacher: Blue / BookOpen; Admin: Indigo / Shield; Superadmin: Amber / ShieldCheck).
+    - Includes live "Online / Active" pulse status indicator, institution/organization badge, and a click-to-copy User ID button with tooltip and visual feedback.
+    - Quick actions right in the hero banner for editing details, jumping to security settings, accessing role dashboard home, and signing out.
+  - **Role-Tailored Status & Telemetry Widgets (`ProfileStats.tsx`)**:
+    - Displays 4 quick metrics customized per role (Learning track for students, teaching credentials & public course publishing status for teachers, authority scope & administrative level for admins).
+  - **Interactive 4-Tab Navigation (`ProfileTabsNav.tsx`)**:
+    - **Account & Identity (`ProfilePersonalInfoTab.tsx`)**: Name inline editing with optimistic updates, email address status, phone SMS OTP linking, organization affiliation (with invite code joining for students/teachers), and role parameters.
+    - **Security & Access (`ProfileSecurityTab.tsx`)**: Expandable Change / Create password form, connected authentication provider details (`Credentials`, `Google OAuth`, `Phone OTP`), and real-time security audit checklist.
+    - **Role & Privileges (`ProfileCapabilitiesTab.tsx` & `capabilitiesConfig.ts`)**: Detailed capabilities breakdown of granted permissions (Course lessons, interactive quizzes, certificates for students; course authoring, video hosting, instructor analytics for teachers; user management, organization governance, platform flags, push broadcasts, content moderation for admins).
+    - **Dashboard Shortcuts (`ProfileShortcutsTab.tsx` & `shortcutsConfig.ts`)**: Interactive quick-access cards to jump directly to role workspaces (Courses, Quizzes, Notes, Progress, Certificates, Favorites, Analytics, Settings, Files).
+  - **Full Bilingual Localization**:
+    - Integrated comprehensive English (`en.ts`) and Hindi (`hi.ts`) translations for all profile sections, role badges, capability descriptions, and shortcut tiles.
+
 ### Reusable Responsive Form Components & Global Integration (August 2026)
 
 - **Reusable Form Controls (`TextField` & `Dropdown`)**:

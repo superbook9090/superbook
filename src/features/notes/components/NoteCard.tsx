@@ -72,11 +72,11 @@ export function NoteCard({
             title={note.isPinned ? t('notes.unpinNote') : t('notes.pinNote')}
             className={`p-2 rounded-lg transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center ${
               note.isPinned
-                ? 'text-amber-500 bg-amber-500/10 hover:bg-amber-500/20'
+                ? 'text-[var(--warning)] bg-[var(--warning-light)] hover:bg-[var(--warning-light)]'
                 : 'text-[var(--color-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-foreground)]'
             }`}
           >
-            <Pin className={`w-4 h-4 ${note.isPinned ? 'fill-amber-500' : ''}`} />
+            <Pin className={`w-4 h-4 ${note.isPinned ? 'fill-[var(--warning)]' : ''}`} />
           </button>
         </div>
 
@@ -153,7 +153,7 @@ export function NoteCard({
               className="p-1.5 rounded-lg text-[var(--color-muted)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted)] transition-colors"
               title={copied ? t('notes.copied') : t('notes.copyContent')}
             >
-              {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+              {copied ? <Check className="w-4 h-4 text-[var(--success)]" /> : <Copy className="w-4 h-4" />}
             </button>
           </div>
 

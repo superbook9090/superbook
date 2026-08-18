@@ -104,8 +104,8 @@ export function NotePreviewModal({
               </span>
 
               {note.isPinned && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                  <Pin className="w-3 h-3 fill-amber-500" />
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--warning-light)] text-[var(--warning)] border border-[var(--warning)]/20">
+                  <Pin className="w-3 h-3 fill-[var(--warning)]" />
                   {t('notes.pinned')}
                 </span>
               )}
@@ -122,12 +122,12 @@ export function NotePreviewModal({
               onClick={() => onTogglePin(note)}
               className={`p-2 rounded-xl transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center ${
                 note.isPinned
-                  ? 'text-amber-500 bg-amber-500/10 hover:bg-amber-500/20'
+                  ? 'text-[var(--warning)] bg-[var(--warning-light)] hover:bg-[var(--warning-light)]'
                   : 'text-[var(--color-muted)] hover:bg-[var(--color-surface-muted)]'
               }`}
               title={note.isPinned ? t('notes.unpinNote') : t('notes.pinNote')}
             >
-              <Pin className={`w-4 h-4 ${note.isPinned ? 'fill-amber-500' : ''}`} />
+              <Pin className={`w-4 h-4 ${note.isPinned ? 'fill-[var(--warning)]' : ''}`} />
             </button>
             <button
               type="button"
@@ -183,7 +183,7 @@ export function NotePreviewModal({
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 px-6 py-4 border-t border-[var(--color-border)] bg-[var(--color-surface-muted)]/40">
           <div className="flex items-center gap-2 flex-wrap">
             <Button onClick={handleCopy} variant="secondary" size="sm">
-              {copied ? <Check className="w-4 h-4 mr-1.5 text-emerald-500" /> : <Copy className="w-4 h-4 mr-1.5" />}
+              {copied ? <Check className="w-4 h-4 mr-1.5 text-[var(--success)]" /> : <Copy className="w-4 h-4 mr-1.5" />}
               <span>{copied ? t('notes.copied') : t('notes.copyContent')}</span>
             </Button>
             <Button onClick={() => handleDownload('md')} variant="secondary" size="sm">

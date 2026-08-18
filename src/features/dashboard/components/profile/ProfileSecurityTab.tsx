@@ -17,17 +17,17 @@ import ChangePasswordForm from '@/features/auth/components/ChangePasswordForm';
 import Button from '@/components/ui/Button';
 import type { AccountInfo } from '@/lib/api/auth';
 
-interface AdminSecurityTabProps {
+interface ProfileSecurityTabProps {
   session: Session;
   accountInfo: AccountInfo | null;
   showPasswordFormDefault?: boolean;
 }
 
-export function AdminSecurityTab({
+export function ProfileSecurityTab({
   session,
   accountInfo,
   showPasswordFormDefault = false,
-}: AdminSecurityTabProps) {
+}: ProfileSecurityTabProps) {
   const { t } = useTranslation();
   const [showPasswordForm, setShowPasswordForm] = useState(showPasswordFormDefault);
 
@@ -44,34 +44,34 @@ export function AdminSecurityTab({
 
   const checklistItems = [
     {
-      title: t('adminProfile.securityCheckStrongPassword') || 'Password Protection Enabled',
+      title: t('profile.securityCheckStrongPassword') || 'Password Protection Enabled',
       status: hasPassword,
-      description: hasPassword ? 'Account secured with credential password' : 'No credential password set',
+      description: hasPassword ? 'Account secured with login password' : 'No credential password set',
     },
     {
-      title: t('adminProfile.securityCheckEmailVerified') || 'Email Address Configured',
+      title: t('profile.securityCheckEmailVerified') || 'Email Address Configured',
       status: hasEmail,
       description: session.user?.email || 'Email address connected',
     },
     {
-      title: t('adminProfile.securityCheckPhoneLinked') || 'Phone Authentication Linked',
+      title: t('profile.securityCheckPhoneLinked') || 'Phone Authentication Linked',
       status: hasPhone,
       description: hasPhone ? session.user?.phone : 'No phone linked for SMS 2FA recovery',
     },
     {
-      title: t('adminProfile.securityCheckRoleEnforced') || 'Role-Based Access Control Enforced',
+      title: t('profile.securityCheckRoleEnforced') || 'Role-Based Access Control Enforced',
       status: true,
-      description: 'Strict middleware and API layer permissions active',
+      description: 'Role-appropriate dashboard and API authorization active',
     },
   ];
 
   return (
     <div className="space-y-6">
       {/* Password Management Card */}
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--card-solid)] shadow-sm overflow-hidden">
-        <div className="p-4 sm:p-6 border-b border-[var(--border)] bg-[var(--color-surface-muted)]/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="card-panel">
+        <div className="card-panel-header bg-[var(--surface-muted)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
+            <div className="p-2 rounded-xl bg-[var(--warning-light)] text-[var(--warning)] shrink-0">
               <Lock className="w-5 h-5" />
             </div>
             <div>
@@ -82,7 +82,7 @@ export function AdminSecurityTab({
               </h2>
               <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)]">
                 {hasPassword
-                  ? t('password.changePasswordDesc') || 'Update your admin account password regularly to protect system access.'
+                  ? t('password.changePasswordDesc') || 'Update your account password regularly to protect your account.'
                   : t('password.setPasswordDesc') || 'Set a password for your account to sign in with email credentials.'}
               </p>
             </div>
@@ -106,7 +106,7 @@ export function AdminSecurityTab({
         </div>
 
         {showPasswordForm && (
-          <div className="p-4 sm:p-6 border-t border-[var(--border)] bg-[var(--card-solid)]">
+          <div className="card-panel-body border-t border-[var(--border)] bg-[var(--card-solid)]">
             <div className="max-w-xl">
               <ChangePasswordForm />
               <div className="mt-4 pt-4 border-t border-[var(--border)] flex justify-end">
@@ -123,20 +123,20 @@ export function AdminSecurityTab({
         )}
       </div>
 
-      {/* Auth Provider & Session Meta */}
+      {/* Auth Provider & Security Checklist */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Provider Overview */}
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--card-solid)] p-4 sm:p-6 shadow-xs">
+        <div className="card-panel p-4 sm:p-6 shadow-xs">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-500 shrink-0">
+            <div className="p-2 rounded-xl bg-[var(--primary-soft)] text-[var(--primary)] shrink-0">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
               <h3 className="text-sm sm:text-base font-semibold text-[var(--color-foreground)]">
-                {t('adminProfile.authProviderTitle') || 'Authentication Provider'}
+                {t('profile.authProviderTitle') || 'Authentication Provider'}
               </h3>
               <p className="text-xs text-[var(--color-muted-foreground)]">
-                {t('adminProfile.authProviderDesc') || 'Method used to authenticate your administrative credentials.'}
+                {t('profile.authProviderDesc') || 'Method used to authenticate your account credentials.'}
               </p>
             </div>
           </div>
@@ -144,7 +144,7 @@ export function AdminSecurityTab({
           <div className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--color-surface-muted)] space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-xs text-[var(--color-muted-foreground)]">Primary Method</span>
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-[var(--primary)]/10 text-[var(--primary)] uppercase">
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-[var(--primary-soft)] text-[var(--primary)] uppercase">
                 {provider}
               </span>
             </div>
@@ -166,17 +166,17 @@ export function AdminSecurityTab({
         </div>
 
         {/* Security Checklist */}
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--card-solid)] p-4 sm:p-6 shadow-xs">
+        <div className="card-panel p-4 sm:p-6 shadow-xs">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500 shrink-0">
+            <div className="p-2 rounded-xl bg-[var(--success-light)] text-[var(--success)] shrink-0">
               <ShieldAlert className="w-5 h-5" />
             </div>
             <div>
               <h3 className="text-sm sm:text-base font-semibold text-[var(--color-foreground)]">
-                {t('adminProfile.securityChecklistTitle') || 'Admin Security Checklist'}
+                {t('profile.securityChecklistTitle') || 'Account Security Checklist'}
               </h3>
               <p className="text-xs text-[var(--color-muted-foreground)]">
-                Key baseline security verifications for this account.
+                Baseline security validations for your account.
               </p>
             </div>
           </div>
@@ -188,9 +188,9 @@ export function AdminSecurityTab({
                 className="flex items-start gap-2.5 p-2.5 rounded-lg border border-[var(--border)] bg-[var(--color-surface-muted)] text-xs"
               >
                 {item.status ? (
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-[var(--success)] shrink-0 mt-0.5" />
                 ) : (
-                  <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                  <AlertTriangle className="w-4 h-4 text-[var(--warning)] shrink-0 mt-0.5" />
                 )}
                 <div className="min-w-0">
                   <p className="font-semibold text-[var(--color-foreground)]">{item.title}</p>

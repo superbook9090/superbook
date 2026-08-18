@@ -1,94 +1,109 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React from 'react';
+import type { Session as NextAuthSession } from 'next-auth';
+import type { Session } from '@/types';
+import { User, GraduationCap, BookOpen, Shield } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
-import ChangePasswordForm from '@/features/auth/components/ChangePasswordForm';
-import LogoutButton from '@/components/ui/LogoutButton';
-import { fetchAccountInfo } from '@/lib/api/auth';
-import Button from '@/components/ui/Button';
-import { Session } from 'next-auth';
-
-import ProfileNameSection from './profile/ProfileNameSection';
-import ProfileEmailSection from './profile/ProfileEmailSection';
-import ProfilePhoneSection from './profile/ProfilePhoneSection';
-import ProfileOrganizationSection from './profile/ProfileOrganizationSection';
+import { normalizeRole, isSuperAdmin } from '@/lib/roles';
 import { PageWrapper, PageHeader } from '@/components/layout';
 
+import { useProfile } from './profile/useProfile';
+import { ProfileHero } from './profile/ProfileHero';
+import { ProfileStats } from './profile/ProfileStats';
+import { ProfileTabsNav } from './profile/ProfileTabsNav';
+import { ProfilePersonalInfoTab } from './profile/ProfilePersonalInfoTab';
+import { ProfileSecurityTab } from './profile/ProfileSecurityTab';
+import { ProfileCapabilitiesTab } from './profile/ProfileCapabilitiesTab';
+import { ProfileShortcutsTab } from './profile/ProfileShortcutsTab';
+
 interface ProfileProps {
-  session: Session;
-  descriptionKey?: 'manageAccount' | 'teacherProfileDesc';
+  session: NextAuthSession | Session;
+  descriptionKey?: 'manageAccount' | 'teacherProfileDesc' | 'studentProfileDesc' | 'adminProfileDesc';
 }
 
-export default function Profile({ session, descriptionKey = 'manageAccount' }: ProfileProps) {
+export default function Profile({ session, descriptionKey }: ProfileProps) {
   const { t } = useTranslation();
-  const [showPasswordForm, setShowPasswordForm] = useState(false);
-  const [hasPassword, setHasPassword] = useState(true);
+  const normalizedSession = session as unknown as Session;
+  const rawRole = normalizedSession?.user?.role;
+  const role = normalizeRole(rawRole);
+  const superAdmin = isSuperAdmin(rawRole);
 
-  useEffect(() => {
-    let cancelled = false;
-    fetchAccountInfo()
-      .then((info) => {
-        if (!cancelled) {
-          setHasPassword(info.hasPassword);
-        }
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const profileState = useProfile(normalizedSession);
+
+  const {
+    accountInfo,
+    activeTab,
+    setActiveTab,
+    showPasswordModal,
+    setShowPasswordModal,
+    copiedId,
+    handleCopyId,
+  } = profileState;
+
+  const pageDescription = (() => {
+    if (descriptionKey) return t(`profile.${descriptionKey}`);
+    if (superAdmin || role === 'admin') return t('profile.adminProfileDesc') || 'Manage administrative credentials and permissions.';
+    if (role === 'teacher') return t('profile.teacherProfileDesc') || 'Manage educator settings and courseware preferences.';
+    return t('profile.studentProfileDesc') || 'Manage your student profile, security settings, and learning preferences.';
+  })();
+
+  const RoleHeaderIcon = (() => {
+    if (superAdmin || role === 'admin') return Shield;
+    if (role === 'teacher') return BookOpen;
+    if (role === 'student') return GraduationCap;
+    return User;
+  })();
 
   return (
-    <PageWrapper>
+    <PageWrapper className="max-w-6xl stack-page">
+      {/* Page Header */}
       <PageHeader
-        title={t('profile.myProfile')}
-        description={t(`profile.${descriptionKey}`)}
+        title={
+          <span className="flex items-center gap-3">
+            <span className="p-2.5 bg-[var(--primary-soft)] text-[var(--primary)] rounded-xl shrink-0 inline-flex shadow-xs">
+              <RoleHeaderIcon className="w-6 h-6" />
+            </span>
+            <span>{t('profile.myProfile') || 'My Profile'}</span>
+          </span>
+        }
+        description={pageDescription}
       />
 
-      <div className="card-surface">
-        <div className="card-body">
-          <div className="space-y-3.5 sm:space-y-4">
-            <ProfileNameSection session={session} />
-            <ProfileEmailSection session={session} />
-            <ProfilePhoneSection session={session} />
-            <ProfileOrganizationSection session={session} />
-            <div>
-              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--color-muted)]">{t('profile.role')}</label>
-              <p className="mt-0.5 text-sm sm:text-base font-medium text-[var(--color-foreground)] capitalize break-words">
-                {session.user?.role}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Hero Banner */}
+      <ProfileHero
+        session={normalizedSession}
+        accountInfo={accountInfo}
+        copiedId={copiedId}
+        onCopyId={handleCopyId}
+        onSelectTab={setActiveTab}
+        onOpenPassword={() => setShowPasswordModal(true)}
+      />
 
-      <div className="card-surface">
-        <div className="card-body border-b border-[var(--color-border)]">
-          <h2 className="text-sm sm:text-base font-semibold text-[var(--color-foreground)]">
-            {hasPassword ? t('password.changePasswordTitle') : (t('password.setPasswordTitle') || 'Create Password')}
-          </h2>
-          <p className="mt-0.5 text-xs text-[var(--color-muted-foreground)]">
-            {hasPassword ? t('password.changePasswordDesc') : (t('password.setPasswordDesc') || 'Set a password for your account to sign in with email/credentials.')}
-          </p>
-        </div>
-        <div className="card-body">
-          {!showPasswordForm ? (
-            <Button
-              onClick={() => setShowPasswordForm(true)}
-              className="min-h-[38px] text-xs sm:text-sm"
-            >
-              {hasPassword ? t('password.changePasswordTitle') : (t('password.setPasswordTitle') || 'Create Password')}
-            </Button>
-          ) : (
-            <div className="space-y-3">
-              <ChangePasswordForm />
-            </div>
-          )}
-        </div>
-      </div>
+      {/* Stats Overview */}
+      <ProfileStats session={normalizedSession} accountInfo={accountInfo} />
 
-      <div className="flex justify-start">
-        <LogoutButton variant="profile" />
+      {/* Tab Navigation */}
+      <ProfileTabsNav activeTab={activeTab} onTabChange={setActiveTab} />
+
+      {/* Tab Content Panels */}
+      <div className="pt-1">
+        {activeTab === 'account' && (
+          <ProfilePersonalInfoTab session={normalizedSession} accountInfo={accountInfo} />
+        )}
+        {activeTab === 'security' && (
+          <ProfileSecurityTab
+            session={normalizedSession}
+            accountInfo={accountInfo}
+            showPasswordFormDefault={showPasswordModal}
+          />
+        )}
+        {activeTab === 'capabilities' && (
+          <ProfileCapabilitiesTab session={normalizedSession} accountInfo={accountInfo} />
+        )}
+        {activeTab === 'shortcuts' && (
+          <ProfileShortcutsTab session={normalizedSession} />
+        )}
       </div>
     </PageWrapper>
   );

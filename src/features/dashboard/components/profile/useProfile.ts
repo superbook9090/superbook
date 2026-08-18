@@ -5,15 +5,15 @@ import type { Session } from '@/types';
 import { fetchAccountInfo, type AccountInfo } from '@/lib/api/auth';
 import { useAlert } from '@/components/ui/AlertContainer';
 import { useTranslation } from '@/hooks/useTranslation';
-import type { AdminProfileTabKey, AdminProfileHookState } from '../_types';
+import type { ProfileTabKey, ProfileHookState } from './types';
 
-export function useAdminProfile(session: Session | null): AdminProfileHookState {
+export function useProfile(session: Session | null): ProfileHookState {
   const { t } = useTranslation();
   const { addAlert } = useAlert();
 
   const [accountInfo, setAccountInfo] = useState<AccountInfo | null>(null);
   const [isLoadingAccount, setIsLoadingAccount] = useState(true);
-  const [activeTab, setActiveTab] = useState<AdminProfileTabKey>('account');
+  const [activeTab, setActiveTab] = useState<ProfileTabKey>('account');
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [copiedId, setCopiedId] = useState(false);
 
@@ -23,7 +23,7 @@ export function useAdminProfile(session: Session | null): AdminProfileHookState 
       const info = await fetchAccountInfo();
       setAccountInfo(info);
     } catch {
-      // Non-blocking fallback
+      // Graceful non-blocking fallback
     } finally {
       setIsLoadingAccount(false);
     }
@@ -50,15 +50,15 @@ export function useAdminProfile(session: Session | null): AdminProfileHookState 
   }, []);
 
   const handleCopyId = useCallback(() => {
-    const adminId = session?.user?.id;
-    if (!adminId) return;
+    const userId = session?.user?.id;
+    if (!userId) return;
 
     if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(adminId).then(() => {
+      navigator.clipboard.writeText(userId).then(() => {
         setCopiedId(true);
         addAlert({
           type: 'info',
-          message: t('adminProfile.idCopied') || 'Admin ID copied to clipboard',
+          message: t('profile.idCopied') || 'User ID copied to clipboard',
         });
         setTimeout(() => setCopiedId(false), 2500);
       }).catch(() => {

@@ -4,7 +4,6 @@ import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
 import { LazyProfile } from '@/lib/lazy';
-
 import { isAdmin } from '@/lib/roles';
 
 export default async function StudentProfilePage() {
@@ -22,5 +21,5 @@ export default async function StudentProfilePage() {
     redirect(ROUTES.teacher.profile);
   }
 
-  return <LazyProfile session={session} />;
+  return <LazyProfile session={session} descriptionKey="studentProfileDesc" />;
 }

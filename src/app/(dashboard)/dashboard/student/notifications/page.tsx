@@ -5,7 +5,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Bell } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
-import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useAlert } from '@/components/ui/AlertContainer';
 import { PageSkeleton } from '@/components/ui/Skeleton';
@@ -37,7 +36,6 @@ export default function StudentNotificationsPage() {
   const { session, status } = useSessionStore();
   const router = useRouter();
   const { t, lang } = useTranslation();
-  const { theme } = useRoleTheme();
   const { addAlert } = useAlert();
 
   const [notifications, setNotifications] = useState<UserNotificationItem[]>([]);
@@ -92,7 +90,7 @@ export default function StudentNotificationsPage() {
       <PageHeader
         title={
           <span className="flex items-center gap-2">
-            <Bell className={`w-7 h-7 ${theme.text}`} aria-hidden />
+            <Bell className="w-7 h-7 text-[var(--primary)]" aria-hidden />
             {t('notifications.inbox.title')}
           </span>
         }

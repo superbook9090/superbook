@@ -201,7 +201,7 @@ export function NoteEditorModal({
               className="w-4 h-4 rounded text-[var(--color-primary)] focus:ring-[var(--color-primary)] cursor-pointer"
             />
             <label htmlFor="pin-note-checkbox" className="text-xs font-medium text-[var(--color-foreground)] flex items-center gap-1 cursor-pointer">
-              <Pin className={`w-3.5 h-3.5 ${isPinned ? 'fill-amber-500 text-amber-500' : 'text-[var(--color-muted)]'}`} />
+              <Pin className={`w-3.5 h-3.5 ${isPinned ? 'fill-[var(--warning)] text-[var(--warning)]' : 'text-[var(--color-muted)]'}`} />
               {t('notes.pinToTop')}
             </label>
           </div>

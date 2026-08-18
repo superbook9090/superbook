@@ -61,7 +61,7 @@ export function PlatformConfigSection({
             {/* Allow Registration */}
             <div className="flex items-center justify-between gap-3 p-3.5 sm:p-4 hover:bg-[var(--color-surface-muted)]/30 transition-colors">
               <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
-                <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-500 shrink-0 shadow-xs">
+                <div className="p-2.5 rounded-xl bg-[var(--success-light)] text-[var(--success)] shrink-0 shadow-xs">
                   <UserPlus className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -116,7 +116,7 @@ export function PlatformConfigSection({
             {/* Default Platform Language */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 sm:p-4 hover:bg-[var(--color-surface-muted)]/30 transition-colors">
               <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
-                <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-500 shrink-0 shadow-xs">
+                <div className="p-2.5 rounded-xl bg-[var(--info-light)] text-[var(--info)] shrink-0 shadow-xs">
                   <Languages className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
                 <div className="min-w-0 flex-1">

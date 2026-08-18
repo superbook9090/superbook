@@ -66,12 +66,12 @@ export function NotesStats({
       </div>
 
       {/* 2. Total Words Card */}
-      <div className="p-4 rounded-2xl bg-[var(--card-solid)] border border-[var(--color-border)] shadow-xs flex flex-col justify-between transition-all hover:border-emerald-500/40">
+      <div className="p-4 rounded-2xl bg-[var(--card-solid)] border border-[var(--color-border)] shadow-xs flex flex-col justify-between transition-all hover:border-[var(--success)]/40">
         <div className="flex items-center justify-between gap-2 mb-2">
           <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-muted)]">
             {t('notes.totalWords')}
           </span>
-          <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+          <div className="p-1.5 rounded-lg bg-[var(--success-light)] text-[var(--success)]">
             <FileText className="w-4 h-4" />
           </div>
         </div>
@@ -91,8 +91,8 @@ export function NotesStats({
         onClick={onTogglePinnedFilter}
         className={`p-4 rounded-2xl border shadow-xs flex flex-col justify-between text-left transition-all cursor-pointer min-h-[44px] ${
           showPinnedOnly
-            ? 'bg-amber-500/10 border-amber-500/40 ring-2 ring-amber-500/20'
-            : 'bg-[var(--card-solid)] border-[var(--color-border)] hover:border-amber-500/40'
+            ? 'bg-[var(--warning-light)] border-[var(--warning)]/40 ring-2 ring-[var(--warning)]/20'
+            : 'bg-[var(--card-solid)] border-[var(--color-border)] hover:border-[var(--warning)]/40'
         }`}
       >
         <div className="flex items-center justify-between gap-2 mb-2 w-full">
@@ -102,18 +102,18 @@ export function NotesStats({
           <div
             className={`p-1.5 rounded-lg transition-colors ${
               showPinnedOnly || pinnedCount > 0
-                ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400'
+                ? 'bg-[var(--warning-light)] text-[var(--warning)]'
                 : 'bg-[var(--color-surface-muted)] text-[var(--color-muted)]'
             }`}
           >
-            <Pin className={`w-4 h-4 ${showPinnedOnly ? 'fill-amber-500' : ''}`} />
+            <Pin className={`w-4 h-4 ${showPinnedOnly ? 'fill-[var(--warning)]' : ''}`} />
           </div>
         </div>
         <div>
           <div className="text-xl sm:text-2xl font-bold text-[var(--color-foreground)] flex items-center gap-2">
             {pinnedCount}
             {showPinnedOnly && (
-              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-500 text-white">
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-[var(--warning)] text-white">
                 Active Filter
               </span>
             )}
@@ -125,19 +125,19 @@ export function NotesStats({
       </button>
 
       {/* 4. Tags & Topics Card */}
-      <div className="p-4 rounded-2xl bg-[var(--card-solid)] border border-[var(--color-border)] shadow-xs flex flex-col justify-between transition-all hover:border-purple-500/40">
+      <div className="p-4 rounded-2xl bg-[var(--card-solid)] border border-[var(--color-border)] shadow-xs flex flex-col justify-between transition-all hover:border-[var(--primary)]/40">
         <div className="flex items-center justify-between gap-2 mb-2">
           <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-muted)]">
             {t('notes.topicsAndTags')}
           </span>
-          <div className="p-1.5 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400">
+          <div className="p-1.5 rounded-lg bg-[var(--primary-soft)] text-[var(--primary)]">
             <Tag className="w-4 h-4" />
           </div>
         </div>
         <div>
           <div className="text-xl sm:text-2xl font-bold text-[var(--color-foreground)] flex items-center gap-1.5">
             {totalTags}
-            <Sparkles className="w-4 h-4 text-purple-500 inline" />
+            <Sparkles className="w-4 h-4 text-[var(--primary)] inline" />
           </div>
           <p className="text-xs text-[var(--color-muted)] mt-1">
             {totalTags === 0 ? 'No tags yet' : `${totalTags} indexed topics`}
