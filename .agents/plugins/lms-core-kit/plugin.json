@@ -1,0 +1,4 @@
+{
+  "name": "lms-core-kit",
+  "description": "Core LMS platform bundle covering backend API endpoints, role-based navigation, Redis caching, and dynamic feature toggles."
+}

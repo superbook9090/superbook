@@ -1,0 +1,7 @@
+{
+  "entries": [
+    { "path": ".agents/plugins/lms-core-kit" },
+    { "path": ".agents/plugins/lms-ui-ux" },
+    { "path": ".agents/plugins/lms-quality-gate" }
+  ]
+}

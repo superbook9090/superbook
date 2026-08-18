@@ -1,0 +1,4 @@
+{
+  "name": "lms-ui-ux",
+  "description": "Mobile-first UI/UX bundle covering component decomposition (<250 LOC), design system tokens, touch accessibility, and English/Hindi localization."
+}

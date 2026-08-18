@@ -106,6 +106,13 @@ There is an existing `.env` file in the repo. Do not print secrets into chat.
 - Firebase Admin: use `getAdminMessaging()` lazily; no top-level init in modules imported at build time.
 - When editing TSX with many JSX tags, prefer careful small edits — bulk writes can corrupt `<>` fragments.
 
+## Customization Rules & Skills
+
+Detailed rules and operational runbooks are maintained in `.agents/`:
+
+- **Skills** (`.agents/skills/`): `feature-toggles`, `lms-role-routing`, `lms-api-endpoint`, `i18n-localization`, `mobile-responsive-ui`
+- **Rules** (`.agents/rules/`): `code-quality.md`, `mobile-and-styling.md`, `backend-api-and-db.md`, `roles-and-security.md`, `i18n-localization.md`
+
 ## Verification
 
 For most code changes:

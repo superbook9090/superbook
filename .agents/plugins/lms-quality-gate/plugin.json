@@ -1,0 +1,4 @@
+{
+  "name": "lms-quality-gate",
+  "description": "Verification, diagnostics, and quality standards for the LMS platform ensuring zero lint errors and consistent build validation."
+}
