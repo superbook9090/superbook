@@ -14,7 +14,6 @@ import { motion } from 'framer-motion';
 
 import { useAlert } from '@/components/ui/AlertContainer';
 import { Loader } from '@/components/ui/Loader';
-import AuthBranding from './AuthBranding';
 import EmailLoginForm from './EmailLoginForm';
 import PhoneLoginForm from './PhoneLoginForm';
 
@@ -82,61 +81,55 @@ function LoginFormInner() {
   }, [router, fetchSession, t, callbackUrl, addAlert]);
 
   return (
-    <div className="flex-1 flex flex-col lg:flex-row">
-      {/* Left Side - Branding (Shared Component) */}
-      <AuthBranding />
+    <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-10 pt-20 sm:pt-24 pb-12 sm:pb-16 min-h-screen relative">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45 }}
+        className="w-full max-w-md my-auto"
+      >
+        {/* Header */}
+        <div className="mb-6 text-center space-y-1.5">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--color-foreground)]">
+            {t('login.welcomeBack')}
+          </h1>
+          <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)]">
+            {t('login.signInCredentials')}
+          </p>
+        </div>
 
-      {/* Right Side - Form */}
-      <div className="flex-1 flex flex-col justify-center py-4 lg:py-12 px-[var(--gutter-x)] lg:px-20 xl:px-24 bg-[var(--color-background)]">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mx-auto w-full max-w-md"
-        >
-          {/* Header */}
-          <div className="mb-[var(--section-gap)] text-center">
-            <h1 className="heading-xl tracking-tight mb-2">
-              {t('login.welcomeBack')}
-            </h1>
-            <p className="text-[var(--color-muted-foreground)]">
-              {t('login.signInCredentials')}
-            </p>
-          </div>
+        {/* Form Card */}
+        <div className="bg-[var(--card-solid)]/95 backdrop-blur-xl rounded-3xl border border-[var(--color-border)] shadow-2xl p-6 sm:p-8 relative overflow-hidden transition-all">
+          {/* Ambient decorative glow inside card */}
+          <div
+            className={`absolute top-0 right-0 w-36 h-36 bg-gradient-to-br ${theme.gradient} opacity-10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none`}
+          />
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="card-body bg-[var(--card-solid)] rounded-2xl border border-[var(--color-border)] shadow-xl relative overflow-hidden"
-          >
-            {/* Background Decorative Blob */}
-            <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${theme.gradient} opacity-5 rounded-full blur-2xl -mr-16 -mt-16`} />
+          {isLoading && (
+            <div className="absolute inset-0 bg-[var(--card-solid)]/85 backdrop-blur-sm flex items-center justify-center z-50 rounded-3xl">
+              <Loader />
+            </div>
+          )}
 
-            {isLoading && (
-              <div className="absolute inset-0 bg-[var(--card-solid)]/80 flex items-center justify-center z-50 rounded-2xl">
-                <Loader />
-              </div>
-            )}
+          {/* Conditionally Render Phone or Email Login Flow */}
+          {isPhoneFlow ? (
+            <PhoneLoginForm
+              theme={theme}
+              callbackUrl={callbackUrl}
+              onBackToEmail={() => setIsPhoneFlow(false)}
+            />
+          ) : (
+            <EmailLoginForm
+              theme={theme}
+              callbackUrl={callbackUrl}
+              onSelectPhoneFlow={() => setIsPhoneFlow(true)}
+            />
+          )}
 
-            {/* Conditionally Render Phone or Email Login Flow */}
-            {isPhoneFlow ? (
-              <PhoneLoginForm
-                theme={theme}
-                callbackUrl={callbackUrl}
-                onBackToEmail={() => setIsPhoneFlow(false)}
-              />
-            ) : (
-              <EmailLoginForm
-                theme={theme}
-                callbackUrl={callbackUrl}
-                onSelectPhoneFlow={() => setIsPhoneFlow(true)}
-              />
-            )}
-
-            {/* Register Link */}
-            {!isPhoneFlow && (
-              <p className="mt-[var(--section-gap)] text-center text-sm text-[var(--color-muted-foreground)]">
+          {/* Register Footer Link */}
+          {!isPhoneFlow && (
+            <div className="mt-6 pt-4 border-t border-[var(--color-border)]/60 text-center">
+              <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)]">
                 {t('login.dontHaveAccount')}{' '}
                 <Link
                   href={
@@ -144,22 +137,28 @@ function LoginFormInner() {
                       ? ROUTES.register
                       : `${ROUTES.register}?callbackUrl=${encodeURIComponent(callbackUrl)}`
                   }
-                  className={`min-h-[44px] inline-flex items-center font-semibold ${theme.text} hover:text-[var(--color-foreground)] transition-colors`}
+                  className="font-bold text-[var(--primary)] hover:text-[var(--primary-hover)] hover:underline transition-colors ml-1"
                 >
                   {t('login.createOne')}
                 </Link>
               </p>
-            )}
-          </motion.div>
-        </motion.div>
-      </div>
+            </div>
+          )}
+        </div>
+      </motion.div>
     </div>
   );
 }
 
 export default function LoginForm() {
   return (
-    <Suspense fallback={<div className="flex-1 flex items-center justify-center"><Loader /></div>}>
+    <Suspense
+      fallback={
+        <div className="flex-1 flex items-center justify-center min-h-screen">
+          <Loader />
+        </div>
+      }
+    >
       <LoginFormInner />
     </Suspense>
   );

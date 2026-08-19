@@ -8,12 +8,14 @@ import { useSessionStore } from '@/store/useSessionStore';
 import { getFirebaseAuth } from '@/lib/notifications/push/firebase';
 import { RecaptchaVerifier, signInWithPhoneNumber, type ConfirmationResult } from 'firebase/auth';
 import { motion } from 'framer-motion';
-import { Phone, ArrowRight, ArrowLeft, GraduationCap, School, Building2 } from 'lucide-react';
+import { Phone, ArrowRight, ArrowLeft, Building2 } from 'lucide-react';
 import { TextField } from '@/components/ui/TextField';
 import { Loader } from '@/components/ui/Loader';
 import { useAlert } from '@/components/ui/AlertContainer';
 import { getDashboardHomePath } from '@/lib/roles';
 import { ROUTES } from '@/constants/routes';
+
+import RoleSelector from './RoleSelector';
 
 interface PhoneRegisterFormProps {
   theme: {
@@ -38,33 +40,6 @@ export default function PhoneRegisterForm({ theme, callbackUrl, onBackToEmail, a
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
   const { addAlert } = useAlert();
   const [isLoading, setIsLoading] = useState(false);
-
-  const roles = [
-    {
-      id: 'student' as const,
-      label: t('register.student'),
-      desc: t('register.studentDesc'),
-      icon: GraduationCap,
-      theme: {
-        colors: { primary: 'var(--student-primary)' },
-        activeBg: 'bg-[var(--student-primary)]/10',
-        text: 'text-[var(--student-primary)]',
-        activeText: 'text-[var(--student-primary)]',
-      }
-    },
-    ...(allowTeacherRegistration ? [{
-      id: 'teacher' as const,
-      label: t('register.teacher'),
-      desc: t('register.teacherDesc'),
-      icon: School,
-      theme: {
-        colors: { primary: 'var(--teacher-primary)' },
-        activeBg: 'bg-[var(--teacher-primary)]/10',
-        text: 'text-[var(--teacher-primary)]',
-        activeText: 'text-[var(--teacher-primary)]',
-      }
-    }] : [])
-  ];
 
   const setupRecaptcha = () => {
     try {
@@ -221,54 +196,19 @@ export default function PhoneRegisterForm({ theme, callbackUrl, onBackToEmail, a
   };
 
   return (
-    <form onSubmit={isOtpSent ? handleVerifyOtp : handleSendOtp} className="flex flex-col gap-4">
+    <form onSubmit={isOtpSent ? handleVerifyOtp : handleSendOtp} className="flex flex-col gap-2.5 sm:gap-3">
       {/* Role Selection */}
-      <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.1 }}
-      >
-        <label className="block text-sm font-semibold text-[var(--color-foreground)] mb-2">
-          {t('register.iWantTo')}
-        </label>
-        <div className={`grid gap-3 ${roles.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
-          {roles.map((r) => {
-            const Icon = r.icon;
-            const isSelected = role === r.id;
-            const rTheme = r.theme;
-            return (
-              <button
-                key={r.id}
-                type="button"
-                onClick={() => setRole(r.id)}
-                className={`flex flex-col items-center p-3 rounded-xl border-2 transition-all ${
-                  isSelected
-                    ? `border-[${rTheme.colors.primary}] ${rTheme.activeBg}`
-                    : 'border-[var(--color-border)] hover:border-[var(--color-muted)] bg-[var(--card-solid)]'
-                }`}
-              >
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-2 ${
-                  isSelected
-                    ? `${rTheme.activeBg} ${rTheme.text}`
-                    : 'bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)]'
-                }`}>
-                  <Icon className="w-5 h-5" />
-                </div>
-                <span className={`font-semibold text-sm ${isSelected ? rTheme.activeText : 'text-[var(--color-foreground)]'}`}>
-                  {r.label}
-                </span>
-                <span className="text-xs text-[var(--color-muted-foreground)] mt-0.5">{r.desc}</span>
-              </button>
-            );
-          })}
-        </div>
-      </motion.div>
+      <RoleSelector
+        role={role}
+        onChange={setRole}
+        allowTeacherRegistration={allowTeacherRegistration}
+      />
 
       {!isOtpSent ? (
         <motion.div
-          initial={{ opacity: 0, x: -20 }}
+          initial={{ opacity: 0, x: -16 }}
           animate={{ opacity: 1, x: 0 }}
-          className="flex flex-col gap-4"
+          className="flex flex-col gap-2.5 sm:gap-3"
         >
           <TextField
             label={t('login.enterPhone') || 'Phone Number'}
@@ -277,7 +217,7 @@ export default function PhoneRegisterForm({ theme, callbackUrl, onBackToEmail, a
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
             placeholder="+919999999999"
-            startIcon={<Phone className="w-5 h-5 text-[var(--color-muted)]" />}
+            startIcon={<Phone className="w-4.5 h-4.5 text-[var(--color-muted)]" />}
             fullWidth
           />
 
@@ -287,36 +227,36 @@ export default function PhoneRegisterForm({ theme, callbackUrl, onBackToEmail, a
             value={inviteCode}
             onChange={(e) => setInviteCode(e.target.value)}
             placeholder={t('register.enterInviteCode') || "Enter invite code (optional)"}
-            startIcon={<Building2 className="w-5 h-5 text-[var(--color-muted)]" />}
+            startIcon={<Building2 className="w-4.5 h-4.5 text-[var(--color-muted)]" />}
             fullWidth
           />
 
-          <div id="recaptcha-container" className="my-2"></div>
+          <div id="recaptcha-container" className="my-1"></div>
 
           <motion.button
             type="submit"
             disabled={isLoading}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className={`w-full flex items-center justify-center py-3.5 px-6 bg-gradient-to-r ${theme.gradient} text-white font-semibold rounded-xl shadow-lg ${theme.shadow} hover:shadow-xl focus:outline-none focus:ring-2 focus:${theme.shadow} disabled:opacity-60 disabled:cursor-not-allowed transition-all`}
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+            className={`w-full flex items-center justify-center py-2.5 sm:py-3 px-5 bg-gradient-to-r ${theme.gradient} text-white font-semibold text-sm sm:text-base rounded-xl shadow-md ${theme.shadow} hover:shadow-lg focus:outline-none focus:ring-2 focus:${theme.shadow} disabled:opacity-60 disabled:cursor-not-allowed transition-all cursor-pointer`}
           >
             {isLoading ? (
               <Loader size="sm" />
             ) : (
               <>
                 {t('login.sendOtp') || 'Send Code'}
-                <ArrowRight className="w-5 h-5 ml-2" />
+                <ArrowRight className="w-4.5 h-4.5 ml-2" />
               </>
             )}
           </motion.button>
         </motion.div>
       ) : (
         <motion.div
-          initial={{ opacity: 0, x: -20 }}
+          initial={{ opacity: 0, x: -16 }}
           animate={{ opacity: 1, x: 0 }}
-          className="flex flex-col gap-4"
+          className="flex flex-col gap-2.5 sm:gap-3"
         >
-          <p className="text-sm text-[var(--color-muted-foreground)]">
+          <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)]">
             {t('login.otpSent', { phone: phoneNumber }) || `Code sent to ${phoneNumber}`}
           </p>
 
@@ -333,16 +273,16 @@ export default function PhoneRegisterForm({ theme, callbackUrl, onBackToEmail, a
           <motion.button
             type="submit"
             disabled={isLoading}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className={`w-full flex items-center justify-center py-3.5 px-6 bg-gradient-to-r ${theme.gradient} text-white font-semibold rounded-xl shadow-lg ${theme.shadow} hover:shadow-xl focus:outline-none focus:ring-2 focus:${theme.shadow} disabled:opacity-60 disabled:cursor-not-allowed transition-all`}
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+            className={`w-full flex items-center justify-center py-2.5 sm:py-3 px-5 bg-gradient-to-r ${theme.gradient} text-white font-semibold text-sm sm:text-base rounded-xl shadow-md ${theme.shadow} hover:shadow-lg focus:outline-none focus:ring-2 focus:${theme.shadow} disabled:opacity-60 disabled:cursor-not-allowed transition-all cursor-pointer`}
           >
             {isLoading ? (
               <Loader size="sm" />
             ) : (
               <>
                 {t('login.verifyOtp') || 'Verify Code'}
-                <ArrowRight className="w-5 h-5 ml-2" />
+                <ArrowRight className="w-4.5 h-4.5 ml-2" />
               </>
             )}
           </motion.button>
@@ -353,9 +293,9 @@ export default function PhoneRegisterForm({ theme, callbackUrl, onBackToEmail, a
       <button
         type="button"
         onClick={handleBack}
-        className="w-full flex items-center justify-center py-2 text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors"
+        className="w-full flex items-center justify-center py-1.5 text-xs sm:text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors cursor-pointer"
       >
-        <ArrowLeft className="w-4 h-4 mr-2" />
+        <ArrowLeft className="w-3.5 h-3.5 mr-1.5" />
         {isOtpSent ? (t('common.back') || 'Back') : (t('login.backToEmail') || 'Back to Email Signup')}
       </button>
     </form>

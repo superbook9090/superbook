@@ -18,14 +18,6 @@ import GoogleAuthButton from './GoogleAuthButton';
 import PhoneAuthButton from './PhoneAuthButton';
 import RoleSelector, { UserRole } from './RoleSelector';
 
-declare global {
-  interface Window {
-    ReactNativeWebView?: {
-      postMessage: (message: string) => void;
-    };
-  }
-}
-
 interface EmailRegisterFormProps {
   theme: {
     gradient: string;
@@ -112,7 +104,7 @@ export default function EmailRegisterForm({ theme, callbackUrl, onSelectPhoneFlo
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-2.5 sm:gap-3">
       {/* Role Selection */}
       <RoleSelector 
         role={formData.role} 
@@ -120,50 +112,51 @@ export default function EmailRegisterForm({ theme, callbackUrl, onSelectPhoneFlo
         allowTeacherRegistration={allowTeacherRegistration} 
       />
 
-      {/* Name Input */}
-      <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.2 }}
-      >
-        <TextField
-          label={t('register.fullName')}
-          type="text"
-          name="name"
-          required
-          value={formData.name}
-          onChange={handleChange}
-          placeholder="John Doe"
-          startIcon={<User className="w-5 h-5 text-[var(--color-muted)]" />}
-          fullWidth
-        />
-      </motion.div>
-
-      {/* Email Input */}
-      <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.3 }}
-      >
-        <TextField
-          label={t('register.emailAddress')}
-          type="email"
-          name="email"
-          required
-          value={formData.email}
-          onChange={handleChange}
-          placeholder="you@example.com"
-          startIcon={<Mail className="w-5 h-5 text-[var(--color-muted)]" />}
-          fullWidth
-        />
-      </motion.div>
-
-      {/* Password Inputs */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {/* Inputs Grid: Row 1 - Full Name & Email */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
         <motion.div
-          initial={{ opacity: 0, x: -20 }}
+          initial={{ opacity: 0, x: -16 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.4 }}
+          transition={{ delay: 0.15 }}
+        >
+          <TextField
+            label={t('register.fullName')}
+            type="text"
+            name="name"
+            required
+            value={formData.name}
+            onChange={handleChange}
+            placeholder="John Doe"
+            startIcon={<User className="w-4.5 h-4.5 text-[var(--color-muted)]" />}
+            fullWidth
+          />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, x: -16 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <TextField
+            label={t('register.emailAddress')}
+            type="email"
+            name="email"
+            required
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="you@example.com"
+            startIcon={<Mail className="w-4.5 h-4.5 text-[var(--color-muted)]" />}
+            fullWidth
+          />
+        </motion.div>
+      </div>
+
+      {/* Inputs Grid: Row 2 - Password & Confirm Password */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
+        <motion.div
+          initial={{ opacity: 0, x: -16 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.25 }}
         >
           <TextField
             label={t('register.password')}
@@ -173,15 +166,15 @@ export default function EmailRegisterForm({ theme, callbackUrl, onSelectPhoneFlo
             value={formData.password}
             onChange={handleChange}
             placeholder={t('register.min8Chars') || "Min 8 characters"}
-            startIcon={<Lock className="w-5 h-5 text-[var(--color-muted)]" />}
+            startIcon={<Lock className="w-4.5 h-4.5 text-[var(--color-muted)]" />}
             fullWidth
           />
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, x: -20 }}
+          initial={{ opacity: 0, x: -16 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.5 }}
+          transition={{ delay: 0.3 }}
         >
           <TextField
             label={t('register.confirmPassword')}
@@ -191,7 +184,7 @@ export default function EmailRegisterForm({ theme, callbackUrl, onSelectPhoneFlo
             value={formData.confirmPassword}
             onChange={handleChange}
             placeholder={t('register.confirmPassword')}
-            startIcon={<Lock className="w-5 h-5 text-[var(--color-muted)]" />}
+            startIcon={<Lock className="w-4.5 h-4.5 text-[var(--color-muted)]" />}
             fullWidth
           />
         </motion.div>
@@ -199,9 +192,9 @@ export default function EmailRegisterForm({ theme, callbackUrl, onSelectPhoneFlo
 
       {/* Invite Code (Optional) */}
       <motion.div
-        initial={{ opacity: 0, x: -20 }}
+        initial={{ opacity: 0, x: -16 }}
         animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.6 }}
+        transition={{ delay: 0.35 }}
       >
         <TextField
           label={`${t('register.inviteCode')} (${t('register.optional')})`}
@@ -210,38 +203,42 @@ export default function EmailRegisterForm({ theme, callbackUrl, onSelectPhoneFlo
           value={formData.inviteCode}
           onChange={handleChange}
           placeholder={t('register.enterInviteCode') || "Enter invite code (optional)"}
-          startIcon={<Building2 className="w-5 h-5 text-[var(--color-muted)]" />}
+          startIcon={<Building2 className="w-4.5 h-4.5 text-[var(--color-muted)]" />}
           fullWidth
         />
       </motion.div>
 
       {/* Submit Button */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.7 }}
+        transition={{ delay: 0.4 }}
       >
         <motion.button
           type="submit"
           disabled={isLoading}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className={`w-full flex items-center justify-center py-3.5 px-6 bg-gradient-to-r ${theme.gradient} text-white font-semibold rounded-xl shadow-lg ${theme.shadow} hover:shadow-xl focus:outline-none focus:ring-2 focus:${theme.shadow} disabled:opacity-60 disabled:cursor-not-allowed transition-all`}
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.99 }}
+          className={`w-full flex items-center justify-center py-2.5 sm:py-3 px-5 bg-gradient-to-r ${theme.gradient} text-white font-semibold text-sm sm:text-base rounded-xl shadow-md ${theme.shadow} hover:shadow-lg focus:outline-none focus:ring-2 focus:${theme.shadow} disabled:opacity-60 disabled:cursor-not-allowed transition-all cursor-pointer`}
         >
           {isLoading ? (
             <Loader size="sm" />
           ) : (
             <>
               {t('register.signUp')}
-              <ArrowRight className="w-5 h-5 ml-2" />
+              <ArrowRight className="w-4.5 h-4.5 ml-2" />
             </>
           )}
         </motion.button>
       </motion.div>
 
       <AuthDivider />
-      <GoogleAuthButton callbackUrl={callbackUrl} />
-      <PhoneAuthButton onClick={onSelectPhoneFlow} />
+
+      {/* Social Auth Buttons Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
+        <GoogleAuthButton callbackUrl={callbackUrl} />
+        <PhoneAuthButton onClick={onSelectPhoneFlow} />
+      </div>
     </form>
   );
 }

@@ -15,6 +15,8 @@ import { roleThemes } from '@/lib/roleTheme';
 import { resetPasswordWithToken } from '@/lib/api/auth';
 import { ApiClientError } from '@/lib/api/http';
 
+import AuthHeader from './AuthHeader';
+
 function ResetPasswordFormInner() {
   const { t } = useTranslation();
   const theme = roleThemes.student;
@@ -60,24 +62,29 @@ function ResetPasswordFormInner() {
 
   if (!token) {
     return (
-      <div className="flex-1 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-[var(--card-solid)]/70 backdrop-blur-md border border-[var(--border)] rounded-3xl shadow-[var(--shadow-md)] card-body text-center">
-          <p className="text-[var(--color-error)] mb-4">{t('password.invalidResetLink')}</p>
-          <Link href={ROUTES.forgotPassword} className="inline-flex min-h-[44px] items-center text-[var(--student-primary)] font-medium hover:underline">
-            {t('password.requestNewLink')}
-          </Link>
+      <div className="w-full min-h-screen flex flex-col overflow-y-auto bg-[var(--color-background)]">
+        <AuthHeader />
+        <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 my-auto">
+          <div className="max-w-md w-full bg-[var(--card-solid)]/70 backdrop-blur-md border border-[var(--border)] rounded-3xl shadow-[var(--shadow-md)] card-body text-center my-auto">
+            <p className="text-[var(--color-error)] mb-4">{t('password.invalidResetLink')}</p>
+            <Link href={ROUTES.forgotPassword} className="inline-flex min-h-[44px] items-center text-[var(--student-primary)] font-medium hover:underline">
+              {t('password.requestNewLink')}
+            </Link>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md bg-[var(--card-solid)]/70 backdrop-blur-md border border-[var(--border)] rounded-3xl shadow-[var(--shadow-md)] card-body"
-      >
+    <div className="w-full min-h-screen flex flex-col overflow-y-auto bg-[var(--color-background)]">
+      <AuthHeader />
+      <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 my-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-md bg-[var(--card-solid)]/70 backdrop-blur-md border border-[var(--border)] rounded-3xl shadow-[var(--shadow-md)] card-body my-auto"
+        >
         <div className="flex justify-center mb-[var(--section-gap)]">
           <PremiumLogo variant="default" size="md" theme="student" />
         </div>
@@ -124,6 +131,7 @@ function ResetPasswordFormInner() {
           </button>
         </form>
       </motion.div>
+      </div>
     </div>
   );
 }
