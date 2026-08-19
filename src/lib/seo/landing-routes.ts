@@ -8,8 +8,13 @@ export type SeoLandingRoute = {
   label: string;
 };
 
-/** Primary keyword landing pages at root paths (highest SEO priority). */
 export const PRIMARY_SEO_LANDINGS: SeoLandingRoute[] = [
+  { path: '/quiz', toolSlug: 'quiz', label: 'Online Quiz' },
+  { path: '/quizzes', toolSlug: 'quizzes', label: 'Free Quizzes' },
+  { path: '/mock-test-maker', toolSlug: 'mock-test-maker', label: 'Mock Test Maker' },
+  { path: '/question-paper-maker', toolSlug: 'question-paper-maker', label: 'Question Paper Maker' },
+  { path: '/ai-course-maker', toolSlug: 'ai-course-maker', label: 'AI Course Maker' },
+  { path: '/quiz-generator-from-pdf', toolSlug: 'quiz-generator-from-pdf', label: 'PDF to Quiz' },
   { path: '/quiz-maker-free', toolSlug: 'quiz-maker-free', label: 'Free Quiz Maker' },
   { path: '/course-maker-free', toolSlug: 'course-maker-free', label: 'Free Course Maker' },
   { path: '/test-series-maker-free', toolSlug: 'test-series-maker-free', label: 'Free Test Series Maker' },

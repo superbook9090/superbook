@@ -411,6 +411,181 @@ export const SEO_TOOLS_DATA: Record<string, SeoToolData> = {
       { question: 'Are previous year patterns covered?', answer: 'Teachers can create quizzes based on CTET syllabus and past paper patterns.' }
     ],
     callToAction: 'Start CTET Practice'
+  },
+  'quiz': {
+    slug: 'quiz',
+    title: 'Online Quiz Platform | Free Quizzes, Tests & Practice — Quiz Do',
+    description: 'Create, take, and share online quizzes for free on Quiz Do. AI-powered quiz generator, auto-grading, mock tests, and practice series for students & teachers.',
+    h1: 'Online Quizzes & Assessments — Create & Practice Instantly',
+    h2: 'The All-in-One Online Quiz Platform for Learning & Testing',
+    intro: 'Welcome to Quiz Do\'s online quiz platform. Whether you are a student looking for practice tests, a teacher creating online assessments, or an institution hosting online exams, Quiz Do delivers instant auto-graded quizzes, AI question generation, and real-time performance analytics.',
+    features: [
+      { title: 'AI & Manual Quiz Builder', description: 'Create quizzes manually or generate MCQs from text using AI in seconds.', iconName: 'Sparkles' },
+      { title: 'Instant Auto-Grading', description: 'Get detailed feedback, instant score reports, and question breakdown immediately upon completion.', iconName: 'Zap' },
+      { title: 'Multi-Device Ready', description: 'Take or host quizzes seamlessly across mobile, tablet, and desktop without installing apps.', iconName: 'Globe' }
+    ],
+    benefits: [
+      { title: 'Free for Students & Educators', description: 'Start creating and practicing online quizzes with no subscription required.' },
+      { title: 'Comprehensive Analytics', description: 'Track accuracy, time per question, and overall progress with actionable insights.' },
+      { title: 'Secure & Reliable Testing', description: 'Set time limits, shuffle questions, and configure pass criteria for anti-cheat exams.' }
+    ],
+    howItWorks: [
+      { step: 1, title: 'Choose or Create', description: 'Select an existing practice quiz or create a custom quiz using our builder or AI.' },
+      { step: 2, title: 'Attempt & Submit', description: 'Answer questions within time limits with interactive, responsive controls.' },
+      { step: 3, title: 'Review Results', description: 'View detailed performance metrics, explanations, and instant auto-grading.' }
+    ],
+    faqs: [
+      { question: 'What is Quiz Do?', answer: 'Quiz Do is an all-in-one online quiz platform designed for students, teachers, and schools to create, take, and share interactive quizzes, mock tests, and practice exams.' },
+      { question: 'Can I create a quiz for free on Quiz Do?', answer: 'Yes! You can create quizzes with multiple question types, share them via links, and get automated grading completely free.' },
+      { question: 'How does the AI quiz generator work?', answer: 'Simply paste your notes, lesson content, or text into the AI generator, and it automatically creates multiple-choice questions with plausible options and explanations.' },
+      { question: 'Can students track their progress over time?', answer: 'Yes, Quiz Do provides student dashboards with progress tracking, score history, and detailed subject analytics.' }
+    ],
+    callToAction: 'Get Started with Free Quizzes'
+  },
+  'quizzes': {
+    slug: 'quizzes',
+    title: 'Free Online Quizzes & Practice Tests | Quiz Do',
+    description: 'Browse and practice free online quizzes, subject tests, and competitive exam question banks on Quiz Do. Auto-graded with instant answers & solutions.',
+    h1: 'Free Online Quizzes & Practice Tests',
+    h2: 'Explore Interactive Quizzes Across Subjects & Competitive Exams',
+    intro: 'Discover thousands of free online quizzes and practice tests on Quiz Do. Practice MCQs across science, math, history, teaching exams, and general knowledge with instant feedback and explanations.',
+    features: [
+      { title: 'Wide Topic Coverage', description: 'Access practice quizzes for school subjects, competitive exams, and general knowledge.', iconName: 'BookOpen' },
+      { title: 'Instant Scoring', description: 'See your score and answer explanations right after completing each quiz.', iconName: 'Zap' },
+      { title: 'Track Your Performance', description: 'Monitor your score history, time management, and accuracy over time.', iconName: 'Brain' }
+    ],
+    benefits: [
+      { title: '100% Free Practice', description: 'Unlimited access to public practice quizzes with zero fees.' },
+      { title: 'Mobile Friendly', description: 'Practice on your smartphone, tablet, or laptop anytime, anywhere.' },
+      { title: 'Detailed Explanations', description: 'Understand every answer with clear, step-by-step solution notes.' }
+    ],
+    howItWorks: [
+      { step: 1, title: 'Pick a Quiz', description: 'Select a subject, topic, or exam category that you want to practice.' },
+      { step: 2, title: 'Answer MCQs', description: 'Solve questions under timed conditions with instant answer selection.' },
+      { step: 3, title: 'Check Results', description: 'Review your total score, correct options, and detailed explanations.' }
+    ],
+    faqs: [
+      { question: 'Are all quizzes on Quiz Do free to attempt?', answer: 'Yes! All public practice quizzes on Quiz Do can be attempted completely free.' },
+      { question: 'Do I need an account to practice quizzes?', answer: 'You can practice guest quizzes instantly, or create a free account to save your progress and scores.' },
+      { question: 'Can teachers publish public quizzes here?', answer: 'Yes, registered teachers can build and publish public quizzes for students nationwide.' }
+    ],
+    callToAction: 'Start Practicing Free Quizzes'
+  },
+  'mock-test-maker': {
+    slug: 'mock-test-maker',
+    title: 'Free Mock Test Maker - Build Online Test Series | Quiz Do',
+    description: 'Create full-length mock tests and exam test series for free. Set section timers, negative marking, and pass cutoffs with Quiz Do Mock Test Maker.',
+    h1: 'Free Mock Test Maker',
+    h2: 'Create Realistic Online Mock Tests & Exam Series',
+    intro: 'Build professional mock tests and timed exam series with Quiz Do. Perfect for coaching centers, educators, and self-study groups needing realistic test conditions, negative marking, and rank analytics.',
+    features: [
+      { title: 'Sectional & Timed Tests', description: 'Configure overall test timers, section limits, and question weighting.', iconName: 'Clock' },
+      { title: 'Negative Marking', description: 'Set customizable negative marks per question to simulate real exam scoring.', iconName: 'Shield' },
+      { title: 'Batch Rank Analytics', description: 'Analyze batch rankings, score distribution, and question difficulty metrics.', iconName: 'Brain' }
+    ],
+    benefits: [
+      { title: 'Simulate Real Exams', description: 'Prepare students with exact exam patterns and timed pressure.' },
+      { title: 'Automated Scorecards', description: 'Generate instant digital report cards and rank lists.' },
+      { title: 'Share via Code or Link', description: 'Invite students to join test series effortlessly.' }
+    ],
+    howItWorks: [
+      { step: 1, title: 'Build Test', description: 'Add your questions, assign section timings, and set marking rules.' },
+      { step: 2, title: 'Publish & Invite', description: 'Share the mock test link or batch code with your students.' },
+      { step: 3, title: 'Evaluate Ranks', description: 'View real-time leaderboard rankings and detailed score analytics.' }
+    ],
+    faqs: [
+      { question: 'Can I set negative marking in mock tests?', answer: 'Yes! You can specify positive marks for correct answers and negative penalties for incorrect ones.' },
+      { question: 'Is the Mock Test Maker free for teachers?', answer: 'Yes, educators can create and host mock tests at no charge.' },
+      { question: 'Can students take mock tests on mobile phones?', answer: 'Yes, all mock tests feature a mobile-responsive interface optimized for screens of all sizes.' }
+    ],
+    callToAction: 'Create a Free Mock Test'
+  },
+  'question-paper-maker': {
+    slug: 'question-paper-maker',
+    title: 'Question Paper Maker - Generate Exams & Test Papers | Quiz Do',
+    description: 'Design and generate custom question papers in minutes. Add MCQs, short answers, and instructions for digital or printable exams.',
+    h1: 'Online Question Paper Maker',
+    h2: 'Design & Generate Professional Test Papers Instantly',
+    intro: 'Simplify exam creation with Quiz Do\'s Question Paper Maker. Create structured test papers with custom sections, marks allocation, and instructions for online testing or printable classroom exams.',
+    features: [
+      { title: 'Custom Marks & Sections', description: 'Organize question papers by section, topic, or difficulty level.', iconName: 'CheckCircle' },
+      { title: 'AI Question Suggestions', description: 'Use AI to generate extra questions and distractors when building papers.', iconName: 'Sparkles' },
+      { title: 'Export & Print Ready', description: 'Generate digital assessments or clean layouts suitable for printing.', iconName: 'Zap' }
+    ],
+    benefits: [
+      { title: 'Save Hours of Drafting', description: 'Reuse existing question banks and assemble test papers fast.' },
+      { title: 'Standardized Formatting', description: 'Clean layout with clear headers, instructions, and scoring scheme.' },
+      { title: 'Flexible Testing Modes', description: 'Use for live online examinations or paper-based tests.' }
+    ],
+    howItWorks: [
+      { step: 1, title: 'Set Blueprint', description: 'Define exam duration, total marks, and section structure.' },
+      { step: 2, title: 'Add Questions', description: 'Select questions from your library or generate new ones with AI.' },
+      { step: 3, title: 'Publish', description: 'Distribute online to students or download for classroom use.' }
+    ],
+    faqs: [
+      { question: 'What question formats are supported in the paper maker?', answer: 'You can include MCQs, true/false questions, short numerical questions, and multi-select items.' },
+      { question: 'Can I randomize question order for different students?', answer: 'Yes, question shuffling can be enabled to prevent cheating during online exams.' },
+      { question: 'Is there a limit on how many papers I can create?', answer: 'No, you can build as many question papers as needed for your classes.' }
+    ],
+    callToAction: 'Build Question Paper Now'
+  },
+  'ai-course-maker': {
+    slug: 'ai-course-maker',
+    title: 'Free AI Course Maker - Generate Courses & Lessons | Quiz Do',
+    description: 'Build full online courses with AI. Generate course outlines, module chapters, lessons, and embedded quizzes automatically in minutes.',
+    h1: 'Free AI Course Maker',
+    h2: 'Turn Topics & Documents into Structured Courses with AI',
+    intro: 'Create comprehensive digital courses effortlessly using Quiz Do\'s AI Course Maker. Input a topic or upload curriculum notes, and our AI will structure complete modules, lesson guides, and end-of-chapter quizzes.',
+    features: [
+      { title: 'Automated Curriculum', description: 'AI generates logical chapter outlines and step-by-step lesson plans.', iconName: 'Brain' },
+      { title: 'Integrated Quizzes', description: 'Automatically attach practice quizzes to every lesson for knowledge checks.', iconName: 'Sparkles' },
+      { title: 'Rich Content Editor', description: 'Refine and customize generated lessons using our full TipTap editor.', iconName: 'Zap' }
+    ],
+    benefits: [
+      { title: 'Launch Courses 10x Faster', description: 'Go from an idea to a fully published course in a fraction of the time.' },
+      { title: 'Structured Learning Flow', description: 'Ensure pedagogical progression with clear modules and milestones.' },
+      { title: 'All-in-One LMS', description: 'Publish courses directly to your students on Quiz Do.' }
+    ],
+    howItWorks: [
+      { step: 1, title: 'Enter Course Topic', description: 'Specify the subject, target audience level, and main goals.' },
+      { step: 2, title: 'AI Generation', description: 'Our AI outlines modules, writes lesson content, and generates quizzes.' },
+      { step: 3, title: 'Edit & Share', description: 'Review lessons, tweak text if needed, and publish for enrollment.' }
+    ],
+    faqs: [
+      { question: 'How does the AI Course Maker generate content?', answer: 'Our AI analyzes your topic or source text to create structured chapters, clear explanations, and assessment quizzes.' },
+      { question: 'Can I customize the AI-generated course content?', answer: 'Yes! You have full editing control over every text block, lesson video, and quiz question.' },
+      { question: 'Is the AI course generator free to try?', answer: 'Yes, Quiz Do provides free AI generations so you can build and publish courses without upfront cost.' }
+    ],
+    callToAction: 'Generate AI Course Now'
+  },
+  'quiz-generator-from-pdf': {
+    slug: 'quiz-generator-from-pdf',
+    title: 'PDF to Quiz Generator - Turn PDFs into MCQs Free | Quiz Do',
+    description: 'Convert PDF files, notes, and textbook chapters into interactive quizzes instantly. Upload PDF text and generate AI quizzes on Quiz Do.',
+    h1: 'PDF to Quiz Generator',
+    h2: 'Convert PDF Documents & Study Notes into Quizzes',
+    intro: 'Stop spending hours manually writing questions from textbooks. Quiz Do\'s PDF to Quiz Generator reads your PDF documents, study guides, and slide decks to extract key concepts and automatically generate MCQs with answers.',
+    features: [
+      { title: 'Smart PDF Parser', description: 'Extracts core educational concepts from long documents and chapters.', iconName: 'Brain' },
+      { title: 'Instant MCQ Creation', description: 'Generates multiple choice questions with plausible distractor choices.', iconName: 'Sparkles' },
+      { title: 'Export & Share', description: 'Share the generated quiz directly with your students via link.', iconName: 'Globe' }
+    ],
+    benefits: [
+      { title: 'Instant Revision Tools', description: 'Turn syllabus PDFs into practice tests right before exams.' },
+      { title: 'Zero Manual Typing', description: 'Eliminate tedious copy-pasting of text and questions.' },
+      { title: 'High Accuracy', description: 'AI extracts questions grounded in your source material.' }
+    ],
+    howItWorks: [
+      { step: 1, title: 'Paste PDF Text', description: 'Paste the text or chapter content from your PDF document.' },
+      { step: 2, title: 'AI Extraction', description: 'AI scans the content and builds relevant multiple choice questions.' },
+      { step: 3, title: 'Publish Quiz', description: 'Review questions, adjust settings, and start testing.' }
+    ],
+    faqs: [
+      { question: 'Can I create a quiz from any textbook PDF?', answer: 'Yes! Simply copy text from your PDF chapter or notes and paste it into the generator.' },
+      { question: 'How many questions can the AI generate from a PDF?', answer: 'You can generate quizzes ranging from 5 to 20+ questions per text extraction.' },
+      { question: 'Is the PDF to Quiz generator free?', answer: 'Yes, Quiz Do offers free access to convert document text into interactive quizzes.' }
+    ],
+    callToAction: 'Convert PDF to Quiz Now'
   }
 };
 

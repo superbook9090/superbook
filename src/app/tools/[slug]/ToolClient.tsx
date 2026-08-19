@@ -35,6 +35,12 @@ const IconMap: Record<string, React.ElementType> = {
 };
 
 const EXPLORE_LINKS = [
+  { slug: 'quiz', path: '/quiz' },
+  { slug: 'quizzes', path: '/quizzes' },
+  { slug: 'mock-test-maker', path: '/mock-test-maker' },
+  { slug: 'question-paper-maker', path: '/question-paper-maker' },
+  { slug: 'ai-course-maker', path: '/ai-course-maker' },
+  { slug: 'quiz-generator-from-pdf', path: '/quiz-generator-from-pdf' },
   { slug: 'quiz-maker-free', path: '/quiz-maker-free' },
   { slug: 'ai-quiz-maker-free', path: '/ai-quiz-generator' },
   { slug: 'mcq-generator-free', path: '/mcq-generator' },
