@@ -16,7 +16,7 @@ interface QuizStatusData {
   name: string;
   value: number;
   color: string;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
 }
 
 interface CustomTooltipProps {

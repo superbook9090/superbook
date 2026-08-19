@@ -8,6 +8,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { useSessionStore } from '@/store/useSessionStore';
 import { listFolderContents } from '@/lib/api/files';
 import { ApiClientError } from '@/lib/api/http';
+import { normalizeRole, isAdmin } from '@/lib/roles';
 import type {
   BreadcrumbItem,
   FileNodeItem,
@@ -26,6 +27,11 @@ export function useAdminFiles() {
   const router = useRouter();
   const { session, status } = useSessionStore();
   const { addAlert } = useAlert();
+
+  const rawRole = session?.user?.role;
+  const userRole = normalizeRole(rawRole);
+  const isAdminUser = isAdmin(rawRole);
+  const isStudent = userRole === 'student';
 
   const [parentId, setParentId] = useState<string | null>(null);
   const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([
@@ -193,6 +199,9 @@ export function useAdminFiles() {
     handleUploadFile: mutations.handleUploadFile,
     handleRename: mutations.handleRename,
     handleDelete: mutations.handleDelete,
+    isAdminUser,
+    isStudent,
+    userRole,
     copyFileLink,
     downloadFile,
   };

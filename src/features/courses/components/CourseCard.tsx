@@ -1,22 +1,22 @@
 'use client';
-import { ROUTES } from '@/constants/routes';
 
 import { useState, memo } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { useTranslation } from '@/hooks/useTranslation';
+import { ROUTES } from '@/constants/routes';
 import {
   BookOpen,
   User,
-  Tag,
   ArrowRight,
   Play,
   RotateCcw,
-  Trash2
+  Trash2,
+  Sparkles,
+  Layers,
 } from 'lucide-react';
 import CourseShareButton from '@/components/courses/CourseShareButton';
-import { Badge } from '@/components/ui/Badge';
 import { Loader } from '@/components/ui/Loader';
 import Tooltip from '@/components/ui/Tooltip';
 import type { Course } from '@/types';
@@ -34,7 +34,6 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
 
-  // Handle both course and enrollment objects
   const isEnrollment = 'course' in course;
   const courseData = isEnrollment ? (course as Enrollment).course : (course as Course);
   const enrollment = isEnrollment ? (course as Enrollment) : null;
@@ -63,99 +62,118 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
     router.push(ROUTES.student.course(courseData._id));
   };
 
+  const isComplete = enrollment?.progress === 100;
+  const isNotStarted = enrollment?.progress === 0;
+
   return (
     <motion.div
-      whileHover={{ y: -3 }}
+      whileHover={{ y: -4 }}
       transition={{ duration: 0.25 }}
-      className="group h-full flex flex-col overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--card-solid)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-shadow duration-300"
+      className="group h-full flex flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card-solid)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-lg)] hover:border-[var(--student-primary)]/40 transition-all duration-300"
     >
-      {/* Thumbnail */}
-      <div className="relative h-36 sm:h-40 overflow-hidden">
-        {(courseData.thumbnail || courseData.thumbnailUrl) ? (
+      {/* Thumbnail Container */}
+      <div className="relative h-40 sm:h-44 w-full overflow-hidden bg-[var(--color-surface-muted)]">
+        {courseData.thumbnail || courseData.thumbnailUrl ? (
           <>
             <Image
               src={courseData.thumbnail || courseData.thumbnailUrl || ''}
               alt={courseData.title}
               fill
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
           </>
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-[var(--primary-soft)] border-b border-[var(--color-border)]">
-            <BookOpen className="w-10 h-10 text-[var(--primary)] opacity-70" />
-          </div>
-        )}
-        
-        {/* Category Badge */}
-        {courseData.category && (
-          <div className="absolute top-3 left-3">
-            <Badge variant="primary" size="sm" icon={<Tag className="w-3 h-3" />}>
-              {courseData.category}
-            </Badge>
-          </div>
-        )}
-
-        {/* Price Badge */}
-        {type === 'available' && (
-          <div className="absolute top-3 right-3">
-            <span className="px-2.5 py-1 bg-white/95 dark:bg-black/80 backdrop-blur-sm rounded-full text-[11px] font-bold uppercase tracking-wider text-[var(--color-foreground)] shadow-sm">
-              {courseData.price === 0 ? t('courses.free') : `$${courseData.price}`}
+          <div className="w-full h-full bg-gradient-to-br from-[var(--student-soft)] via-[var(--student-border)] to-[var(--color-surface-muted)] flex flex-col items-center justify-center p-4">
+            <div className="w-12 h-12 rounded-2xl bg-[var(--student-primary)]/10 text-[var(--student-primary)] flex items-center justify-center mb-1">
+              <BookOpen className="w-6 h-6" />
+            </div>
+            <span className="text-xs font-semibold text-[var(--color-muted-foreground)]">
+              {courseData.category || 'Course'}
             </span>
           </div>
         )}
+
+        {/* Category Badge */}
+        {courseData.category && (
+          <div className="absolute top-3 left-3 flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-black/60 text-white backdrop-blur-md shadow-sm">
+            <Sparkles className="w-3 h-3 text-[var(--color-warning)]" />
+            <span>{courseData.category}</span>
+          </div>
+        )}
+
+        {/* Price or Completion status */}
+        <div className="absolute top-3 right-3">
+          {type === 'available' ? (
+            <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-[var(--student-primary)] text-white shadow-md">
+              {courseData.price === 0 ? t('courses.free') : `₹${courseData.price}`}
+            </span>
+          ) : isComplete ? (
+            <span className="px-3 py-1 rounded-full text-xs font-bold bg-[var(--color-success)] text-white shadow-md">
+              {t('courses.completed')}
+            </span>
+          ) : null}
+        </div>
       </div>
 
       {/* Content */}
-      <div className="p-3.5 sm:p-4 flex-1 flex flex-col">
-        <h3 className="text-sm sm:text-base font-bold text-[var(--color-foreground)] mb-1 line-clamp-1">
-          {courseData.title}
-        </h3>
-        <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] mb-2.5 line-clamp-2 min-h-[32px]">
-          {courseData.description || t('courses.noDescription')}
-        </p>
-
-        <div className="mt-auto space-y-2.5">
-          {/* Instructor */}
-          <div className="flex items-center gap-2 text-xs font-medium text-[var(--color-muted-foreground)]">
-            <div className="gradient-bg w-5 h-5 rounded-md flex items-center justify-center shadow-[var(--shadow-sm)] shrink-0">
-              <User className="w-3 h-3 text-white" />
+      <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
+        <div>
+          <div className="flex items-center justify-between text-xs text-[var(--color-muted-foreground)] mb-2">
+            <div className="flex items-center gap-1.5 font-medium truncate max-w-[70%]">
+              <User className="w-3.5 h-3.5 text-[var(--student-primary)] shrink-0" />
+              <span className="truncate">{courseData.instructor?.name || t('courses.unknown')}</span>
             </div>
-            <span className="truncate">{courseData.instructor?.name || t('courses.unknown')}</span>
+            {'chapterCount' in courseData && courseData.chapterCount ? (
+              <div className="flex items-center gap-1 text-[11px]">
+                <Layers className="w-3 h-3" />
+                <span>{courseData.chapterCount} Ch.</span>
+              </div>
+            ) : null}
           </div>
 
-          {/* Progress (for enrolled courses) */}
+          <h3 className="text-base font-bold text-[var(--color-foreground)] mb-1.5 line-clamp-1 group-hover:text-[var(--student-primary)] transition-colors">
+            {courseData.title}
+          </h3>
+
+          <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] line-clamp-2 mb-4 leading-relaxed">
+            {courseData.description || t('courses.noDescription')}
+          </p>
+        </div>
+
+        {/* Bottom Area: Progress & Actions */}
+        <div className="space-y-3 pt-2">
           {type === 'enrolled' && enrollment && (
-            <div className="p-2.5 bg-[var(--color-surface-muted)] rounded-lg border border-[var(--border)]">
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-muted-foreground)]">{t('courses.progress')}</span>
-                <span className="text-xs font-bold tabular-nums text-[var(--primary)]">{enrollment.progress}%</span>
+            <div className="p-3 bg-[var(--color-surface-muted)] rounded-xl border border-[var(--border)]">
+              <div className="flex items-center justify-between text-xs font-bold mb-1.5">
+                <span className="text-[var(--color-muted-foreground)]">{t('courses.progress')}</span>
+                <span className="text-[var(--student-primary)] tabular-nums">{enrollment.progress}%</span>
               </div>
-              <div className="w-full bg-[var(--color-surface-muted-strong)] rounded-full h-1.5 overflow-hidden">
+              <div className="w-full bg-[var(--border)] rounded-full h-2 overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${enrollment.progress}%` }}
-                  className="gradient-bg h-full rounded-full"
+                  className="h-full rounded-full bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)]"
                 />
               </div>
             </div>
           )}
 
-          {/* Actions */}
-          <div className="flex gap-2 pt-1">
+          <div className="flex items-center gap-2">
             {type === 'available' ? (
               <>
                 <button
                   onClick={handleEnroll}
                   disabled={isLoading}
-                  className="btn-premium flex-1 group/btn min-h-[38px] text-xs sm:text-sm"
+                  className="btn-premium flex-1 group/btn min-h-[42px] text-xs sm:text-sm"
                 >
                   {isLoading ? (
                     <Loader size="sm" />
                   ) : (
                     <>
-                      {t('courses.enrollNow')}
-                      <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
+                      <span>{t('courses.enrollNow')}</span>
+                      <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                     </>
                   )}
                 </button>
@@ -165,11 +183,11 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
               <>
                 <button
                   onClick={handleContinue}
-                  className="btn-premium flex-1 group/btn min-h-[38px] text-xs sm:text-sm"
+                  className="btn-premium flex-1 group/btn min-h-[42px] text-xs sm:text-sm"
                 >
-                  {enrollment?.progress === 0 ? (
+                  {isNotStarted ? (
                     <><Play className="w-3.5 h-3.5 fill-current" /> {t('courses.start')}</>
-                  ) : enrollment?.progress === 100 ? (
+                  ) : isComplete ? (
                     <><RotateCcw className="w-3.5 h-3.5" /> {t('courses.review')}</>
                   ) : (
                     <><ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" /> {t('courses.continue')}</>
@@ -180,7 +198,7 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
                   <button
                     onClick={handleDrop}
                     disabled={isLoading}
-                    className="p-2 min-h-[38px] min-w-[38px] flex items-center justify-center border border-[var(--color-error)]/25 text-[var(--color-error)] rounded-lg hover:bg-[var(--color-error-light)] transition-all disabled:opacity-50"
+                    className="p-2.5 min-h-[42px] min-w-[42px] flex items-center justify-center border border-[var(--color-error)]/25 text-[var(--color-error)] rounded-xl hover:bg-[var(--color-error-light)] transition-all disabled:opacity-50"
                     aria-label={t('courses.dropCourse')}
                   >
                     {isLoading ? <Loader size="sm" /> : <Trash2 className="w-4 h-4" />}

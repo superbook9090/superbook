@@ -10,12 +10,9 @@ import { PageWrapper, PageHeader } from '@/components/layout';
 
 import { useProfile } from './profile/useProfile';
 import { ProfileHero } from './profile/ProfileHero';
-import { ProfileStats } from './profile/ProfileStats';
 import { ProfileTabsNav } from './profile/ProfileTabsNav';
 import { ProfilePersonalInfoTab } from './profile/ProfilePersonalInfoTab';
 import { ProfileSecurityTab } from './profile/ProfileSecurityTab';
-import { ProfileCapabilitiesTab } from './profile/ProfileCapabilitiesTab';
-import { ProfileShortcutsTab } from './profile/ProfileShortcutsTab';
 
 interface ProfileProps {
   session: NextAuthSession | Session;
@@ -35,10 +32,6 @@ export default function Profile({ session, descriptionKey }: ProfileProps) {
     accountInfo,
     activeTab,
     setActiveTab,
-    showPasswordModal,
-    setShowPasswordModal,
-    copiedId,
-    handleCopyId,
   } = profileState;
 
   const pageDescription = (() => {
@@ -56,7 +49,7 @@ export default function Profile({ session, descriptionKey }: ProfileProps) {
   })();
 
   return (
-    <PageWrapper className="max-w-6xl stack-page">
+    <PageWrapper className="w-full stack-page">
       {/* Page Header */}
       <PageHeader
         title={
@@ -74,14 +67,7 @@ export default function Profile({ session, descriptionKey }: ProfileProps) {
       <ProfileHero
         session={normalizedSession}
         accountInfo={accountInfo}
-        copiedId={copiedId}
-        onCopyId={handleCopyId}
-        onSelectTab={setActiveTab}
-        onOpenPassword={() => setShowPasswordModal(true)}
       />
-
-      {/* Stats Overview */}
-      <ProfileStats session={normalizedSession} accountInfo={accountInfo} />
 
       {/* Tab Navigation */}
       <ProfileTabsNav activeTab={activeTab} onTabChange={setActiveTab} />
@@ -95,14 +81,7 @@ export default function Profile({ session, descriptionKey }: ProfileProps) {
           <ProfileSecurityTab
             session={normalizedSession}
             accountInfo={accountInfo}
-            showPasswordFormDefault={showPasswordModal}
           />
-        )}
-        {activeTab === 'capabilities' && (
-          <ProfileCapabilitiesTab session={normalizedSession} accountInfo={accountInfo} />
-        )}
-        {activeTab === 'shortcuts' && (
-          <ProfileShortcutsTab session={normalizedSession} />
         )}
       </div>
     </PageWrapper>

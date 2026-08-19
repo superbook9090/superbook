@@ -1,28 +1,37 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import Image from 'next/image';
 import { createPageMetadata } from '@/lib/seo/metadata';
 import { getSiteUrl } from '@/lib/seo/config';
-import { listPublicCourses, listPublicCourseCategories, buildPublicCoursePath } from '@/lib/courses/public';
+import { listPublicCourses, listPublicCourseCategories } from '@/lib/courses/public';
 import { ROUTES } from '@/constants/routes';
 import MarketingHeader from '@/components/home/MarketingHeader';
 import Footer from '@/components/home/Footer';
 import { ensureFeatureEnabled } from '@/lib/settingsHelpers';
+import PublicCoursesHero from './_components/PublicCoursesHero';
+import PublicCoursesExplorer from './_components/PublicCoursesExplorer';
+import { BookCheck, Award, Flame, Lightbulb, Sparkles, ArrowRight } from 'lucide-react';
 
 export const revalidate = 300;
 
 export const metadata: Metadata = createPageMetadata({
-  title: 'Free Online Courses',
-  description: 'Browse free public courses on Quiz Do. Structured lessons, chapters, quizzes, and progress tracking for students and competitive exam preparation.',
+  title: 'Free Online Courses & Learning Paths',
+  description:
+    'Browse free online courses on Quiz Do with structured chapters, interactive quizzes, progress tracking, and verifiable completion certificates.',
   path: '/courses',
-  keywords: ['free online courses', 'online learning', 'course catalog', 'exam preparation courses'],
+  keywords: [
+    'free online courses',
+    'online learning platform',
+    'quiz based courses',
+    'exam preparation courses',
+    'certificate courses',
+  ],
 });
 
 export default async function PublicCoursesPage() {
   await ensureFeatureEnabled('enableCourses');
 
   const [data, categories] = await Promise.all([
-    listPublicCourses({ page: 1, limit: 24 }),
+    listPublicCourses({ page: 1, limit: 36 }),
     listPublicCourseCategories(),
   ]);
 
@@ -35,8 +44,35 @@ export default async function PublicCoursesPage() {
     ],
   };
 
+  const featureCards = [
+    {
+      icon: BookCheck,
+      title: 'Structured Learning',
+      desc: 'Carefully organized chapters, subtopics, and bite-sized lessons designed for maximum retention.',
+      color: 'from-violet-500/20 to-purple-500/20 text-violet-600',
+    },
+    {
+      icon: Flame,
+      title: 'Interactive Assessments',
+      desc: 'Quizzes embedded directly at every milestone to test understanding before progressing.',
+      color: 'from-amber-500/20 to-orange-500/20 text-amber-600',
+    },
+    {
+      icon: Award,
+      title: 'Verified Certificates',
+      desc: 'Earn verifiable completion certificates to showcase your mastery and skills.',
+      color: 'from-emerald-500/20 to-teal-500/20 text-emerald-600',
+    },
+    {
+      icon: Lightbulb,
+      title: 'Paced & Flexible',
+      desc: 'Learn on any device, track your progress automatically, and never lose your streak.',
+      color: 'from-blue-500/20 to-indigo-500/20 text-blue-600',
+    },
+  ];
+
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen bg-[var(--background)] flex flex-col justify-between">
       <script
         id="jsonld-courses-breadcrumb"
         type="application/ld+json"
@@ -44,94 +80,84 @@ export default async function PublicCoursesPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
       <MarketingHeader />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <header className="mb-10 text-center max-w-3xl mx-auto">
-          <h1 className="text-4xl font-bold text-[var(--color-foreground)] mb-4">Free Online Courses</h1>
-          <p className="text-lg text-[var(--color-muted-foreground)]">
-            Explore public courses with structured lessons, embedded quizzes, and progress tracking.
-            Enroll free to start learning on Quiz Do.
-          </p>
-        </header>
 
-        {categories.length > 0 && (
-          <nav className="flex flex-wrap justify-center gap-2 mb-10" aria-label="Course categories">
-            {categories.map((cat) => (
-              <span
-                key={cat}
-                className="text-sm px-4 py-2 rounded-full bg-[var(--color-surface-muted)] text-[var(--color-foreground)]"
-              >
-                {cat}
-              </span>
-            ))}
-          </nav>
-        )}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex-1 w-full space-y-16">
+        {/* Hero Section */}
+        <PublicCoursesHero totalCourses={data.courses.length} />
 
-        {data.courses.length === 0 ? (
-          <div className="text-center py-16 text-[var(--color-muted-foreground)]">
-            <p className="text-lg mb-4">No public courses yet. Check back soon!</p>
-            <Link href={ROUTES.register} className="text-[var(--color-primary)] font-semibold hover:underline">
-              Create the first course →
-            </Link>
+        {/* Interactive Course Catalog Explorer */}
+        <PublicCoursesExplorer initialCourses={data.courses} categories={categories} />
+
+        {/* Why Learn on Quiz-Do Value Prop Section */}
+        <section className="pt-12 border-t border-[var(--border)]">
+          <div className="text-center max-w-2xl mx-auto mb-10">
+            <span className="text-xs font-black uppercase tracking-widest text-[var(--student-primary)]">
+              Built For Mastery
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-black text-[var(--color-foreground)] mt-2">
+              Why Learn on Quiz-Do?
+            </h2>
+            <p className="text-sm text-[var(--color-muted-foreground)] mt-2">
+              We combine structured curriculum with active retrieval testing so you retain what you study.
+            </p>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {data.courses.map((course) => (
-              <article
-                key={course._id}
-                className="rounded-2xl border border-[var(--border)] bg-[var(--card-solid)] overflow-hidden hover:shadow-md transition-shadow"
-              >
-                {course.thumbnail ? (
-                  <div className="relative h-40 bg-[var(--color-surface-muted)]">
-                    <Image
-                      src={course.thumbnail}
-                      alt={course.title}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                    />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {featureCards.map((card, idx) => {
+              const Icon = card.icon;
+              return (
+                <div
+                  key={idx}
+                  className="p-6 rounded-2xl bg-[var(--card-solid)] border border-[var(--border)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-shadow"
+                >
+                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${card.color} flex items-center justify-center mb-4`}>
+                    <Icon className="w-6 h-6" />
                   </div>
-                ) : (
-                  <div className="h-40 bg-gradient-to-br from-[var(--student-soft)] to-[var(--teacher-soft)] flex items-center justify-center">
-                    <span className="text-4xl font-bold text-[var(--color-primary)] opacity-30">
-                      {course.title.charAt(0)}
-                    </span>
-                  </div>
-                )}
-                <div className="p-5">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-primary)] mb-2">
-                    {course.category}
+                  <h3 className="text-base font-bold text-[var(--color-foreground)] mb-2">
+                    {card.title}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] leading-relaxed">
+                    {card.desc}
                   </p>
-                  <h2 className="text-lg font-bold text-[var(--color-foreground)] mb-2">
-                    <Link href={buildPublicCoursePath(course.slug)} className="hover:text-[var(--color-primary)]">
-                      {course.title}
-                    </Link>
-                  </h2>
-                  <p className="text-sm text-[var(--color-muted-foreground)] line-clamp-2 mb-4">
-                    {course.description}
-                  </p>
-                  <div className="flex items-center justify-between text-xs text-[var(--color-muted-foreground)]">
-                    <span>{course.chapterCount} chapters · {course.lessonCount} lessons</span>
-                    <span>{course.price === 0 ? 'Free' : `₹${course.price}`}</span>
-                  </div>
                 </div>
-              </article>
-            ))}
+              );
+            })}
           </div>
-        )}
+        </section>
 
-        <section className="mt-16 pt-10 border-t border-[var(--border)] text-center">
-          <h2 className="text-2xl font-bold text-[var(--color-foreground)] mb-4">Want to teach?</h2>
-          <p className="text-[var(--color-muted-foreground)] mb-6 max-w-xl mx-auto">
-            Create your own course with chapters, lessons, and quizzes. Publish publicly to reach students through search.
-          </p>
-          <Link
-            href={ROUTES.register}
-            className="inline-flex items-center px-8 py-3 rounded-xl bg-[var(--color-primary)] text-white font-semibold hover:opacity-90 transition-opacity"
-          >
-            Start Teaching Free
-          </Link>
+        {/* High Converting Dual CTA Section */}
+        <section className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-[var(--student-primary)] via-purple-700 to-[var(--teacher-primary)] p-8 sm:p-12 text-white shadow-xl">
+          <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="relative z-10 max-w-3xl mx-auto text-center space-y-6">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-xs font-bold text-white">
+              <Sparkles className="w-4 h-4 text-amber-300" />
+              <span>Start Your Journey Today</span>
+            </div>
+            <h2 className="text-2xl sm:text-4xl font-black tracking-tight leading-tight">
+              Ready to Advance Your Skills or Share Your Knowledge?
+            </h2>
+            <p className="text-sm sm:text-base text-white/80 max-w-xl mx-auto">
+              Join thousands of students learning for free, or publish your own curriculum with interactive quizzes.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+              <Link
+                href={ROUTES.register}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-white text-[var(--student-primary)] font-bold text-sm hover:bg-white/90 shadow-lg transition-all"
+              >
+                <span>Enroll Free as Student</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link
+                href={`${ROUTES.register}?role=teacher`}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-white/15 hover:bg-white/25 text-white font-bold text-sm border border-white/20 backdrop-blur-md transition-all"
+              >
+                <span>Become an Instructor</span>
+              </Link>
+            </div>
+          </div>
         </section>
       </div>
+
       <Footer />
     </main>
   );

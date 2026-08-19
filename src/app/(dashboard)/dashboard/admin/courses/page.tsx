@@ -1,45 +1,36 @@
 'use client';
-import { ROUTES } from '@/constants/routes';
 
-import { useState, useEffect, useCallback } from 'react';
+import { ROUTES } from '@/constants/routes';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import {
-  BookOpen,
-  Calendar,
-  Users,
-  GraduationCap,
-  Edit,
-} from 'lucide-react';
+import { BookOpen, LayoutGrid, Table as TableIcon } from 'lucide-react';
 import { PageSkeleton } from '@/components/ui/Skeleton';
-import { Badge } from '@/components/ui/Badge';
 import { useAlert } from '@/components/ui/AlertContainer';
-import Button from '@/components/ui/Button';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useTranslation } from '@/hooks/useTranslation';
-import { formatDate } from '@/lib/dateUtils';
 import type { Course } from '@/types';
 import { listCoursesAdmin } from '@/lib/api/courses';
 import { ApiClientError } from '@/lib/api/http';
 import DashboardListFilters, { FilterPanel } from '@/components/filters/DashboardListFilters';
 import { buildPublishStatusOptions, type PublishStatusFilter } from '@/components/filters/publishStatusOptions';
 import { isSuperAdmin } from '@/lib/roles';
+import { PageWrapper, PageHeader, ResponsiveGrid, EmptyState } from '@/components/layout';
+import AdminCoursesStats from './_components/AdminCoursesStats';
+import AdminCourseCard from './_components/AdminCourseCard';
+import AdminCoursesTable from './_components/AdminCoursesTable';
 
 export default function AdminCoursesPage() {
   const { session, status } = useSessionStore();
   const router = useRouter();
   const isSuperAdminUser = isSuperAdmin(session?.user?.role);
   const { t } = useTranslation();
+
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<PublishStatusFilter>('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const { addAlert } = useAlert();
-
-  const clearFilters = () => {
-    setSearchQuery('');
-    setFilter('all');
-  };
 
   const fetchCourses = useCallback(async () => {
     try {
@@ -65,171 +56,131 @@ export default function AdminCoursesPage() {
     }
   }, [status, session, router, fetchCourses]);
 
-  const filteredCourses = courses.filter(course => {
-    const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.instructor?.name?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filter === 'all' ||
-      (filter === 'published' && course.isPublished) ||
-      (filter === 'draft' && !course.isPublished);
-    return matchesSearch && matchesFilter;
-  });
+  const filteredCourses = useMemo(() => {
+    return courses.filter((course) => {
+      const q = searchQuery.toLowerCase().trim();
+      const matchesSearch =
+        !q ||
+        course.title.toLowerCase().includes(q) ||
+        (course.instructor?.name && course.instructor.name.toLowerCase().includes(q));
 
-  if (isLoading) {
+      const matchesFilter =
+        filter === 'all' ||
+        (filter === 'published' && course.isPublished) ||
+        (filter === 'draft' && !course.isPublished);
+
+      return matchesSearch && matchesFilter;
+    });
+  }, [courses, searchQuery, filter]);
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setFilter('all');
+  };
+
+  if (isLoading || status === 'loading') {
     return <PageSkeleton />;
   }
 
   return (
-    <div className="stack-page overflow-x-hidden">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center gap-3"
-      >
-        <div className="p-3 bg-[var(--info-light)] rounded-xl">
-          <BookOpen className="w-6 h-6 text-[var(--info)]" />
-        </div>
-        <div>
-          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">{t('admin.allCourses')}</h1>
-          <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">{t('admin.manageCoursesDesc')}</p>
-        </div>
-      </motion.div>
+    <PageWrapper>
+      <PageHeader
+        title={t('admin.allCourses')}
+        description={t('admin.manageCoursesDesc')}
+        actions={
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--border)]">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-2 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+                viewMode === 'grid'
+                  ? 'bg-[var(--card-solid)] text-[var(--color-foreground)] shadow-sm'
+                  : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]'
+              }`}
+              title={t('admin.viewGrid')}
+            >
+              <LayoutGrid className="w-4 h-4" />
+              <span className="hidden sm:inline">{t('admin.viewGrid')}</span>
+            </button>
+            <button
+              onClick={() => setViewMode('table')}
+              className={`p-2 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+                viewMode === 'table'
+                  ? 'bg-[var(--card-solid)] text-[var(--color-foreground)] shadow-sm'
+                  : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]'
+              }`}
+              title={t('admin.viewTable')}
+            >
+              <TableIcon className="w-4 h-4" />
+              <span className="hidden sm:inline">{t('admin.viewTable')}</span>
+            </button>
+          </div>
+        }
+      />
+
+      {/* KPI Stats */}
+      <AdminCoursesStats courses={courses} />
 
       {/* Filters */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-      >
-        <FilterPanel>
-          <DashboardListFilters
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            onClear={clearFilters}
-            searchPlaceholder={t('admin.searchCourses')}
-            segmentedFilter={{
-              value: filter,
-              onChange: (id) => setFilter(id as PublishStatusFilter),
-              neutralValue: 'all',
-              options: buildPublishStatusOptions({
-                all: t('admin.allCourses'),
-                published: t('common.published'),
-                draft: t('common.draft'),
-              }),
-            }}
+      <FilterPanel>
+        <DashboardListFilters
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          onClear={clearFilters}
+          searchPlaceholder={t('admin.searchCourses')}
+          segmentedFilter={{
+            value: filter,
+            onChange: (id) => setFilter(id as PublishStatusFilter),
+            neutralValue: 'all',
+            options: buildPublishStatusOptions({
+              all: t('admin.allCourses'),
+              published: t('common.published'),
+              draft: t('common.draft'),
+            }),
+          }}
+        />
+      </FilterPanel>
+
+      {/* Course List: Grid or Table view */}
+      <div>
+        {courses.length === 0 ? (
+          <EmptyState
+            icon={BookOpen}
+            title={t('admin.noCoursesFound')}
+            description={t('admin.adjustSearch')}
           />
-        </FilterPanel>
-      </motion.div>
-
-      {/* Stats */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="grid grid-cols-1 sm:grid-cols-3 gap-4"
-      >
-        <div className="bg-[var(--card-solid)] rounded-xl p-4 shadow-sm">
-          <p className="text-2xl font-bold text-[var(--info)]">{courses.length}</p>
-          <p className="text-sm text-[var(--color-muted-foreground)]">{t('admin.totalCourses')}</p>
-        </div>
-        <div className="bg-[var(--card-solid)] rounded-xl p-4 shadow-sm">
-          <p className="text-2xl font-bold text-[var(--success)]">{courses.filter(c => c.isPublished).length}</p>
-          <p className="text-sm text-[var(--color-muted-foreground)]">{t('common.published')}</p>
-        </div>
-        <div className="bg-[var(--card-solid)] rounded-xl p-4 shadow-sm">
-          <p className="text-2xl font-bold text-[var(--warning)]">{courses.filter(c => !c.isPublished).length}</p>
-          <p className="text-sm text-[var(--color-muted-foreground)]">{t('common.draft')}</p>
-        </div>
-      </motion.div>
-
-      {/* Courses Grid */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[var(--card-gap)]"
-      >
-        {filteredCourses.length === 0 ? (
-          <div className="col-span-full text-center py-16 bg-[var(--card-solid)] rounded-2xl shadow-sm">
-            <BookOpen className="w-16 h-16 text-[var(--color-muted-foreground)] mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-[var(--color-foreground)] mb-2">{t('admin.noCoursesFound')}</h3>
-            <p className="text-[var(--color-muted-foreground)]">{t('admin.adjustSearch')}</p>
-          </div>
-        ) : (
-          filteredCourses.map((course, index) => (
-            <motion.div
-              key={course._id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 * index }}
-              className="bg-[var(--card-solid)] rounded-2xl shadow-sm hover:shadow-lg transition-shadow overflow-hidden group flex flex-col h-full"
+        ) : filteredCourses.length === 0 ? (
+          <div className="text-center py-20 bg-[var(--card-solid)] border border-dashed border-[var(--border)] rounded-2xl p-8">
+            <BookOpen className="w-12 h-12 text-[var(--muted)] mx-auto mb-4 opacity-30" />
+            <h3 className="heading-md text-[var(--color-foreground)] mb-1">
+              {t('admin.noCoursesFound')}
+            </h3>
+            <p className="text-sm text-[var(--color-muted-foreground)] mb-6">
+              {t('admin.adjustSearch')}
+            </p>
+            <button
+              onClick={clearFilters}
+              className="px-6 py-2.5 bg-[var(--info)] text-white rounded-xl text-xs sm:text-sm font-bold hover:opacity-90 transition-opacity shadow-sm"
             >
-              <div className="p-6 flex flex-col h-full">
-                <div className="flex-grow flex flex-col">
-                  {/* Header */}
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="p-3 rounded-xl bg-gradient-to-br from-[var(--primary)] to-[var(--primary-accent)] text-white">
-                      <GraduationCap className="w-5 h-5" />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={course.isPublished ? 'primary' : 'default'} size="sm">
-                        {course.isPublished ? t('common.published') : t('common.draft')}
-                      </Badge>
-                      {isSuperAdminUser && (
-                        <Badge variant={course.isPrivate ? 'warning' : 'info'} size="sm">
-                          {course.isPrivate ? t('courses.privateCourse') : t('courses.publicCourse')}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Title */}
-                  <h3 className="text-lg font-semibold text-[var(--color-foreground)] mb-2 line-clamp-2 min-h-[3.5rem]">
-                    {course.title}
-                  </h3>
-
-                  {/* Description */}
-                  <p className="text-[var(--color-muted-foreground)] text-sm mb-4 line-clamp-2 min-h-[2.5rem]">
-                    {course.description || t('courses.noDescription')}
-                  </p>
-
-                  {/* Meta */}
-                  <div className="flex flex-col gap-2 mb-4 mt-auto">
-                    <div className="flex items-center text-sm text-[var(--color-muted-foreground)]">
-                      <Users className="w-4 h-4 mr-2" />
-                      {course.instructor?.name || t('admin.unknownInstructor')}
-                    </div>
-                    <div className="flex items-center text-sm text-[var(--color-muted-foreground)]">
-                      <Users className="w-4 h-4 mr-2" />
-                      {t('admin.studentsEnrolled', { count: course.enrolledCount || 0 })}
-                    </div>
-                    <div className="flex items-center text-sm text-[var(--color-muted-foreground)]">
-                      <Calendar className="w-4 h-4 mr-2" />
-                      {formatDate(course.createdAt)}
-                    </div>
-                    <div className="flex items-center text-sm text-[var(--color-muted-foreground)]">
-                      <span className="mr-2">{t('admin.languageLabel')}:</span>
-                      <span className="font-medium">{course.locale === 'hi' ? t('common.hindi') : t('common.english')}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex pt-4 border-t border-[var(--border)] mt-auto">
-                  <Button
-                    onClick={() => router.push(ROUTES.teacher.courseEdit(course._id))}
-                    variant="secondary"
-                    className="flex-grow flex items-center justify-center gap-2"
-                  >
-                    <Edit className="w-4 h-4" />
-                    {t('common.edit')}
-                  </Button>
-                </div>
-              </div>
-            </motion.div>
-          ))
+              {t('common.reset')}
+            </button>
+          </div>
+        ) : viewMode === 'grid' ? (
+          <ResponsiveGrid variant="cards">
+            {filteredCourses.map((course) => (
+              <AdminCourseCard
+                key={course._id}
+                course={course}
+                isSuperAdmin={isSuperAdminUser}
+              />
+            ))}
+          </ResponsiveGrid>
+        ) : (
+          <AdminCoursesTable
+            courses={filteredCourses}
+            isSuperAdmin={isSuperAdminUser}
+          />
         )}
-      </motion.div>
-    </div>
+      </div>
+    </PageWrapper>
   );
 }

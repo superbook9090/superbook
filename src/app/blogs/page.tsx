@@ -15,8 +15,18 @@ export const metadata: Metadata = createPageMetadata({
   keywords: ['education blog', 'exam preparation blog', 'study tips', 'quiz-do blogs'],
 });
 
-export default async function PublicBlogsPage() {
+export default async function PublicBlogsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ page?: string; topic?: string; search?: string; sort?: string; language?: string }>;
+}) {
   await ensureFeatureEnabled('enableBlogs');
+
+  const resolvedParams = searchParams ? await searchParams : {};
+  const page = Number(resolvedParams.page || '1') || 1;
+  const topic = resolvedParams.topic || undefined;
+  const search = resolvedParams.search || undefined;
+  const sort = resolvedParams.sort === 'popular' ? 'popular' : 'latest';
 
   let data: Awaited<ReturnType<typeof listPublicBlogs>> = {
     blogs: [],
@@ -26,7 +36,7 @@ export default async function PublicBlogsPage() {
 
   try {
     [data, topics] = await Promise.all([
-      listPublicBlogs({ page: 1, limit: 12, sort: 'latest' }),
+      listPublicBlogs({ page, limit: 12, topic, search, sort }),
       listPublicBlogTopics(),
     ]);
   } catch (err) {

@@ -1,19 +1,19 @@
-// src/app/(dashboard)/dashboard/teacher/courses/page.tsx
 'use client';
 
 import { ROUTES } from '@/constants/routes';
-import { useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useAlert } from '@/components/ui/AlertContainer';
-import Button from '@/components/ui/Button';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { useTeacherCourses, type Course } from '@/lib/react-query/hooks';
 import { PageWrapper, PageHeader, ResponsiveGrid, EmptyState } from '@/components/layout';
-import { Award, BookOpen, Plus } from 'lucide-react';
+import { BookOpen, Plus } from 'lucide-react';
+import TeacherCoursesStats from './_components/TeacherCoursesStats';
+import TeacherCourseCard from './_components/TeacherCourseCard';
+import TeacherCoursesFilter, { type TeacherStatusFilter } from './_components/TeacherCoursesFilter';
 
 export default function TeacherCoursesPage() {
   const { session, status } = useSessionStore();
@@ -21,7 +21,10 @@ export default function TeacherCoursesPage() {
   const { t } = useTranslation();
   const { addAlert } = useAlert();
 
-  // Get orgId from session
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<TeacherStatusFilter>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+
   const orgId = (session?.user as { organizationId?: string })?.organizationId || 'public';
   const { data: courses = [], isLoading, error } = useTeacherCourses(orgId);
 
@@ -37,6 +40,41 @@ export default function TeacherCoursesPage() {
       addAlert({ type: 'error', message: String(error) });
     }
   }, [error, addAlert]);
+
+  const categories = useMemo(() => {
+    const cats = new Set<string>();
+    courses.forEach((c: Course) => {
+      if (c.category) cats.add(c.category);
+    });
+    return Array.from(cats);
+  }, [courses]);
+
+  const filteredCourses = useMemo(() => {
+    return courses.filter((course: Course) => {
+      const q = searchQuery.toLowerCase().trim();
+      const matchesSearch =
+        !q ||
+        course.title.toLowerCase().includes(q) ||
+        (course.description && course.description.toLowerCase().includes(q));
+
+      const matchesStatus =
+        statusFilter === 'all' ||
+        (statusFilter === 'published' && course.isPublished) ||
+        (statusFilter === 'draft' && !course.isPublished) ||
+        (statusFilter === 'private' && (course as { isPrivate?: boolean }).isPrivate);
+
+      const matchesCategory =
+        selectedCategory === 'All' || course.category === selectedCategory;
+
+      return matchesSearch && matchesStatus && matchesCategory;
+    });
+  }, [courses, searchQuery, statusFilter, selectedCategory]);
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setStatusFilter('all');
+    setSelectedCategory('All');
+  };
 
   if (status === 'loading' || isLoading) {
     return <PageSkeleton />;
@@ -58,12 +96,24 @@ export default function TeacherCoursesPage() {
         }
       />
 
-      {error && (
-        <div className="p-4 rounded-xl bg-[var(--color-error)]/10 text-[var(--color-error)] border border-[var(--color-error)]/20">
-          {String(error)}
-        </div>
+      {/* KPI Stats Overview */}
+      {courses.length > 0 && <TeacherCoursesStats courses={courses} />}
+
+      {/* Search & Filter Toolbar */}
+      {courses.length > 0 && (
+        <TeacherCoursesFilter
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          statusFilter={statusFilter}
+          onStatusChange={setStatusFilter}
+          selectedCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
+          categories={categories}
+          onClear={clearFilters}
+        />
       )}
 
+      {/* Main Course Grid or Empty State */}
       <div>
         {courses.length === 0 ? (
           <EmptyState
@@ -80,72 +130,26 @@ export default function TeacherCoursesPage() {
               </Link>
             }
           />
+        ) : filteredCourses.length === 0 ? (
+          <div className="text-center py-20 bg-[var(--card-solid)] border border-dashed border-[var(--border)] rounded-2xl p-8">
+            <BookOpen className="w-12 h-12 text-[var(--muted)] mx-auto mb-4 opacity-30" />
+            <h3 className="heading-md text-[var(--color-foreground)] mb-1">
+              {t('courses.noCoursesFound')}
+            </h3>
+            <p className="text-sm text-[var(--color-muted-foreground)] mb-6">
+              {t('courses.tryAdjustingFilters')}
+            </p>
+            <button
+              onClick={clearFilters}
+              className="px-6 py-2.5 bg-[var(--teacher-primary)] text-white rounded-xl text-xs sm:text-sm font-bold hover:bg-[var(--teacher-hover)] transition-colors shadow-sm"
+            >
+              {t('common.reset')}
+            </button>
+          </div>
         ) : (
           <ResponsiveGrid variant="dense">
-            {courses.map((course: Course) => (
-              <div
-                key={course._id}
-                className="bg-[var(--card-solid)] rounded-xl border border-[var(--color-border)] shadow-[var(--shadow-sm)] overflow-hidden hover:shadow-[var(--shadow-md)] transition-all flex flex-col"
-              >
-                {course.thumbnail ? (
-                  <div className="relative h-36 sm:h-40 w-full">
-                    <Image
-                      src={course.thumbnail}
-                      alt={course.title}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                ) : (
-                  <div className="w-full h-36 sm:h-40 bg-gradient-to-br from-[var(--teacher-primary)] to-[var(--teacher-accent)] flex items-center justify-center">
-                    <BookOpen className="w-10 h-10 text-white/80" />
-                  </div>
-                )}
-                <div className="card-body flex-1 flex flex-col">
-                  <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${course.isPublished
-                        ? 'bg-[var(--success-light)] text-[var(--success)]'
-                        : 'bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)]'
-                        }`}>
-                        {course.isPublished ? t('teacherCourses.published') : t('teacherCourses.draft')}
-                      </span>
-                      {course.isCompleted && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-[var(--color-info-light)] text-[var(--color-info)]">
-                          <Award className="w-3 h-3" />
-                          {t('teacherCourses.completed')}
-                        </span>
-                      )}
-                      {(course as { isPrivate?: boolean }).isPrivate && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-[var(--color-warning-light)] text-[var(--color-warning)]">
-                          {t('courses.privateCourse')}
-                        </span>
-                      )}
-                    </div>
-                    {course.category && (
-                      <span className="text-xs font-medium text-[var(--color-muted-foreground)]">{course.category}</span>
-                    )}
-                  </div>
-                  <h3 className="text-sm sm:text-base font-bold text-[var(--color-foreground)] mb-1 line-clamp-1">{course.title}</h3>
-                  <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] mb-3 line-clamp-2">{course.description || t('teacherCourses.noDescription')}</p>
-                  <div className="mt-auto flex items-center justify-between text-xs sm:text-sm font-medium text-[var(--color-muted-foreground)]">
-                    <span>{course.enrolledCount || 0} {t('teacherCourses.studentsEnrolled')}</span>
-                    <span className="font-bold text-[var(--color-foreground)]">{course.price > 0 ? `₹${course.price}` : t('teacherCourses.free')}</span>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="mt-3 pt-2.5 border-t border-[var(--border)]">
-                    <Button
-                      onClick={() => router.push(ROUTES.teacher.courseEdit(course._id))}
-                      variant="primary"
-                      fullWidth
-                      className="min-h-[38px] text-xs sm:text-sm"
-                    >
-                      {t('teacherCourses.edit') || 'Edit Course'}
-                    </Button>
-                  </div>
-                </div>
-              </div>
+            {filteredCourses.map((course: Course) => (
+              <TeacherCourseCard key={course._id} course={course} />
             ))}
           </ResponsiveGrid>
         )}

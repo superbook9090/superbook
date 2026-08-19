@@ -1,75 +1,28 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import type { Session } from '@/types';
-import {
-  Lock,
-  KeyRound,
-  ShieldCheck,
-  CheckCircle2,
-  AlertTriangle,
-  Smartphone,
-  Mail,
-  ShieldAlert,
-} from 'lucide-react';
+import { Lock } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import ChangePasswordForm from '@/features/auth/components/ChangePasswordForm';
-import Button from '@/components/ui/Button';
 import type { AccountInfo } from '@/lib/api/auth';
 
 interface ProfileSecurityTabProps {
   session: Session;
-  accountInfo: AccountInfo | null;
-  showPasswordFormDefault?: boolean;
+  accountInfo?: AccountInfo | null;
 }
 
 export function ProfileSecurityTab({
-  session,
   accountInfo,
-  showPasswordFormDefault = false,
 }: ProfileSecurityTabProps) {
   const { t } = useTranslation();
-  const [showPasswordForm, setShowPasswordForm] = useState(showPasswordFormDefault);
-
-  useEffect(() => {
-    if (showPasswordFormDefault) {
-      setShowPasswordForm(true);
-    }
-  }, [showPasswordFormDefault]);
-
   const hasPassword = accountInfo?.hasPassword ?? true;
-  const provider = accountInfo?.provider || 'credentials';
-  const hasPhone = Boolean(session.user?.phone);
-  const hasEmail = Boolean(session.user?.email && !session.user.email.endsWith('@phone.quizdo.com'));
-
-  const checklistItems = [
-    {
-      title: t('profile.securityCheckStrongPassword') || 'Password Protection Enabled',
-      status: hasPassword,
-      description: hasPassword ? 'Account secured with login password' : 'No credential password set',
-    },
-    {
-      title: t('profile.securityCheckEmailVerified') || 'Email Address Configured',
-      status: hasEmail,
-      description: session.user?.email || 'Email address connected',
-    },
-    {
-      title: t('profile.securityCheckPhoneLinked') || 'Phone Authentication Linked',
-      status: hasPhone,
-      description: hasPhone ? session.user?.phone : 'No phone linked for SMS 2FA recovery',
-    },
-    {
-      title: t('profile.securityCheckRoleEnforced') || 'Role-Based Access Control Enforced',
-      status: true,
-      description: 'Role-appropriate dashboard and API authorization active',
-    },
-  ];
 
   return (
     <div className="space-y-6">
       {/* Password Management Card */}
       <div className="card-panel">
-        <div className="card-panel-header bg-[var(--surface-muted)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="card-panel-header bg-[var(--surface-muted)]">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-[var(--warning-light)] text-[var(--warning)] shrink-0">
               <Lock className="w-5 h-5" />
@@ -87,119 +40,11 @@ export function ProfileSecurityTab({
               </p>
             </div>
           </div>
-
-          {!showPasswordForm && (
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setShowPasswordForm(true)}
-              className="shrink-0 flex items-center gap-1.5"
-            >
-              <KeyRound className="w-4 h-4 text-[var(--primary)]" />
-              <span>
-                {hasPassword
-                  ? t('password.changePasswordTitle') || 'Change Password'
-                  : t('password.setPasswordTitle') || 'Create Password'}
-              </span>
-            </Button>
-          )}
         </div>
 
-        {showPasswordForm && (
-          <div className="card-panel-body border-t border-[var(--border)] bg-[var(--card-solid)]">
-            <div className="max-w-xl">
-              <ChangePasswordForm />
-              <div className="mt-4 pt-4 border-t border-[var(--border)] flex justify-end">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowPasswordForm(false)}
-                >
-                  {t('common.cancel') || 'Cancel'}
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Auth Provider & Security Checklist */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Provider Overview */}
-        <div className="card-panel p-4 sm:p-6 shadow-xs">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-xl bg-[var(--primary-soft)] text-[var(--primary)] shrink-0">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="text-sm sm:text-base font-semibold text-[var(--color-foreground)]">
-                {t('profile.authProviderTitle') || 'Authentication Provider'}
-              </h3>
-              <p className="text-xs text-[var(--color-muted-foreground)]">
-                {t('profile.authProviderDesc') || 'Method used to authenticate your account credentials.'}
-              </p>
-            </div>
-          </div>
-
-          <div className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--color-surface-muted)] space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-[var(--color-muted-foreground)]">Primary Method</span>
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-[var(--primary-soft)] text-[var(--primary)] uppercase">
-                {provider}
-              </span>
-            </div>
-            <div className="flex items-center justify-between text-xs text-[var(--color-foreground)] pt-1 border-t border-[var(--border)]">
-              <span className="flex items-center gap-1 text-[var(--color-muted-foreground)]">
-                <Mail className="w-3.5 h-3.5" /> Email
-              </span>
-              <span className="font-medium truncate max-w-[180px]">{session.user?.email}</span>
-            </div>
-            {session.user?.phone && (
-              <div className="flex items-center justify-between text-xs text-[var(--color-foreground)] pt-1 border-t border-[var(--border)]">
-                <span className="flex items-center gap-1 text-[var(--color-muted-foreground)]">
-                  <Smartphone className="w-3.5 h-3.5" /> Phone
-                </span>
-                <span className="font-medium">{session.user.phone}</span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Security Checklist */}
-        <div className="card-panel p-4 sm:p-6 shadow-xs">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-xl bg-[var(--success-light)] text-[var(--success)] shrink-0">
-              <ShieldAlert className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="text-sm sm:text-base font-semibold text-[var(--color-foreground)]">
-                {t('profile.securityChecklistTitle') || 'Account Security Checklist'}
-              </h3>
-              <p className="text-xs text-[var(--color-muted-foreground)]">
-                Baseline security validations for your account.
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-2.5">
-            {checklistItems.map((item, i) => (
-              <div
-                key={i}
-                className="flex items-start gap-2.5 p-2.5 rounded-lg border border-[var(--border)] bg-[var(--color-surface-muted)] text-xs"
-              >
-                {item.status ? (
-                  <CheckCircle2 className="w-4 h-4 text-[var(--success)] shrink-0 mt-0.5" />
-                ) : (
-                  <AlertTriangle className="w-4 h-4 text-[var(--warning)] shrink-0 mt-0.5" />
-                )}
-                <div className="min-w-0">
-                  <p className="font-semibold text-[var(--color-foreground)]">{item.title}</p>
-                  <p className="text-[11px] text-[var(--color-muted-foreground)] truncate">
-                    {item.description}
-                  </p>
-                </div>
-              </div>
-            ))}
+        <div className="card-panel-body bg-[var(--card-solid)]">
+          <div className="max-w-xl">
+            <ChangePasswordForm />
           </div>
         </div>
       </div>

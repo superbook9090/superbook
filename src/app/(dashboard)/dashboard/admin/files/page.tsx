@@ -66,6 +66,7 @@ export default function AdminFilesPage() {
     handleUploadFile,
     handleRename,
     handleDelete,
+    isStudent,
     copyFileLink,
     downloadFile,
   } = useAdminFiles();
@@ -107,7 +108,11 @@ export default function AdminFilesPage() {
             <span>{t('files.title') || 'Files & Documents'}</span>
           </span>
         }
-        description={t('files.description') || 'Upload, manage, organize, and preview system documents.'}
+        description={
+          isStudent
+            ? t('files.studentDescription') || 'Browse, preview, and download study documents and learning resources.'
+            : t('files.description') || 'Upload, manage, organize, and preview system documents.'
+        }
         actions={
           <div className="flex items-center gap-2">
             <Tooltip label={t('analytics.refresh') || 'Refresh'}>
@@ -148,8 +153,8 @@ export default function AdminFilesPage() {
         }
       />
 
-      {/* Executive Summary Stats */}
-      <FilesStats stats={stats} isLoading={isLoading} />
+      {/* Executive Summary Stats (Admins / Staff only) */}
+      {!isStudent && <FilesStats stats={stats} isLoading={isLoading} />}
 
       {/* Breadcrumb Navigation */}
       <FilesBreadcrumbs

@@ -32,29 +32,33 @@ export function FilesEmptyState({
       }
       description={
         isFolderEmpty
-          ? t('files.emptyFolderDesc') || 'Upload a PDF or create a subfolder to get started.'
+          ? canMutate
+            ? t('files.emptyFolderDesc') || 'Upload a PDF or create a subfolder to get started.'
+            : t('files.studentEmptyDesc') || 'No study materials or documents available in this folder yet.'
           : t('files.noFilteredResultsDesc') || 'Try adjusting your search query or filters.'
       }
       action={
-        isFolderEmpty && canMutate ? (
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={onOpenCreateFolder}
-              variant="secondary"
-              className="flex items-center gap-2"
-            >
-              <FolderPlus className="w-4 h-4 text-[var(--color-warning)]" />
-              <span>{t('files.createFolder') || 'New Folder'}</span>
-            </Button>
-            <Button
-              onClick={onOpenUpload}
-              variant="primary"
-              className="flex items-center gap-2"
-            >
-              <UploadCloud className="w-4 h-4" />
-              <span>{t('files.uploadPdf') || 'Upload PDF'}</span>
-            </Button>
-          </div>
+        isFolderEmpty ? (
+          canMutate ? (
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={onOpenCreateFolder}
+                variant="secondary"
+                className="flex items-center gap-2"
+              >
+                <FolderPlus className="w-4 h-4 text-[var(--color-warning)]" />
+                <span>{t('files.createFolder') || 'New Folder'}</span>
+              </Button>
+              <Button
+                onClick={onOpenUpload}
+                variant="primary"
+                className="flex items-center gap-2"
+              >
+                <UploadCloud className="w-4 h-4" />
+                <span>{t('files.uploadPdf') || 'Upload PDF'}</span>
+              </Button>
+            </div>
+          ) : undefined
         ) : (
           <Button onClick={onResetFilters} variant="secondary">
             {t('common.reset') || 'Reset Filters'}

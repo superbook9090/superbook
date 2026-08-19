@@ -40,6 +40,14 @@ export interface Course {
   courseCode?: string | null;
   isPrivate?: boolean;
   slug?: string | null;
+  organizationId?: string | null;
+  organization?: {
+    _id: string;
+    name: string;
+  } | null;
+  chapterCount?: number;
+  lessonCount?: number;
+  isCompleted?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }

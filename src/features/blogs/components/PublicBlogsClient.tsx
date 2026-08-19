@@ -2,35 +2,24 @@
 
 import React, { useTransition, useState, useEffect } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
-import Link from 'next/link';
-import { ROUTES } from '@/constants/routes';
-import BackButton from '@/components/ui/BackButton';
-import DashboardListFilters, { FilterPanel } from '@/components/filters/DashboardListFilters';
+import { BookOpen } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
-import { User } from 'lucide-react';
-
-interface Blog {
-  _id: string;
-  title: string;
-  excerpt: string;
-  topic: string;
-  slug: string;
-  readingTimeMinutes: number;
-  createdAt: string;
-  author?: { _id: string; name: string | null };
-}
-
-interface Pagination {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-}
+import { useSessionStore } from '@/store/useSessionStore';
+import { useAlert } from '@/components/ui/AlertContainer';
+import { useAddFavorite, useRemoveFavorite } from '@/lib/react-query/hooks';
+import { normalizeRole } from '@/lib/roles';
+import type { PublicBlogItem, BlogPagination, BlogLanguageType, BlogSortType } from './types';
+import BlogHeroHeader from './BlogHeroHeader';
+import BlogTopicTabs from './BlogTopicTabs';
+import BlogFeaturedSpotlight from './BlogFeaturedSpotlight';
+import BlogCard from './BlogCard';
+import BlogCardSkeleton from './BlogCardSkeleton';
+import BlogListPagination from './BlogListPagination';
 
 interface PublicBlogsClientProps {
-  blogs: Blog[];
+  blogs: PublicBlogItem[];
   topics: string[];
-  pagination: Pagination;
+  pagination: BlogPagination;
 }
 
 export default function PublicBlogsClient({
@@ -42,168 +31,204 @@ export default function PublicBlogsClient({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { t } = useTranslation();
+  const { addAlert } = useAlert();
   const [isPending, startTransition] = useTransition();
+
+  const { session, favorites } = useSessionStore();
+  const role = session?.user?.role ? normalizeRole(session.user.role) : 'guest';
+  const currentUserId = session?.user?.id;
 
   const currentTopic = searchParams.get('topic') || 'All';
   const currentSearch = searchParams.get('search') || '';
+  const currentLang = (searchParams.get('language') as BlogLanguageType) || 'all';
+  const currentSort = (searchParams.get('sort') as BlogSortType) || 'latest';
 
   const [searchQuery, setSearchQuery] = useState(currentSearch);
+  const [selectedTopic, setSelectedTopic] = useState(currentTopic);
+  const [languageFilter, setLanguageFilter] = useState<BlogLanguageType>(currentLang);
+  const [sort, setSort] = useState<BlogSortType>(currentSort);
 
-  // Sync state with URL search parameters
   useEffect(() => {
     setSearchQuery(currentSearch);
-  }, [currentSearch]);
+    setSelectedTopic(currentTopic);
+    setLanguageFilter(currentLang);
+    setSort(currentSort);
+  }, [currentSearch, currentTopic, currentLang, currentSort]);
 
-  const updateFilters = (newSearch: string, newTopic: string) => {
+  const addFavoriteMutation = useAddFavorite();
+  const removeFavoriteMutation = useRemoveFavorite();
+
+  const applyUrlFilters = (
+    newSearch: string,
+    newTopic: string,
+    newLang: BlogLanguageType,
+    newSort: BlogSortType,
+    newPage = 1
+  ) => {
     const params = new URLSearchParams(searchParams.toString());
-    params.set('page', '1'); // Reset to page 1 on filter change
+    params.set('page', newPage.toString());
 
-    if (newSearch.trim()) {
-      params.set('search', newSearch);
-    } else {
-      params.delete('search');
-    }
+    if (newSearch.trim()) params.set('search', newSearch.trim());
+    else params.delete('search');
 
-    if (newTopic && newTopic !== 'All') {
-      params.set('topic', newTopic);
-    } else {
-      params.delete('topic');
-    }
+    if (newTopic && newTopic !== 'All') params.set('topic', newTopic);
+    else params.delete('topic');
+
+    if (newLang && newLang !== 'all') params.set('language', newLang);
+    else params.delete('language');
+
+    if (newSort && newSort !== 'latest') params.set('sort', newSort);
+    else params.delete('sort');
 
     startTransition(() => {
       router.push(`${pathname}?${params.toString()}`);
     });
   };
 
-  const handleSearchChange = (value: string) => {
-    setSearchQuery(value);
-    updateFilters(value, currentTopic);
+  const handleSearchChange = (val: string) => {
+    setSearchQuery(val);
+    applyUrlFilters(val, selectedTopic, languageFilter, sort);
   };
 
-  const handleTopicChange = (value: string) => {
-    updateFilters(searchQuery, value);
+  const handleTopicChange = (topic: string) => {
+    setSelectedTopic(topic);
+    applyUrlFilters(searchQuery, topic, languageFilter, sort);
   };
 
-  const handleClear = () => {
-    setSearchQuery('');
-    updateFilters('', 'All');
+  const handleLanguageChange = (lang: BlogLanguageType) => {
+    setLanguageFilter(lang);
+    applyUrlFilters(searchQuery, selectedTopic, lang, sort);
   };
 
-  // Convert topics to FilterChipOption format
-  const topicOptions = [
-    { id: 'All', label: t('common.all') || 'All' },
-    ...topics.map((topic) => ({ id: topic, label: topic })),
-  ];
+  const handleSortChange = (newSort: BlogSortType) => {
+    setSort(newSort);
+    applyUrlFilters(searchQuery, selectedTopic, languageFilter, newSort);
+  };
 
-  const chipGroups = [
-    {
-      label: t('blog.topic') || 'Topic',
-      value: currentTopic,
-      onChange: handleTopicChange,
-      options: topicOptions,
-      neutralValue: 'All',
-    },
-  ];
+  const handlePageChange = (newPage: number) => {
+    applyUrlFilters(searchQuery, selectedTopic, languageFilter, sort, newPage);
+  };
+
+  const handleToggleFavorite = async (blogId: string) => {
+    if (role === 'guest') {
+      addAlert({
+        type: 'info',
+        message: t('blog.signInToSave') || 'Please sign in to save articles to your favorites',
+      });
+      return;
+    }
+    const isFavorited = favorites.has(blogId);
+    try {
+      if (isFavorited) {
+        await removeFavoriteMutation.mutateAsync(blogId);
+        addAlert({ type: 'success', message: t('blog.removedSuccess') || 'Removed from favorites' });
+      } else {
+        await addFavoriteMutation.mutateAsync(blogId);
+        addAlert({ type: 'success', message: t('blog.savedSuccess') || 'Added to favorites' });
+      }
+    } catch {
+      addAlert({ type: 'error', message: t('blog.failedUpdateFavorite') || 'Could not update favorite' });
+    }
+  };
+
+  // When browsing first page without active query, spotlight the top featured/trending post
+  const isDefaultView = pagination.page === 1 && !searchQuery && selectedTopic === 'All' && languageFilter === 'all';
+  const spotlightBlog = isDefaultView && blogs.length > 0 ? blogs[0] : null;
+  const gridBlogs = spotlightBlog ? blogs.slice(1) : blogs;
 
   return (
     <div className="stack-page">
-      <div className="flex items-center justify-between">
-        <BackButton
-          href={ROUTES.home}
-          label={t('privacy.backToHome') || 'Back to Home'}
-        />
-      </div>
+      {/* Hero Header with Role-Adaptive Action Banners */}
+      <BlogHeroHeader
+        role={role}
+        userName={session?.user?.name}
+        favoritesCount={favorites.size}
+        totalBlogs={pagination.total}
+      />
 
-      <div className="space-y-3">
-        <h1 className="text-4xl font-bold text-[var(--color-foreground)]">
-          {t('blog.studyResources') || 'Study resources and exam preparation articles'}
-        </h1>
-        <p className="max-w-3xl text-[var(--color-muted-foreground)]">
-          {t('blog.studyResourcesDesc') || 'Search public articles, browse by category, and discover featured explainers designed for organic discovery and sharing.'}
-        </p>
-      </div>
+      {/* Dynamic Topic & Filter Navigation */}
+      <BlogTopicTabs
+        topics={topics}
+        selectedTopic={selectedTopic}
+        onSelectTopic={handleTopicChange}
+        searchQuery={searchQuery}
+        onSearchChange={handleSearchChange}
+        onClearSearch={() => handleSearchChange('')}
+        languageFilter={languageFilter}
+        onLanguageChange={handleLanguageChange}
+        sort={sort}
+        onSortChange={handleSortChange}
+        totalCount={pagination.total}
+      />
 
-      <FilterPanel>
-        <DashboardListFilters
-          searchQuery={searchQuery}
-          onSearchChange={handleSearchChange}
-          onClear={handleClear}
-          searchPlaceholder={t('blog.searchBlogs') || 'Search blogs...'}
-          chipGroups={chipGroups}
-        />
-      </FilterPanel>
-
-      {isPending && (
-        <div className="text-center py-4 text-sm text-[var(--color-muted-foreground)]">
-          Loading...
+      {/* Loading Overlay State */}
+      {isPending ? (
+        <BlogCardSkeleton count={6} />
+      ) : blogs.length === 0 ? (
+        /* Empty State */
+        <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-[var(--border)] bg-[var(--card-solid)] p-10 sm:p-16 text-center shadow-[var(--shadow-sm)]">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--primary)]/10 text-[var(--primary)] mb-4">
+            <BookOpen className="w-8 h-8" />
+          </div>
+          <h3 className="text-xl font-bold text-[var(--color-foreground)]">
+            {t('blog.noBlogsFound') || 'No articles found'}
+          </h3>
+          <p className="mt-1.5 max-w-md text-sm text-[var(--color-muted-foreground)]">
+            {t('blog.tryAdjusting') || 'Try adjusting your search query, topic filter, or language.'}
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              setSearchQuery('');
+              setSelectedTopic('All');
+              setLanguageFilter('all');
+              applyUrlFilters('', 'All', 'all', 'latest');
+            }}
+            className="mt-6 rounded-xl bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition-all"
+          >
+            {t('common.clearFilters') || 'Clear all filters'}
+          </button>
         </div>
-      )}
+      ) : (
+        /* Content Feed */
+        <div className="space-y-8">
+          {/* Spotlight Hero Article on Page 1 Default Feed */}
+          {spotlightBlog && (
+            <BlogFeaturedSpotlight
+              blog={spotlightBlog}
+              role={role}
+              currentUserId={currentUserId}
+              isFavorited={favorites.has(spotlightBlog._id)}
+              onToggleFavorite={handleToggleFavorite}
+            />
+          )}
 
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {blogs.length === 0 ? (
-          <div className="col-span-full text-center py-20 bg-[var(--card-solid)] border border-dashed border-[var(--border)] rounded-2xl">
-            <h3 className="heading-md text-[var(--color-foreground)] mb-1">
-              {t('blog.noBlogsFound') || 'No blogs found'}
-            </h3>
-            <p className="text-sm text-[var(--color-muted-foreground)] mb-6">
-              {t('courses.tryAdjustingFilters') || 'Try adjusting your search or category filters.'}
-            </p>
-          </div>
-        ) : (
-          blogs.map((blog) => (
-            <article key={blog._id} className="rounded-xl border border-[var(--border)] bg-[var(--card-solid)] p-5 flex flex-col justify-between hover:shadow-md transition-shadow">
-              <div>
-                <div className="mb-3 flex items-center justify-between text-xs text-[var(--color-muted-foreground)]">
-                  <span className="font-semibold px-2.5 py-0.5 bg-[var(--color-surface-muted)] rounded-full">{blog.topic}</span>
-                  <span>{blog.readingTimeMinutes} {t('quiz.min') || 'min'} read</span>
-                </div>
-                <h2 className="text-xl font-bold text-[var(--color-foreground)] line-clamp-2">{blog.title}</h2>
-                <p className="mt-3 text-sm text-[var(--color-muted-foreground)] line-clamp-3">{blog.excerpt}</p>
-              </div>
-              <div className="mt-6 pt-4 border-t border-[var(--border)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-[var(--color-muted-foreground)]">
-                <div className="flex items-center justify-between w-full sm:w-auto sm:justify-start gap-4">
-                  {blog.author?.name && (
-                    <span className="flex items-center gap-1 font-semibold text-[var(--color-foreground)]">
-                      <User className="w-3.5 h-3.5 text-[var(--color-muted)]" />
-                      {blog.author.name}
-                    </span>
-                  )}
-                  <span>
-                    {new Date(blog.createdAt).toLocaleDateString('en-IN')}
-                  </span>
-                </div>
-                <Link href={ROUTES.blog(blog.slug)} className="text-sm font-semibold text-[var(--color-primary)] hover:underline shrink-0">
-                  {t('favorites.readArticle') || 'Read Article'}
-                </Link>
-              </div>
-            </article>
-          ))
-        )}
-      </div>
+          {/* Grid of Articles */}
+          {gridBlogs.length > 0 && (
+            <div className="grid gap-5 sm:gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {gridBlogs.map((blog) => (
+                <BlogCard
+                  key={blog._id}
+                  blog={blog}
+                  role={role}
+                  currentUserId={currentUserId}
+                  isFavorited={favorites.has(blog._id)}
+                  onToggleFavorite={handleToggleFavorite}
+                />
+              ))}
+            </div>
+          )}
 
-      {pagination.totalPages > 1 && (
-        <div className="flex items-center justify-between mt-8 pt-4 border-t border-[var(--border)]">
-          <span className="text-sm text-[var(--color-muted-foreground)]">
-            {t('common.pageOf') ? `${t('common.page')} ${pagination.page} ${t('common.of') || 'of'} ${pagination.totalPages}` : `Page ${pagination.page} of ${pagination.totalPages}`}
-          </span>
-          <div className="flex gap-2">
-            {pagination.page > 1 && (
-              <Link
-                href={`/blogs?page=${pagination.page - 1}${currentTopic !== 'All' ? `&topic=${encodeURIComponent(currentTopic)}` : ''}${currentSearch ? `&search=${encodeURIComponent(currentSearch)}` : ''}`}
-                className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted)] transition-colors"
-              >
-                {t('common.previous') || 'Previous'}
-              </Link>
-            )}
-            {pagination.page < pagination.totalPages && (
-              <Link
-                href={`/blogs?page=${pagination.page + 1}${currentTopic !== 'All' ? `&topic=${encodeURIComponent(currentTopic)}` : ''}${currentSearch ? `&search=${encodeURIComponent(currentSearch)}` : ''}`}
-                className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted)] transition-colors"
-              >
-                {t('common.next') || 'Next'}
-              </Link>
-            )}
-          </div>
+          {/* Pagination Controls */}
+          {pagination.totalPages > 1 && (
+            <div className="pt-4 border-t border-[var(--border)]">
+              <BlogListPagination
+                page={pagination.page}
+                pagination={pagination}
+                onPageChange={handlePageChange}
+              />
+            </div>
+          )}
         </div>
       )}
     </div>

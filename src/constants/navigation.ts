@@ -54,6 +54,7 @@ export const TEACHER_NAV: DashboardNavItem[] = [
   { nameKey: 'common.blogs', href: ROUTES.teacher.blogs, icon: 'Newspaper', feature: 'enableBlogs' },
   { nameKey: 'common.notes', href: ROUTES.teacher.notes, icon: 'Notebook', feature: 'enableNotes' },
   { nameKey: 'common.analytics', href: ROUTES.teacher.analytics, icon: 'BarChart3', feature: 'enableAnalytics' },
+  { nameKey: 'common.progress', href: ROUTES.teacher.progress, icon: 'TrendingUp' },
   { nameKey: 'common.profile', href: ROUTES.teacher.profile, icon: 'User' },
   { nameKey: 'contact.title', href: ROUTES.contact, icon: 'Mail' },
 ];
@@ -67,6 +68,7 @@ export const ADMIN_NAV: DashboardNavItem[] = [
   { nameKey: 'common.files', href: ROUTES.admin.files, icon: 'Folder', superadminOnly: true },
   { nameKey: 'common.notes', href: ROUTES.admin.notes, icon: 'Notebook', feature: 'enableNotes' },
   { nameKey: 'common.analytics', href: ROUTES.admin.analytics, icon: 'BarChart3', feature: 'enableAnalytics' },
+  { nameKey: 'common.progress', href: ROUTES.admin.progress, icon: 'TrendingUp' },
   { nameKey: 'common.notifications', href: ROUTES.admin.notifications, icon: 'Bell', superadminOnly: true },
   { nameKey: 'common.settings', href: ROUTES.admin.settings, icon: 'User' },
   { nameKey: 'common.profile', href: ROUTES.admin.profile, icon: 'User' },

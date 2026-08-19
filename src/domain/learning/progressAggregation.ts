@@ -3,6 +3,9 @@ import Enrollment from '@/models/Enrollment';
 import QuizAttempt from '@/models/QuizAttempt';
 import Quiz from '@/models/Quiz';
 
+export { aggregateTeacherProgress } from './teacherProgressAggregation';
+export { aggregateAdminProgress } from './adminProgressAggregation';
+
 export async function aggregateStudentProgress(
   studentId: string,
   opts: { courseId?: string | null; skip: number; limit: number }
@@ -19,12 +22,22 @@ export async function aggregateStudentProgress(
     .lean();
 
   if (enrollments.length === 0) {
-    return { rows: [], overall: { totalCourses: 0, completedCourses: 0, inProgressCourses: 0, averageProgress: 0, totalQuizzesTaken: 0, overallAverageScore: 0 } };
+    return {
+      rows: [],
+      overall: {
+        totalCourses: 0,
+        completedCourses: 0,
+        inProgressCourses: 0,
+        averageProgress: 0,
+        totalQuizzesTaken: 0,
+        overallAverageScore: 0,
+      },
+    };
   }
 
   const courseIds = enrollments.map((e) => (e.course as { _id: Types.ObjectId })._id);
 
-  const [attemptAgg, quizCounts] = await Promise.all([
+  const [attemptAgg, quizCounts, attemptsList] = await Promise.all([
     QuizAttempt.aggregate<{
       _id: Types.ObjectId;
       completed: number;
@@ -53,10 +66,49 @@ export async function aggregateStudentProgress(
       { $match: { course: { $in: courseIds }, isPublished: true } },
       { $group: { _id: '$course', total: { $sum: 1 } } },
     ]),
+    QuizAttempt.find({
+      student: sid,
+      course: { $in: courseIds },
+      status: 'completed',
+    })
+      .populate('quiz', 'title')
+      .sort({ submittedAt: -1 })
+      .limit(100)
+      .lean(),
   ]);
 
   const byCourseAttempts = new Map(attemptAgg.map((a) => [a._id.toString(), a]));
   const byCourseQuizTotal = new Map(quizCounts.map((q) => [q._id.toString(), q.total]));
+
+  const attemptsByCourse = new Map<string, Array<{
+    _id: string;
+    quizTitle: string;
+    score: number;
+    correctCount: number;
+    totalQuestions: number;
+    timeTaken: number;
+    submittedAt: string;
+    attemptNumber: number;
+  }>>();
+
+  for (const att of attemptsList) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const a = att as any;
+    if (!a.course) continue;
+    const cid = String(a.course);
+    if (!attemptsByCourse.has(cid)) attemptsByCourse.set(cid, []);
+    const quizTitle = a.quiz && typeof a.quiz === 'object' && 'title' in a.quiz ? a.quiz.title : 'Quiz';
+    attemptsByCourse.get(cid)!.push({
+      _id: String(a._id),
+      quizTitle,
+      score: a.score || 0,
+      correctCount: a.correctAnswers || 0,
+      totalQuestions: a.totalQuestions || 0,
+      timeTaken: a.timeSpent || 0,
+      submittedAt: a.submittedAt ? new Date(a.submittedAt).toISOString() : new Date(a.createdAt).toISOString(),
+      attemptNumber: a.attemptNumber || 1,
+    });
+  }
 
   const rows = enrollments.map((enrollment) => {
     const cid = (enrollment.course as { _id: Types.ObjectId })._id.toString();
@@ -64,11 +116,11 @@ export async function aggregateStudentProgress(
     const totalQuizzes = byCourseQuizTotal.get(cid) ?? 0;
     return {
       enrollment: {
-        _id: enrollment._id,
+        _id: String(enrollment._id),
         progress: enrollment.progress,
         status: enrollment.status,
-        enrolledAt: enrollment.enrolledAt,
-        completedAt: enrollment.completedAt,
+        enrolledAt: enrollment.enrolledAt ? new Date(enrollment.enrolledAt).toISOString() : '',
+        completedAt: enrollment.completedAt ? new Date(enrollment.completedAt).toISOString() : undefined,
         lessonCompletedCount: enrollment.lessonCompletedCount,
       },
       course: enrollment.course,
@@ -79,6 +131,7 @@ export async function aggregateStudentProgress(
         highestScore: stats?.maxScore ?? 0,
         lowestScore: stats?.minScore ?? 0,
       },
+      attempts: attemptsByCourse.get(cid) || [],
     };
   });
 

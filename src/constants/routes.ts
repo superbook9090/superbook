@@ -19,6 +19,7 @@ export const ROUTES = {
   tools: (slug: string) => `/tools/${slug}`,
   dashboard: '/dashboard',
   profile: '/dashboard/profile',
+  progress: '/progress',
   student: {
     root: '/dashboard/student',
     courses: '/dashboard/student/courses',
@@ -55,6 +56,7 @@ export const ROUTES = {
     blogCreate: '/dashboard/teacher/blogs/create',
     blogEdit: (id: string) => `/dashboard/teacher/blogs/edit/${id}`,
     analytics: '/dashboard/teacher/analytics',
+    progress: '/dashboard/teacher/progress',
     profile: '/dashboard/teacher/profile',
     notes: '/dashboard/teacher/notes',
   },
@@ -68,6 +70,7 @@ export const ROUTES = {
     blogs: '/dashboard/admin/blogs',
     files: '/dashboard/admin/files',
     analytics: '/dashboard/admin/analytics',
+    progress: '/dashboard/admin/progress',
     notifications: '/dashboard/admin/notifications',
     settings: '/dashboard/admin/settings',
     profile: '/dashboard/admin/profile',

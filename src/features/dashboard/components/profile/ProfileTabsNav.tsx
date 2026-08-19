@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { User, ShieldCheck, Award, LayoutGrid } from 'lucide-react';
+import { User, Lock } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { ProfileTabKey } from './types';
 
@@ -16,23 +16,13 @@ export function ProfileTabsNav({ activeTab, onTabChange }: ProfileTabsNavProps) 
   const tabs: { id: ProfileTabKey; label: string; icon: React.ElementType }[] = [
     {
       id: 'account',
-      label: t('profile.tabAccount') || 'Account & Identity',
+      label: t('profile.tabAccount') || 'Personal Details',
       icon: User,
     },
     {
       id: 'security',
-      label: t('profile.tabSecurity') || 'Security & Access',
-      icon: ShieldCheck,
-    },
-    {
-      id: 'capabilities',
-      label: t('profile.tabCapabilities') || 'Role & Privileges',
-      icon: Award,
-    },
-    {
-      id: 'shortcuts',
-      label: t('profile.tabShortcuts') || 'Quick Shortcuts',
-      icon: LayoutGrid,
+      label: t('profile.tabSecurity') || 'Security & Password',
+      icon: Lock,
     },
   ];
 
