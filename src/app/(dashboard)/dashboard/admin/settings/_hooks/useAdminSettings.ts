@@ -14,7 +14,7 @@ import { isSuperAdmin } from '@/lib/roles';
 import type { AppSettings, SettingsTab, SettingsStats } from '../_components/types';
 
 const defaultSettings: AppSettings = {
-  teacherLimits: { courses: 5, quizzes: 10, blogs: 2 },
+  teacherLimits: { courses: 5, quizzes: 10, blogs: 2, aiQuizGenerations: 5 },
   notesLimits: { maxPagesPerUser: 5, maxWordsPerPage: 1000 },
   featureToggles: {
     enableBlogs: true,
@@ -30,6 +30,7 @@ const defaultSettings: AppSettings = {
     enableGoogleAuthApp: true,
     enableGoogleAuthWeb: true,
     enableNotes: true,
+    enableAiQuizGen: true,
   },
   platformConfig: {
     siteName: 'Quiz Do',
@@ -105,6 +106,7 @@ export function useAdminSettings() {
     if (settings.teacherLimits.courses !== initialSettings.teacherLimits.courses) count++;
     if (settings.teacherLimits.quizzes !== initialSettings.teacherLimits.quizzes) count++;
     if (settings.teacherLimits.blogs !== initialSettings.teacherLimits.blogs) count++;
+    if (settings.teacherLimits.aiQuizGenerations !== initialSettings.teacherLimits.aiQuizGenerations) count++;
 
     // Check notes limits
     if (settings.notesLimits?.maxPagesPerUser !== initialSettings.notesLimits?.maxPagesPerUser) count++;

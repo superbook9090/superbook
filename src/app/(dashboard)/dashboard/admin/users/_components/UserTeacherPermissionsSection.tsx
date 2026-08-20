@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Video, Globe, Sliders, Check, BookOpen, HelpCircle, FileText } from 'lucide-react';
+import { Video, Globe, Sliders, Check, BookOpen, HelpCircle, FileText, Sparkles } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import Button from '@/components/ui/Button';
 import { TextField } from '@/components/ui/TextField';
@@ -11,8 +11,8 @@ interface UserTeacherPermissionsSectionProps {
   user: User;
   onToggleVideo: (currentVal: boolean) => void;
   onTogglePublicCourse: (currentVal: boolean) => void;
-  limitsForm: { courses: string; quizzes: string; blogs: string };
-  onLimitsChange: (field: 'courses' | 'quizzes' | 'blogs', value: string) => void;
+  limitsForm: { courses: string; quizzes: string; blogs: string; aiQuizGenerations?: string };
+  onLimitsChange: (field: 'courses' | 'quizzes' | 'blogs' | 'aiQuizGenerations', value: string) => void;
   onSaveLimits: () => void;
   isSavingLimits?: boolean;
 }
@@ -35,7 +35,8 @@ export function UserTeacherPermissionsSection({
   const hasLimitsChanged =
     limitsForm.courses !== String(user.limits?.courses ?? '') ||
     limitsForm.quizzes !== String(user.limits?.quizzes ?? '') ||
-    limitsForm.blogs !== String(user.limits?.blogs ?? '');
+    limitsForm.blogs !== String(user.limits?.blogs ?? '') ||
+    limitsForm.aiQuizGenerations !== String(user.limits?.aiQuizGenerations ?? '');
 
   return (
     <div className="flex flex-col gap-4 p-4 rounded-xl bg-[var(--color-surface-muted)]/40 border border-[var(--border)]">
@@ -110,7 +111,7 @@ export function UserTeacherPermissionsSection({
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <TextField
             label={t('adminUsers.courses') || 'Courses'}
             type="number"
@@ -139,6 +140,16 @@ export function UserTeacherPermissionsSection({
             value={limitsForm.blogs}
             onChange={(e) => onLimitsChange('blogs', e.target.value)}
             placeholder={t('adminUsers.unlimited') || 'Unlimited'}
+            fullWidth
+          />
+          <TextField
+            label={t('adminUsers.aiQuizGenerations') || 'AI Quiz Quota'}
+            type="number"
+            min="1"
+            startIcon={<Sparkles className="w-4 h-4 text-[var(--color-muted)]" />}
+            value={limitsForm.aiQuizGenerations || ''}
+            onChange={(e) => onLimitsChange('aiQuizGenerations', e.target.value)}
+            placeholder={t('adminUsers.globalDefault') || 'Global Default (5)'}
             fullWidth
           />
         </div>

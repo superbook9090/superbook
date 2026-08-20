@@ -158,6 +158,7 @@ export const updateSettingsSchema = z.object({
     courses: z.number().int().min(1, 'Courses limit must be at least 1'),
     quizzes: z.number().int().min(1, 'Quizzes limit must be at least 1'),
     blogs: z.number().int().min(1, 'Blogs limit must be at least 1'),
+    aiQuizGenerations: z.number().int().min(1, 'AI Quiz Generations limit must be at least 1').optional(),
   }).optional(),
   notesLimits: z.object({
     maxPagesPerUser: z.number().int().min(1, 'Max pages limit must be at least 1'),
@@ -177,6 +178,7 @@ export const updateSettingsSchema = z.object({
     enableGoogleAuthApp: z.boolean().optional(),
     enableGoogleAuthWeb: z.boolean().optional(),
     enableNotes: z.boolean().optional(),
+    enableAiQuizGen: z.boolean().optional(),
   }).optional(),
   platformConfig: z.object({
     siteName: z.string().max(100).optional(),

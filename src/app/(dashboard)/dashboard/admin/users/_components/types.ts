@@ -2,6 +2,7 @@ export interface UserLimits {
   courses?: number;
   quizzes?: number;
   blogs?: number;
+  aiQuizGenerations?: number;
 }
 
 export interface User {

@@ -21,7 +21,7 @@ type Props = {
   handleSaveOrgAssign: (userId: string, orgId: string | null) => Promise<void>;
   handleToggleVideoUpload: (userId: string, currentVal: boolean) => void;
   handleTogglePublicCoursePermission: (userId: string, currentVal: boolean) => void;
-  handleSaveLimits: (userId: string, limits: { courses?: number; quizzes?: number; blogs?: number }) => Promise<void>;
+  handleSaveLimits: (userId: string, limits: { courses?: number; quizzes?: number; blogs?: number; aiQuizGenerations?: number }) => Promise<void>;
   handleToggleSuspend: (userId: string, isSuspended: boolean) => Promise<void>;
   handleDeleteClick: (userId: string) => void;
 };
@@ -39,6 +39,7 @@ export function UserDetailModal({
     courses: selectedUser.limits?.courses ? String(selectedUser.limits.courses) : '',
     quizzes: selectedUser.limits?.quizzes ? String(selectedUser.limits.quizzes) : '',
     blogs: selectedUser.limits?.blogs ? String(selectedUser.limits.blogs) : '',
+    aiQuizGenerations: selectedUser.limits?.aiQuizGenerations ? String(selectedUser.limits.aiQuizGenerations) : '',
   });
   const [isSavingOrg, setIsSavingOrg] = useState(false);
   const [isSavingLimits, setIsSavingLimits] = useState(false);
@@ -50,6 +51,7 @@ export function UserDetailModal({
       courses: selectedUser.limits?.courses ? String(selectedUser.limits.courses) : '',
       quizzes: selectedUser.limits?.quizzes ? String(selectedUser.limits.quizzes) : '',
       blogs: selectedUser.limits?.blogs ? String(selectedUser.limits.blogs) : '',
+      aiQuizGenerations: selectedUser.limits?.aiQuizGenerations ? String(selectedUser.limits.aiQuizGenerations) : '',
     });
   }, [selectedUser]);
 
@@ -71,10 +73,11 @@ export function UserDetailModal({
   const onSaveLimits = async () => {
     setIsSavingLimits(true);
     try {
-      const parsed: { courses?: number; quizzes?: number; blogs?: number } = {};
+      const parsed: { courses?: number; quizzes?: number; blogs?: number; aiQuizGenerations?: number } = {};
       if (limitsForm.courses) parsed.courses = parseInt(limitsForm.courses, 10);
       if (limitsForm.quizzes) parsed.quizzes = parseInt(limitsForm.quizzes, 10);
       if (limitsForm.blogs) parsed.blogs = parseInt(limitsForm.blogs, 10);
+      if (limitsForm.aiQuizGenerations) parsed.aiQuizGenerations = parseInt(limitsForm.aiQuizGenerations, 10);
       await handleSaveLimits(selectedUser._id, parsed);
     } finally {
       setIsSavingLimits(false);

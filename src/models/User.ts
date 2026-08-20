@@ -18,7 +18,9 @@ export interface IUser extends Document {
     courses: number;
     quizzes: number;
     blogs: number;
+    aiQuizGenerations?: number;
   };
+  aiQuizGenerationsCount?: number;
   canUploadVideos: boolean;
   canCreatePublicCourses?: boolean;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -41,7 +43,9 @@ const userSchema = new Schema<IUser>(
       courses: { type: Number, default: undefined },
       quizzes: { type: Number, default: undefined },
       blogs: { type: Number, default: undefined },
+      aiQuizGenerations: { type: Number, default: undefined },
     },
+    aiQuizGenerationsCount: { type: Number, default: 0 },
     canUploadVideos: { type: Boolean, default: false },
     canCreatePublicCourses: { type: Boolean, default: false },
   },

@@ -5,6 +5,7 @@ export interface AppSettings {
     courses: number;
     quizzes: number;
     blogs: number;
+    aiQuizGenerations: number;
   };
   notesLimits?: {
     maxPagesPerUser: number;
@@ -24,6 +25,7 @@ export interface AppSettings {
     enableGoogleAuthApp?: boolean;
     enableGoogleAuthWeb?: boolean;
     enableNotes?: boolean;
+    enableAiQuizGen?: boolean;
   };
   platformConfig: {
     siteName?: string;

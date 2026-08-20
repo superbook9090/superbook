@@ -105,7 +105,17 @@ export async function POST(req: NextRequest) {
       selectedOption,
     });
 
-    const analysis = await fetchStockanlyzerChat(prompt);
+    let analysis: string;
+    try {
+      analysis = await fetchStockanlyzerChat(prompt);
+    } catch (aiError) {
+      logApiError(aiError as Error, 'POST', '/api/quiz-attempts/analyze-solution', logContext);
+      return jsonApiError(
+        'SERVICE_UNAVAILABLE',
+        'AI Solution Analysis service is currently unavailable or returning an error (HTTP 500 from model server). Please verify your remote model host or try again shortly.',
+        503
+      );
+    }
 
     return jsonSuccess({ analysis });
   } catch (error) {

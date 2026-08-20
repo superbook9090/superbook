@@ -1,6 +1,9 @@
 import React, { useState, useRef, useCallback } from 'react';
 import * as XLSX from 'xlsx';
+import { Sparkles } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useSettingsStore } from '@/store/useSettingsStore';
+import { AiQuizGeneratorModal } from './AiQuizGeneratorModal';
 import type { Question, ExcelRow } from './types';
 
 type Props = {
@@ -10,16 +13,20 @@ type Props = {
 
 export function QuizImportTool({ theme, onImport }: Props) {
   const { t } = useTranslation();
-  
+  const enableAiQuizGen = useSettingsStore(
+    (s) => s.settings.featureToggles.enableAiQuizGen ?? true
+  );
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showImportHelp, setShowImportHelp] = useState(false);
   const [previewData, setPreviewData] = useState<ExcelRow[]>([]);
   const [uploadError, setUploadError] = useState('');
   const [isParsing, setIsParsing] = useState(false);
-  
+
   const [showTextImport, setShowTextImport] = useState(false);
   const [importText, setImportText] = useState('');
   const [showTextImportHelp, setShowTextImportHelp] = useState(false);
+  const [showAiModal, setShowAiModal] = useState(false);
 
   const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -320,6 +327,16 @@ export function QuizImportTool({ theme, onImport }: Props) {
       />
 
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
+        {enableAiQuizGen && (
+          <button
+            type="button"
+            onClick={() => setShowAiModal(true)}
+            className={`inline-flex flex-1 sm:flex-none items-center justify-center gap-2 min-h-[44px] px-5 py-2.5 text-sm font-semibold rounded-lg text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 transition-opacity shadow-sm`}
+          >
+            <Sparkles className="w-4 h-4 text-yellow-300 animate-pulse" />
+            <span>{t('createQuizForm.generateAi') || 'Generate with AI'}</span>
+          </button>
+        )}
         <button
           type="button"
           onClick={triggerFileImport}
@@ -351,6 +368,13 @@ export function QuizImportTool({ theme, onImport }: Props) {
           {t('createQuizForm.pasteText')}
         </button>
       </div>
+
+      <AiQuizGeneratorModal
+        isOpen={showAiModal}
+        onClose={() => setShowAiModal(false)}
+        onSuccess={(imported) => onImport(imported)}
+        theme={theme}
+      />
 
       <h3 className="text-lg font-medium text-[var(--color-foreground)] mb-4">{t('createQuizForm.questions')}</h3>
 

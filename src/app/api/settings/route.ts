@@ -36,6 +36,7 @@ export async function GET() {
         courses: 5,
         quizzes: 10,
         blogs: 2,
+        aiQuizGenerations: 5,
       },
       notesLimits: {
         maxPagesPerUser: 5,
@@ -55,6 +56,7 @@ export async function GET() {
         enableGoogleAuthApp: true,
         enableGoogleAuthWeb: true,
         enableNotes: true,
+        enableAiQuizGen: true,
       },
       platformConfig: {
         siteName: 'Quiz Do',

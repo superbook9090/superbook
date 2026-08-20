@@ -1,7 +1,7 @@
-const DEFAULT_CHAT_URL = 'https://api.stockanlyzer.com/api/chat';
+const DEFAULT_CHAT_URL = 'https://smart-icons-design.loca.lt/generate';
 
 function getChatApiUrl(): string {
-  return process.env.STOCKANLYZER_CHAT_API_URL?.trim() || DEFAULT_CHAT_URL;
+  return process.env.AI_API_URL?.trim() || DEFAULT_CHAT_URL;
 }
 
 function extractReplyText(payload: unknown): string | null {
@@ -9,12 +9,27 @@ function extractReplyText(payload: unknown): string | null {
     return payload.trim();
   }
 
+  if (Array.isArray(payload) && payload.length > 0) {
+    return extractReplyText(payload[0]);
+  }
+
   if (typeof payload !== 'object' || payload === null) {
     return null;
   }
 
   const record = payload as Record<string, unknown>;
-  const directKeys = ['reply', 'response', 'message', 'answer', 'content', 'text', 'output'];
+  const directKeys = [
+    'reply',
+    'response',
+    'message',
+    'answer',
+    'content',
+    'text',
+    'output',
+    'generated_text',
+    'generation',
+    'result',
+  ];
 
   for (const key of directKeys) {
     const value = record[key];
@@ -47,44 +62,69 @@ function extractReplyText(payload: unknown): string | null {
   return null;
 }
 
-export async function fetchStockanlyzerChat(message: string): Promise<string> {
+export async function fetchStockanlyzerChat(
+  message: string,
+  retries = 1,
+  maxTokens = 2048
+): Promise<string> {
   const trimmed = message.trim();
   if (!trimmed) {
     throw new Error('Message is required');
   }
 
-  const res = await fetch(getChatApiUrl(), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message: trimmed }),
-    cache: 'no-store',
-  });
+  const url = getChatApiUrl();
+  let lastError: Error | null = null;
 
-  let payload: unknown = {};
-  try {
-    payload = await res.json();
-  } catch {
-    payload = {};
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      if (attempt > 0) {
+        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+      }
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'bypass-tunnel-reminder': 'true',
+        },
+        body: JSON.stringify({
+          prompt: trimmed,
+          max_tokens: maxTokens,
+        }),
+        cache: 'no-store',
+      });
+
+      let payload: unknown = {};
+      try {
+        payload = await res.json();
+      } catch {
+        payload = {};
+      }
+
+      if (!res.ok) {
+        const errorDetail =
+          extractReplyText(payload) ||
+          (typeof payload === 'object' &&
+            payload !== null &&
+            typeof (payload as Record<string, unknown>).error === 'string'
+            ? String((payload as Record<string, unknown>).error)
+            : null) ||
+          `Remote AI service (${url}) returned HTTP ${res.status}`;
+        throw new Error(errorDetail);
+      }
+
+      const reply = extractReplyText(payload);
+      if (!reply) {
+        throw new Error('AI service returned an empty response');
+      }
+
+      return reply;
+    } catch (err) {
+      lastError = err as Error;
+    }
   }
 
-  if (!res.ok) {
-    const errorMessage =
-      extractReplyText(payload) ||
-      (typeof payload === 'object' &&
-      payload !== null &&
-      typeof (payload as Record<string, unknown>).error === 'string'
-        ? String((payload as Record<string, unknown>).error)
-        : null) ||
-      `Chat service returned ${res.status}`;
-    throw new Error(errorMessage);
-  }
-
-  const reply = extractReplyText(payload);
-  if (!reply) {
-    throw new Error('Chat service returned an empty response');
-  }
-
-  return reply;
+  throw lastError ?? new Error('Failed to connect to AI solution analysis service');
 }
 
 export function buildSolutionAnalysisPrompt(input: {

@@ -100,6 +100,7 @@ export function FeatureTogglesSection({
       titleKey: 'adminSettings.categoryAi',
       descKey: 'adminSettings.categoryAiDesc',
       items: [
+        { key: 'enableAiQuizGen', labelKey: 'adminSettings.enableAiQuizGen', descKey: 'adminSettings.enableAiQuizGenDesc', icon: Sparkles, iconBg: 'bg-[var(--primary-soft)]', iconColor: 'text-[var(--primary)]', isAiFeature: true },
         { key: 'enableQuizSolutionAnalysis', labelKey: 'adminSettings.enableQuizSolutionAnalysis', descKey: 'adminSettings.enableQuizSolutionAnalysisDesc', icon: Sparkles, iconBg: 'bg-[var(--primary-soft)]', iconColor: 'text-[var(--primary)]', isSuperAdminOnly: true, isAiFeature: true },
       ],
     },

@@ -121,14 +121,28 @@ export async function PATCH(req: NextRequest) {
           { status: 400 }
         );
       }
-      settings.teacherLimits = teacherLimits;
+      if (
+        teacherLimits.aiQuizGenerations !== undefined &&
+        (typeof teacherLimits.aiQuizGenerations !== 'number' || teacherLimits.aiQuizGenerations < 1)
+      ) {
+        return NextResponse.json(
+          { message: 'aiQuizGenerations limit must be a positive number' },
+          { status: 400 }
+        );
+      }
+      settings.teacherLimits = {
+        courses: teacherLimits.courses,
+        quizzes: teacherLimits.quizzes,
+        blogs: teacherLimits.blogs,
+        aiQuizGenerations: teacherLimits.aiQuizGenerations ?? settings.teacherLimits?.aiQuizGenerations ?? 5,
+      };
     }
 
     // Update notes limits if provided
     if (notesLimits) {
       if (typeof notesLimits.maxPagesPerUser !== 'number' || notesLimits.maxPagesPerUser < 1) {
         return NextResponse.json(
-          { message: 'maxPagesPerUser must be at least 1' },
+          { message: 'maxPagesPerUser must be a positive number' },
           { status: 400 }
         );
       }
@@ -155,6 +169,7 @@ export async function PATCH(req: NextRequest) {
         enableClarity: featureToggles.enableClarity ?? existingToggles.enableClarity ?? true,
         enablePhoneAuth: featureToggles.enablePhoneAuth ?? existingToggles.enablePhoneAuth ?? true,
         enableNotes: featureToggles.enableNotes ?? existingToggles.enableNotes ?? true,
+        enableAiQuizGen: featureToggles.enableAiQuizGen ?? existingToggles.enableAiQuizGen ?? true,
         enableQuizSolutionAnalysis:
           isSuper && featureToggles.enableQuizSolutionAnalysis !== undefined
             ? featureToggles.enableQuizSolutionAnalysis

@@ -18,12 +18,14 @@ interface FeatureToggles {
   enableGoogleAuthApp?: boolean;
   enableGoogleAuthWeb?: boolean;
   enableNotes?: boolean;
+  enableAiQuizGen?: boolean;
 }
 
 interface TeacherLimits {
   courses: number;
   quizzes: number;
   blogs: number;
+  aiQuizGenerations?: number;
 }
 
 const DEFAULT_FEATURE_TOGGLES: Partial<Record<keyof FeatureToggles, boolean>> = {
@@ -40,6 +42,7 @@ const DEFAULT_FEATURE_TOGGLES: Partial<Record<keyof FeatureToggles, boolean>> = 
   enableGoogleAuthApp: true,
   enableGoogleAuthWeb: true,
   enableNotes: true,
+  enableAiQuizGen: true,
 };
 
 export async function isFeatureEnabled(feature: keyof FeatureToggles): Promise<boolean> {
@@ -132,12 +135,13 @@ export async function isTeacherRegistrationAllowed(): Promise<boolean> {
 export async function getTeacherLimit(type: keyof TeacherLimits, userId?: string): Promise<number> {
   if (userId) {
     const user = await User.findById(userId);
-    if (user?.limits?.[type]) {
-      return user.limits[type];
+    if (user?.limits?.[type] !== undefined && user.limits[type] !== null) {
+      return user.limits[type]!;
     }
   }
   const settings = await getSettingsWithDefaults();
-  return settings?.teacherLimits?.[type] ?? 10;
+  const defaultVal = type === 'aiQuizGenerations' ? 5 : 10;
+  return settings?.teacherLimits?.[type] ?? defaultVal;
 }
 
 /**

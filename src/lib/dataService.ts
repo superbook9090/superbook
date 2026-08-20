@@ -10,6 +10,7 @@ const DEFAULT_SETTINGS = {
     courses: 5,
     quizzes: 10,
     blogs: 2,
+    aiQuizGenerations: 5,
   },
   notesLimits: {
     maxPagesPerUser: 5,
@@ -29,6 +30,7 @@ const DEFAULT_SETTINGS = {
     enableGoogleAuthApp: true,
     enableGoogleAuthWeb: true,
     enableNotes: true,
+    enableAiQuizGen: true,
   },
   platformConfig: {
     siteName: 'Quiz Do',

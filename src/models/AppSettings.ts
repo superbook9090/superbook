@@ -5,6 +5,7 @@ export interface IAppSettings extends Document {
     courses: number;
     quizzes: number;
     blogs: number;
+    aiQuizGenerations?: number;
   };
   notesLimits?: {
     maxPagesPerUser: number;
@@ -24,6 +25,7 @@ export interface IAppSettings extends Document {
     enableGoogleAuthApp?: boolean;
     enableGoogleAuthWeb?: boolean;
     enableNotes?: boolean;
+    enableAiQuizGen?: boolean;
   };
   platformConfig: {
     maintenanceMode: boolean;
@@ -49,6 +51,11 @@ const appSettingsSchema = new Schema<IAppSettings>(
       blogs: {
         type: Number,
         default: 2,
+        min: 1,
+      },
+      aiQuizGenerations: {
+        type: Number,
+        default: 5,
         min: 1,
       },
     },
@@ -114,6 +121,10 @@ const appSettingsSchema = new Schema<IAppSettings>(
         default: true,
       },
       enableNotes: {
+        type: Boolean,
+        default: true,
+      },
+      enableAiQuizGen: {
         type: Boolean,
         default: true,
       },

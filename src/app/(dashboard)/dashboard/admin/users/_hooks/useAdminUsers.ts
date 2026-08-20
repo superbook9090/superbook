@@ -116,7 +116,10 @@ export function useAdminUsers() {
     }
   };
 
-  const handleSaveLimits = async (userId: string, limits: { courses?: number; quizzes?: number; blogs?: number }) => {
+  const handleSaveLimits = async (
+    userId: string,
+    limits: { courses?: number; quizzes?: number; blogs?: number; aiQuizGenerations?: number }
+  ) => {
     try {
       await patchAdminUser({ userId, updates: { limits } });
       setUsers((prev) => prev.map((u) => (u._id === userId ? { ...u, limits } : u)));

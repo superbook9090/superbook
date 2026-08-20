@@ -14,15 +14,17 @@ export type FeatureToggleKey =
   | 'enablePullToRefresh'
   | 'enableGoogleAuthApp'
   | 'enableGoogleAuthWeb'
-  | 'enableNotes';
+  | 'enableNotes'
+  | 'enableAiQuizGen';
 
-export type TeacherLimitKey = 'courses' | 'quizzes' | 'blogs';
+export type TeacherLimitKey = 'courses' | 'quizzes' | 'blogs' | 'aiQuizGenerations';
 
 export interface PublicAppSettings {
   teacherLimits: {
     courses: number;
     quizzes: number;
     blogs: number;
+    aiQuizGenerations?: number;
   };
   featureToggles: Record<FeatureToggleKey, boolean>;
   platformConfig: {
@@ -38,6 +40,7 @@ export const defaultPublicAppSettings: PublicAppSettings = {
     courses: 5,
     quizzes: 10,
     blogs: 2,
+    aiQuizGenerations: 5,
   },
   featureToggles: {
     enableBlogs: true,
@@ -53,6 +56,7 @@ export const defaultPublicAppSettings: PublicAppSettings = {
     enableGoogleAuthApp: true,
     enableGoogleAuthWeb: true,
     enableNotes: true,
+    enableAiQuizGen: true,
   },
   platformConfig: {
     maintenanceMode: false,

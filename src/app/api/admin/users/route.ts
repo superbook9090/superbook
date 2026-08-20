@@ -298,6 +298,15 @@ export async function PATCH(request: NextRequest) {
           { status: 400 }
         );
       }
+      if (
+        updates.limits.aiQuizGenerations !== undefined &&
+        (typeof updates.limits.aiQuizGenerations !== 'number' || updates.limits.aiQuizGenerations < 1)
+      ) {
+        return NextResponse.json(
+          { message: 'AI Quiz Generations limit must be a positive integer' },
+          { status: 400 }
+        );
+      }
     }
 
     const user = await User.findByIdAndUpdate(

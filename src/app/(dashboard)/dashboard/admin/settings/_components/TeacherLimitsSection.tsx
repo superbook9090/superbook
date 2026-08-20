@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { GraduationCap, FileText, BookOpen, Minus, Plus } from 'lucide-react';
+import { GraduationCap, FileText, BookOpen, Minus, Plus, Sparkles } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { AppSettings } from './types';
 
@@ -55,6 +55,16 @@ export function TeacherLimitsSection({ settings, setSettings, searchQuery = '' }
       iconBg: 'bg-[var(--info-light)]',
       iconColor: 'text-[var(--info)]',
       presets: [2, 5, 10, 25],
+      min: 1,
+    },
+    {
+      key: 'aiQuizGenerations',
+      titleKey: 'adminSettings.aiQuizGenerationsLimit',
+      descKey: 'adminSettings.aiQuizGenerationsLimitDesc',
+      icon: Sparkles,
+      iconBg: 'bg-[var(--warning-light)]',
+      iconColor: 'text-[var(--warning)]',
+      presets: [3, 5, 10, 20, 50],
       min: 1,
     },
   ];
