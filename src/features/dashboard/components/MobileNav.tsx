@@ -44,7 +44,7 @@ function MobileNavComponent({
   const mainItems = useDashboardNav(navigation);
   const adminItems = useDashboardNav(adminNavigation, { isSuperAdmin });
 
-  const headerBg = 'bg-[var(--card-solid)]';
+  const headerBg = 'bg-[var(--card-solid)]/95 backdrop-blur-md support-backdrop-blur:bg-[var(--card-solid)]';
 
   const allNavItems = useMemo(() => {
     if (isStaff && adminItems.length > 0) {
@@ -63,24 +63,24 @@ function MobileNavComponent({
 
   return (
     <>
-      <div className={cn(headerBg, 'md:hidden fixed top-0 left-0 right-0 z-50 safe-area-pt shadow-[var(--shadow-sm)] border-b border-[var(--border)]')}>
-        <div className="mobile-header-bar flex items-center justify-between px-3">
+      <div className={cn(headerBg, 'md:hidden fixed top-0 left-0 right-0 z-50 safe-area-pt-compact shadow-[var(--shadow-sm)] border-b border-[var(--border)]')}>
+        <div className="mobile-header-bar flex items-center justify-between px-5 pb-4">
           <Link
             href={isStaff ? ROUTES.teacher.root : ROUTES.student.root}
-            className="flex items-center gap-2 touch-target shrink-0"
+            className="flex items-center gap-2 shrink-0 h-full my-auto"
           >
-            <PremiumLogo size="md" />
+            <PremiumLogo size="sm" />
           </Link>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 shrink-0 h-full my-auto">
             <Tooltip label={t('common.toggleMenu')} position="bottom">
               <button
                 type="button"
                 onClick={toggleMenu}
-                className="inline-flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--card-solid)] text-[var(--foreground)] hover:bg-[var(--surface-muted)] transition-all active:scale-95 shadow-sm"
+                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--card-solid)] text-[var(--foreground)] hover:bg-[var(--surface-muted)] transition-all active:scale-95 shadow-sm my-auto"
                 aria-label={t('common.toggleMenu')}
                 aria-expanded={isOpen}
               >
-                {isOpen ? <X className="w-4.5 h-4.5" /> : <Menu className="w-4.5 h-4.5" />}
+                {isOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
               </button>
             </Tooltip>
           </div>
@@ -91,7 +91,7 @@ function MobileNavComponent({
         <div
           className={cn(
             headerBg,
-            'md:hidden fixed left-0 right-0 bottom-0 z-40 border-t border-[var(--border)] top-[calc(var(--mobile-header-height)+env(safe-area-inset-top,0px))]'
+            'md:hidden fixed left-0 right-0 bottom-0 z-40 border-t border-[var(--border)] top-[calc(var(--mobile-header-height)+1rem+min(env(safe-area-inset-top,0px),20px))]'
           )}
         >
           <div className="h-full overflow-y-auto px-3 py-3 pb-24 flex flex-col justify-between">

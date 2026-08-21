@@ -40,8 +40,8 @@
   --card-padding: var(--space-3);
   --card-gap: var(--space-3);
   --form-gap: var(--space-3);
-  --mobile-nav-offset: 4rem;
-  --mobile-header-height: 3.25rem;
+  --mobile-nav-offset: 3.5rem;
+  --mobile-header-height: 2.875rem;
   --mobile-header-gap: var(--space-2);
 
   /* Layout */
@@ -1215,17 +1215,21 @@ body.quiz-fullscreen nav {
   padding-top: env(safe-area-inset-top, 0px);
 }
 
+.safe-area-pt-compact {
+  padding-top: min(env(safe-area-inset-top, 0px), 20px);
+}
+
 .mobile-header-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-3);
+  gap: var(--space-2);
   height: var(--mobile-header-height);
   padding-inline: var(--gutter-x);
 }
 
 .mobile-header-spacer {
-  height: calc(var(--mobile-header-height) + env(safe-area-inset-top, 0px));
+  height: calc(var(--mobile-header-height) + 1rem + min(env(safe-area-inset-top, 0px), 20px));
   flex-shrink: 0;
 }
 
@@ -1698,11 +1702,17 @@ body.quiz-fullscreen nav {
   left: 0;
   right: 0;
   z-index: 50;
-  background: color-mix(in srgb, var(--card-solid) 90%, transparent);
-  backdrop-filter: var(--blur-glass) saturate(180%);
-  -webkit-backdrop-filter: var(--blur-glass) saturate(180%);
+  background: var(--card-solid);
   border-top: 1px solid var(--border);
-  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.06);
+}
+
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .nav-bottom-bar {
+    background: color-mix(in srgb, var(--card-solid) 96%, transparent);
+    backdrop-filter: var(--blur-glass) saturate(180%);
+    -webkit-backdrop-filter: var(--blur-glass) saturate(180%);
+  }
 }
 
 .nav-bottom-bar__inner {
