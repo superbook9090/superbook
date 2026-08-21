@@ -7,6 +7,7 @@ import dbConnect from '@/lib/db';
 import { sanitizeSearchQuery, validateObjectId } from '@/lib/sanitize';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { isAdmin, isSuperAdmin } from '@/lib/roles';
+import { deleteUserRelatedData } from '@/lib/cascade/deleteRelated';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface QueryFilter { [key: string]: any }
@@ -309,6 +310,13 @@ export async function PATCH(request: NextRequest) {
       }
     }
 
+    // If the role is being changed, delete all related data (progress, authored content, etc.)
+    // to ensure a clean slate for the new role, keeping only profile info.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (updates.role && updates.role !== (targetUser as any).role) {
+      await deleteUserRelatedData(userId);
+    }
+
     const user = await User.findByIdAndUpdate(
       userId,
       { $set: updates },
@@ -420,6 +428,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
+    await deleteUserRelatedData(userId);
     const user = await User.findByIdAndDelete(userId);
 
     if (!user) {

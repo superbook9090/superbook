@@ -5,24 +5,27 @@ import { usePathname } from 'next/navigation';
 import { memo, useMemo } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useDashboardNav } from '@/hooks/useDashboardNav';
-import { MOBILE_BOTTOM_NAV_KEYS, type DashboardNavItem } from '@/constants/navigation';
+import { MOBILE_BOTTOM_NAV_KEYS, ADMIN_BOTTOM_NAV_KEYS, type DashboardNavItem } from '@/constants/navigation';
 import { getNavIcon } from '@/lib/navigation/icons';
 import { cn } from '@/lib/utils';
 
 interface MobileBottomNavProps {
   items: DashboardNavItem[];
+  isAdminUser?: boolean;
+  isSuperAdmin?: boolean;
 }
 
-function MobileBottomNavComponent({ items }: MobileBottomNavProps) {
+function MobileBottomNavComponent({ items, isAdminUser, isSuperAdmin }: MobileBottomNavProps) {
   const pathname = usePathname();
   const { t } = useTranslation();
-  const filtered = useDashboardNav(items);
+  const filtered = useDashboardNav(items, { isSuperAdmin });
 
   const bottomNavItems = useMemo(() => {
-    const keySet = new Set<string>(MOBILE_BOTTOM_NAV_KEYS);
+    const keysToUse = isAdminUser ? ADMIN_BOTTOM_NAV_KEYS : MOBILE_BOTTOM_NAV_KEYS;
+    const keySet = new Set<string>(keysToUse);
     const preferred = filtered.filter((item) => keySet.has(item.nameKey));
     return preferred.length > 0 ? preferred.slice(0, 5) : filtered.slice(0, 5);
-  }, [filtered]);
+  }, [filtered, isAdminUser]);
 
   return (
     <nav className="nav-bottom-bar md:hidden safe-area-pb" aria-label={t('common.dashboard')}>

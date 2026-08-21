@@ -74,12 +74,20 @@ export const ADMIN_NAV: DashboardNavItem[] = [
   { nameKey: 'common.profile', href: ROUTES.admin.profile, icon: 'User' },
 ];
 
-/** Primary items shown in mobile bottom bar (max 5). */
 export const MOBILE_BOTTOM_NAV_KEYS = [
   'common.dashboard',
   'common.myCourses',
   'common.browse',
   'common.quizzes',
+  'common.profile',
+] as const;
+
+/** Primary items shown in mobile bottom bar for Admin/SuperAdmin (max 5). */
+export const ADMIN_BOTTOM_NAV_KEYS = [
+  'common.users',
+  'common.organizations',
+  'common.allCourses',
+  'common.settings',
   'common.profile',
 ] as const;
 

@@ -8,9 +8,10 @@ import { motion } from 'framer-motion';
 
 interface GoogleAuthButtonProps {
   callbackUrl: string;
+  role?: string;
 }
 
-export default function GoogleAuthButton({ callbackUrl }: GoogleAuthButtonProps) {
+export default function GoogleAuthButton({ callbackUrl, role }: GoogleAuthButtonProps) {
   const { t } = useTranslation();
   const enableGoogleAuthApp = useSettingsStore(
     (s) => s.settings.featureToggles.enableGoogleAuthApp ?? true
@@ -27,6 +28,10 @@ export default function GoogleAuthButton({ callbackUrl }: GoogleAuthButtonProps)
   }, [enableGoogleAuthApp, enableGoogleAuthWeb]);
 
   const handleGoogleSignIn = () => {
+    if (role) {
+      document.cookie = `google-auth-role=${role}; path=/; max-age=300`; // expires in 5 minutes
+    }
+    
     if (typeof window !== 'undefined' && window.ReactNativeWebView) {
       window.ReactNativeWebView.postMessage(JSON.stringify({ action: 'REQUEST_GOOGLE_SIGN_IN' }));
     } else {

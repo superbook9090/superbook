@@ -234,9 +234,8 @@ export default function EmailRegisterForm({ theme, callbackUrl, onSelectPhoneFlo
 
       <AuthDivider />
 
-      {/* Social Auth Buttons Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
-        <GoogleAuthButton callbackUrl={callbackUrl} />
+        <GoogleAuthButton callbackUrl={callbackUrl} role={formData.role} />
         <PhoneAuthButton onClick={onSelectPhoneFlow} />
       </div>
     </form>

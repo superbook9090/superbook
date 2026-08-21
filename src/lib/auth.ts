@@ -189,10 +189,23 @@ export const authOptions: AuthOptions = {
 
         if (!dbUser) {
           const normalizedEmail = user.email.trim().toLowerCase();
+          
+          let role = 'student';
+          try {
+            const { cookies } = await import('next/headers');
+            const cookieStore = await cookies();
+            const roleCookie = cookieStore.get('google-auth-role');
+            if (roleCookie && (roleCookie.value === 'student' || roleCookie.value === 'teacher')) {
+              role = roleCookie.value;
+            }
+          } catch (e) {
+            console.error('Error reading google-auth-role cookie:', e);
+          }
+
           dbUser = await User.create({
             name: user.name || 'Google User',
             email: normalizedEmail,
-            role: 'student',
+            role: role,
             avatar: user.image,
             isVerified: true,
             provider: 'google',

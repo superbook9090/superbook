@@ -9,6 +9,15 @@ import VideoProgress from '@/models/VideoProgress';
 import Enrollment from '@/models/Enrollment';
 import CourseBookmark from '@/models/CourseBookmark';
 import Certificate from '@/models/Certificate';
+import Course from '@/models/Course';
+import Blog from '@/models/Blog';
+import FileNode from '@/models/FileNode';
+import Favorite from '@/models/Favorite';
+import Note from '@/models/Note';
+import UserNotification from '@/models/UserNotification';
+import NotificationPreference from '@/models/NotificationPreference';
+import NotificationToken from '@/models/NotificationToken';
+import PasswordResetToken from '@/models/PasswordResetToken';
 
 type Id = Types.ObjectId | string;
 
@@ -66,5 +75,48 @@ export async function deleteCourseRelatedData(courseId: Id): Promise<void> {
     Certificate.deleteMany({ course: courseId }),
     Lesson.deleteMany({ course: courseId }),
     Chapter.deleteMany({ course: courseId }),
+  ]);
+}
+
+/** All user data, including their progress, auth tokens, and authored content (courses, blogs, quizzes). */
+export async function deleteUserRelatedData(userId: Id): Promise<void> {
+  // 1. Delete all courses authored by this user
+  const courses = await Course.find({ instructor: userId }).select('_id').lean();
+  const courseIds = courses.map((c) => c._id as Types.ObjectId);
+  
+  for (const courseId of courseIds) {
+    await deleteCourseRelatedData(courseId);
+  }
+  await Course.deleteMany({ instructor: userId });
+
+  // 2. Delete all standalone quizzes authored by this user
+  const quizzes = await Quiz.find({ instructor: userId }).select('_id').lean();
+  const quizIds = quizzes.map((q) => q._id as Types.ObjectId);
+  await deleteQuizzesAndQuestions(quizIds);
+
+  // 3. Delete other teacher-authored content
+  await Promise.all([
+    Blog.deleteMany({ author: userId }),
+    FileNode.deleteMany({ uploadedBy: userId }),
+  ]);
+
+  // 4. Delete all student progress, enrollments, and personal data
+  await Promise.all([
+    Enrollment.deleteMany({ student: userId }),
+    LessonCompletion.deleteMany({ student: userId }),
+    VideoProgress.deleteMany({ student: userId }),
+    QuizAttempt.deleteMany({ student: userId }),
+    CourseBookmark.deleteMany({ user: userId }),
+    Favorite.deleteMany({ user: userId }),
+    Certificate.deleteMany({ student: userId }),
+    Note.deleteMany({ user: userId }),
+  ]);
+
+  // 5. Delete authentication and notification metadata
+  await Promise.all([
+    UserNotification.deleteMany({ userId }),
+    NotificationPreference.deleteOne({ userId }),
+    NotificationToken.deleteMany({ userId }),
+    PasswordResetToken.deleteMany({ userId }),
   ]);
 }

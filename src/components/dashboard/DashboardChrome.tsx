@@ -77,7 +77,13 @@ export default function DashboardChrome({
             </DashboardContent>
           </RoleThemeProvider>
 
-          {!isTakingQuiz && <LazyMobileBottomNav items={mainNav} />}
+          {!isTakingQuiz && (
+            <LazyMobileBottomNav 
+              items={isAdminUser ? ADMIN_NAV : mainNav}
+              isAdminUser={isAdminUser}
+              isSuperAdmin={isSuperAdminUser}
+            />
+          )}
         </div>
       </div>
     </QuizProvider>
