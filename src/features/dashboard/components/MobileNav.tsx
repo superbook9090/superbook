@@ -64,23 +64,23 @@ function MobileNavComponent({
   return (
     <>
       <div className={cn(headerBg, 'md:hidden fixed top-0 left-0 right-0 z-50 safe-area-pt-compact shadow-[var(--shadow-sm)] border-b border-[var(--border)]')}>
-        <div className="mobile-header-bar flex items-center justify-between px-5 pb-4">
+        <div className="mobile-header-bar flex items-center justify-between px-4 sm:px-5">
           <Link
             href={isStaff ? ROUTES.teacher.root : ROUTES.student.root}
-            className="flex items-center gap-2 shrink-0 h-full my-auto"
+            className="flex items-center gap-2 shrink-0 my-auto"
           >
             <PremiumLogo size="sm" />
           </Link>
-          <div className="flex items-center gap-2 shrink-0 h-full my-auto">
+          <div className="flex items-center gap-2 shrink-0 my-auto">
             <Tooltip label={t('common.toggleMenu')} position="bottom">
               <button
                 type="button"
                 onClick={toggleMenu}
-                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--card-solid)] text-[var(--foreground)] hover:bg-[var(--surface-muted)] transition-all active:scale-95 shadow-sm my-auto"
+                className="inline-flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--card-solid)] text-[var(--foreground)] hover:bg-[var(--surface-muted)] transition-all active:scale-95 shadow-sm"
                 aria-label={t('common.toggleMenu')}
                 aria-expanded={isOpen}
               >
-                {isOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+                {isOpen ? <X className="w-4.5 h-4.5" /> : <Menu className="w-4.5 h-4.5" />}
               </button>
             </Tooltip>
           </div>
@@ -91,7 +91,7 @@ function MobileNavComponent({
         <div
           className={cn(
             headerBg,
-            'md:hidden fixed left-0 right-0 bottom-0 z-40 border-t border-[var(--border)] top-[calc(var(--mobile-header-height)+1rem+min(env(safe-area-inset-top,0px),20px))]'
+            'md:hidden fixed left-0 right-0 bottom-0 z-40 border-t border-[var(--border)] top-[calc(var(--mobile-header-height)+min(env(safe-area-inset-top,0px),16px))]'
           )}
         >
           <div className="h-full overflow-y-auto px-3 py-3 pb-24 flex flex-col justify-between">
