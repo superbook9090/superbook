@@ -6,6 +6,7 @@ import HomeBelowFold from '@/components/home/HomeBelowFold';
 import HomeQuizMakerSeo from '@/components/home/HomeQuizMakerSeo';
 import FeaturedBlogs from '@/components/home/FeaturedBlogs';
 import SeoResources from '@/components/home/SeoResources';
+import MobileWebviewGuard from '@/components/mobile/MobileWebviewGuard';
 import { createPageMetadata } from '@/lib/seo/metadata';
 
 export const dynamic = 'force-static';
@@ -47,6 +48,7 @@ export const metadata: Metadata = createPageMetadata({
 export default function HomePage() {
   return (
     <main className="min-h-screen">
+      <MobileWebviewGuard />
       <JsonLd includeWebSite />
       <HeroStatic />
       <MarketingHeader />

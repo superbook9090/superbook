@@ -84,6 +84,7 @@ export function FeatureTogglesSection({
       items: [
         { key: 'enableAnalytics', labelKey: 'adminSettings.enableAnalytics', descKey: 'adminSettings.enableAnalyticsDesc', icon: BarChart3, iconBg: 'bg-[var(--info-light)]', iconColor: 'text-[var(--info)]' },
         { key: 'enableClarity', labelKey: 'adminSettings.enableClarity', descKey: 'adminSettings.enableClarityDesc', icon: Activity, iconBg: 'bg-[var(--warning-light)]', iconColor: 'text-[var(--warning)]' },
+        { key: 'enableGoogleAdsense', labelKey: 'adminSettings.enableGoogleAdsense', descKey: 'adminSettings.enableGoogleAdsenseDesc', icon: Globe, iconBg: 'bg-[var(--success-light)]', iconColor: 'text-[var(--success)]' },
       ],
     },
     {

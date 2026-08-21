@@ -7,6 +7,7 @@ import { translate } from '@/i18n';
 import { roleThemes } from '@/lib/roleTheme';
 import { useFeature } from '@/contexts/AppSettingsContext';
 import ThemeToggle from '@/components/ui/ThemeToggle';
+import DownloadAppSidebarCard from '@/components/ui/DownloadAppSidebarCard';
 
 export default function HeaderStatic({ forceScrolled = false }: { forceScrolled?: boolean }) {
   const t = (key: Parameters<typeof translate>[1]) => translate('en', key);
@@ -51,6 +52,7 @@ export default function HeaderStatic({ forceScrolled = false }: { forceScrolled?
             </button>
 
             <div id="header-auth-guest" className="flex items-center gap-4">
+              <DownloadAppSidebarCard compact />
               <Link
                 href={ROUTES.login}
                 data-i18n-key="home.login"
@@ -101,11 +103,12 @@ export default function HeaderStatic({ forceScrolled = false }: { forceScrolled?
                 <line x1="4" x2="20" y1="18" y2="18" />
               </svg>
             </summary>
-            <div className="absolute right-0 top-full mt-1.5 w-56 rounded-xl bg-[var(--card-solid)]/95 backdrop-blur-md shadow-xl border border-[var(--border)] p-2.5 flex flex-col gap-2 z-50">
+            <div className="absolute right-0 top-full mt-1.5 w-60 rounded-xl bg-[var(--card-solid)]/95 backdrop-blur-md shadow-xl border border-[var(--border)] p-2.5 flex flex-col gap-2 z-50">
               <div className="flex items-center justify-between pb-2 border-b border-[var(--border)]">
                 <span className="text-xs font-semibold text-[var(--muted)]">Theme</span>
                 <ThemeToggle />
               </div>
+              <DownloadAppSidebarCard compact />
               {enableBlogs && (
                 <Link
                   href={ROUTES.blogs}

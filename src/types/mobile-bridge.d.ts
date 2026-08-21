@@ -2,6 +2,9 @@ import type { NativeOpenLinkTarget, NativeSharePayload } from '@/lib/mobile/webv
 
 declare global {
   interface Window {
+    AndroidBridge?: {
+      postMessage?: (message: string) => void;
+    };
     ReactNativeWebView?: {
       postMessage: (message: string) => void;
     };
@@ -12,7 +15,10 @@ declare global {
       openExternal: (url: string) => boolean;
       openInternal: (url: string) => boolean;
     };
+    opera?: string;
+    MSStream?: unknown;
   }
 }
 
 export {};
+

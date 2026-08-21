@@ -7,6 +7,7 @@ export const ROUTES = {
   forgotPassword: '/forgot-password',
   contact: '/contact',
   privacy: '/privacy',
+  downloadApp: 'https://play.google.com/store/apps/details?id=com.quizdo',
   maintenance: '/maintenance',
   howItWorks: '/how-it-works',
   blogs: '/blogs',

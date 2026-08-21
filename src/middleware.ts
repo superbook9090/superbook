@@ -4,6 +4,7 @@ import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import { ROUTES } from '@/constants/routes';
 import { authRateLimiter, generalRateLimiter, adminRateLimiter, publicBlogRateLimiter } from '@/lib/rateLimiter';
+import { isMobileAppUserAgent } from '@/lib/mobile/mobileDetection';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -71,12 +72,22 @@ export async function middleware(request: NextRequest) {
   }
 
   // =========================
-  // ✅ 2. REDIRECT AUTHENTICATED USERS FROM HOME
+  // ✅ 2. REDIRECT AUTHENTICATED USERS & MOBILE APP WEBVIEW FROM HOME
   // =========================
   if (pathname === '/') {
     if (token?.id) {
       return NextResponse.redirect(new URL(ROUTES.dashboard, request.url));
     }
+
+    const userAgent = request.headers.get('user-agent');
+    const isWebviewParam =
+      request.nextUrl.searchParams.get('webview') === 'true' ||
+      request.nextUrl.searchParams.get('app') === 'true';
+
+    if (isWebviewParam || isMobileAppUserAgent(userAgent)) {
+      return NextResponse.redirect(new URL(ROUTES.login, request.url));
+    }
+
     return NextResponse.next();
   }
 

@@ -7,6 +7,7 @@ import { AlertProvider } from '@/components/ui/AlertContainer';
 import MaintenanceCheck from '@/components/MaintenanceCheck';
 import DeferredAnalytics from '@/components/providers/DeferredAnalytics';
 import ClarityInit from '@/components/providers/ClarityInit';
+import GoogleAdsenseInit from '@/components/providers/GoogleAdsenseInit';
 import { createRootMetadata } from '@/lib/seo/metadata';
 import { fontVariables } from '@/lib/fonts';
 import PullToRefresh from '@/components/PullToRefresh';
@@ -56,6 +57,7 @@ export default function RootLayout({
         <AnimatedCursor />
         <DeferredAnalytics />
         <ClarityInit />
+        <GoogleAdsenseInit />
       </body>
     </html>
   );

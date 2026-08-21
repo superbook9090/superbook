@@ -26,6 +26,7 @@ export interface AppSettings {
     enableGoogleAuthWeb?: boolean;
     enableNotes?: boolean;
     enableAiQuizGen?: boolean;
+    enableGoogleAdsense?: boolean;
   };
   platformConfig: {
     siteName?: string;

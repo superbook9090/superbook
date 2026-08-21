@@ -13,6 +13,7 @@ import { isAdmin, isSuperAdmin } from '@/lib/roles';
 import { ADMIN_NAV, TEACHER_NAV } from '@/constants/navigation';
 import { getNavIcon } from '@/lib/navigation/icons';
 import { useDashboardNav } from '@/hooks/useDashboardNav';
+import DownloadAppSidebarCard from '@/components/ui/DownloadAppSidebarCard';
 
 interface User {
   id?: string;
@@ -124,8 +125,9 @@ export default function TeacherSidebar({ user }: { user: User | null }) {
         </nav>
       </div>
 
-      {/* User Profile Section - Fixed at Bottom */}
-      <div className="flex-shrink-0 p-3 sm:p-4">
+      {/* User Profile & Download App Section - Fixed at Bottom */}
+      <div className="flex-shrink-0 p-3 sm:p-4 space-y-2">
+        <DownloadAppSidebarCard />
         <div className="card-surface rounded-2xl p-3 sm:p-4">
           <div className="flex items-center">
             <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full gradient-bg flex items-center justify-center text-white font-semibold">

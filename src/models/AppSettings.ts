@@ -26,6 +26,7 @@ export interface IAppSettings extends Document {
     enableGoogleAuthWeb?: boolean;
     enableNotes?: boolean;
     enableAiQuizGen?: boolean;
+    enableGoogleAdsense?: boolean;
   };
   platformConfig: {
     maintenanceMode: boolean;
@@ -125,6 +126,10 @@ const appSettingsSchema = new Schema<IAppSettings>(
         default: true,
       },
       enableAiQuizGen: {
+        type: Boolean,
+        default: true,
+      },
+      enableGoogleAdsense: {
         type: Boolean,
         default: true,
       },

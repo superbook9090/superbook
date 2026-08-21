@@ -15,6 +15,7 @@ import type { DashboardNavItem } from '@/constants/navigation';
 import { getNavIcon } from '@/lib/navigation/icons';
 import { useDashboardNav } from '@/hooks/useDashboardNav';
 import { cn } from '@/lib/utils';
+import DownloadAppSidebarCard from '@/components/ui/DownloadAppSidebarCard';
 
 interface User {
   id?: string;
@@ -152,7 +153,8 @@ function MobileNavComponent({
               </nav>
             </div>
 
-            <div className="mt-6 pt-3 border-t border-[var(--border)]">
+            <div className="mt-6 pt-3 border-t border-[var(--border)] space-y-2">
+              <DownloadAppSidebarCard compact />
               <div className="text-[var(--color-foreground)] mb-3 px-3">
                 <div className="text-sm font-semibold truncate">{user?.name}</div>
                 <div className="text-xs text-[var(--color-muted-foreground)] truncate">{user?.email}</div>

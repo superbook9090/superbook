@@ -15,7 +15,8 @@ export type FeatureToggleKey =
   | 'enableGoogleAuthApp'
   | 'enableGoogleAuthWeb'
   | 'enableNotes'
-  | 'enableAiQuizGen';
+  | 'enableAiQuizGen'
+  | 'enableGoogleAdsense';
 
 export type TeacherLimitKey = 'courses' | 'quizzes' | 'blogs' | 'aiQuizGenerations';
 
@@ -57,6 +58,7 @@ export const defaultPublicAppSettings: PublicAppSettings = {
     enableGoogleAuthWeb: true,
     enableNotes: true,
     enableAiQuizGen: true,
+    enableGoogleAdsense: true,
   },
   platformConfig: {
     maintenanceMode: false,
