@@ -19,6 +19,7 @@ interface FeatureToggles {
   enableGoogleAuthWeb?: boolean;
   enableNotes?: boolean;
   enableAiQuizGen?: boolean;
+  enableCourseDoubts?: boolean;
 }
 
 interface TeacherLimits {
@@ -43,6 +44,7 @@ const DEFAULT_FEATURE_TOGGLES: Partial<Record<keyof FeatureToggles, boolean>> = 
   enableGoogleAuthWeb: true,
   enableNotes: true,
   enableAiQuizGen: true,
+  enableCourseDoubts: true,
 };
 
 export async function isFeatureEnabled(feature: keyof FeatureToggles): Promise<boolean> {

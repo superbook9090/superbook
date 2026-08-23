@@ -64,6 +64,7 @@ export function FeatureTogglesSection({
         { key: 'enableQuizzes', labelKey: 'adminSettings.enableQuizzes', descKey: 'adminSettings.enableQuizzesDesc', icon: FileText, iconBg: 'bg-[var(--primary-soft)]', iconColor: 'text-[var(--primary)]' },
         { key: 'enableBlogs', labelKey: 'adminSettings.enableBlogs', descKey: 'adminSettings.enableBlogsDesc', icon: BookOpen, iconBg: 'bg-[var(--info-light)]', iconColor: 'text-[var(--info)]' },
         { key: 'enableNotes', labelKey: 'adminSettings.enableNotes', descKey: 'adminSettings.enableNotesDesc', icon: Notebook, iconBg: 'bg-[var(--warning-light)]', iconColor: 'text-[var(--warning)]' },
+        { key: 'enableCourseDoubts', labelKey: 'adminSettings.enableCourseDoubts', descKey: 'adminSettings.enableCourseDoubtsDesc', icon: FileText, iconBg: 'bg-[var(--success-light)]', iconColor: 'text-[var(--success)]' },
       ],
     },
     {

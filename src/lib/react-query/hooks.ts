@@ -25,6 +25,7 @@ import { listTeacherCoursesSelf } from '@/lib/api/courses';
 import { listEnrollments, enrollInCourse, joinCourseByCode, dropEnrollment } from '@/lib/api/enrollments';
 import { listCertificates } from '@/lib/api/certificates';
 import { listQuizAttempts, startQuizAttempt, submitQuizAttempt, type SubmitQuizAttemptInput } from '@/lib/api/quizAttempts';
+import { fetchCourseDoubts, askCourseDoubt, replyCourseDoubt, type DoubtQuestion } from '@/lib/api/doubts';
 import { queryKeys, favoritesListDefaults } from '@/lib/react-query/query-keys';
 import { useSessionStore } from '@/store/useSessionStore';
 export type { DashboardData, TeacherDashboardData };
@@ -685,3 +686,36 @@ export function useDeleteQuiz() {
     },
   });
 }
+
+// ============ DOUBTS QUERIES & MUTATIONS ============
+
+export type { DoubtQuestion };
+
+export function useCourseDoubts(courseId: string) {
+  return useQuery({
+    queryKey: queryKeys.doubts.all(courseId),
+    queryFn: () => fetchCourseDoubts(courseId),
+    enabled: !!courseId,
+  });
+}
+
+export function useAskCourseDoubt() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ courseId, question }: { courseId: string; question: string }) => askCourseDoubt(courseId, question),
+    onSuccess: (_, { courseId }) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.doubts.all(courseId) });
+    },
+  });
+}
+
+export function useReplyCourseDoubt() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ courseId, doubtId, answer }: { courseId: string; doubtId: string; answer: string }) => replyCourseDoubt(courseId, doubtId, answer),
+    onSuccess: (_, { courseId }) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.doubts.all(courseId) });
+    },
+  });
+}
+

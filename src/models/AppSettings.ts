@@ -27,6 +27,7 @@ export interface IAppSettings extends Document {
     enableNotes?: boolean;
     enableAiQuizGen?: boolean;
     enableGoogleAdsense?: boolean;
+    enableCourseDoubts?: boolean;
   };
   platformConfig: {
     maintenanceMode: boolean;
@@ -130,6 +131,10 @@ const appSettingsSchema = new Schema<IAppSettings>(
         default: true,
       },
       enableGoogleAdsense: {
+        type: Boolean,
+        default: true,
+      },
+      enableCourseDoubts: {
         type: Boolean,
         default: true,
       },

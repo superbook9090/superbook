@@ -23,6 +23,7 @@ import './UserNotification';
 import './PasswordResetToken';
 import './Certificate';
 import './Note';
+import './CourseDoubt';
 
 export { default as User } from './User';
 export { default as Organization } from './Organization';
@@ -46,3 +47,4 @@ export { default as UserNotification } from './UserNotification';
 export { default as PasswordResetToken } from './PasswordResetToken';
 export { default as Certificate } from './Certificate';
 export { default as Note } from './Note';
+export { default as CourseDoubt } from './CourseDoubt';

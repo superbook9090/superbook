@@ -3,13 +3,18 @@
 import { useState } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { LazyCreateCourseForm, LazyCurriculumEditor } from '@/lib/lazy';
-import { Settings, Layout } from 'lucide-react';
+import { Settings, Layout, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import CourseActionBar from './CourseActionBar';
+import { TeacherDoubtsTab } from '@/app/(dashboard)/dashboard/teacher/courses/[id]/_components/TeacherDoubtsTab';
+import { useSettingsStore } from '@/store/useSettingsStore';
 
 export default function EditCoursePageContent({ courseId }: { courseId: string }) {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<'basic' | 'curriculum'>('curriculum');
+  const { isFeatureEnabled } = useSettingsStore();
+  const doubtsEnabled = isFeatureEnabled('enableCourseDoubts');
+  
+  const [activeTab, setActiveTab] = useState<'basic' | 'curriculum' | 'doubts'>('curriculum');
 
   return (
     <div>
@@ -52,6 +57,21 @@ export default function EditCoursePageContent({ courseId }: { courseId: string }
           <Layout className="w-4 h-4" />
           {t('courseEdit.curriculum')}
         </button>
+        {doubtsEnabled && (
+          <button
+            type="button"
+            onClick={() => setActiveTab('doubts')}
+            className={cn(
+              'flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all',
+              activeTab === 'doubts'
+                ? 'bg-[var(--card-solid)] text-[var(--color-foreground)] shadow-sm'
+                : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]'
+            )}
+          >
+            <MessageCircle className="w-4 h-4" />
+            {t('courseDoubts.tabDoubts')}
+          </button>
+        )}
       </div>
 
       <div
@@ -60,11 +80,17 @@ export default function EditCoursePageContent({ courseId }: { courseId: string }
           activeTab === 'curriculum' ? 'p-0' : 'p-6 md:p-10'
         )}
       >
-        {activeTab === 'basic' ? (
+        {activeTab === 'basic' && (
           <LazyCreateCourseForm courseId={courseId} />
-        ) : (
+        )}
+        {activeTab === 'curriculum' && (
           <div className="p-6 md:p-10">
             <LazyCurriculumEditor courseId={courseId} />
+          </div>
+        )}
+        {activeTab === 'doubts' && doubtsEnabled && (
+          <div className="p-6 md:p-10">
+            <TeacherDoubtsTab courseId={courseId} />
           </div>
         )}
       </div>

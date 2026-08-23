@@ -16,7 +16,7 @@ import {
   useCourseCurriculum,
   type Quiz,
 } from '@/lib/react-query/hooks';
-import { BookOpen, Trophy, Target, Info } from 'lucide-react';
+import { BookOpen, Trophy, Target, Info, MessageCircle } from 'lucide-react';
 import {
   LazyCourseLeaderboard,
   LazyCurriculumQuizRow,
@@ -35,8 +35,10 @@ import { OverviewTab } from './_components/OverviewTab';
 import { QuizzesTab } from './_components/QuizzesTab';
 import { CurriculumTab, type ChapterWithQuizzes } from './_components/CurriculumTab';
 import CurriculumLessonRow from './_components/CurriculumLessonRow';
+import { DoubtsTab } from './_components/DoubtsTab';
+import { useSettingsStore } from '@/store/useSettingsStore';
 
-type TabType = 'curriculum' | 'overview' | 'quizzes' | 'leaderboard';
+type TabType = 'curriculum' | 'overview' | 'quizzes' | 'leaderboard' | 'doubts';
 type PendingQuizStart = QuizStartInfo & { quizId: string; attemptId?: string };
 
 export default function CourseDetailPage() {
@@ -47,8 +49,11 @@ export default function CourseDetailPage() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
+  const { isFeatureEnabled } = useSettingsStore();
+  const doubtsEnabled = isFeatureEnabled('enableCourseDoubts');
+
   const tabParam = searchParams.get('tab') as TabType;
-  const validTabs: TabType[] = ['curriculum', 'overview', 'quizzes', 'leaderboard'];
+  const validTabs: TabType[] = ['curriculum', 'overview', 'quizzes', 'leaderboard', ...(doubtsEnabled ? ['doubts' as TabType] : [])];
   const initialTab = validTabs.includes(tabParam) ? tabParam : 'curriculum';
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
 
@@ -210,6 +215,7 @@ export default function CourseDetailPage() {
             { id: 'overview', label: t('common.overview'), icon: <Info className="w-4 h-4" /> },
             { id: 'quizzes', label: t('nav.quizzes'), icon: <Target className="w-4 h-4" />, count: courseQuizzes.length },
             { id: 'leaderboard', label: t('courses.leaderboard'), icon: <Trophy className="w-4 h-4" /> },
+            ...(doubtsEnabled ? [{ id: 'doubts', label: t('courseDoubts.tabDoubts'), icon: <MessageCircle className="w-4 h-4" /> }] : []),
           ].map((tab) => (
             <button
               key={tab.id}
@@ -318,6 +324,10 @@ export default function CourseDetailPage() {
                 <LazyCourseLeaderboard courseId={courseId} courseTitle={enrollment.course.title} showUserRank={true} currentUserId={session?.user?.id} />
               </div>
             </div>
+          )}
+
+          {activeTab === 'doubts' && doubtsEnabled && (
+            <DoubtsTab courseId={courseId} />
           )}
         </div>
       </div>

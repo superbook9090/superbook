@@ -180,6 +180,7 @@ export const updateSettingsSchema = z.object({
     enableNotes: z.boolean().optional(),
     enableAiQuizGen: z.boolean().optional(),
     enableGoogleAdsense: z.boolean().optional(),
+    enableCourseDoubts: z.boolean().optional(),
   }).optional(),
   platformConfig: z.object({
     siteName: z.string().max(100).optional(),

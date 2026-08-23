@@ -58,6 +58,7 @@ export async function GET() {
         enableNotes: true,
         enableAiQuizGen: true,
         enableGoogleAdsense: true,
+        enableCourseDoubts: true,
       },
       platformConfig: {
         siteName: 'Quiz Do',

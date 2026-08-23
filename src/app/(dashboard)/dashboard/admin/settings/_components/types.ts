@@ -27,6 +27,7 @@ export interface AppSettings {
     enableNotes?: boolean;
     enableAiQuizGen?: boolean;
     enableGoogleAdsense?: boolean;
+    enableCourseDoubts?: boolean;
   };
   platformConfig: {
     siteName?: string;
