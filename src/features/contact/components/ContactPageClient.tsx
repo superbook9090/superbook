@@ -158,51 +158,65 @@ export default function ContactPageClient() {
   };
 
   return (
-    <div data-role={role} className="min-h-screen flex flex-col bg-[var(--background)] text-[var(--color-foreground)] overflow-x-hidden selection:bg-[var(--primary)] selection:text-white">
-      <Header />
+    <div data-role={role} className="min-h-screen flex flex-col bg-[var(--background)] text-[var(--color-foreground)] overflow-x-hidden selection:bg-[var(--primary)] selection:text-white relative">
+      {/* Global Ambient Background */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-[var(--primary)]/10 blur-[120px] animate-pulse" style={{ animationDuration: '8s' }} />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-[var(--primary-accent)]/10 blur-[150px] animate-pulse" style={{ animationDuration: '12s' }} />
+        <div className="absolute top-[40%] left-[60%] w-[30%] h-[30%] rounded-full bg-[var(--primary-light)]/5 blur-[100px] animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }} />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:40px_40px] opacity-30" />
+      </div>
 
-      <ContactHero />
+      <div className="relative z-10 flex flex-col min-h-screen w-full">
+        <Header />
 
-      <section className="relative -mt-10 sm:-mt-14 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 z-20 w-full">
-        <div className="grid lg:grid-cols-12 gap-8 items-start">
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="lg:col-span-7 glass border border-[var(--color-border)] rounded-3xl p-6 sm:p-8 lg:p-10 shadow-2xl backdrop-blur-xl relative overflow-hidden"
-          >
-            <div className="absolute top-0 inset-x-0 h-1 bg-[var(--primary-gradient)]" />
-            <h2 className="text-2xl font-black mb-2 text-[var(--color-foreground)] uppercase tracking-tight flex items-center gap-2">
-              {t('contact.heroSubtitle')}
-            </h2>
-            <p className="text-[var(--color-muted)] text-sm mb-8 font-medium">
-              {t('contact.responseTime')}
-            </p>
-            <ContactForm
-              form={form}
-              errors={errors}
-              touched={touched}
-              isSubmitting={isSubmitting}
-              handleChange={handleChange}
-              handleBlur={handleBlur}
-              handleSubmit={handleSubmit}
-            />
-          </motion.div>
+        <ContactHero />
 
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="lg:col-span-5 space-y-6"
-          >
-            <ContactInfo />
-          </motion.div>
-        </div>
-      </section>
+        <section className="relative -mt-16 sm:-mt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 z-20 w-full">
+          <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              className="lg:col-span-7 glass border border-white/10 dark:border-white/5 rounded-[2rem] p-6 sm:p-10 lg:p-12 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] backdrop-blur-2xl relative overflow-hidden bg-white/40 dark:bg-[#101319]/60"
+            >
+              <div className="absolute top-0 inset-x-0 h-1.5 bg-[var(--primary-gradient)] opacity-90" />
+              <div className="absolute inset-0 bg-gradient-to-b from-white/40 to-transparent dark:from-white/5 opacity-50 pointer-events-none" />
+              
+              <div className="relative z-10">
+                <h2 className="text-2xl sm:text-3xl font-black mb-3 text-[var(--color-foreground)] uppercase tracking-tight">
+                  {t('contact.heroSubtitle')}
+                </h2>
+                <p className="text-[var(--color-muted-foreground)] text-sm sm:text-base mb-10 font-medium">
+                  {t('contact.responseTime')}
+                </p>
+                <ContactForm
+                  form={form}
+                  errors={errors}
+                  touched={touched}
+                  isSubmitting={isSubmitting}
+                  handleChange={handleChange}
+                  handleBlur={handleBlur}
+                  handleSubmit={handleSubmit}
+                />
+              </div>
+            </motion.div>
 
-      <ContactFaq />
-      <ContactCta />
-      <Footer />
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              className="lg:col-span-5 space-y-6 lg:space-y-8"
+            >
+              <ContactInfo />
+            </motion.div>
+          </div>
+        </section>
+
+        <ContactFaq />
+        <ContactCta />
+        <Footer />
+      </div>
     </div>
   );
 }

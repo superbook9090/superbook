@@ -68,7 +68,10 @@ export async function GET(request: NextRequest) {
 
 async function getAdminStats(organizationId?: string | null, isSuperAdmin: boolean = false) {
   // Build organization filter
-  const orgFilter = isSuperAdmin ? {} : (organizationId ? { organizationId } : { organizationId: null });
+  const orgObjectId = organizationId && mongoose.Types.ObjectId.isValid(organizationId)
+    ? new mongoose.Types.ObjectId(organizationId)
+    : null;
+  const orgFilter = isSuperAdmin ? {} : (orgObjectId ? { organizationId: orgObjectId } : { organizationId: null });
 
   const startOfMonth = new Date();
   startOfMonth.setDate(1);
@@ -292,6 +295,14 @@ async function getAdminStats(organizationId?: string | null, isSuperAdmin: boole
 }
 
 async function getTeacherStats(teacherId: string) {
+  if (!mongoose.Types.ObjectId.isValid(teacherId)) {
+    return {
+      courses: [],
+      overview: { totalCourses: 0, totalStudents: 0, totalQuizzes: 0, totalAttempts: 0, averageScore: 0, publishedCourses: 0 },
+      topStudents: [],
+    };
+  }
+
   // Use aggregation to get all data in a single query pipeline
   const courseStats = await Course.aggregate([
     { $match: { instructor: new mongoose.Types.ObjectId(teacherId) } },
@@ -452,6 +463,9 @@ async function getTeacherStats(teacherId: string) {
 
 async function getUserOverview(userId: string, role: string) {
   if (role === 'student') {
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return { enrollments: 0, completedCourses: 0, quizzesTaken: 0, averageScore: 0 };
+    }
     const oid = new mongoose.Types.ObjectId(userId);
     const [enrollmentAgg, attemptAgg] = await Promise.all([
       Enrollment.aggregate([

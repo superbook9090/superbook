@@ -1,54 +1,43 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import dynamic from 'next/dynamic';
+import { useEffect } from 'react';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { GoogleAnalytics, GoogleTagManager } from '@next/third-parties/google';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import { useSettingsStore } from '@/store/useSettingsStore';
 
-const GoogleAnalytics = dynamic(
-  () => import('@next/third-parties/google').then((mod) => mod.GoogleAnalytics),
-  { ssr: false }
-);
-const GoogleTagManager = dynamic(
-  () => import('@next/third-parties/google').then((mod) => mod.GoogleTagManager),
-  { ssr: false }
-);
-const Analytics = dynamic(
-  () => import('@vercel/analytics/react').then((mod) => mod.Analytics),
-  { ssr: false }
-);
-const SpeedInsights = dynamic(
-  () => import('@vercel/speed-insights/next').then((mod) => mod.SpeedInsights),
-  { ssr: false }
-);
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID || 'G-DRRECK67YF';
+const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID || 'GTM-PRZ4PRLN';
 
 export default function DeferredAnalytics() {
-  const [enabled, setEnabled] = useState(false);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const enableAnalytics = useSettingsStore((s) => s.settings.featureToggles.enableAnalytics ?? true);
 
+  // Send pageview on App Router client-side route changes
   useEffect(() => {
-    if (!enableAnalytics) {
-      setEnabled(false);
-      return;
+    if (!enableAnalytics || !pathname) return;
+    const url = searchParams?.toString() ? `${pathname}?${searchParams.toString()}` : pathname;
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (typeof window !== 'undefined' && typeof (window as any).gtag === 'function') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (window as any).gtag('config', GA_ID, {
+        page_path: url,
+      });
     }
-    const enable = () => setEnabled(true);
+  }, [pathname, searchParams, enableAnalytics]);
 
-    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-      const id = window.requestIdleCallback(enable, { timeout: 2500 });
-      return () => window.cancelIdleCallback(id);
-    }
-
-    const timer = setTimeout(enable, 1500);
-    return () => clearTimeout(timer);
-  }, [enableAnalytics]);
-
-  if (!enableAnalytics || !enabled) return null;
+  if (!enableAnalytics) return null;
 
   return (
     <>
-      <GoogleTagManager gtmId="GTM-PRZ4PRLN" />
-      <GoogleAnalytics gaId="G-DRRECK67YF" />
+      {GTM_ID && <GoogleTagManager gtmId={GTM_ID} />}
+      {GA_ID && <GoogleAnalytics gaId={GA_ID} />}
       <Analytics />
       <SpeedInsights />
     </>
   );
 }
+

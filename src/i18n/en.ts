@@ -1487,6 +1487,20 @@ export const en = {
     pageErrorTitle: 'Something went wrong',
     pageErrorDescription: 'An unexpected error occurred. Please try again later.',
     tryAgainButton: 'Try again',
+    // ErrorScreen slot machine keys
+    pageNotFound: 'Page Not Found',
+    pageNotFoundBody: "Sorry, we couldn't find the page you're looking for. It might have been moved, deleted, or never existed.",
+    slotStatusNotFound: 'SYSTEM STATUS: 404 NOT FOUND',
+    pageGone: 'Page Permanently Moved',
+    pageGoneBody: 'This page or resource has been permanently removed and is no longer available.',
+    slotStatusGone: 'SYSTEM STATUS: 410 GONE',
+    pageError: 'Something Went Wrong',
+    pageErrorBody: 'An unexpected server or rendering error occurred. Please try again or return home.',
+    slotStatusError: 'SYSTEM STATUS: 500 SERVER ERROR',
+    homeAriaLabel: 'Go to home page',
+    pullLeverAriaLabel: 'Pull slot machine lever',
+    tryAgain: 'Try Again',
+    backToHome: 'Back to Home',
   },
 
   // Favorites

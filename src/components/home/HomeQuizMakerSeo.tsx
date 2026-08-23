@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { ROUTES } from '@/constants/routes';
 import { useTranslation } from '@/hooks/useTranslation';
+import { Accordion } from '@/components/ui/Accordion';
 
 const FAQ_KEYS = ['q1', 'q2', 'q3', 'q4'] as const;
 
@@ -117,18 +118,13 @@ export default function HomeQuizMakerSeo() {
         <h3 className="text-xl font-bold text-[var(--color-foreground)] mb-4">
           {t('seoTools.common.faqTitle')}
         </h3>
-        <dl className="flex flex-col gap-4">
-          {FAQ_KEYS.map((key) => (
-            <div key={key} className="rounded-xl border border-[var(--border)] p-5">
-              <dt className="font-semibold text-[var(--color-foreground)] mb-2">
-                {t(`home.quizMakerSeo.faqs.${key}.question`)}
-              </dt>
-              <dd className="text-sm text-[var(--color-muted-foreground)] leading-relaxed">
-                {t(`home.quizMakerSeo.faqs.${key}.answer`)}
-              </dd>
-            </div>
+        <div className="space-y-4">
+          {FAQ_KEYS.map((key, idx) => (
+            <Accordion key={key} index={idx} title={t(`home.quizMakerSeo.faqs.${key}.question`)}>
+              <p>{t(`home.quizMakerSeo.faqs.${key}.answer`)}</p>
+            </Accordion>
           ))}
-        </dl>
+        </div>
 
         <p className="mt-8 text-sm text-[var(--color-muted-foreground)]">
           {t('home.quizMakerSeo.footer.prefix')}{' '}

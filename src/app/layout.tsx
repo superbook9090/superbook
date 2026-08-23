@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import type { Metadata, Viewport } from "next";
 import "@/app/globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
@@ -55,7 +56,9 @@ export default function RootLayout({
           </LanguageProvider>
         </AlertProvider>
         <AnimatedCursor />
-        <DeferredAnalytics />
+        <Suspense fallback={null}>
+          <DeferredAnalytics />
+        </Suspense>
         <ClarityInit />
         <GoogleAdsenseInit />
       </body>

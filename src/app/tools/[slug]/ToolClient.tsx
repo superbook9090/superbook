@@ -22,6 +22,7 @@ import { landing } from '@/components/home/landingStyles';
 import MarketingHeader from '@/components/home/MarketingHeader';
 import Footer from '@/components/home/Footer';
 import { useFeature } from '@/contexts/AppSettingsContext';
+import { Accordion } from '@/components/ui/Accordion';
 
 const IconMap: Record<string, React.ElementType> = {
   Zap,
@@ -47,38 +48,6 @@ const EXPLORE_LINKS = [
   { slug: 'course-maker-free', path: '/course-maker-free' },
   { slug: 'test-series-maker-free', path: '/test-series-maker-free' },
 ] as const;
-
-function Accordion({ title, children }: { title: string; children: React.ReactNode }) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <div className="border border-[var(--border)] rounded-2xl bg-[var(--color-surface-muted)] overflow-hidden mb-4 hover:bg-[var(--card-solid)] hover:shadow-md transition-all duration-300">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-5 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--student-primary)]"
-      >
-        <h3 className="text-lg font-semibold text-[var(--color-foreground)]">{title}</h3>
-        <ChevronDown
-          className={`w-5 h-5 text-[var(--color-muted-foreground)] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
-        />
-      </button>
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <div className="p-5 pt-0 text-[var(--color-muted-foreground)] border-t border-[var(--border)] mt-4 leading-relaxed">
-              {children}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
 
 type ToolClientProps = {
   toolSlug: string;
@@ -177,7 +146,7 @@ export default function ToolClient({ toolSlug }: ToolClientProps) {
               </h2>
               <div className="space-y-4">
                 {tool.faqs.map((faq, i) => (
-                  <Accordion key={i} title={faq.question}>
+                  <Accordion key={i} title={faq.question} index={i}>
                     <p>{faq.answer}</p>
                   </Accordion>
                 ))}
