@@ -15,7 +15,7 @@ export default function SpaceSaverPrivacyPolicyPage() {
           <p className="text-sm text-gray-500 mb-8">Last updated: August 23, 2026</p>
 
           <p>
-            Welcome to Space Saver ("we," "our," or "us"). We are committed to protecting your personal information and your right to privacy. If you have any questions or concerns about this privacy notice or our practices with regard to your personal information, please contact us.
+            Welcome to Space Saver (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;). We are committed to protecting your personal information and your right to privacy. If you have any questions or concerns about this privacy notice or our practices with regard to your personal information, please contact us.
           </p>
 
           <h2 className="text-xl font-semibold mt-8 mb-4">1. Information We Collect</h2>
@@ -50,14 +50,14 @@ export default function SpaceSaverPrivacyPolicyPage() {
             The app may use third-party services (such as crash reporting or analytics) to help us improve the app. These services may collect anonymous, aggregated data about how you use the app, such as device type, OS version, and crash logs. These services do not have access to your personal files.
           </p>
 
-          <h2 className="text-xl font-semibold mt-8 mb-4">5. Children's Privacy</h2>
+          <h2 className="text-xl font-semibold mt-8 mb-4">5. Children&apos;s Privacy</h2>
           <p>
             Our application is not intended for children under 13 years of age. We do not knowingly collect personal information from children under 13.
           </p>
 
           <h2 className="text-xl font-semibold mt-8 mb-4">6. Changes to This Privacy Policy</h2>
           <p>
-            We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last updated" date.
+            We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the &quot;Last updated&quot; date.
           </p>
 
           <h2 className="text-xl font-semibold mt-8 mb-4">7. Contact Us</h2>
