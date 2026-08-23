@@ -2,8 +2,6 @@
 
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSeoTool } from '@/hooks/useSeoTool';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
 import {
   BookOpen,
   CheckCircle,
@@ -12,8 +10,7 @@ import {
   Clock,
   Globe,
   Shield,
-  Sparkles,
-  ChevronDown
+  Sparkles
 } from 'lucide-react';
 import { PageWrapper } from '@/components/layout';
 import { ROUTES } from '@/constants/routes';

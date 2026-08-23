@@ -60,7 +60,7 @@ export async function PATCH(
 
     doubt.answer = answer.trim();
     doubt.status = 'answered';
-    doubt.teacherId = session.user.id as any;
+    doubt.teacherId = session.user.id as unknown as import('mongoose').Types.ObjectId;
 
     await courseDoubt.save();
 

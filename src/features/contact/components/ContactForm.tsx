@@ -1,5 +1,5 @@
-import { motion, AnimatePresence } from 'framer-motion';
-import { Send, AlertCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Send } from 'lucide-react';
 import { TextField } from '@/components/ui/TextField';
 import Button from '@/components/ui/Button';
 import { useTranslation } from '@/hooks/useTranslation';

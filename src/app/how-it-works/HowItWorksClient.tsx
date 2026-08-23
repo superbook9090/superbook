@@ -1,8 +1,7 @@
 'use client';
 
 import { useTranslation } from '@/hooks/useTranslation';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { motion } from 'framer-motion';
 import {
   BookOpen,
   CheckCircle,
@@ -14,7 +13,6 @@ import {
   Video,
   FileText,
   Lock,
-  ChevronDown,
   Sparkles
 } from 'lucide-react';
 import { PageWrapper } from '@/components/layout';

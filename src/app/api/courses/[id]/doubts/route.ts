@@ -110,9 +110,9 @@ export async function POST(
 
     let courseDoubt = await CourseDoubt.findOne({ courseId: id });
     if (!courseDoubt) {
-      courseDoubt = new CourseDoubt({ courseId: id, doubts: [newDoubt as any] });
+      courseDoubt = new CourseDoubt({ courseId: id, doubts: [newDoubt as unknown as import('@/models/CourseDoubt').IDoubtQuestion] });
     } else {
-      courseDoubt.doubts.push(newDoubt as any);
+      courseDoubt.doubts.push(newDoubt as unknown as import('@/models/CourseDoubt').IDoubtQuestion);
     }
 
     await courseDoubt.save();
