@@ -97,7 +97,7 @@ export default function HomeQuizMakerSeo() {
         <div className="flex flex-wrap gap-3 mb-10">
           <Link
             href="/quiz-maker-free"
-            className="inline-flex items-center px-6 py-3 rounded-xl bg-[var(--color-primary)] text-white font-semibold hover:opacity-90 transition-opacity"
+            className="inline-flex items-center px-6 py-3 rounded-xl border border-[var(--border)] text-[var(--color-foreground)] font-semibold hover:bg-[var(--color-surface-muted)] transition-colors"
           >
             {t('home.quizMakerSeo.cta.tryQuizMaker')}
           </Link>
@@ -109,7 +109,7 @@ export default function HomeQuizMakerSeo() {
           </Link>
           <Link
             href={ROUTES.register}
-            className="inline-flex items-center px-6 py-3 rounded-xl border border-[var(--border)] text-[var(--color-foreground)] font-semibold hover:bg-[var(--color-surface-muted)] transition-colors"
+            className="inline-flex items-center px-6 py-3 rounded-xl bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)] text-white font-semibold shadow-md hover:shadow-lg transition-shadow"
           >
             {t('home.quizMakerSeo.cta.createAccount')}
           </Link>

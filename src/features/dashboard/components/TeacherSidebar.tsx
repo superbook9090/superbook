@@ -77,7 +77,7 @@ export default function TeacherSidebar({ user }: { user: User | null }) {
                   <span className="truncate">{t(item.nameKey)}</span>
                   {isActive && (
                     <motion.div
-                      layoutId="activeIndicator"
+                      layoutId="sidebarActiveIndicator"
                       className="rail-link__dot"
                     />
                   )}

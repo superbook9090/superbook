@@ -92,9 +92,9 @@ export default function About() {
                     />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-[var(--color-foreground)] mb-1">
+                    <h3 className="font-semibold text-[var(--color-foreground)] mb-1">
                       {t(`home.about.${capabilityKey}`)}
-                    </h4>
+                    </h3>
                     <p className="text-sm text-[var(--color-muted-foreground)]">
                       {t(`home.about.${capabilityKey}Desc`)}
                     </p>
@@ -128,12 +128,12 @@ export default function About() {
                   {previewItems.map(({ key, fillClass }) => (
                     <div
                       key={key}
-                      className="flex flex-col justify-end rounded-xl bg-[var(--color-surface-muted)] p-3 min-h-[5rem]"
+                      className="flex flex-col justify-end rounded-xl bg-[var(--card-solid)] border border-[var(--border)] p-3 min-h-[5rem]"
                     >
-                      <span className="text-[10px] uppercase tracking-wide text-[var(--color-muted)] mb-1">
+                      <span className="text-[10px] uppercase tracking-wide text-[var(--color-muted)] mb-1 font-medium">
                         {t(`home.about.${key}`)}
                       </span>
-                      <div className="h-1.5 w-full rounded-full bg-[var(--color-surface-muted-strong)] overflow-hidden">
+                      <div className="h-1.5 w-full rounded-full bg-[var(--color-border)] overflow-hidden">
                         <div
                           className={`h-full rounded-full bg-gradient-to-r from-[var(--primary)] to-[var(--primary-accent)] ${fillClass}`}
                         />
@@ -141,10 +141,10 @@ export default function About() {
                     </div>
                   ))}
                 </div>
-                <div className="rounded-xl bg-[var(--color-surface-muted)] card-body flex flex-col gap-2">
-                  <div className="h-2 bg-[var(--color-surface-muted-strong)] rounded-full w-4/5" />
-                  <div className="h-2 bg-[var(--color-surface-muted-strong)] rounded-full w-3/5" />
-                  <div className="h-2 bg-[var(--color-surface-muted-strong)] rounded-full w-2/3" />
+                <div className="rounded-xl bg-[var(--card-solid)] border border-[var(--border)] p-5 flex flex-col gap-3">
+                  <div className="h-2 bg-[var(--color-border)] rounded-full w-4/5" />
+                  <div className="h-2 bg-[var(--color-border)] rounded-full w-3/5" />
+                  <div className="h-2 bg-[var(--color-border)] rounded-full w-2/3" />
                 </div>
               </div>
 

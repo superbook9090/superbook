@@ -53,7 +53,7 @@ export default function ContinueLearning({ enrollments }: ContinueLearningProps)
       aria-labelledby="continue-learning-heading"
       className="space-y-3 sm:space-y-4"
     >
-      <div className="flex items-center justify-between">
+      <div className="flex items-baseline justify-between">
         <div>
           <h2 id="continue-learning-heading" className="text-lg sm:text-xl font-bold text-[var(--color-foreground)]">
             {t('dashboard.inProgressCourses')}
@@ -85,7 +85,7 @@ export default function ContinueLearning({ enrollments }: ContinueLearningProps)
             >
               <div>
                 <div className="flex items-center justify-between gap-2 mb-3">
-                  <span className="px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-[var(--student-soft)] text-[var(--student-primary)] truncate max-w-[150px]">
+                  <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-[var(--student-soft)] text-[var(--student-primary)] truncate max-w-[150px]">
                     {courseCategory || t('common.course')}
                   </span>
                   <span className="text-xs font-bold tabular-nums text-[var(--color-muted-foreground)]">

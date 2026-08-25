@@ -52,11 +52,11 @@ export default async function FeaturedBlogs() {
             {t('home.featuredBlogs.viewAll')}
           </Link>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="flex flex-wrap justify-center gap-6">
           {blogs.map((blog) => (
             <article
               key={blog._id}
-              className="rounded-2xl border border-[var(--border)] bg-[var(--card-solid)] p-6 hover:shadow-md transition-shadow"
+              className="w-full sm:w-[calc(50%-12px)] md:w-[calc(33.333%-16px)] rounded-2xl border border-[var(--border)] bg-[var(--card-solid)] p-6 hover:shadow-md transition-shadow"
             >
               <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-primary)] mb-2">
                 {blog.topic}

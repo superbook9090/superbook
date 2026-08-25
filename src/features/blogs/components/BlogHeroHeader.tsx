@@ -25,7 +25,7 @@ export default function BlogHeroHeader({
   return (
     <div className="space-y-4">
       {/* Main Title Hero */}
-      <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-gradient-to-r from-[var(--primary)]/10 via-[var(--card-solid)] to-[var(--primary)]/5 p-6 sm:p-8 lg:p-10 shadow-[var(--shadow-sm)]">
+      <div className="relative overflow-hidden rounded-2xl border border-[var(--border)] bg-gradient-to-r from-[var(--primary)]/10 via-[var(--card-solid)] to-[var(--primary)]/5 p-6 sm:p-8 lg:p-10 shadow-[var(--shadow-sm)]">
         <div className="relative z-10 max-w-3xl space-y-3">
           <div className="inline-flex items-center gap-2 rounded-full border border-[var(--primary)]/20 bg-[var(--card-solid)] px-3.5 py-1 text-xs font-semibold text-[var(--primary)] shadow-sm">
             <Sparkles className="w-3.5 h-3.5" />

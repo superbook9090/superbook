@@ -9,7 +9,7 @@ const MotionLink = motion(Link);
 interface QuickActionCardProps {
   icon: LucideIcon;
   title: string;
-  description: string;
+  description?: string;
   href: string;
   color?: 'info' | 'success' | 'warning' | 'error' | 'student' | 'teacher' | 'admin';
   disabled?: boolean;
@@ -93,7 +93,7 @@ export default function QuickActionCard({
         >
           {title}
         </div>
-        <div className="text-[11px] sm:text-xs text-[var(--color-muted-foreground)] truncate mt-0.5">{description}</div>
+        {description && <div className="text-xs text-[var(--color-muted-foreground)] truncate mt-0.5">{description}</div>}
       </div>
     </>
   );

@@ -35,7 +35,7 @@ export default function BlogFeaturedSpotlight({
   });
 
   return (
-    <section className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-gradient-to-br from-[var(--card-solid)] via-[var(--color-surface-muted)]/50 to-[var(--card-solid)] p-6 sm:p-8 lg:p-10 shadow-[var(--shadow-md)]">
+    <section className="relative overflow-hidden rounded-2xl border border-[var(--border)] bg-gradient-to-br from-[var(--card-solid)] via-[var(--color-surface-muted)]/50 to-[var(--card-solid)] p-6 sm:p-8 lg:p-10 shadow-[var(--shadow-md)]">
       {/* Background ambient glow */}
       <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-[var(--primary)]/10 blur-3xl" />
       <div className="pointer-events-none absolute -left-16 -bottom-16 h-64 w-64 rounded-full bg-[var(--primary)]/5 blur-3xl" />

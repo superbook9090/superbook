@@ -69,7 +69,7 @@ export default function Footer() {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            <h4 className="font-semibold mb-4">{t('home.footer.product')}</h4>
+            <h3 className="font-semibold mb-4">{t('home.footer.product')}</h3>
             <ul className="flex flex-col gap-2">
               {getFooterLinks(t).product.map((link) => (
                 <li key={link.label}>
@@ -90,7 +90,7 @@ export default function Footer() {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.15 }}
           >
-            <h4 className="font-semibold mb-4">{t('home.footer.resources')}</h4>
+            <h3 className="font-semibold mb-4">{t('home.footer.resources')}</h3>
             <ul className="flex flex-col gap-2">
               {resourceLinks.map((link) => (
                 <li key={link.label}>
@@ -111,7 +111,7 @@ export default function Footer() {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <h4 className="font-semibold mb-4">{t('home.footer.getStarted')}</h4>
+            <h3 className="font-semibold mb-4">{t('home.footer.getStarted')}</h3>
             <ul className="flex flex-col gap-2">
               {getFooterLinks(t).auth.map((link) => (
                 <li key={link.label}>

@@ -70,7 +70,7 @@ export default function StudentSidebar({ user }: { user: User | null }) {
                   <span className="truncate">{t(item.nameKey)}</span>
                   {isActive && (
                     <motion.div
-                      layoutId="activeIndicator"
+                      layoutId="studentSidebarActiveIndicator"
                       className="rail-link__dot"
                     />
                   )}

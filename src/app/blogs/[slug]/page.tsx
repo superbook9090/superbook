@@ -112,8 +112,29 @@ export default async function PublicBlogDetailPage({
           </header>
 
           <div
-            className="prose prose-lg max-w-none text-[var(--color-foreground)] prose-headings:text-[var(--color-foreground)] prose-a:text-[var(--color-primary)]"
-            dangerouslySetInnerHTML={{ __html: blog.content }}
+            className="prose prose-lg max-w-none text-[var(--color-foreground)] prose-headings:text-[var(--color-foreground)] prose-a:text-[var(--color-primary)] [&_aside>div:nth-of-type(n+4)]:hidden"
+            dangerouslySetInnerHTML={{
+              __html: (() => {
+                let clean = blog.content || '';
+                
+                // Fix CMS exact duplication bug
+                const half = Math.floor(clean.length / 2);
+                if (clean.length > 200 && clean.substring(0, half) === clean.substring(half)) {
+                  clean = clean.substring(0, half);
+                }
+
+                // Remove the first H1 if it matches the page title (Issue #4)
+                const h1Match = clean.match(/<h1[^>]*>(.*?)<\/h1>/i);
+                if (h1Match && h1Match[1].replace(/<[^>]+>/g, '').trim() === blog.title.trim()) {
+                  clean = clean.replace(h1Match[0], '');
+                }
+                
+                // Convert remaining H1s to H2s to keep a single H1 per page (Issue #1)
+                clean = clean.replace(/<h1/gi, '<h2').replace(/<\/h1>/gi, '</h2>');
+                
+                return clean;
+              })()
+            }}
           />
         </article>
 
@@ -135,7 +156,7 @@ export default async function PublicBlogDetailPage({
           </div>
 
           {related.length > 0 && (
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--card-solid)] p-5">
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--card-solid)] p-5 related-articles-widget">
               <h2 className="text-lg font-semibold text-[var(--color-foreground)]">Related articles</h2>
               <div className="mt-4 space-y-4">
                 {related.map((item) => (

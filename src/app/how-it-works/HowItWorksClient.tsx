@@ -34,7 +34,7 @@ function TimelineItem({ icon: Icon, title, description, isLast = false, theme = 
   const isStudent = theme === 'student';
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, x: -20 }}
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true, margin: "-50px" }}
@@ -44,13 +44,13 @@ function TimelineItem({ icon: Icon, title, description, isLast = false, theme = 
       {!isLast && (
         <div className={`absolute left-6 top-10 bottom-0 w-[2px] -translate-x-1/2 border-l-2 border-dashed ${isStudent ? 'border-[var(--student-border)] group-hover:border-[var(--student-primary)]/50' : 'border-[var(--teacher-border)] group-hover:border-[var(--teacher-primary)]/50'} transition-colors duration-300`} />
       )}
-      <div className={`relative z-10 flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center border-2 shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:shadow-md ${isStudent ? 'bg-[var(--student-soft)] border-[var(--student-border)] text-[var(--student-primary)] group-hover:shadow-[0_0_15px_rgba(var(--student-primary-rgb),0.3)]' : 'bg-[var(--teacher-soft)] border-[var(--teacher-border)] text-[var(--teacher-primary)] group-hover:shadow-[0_0_15px_rgba(var(--teacher-primary-rgb),0.3)]'}`}>
+      <div className={`relative z-10 flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center border-2 shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:shadow-md ${isStudent ? 'bg-[var(--student-soft)] border-[var(--student-border)] text-[var(--student-primary)] group-hover:shadow-[0_0_15px_rgba(var(--student-primary-rgb),0.3)]' : 'bg-[var(--teacher-soft)] border-[var(--teacher-border)] text-[var(--teacher-primary)] group-hover:shadow-[0_0_15px_rgba(var(--teacher-primary-rgb),0.3)]'}`}>
         <Icon className="w-6 h-6 transition-transform duration-300 group-hover:scale-110" />
       </div>
       <div className="flex-1 pt-1 transition-transform duration-300 group-hover:translate-x-1">
-        <h4 className={`text-lg font-bold text-[var(--color-foreground)] mb-1 transition-colors duration-300 ${isStudent ? 'group-hover:text-[var(--student-primary)]' : 'group-hover:text-[var(--teacher-primary)]'}`}>
+        <h3 className={`text-lg font-bold text-[var(--color-foreground)] mb-1 transition-colors duration-300 ${isStudent ? 'group-hover:text-[var(--student-primary)]' : 'group-hover:text-[var(--teacher-primary)]'}`}>
           {title}
-        </h4>
+        </h3>
         <p className="text-[var(--color-muted-foreground)] leading-relaxed">
           {description}
         </p>
@@ -69,12 +69,12 @@ export default function HowItWorksClient() {
       <div className={`${landing.container} flex-1 mt-20 sm:mt-24 pb-20`}>
         <PageWrapper>
           {/* Hero Section */}
-          <div className="relative py-24 sm:py-32 text-center max-w-4xl mx-auto overflow-hidden rounded-[3rem]">
+          <div className="relative py-24 sm:py-32 text-center max-w-4xl mx-auto overflow-hidden rounded-[2.5rem]">
             {/* Dynamic Animated Background */}
             <div className="absolute inset-0 bg-gradient-to-br from-[var(--surface-muted)]/30 to-transparent backdrop-blur-3xl border border-white/10 dark:border-white/5 z-0" />
             <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-[var(--primary)]/10 blur-[120px] rounded-full pointer-events-none z-0" />
             <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-[var(--primary-accent)]/10 blur-[120px] rounded-full pointer-events-none z-0" />
-            
+
             <div className="relative z-10 px-6">
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -83,11 +83,11 @@ export default function HowItWorksClient() {
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[var(--student-soft)] to-transparent rounded-full border border-[var(--student-border)] mb-8 shadow-sm"
               >
                 <Sparkles className="w-4 h-4 text-[var(--student-primary)]" aria-hidden />
-                <span className="text-sm font-bold tracking-wide text-[var(--student-primary)] uppercase">
+                <span className="text-sm font-bold tracking-wide text-[var(--student-primary)]">
                   {t('home.howItWorksPage.title')}
                 </span>
               </motion.div>
-              <motion.h1 
+              <motion.h1
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
@@ -95,7 +95,7 @@ export default function HowItWorksClient() {
               >
                 {t('home.howItWorksPage.title')}
               </motion.h1>
-              <motion.p 
+              <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
@@ -108,7 +108,7 @@ export default function HowItWorksClient() {
 
           <div className="space-y-24 mt-16">
             {/* Section 1: Overview */}
-            <motion.section 
+            <motion.section
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
@@ -123,7 +123,7 @@ export default function HowItWorksClient() {
                   <h2 className="text-3xl sm:text-4xl font-black text-[var(--color-foreground)] mb-6 tracking-tight">
                     {t('home.howItWorksPage.platformOverview.title')}
                   </h2>
-                  <div className="space-y-6 text-lg sm:text-xl text-[var(--color-muted-foreground)] leading-relaxed max-w-3xl font-medium">
+                  <div className="space-y-6 text-lg sm:text-xl text-[var(--color-muted-foreground)] leading-relaxed max-w-2xl mx-auto font-medium">
                     <p>{t('home.howItWorksPage.platformOverview.intro')}</p>
                     <p>{t('home.howItWorksPage.platformOverview.benefits')}</p>
                   </div>
@@ -132,9 +132,9 @@ export default function HowItWorksClient() {
             </motion.section>
 
             {/* Journeys Split View */}
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 lg:gap-12">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 lg:gap-12 items-start">
               {/* Student Journey */}
-              <section className="bg-[var(--card-solid)] border border-[var(--color-border)] rounded-[32px] p-6 sm:p-10 shadow-[var(--shadow-sm)] relative overflow-hidden">
+              <section className="bg-[var(--card-solid)] border border-[var(--color-border)] rounded-[2.5rem] p-6 sm:p-10 shadow-[var(--shadow-sm)] relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-[3px]" style={{ background: 'var(--student-gradient)' }} />
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-14 h-14 bg-[var(--student-soft)] rounded-2xl flex items-center justify-center border border-[var(--student-border)]">
@@ -164,7 +164,7 @@ export default function HowItWorksClient() {
               </section>
 
               {/* Teacher Journey */}
-              <section className="bg-[var(--card-solid)] border border-[var(--color-border)] rounded-[32px] p-6 sm:p-10 shadow-[var(--shadow-sm)] relative overflow-hidden">
+              <section className="bg-[var(--card-solid)] border border-[var(--color-border)] rounded-[2.5rem] p-6 sm:p-10 shadow-[var(--shadow-sm)] relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-[3px]" style={{ background: 'var(--teacher-gradient)' }} />
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-14 h-14 bg-[var(--teacher-soft)] rounded-2xl flex items-center justify-center border border-[var(--teacher-border)]">
@@ -246,37 +246,14 @@ export default function HowItWorksClient() {
             </section>
 
             {/* CTA Section */}
-            <section className="py-24 sm:py-32 relative overflow-hidden text-center w-full rounded-[3rem] mt-10">
+            <section className="py-24 sm:py-32 relative overflow-hidden text-center w-full rounded-[2.5rem] mt-10">
               {/* Immersive Background */}
               <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-[#101319] to-black z-0" />
               <div className="absolute inset-0 bg-[var(--primary)]/10 mix-blend-color z-0" />
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-[var(--primary)]/20 blur-[150px] rounded-full pointer-events-none z-0" />
               <div className="absolute inset-0 bg-[url('/noise.png')] opacity-20 mix-blend-overlay pointer-events-none z-0" />
 
-              {/* Floating particles simulation */}
-              <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-                {[...Array(6)].map((_, i) => (
-                  <motion.div
-                    key={i}
-                    className="absolute rounded-full bg-white/20 blur-[2px]"
-                    style={{
-                      width: Math.random() * 8 + 2 + 'px',
-                      height: Math.random() * 8 + 2 + 'px',
-                      left: Math.random() * 100 + '%',
-                      top: Math.random() * 100 + '%',
-                    }}
-                    animate={{
-                      y: [0, -40, 0],
-                      opacity: [0.3, 0.8, 0.3],
-                    }}
-                    transition={{
-                      duration: Math.random() * 4 + 4,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }}
-                  />
-                ))}
-              </div>
+
 
               <div className="relative max-w-4xl mx-auto px-4 z-10 flex flex-col items-center">
                 <motion.div
@@ -285,13 +262,13 @@ export default function HowItWorksClient() {
                   viewport={{ once: true, margin: "-100px" }}
                   transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
                 >
-                  <h2 className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white mb-6 drop-shadow-[0_0_30px_rgba(var(--primary-rgb),0.5)]">
+                  <h2 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white mb-6 drop-shadow-[0_0_30px_rgba(var(--primary-rgb),0.5)]">
                     {t('home.cta.title')}
                   </h2>
                   <p className="text-base sm:text-lg text-white/70 font-medium max-w-xl mx-auto mb-10 leading-relaxed">
                     {t('home.cta.subtitle')}
                   </p>
-                  
+
                   <motion.div
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}

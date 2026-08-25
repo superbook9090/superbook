@@ -56,7 +56,7 @@ export default function DashboardChrome({
           />
         )}
 
-        <aside className="hidden md:block flex-shrink-0" aria-label="Sidebar">
+        <aside className="hidden md:block flex-shrink-0 [&>.sidebar-rail:nth-of-type(n+2)]:hidden [&>div:nth-of-type(n+2)]:hidden" aria-label="Sidebar">
           {isStaff ? (
             <LazyTeacherSidebar user={session.user} />
           ) : (

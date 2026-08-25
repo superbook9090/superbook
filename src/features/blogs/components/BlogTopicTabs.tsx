@@ -88,47 +88,39 @@ export default function BlogTopicTabs({
         {/* Language & Sort Controls */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
           {/* Language Selector */}
-          <div className="flex items-center gap-1 rounded-xl border border-[var(--border)] bg-[var(--background)] p-1 shrink-0">
-            <Globe className="w-3.5 h-3.5 text-[var(--color-muted-foreground)] ml-1.5" />
-            {(['all', 'en', 'hi'] as const).map((langCode) => (
-              <button
-                key={langCode}
-                type="button"
-                onClick={() => onLanguageChange(langCode)}
-                className={`touch-target rounded-lg px-2.5 py-1 text-xs font-semibold transition-all ${
-                  languageFilter === langCode
-                    ? 'bg-[var(--primary)] text-white shadow-sm'
-                    : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]'
-                }`}
-              >
-                {langCode === 'all' ? (t('common.all') || 'All') : langCode === 'hi' ? 'हिंदी' : 'EN'}
-              </button>
-            ))}
+          <div className="relative flex items-center rounded-xl border border-[var(--border)] bg-[var(--background)] hover:border-[var(--primary)]/50 transition-colors">
+            <Globe className="absolute left-3 w-3.5 h-3.5 text-[var(--color-muted-foreground)] pointer-events-none" />
+            <select
+              value={languageFilter}
+              onChange={(e) => onLanguageChange(e.target.value as BlogLanguageType)}
+              className="w-full appearance-none bg-transparent py-2 pl-9 pr-8 text-xs font-semibold text-[var(--color-foreground)] outline-none cursor-pointer"
+              aria-label="Filter by language"
+            >
+              <option value="all">{t('common.all') || 'All'}</option>
+              <option value="en">English (EN)</option>
+              <option value="hi">हिंदी (HI)</option>
+            </select>
+            <div className="absolute right-2.5 pointer-events-none text-[var(--color-muted-foreground)]">
+              <ArrowUpDown className="w-3.5 h-3.5" />
+            </div>
           </div>
 
           {/* Sort Selector */}
-          <div className="flex items-center gap-1 rounded-xl border border-[var(--border)] bg-[var(--background)] p-1 shrink-0">
-            <ArrowUpDown className="w-3.5 h-3.5 text-[var(--color-muted-foreground)] ml-1.5" />
-            {(
-              [
-                { id: 'latest', label: t('blog.latestArticles') || 'Latest' },
-                { id: 'popular', label: t('blog.mostPopular') || 'Popular' },
-                { id: 'quick', label: t('blog.quickReads') || 'Quick' },
-              ] as const
-            ).map((sortOpt) => (
-              <button
-                key={sortOpt.id}
-                type="button"
-                onClick={() => onSortChange(sortOpt.id)}
-                className={`touch-target rounded-lg px-2.5 py-1 text-xs font-semibold transition-all ${
-                  sort === sortOpt.id
-                    ? 'bg-[var(--primary)] text-white shadow-sm'
-                    : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]'
-                }`}
-              >
-                {sortOpt.label}
-              </button>
-            ))}
+          <div className="relative flex items-center rounded-xl border border-[var(--border)] bg-[var(--background)] hover:border-[var(--primary)]/50 transition-colors">
+            <ArrowUpDown className="absolute left-3 w-3.5 h-3.5 text-[var(--color-muted-foreground)] pointer-events-none" />
+            <select
+              value={sort}
+              onChange={(e) => onSortChange(e.target.value as BlogSortType)}
+              className="w-full appearance-none bg-transparent py-2 pl-9 pr-8 text-xs font-semibold text-[var(--color-foreground)] outline-none cursor-pointer"
+              aria-label="Sort articles"
+            >
+              <option value="latest">{t('blog.latestArticles') || 'Latest'}</option>
+              <option value="popular">{t('blog.mostPopular') || 'Popular'}</option>
+              <option value="quick">{t('blog.quickReads') || 'Quick Reads'}</option>
+            </select>
+            <div className="absolute right-2.5 pointer-events-none text-[var(--color-muted-foreground)]">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+            </div>
           </div>
         </div>
       </div>

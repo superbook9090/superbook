@@ -86,7 +86,7 @@ export default function StudentQuickLinks() {
           <QuickActionCard
             icon={Award}
             title={t('dashboard.viewCertificates')}
-            description={t('common.certificates')}
+            description={t('dashboard.certificatesDesc')}
             href={ROUTES.student.certificates}
             color="student"
             delay={0.3}
@@ -97,7 +97,7 @@ export default function StudentQuickLinks() {
           <QuickActionCard
             icon={Newspaper}
             title={t('dashboard.readBlogs')}
-            description={t('common.blogs')}
+            description={t('dashboard.readBlogsDesc')}
             href={ROUTES.student.blogs}
             color="admin"
             delay={0.35}

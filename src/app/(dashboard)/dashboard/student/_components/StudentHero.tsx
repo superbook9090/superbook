@@ -34,10 +34,10 @@ export default function StudentHero({ userName, enrolledCount }: StudentHeroProp
             <Sparkles className="w-3.5 h-3.5" />
             <span>{t('dashboard.studentDashboard')}</span>
           </div>
-          <h1 className="heading-xl">
+          <h2 className="heading-xl">
             {t('dashboard.welcomeBack')}{displayName ? `, ` : '!'}
             {displayName && <span className="gradient-text">{displayName}!</span>}
-          </h1>
+          </h2>
           <p className="text-sm sm:text-base text-[var(--color-muted-foreground)]">
             {t('dashboard.continueLearning').replace('{count}', String(enrolledCount))}
           </p>

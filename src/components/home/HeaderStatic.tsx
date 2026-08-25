@@ -62,7 +62,7 @@ export default function HeaderStatic({ forceScrolled = false }: { forceScrolled?
               <Link
                 href={ROUTES.register}
                 data-i18n-key="home.register"
-                className="px-4 py-2 rounded-lg text-sm font-semibold bg-white text-[var(--student-primary)] hover:bg-white/90 transition-colors"
+                className={`px-4 py-2 rounded-lg text-sm font-semibold text-white bg-gradient-to-r ${theme.gradient} hover:shadow-md transition-shadow`}
               >
                 {t('home.register')}
               </Link>
