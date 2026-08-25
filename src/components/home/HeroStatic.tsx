@@ -65,7 +65,7 @@ export default function HeroStatic() {
         </p>
 
         <p
-          className="hero-fade-in hero-fade-in-delay-4 text-base sm:text-lg text-[var(--muted-light)] max-w-2xl mx-auto mb-12 leading-relaxed"
+          className="hero-fade-in hero-fade-in-delay-4 text-base sm:text-lg text-[var(--muted-light)] max-w-2xl mx-auto mb-10 leading-relaxed"
           data-i18n-key="home.description"
         >
           {t('home.description')}

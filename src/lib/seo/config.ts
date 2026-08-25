@@ -57,14 +57,17 @@ export const EDUCATION_KEYWORDS = [
   'student evaluation software',
   'custom quiz builder',
   'online exam system',
-  'digital assessment platform',
+  'online test series platform',
+  'gamified quizzes',
+  'interactive learning games',
+  'free study tools',
 ] as const;
 
 export const DEFAULT_DESCRIPTION =
-  'Quiz Do is a free quiz maker online. Create quizzes, MCQ tests, mock exams, and courses for free. The online quiz maker trusted by teachers, students, and exam prep coaches in India.';
+  'Join thousands of educators and students on Quiz Do. Create free MCQ quizzes, mock exams, and interactive lessons. No credit card required — start learning today!';
 
 export const DEFAULT_TITLE =
-  'Free Quiz Maker Online | Create Quizzes & Mock Tests — Quiz Do';
+  'Quiz Do | Free Quiz Maker & Interactive Learning Platform';
 
 /** Resolve canonical site URL for metadata, sitemap, and JSON-LD. */
 export function getSiteUrl(): string {

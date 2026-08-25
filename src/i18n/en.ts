@@ -176,10 +176,10 @@ export const en = {
 
   // Home / Landing Page
   home: {
-    title: 'Free Quiz Maker — Create Online Quizzes & Mock Tests',
+    title: 'Free Quiz Maker — Create Engaging Online Quizzes',
     subtitle: 'The free online quiz maker for teachers, students, and coaching institutes',
     description:
-      'Create quizzes free with Quiz Do. Build MCQ tests, timed mock exams, test series, and courses — then share with one link. Auto-grading, analytics, and Hindi & English support included.',
+      'Create quizzes for free with Quiz Do. Build MCQ tests, timed mock exams, and interactive courses. Trusted by teachers and coaching institutes for seamless learning and analytics.',
     badge: 'Free Quiz Maker · Online Tests · Courses & Analytics',
     login: 'Login',
     register: 'Create free account',

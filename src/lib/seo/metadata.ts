@@ -95,6 +95,11 @@ export function createRootMetadata(): Metadata {
         should_fallback: true,
       },
     },
+    appleWebApp: {
+      capable: true,
+      title: SITE_NAME,
+      statusBarStyle: 'default',
+    },
     other: {
       'theme-color': '#7c3aed',
       ...getSearchVerificationMeta(),

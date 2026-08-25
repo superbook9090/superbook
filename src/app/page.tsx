@@ -13,9 +13,9 @@ export const dynamic = 'force-static';
 export const revalidate = 3600;
 
 export const metadata: Metadata = createPageMetadata({
-  title: 'Free Quiz Maker Online | Create Quizzes, MCQs & Mock Tests',
+  title: 'Free Quiz Maker Online | Create Gamified Quizzes & Mock Tests',
   description:
-    'Quiz Do is a free online quiz maker for teachers and students. Create quizzes, MCQ tests, mock exams, and test series in minutes. No credit card — start free today.',
+    'Quiz Do is the best free online quiz maker for teachers and students. Create timed quizzes, mock exams, and engaging test series in minutes. Start for free.',
   path: '/',
   keywords: [
     'quiz',
