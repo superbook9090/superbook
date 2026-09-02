@@ -27,6 +27,8 @@ export function useAdminUsers() {
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebouncedValue(searchQuery, 300);
   const [roleFilter, setRoleFilter] = useState('all');
+  const [platformFilter, setPlatformFilter] = useState('all');
+  const [activityFilter, setActivityFilter] = useState('all');
   const [orgFilter, setOrgFilter] = useState('all');
   const [page, setPage] = useState(1);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -41,6 +43,8 @@ export function useAdminUsers() {
       const data = await listAdminUsers({
         search: debouncedSearch || undefined,
         role: roleFilter === 'all' ? undefined : roleFilter,
+        platform: platformFilter === 'all' ? undefined : platformFilter,
+        activity: activityFilter === 'all' ? undefined : activityFilter,
         organizationId: orgFilter === 'all' ? undefined : orgFilter,
         page,
       });
@@ -55,7 +59,7 @@ export function useAdminUsers() {
     } finally {
       setIsLoading(false);
     }
-  }, [debouncedSearch, roleFilter, orgFilter, page, t, addAlert]);
+  }, [debouncedSearch, roleFilter, platformFilter, activityFilter, orgFilter, page, t, addAlert]);
 
   const fetchOrganizations = useCallback(async () => {
     try {
@@ -190,6 +194,10 @@ export function useAdminUsers() {
     setSearchQuery,
     roleFilter,
     setRoleFilter,
+    platformFilter,
+    setPlatformFilter,
+    activityFilter,
+    setActivityFilter,
     orgFilter,
     setOrgFilter,
     page,

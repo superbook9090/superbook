@@ -81,12 +81,26 @@ async function getAdminStats(organizationId?: string | null, isSuperAdmin: boole
   fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 13);
   fourteenDaysAgo.setHours(0, 0, 0, 0);
 
+  const nowTime = Date.now();
+  const oneDayAgo = new Date(nowTime - 24 * 60 * 60 * 1000);
+  const sevenDaysAgo = new Date(nowTime - 7 * 24 * 60 * 60 * 1000);
+  const thirtyDaysAgo = new Date(nowTime - 30 * 24 * 60 * 60 * 1000);
+
   const [
     totalUsers,
     students,
     teachers,
     admins,
     newUsersThisMonth,
+    dauCount,
+    wauCount,
+    mauCount,
+    appUsersCount,
+    webUsersCount,
+    androidUsersCount,
+    iosUsersCount,
+    activeAppUsersCount,
+    activeWebUsersCount,
     totalCourses,
     publishedCourses,
     totalQuizzes,
@@ -105,6 +119,26 @@ async function getAdminStats(organizationId?: string | null, isSuperAdmin: boole
     User.countDocuments({
       ...orgFilter,
       createdAt: { $gte: startOfMonth },
+    }),
+    User.countDocuments({ ...orgFilter, lastActiveAt: { $gte: oneDayAgo } }),
+    User.countDocuments({ ...orgFilter, lastActiveAt: { $gte: sevenDaysAgo } }),
+    User.countDocuments({ ...orgFilter, lastActiveAt: { $gte: thirtyDaysAgo } }),
+    User.countDocuments({ ...orgFilter, lastPlatform: { $in: ['android', 'ios'] } }),
+    User.countDocuments({
+      ...orgFilter,
+      $or: [{ lastPlatform: 'web' }, { lastPlatform: { $exists: false } }, { lastPlatform: null }],
+    }),
+    User.countDocuments({ ...orgFilter, lastPlatform: 'android' }),
+    User.countDocuments({ ...orgFilter, lastPlatform: 'ios' }),
+    User.countDocuments({
+      ...orgFilter,
+      lastPlatform: { $in: ['android', 'ios'] },
+      lastActiveAt: { $gte: thirtyDaysAgo },
+    }),
+    User.countDocuments({
+      ...orgFilter,
+      $or: [{ lastPlatform: 'web' }, { lastPlatform: { $exists: false } }, { lastPlatform: null }],
+      lastActiveAt: { $gte: thirtyDaysAgo },
     }),
     Course.countDocuments(orgFilter),
     Course.countDocuments({ ...orgFilter, isPublished: true }),
@@ -254,6 +288,11 @@ async function getAdminStats(organizationId?: string | null, isSuperAdmin: boole
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, 8);
 
+  const inactiveCount = Math.max(0, totalUsers - mauCount);
+  const stickinessRatio = mauCount > 0 ? Math.round((dauCount / mauCount) * 100) : 0;
+  const appPct = totalUsers > 0 ? Math.round((appUsersCount / totalUsers) * 100) : 0;
+  const webPct = totalUsers > 0 ? Math.max(0, 100 - appPct) : 0;
+
   return {
     users: {
       total: totalUsers,
@@ -261,6 +300,29 @@ async function getAdminStats(organizationId?: string | null, isSuperAdmin: boole
       teachers,
       admins,
       newThisMonth: newUsersThisMonth,
+    },
+    activeUsers: {
+      dau: dauCount,
+      wau: wauCount,
+      mau: mauCount,
+      inactive: inactiveCount,
+      stickinessRatio,
+      recency: {
+        within24Hours: dauCount,
+        within7Days: Math.max(0, wauCount - dauCount),
+        within30Days: Math.max(0, mauCount - wauCount),
+        olderOrNever: inactiveCount,
+      },
+    },
+    platformStats: {
+      totalApp: appUsersCount,
+      totalWeb: webUsersCount,
+      android: androidUsersCount,
+      ios: iosUsersCount,
+      activeApp: activeAppUsersCount,
+      activeWeb: activeWebUsersCount,
+      appPercentage: appPct,
+      webPercentage: webPct,
     },
     courses: {
       total: totalCourses,

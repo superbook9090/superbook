@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useSessionStore } from '@/store/useSessionStore';
 import UsernameModal from '@/components/auth/UsernameModal';
+import { useUserActivityTracker } from '@/hooks/useUserActivityTracker';
 
 export function SessionProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -12,6 +13,9 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const hasFetchedFavorites = useRef(false);
   const [showUsernameModal, setShowUsernameModal] = useState(false);
   const role = session?.user?.role;
+
+  // Track active sessions and platform (App vs Web)
+  useUserActivityTracker(session?.user?.id);
 
   // Fetch once on app load (cached) so maintenance mode can detect admin sessions.
   useEffect(() => {

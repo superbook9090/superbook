@@ -21,6 +21,31 @@ export interface ActivityItem {
   date: string;
 }
 
+export interface ActiveUsersStats {
+  dau: number;
+  wau: number;
+  mau: number;
+  inactive: number;
+  stickinessRatio: number;
+  recency: {
+    within24Hours: number;
+    within7Days: number;
+    within30Days: number;
+    olderOrNever: number;
+  };
+}
+
+export interface PlatformStats {
+  totalApp: number;
+  totalWeb: number;
+  android: number;
+  ios: number;
+  activeApp: number;
+  activeWeb: number;
+  appPercentage: number;
+  webPercentage: number;
+}
+
 export interface AdminStats {
   users: {
     total: number;
@@ -29,6 +54,8 @@ export interface AdminStats {
     admins: number;
     newThisMonth: number;
   };
+  activeUsers?: ActiveUsersStats;
+  platformStats?: PlatformStats;
   courses: {
     total: number;
     published: number;

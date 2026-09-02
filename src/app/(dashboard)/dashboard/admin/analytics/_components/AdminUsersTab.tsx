@@ -7,6 +7,8 @@ import { ROUTES } from '@/constants/routes';
 import { useTranslation } from '@/hooks/useTranslation';
 import StatCard from '@/components/ui/StatCard';
 import { AdminRoleDistributionChart } from './AdminRoleDistributionChart';
+import { AdminPlatformDistributionChart } from './AdminPlatformDistributionChart';
+import { AdminActivityEngagementCard } from './AdminActivityEngagementCard';
 import type { AdminStats } from './types';
 
 interface AdminUsersTabProps {
@@ -68,6 +70,23 @@ export function AdminUsersTab({ stats }: AdminUsersTabProps) {
           color="warning"
           delay={0.25}
         />
+      </div>
+
+      {/* Platform (App vs Web) & Last Opened / Activity Engagement Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 w-full min-w-0">
+        <div className="w-full min-w-0">
+          <AdminPlatformDistributionChart
+            platformStats={stats.platformStats}
+            totalUsers={stats.users.total}
+          />
+        </div>
+
+        <div className="w-full min-w-0">
+          <AdminActivityEngagementCard
+            activeUsers={stats.activeUsers}
+            totalUsers={stats.users.total}
+          />
+        </div>
       </div>
 
       {/* Role Breakdown & User Management Link */}

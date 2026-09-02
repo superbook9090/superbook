@@ -2,9 +2,20 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Phone, Building2, Calendar, ChevronRight, UserX, Shield } from 'lucide-react';
+import {
+  Mail,
+  Phone,
+  Building2,
+  Calendar,
+  ChevronRight,
+  UserX,
+  Shield,
+  Smartphone,
+  Globe,
+  Clock,
+} from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
-import { formatDate } from '@/lib/dateUtils';
+import { formatDate, getRelativeTime } from '@/lib/dateUtils';
 import type { User } from './types';
 
 type Props = {
@@ -103,6 +114,42 @@ export function UsersMobileList({ users, organizations, handleOpenUserDetail }: 
 
             {/* Info Grid */}
             <div className="flex flex-col gap-2 pt-2.5 border-t border-[var(--border)] text-xs">
+              {/* Platform & Last Opened */}
+              <div className="flex items-center justify-between">
+                <span className="text-[var(--color-muted-foreground)]">{t('adminAnalytics.platform') || 'Platform'}</span>
+                {user.lastPlatform === 'android' ? (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--primary-soft)] text-[var(--primary)] text-[11px] font-semibold">
+                    <Smartphone className="w-3 h-3" />
+                    Android App
+                  </span>
+                ) : user.lastPlatform === 'ios' ? (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--primary-soft)] text-[var(--primary)] text-[11px] font-semibold">
+                    <Smartphone className="w-3 h-3" />
+                    iOS App
+                  </span>
+                ) : user.lastPlatform === 'web' ? (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--info-light)] text-[var(--info)] text-[11px] font-semibold">
+                    <Globe className="w-3 h-3" />
+                    Website
+                  </span>
+                ) : (
+                  <span className="text-[var(--color-muted)] italic">N/A</span>
+                )}
+              </div>
+
+              {/* Last Opened */}
+              <div className="flex items-center justify-between">
+                <span className="text-[var(--color-muted-foreground)]">{t('adminUsers.lastOpened') || 'Last Opened'}</span>
+                {user.lastActiveAt ? (
+                  <span className="font-semibold text-[var(--color-foreground)] flex items-center gap-1">
+                    <Clock className="w-3 h-3 text-[var(--primary)]" />
+                    {getRelativeTime(user.lastActiveAt)}
+                  </span>
+                ) : (
+                  <span className="text-[var(--color-muted)] italic">{t('common.never') || 'Never'}</span>
+                )}
+              </div>
+
               {/* Organization */}
               <div className="flex items-center justify-between">
                 <span className="text-[var(--color-muted-foreground)]">{t('adminUsers.organization') || 'Organization'}</span>

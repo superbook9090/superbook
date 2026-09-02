@@ -67,19 +67,19 @@ export function SendEmailModal({ user, onClose }: SendEmailModalProps) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-3 sm:p-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))]"
       onClick={onClose}
     >
       <motion.div
         initial={{ scale: 0.96, opacity: 0, y: 15 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.96, opacity: 0, y: 15 }}
-        className="bg-[var(--card-solid)] border border-[var(--border)] rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col my-auto"
+        className="bg-[var(--card-solid)] border border-[var(--border)] rounded-2xl shadow-2xl w-full max-w-lg max-h-[min(90vh,calc(100dvh-1.5rem))] sm:max-h-[min(88dvh,750px)] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="p-5 sm:p-6 border-b border-[var(--border)] bg-[var(--color-surface-muted)]/40 flex items-start justify-between gap-4">
-          <div className="flex items-center gap-3">
+        {/* Header - Fixed */}
+        <div className="p-4 sm:p-6 border-b border-[var(--border)] bg-[var(--color-surface-muted)]/40 flex items-start justify-between gap-4 shrink-0">
+          <div className="flex items-center gap-3 min-w-0">
             <div className="p-2.5 rounded-xl bg-[var(--primary-soft)] text-[var(--primary)] shrink-0 shadow-xs">
               <Mail className="w-5 h-5" />
             </div>
@@ -97,15 +97,15 @@ export function SendEmailModal({ user, onClose }: SendEmailModalProps) {
             <button
               onClick={onClose}
               aria-label={t('common.close')}
-              className="p-2 hover:bg-[var(--color-surface-muted)] rounded-xl transition-colors text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
+              className="p-2 hover:bg-[var(--color-surface-muted)] rounded-xl transition-colors text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] shrink-0 min-h-[40px] min-w-[40px] flex items-center justify-center"
             >
               <X className="w-5 h-5" />
             </button>
           </Tooltip>
         </div>
 
-        {/* Form Body */}
-        <form onSubmit={handleSend} className="p-5 sm:p-6 flex flex-col gap-4">
+        {/* Form Body - Scrollable */}
+        <form onSubmit={handleSend} className="p-4 sm:p-6 flex flex-col gap-4 overflow-y-auto flex-1 min-h-0 overscroll-contain">
           {error && (
             <div className="flex items-center gap-2 p-3 rounded-xl bg-[var(--error-light)] text-[var(--error)] text-xs font-semibold">
               <AlertCircle className="w-4 h-4 shrink-0" />
@@ -127,7 +127,7 @@ export function SendEmailModal({ user, onClose }: SendEmailModalProps) {
           <TextField
             label={t('adminUsers.emailMessage') || 'Message'}
             multiline
-            rows={5}
+            rows={4}
             required
             placeholder={t('adminUsers.emailMessagePlaceholder') || 'Type your message to this user here...'}
             value={message}
@@ -140,7 +140,7 @@ export function SendEmailModal({ user, onClose }: SendEmailModalProps) {
             {t('adminUsers.directEmailDesc') || "This email will be delivered directly to the user's registered address from the official platform inbox."}
           </p>
 
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-[var(--border)]">
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-[var(--border)] mt-auto">
             <Button
               type="button"
               onClick={onClose}

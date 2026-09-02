@@ -24,6 +24,9 @@ export interface User {
   limits?: UserLimits;
   canUploadVideos?: boolean;
   canCreatePublicCourses?: boolean;
+  lastActiveAt?: string;
+  lastPlatform?: 'android' | 'ios' | 'web';
+  lastUserAgent?: string;
   createdAt: string;
   updatedAt?: string;
 }
@@ -35,4 +38,8 @@ export interface UserStats {
   admins: number;
   superadmins: number;
   suspended: number;
+  appUsers?: number;
+  webUsers?: number;
+  activeToday?: number;
+  activeMonthly?: number;
 }

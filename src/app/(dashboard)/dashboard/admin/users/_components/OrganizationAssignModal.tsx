@@ -27,12 +27,12 @@ export function OrganizationAssignModal({
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-3 sm:p-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))]"
     >
       <motion.div
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="bg-[var(--card-solid)] rounded-2xl p-6 w-full max-w-md shadow-2xl"
+        className="bg-[var(--card-solid)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 w-full max-w-md shadow-2xl max-h-[min(90vh,calc(100dvh-1.5rem))] overflow-y-auto"
       >
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-[var(--color-foreground)]">{t('adminUsers.assignOrganization')}</h3>

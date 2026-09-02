@@ -65,30 +65,22 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const role = searchParams.get('role');
     const search = searchParams.get('search');
+    const platform = searchParams.get('platform');
+    const activity = searchParams.get('activity');
     const organizationIdParam = searchParams.get('organizationId');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const skip = (page - 1) * limit;
 
-    // Build query with sanitized inputs
-    const query: QueryFilter = {};
-
     // STRICT ORGANIZATION FILTERING:
-    // - Super admins can see ALL users (no filter) unless explicitly filtered
-    // - Public admins (without organizationId) can see ONLY public users (users without organizationId)
-    // - Organizational admins (with organizationId) can see ONLY users from their organization
     let orgFilter: QueryFilter = {};
     if (!authResult.isSuperAdmin) {
-      // Regular admin (not superadmin)
       if (!authResult.organizationId) {
-        // Public admin sees only public users (users without organization)
         orgFilter = { organizationId: null };
       } else {
-        // Organizational admin sees only users from their organization
         orgFilter = { organizationId: authResult.organizationId };
       }
     } else if (organizationIdParam) {
-      // Super admin optional organization filter
       if (organizationIdParam === 'null' || organizationIdParam === 'none') {
         orgFilter = { organizationId: null };
       } else if (validateObjectId(organizationIdParam)) {
@@ -96,31 +88,65 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    if (role) query.role = role;
+    const andClauses: QueryFilter[] = [];
 
-    // Combine organization filter with search filter
+    if (Object.keys(orgFilter).length > 0) {
+      andClauses.push(orgFilter);
+    }
+
+    if (role && role !== 'all') {
+      andClauses.push({ role });
+    }
+
+    if (platform && platform !== 'all') {
+      if (platform === 'app') {
+        andClauses.push({ lastPlatform: { $in: ['android', 'ios'] } });
+      } else if (platform === 'web') {
+        andClauses.push({
+          $or: [
+            { lastPlatform: 'web' },
+            { lastPlatform: { $exists: false } },
+            { lastPlatform: null },
+          ],
+        });
+      } else if (['android', 'ios'].includes(platform)) {
+        andClauses.push({ lastPlatform: platform });
+      }
+    }
+
+    if (activity && activity !== 'all') {
+      const now = Date.now();
+      if (activity === 'today') {
+        andClauses.push({ lastActiveAt: { $gte: new Date(now - 24 * 60 * 60 * 1000) } });
+      } else if (activity === 'week') {
+        andClauses.push({ lastActiveAt: { $gte: new Date(now - 7 * 24 * 60 * 60 * 1000) } });
+      } else if (activity === 'month') {
+        andClauses.push({ lastActiveAt: { $gte: new Date(now - 30 * 24 * 60 * 60 * 1000) } });
+      } else if (activity === 'inactive') {
+        const thirtyDaysAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
+        andClauses.push({
+          $or: [
+            { lastActiveAt: { $lt: thirtyDaysAgo } },
+            { lastActiveAt: { $exists: false } },
+            { lastActiveAt: null },
+          ],
+        });
+      }
+    }
+
     if (search) {
       const sanitizedSearch = sanitizeSearchQuery(search);
-      const searchFilter = {
+      andClauses.push({
         $or: [
           { name: { $regex: sanitizedSearch, $options: 'i' } },
           { email: { $regex: sanitizedSearch, $options: 'i' } },
-        ]
-      };
-
-      // If there's an organization filter, combine with $and
-      if (Object.keys(orgFilter).length > 0) {
-        query.$and = [orgFilter, searchFilter];
-      } else {
-        // Super admin or no org filter, just use search
-        Object.assign(query, searchFilter);
-      }
-    } else {
-      // No search, just apply organization filter
-      Object.assign(query, orgFilter);
+        ],
+      });
     }
 
-    const [users, total, statsAgg, suspendedCount] = await Promise.all([
+    const query = andClauses.length > 0 ? (andClauses.length === 1 ? andClauses[0] : { $and: andClauses }) : {};
+
+    const [users, total, statsAgg, suspendedCount, appUsersCount, webUsersCount, dauCount, mauCount] = await Promise.all([
       User.find(query)
         .select('-password')
         .sort({ createdAt: -1 })
@@ -138,6 +164,13 @@ export async function GET(request: NextRequest) {
         },
       ]),
       User.countDocuments({ ...orgFilter, isSuspended: true }),
+      User.countDocuments({ ...orgFilter, lastPlatform: { $in: ['android', 'ios'] } }),
+      User.countDocuments({
+        ...orgFilter,
+        $or: [{ lastPlatform: 'web' }, { lastPlatform: { $exists: false } }, { lastPlatform: null }],
+      }),
+      User.countDocuments({ ...orgFilter, lastActiveAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } }),
+      User.countDocuments({ ...orgFilter, lastActiveAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } }),
     ]);
 
     const stats = {
@@ -147,6 +180,10 @@ export async function GET(request: NextRequest) {
       admins: 0,
       superadmins: 0,
       suspended: suspendedCount,
+      appUsers: appUsersCount,
+      webUsers: webUsersCount,
+      activeToday: dauCount,
+      activeMonthly: mauCount,
     };
 
     statsAgg.forEach((item: { _id: string; count: number }) => {

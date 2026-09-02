@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Mail,
   Phone,
@@ -13,9 +13,12 @@ import {
   Building2,
   UserCheck,
   Send,
+  Smartphone,
+  Globe,
+  Clock,
 } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
-import { formatDateTime } from '@/lib/dateUtils';
+import { formatDateTime, getRelativeTime } from '@/lib/dateUtils';
 import Tooltip from '@/components/ui/Tooltip';
 import Button from '@/components/ui/Button';
 import type { User } from './types';
@@ -129,6 +132,52 @@ export function UserProfileInfoSection({
               </button>
             </Tooltip>
           )}
+        </div>
+
+        {/* Platform Used */}
+        <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--card-solid)] border border-[var(--border)]">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="p-2 rounded-lg bg-[var(--primary-soft)] text-[var(--primary)] shrink-0">
+              {user.lastPlatform === 'android' || user.lastPlatform === 'ios' ? (
+                <Smartphone className="w-4 h-4" />
+              ) : (
+                <Globe className="w-4 h-4" />
+              )}
+            </div>
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold text-[var(--color-muted-foreground)] uppercase">
+                {t('adminAnalytics.platform') || 'Platform Used'}
+              </p>
+              <p className="text-xs sm:text-sm font-bold text-[var(--color-foreground)] truncate capitalize">
+                {user.lastPlatform === 'android'
+                  ? 'Android App'
+                  : user.lastPlatform === 'ios'
+                    ? 'iOS App'
+                    : user.lastPlatform === 'web'
+                      ? 'Website (Browser)'
+                      : t('common.none') || 'None'}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Last Opened / Active Date & Time */}
+        <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--card-solid)] border border-[var(--border)]">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="p-2 rounded-lg bg-[var(--warning-light)] text-[var(--warning)] shrink-0">
+              <Clock className="w-4 h-4" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold text-[var(--color-muted-foreground)] uppercase">
+                {t('adminUsers.lastOpened') || 'Last Opened'}
+              </p>
+              <p className="text-xs sm:text-sm font-bold text-[var(--color-foreground)] truncate">
+                {user.lastActiveAt
+                  ? `${getRelativeTime(user.lastActiveAt)} (${formatDateTime(user.lastActiveAt)})`
+                  : t('common.never') || 'Never'}
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Joined Date & Time */}

@@ -121,11 +121,16 @@ export async function upsertDeviceToken(userId: string, deviceToken: string, pla
     }
   }
 
-  await NotificationToken.findOneAndUpdate(
-    { deviceToken },
-    { userId, platform, isActive: true, updatedAt: new Date() },
-    { upsert: true, new: true }
-  );
+  await Promise.all([
+    NotificationToken.findOneAndUpdate(
+      { deviceToken },
+      { userId, platform, isActive: true, updatedAt: new Date() },
+      { upsert: true, new: true }
+    ),
+    User.findByIdAndUpdate(userId, {
+      $set: { lastActiveAt: new Date(), lastPlatform: platform },
+    }),
+  ]);
 }
 
 export async function deactivateDeviceToken(userId: string, deviceToken: string) {

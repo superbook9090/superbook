@@ -2,9 +2,22 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Phone, Building2, Calendar, Video, Globe, ChevronRight, UserX, Shield, Trash2 } from 'lucide-react';
+import {
+  Mail,
+  Phone,
+  Building2,
+  Calendar,
+  Video,
+  Globe,
+  ChevronRight,
+  UserX,
+  Shield,
+  Trash2,
+  Smartphone,
+  Clock,
+} from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
-import { formatDate } from '@/lib/dateUtils';
+import { formatDate, formatDateTime, getRelativeTime } from '@/lib/dateUtils';
 import Tooltip from '@/components/ui/Tooltip';
 import type { User } from './types';
 
@@ -67,6 +80,12 @@ export function UsersTable({ users, organizations, handleOpenUserDetail, handleD
               </th>
               <th className="px-5 py-3.5 text-left text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider">
                 {t('admin.role') || 'Role & Status'}
+              </th>
+              <th className="px-5 py-3.5 text-left text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider">
+                {t('adminAnalytics.platform') || 'Platform'}
+              </th>
+              <th className="px-5 py-3.5 text-left text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider">
+                {t('adminUsers.lastOpened') || 'Last Opened'}
               </th>
               <th className="px-5 py-3.5 text-left text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider">
                 {t('adminUsers.organization') || 'Organization'}
@@ -148,6 +167,46 @@ export function UsersTable({ users, organizations, handleOpenUserDetail, handleD
                         </span>
                       )}
                     </div>
+                  </td>
+
+                  {/* Platform (App vs Website) Column */}
+                  <td className="px-5 py-3.5">
+                    {user.lastPlatform === 'android' ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[var(--primary-soft)] text-[var(--primary)] text-xs font-semibold">
+                        <Smartphone className="w-3.5 h-3.5" />
+                        <span>Android</span>
+                      </span>
+                    ) : user.lastPlatform === 'ios' ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[var(--primary-soft)] text-[var(--primary)] text-xs font-semibold">
+                        <Smartphone className="w-3.5 h-3.5" />
+                        <span>iOS</span>
+                      </span>
+                    ) : user.lastPlatform === 'web' ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[var(--info-light)] text-[var(--info)] text-xs font-semibold">
+                        <Globe className="w-3.5 h-3.5" />
+                        <span>Website</span>
+                      </span>
+                    ) : (
+                      <span className="text-xs text-[var(--color-muted)] italic">
+                        {t('common.notAvailable') || 'N/A'}
+                      </span>
+                    )}
+                  </td>
+
+                  {/* Last Opened Column */}
+                  <td className="px-5 py-3.5 text-xs text-[var(--color-muted-foreground)]">
+                    {user.lastActiveAt ? (
+                      <Tooltip label={formatDateTime(user.lastActiveAt)}>
+                        <div className="inline-flex items-center gap-1.5 font-medium text-[var(--color-foreground)]">
+                          <Clock className="w-3.5 h-3.5 text-[var(--primary)] shrink-0" />
+                          <span>{getRelativeTime(user.lastActiveAt)}</span>
+                        </div>
+                      </Tooltip>
+                    ) : (
+                      <span className="text-xs text-[var(--color-muted)] italic">
+                        {t('common.never') || 'Never'}
+                      </span>
+                    )}
                   </td>
 
                   {/* Organization Column */}

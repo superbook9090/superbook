@@ -82,6 +82,12 @@ export const authOptions: AuthOptions = {
                 role: credentials?.role || 'student',
                 isVerified: true,
                 provider: 'phone',
+                lastActiveAt: new Date(),
+                lastPlatform: 'android',
+              });
+            } else {
+              await User.findByIdAndUpdate(dbUser._id, {
+                $set: { lastActiveAt: new Date(), lastPlatform: 'android' },
               });
             }
 
@@ -124,6 +130,12 @@ export const authOptions: AuthOptions = {
                 avatar: payload.picture,
                 isVerified: true,
                 provider: 'google',
+                lastActiveAt: new Date(),
+                lastPlatform: 'android',
+              });
+            } else {
+              await User.findByIdAndUpdate(dbUser._id, {
+                $set: { lastActiveAt: new Date(), lastPlatform: 'android' },
               });
             }
 
@@ -164,6 +176,10 @@ export const authOptions: AuthOptions = {
         if (!isValid) {
           throw new Error('Invalid password');
         }
+
+        await User.findByIdAndUpdate(user._id, {
+          $set: { lastActiveAt: new Date() },
+        });
 
         return {
           id: user._id.toString(),
@@ -209,6 +225,12 @@ export const authOptions: AuthOptions = {
             avatar: user.image,
             isVerified: true,
             provider: 'google',
+            lastActiveAt: new Date(),
+            lastPlatform: 'web',
+          });
+        } else {
+          await User.findByIdAndUpdate(dbUser._id, {
+            $set: { lastActiveAt: new Date() },
           });
         }
 

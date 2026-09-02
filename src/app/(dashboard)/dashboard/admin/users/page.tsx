@@ -5,7 +5,7 @@ import { ROUTES } from '@/constants/routes';
 import { useEffect } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { motion } from 'framer-motion';
-import { Users, Shield, ChevronLeft, ChevronRight, RefreshCw, Building2 } from 'lucide-react';
+import { Users, Shield, ChevronLeft, ChevronRight, RefreshCw, Building2, Smartphone, Activity } from 'lucide-react';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import Tooltip from '@/components/ui/Tooltip';
 import Button from '@/components/ui/Button';
@@ -34,6 +34,10 @@ export default function AdminUsersPage() {
     setSearchQuery,
     roleFilter,
     setRoleFilter,
+    platformFilter,
+    setPlatformFilter,
+    activityFilter,
+    setActivityFilter,
     orgFilter,
     setOrgFilter,
     page,
@@ -89,6 +93,34 @@ export default function AdminUsersPage() {
         { id: 'admin', label: t('roles.admin') || 'Admins' },
       ],
     },
+    {
+      label: t('adminAnalytics.platform') || 'Platform',
+      icon: <Smartphone className="w-3.5 h-3.5" aria-hidden />,
+      value: platformFilter,
+      onChange: (val: string) => { setPlatformFilter(val); setPage(1); },
+      neutralValue: 'all',
+      options: [
+        { id: 'all', label: t('adminAnalytics.allPlatforms') || 'All Platforms' },
+        { id: 'app', label: t('adminAnalytics.platformApp') || 'Mobile App' },
+        { id: 'web', label: t('adminAnalytics.platformWeb') || 'Website' },
+        { id: 'android', label: 'Android' },
+        { id: 'ios', label: 'iOS' },
+      ],
+    },
+    {
+      label: t('adminAnalytics.activity') || 'Activity',
+      icon: <Activity className="w-3.5 h-3.5" aria-hidden />,
+      value: activityFilter,
+      onChange: (val: string) => { setActivityFilter(val); setPage(1); },
+      neutralValue: 'all',
+      options: [
+        { id: 'all', label: t('adminAnalytics.allActivity') || 'All Activity' },
+        { id: 'today', label: t('adminAnalytics.activeToday') || 'Active Today' },
+        { id: 'week', label: t('adminAnalytics.activeThisWeek') || 'Active 7 Days' },
+        { id: 'month', label: t('adminAnalytics.activeThisMonth') || 'Active 30 Days' },
+        { id: 'inactive', label: t('adminAnalytics.inactiveUsers') || 'Inactive (>30d)' },
+      ],
+    },
     ...(isSuper && organizations.length > 0
       ? [{
           label: t('adminUsers.organization') || 'Organization',
@@ -108,6 +140,8 @@ export default function AdminUsersPage() {
   const handleResetFilters = () => {
     setSearchQuery('');
     setRoleFilter('all');
+    setPlatformFilter('all');
+    setActivityFilter('all');
     setOrgFilter('all');
     setPage(1);
   };

@@ -22,6 +22,10 @@ export function UsersStats({ stats, isLoading }: UsersStatsProps) {
       icon: Users,
       iconBg: 'bg-[var(--info-light)] text-[var(--info)]',
       border: 'border-[var(--border)]',
+      subtitle:
+        stats?.appUsers !== undefined && stats?.webUsers !== undefined
+          ? `${stats.appUsers} ${t('adminAnalytics.platformApp') || 'App'} • ${stats.webUsers} ${t('adminAnalytics.platformWeb') || 'Web'}`
+          : undefined,
     },
     {
       id: 'students',
@@ -30,6 +34,10 @@ export function UsersStats({ stats, isLoading }: UsersStatsProps) {
       icon: GraduationCap,
       iconBg: 'bg-[var(--student-soft)] text-[var(--student-primary)]',
       border: 'border-[var(--border)]',
+      subtitle:
+        stats?.activeToday !== undefined && stats.activeToday > 0
+          ? `${stats.activeToday} ${t('adminAnalytics.activeToday') || 'active today'}`
+          : undefined,
     },
     {
       id: 'teachers',
@@ -85,6 +93,12 @@ export function UsersStats({ stats, isLoading }: UsersStatsProps) {
             )}
             {card.badge}
           </div>
+
+          {card.subtitle && (
+            <p className="text-[11px] text-[var(--color-muted-foreground)] mt-1 truncate">
+              {card.subtitle}
+            </p>
+          )}
         </motion.div>
       ))}
     </div>

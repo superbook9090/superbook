@@ -16,7 +16,7 @@ import { ROUTES } from '@/constants/routes';
 import { useTranslation } from '@/hooks/useTranslation';
 import StatCard from '@/components/ui/StatCard';
 import { AdminActivityChart } from './AdminActivityChart';
-import { AdminRoleDistributionChart } from './AdminRoleDistributionChart';
+import { AdminPlatformDistributionChart } from './AdminPlatformDistributionChart';
 import type { AdminStats } from './types';
 
 interface AdminOverviewTabProps {
@@ -80,6 +80,18 @@ export function AdminOverviewTab({ stats }: AdminOverviewTabProps) {
           }
         />
         <StatCard
+          icon={TrendingUp}
+          value={stats.activeUsers?.dau ?? 0}
+          label={t('adminAnalytics.activeToday') || 'Active Today'}
+          color="student"
+          delay={0.08}
+          description={
+            stats.platformStats
+              ? `${stats.platformStats.appPercentage}% ${t('adminAnalytics.platformApp') || 'App'}`
+              : undefined
+          }
+        />
+        <StatCard
           icon={BookOpen}
           value={stats.courses.total}
           label={t('adminAnalytics.totalCourses')}
@@ -104,34 +116,27 @@ export function AdminOverviewTab({ stats }: AdminOverviewTabProps) {
           description={`${stats.quizzes.total} ${t('adminAnalytics.totalQuizzes')}`}
         />
         <StatCard
-          icon={TrendingUp}
-          value={stats.quizzes.averageScore}
-          suffix="%"
-          label={t('adminAnalytics.averageScore')}
-          color="student"
-          delay={0.25}
-          showProgress={true}
-          progress={stats.quizzes.averageScore}
-        />
-        <StatCard
           icon={CheckCircle2}
           value={completionRate}
           suffix="%"
           label={t('adminAnalytics.completionRate')}
           color="success"
-          delay={0.3}
+          delay={0.25}
           showProgress={true}
           progress={completionRate}
         />
       </div>
 
-      {/* Main Charts Row */}
+      {/* Main Charts & Intelligence Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 w-full min-w-0">
         <div className="lg:col-span-2 w-full min-w-0">
           <AdminActivityChart data={stats.trends || []} />
         </div>
         <div className="lg:col-span-1 w-full min-w-0">
-          <AdminRoleDistributionChart users={stats.users} />
+          <AdminPlatformDistributionChart
+            platformStats={stats.platformStats}
+            totalUsers={stats.users.total}
+          />
         </div>
       </div>
 

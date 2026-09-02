@@ -141,6 +141,11 @@ export const unregisterDeviceSchema = z.object({
   deviceToken: z.string().min(1, 'Device token is required'),
 });
 
+export const userActivitySchema = z.object({
+  platform: z.enum(['android', 'ios', 'web']).optional(),
+  path: z.string().max(300).optional(),
+});
+
 // Note validation schemas
 export const createNoteSchema = z.object({
   title: z.string().min(1, 'Title is required').max(150, 'Title must be 150 characters or less'),

@@ -7,6 +7,10 @@ export type AdminUsersStats = {
   admins: number;
   superadmins: number;
   suspended: number;
+  appUsers?: number;
+  webUsers?: number;
+  activeToday?: number;
+  activeMonthly?: number;
 };
 
 export type AdminUsersListResult = {
@@ -18,12 +22,16 @@ export type AdminUsersListResult = {
 export function listAdminUsers(params: {
   search?: string;
   role?: string;
+  platform?: string;
+  activity?: string;
   organizationId?: string;
   page: number;
 }): Promise<AdminUsersListResult> {
   const sp = new URLSearchParams();
   if (params.search) sp.set('search', params.search);
   if (params.role) sp.set('role', params.role);
+  if (params.platform) sp.set('platform', params.platform);
+  if (params.activity) sp.set('activity', params.activity);
   if (params.organizationId) sp.set('organizationId', params.organizationId);
   sp.set('page', String(params.page));
   return apiJson(`/api/admin/users?${sp}`, { method: 'GET' });

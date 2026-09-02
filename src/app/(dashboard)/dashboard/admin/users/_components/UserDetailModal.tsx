@@ -107,7 +107,7 @@ export function UserDetailModal({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))]"
       onClick={handleCloseUserDetail}
     >
       <motion.div
@@ -115,14 +115,14 @@ export function UserDetailModal({
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.96, opacity: 0, y: 15 }}
         transition={{ duration: 0.2 }}
-        className="bg-[var(--card-solid)] border border-[var(--border)] rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] overflow-y-auto flex flex-col my-auto"
+        className="bg-[var(--card-solid)] border border-[var(--border)] rounded-2xl shadow-2xl w-full max-w-2xl max-h-[min(90vh,calc(100dvh-1.5rem))] sm:max-h-[min(88dvh,850px)] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="p-5 sm:p-6 border-b border-[var(--border)] sticky top-0 bg-[var(--card-solid)]/95 backdrop-blur-md z-10">
-          <div className="flex items-start justify-between gap-4">
+        {/* Header - Fixed & Pinned to Top */}
+        <div className="p-4 sm:p-6 border-b border-[var(--border)] bg-[var(--card-solid)] shrink-0 z-10">
+          <div className="flex items-start justify-between gap-3 sm:gap-4">
             <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-tr from-[var(--primary)] to-[var(--student-accent)] text-white flex items-center justify-center font-black text-lg sm:text-xl shadow-md shrink-0">
+              <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-tr from-[var(--primary)] to-[var(--student-accent)] text-white flex items-center justify-center font-black text-base sm:text-xl shadow-md shrink-0">
                 {initials}
               </div>
               <div className="min-w-0">
@@ -152,8 +152,8 @@ export function UserDetailModal({
                     title={t('adminUsers.copyUserId') || 'Copy User ID'}
                   >
                     <Shield className="w-3 h-3 text-[var(--info)] shrink-0" />
-                    <span>ID: {selectedUser._id}</span>
-                    {copiedId ? <Check className="w-3 h-3 text-[var(--success)]" /> : <Copy className="w-3 h-3" />}
+                    <span className="truncate max-w-[120px] sm:max-w-none">ID: {selectedUser._id}</span>
+                    {copiedId ? <Check className="w-3 h-3 text-[var(--success)] shrink-0" /> : <Copy className="w-3 h-3 shrink-0" />}
                   </button>
                 </div>
               </div>
@@ -163,7 +163,7 @@ export function UserDetailModal({
               <button
                 onClick={handleCloseUserDetail}
                 aria-label={t('common.close')}
-                className="p-2 hover:bg-[var(--color-surface-muted)] rounded-xl transition-colors text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] shrink-0"
+                className="p-2 hover:bg-[var(--color-surface-muted)] rounded-xl transition-colors text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] shrink-0 min-h-[40px] min-w-[40px] flex items-center justify-center"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -171,8 +171,8 @@ export function UserDetailModal({
           </div>
         </div>
 
-        {/* Modal Body */}
-        <div className="p-5 sm:p-6 flex flex-col gap-4">
+        {/* Modal Body - Scrollable */}
+        <div className="p-4 sm:p-6 flex flex-col gap-4 overflow-y-auto flex-1 min-h-0 overscroll-contain">
           {/* User Profile Overview & Contact Info */}
           <UserProfileInfoSection
             user={selectedUser}
