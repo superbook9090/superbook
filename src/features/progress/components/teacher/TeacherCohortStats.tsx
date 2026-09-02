@@ -39,7 +39,7 @@ export function TeacherCohortStats({ stats }: TeacherCohortStatsProps) {
     {
       label: t('progress.atRiskStudents'),
       value: stats.strugglingCount,
-      colorClass: 'text-red-500',
+      colorClass: 'text-[var(--error)]',
     },
     {
       label: t('courses.totalCourses'),

@@ -49,25 +49,25 @@ export default async function PublicCoursesPage() {
       icon: BookCheck,
       title: 'Structured Learning',
       desc: 'Carefully organized chapters, subtopics, and bite-sized lessons designed for maximum retention.',
-      color: 'from-violet-500/20 to-purple-500/20 text-violet-600',
+      color: 'from-violet-500/20 to-purple-500/20 text-violet-600 dark:text-violet-400',
     },
     {
       icon: Flame,
       title: 'Interactive Assessments',
       desc: 'Quizzes embedded directly at every milestone to test understanding before progressing.',
-      color: 'from-amber-500/20 to-orange-500/20 text-amber-600',
+      color: 'from-amber-500/20 to-orange-500/20 text-amber-600 dark:text-amber-400',
     },
     {
       icon: Award,
       title: 'Verified Certificates',
       desc: 'Earn verifiable completion certificates to showcase your mastery and skills.',
-      color: 'from-emerald-500/20 to-teal-500/20 text-emerald-600',
+      color: 'from-emerald-500/20 to-teal-500/20 text-emerald-600 dark:text-emerald-400',
     },
     {
       icon: Lightbulb,
       title: 'Paced & Flexible',
       desc: 'Learn on any device, track your progress automatically, and never lose your streak.',
-      color: 'from-blue-500/20 to-indigo-500/20 text-blue-600',
+      color: 'from-blue-500/20 to-indigo-500/20 text-blue-600 dark:text-blue-400',
     },
   ];
 

@@ -43,7 +43,7 @@ export function AdminCourseHealthList({ courseHealth }: AdminCourseHealthListPro
                       isHigh
                         ? 'bg-[var(--success-light)] text-[var(--success)]'
                         : isLow
-                        ? 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400'
+                        ? 'bg-[var(--color-error-light)] text-[var(--color-error)]'
                         : 'bg-[var(--warning-light)] text-[var(--warning)]'
                     }`}
                   >
@@ -74,7 +74,7 @@ export function AdminCourseHealthList({ courseHealth }: AdminCourseHealthListPro
                       isHigh
                         ? 'bg-[var(--success)]'
                         : isLow
-                        ? 'bg-red-500'
+                        ? 'bg-[var(--color-error)]'
                         : 'bg-[var(--teacher-primary)]'
                     }`}
                     style={{ width: `${course.completionRate}%` }}

@@ -55,7 +55,8 @@ export const authOptions: AuthOptions = {
         password: { label: "Password", type: "password" },
         googleIdToken: { label: "Google ID Token", type: "text" },
         firebaseIdToken: { label: "Firebase ID Token", type: "text" },
-        role: { label: "Role", type: "text" }
+        role: { label: "Role", type: "text" },
+        platform: { label: "Platform", type: "text" }
       },
       async authorize(credentials) {
         await dbConnect();
@@ -106,21 +107,37 @@ export const authOptions: AuthOptions = {
           }
         }
 
-        // Native Google Sign-In flow (from React Native app)
+        // Native Google Sign-In flow (from React Native app / web)
         if (credentials?.googleIdToken) {
           const { OAuth2Client } = await import('google-auth-library');
-          const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+          
+          const isMobileApp =
+            credentials.platform === 'mobile' ||
+            credentials.platform === 'android' ||
+            credentials.platform === 'ios';
+
+          const targetClientId = isMobileApp
+            ? (process.env.GOOGLE_MOBILE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID)
+            : (process.env.GOOGLE_CLIENT_ID || process.env.GOOGLE_MOBILE_CLIENT_ID);
+
+          const client = new OAuth2Client(targetClientId);
 
           try {
             const ticket = await client.verifyIdToken({
               idToken: credentials.googleIdToken,
-              // audience: process.env.GOOGLE_CLIENT_ID, // Use backend's client ID, or omit to allow multi-audience
+              audience: [
+                targetClientId,
+                process.env.GOOGLE_CLIENT_ID,
+                process.env.GOOGLE_MOBILE_CLIENT_ID,
+              ].filter(Boolean) as string[],
             });
             const payload = ticket.getPayload();
             if (!payload?.email) throw new Error('Invalid Google Token payload');
 
             const normalizedEmail = payload.email.trim().toLowerCase();
             let dbUser = await findUserByEmail(normalizedEmail);
+
+            const platform = isMobileApp ? 'android' : 'web';
 
             if (!dbUser) {
               dbUser = await User.create({
@@ -131,11 +148,11 @@ export const authOptions: AuthOptions = {
                 isVerified: true,
                 provider: 'google',
                 lastActiveAt: new Date(),
-                lastPlatform: 'android',
+                lastPlatform: platform,
               });
             } else {
               await User.findByIdAndUpdate(dbUser._id, {
-                $set: { lastActiveAt: new Date(), lastPlatform: 'android' },
+                $set: { lastActiveAt: new Date(), lastPlatform: platform },
               });
             }
 

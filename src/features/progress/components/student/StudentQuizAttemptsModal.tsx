@@ -103,7 +103,7 @@ export function StudentQuizAttemptsModal({
                           ? 'bg-[var(--success-light)] text-[var(--success)]'
                           : isAverage
                           ? 'bg-[var(--warning-light)] text-[var(--warning)]'
-                          : 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400'
+                          : 'bg-[var(--color-error-light)] text-[var(--color-error)]'
                       }`}
                     >
                       {isPassing && <CheckCircle2 className="w-3.5 h-3.5" />}

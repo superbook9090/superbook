@@ -78,8 +78,8 @@ export function TeacherCourseSelector({
           onClick={() => onStatusFilterChange('struggling')}
           className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors whitespace-nowrap ${
             statusFilter === 'struggling'
-              ? 'bg-red-600 text-white'
-              : 'bg-[var(--color-surface-muted)] text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30'
+              ? 'bg-[var(--error)] text-white'
+              : 'bg-[var(--color-surface-muted)] text-[var(--error)] hover:bg-[var(--color-error-light)]'
           }`}
         >
           {t('progress.atRiskStudents')}

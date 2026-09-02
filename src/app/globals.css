@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *, .dark, .dark *));
+
 @source "../components/**/*.{js,ts,jsx,tsx}";
 @source "../features/**/*.{js,ts,jsx,tsx}";
 @source "../constants/**/*.{js,ts,jsx,tsx}";
@@ -10,8 +12,12 @@
 
 :root {
   /* Core */
+  color-scheme: light;
   --background: #f9fafb;
   --foreground: #141822;
+  --surface: #ffffff;
+  --color-surface: #ffffff;
+  --color-secondary: #c4b5fd;
 
   /* Typography (populated by next/font in src/lib/fonts.ts) */
   --font-sans: var(--font-sans-body), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
@@ -165,6 +171,9 @@
   --foreground: #f4f5f8;
   --card: rgba(22, 25, 33, 0.55);
   --card-solid: #101319;
+  --surface: #101319;
+  --color-surface: #101319;
+  --color-secondary: #c084fc;
   --border: rgba(255, 255, 255, 0.09);
   --muted: #9398a4;
   --muted-light: #7e838e;
@@ -929,7 +938,7 @@ pre,
   background: var(--card);
   backdrop-filter: var(--blur-glass) saturate(160%);
   -webkit-backdrop-filter: var(--blur-glass) saturate(160%);
-  border: 1px solid rgba(20, 24, 34, 0.09);
+  border: 1px solid var(--border);
   box-shadow: var(--shadow-md);
   border-radius: 16px;
 }
@@ -1019,18 +1028,56 @@ body.quiz-fullscreen nav {
 
 /* =========================
    RICH TEXT / PROSE STYLES
-   (For Lesson Content)
+   (For Lesson Content, Blogs, Editor)
 ========================= */
 
 .prose {
+  --tw-prose-body: var(--color-foreground);
+  --tw-prose-headings: var(--color-foreground);
+  --tw-prose-lead: var(--color-muted-foreground);
+  --tw-prose-links: var(--student-primary);
+  --tw-prose-bold: var(--color-foreground);
+  --tw-prose-counters: var(--color-muted-foreground);
+  --tw-prose-bullets: var(--student-primary);
+  --tw-prose-hr: var(--border);
+  --tw-prose-quotes: var(--color-foreground);
+  --tw-prose-quote-borders: var(--student-primary);
+  --tw-prose-captions: var(--color-muted-foreground);
+  --tw-prose-code: var(--color-foreground);
+  --tw-prose-pre-code: #e2e8f0;
+  --tw-prose-pre-bg: #1e293b;
+  --tw-prose-th-borders: var(--border);
+  --tw-prose-td-borders: var(--border);
   color: var(--color-foreground);
   line-height: 1.625;
   font-size: 1rem;
 }
 
+[data-theme="dark"] .prose,
+.theme-dark .prose {
+  --tw-prose-body: var(--color-foreground);
+  --tw-prose-headings: var(--color-foreground);
+  --tw-prose-lead: var(--color-muted-foreground);
+  --tw-prose-links: var(--student-primary);
+  --tw-prose-bold: var(--color-foreground);
+  --tw-prose-counters: var(--color-muted-foreground);
+  --tw-prose-bullets: var(--student-primary);
+  --tw-prose-hr: var(--border);
+  --tw-prose-quotes: var(--color-foreground);
+  --tw-prose-quote-borders: var(--student-primary);
+  --tw-prose-captions: var(--color-muted-foreground);
+  --tw-prose-code: var(--color-foreground);
+  --tw-prose-pre-code: #e2e8f0;
+  --tw-prose-pre-bg: #1e293b;
+  --tw-prose-th-borders: var(--border);
+  --tw-prose-td-borders: var(--border);
+  color: var(--color-foreground);
+}
+
 .prose p {
   margin-top: 1.25em;
   margin-bottom: 1.25em;
+  color: inherit;
 }
 
 .prose h1 {
@@ -1039,6 +1086,7 @@ body.quiz-fullscreen nav {
   margin-bottom: 0.8em;
   line-height: 1.2;
   font-weight: 800;
+  color: var(--color-foreground);
 }
 
 .prose h2 {
@@ -1047,6 +1095,7 @@ body.quiz-fullscreen nav {
   margin-bottom: 0.8em;
   line-height: 1.3;
   font-weight: 700;
+  color: var(--color-foreground);
 }
 
 .prose h3 {
@@ -1055,8 +1104,8 @@ body.quiz-fullscreen nav {
   margin-bottom: 0.6em;
   line-height: 1.4;
   font-weight: 600;
+  color: var(--color-foreground);
 }
-
 
 .prose strong {
   color: var(--color-foreground);
@@ -1191,6 +1240,29 @@ body.quiz-fullscreen nav {
   width: 1.25rem;
   height: 1.25rem;
   accent-color: var(--primary);
+}
+
+/* =========================
+   FORM CONTROLS & AUTOFILL
+========================= */
+
+select option {
+  background-color: var(--card-solid);
+  color: var(--color-foreground);
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--color-foreground);
+  -webkit-box-shadow: 0 0 0px 1000px var(--color-surface-muted) inset;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 /* =========================

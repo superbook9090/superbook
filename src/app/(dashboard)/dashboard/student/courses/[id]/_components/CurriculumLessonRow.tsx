@@ -34,8 +34,8 @@ export default function CurriculumLessonRow({
             className={cn(
               'w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-sm transition-all',
               lesson.videoUrl
-                ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
-                : 'bg-purple-500/10 text-purple-600 dark:text-purple-400'
+                ? 'bg-[var(--info-light)] text-[var(--info)]'
+                : 'bg-[var(--student-soft)] text-[var(--student-primary)]'
             )}
           >
             {lesson.videoUrl ? <PlayCircle className="w-4 h-4" /> : <BookOpen className="w-4 h-4" />}

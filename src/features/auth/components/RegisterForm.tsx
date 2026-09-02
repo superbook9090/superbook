@@ -49,6 +49,7 @@ function RegisterFormInner() {
           const result = await signIn('credentials', {
             redirect: false,
             googleIdToken: data.token,
+            platform: 'mobile',
           });
 
           if (result?.error) {

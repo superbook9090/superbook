@@ -77,7 +77,7 @@ export function TeacherStudentRosterTable({
                         isCompleted
                           ? 'bg-[var(--success-light)] text-[var(--success)]'
                           : isStruggling
-                          ? 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400'
+                          ? 'bg-[var(--color-error-light)] text-[var(--color-error)]'
                           : 'bg-[var(--warning-light)] text-[var(--warning)]'
                       }`}
                     >
@@ -89,12 +89,12 @@ export function TeacherStudentRosterTable({
                   <td className="py-3.5 px-4">
                     <div className="w-32 space-y-1">
                       <div className="flex justify-between text-[11px] font-bold">
-                        <span className={isStruggling ? 'text-red-500' : 'text-[var(--teacher-primary)]'}>{row.progress}%</span>
+                        <span className={isStruggling ? 'text-[var(--color-error)]' : 'text-[var(--teacher-primary)]'}>{row.progress}%</span>
                       </div>
                       <div className="w-full bg-[var(--color-surface-muted)] rounded-full h-2 overflow-hidden">
                         <div
                           className={`h-2 rounded-full ${
-                            isCompleted ? 'bg-[var(--success)]' : isStruggling ? 'bg-red-500' : 'bg-[var(--teacher-primary)]'
+                            isCompleted ? 'bg-[var(--success)]' : isStruggling ? 'bg-[var(--color-error)]' : 'bg-[var(--teacher-primary)]'
                           }`}
                           style={{ width: `${row.progress}%` }}
                         />

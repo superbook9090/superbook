@@ -80,7 +80,7 @@ export function ContactInfo() {
               { icon: Instagram, href: 'https://www.instagram.com/quiz_do__/?hl=en', name: 'Instagram', color: 'hover:text-pink-500 hover:border-pink-500/30 hover:bg-pink-500/10' },
               { icon: Github, href: 'https://github.', name: 'GitHub', color: 'hover:text-slate-800 dark:hover:text-white hover:border-slate-800/30 dark:hover:border-white/30 hover:bg-slate-800/10 dark:hover:bg-white/10' },
               { icon: Twitter, href: 'https://twitter.', name: 'Twitter', color: 'hover:text-blue-400 hover:border-blue-400/30 hover:bg-blue-400/10' },
-              { icon: Linkedin, href: 'https://linkedin.', name: 'LinkedIn', color: 'hover:text-blue-600 hover:border-blue-600/30 hover:bg-blue-600/10' },
+              { icon: Linkedin, href: 'https://linkedin.', name: 'LinkedIn', color: 'hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-600/30 dark:hover:border-blue-400/30 hover:bg-blue-600/10 dark:hover:bg-blue-400/10' },
               { icon: Facebook, href: 'https://facebook.', name: 'Facebook', color: 'hover:text-blue-500 hover:border-blue-500/30 hover:bg-blue-500/10' },
             ].map((soc, idx) => (
               <motion.a
