@@ -1,15 +1,8 @@
 'use client';
 
 import Script from 'next/script';
-import { useSettingsStore } from '@/store/useSettingsStore';
 
 export default function GoogleAdsenseInit() {
-  const enableGoogleAdsense = useSettingsStore(
-    (s) => s.settings.featureToggles.enableGoogleAdsense ?? true
-  );
-
-  if (!enableGoogleAdsense) return null;
-
   return (
     <Script
       async

@@ -25,6 +25,7 @@ import { QuizBasicInfoForm } from './QuizBasicInfoForm';
 import { QuizImportTool } from './QuizImportTool';
 import { QuizQuestionsEditor } from './QuizQuestionsEditor';
 import type { Question } from './types';
+import { sendGAEvent } from '@next/third-parties/google';
 
 interface Course {
   _id: string;
@@ -372,6 +373,7 @@ export default function CreateQuizForm({ quizId }: Props) {
           isPublished: formData.isPublished,
           questions,
         });
+        sendGAEvent({ event: 'create_quiz', quiz_title: formData.title });
         addAlert({
           type: 'success',
           message: t('createQuizForm.createSuccess'),

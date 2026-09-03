@@ -31,7 +31,9 @@ export async function GET(request: NextRequest) {
     await dbConnect();
 
     const { searchParams } = new URL(request.url);
-    const type = searchParams.get('type') || 'overview'; // overview, teacher, admin
+    const type = searchParams.get('type') || 'overview';
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
 
     const isAdmin = session.user?.role === 'admin';
     const isSuperAdmin = session.user?.role === 'superadmin';
@@ -39,7 +41,7 @@ export async function GET(request: NextRequest) {
 
     // Admin gets organization-specific analytics, superadmin gets system-wide
     if (type === 'admin' && (isAdmin || isSuperAdmin)) {
-      const stats = await getAdminStats(session.user.organizationId, isSuperAdmin);
+      const stats = await getAdminStats(session.user.organizationId, isSuperAdmin, startDate, endDate);
       return NextResponse.json({ stats }, { status: 200 });
     }
 
@@ -66,25 +68,51 @@ export async function GET(request: NextRequest) {
   }
 }
 
-async function getAdminStats(organizationId?: string | null, isSuperAdmin: boolean = false) {
+async function getAdminStats(organizationId?: string | null, isSuperAdmin: boolean = false, startDateStr?: string | null, endDateStr?: string | null) {
   // Build organization filter
   const orgObjectId = organizationId && mongoose.Types.ObjectId.isValid(organizationId)
     ? new mongoose.Types.ObjectId(organizationId)
     : null;
   const orgFilter = isSuperAdmin ? {} : (orgObjectId ? { organizationId: orgObjectId } : { organizationId: null });
 
-  const startOfMonth = new Date();
-  startOfMonth.setDate(1);
-  startOfMonth.setHours(0, 0, 0, 0);
-
-  const fourteenDaysAgo = new Date();
-  fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 13);
-  fourteenDaysAgo.setHours(0, 0, 0, 0);
-
   const nowTime = Date.now();
+  
+  let rangeStart = new Date();
+  rangeStart.setDate(1);
+  rangeStart.setHours(0, 0, 0, 0);
+
+  let rangeEnd = new Date();
+  
+  let trendStart = new Date();
+  trendStart.setDate(trendStart.getDate() - 13);
+  trendStart.setHours(0, 0, 0, 0);
+
+  const customStartDate = startDateStr ? new Date(startDateStr) : null;
+  const customEndDate = endDateStr ? new Date(endDateStr) : null;
+
+  if (customStartDate && !isNaN(customStartDate.getTime())) {
+    customStartDate.setHours(0, 0, 0, 0);
+    rangeStart = customStartDate;
+    trendStart = customStartDate;
+  }
+  
+  if (customEndDate && !isNaN(customEndDate.getTime())) {
+    customEndDate.setHours(23, 59, 59, 999);
+    rangeEnd = customEndDate;
+  }
+
   const oneDayAgo = new Date(nowTime - 24 * 60 * 60 * 1000);
   const sevenDaysAgo = new Date(nowTime - 7 * 24 * 60 * 60 * 1000);
   const thirtyDaysAgo = new Date(nowTime - 30 * 24 * 60 * 60 * 1000);
+  
+  const createdRangeQuery = { $gte: rangeStart, $lte: rangeEnd };
+  const trendDaysCount = Math.max(1, Math.ceil((rangeEnd.getTime() - trendStart.getTime()) / (1000 * 60 * 60 * 24)));
+  const trendDaysMax = Math.min(trendDaysCount, 90); // Cap at 90 days to avoid huge arrays
+  
+  // Use rangeEnd for orgFilter if filtering by creation date
+  // For total counts we might want all time, but the user asked for date-wise analytics
+  // Usually this means we filter the "new in range" stats. We'll leave total counts as all time
+  // unless we explicitly want to filter everything. Let's just adjust the range queries.
 
   const [
     totalUsers,
@@ -118,7 +146,7 @@ async function getAdminStats(organizationId?: string | null, isSuperAdmin: boole
     User.countDocuments({ ...orgFilter, role: 'admin' }),
     User.countDocuments({
       ...orgFilter,
-      createdAt: { $gte: startOfMonth },
+      createdAt: createdRangeQuery,
     }),
     User.countDocuments({ ...orgFilter, lastActiveAt: { $gte: oneDayAgo } }),
     User.countDocuments({ ...orgFilter, lastActiveAt: { $gte: sevenDaysAgo } }),
@@ -149,7 +177,7 @@ async function getAdminStats(organizationId?: string | null, isSuperAdmin: boole
     User.find(orgFilter).select('_id').lean(),
     Quiz.find(orgFilter).select('_id').lean(),
     User.aggregate([
-      { $match: { ...orgFilter, createdAt: { $gte: fourteenDaysAgo } } },
+      { $match: { ...orgFilter, createdAt: { $gte: trendStart, $lte: rangeEnd } } },
       {
         $group: {
           _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
@@ -214,7 +242,7 @@ async function getAdminStats(organizationId?: string | null, isSuperAdmin: boole
         ])
       : Promise.resolve([]),
     Enrollment.aggregate([
-      { $match: { student: { $in: userIds }, createdAt: { $gte: fourteenDaysAgo } } },
+      { $match: { student: { $in: userIds }, createdAt: { $gte: trendStart, $lte: rangeEnd } } },
       {
         $group: {
           _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
@@ -224,7 +252,7 @@ async function getAdminStats(organizationId?: string | null, isSuperAdmin: boole
     ]),
     quizIds.length
       ? QuizAttempt.aggregate([
-          { $match: { quiz: { $in: quizIds }, status: 'completed', createdAt: { $gte: fourteenDaysAgo } } },
+          { $match: { quiz: { $in: quizIds }, status: 'completed', createdAt: { $gte: trendStart, $lte: rangeEnd } } },
           {
             $group: {
               _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
@@ -255,9 +283,10 @@ async function getAdminStats(organizationId?: string | null, isSuperAdmin: boole
   const enrollmentTrendMap = new Map((enrollmentDailyTrends || []).map((e: { _id: string; count: number }) => [e._id, e.count]));
   const attemptTrendMap = new Map((quizAttemptDailyTrends || []).map((a: { _id: string; count: number }) => [a._id, a.count]));
 
-  for (let i = 0; i < 14; i++) {
-    const d = new Date(fourteenDaysAgo);
+  for (let i = 0; i < trendDaysMax; i++) {
+    const d = new Date(trendStart);
     d.setDate(d.getDate() + i);
+    if (d.getTime() > rangeEnd.getTime()) break;
     const dateStr = d.toISOString().split('T')[0];
     trendDays.push({
       date: dateStr,

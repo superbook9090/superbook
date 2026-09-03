@@ -17,6 +17,7 @@ import AuthDivider from './AuthDivider';
 import GoogleAuthButton from './GoogleAuthButton';
 import PhoneAuthButton from './PhoneAuthButton';
 import RoleSelector, { UserRole } from './RoleSelector';
+import { sendGAEvent } from '@next/third-parties/google';
 
 interface EmailRegisterFormProps {
   theme: {
@@ -86,6 +87,8 @@ export default function EmailRegisterForm({ theme, callbackUrl, onSelectPhoneFlo
         setIsLoading(false);
         return;
       }
+
+      sendGAEvent({ event: 'sign_up', method: 'email' });
 
       await fetchSession(true);
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -235,7 +238,7 @@ export default function EmailRegisterForm({ theme, callbackUrl, onSelectPhoneFlo
       <AuthDivider />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
-        <GoogleAuthButton callbackUrl={callbackUrl} role={formData.role} />
+        <GoogleAuthButton callbackUrl={callbackUrl} role={formData.role} isRegistration={true} />
         <PhoneAuthButton onClick={onSelectPhoneFlow} />
       </div>
     </form>

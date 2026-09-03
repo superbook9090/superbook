@@ -28,6 +28,8 @@ export default function ClarityInit() {
       try {
         clarity.identify(session.user.email);
         clarity.setTag("is_logged_in", "true");
+        clarity.setTag("user_id", session.user.email);
+        clarity.setTag("email", session.user.email);
       } catch (error) {
         console.error("Failed to set user data in Microsoft Clarity", error);
       }

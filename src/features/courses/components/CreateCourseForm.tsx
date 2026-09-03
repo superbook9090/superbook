@@ -17,6 +17,7 @@ import { generateInviteCode } from '@/lib/inviteCode';
 import { Copy, RefreshCw, Lock } from 'lucide-react';
 import { TextField } from '@/components/ui/TextField';
 import { Dropdown } from '@/components/ui/Dropdown';
+import { sendGAEvent } from '@next/third-parties/google';
 
 type Props = {
   /** When set, form loads this course and PATCHes on submit. */
@@ -182,6 +183,7 @@ export default function CreateCourseForm({ courseId }: Props) {
       } else {
         await createCourse(body);
         invalidateCourseLists();
+        sendGAEvent({ event: 'create_course', course_title: formData.title });
         addAlert({
           type: 'success',
           message: t('createCourseForm.createSuccess'),

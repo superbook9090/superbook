@@ -16,7 +16,7 @@ import AdminSystemOverview from './_components/AdminSystemOverview';
 export default function AdminDashboardPage() {
   const { session, status } = useSessionStore();
   const router = useRouter();
-  const { stats, isLoading, isRefreshing, handleRefresh } = useAdminAnalytics();
+  const { stats, isLoading, isRefreshing, handleRefresh, dateRange, setDateRange } = useAdminAnalytics();
 
   if (status === 'loading') {
     return (
@@ -40,6 +40,8 @@ export default function AdminDashboardPage() {
         isSuperAdmin={isSuperAdmin}
         isRefreshing={isRefreshing}
         onRefresh={handleRefresh}
+        dateRange={dateRange}
+        onDateRangeChange={setDateRange}
       />
 
       <AdminStatsGrid

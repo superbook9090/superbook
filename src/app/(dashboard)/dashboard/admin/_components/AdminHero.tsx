@@ -9,6 +9,8 @@ interface AdminHeroProps {
   isSuperAdmin: boolean;
   isRefreshing: boolean;
   onRefresh: () => void;
+  dateRange: { startDate: string; endDate: string };
+  onDateRangeChange: (range: { startDate: string; endDate: string }) => void;
 }
 
 export default function AdminHero({
@@ -16,6 +18,8 @@ export default function AdminHero({
   isSuperAdmin,
   isRefreshing,
   onRefresh,
+  dateRange,
+  onDateRangeChange,
 }: AdminHeroProps) {
   const { t } = useTranslation();
 
@@ -53,7 +57,26 @@ export default function AdminHero({
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 pt-2 md:pt-0">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 pt-2 md:pt-0">
+          {isSuperAdmin && (
+            <div className="flex items-center gap-2 bg-[var(--card-solid)] border border-[var(--border)] rounded-xl px-3 py-2 text-sm shadow-[var(--shadow-sm)]">
+              <input
+                type="date"
+                value={dateRange.startDate}
+                onChange={(e) => onDateRangeChange({ ...dateRange, startDate: e.target.value })}
+                className="bg-transparent text-[var(--color-foreground)] border-none outline-none cursor-pointer"
+                aria-label="Start Date"
+              />
+              <span className="text-[var(--color-muted-foreground)]">to</span>
+              <input
+                type="date"
+                value={dateRange.endDate}
+                onChange={(e) => onDateRangeChange({ ...dateRange, endDate: e.target.value })}
+                className="bg-transparent text-[var(--color-foreground)] border-none outline-none cursor-pointer"
+                aria-label="End Date"
+              />
+            </div>
+          )}
           <button
             type="button"
             onClick={onRefresh}

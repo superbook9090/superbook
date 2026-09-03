@@ -12,6 +12,7 @@ import { ArrowRight, ArrowLeft, Edit2 } from 'lucide-react';
 
 import { Loader } from '@/components/ui/Loader';
 import { useAlert } from '@/components/ui/AlertContainer';
+import { sendGAEvent } from '@next/third-parties/google';
 
 interface PhoneLoginFormProps {
   theme: {
@@ -157,6 +158,7 @@ export default function PhoneLoginForm({ theme, callbackUrl, onBackToEmail }: Ph
       }
 
       await fetchSession(true);
+      sendGAEvent({ event: 'login', method: 'phone' });
       await new Promise(resolve => setTimeout(resolve, 500));
       router.push(callbackUrl);
     } catch (err) {

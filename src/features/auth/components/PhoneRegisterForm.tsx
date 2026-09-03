@@ -14,6 +14,7 @@ import { Loader } from '@/components/ui/Loader';
 import { useAlert } from '@/components/ui/AlertContainer';
 import { getDashboardHomePath } from '@/lib/roles';
 import { ROUTES } from '@/constants/routes';
+import { sendGAEvent } from '@next/third-parties/google';
 
 import RoleSelector from './RoleSelector';
 
@@ -171,6 +172,7 @@ export default function PhoneRegisterForm({ theme, callbackUrl, onBackToEmail, a
       }
 
       await fetchSession(true);
+      sendGAEvent({ event: 'sign_up', method: 'phone' });
       await new Promise(resolve => setTimeout(resolve, 500));
 
       const redirectTo =

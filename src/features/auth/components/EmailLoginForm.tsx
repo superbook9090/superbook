@@ -15,6 +15,7 @@ import { useAlert } from '@/components/ui/AlertContainer';
 import AuthDivider from './AuthDivider';
 import GoogleAuthButton from './GoogleAuthButton';
 import PhoneAuthButton from './PhoneAuthButton';
+import { sendGAEvent } from '@next/third-parties/google';
 
 declare global {
   interface Window {
@@ -77,6 +78,8 @@ export default function EmailLoginForm({ theme, callbackUrl, onSelectPhoneFlow }
       } else {
         localStorage.removeItem('quizdo_remembered_email');
       }
+
+      sendGAEvent({ event: 'login', method: 'email' });
 
       await fetchSession(true);
       await new Promise(resolve => setTimeout(resolve, 500));

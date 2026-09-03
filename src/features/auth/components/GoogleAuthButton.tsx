@@ -5,13 +5,15 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { signIn } from 'next-auth/react';
 import { motion } from 'framer-motion';
+import { sendGAEvent } from '@next/third-parties/google';
 
 interface GoogleAuthButtonProps {
   callbackUrl: string;
   role?: string;
+  isRegistration?: boolean;
 }
 
-export default function GoogleAuthButton({ callbackUrl, role }: GoogleAuthButtonProps) {
+export default function GoogleAuthButton({ callbackUrl, role, isRegistration }: GoogleAuthButtonProps) {
   const { t } = useTranslation();
   const enableGoogleAuthApp = useSettingsStore(
     (s) => s.settings.featureToggles.enableGoogleAuthApp ?? true
@@ -28,6 +30,8 @@ export default function GoogleAuthButton({ callbackUrl, role }: GoogleAuthButton
   }, [enableGoogleAuthApp, enableGoogleAuthWeb]);
 
   const handleGoogleSignIn = () => {
+    sendGAEvent({ event: isRegistration ? 'sign_up' : 'login', method: 'google' });
+    
     if (role) {
       document.cookie = `google-auth-role=${role}; path=/; max-age=300`; // expires in 5 minutes
     }

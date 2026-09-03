@@ -18,6 +18,12 @@ export function useAdminAnalytics() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<AnalyticsTabKey>('overview');
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  
+  // Date range state
+  const [dateRange, setDateRange] = useState<{ startDate: string; endDate: string }>({
+    startDate: '',
+    endDate: '',
+  });
 
   const fetchStats = useCallback(
     async (isManualRefresh = false) => {
@@ -25,7 +31,7 @@ export function useAdminAnalytics() {
         setIsRefreshing(true);
       }
       try {
-        const data = (await fetchAnalytics('admin')) as { stats?: AdminStats };
+        const data = (await fetchAnalytics('admin', dateRange)) as { stats?: AdminStats };
         if (data.stats) {
           setStats(data.stats);
           setLastUpdated(new Date());
@@ -40,7 +46,7 @@ export function useAdminAnalytics() {
         setIsRefreshing(false);
       }
     },
-    [t, addAlert]
+    [t, addAlert, dateRange]
   );
 
   useEffect(() => {
@@ -64,5 +70,7 @@ export function useAdminAnalytics() {
     setActiveTab,
     lastUpdated,
     handleRefresh,
+    dateRange,
+    setDateRange,
   };
 }
