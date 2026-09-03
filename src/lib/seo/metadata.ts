@@ -102,6 +102,7 @@ export function createRootMetadata(): Metadata {
     },
     other: {
       'theme-color': '#7c3aed',
+      'google-adsense-account': 'ca-pub-3910555435236193',
       ...getSearchVerificationMeta(),
     },
   };
