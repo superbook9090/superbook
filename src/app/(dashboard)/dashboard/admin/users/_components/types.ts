@@ -27,6 +27,7 @@ export interface User {
   lastActiveAt?: string;
   lastPlatform?: 'android' | 'ios' | 'web';
   lastUserAgent?: string;
+  canCreateContests?: boolean;
   createdAt: string;
   updatedAt?: string;
 }

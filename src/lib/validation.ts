@@ -313,3 +313,62 @@ export const setPasswordSchema = z
     message: 'Passwords do not match',
     path: ['confirmPassword'],
   });
+
+// Contest validation schemas
+export const contestPrizeSchema = z.object({
+  rank: z.union([z.number().int().min(1), z.string().min(1)]),
+  title: z.string().min(1, 'Prize title is required').max(100),
+  description: z.string().max(300).optional(),
+  rewardType: z.enum(['trophy', 'certificate', 'cash', 'points', 'gift', 'badge', 'other']).optional(),
+  value: z.string().max(100).optional(),
+});
+
+export const contestQuestionSchema = z.object({
+  question: z.string().min(1, 'Question prompt is required').max(1000),
+  options: z.array(z.string().min(1, 'Option text is required')).min(2, 'At least 2 options required').max(6),
+  correctAnswer: z.number().int().min(0, 'Valid correct answer index required'),
+  points: z.number().min(1).optional(),
+});
+
+export const contestQuizInputSchema = z.object({
+  quizId: objectIdSchema.optional(),
+  title: z.string().max(200).optional(),
+  order: z.number().int().min(0).optional(),
+  questions: z.array(contestQuestionSchema).optional(),
+});
+
+export const createContestSchema = z.object({
+  title: z.string().min(1, 'Contest title is required').max(200, 'Title must be less than 200 characters'),
+  description: z.string().max(5000).optional(),
+  instructions: z.string().max(10000).optional(),
+  startTime: z.string().or(z.date()),
+  endTime: z.string().or(z.date()),
+  duration: z.number().int().min(1, 'Duration must be at least 1 minute').max(1440, 'Duration cannot exceed 24 hours'),
+  solutionsReleaseAt: z.string().or(z.date()).optional(),
+  scheduleType: z.enum(['one_time', 'daily', 'weekly']).optional(),
+  prizes: z.array(contestPrizeSchema).optional(),
+  maxAttempts: z.number().int().min(1).max(10).optional(),
+  maxParticipants: z.number().int().min(1).nullable().optional(),
+  visibility: z.enum(['public', 'organization', 'unlisted']).optional(),
+  leaderboardVisibility: z.enum(['live', 'after_end', 'hidden']).optional(),
+  quizzes: z.array(contestQuizInputSchema).optional(),
+  questions: z.array(contestQuestionSchema).optional(),
+});
+
+export const updateContestSchema = createContestSchema.partial().extend({
+  status: z.enum(['draft', 'published', 'cancelled', 'completed']).optional(),
+});
+
+export const createContestAttemptSchema = z.object({
+  action: z.enum(['start', 'submit']),
+  answers: z.array(
+    z.object({
+      quizId: z.string().optional().nullable(),
+      questionId: z.string().min(1, 'Question ID is required'),
+      selectedOption: z.number().int().min(-1),
+    })
+  ).optional(),
+  timeTaken: z.number().int().min(0).nullable().optional(),
+  violationCount: z.number().int().min(0).optional(),
+});
+

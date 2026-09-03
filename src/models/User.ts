@@ -26,6 +26,7 @@ export interface IUser extends Document {
   lastActiveAt?: Date;
   lastPlatform?: 'android' | 'ios' | 'web';
   lastUserAgent?: string;
+  canCreateContests?: boolean;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -51,9 +52,13 @@ const userSchema = new Schema<IUser>(
     aiQuizGenerationsCount: { type: Number, default: 0 },
     canUploadVideos: { type: Boolean, default: false },
     canCreatePublicCourses: { type: Boolean, default: false },
+<<<<<<< Updated upstream
     lastActiveAt: { type: Date },
     lastPlatform: { type: String, enum: ['android', 'ios', 'web'] },
     lastUserAgent: String,
+=======
+    canCreateContests: { type: Boolean, default: false },
+>>>>>>> Stashed changes
   },
   { timestamps: true }
 );
@@ -89,9 +94,13 @@ userSchema.index({ isVerified: 1 });
 userSchema.index({ isSuspended: 1 });
 userSchema.index({ canUploadVideos: 1 });
 userSchema.index({ canCreatePublicCourses: 1 });
+<<<<<<< Updated upstream
 userSchema.index({ lastActiveAt: -1 });
 userSchema.index({ lastPlatform: 1 });
 userSchema.index({ organizationId: 1, lastActiveAt: -1 });
+=======
+userSchema.index({ canCreateContests: 1 });
+>>>>>>> Stashed changes
 
 const User: mongoose.Model<IUser> =
   (mongoose.models.User as mongoose.Model<IUser>) ||

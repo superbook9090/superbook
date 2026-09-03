@@ -1,6 +1,7 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IQuizQuestion extends Document {
+  _id: mongoose.Types.ObjectId;
   quiz: mongoose.Types.ObjectId;
   order: number;
   prompt: string;

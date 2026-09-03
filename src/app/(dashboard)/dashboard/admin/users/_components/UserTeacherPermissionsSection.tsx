@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Video, Globe, Sliders, Check, BookOpen, HelpCircle, FileText, Sparkles } from 'lucide-react';
+import { Video, Globe, Sliders, Check, BookOpen, HelpCircle, FileText, Sparkles, Trophy } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import Button from '@/components/ui/Button';
 import { TextField } from '@/components/ui/TextField';
@@ -11,6 +11,7 @@ interface UserTeacherPermissionsSectionProps {
   user: User;
   onToggleVideo: (currentVal: boolean) => void;
   onTogglePublicCourse: (currentVal: boolean) => void;
+  onToggleContest?: (currentVal: boolean) => void;
   limitsForm: { courses: string; quizzes: string; blogs: string; aiQuizGenerations?: string };
   onLimitsChange: (field: 'courses' | 'quizzes' | 'blogs' | 'aiQuizGenerations', value: string) => void;
   onSaveLimits: () => void;
@@ -21,6 +22,7 @@ export function UserTeacherPermissionsSection({
   user,
   onToggleVideo,
   onTogglePublicCourse,
+  onToggleContest,
   limitsForm,
   onLimitsChange,
   onSaveLimits,
@@ -46,7 +48,7 @@ export function UserTeacherPermissionsSection({
       </div>
 
       {/* Feature Toggles */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
         {/* Video Upload Permission */}
         <div className="flex items-center justify-between gap-3 p-3.5 rounded-xl bg-[var(--card-solid)] border border-[var(--border)]">
           <div className="flex items-center gap-2.5 min-w-0">
@@ -96,6 +98,32 @@ export function UserTeacherPermissionsSection({
               className="sr-only peer"
             />
             <div className="w-11 h-6 bg-[var(--color-surface-muted-strong)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[var(--color-border)] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--teacher-primary)]" />
+          </label>
+        </div>
+
+        {/* Contest Creation Permission */}
+        <div className="flex items-center justify-between gap-3 p-3.5 rounded-xl bg-[var(--card-solid)] border border-[var(--border)]">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="p-2 rounded-lg bg-[var(--warning-light)] text-[var(--warning)] shrink-0">
+              <Trophy className="w-4 h-4" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs sm:text-sm font-semibold text-[var(--color-foreground)] truncate">
+                {t('adminUsers.canCreateContests') || 'Contest Creator'}
+              </p>
+              <p className="text-[11px] sm:text-xs text-[var(--color-muted-foreground)] truncate">
+                {t('adminUsers.canCreateContestsDesc') || 'Create & schedule live contests.'}
+              </p>
+            </div>
+          </div>
+          <label className="relative inline-flex items-center cursor-pointer shrink-0">
+            <input
+              type="checkbox"
+              checked={Boolean(user.canCreateContests)}
+              onChange={() => onToggleContest?.(Boolean(user.canCreateContests))}
+              className="sr-only peer"
+            />
+            <div className="w-11 h-6 bg-[var(--color-surface-muted-strong)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[var(--color-border)] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--warning)]" />
           </label>
         </div>
       </div>

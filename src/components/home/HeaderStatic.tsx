@@ -33,6 +33,14 @@ export default function HeaderStatic({ forceScrolled = false }: { forceScrolled?
           <div className="hidden md:flex items-center gap-4">
             <DownloadAppSidebarCard compact />
             <ThemeToggle />
+            <Link
+              id="header-contests-link"
+              href={ROUTES.contests}
+              data-i18n-key="common.contests"
+              className={`header-nav-btn ${forceScrolled ? 'header-nav-btn-dark' : 'header-nav-btn-light'}`}
+            >
+              {t('common.contests') || 'Contests'}
+            </Link>
             {enableBlogs && (
               <Link
                 id="header-blogs-link"

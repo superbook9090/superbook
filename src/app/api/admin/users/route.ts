@@ -316,6 +316,22 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
+    // Validate canCreateContests if provided (Only Superadmin can grant/revoke)
+    if (updates.canCreateContests !== undefined) {
+      if (typeof updates.canCreateContests !== 'boolean') {
+        return NextResponse.json(
+          { message: 'canCreateContests must be a boolean' },
+          { status: 400 }
+        );
+      }
+      if (!authResult.isSuperAdmin) {
+        return NextResponse.json(
+          { message: 'Only super admins can configure contest permissions' },
+          { status: 403 }
+        );
+      }
+    }
+
     // Validate limits if provided
     if (updates.limits) {
       if (updates.limits.courses !== undefined && (typeof updates.limits.courses !== 'number' || updates.limits.courses < 1)) {

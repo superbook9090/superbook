@@ -17,7 +17,7 @@ export async function GET() {
     }
 
     await dbConnect();
-    const user = await User.findById(session.user.id).select('password provider organizationId');
+    const user = await User.findById(session.user.id).select('password provider organizationId canCreateContests');
 
     if (!user) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
@@ -40,6 +40,7 @@ export async function GET() {
         session.user.id,
         session.user.role
       ),
+      canCreateContests: Boolean(user.canCreateContests || session.user.role === 'superadmin'),
       organizationName,
     });
   } catch (error) {

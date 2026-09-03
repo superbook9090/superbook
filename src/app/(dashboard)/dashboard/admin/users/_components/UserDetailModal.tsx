@@ -21,6 +21,7 @@ type Props = {
   handleSaveOrgAssign: (userId: string, orgId: string | null) => Promise<void>;
   handleToggleVideoUpload: (userId: string, currentVal: boolean) => void;
   handleTogglePublicCoursePermission: (userId: string, currentVal: boolean) => void;
+  handleToggleContestPermission?: (userId: string, currentVal: boolean) => void;
   handleSaveLimits: (userId: string, limits: { courses?: number; quizzes?: number; blogs?: number; aiQuizGenerations?: number }) => Promise<void>;
   handleToggleSuspend: (userId: string, isSuspended: boolean) => Promise<void>;
   handleDeleteClick: (userId: string) => void;
@@ -29,6 +30,7 @@ type Props = {
 export function UserDetailModal({
   selectedUser, session, organizations, handleCloseUserDetail, handleRoleChange,
   handleSaveOrgAssign, handleToggleVideoUpload, handleTogglePublicCoursePermission,
+  handleToggleContestPermission,
   handleSaveLimits, handleToggleSuspend, handleDeleteClick,
 }: Props) {
   const { t } = useTranslation();
@@ -197,6 +199,7 @@ export function UserDetailModal({
             user={selectedUser}
             onToggleVideo={(val) => handleToggleVideoUpload(selectedUser._id, val)}
             onTogglePublicCourse={(val) => handleTogglePublicCoursePermission(selectedUser._id, val)}
+            onToggleContest={(val) => handleToggleContestPermission?.(selectedUser._id, val)}
             limitsForm={limitsForm}
             onLimitsChange={(field, val) => setLimitsForm((prev) => ({ ...prev, [field]: val }))}
             onSaveLimits={onSaveLimits}

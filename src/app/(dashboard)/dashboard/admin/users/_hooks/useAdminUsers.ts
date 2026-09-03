@@ -120,6 +120,21 @@ export function useAdminUsers() {
     }
   };
 
+  const handleToggleContestPermission = async (userId: string, currentVal: boolean) => {
+    try {
+      const newVal = !currentVal;
+      await patchAdminUser({ userId, updates: { canCreateContests: newVal } });
+      setUsers((prev) => prev.map((u) => (u._id === userId ? { ...u, canCreateContests: newVal } : u)));
+      if (selectedUser?._id === userId) setSelectedUser((prev) => (prev ? { ...prev, canCreateContests: newVal } : null));
+      addAlert({ type: 'success', message: t('adminUsers.contestPermissionUpdated') || 'Contest permission updated' });
+    } catch (err) {
+      addAlert({
+        type: 'error',
+        message: err instanceof ApiClientError ? err.message : t('adminSettings.errorUpdatingUser'),
+      });
+    }
+  };
+
   const handleSaveLimits = async (
     userId: string,
     limits: { courses?: number; quizzes?: number; blogs?: number; aiQuizGenerations?: number }
@@ -142,23 +157,24 @@ export function useAdminUsers() {
       const data = (await patchAdminUserOrganization(userId, { organizationId: orgId })) as Partial<User>;
       setUsers((prev) => prev.map((u) => (u._id === userId ? { ...u, ...data } : u)));
       if (selectedUser?._id === userId) setSelectedUser((prev) => (prev ? { ...prev, ...data } : null));
-      addAlert({ type: 'success', message: t('adminUsers.userOrganizationUpdated') });
+      addAlert({ type: 'success', message: t('adminUsers.orgAssignedSuccess') });
     } catch (err) {
       addAlert({
         type: 'error',
-        message: err instanceof ApiClientError ? err.message : t('adminSettings.errorUpdatingOrganization'),
+        message: err instanceof ApiClientError ? err.message : t('adminUsers.failedAssignOrg'),
       });
     }
   };
 
-  const handleToggleSuspend = async (userId: string, isSuspended: boolean) => {
+  const handleToggleSuspend = async (userId: string, currentVal: boolean) => {
     try {
-      await patchAdminUser({ userId, updates: { isSuspended } });
-      setUsers((prev) => prev.map((u) => (u._id === userId ? { ...u, isSuspended } : u)));
-      if (selectedUser?._id === userId) setSelectedUser((prev) => (prev ? { ...prev, isSuspended } : null));
+      const newVal = !currentVal;
+      await patchAdminUser({ userId, updates: { isSuspended: newVal } });
+      setUsers((prev) => prev.map((u) => (u._id === userId ? { ...u, isSuspended: newVal } : u)));
+      if (selectedUser?._id === userId) setSelectedUser((prev) => (prev ? { ...prev, isSuspended: newVal } : null));
       addAlert({
         type: 'success',
-        message: isSuspended ? t('adminUsers.userSuspendedSuccess') : t('adminUsers.userUnsuspendedSuccess'),
+        message: newVal ? t('adminUsers.userSuspended') : t('adminUsers.userUnsuspended'),
       });
     } catch (err) {
       addAlert({
@@ -168,14 +184,15 @@ export function useAdminUsers() {
     }
   };
 
-  const handleDelete = async (userId: string) => {
+  const handleDelete = async (overrideId?: string) => {
+    const targetId = overrideId || deleteId;
+    if (!targetId) return;
     try {
-      await deleteAdminUser(userId);
-      setUsers((prev) => prev.filter((u) => u._id !== userId));
-      addAlert({ type: 'success', message: t('adminUsers.userDeletedSuccess') });
-      setDeleteId(null);
+      await deleteAdminUser(targetId);
+      setUsers((prev) => prev.filter((u) => u._id !== targetId));
       setShowDeleteDialog(false);
-      setShowUserDetail(false);
+      setDeleteId(null);
+      addAlert({ type: 'success', message: t('adminUsers.userDeletedSuccess') });
     } catch (err) {
       addAlert({
         type: 'error',
@@ -216,6 +233,7 @@ export function useAdminUsers() {
     handleRoleChange,
     handleToggleVideoUpload,
     handleTogglePublicCoursePermission,
+    handleToggleContestPermission,
     handleSaveLimits,
     handleSaveOrgAssign,
     handleToggleSuspend,

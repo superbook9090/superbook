@@ -56,6 +56,7 @@ export default function AdminUsersPage() {
     handleRoleChange,
     handleToggleVideoUpload,
     handleTogglePublicCoursePermission,
+    handleToggleContestPermission,
     handleSaveLimits,
     handleSaveOrgAssign,
     handleToggleSuspend,
@@ -261,6 +262,7 @@ export default function AdminUsersPage() {
           handleSaveOrgAssign={handleSaveOrgAssign}
           handleToggleVideoUpload={handleToggleVideoUpload}
           handleTogglePublicCoursePermission={handleTogglePublicCoursePermission}
+          handleToggleContestPermission={handleToggleContestPermission}
           handleSaveLimits={handleSaveLimits}
           handleToggleSuspend={handleToggleSuspend}
           handleDeleteClick={(id) => { setDeleteId(id); setShowDeleteDialog(true); }}

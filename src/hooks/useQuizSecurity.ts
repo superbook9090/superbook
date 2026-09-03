@@ -199,19 +199,30 @@ export function useQuizSecurity({
     (e: KeyboardEvent) => {
       if (!state.isActive || isSubmittingRef.current) return;
 
-      // Detect common dev tools shortcuts
+      const key = e.key.toUpperCase();
+      // Detect common dev tools shortcuts (F12, Ctrl/Cmd + Shift + I/J/C/K, Ctrl/Cmd + U, Cmd + Option + I/J/C)
       const isDevToolsShortcut =
-        (e.key === 'F12') ||
-        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
-        (e.ctrlKey && e.key === 'U') ||
-        (e.metaKey && e.altKey && e.key === 'I');
+        e.key === 'F12' ||
+        ((e.ctrlKey || e.metaKey) && e.shiftKey && (key === 'I' || key === 'J' || key === 'C' || key === 'K')) ||
+        ((e.ctrlKey || e.metaKey) && key === 'U') ||
+        (e.metaKey && e.altKey && (key === 'I' || key === 'J' || key === 'C'));
 
       if (isDevToolsShortcut) {
         e.preventDefault();
+        e.stopPropagation();
         handleViolation('dev_tools');
       }
     },
     [state.isActive, handleViolation]
+  );
+
+  // Disable context menu (right click inspect element) during active quiz
+  const handleContextMenu = useCallback(
+    (e: MouseEvent) => {
+      if (!state.isActive || isSubmittingRef.current) return;
+      e.preventDefault();
+    },
+    [state.isActive]
   );
 
   // Detect dev tools via window resize (dev tools changes window size)
@@ -297,15 +308,11 @@ export function useQuizSecurity({
     // Keyboard shortcuts (dev tools detection)
     window.addEventListener('keydown', handleKeyDown);
 
+    // Disable right click during quiz
+    window.addEventListener('contextmenu', handleContextMenu);
+
     // Window resize (dev tools detection)
     window.addEventListener('resize', handleResize);
-
-    // Check for other tabs periodically (disabled due to false positives)
-    // const tabCheckInterval = setInterval(() => {
-    //   if (state.isActive && checkDuplicateTab()) {
-    //     handleViolation('duplicate_tab');
-    //   }
-    // }, 1000);
 
     return () => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
@@ -316,9 +323,10 @@ export function useQuizSecurity({
       window.removeEventListener('blur', handleWindowBlur);
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('contextmenu', handleContextMenu);
       window.removeEventListener('resize', handleResize);
     };
-  }, [enabled, handleFullscreenChange, handleVisibilityChange, handleWindowBlur, handleBeforeUnload, handleKeyDown, handleResize, checkDuplicateTab, handleViolation, setActiveSession]);
+  }, [enabled, handleFullscreenChange, handleVisibilityChange, handleWindowBlur, handleBeforeUnload, handleKeyDown, handleContextMenu, handleResize, checkDuplicateTab, handleViolation, setActiveSession]);
 
   // Reset submitting flag when not active
   useEffect(() => {
