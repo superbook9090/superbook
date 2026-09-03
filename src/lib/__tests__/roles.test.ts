@@ -3,10 +3,8 @@ import {
   normalizeRole,
   isStaffRole,
   isAdmin,
-  isSuperAdmin,
   getDashboardHomePath,
-  withDashboardHome,
-  type UserRole
+  withDashboardHome
 } from '../roles';
 
 // Mock ROUTES constant

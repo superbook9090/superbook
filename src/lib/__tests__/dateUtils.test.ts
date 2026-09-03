@@ -1,9 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   formatDate,
-  formatDateTime,
-  formatShortDate,
-  formatTime,
   formatDuration,
   getRelativeTime
 } from '../dateUtils';

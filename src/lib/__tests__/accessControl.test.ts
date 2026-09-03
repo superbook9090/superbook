@@ -46,19 +46,19 @@ describe('accessControl', () => {
     it('returns null org filter for sys admin', () => {
       const filter = getAccessFilter(sysAdmin);
       expect(filter).toHaveProperty('$or');
-      expect((filter as any).$or).toHaveLength(2);
+      expect((filter as { $or: unknown[] }).$or).toHaveLength(2);
     });
 
     it('returns org or public filter for org student', () => {
       const filter = getAccessFilter(orgStudent);
       expect(filter).toHaveProperty('$or');
-      expect((filter as any).$or).toContainEqual({ organizationId: orgStudent.organizationId });
+      expect((filter as { $or: unknown[] }).$or).toContainEqual({ organizationId: orgStudent.organizationId });
     });
 
     it('returns public filter for public student', () => {
       const filter = getAccessFilter(publicStudent);
       expect(filter).toHaveProperty('$or');
-      expect((filter as any).$or[0]).toEqual({ organizationId: null });
+      expect((filter as { $or: unknown[] }).$or[0]).toEqual({ organizationId: null });
     });
   });
 
