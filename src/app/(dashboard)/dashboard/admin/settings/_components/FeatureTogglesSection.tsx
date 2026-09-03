@@ -16,6 +16,7 @@ import {
   RefreshCw,
   Users,
   Sparkles,
+  Trophy,
 } from 'lucide-react';
 import ToggleSwitch from '@/components/ui/ToggleSwitch';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -65,6 +66,8 @@ export function FeatureTogglesSection({
         { key: 'enableBlogs', labelKey: 'adminSettings.enableBlogs', descKey: 'adminSettings.enableBlogsDesc', icon: BookOpen, iconBg: 'bg-[var(--info-light)]', iconColor: 'text-[var(--info)]' },
         { key: 'enableNotes', labelKey: 'adminSettings.enableNotes', descKey: 'adminSettings.enableNotesDesc', icon: Notebook, iconBg: 'bg-[var(--warning-light)]', iconColor: 'text-[var(--warning)]' },
         { key: 'enableCourseDoubts', labelKey: 'adminSettings.enableCourseDoubts', descKey: 'adminSettings.enableCourseDoubtsDesc', icon: FileText, iconBg: 'bg-[var(--success-light)]', iconColor: 'text-[var(--success)]' },
+        { key: 'enableContests', labelKey: 'adminSettings.enableContests', descKey: 'adminSettings.enableContestsDesc', icon: Trophy, iconBg: 'bg-[var(--primary-soft)]', iconColor: 'text-[var(--primary)]', isSuperAdminOnly: true },
+        { key: 'enableContestMarketingPopup', labelKey: 'adminSettings.enableContestMarketingPopup', descKey: 'adminSettings.enableContestMarketingPopupDesc', icon: Sparkles, iconBg: 'bg-[var(--warning-light)]', iconColor: 'text-[var(--warning)]', isSuperAdminOnly: true },
       ],
     },
     {

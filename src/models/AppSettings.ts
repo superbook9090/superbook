@@ -28,6 +28,8 @@ export interface IAppSettings extends Document {
     enableAiQuizGen?: boolean;
     enableGoogleAdsense?: boolean;
     enableCourseDoubts?: boolean;
+    enableContests?: boolean;
+    enableContestMarketingPopup?: boolean;
   };
   platformConfig: {
     maintenanceMode: boolean;
@@ -137,6 +139,14 @@ const appSettingsSchema = new Schema<IAppSettings>(
       enableCourseDoubts: {
         type: Boolean,
         default: true,
+      },
+      enableContests: {
+        type: Boolean,
+        default: false,
+      },
+      enableContestMarketingPopup: {
+        type: Boolean,
+        default: false,
       },
     },
     platformConfig: {

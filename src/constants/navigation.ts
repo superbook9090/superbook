@@ -22,7 +22,7 @@ export type NavIconName =
   | 'Notebook'
   | 'Trophy';
 
-export type NavFeatureFlag = 'enableBlogs' | 'enableQuizzes' | 'enableCourses' | 'enableAnalytics' | 'enableNotes';
+export type NavFeatureFlag = 'enableBlogs' | 'enableQuizzes' | 'enableCourses' | 'enableAnalytics' | 'enableNotes' | 'enableContests';
 
 export interface DashboardNavItem {
   /** i18n key, e.g. `common.dashboard` */
@@ -35,7 +35,7 @@ export interface DashboardNavItem {
 
 export const STUDENT_NAV: DashboardNavItem[] = [
   { nameKey: 'common.dashboard', href: ROUTES.student.root, icon: 'LayoutDashboard' },
-  { nameKey: 'common.contests', href: ROUTES.student.contests, icon: 'Trophy' },
+  { nameKey: 'common.contests', href: ROUTES.student.contests, icon: 'Trophy', feature: 'enableContests' },
   { nameKey: 'common.myCourses', href: ROUTES.student.courses, icon: 'BookOpen', feature: 'enableCourses' },
   { nameKey: 'common.browse', href: ROUTES.student.browse, icon: 'Search', feature: 'enableCourses' },
   { nameKey: 'common.files', href: ROUTES.student.files, icon: 'Folder' },
@@ -51,7 +51,7 @@ export const STUDENT_NAV: DashboardNavItem[] = [
 
 export const TEACHER_NAV: DashboardNavItem[] = [
   { nameKey: 'common.dashboard', href: ROUTES.teacher.root, icon: 'LayoutDashboard' },
-  { nameKey: 'common.contests', href: ROUTES.teacher.contests, icon: 'Trophy' },
+  { nameKey: 'common.contests', href: ROUTES.teacher.contests, icon: 'Trophy', feature: 'enableContests' },
   { nameKey: 'common.myCourses', href: ROUTES.teacher.courses, icon: 'BookOpen', feature: 'enableCourses' },
   { nameKey: 'common.quizzes', href: ROUTES.teacher.quizzes, icon: 'HelpCircle', feature: 'enableQuizzes' },
   { nameKey: 'common.blogs', href: ROUTES.teacher.blogs, icon: 'Newspaper', feature: 'enableBlogs' },

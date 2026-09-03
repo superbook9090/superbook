@@ -25,11 +25,14 @@ const DASHBOARD_FEATURE_ROUTES: FeatureRouteRule[] = [
   { prefix: ROUTES.admin.notes, feature: 'enableNotes' },
   { prefix: ROUTES.teacher.analytics, feature: 'enableAnalytics' },
   { prefix: ROUTES.admin.analytics, feature: 'enableAnalytics' },
+  { prefix: ROUTES.student.contests, feature: 'enableContests' },
+  { prefix: ROUTES.teacher.contests, feature: 'enableContests' },
 ];
 
 const PUBLIC_FEATURE_ROUTES: FeatureRouteRule[] = [
   { prefix: ROUTES.blogs, feature: 'enableBlogs' },
   { prefix: ROUTES.courses, feature: 'enableCourses' },
+  { prefix: ROUTES.contests, feature: 'enableContests' },
 ];
 
 const ALL_FEATURE_ROUTES = [...DASHBOARD_FEATURE_ROUTES, ...PUBLIC_FEATURE_ROUTES].sort(

@@ -159,6 +159,7 @@ export default function PhoneLoginForm({ theme, callbackUrl, onBackToEmail }: Ph
 
       await fetchSession(true);
       sendGAEvent({ event: 'login', method: 'phone' });
+      sessionStorage.setItem('quizdo_just_logged_in', 'true');
       await new Promise(resolve => setTimeout(resolve, 500));
       router.push(callbackUrl);
     } catch (err) {

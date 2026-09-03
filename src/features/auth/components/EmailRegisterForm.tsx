@@ -89,6 +89,7 @@ export default function EmailRegisterForm({ theme, callbackUrl, onSelectPhoneFlo
       }
 
       sendGAEvent({ event: 'sign_up', method: 'email' });
+      sessionStorage.setItem('quizdo_just_logged_in', 'true');
 
       await fetchSession(true);
       await new Promise(resolve => setTimeout(resolve, 500));

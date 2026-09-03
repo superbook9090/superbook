@@ -186,6 +186,8 @@ export const updateSettingsSchema = z.object({
     enableAiQuizGen: z.boolean().optional(),
     enableGoogleAdsense: z.boolean().optional(),
     enableCourseDoubts: z.boolean().optional(),
+    enableContests: z.boolean().optional(),
+    enableContestMarketingPopup: z.boolean().optional(),
   }).optional(),
   platformConfig: z.object({
     siteName: z.string().max(100).optional(),

@@ -28,6 +28,8 @@ export interface AppSettings {
     enableAiQuizGen?: boolean;
     enableGoogleAdsense?: boolean;
     enableCourseDoubts?: boolean;
+    enableContests?: boolean;
+    enableContestMarketingPopup?: boolean;
   };
   platformConfig: {
     siteName?: string;

@@ -172,6 +172,10 @@ export async function PATCH(req: NextRequest) {
         enableAiQuizGen: featureToggles.enableAiQuizGen ?? existingToggles.enableAiQuizGen ?? true,
         enableGoogleAdsense: featureToggles.enableGoogleAdsense ?? existingToggles.enableGoogleAdsense ?? true,
         enableCourseDoubts: featureToggles.enableCourseDoubts ?? existingToggles.enableCourseDoubts ?? true,
+        enableContests:
+          isSuper && featureToggles.enableContests !== undefined
+            ? featureToggles.enableContests
+            : (existingToggles.enableContests ?? false),
         enableQuizSolutionAnalysis:
           isSuper && featureToggles.enableQuizSolutionAnalysis !== undefined
             ? featureToggles.enableQuizSolutionAnalysis

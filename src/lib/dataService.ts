@@ -33,6 +33,7 @@ const DEFAULT_SETTINGS = {
     enableAiQuizGen: true,
     enableGoogleAdsense: true,
     enableCourseDoubts: true,
+    enableContests: false,
   },
   platformConfig: {
     siteName: 'Quiz Do',

@@ -15,6 +15,12 @@ import {
   LazyTeacherSidebar,
 } from '@/lib/lazy';
 import FeatureRouteGuard from '@/components/dashboard/FeatureRouteGuard';
+import dynamic from 'next/dynamic';
+
+const LazyContestMarketingPopup = dynamic(
+  () => import('@/components/marketing/ContestMarketingPopup'),
+  { ssr: false }
+);
 
 type DashboardChromeProps = {
   session: Session;
@@ -73,6 +79,7 @@ export default function DashboardChrome({
           <RoleThemeProvider role={role || 'student'}>
             <DashboardContent>
               <LazyPushNotificationManager />
+              <LazyContestMarketingPopup />
               {children}
             </DashboardContent>
           </RoleThemeProvider>
