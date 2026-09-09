@@ -14,8 +14,6 @@ import { roleThemes } from '@/lib/roleTheme';
 import { requestForgotPassword } from '@/lib/api/auth';
 import { ApiClientError } from '@/lib/api/http';
 
-import AuthHeader from './AuthHeader';
-
 export default function ForgotPasswordForm() {
   const { t } = useTranslation();
   const theme = roleThemes.student;
@@ -46,9 +44,7 @@ export default function ForgotPasswordForm() {
   };
 
   return (
-    <div className="w-full min-h-screen flex flex-col overflow-y-auto bg-[var(--color-background)]">
-      <AuthHeader />
-      <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 my-auto">
+    <div className="w-full flex-1 flex flex-col items-center justify-center p-4 sm:p-6 my-auto">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -98,7 +94,6 @@ export default function ForgotPasswordForm() {
           className="mt-[var(--section-gap)] w-full justify-center text-[var(--student-primary)] hover:underline"
         />
       </motion.div>
-      </div>
     </div>
   );
 }

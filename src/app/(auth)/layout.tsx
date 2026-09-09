@@ -4,7 +4,7 @@ import AuthHeader from '@/features/auth/components/AuthHeader';
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthProviders>
-      <div className="relative h-dvh max-h-dvh flex flex-col bg-[var(--color-background)] selection:bg-[var(--primary)] selection:text-white overflow-hidden">
+      <div className="relative min-h-dvh flex flex-col bg-[var(--color-background)] selection:bg-[var(--primary)] selection:text-white overflow-x-hidden">
         {/* Ambient Aurora Background */}
         <div className="aurora-bg fixed inset-0 pointer-events-none" aria-hidden>
           <div className="grid-lines absolute inset-0 opacity-[0.25] [mask-image:radial-gradient(ellipse_80%_70%_at_50%_10%,#000,transparent)]" />
@@ -17,7 +17,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <AuthHeader />
 
         {/* Main Content Area */}
-        <main className="relative flex-1 flex flex-col h-full overflow-hidden justify-center">
+        <main className="relative flex-1 flex flex-col justify-center items-center w-full">
           {children}
         </main>
       </div>

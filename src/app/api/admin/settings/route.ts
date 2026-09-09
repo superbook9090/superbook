@@ -176,6 +176,10 @@ export async function PATCH(req: NextRequest) {
           isSuper && featureToggles.enableContests !== undefined
             ? featureToggles.enableContests
             : (existingToggles.enableContests ?? false),
+        enableContestMarketingPopup:
+          isSuper && featureToggles.enableContestMarketingPopup !== undefined
+            ? featureToggles.enableContestMarketingPopup
+            : (existingToggles.enableContestMarketingPopup ?? false),
         enableQuizSolutionAnalysis:
           isSuper && featureToggles.enableQuizSolutionAnalysis !== undefined
             ? featureToggles.enableQuizSolutionAnalysis

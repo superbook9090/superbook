@@ -82,6 +82,8 @@ export const ROUTES = {
     courses: '/dashboard/admin/courses',
     courseStudents: (id: string) => `/dashboard/admin/courses/${id}/students`,
     quizzes: '/dashboard/admin/quizzes',
+    quizCreate: '/dashboard/admin/quizzes/create',
+    quizEdit: (id: string) => `/dashboard/admin/quizzes/${id}/edit`,
     blogs: '/dashboard/admin/blogs',
     files: '/dashboard/admin/files',
     analytics: '/dashboard/admin/analytics',

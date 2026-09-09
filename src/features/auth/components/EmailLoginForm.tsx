@@ -137,18 +137,20 @@ export default function EmailLoginForm({ theme, callbackUrl, onSelectPhoneFlow }
         transition={{ delay: 0.4 }}
         className="flex items-center justify-between"
       >
-        <label className="flex items-center min-h-[44px] cursor-pointer group">
+        <label className="inline-flex items-center min-h-[44px] cursor-pointer select-none group">
           <input
             type="checkbox"
             checked={rememberMe}
             onChange={(e) => setRememberMe(e.target.checked)}
-            className={`w-4 h-4 rounded border-[var(--color-border)] ${theme.text} focus:${theme.shadow}`}
+            className="w-4 h-4 rounded border-[var(--color-border)] accent-[var(--primary)] cursor-pointer"
           />
-          <span className="ml-2 text-sm text-[var(--color-muted-foreground)]">{t('login.rememberMe')}</span>
+          <span className="ml-2 text-xs sm:text-sm text-[var(--color-muted-foreground)] group-hover:text-[var(--color-foreground)] transition-colors">
+            {t('login.rememberMe')}
+          </span>
         </label>
         <Link
           href={ROUTES.forgotPassword}
-          className={`inline-flex items-center min-h-[44px] text-sm font-medium ${theme.text} hover:text-[var(--color-foreground)] transition-colors`}
+          className="inline-flex items-center min-h-[44px] text-xs sm:text-sm font-semibold text-[var(--primary)] hover:text-[var(--primary-hover)] hover:underline transition-colors"
         >
           {t('login.forgotPassword')}
         </Link>
@@ -156,31 +158,33 @@ export default function EmailLoginForm({ theme, callbackUrl, onSelectPhoneFlow }
 
       {/* Submit Button */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
       >
         <motion.button
           type="submit"
           disabled={isLoading}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className={`w-full flex items-center justify-center py-4 px-6 bg-gradient-to-r ${theme.gradient} text-white font-semibold rounded-xl shadow-lg ${theme.shadow} hover:shadow-xl focus:outline-none focus:ring-2 focus:${theme.shadow} disabled:opacity-60 disabled:cursor-not-allowed transition-all`}
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.99 }}
+          className={`w-full flex items-center justify-center py-3 sm:py-3.5 px-6 bg-gradient-to-r ${theme.gradient} text-white font-semibold text-sm sm:text-base rounded-xl shadow-md ${theme.shadow} hover:shadow-lg focus:outline-none focus:ring-2 focus:${theme.shadow} disabled:opacity-60 disabled:cursor-not-allowed transition-all cursor-pointer`}
         >
           {isLoading ? (
             <Loader size="sm" />
           ) : (
             <>
               {t('login.signIn')}
-              <ArrowRight className="w-5 h-5 ml-2" />
+              <ArrowRight className="w-4.5 h-4.5 ml-2" />
             </>
           )}
         </motion.button>
       </motion.div>
 
       <AuthDivider />
-      <GoogleAuthButton callbackUrl={callbackUrl} />
-      <PhoneAuthButton onClick={onSelectPhoneFlow} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
+        <GoogleAuthButton callbackUrl={callbackUrl} />
+        <PhoneAuthButton onClick={onSelectPhoneFlow} />
+      </div>
     </form>
   );
 }

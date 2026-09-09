@@ -14,7 +14,7 @@ import { getAccessFilter } from '@/lib/accessControl';
 import { getCachedData, setCachedData, invalidatePattern } from '@/lib/redis';
 import { setQuizQuestions } from '@/domain/learning/quizContent';
 import { resolveQuizPlacement } from '@/lib/quiz/quizPlacement';
-import { isStaffRole } from '@/lib/roles';
+import { isStaffRole, isAdmin } from '@/lib/roles';
 
 // GET /api/quizzes - Get all quizzes (with optional filtering)
 export async function GET(request: NextRequest) {
@@ -257,11 +257,13 @@ export async function POST(request: NextRequest) {
       if (limitCheck) return limitCheck;
     }
 
-    // Verify course exists and belongs to this instructor
-    const courseDoc = await Course.findOne({
-      _id: course,
-      instructor: session.user.id,
-    }).lean();
+    // Verify course exists and belongs to this instructor (or bypass if admin)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const courseQuery: any = { _id: course };
+    if (!isAdmin(session.user?.role)) {
+      courseQuery.instructor = session.user.id;
+    }
+    const courseDoc = await Course.findOne(courseQuery).lean();
 
     if (!courseDoc) {
       return NextResponse.json(

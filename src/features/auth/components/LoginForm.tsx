@@ -14,6 +14,7 @@ import { motion } from 'framer-motion';
 
 import { useAlert } from '@/components/ui/AlertContainer';
 import { Loader } from '@/components/ui/Loader';
+import AuthBranding from './AuthBranding';
 import EmailLoginForm from './EmailLoginForm';
 import PhoneLoginForm from './PhoneLoginForm';
 
@@ -82,69 +83,77 @@ function LoginFormInner() {
   }, [router, fetchSession, t, callbackUrl, addAlert]);
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-10 pt-20 sm:pt-24 pb-12 sm:pb-16 min-h-screen relative">
+    <div className="w-full flex-1 flex flex-col items-center justify-center p-3 sm:p-6 lg:p-8 my-auto">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45 }}
-        className="w-full max-w-md my-auto"
+        className="w-full max-w-md lg:max-w-5xl rounded-2xl sm:rounded-3xl border border-[var(--color-border)] shadow-2xl bg-[var(--card-solid)]/95 backdrop-blur-2xl overflow-hidden my-auto"
       >
-        {/* Header */}
-        <div className="mb-6 text-center space-y-1.5">
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--color-foreground)]">
-            {t('login.welcomeBack')}
-          </h1>
-          <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)]">
-            {t('login.signInCredentials')}
-          </p>
-        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[560px]">
+          {/* Left: Branding Showcase (Visible on lg+) */}
+          <AuthBranding mode="login" className="lg:col-span-6" />
 
-        {/* Form Card */}
-        <div className="bg-[var(--card-solid)]/95 backdrop-blur-xl rounded-3xl border border-[var(--color-border)] shadow-2xl p-6 sm:p-8 relative overflow-hidden transition-all">
-          {/* Ambient decorative glow inside card */}
-          <div
-            className={`absolute top-0 right-0 w-36 h-36 bg-gradient-to-br ${theme.gradient} opacity-10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none`}
-          />
-
-          {isLoading && (
-            <div className="absolute inset-0 bg-[var(--card-solid)]/85 backdrop-blur-sm flex items-center justify-center z-50 rounded-3xl">
-              <Loader />
-            </div>
-          )}
-
-          {/* Conditionally Render Phone or Email Login Flow */}
-          {isPhoneFlow ? (
-            <PhoneLoginForm
-              theme={theme}
-              callbackUrl={callbackUrl}
-              onBackToEmail={() => setIsPhoneFlow(false)}
+          {/* Right: Form Area */}
+          <div className="lg:col-span-6 p-6 sm:p-8 xl:p-10 flex flex-col justify-center relative">
+            {/* Ambient decorative glow */}
+            <div
+              className={`absolute top-0 right-0 w-36 h-36 bg-gradient-to-br ${theme.gradient} opacity-10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none`}
             />
-          ) : (
-            <EmailLoginForm
-              theme={theme}
-              callbackUrl={callbackUrl}
-              onSelectPhoneFlow={() => setIsPhoneFlow(true)}
-            />
-          )}
 
-          {/* Register Footer Link */}
-          {!isPhoneFlow && (
-            <div className="mt-6 pt-4 border-t border-[var(--color-border)]/60 text-center">
+            {isLoading && (
+              <div className="absolute inset-0 bg-[var(--card-solid)]/85 backdrop-blur-sm flex items-center justify-center z-50">
+                <Loader />
+              </div>
+            )}
+
+            {/* Header */}
+            <div className="mb-6 space-y-1.5">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--student-soft)] text-[var(--student-primary)] text-xs font-semibold">
+                <span>👋 {t('login.welcomeBack')}</span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--color-foreground)]">
+                {t('login.welcomeBack')}
+              </h1>
               <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)]">
-                {t('login.dontHaveAccount')}{' '}
-                <Link
-                  href={
-                    callbackUrl === ROUTES.dashboard
-                      ? ROUTES.register
-                      : `${ROUTES.register}?callbackUrl=${encodeURIComponent(callbackUrl)}`
-                  }
-                  className="font-bold text-[var(--primary)] hover:text-[var(--primary-hover)] hover:underline transition-colors ml-1"
-                >
-                  {t('login.createOne')}
-                </Link>
+                {t('login.signInCredentials')}
               </p>
             </div>
-          )}
+
+            {/* Conditionally Render Phone or Email Login Flow */}
+            {isPhoneFlow ? (
+              <PhoneLoginForm
+                theme={theme}
+                callbackUrl={callbackUrl}
+                onBackToEmail={() => setIsPhoneFlow(false)}
+              />
+            ) : (
+              <EmailLoginForm
+                theme={theme}
+                callbackUrl={callbackUrl}
+                onSelectPhoneFlow={() => setIsPhoneFlow(true)}
+              />
+            )}
+
+            {/* Register Footer Link */}
+            {!isPhoneFlow && (
+              <div className="mt-6 pt-4 border-t border-[var(--color-border)]/60 text-center">
+                <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)]">
+                  {t('login.dontHaveAccount')}{' '}
+                  <Link
+                    href={
+                      callbackUrl === ROUTES.dashboard
+                        ? ROUTES.register
+                        : `${ROUTES.register}?callbackUrl=${encodeURIComponent(callbackUrl)}`
+                    }
+                    className="font-bold text-[var(--primary)] hover:text-[var(--primary-hover)] hover:underline transition-colors ml-1"
+                  >
+                    {t('login.createOne')}
+                  </Link>
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </motion.div>
     </div>

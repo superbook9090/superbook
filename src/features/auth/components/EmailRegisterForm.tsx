@@ -31,7 +31,12 @@ interface EmailRegisterFormProps {
   allowTeacherRegistration: boolean;
 }
 
-export default function EmailRegisterForm({ theme, callbackUrl, onSelectPhoneFlow, allowTeacherRegistration }: EmailRegisterFormProps) {
+export default function EmailRegisterForm({
+  theme,
+  callbackUrl,
+  onSelectPhoneFlow,
+  allowTeacherRegistration,
+}: EmailRegisterFormProps) {
   const { t } = useTranslation();
   const { addAlert } = useAlert();
   const router = useRouter();
@@ -48,7 +53,7 @@ export default function EmailRegisterForm({ theme, callbackUrl, onSelectPhoneFlo
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -92,7 +97,7 @@ export default function EmailRegisterForm({ theme, callbackUrl, onSelectPhoneFlo
       sessionStorage.setItem('quizdo_just_logged_in', 'true');
 
       await fetchSession(true);
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       const redirectTo =
         formData.role === 'student' && callbackUrl !== ROUTES.dashboard
@@ -110,19 +115,15 @@ export default function EmailRegisterForm({ theme, callbackUrl, onSelectPhoneFlo
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-2.5 sm:gap-3">
       {/* Role Selection */}
-      <RoleSelector 
-        role={formData.role} 
-        onChange={(role) => setFormData(prev => ({ ...prev, role }))} 
-        allowTeacherRegistration={allowTeacherRegistration} 
+      <RoleSelector
+        role={formData.role}
+        onChange={(role) => setFormData((prev) => ({ ...prev, role }))}
+        allowTeacherRegistration={allowTeacherRegistration}
       />
 
-      {/* Inputs Grid: Row 1 - Full Name & Email */}
+      {/* Row 1: Name & Email */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
-        <motion.div
-          initial={{ opacity: 0, x: -16 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.15 }}
-        >
+        <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 }}>
           <TextField
             label={t('register.fullName')}
             type="text"
@@ -131,16 +132,12 @@ export default function EmailRegisterForm({ theme, callbackUrl, onSelectPhoneFlo
             value={formData.name}
             onChange={handleChange}
             placeholder="John Doe"
-            startIcon={<User className="w-4.5 h-4.5 text-[var(--color-muted)]" />}
+            startIcon={<User className="w-4 h-4 text-[var(--color-muted)]" />}
             fullWidth
           />
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, x: -16 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2 }}
-        >
+        <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
           <TextField
             label={t('register.emailAddress')}
             type="email"
@@ -149,19 +146,15 @@ export default function EmailRegisterForm({ theme, callbackUrl, onSelectPhoneFlo
             value={formData.email}
             onChange={handleChange}
             placeholder="you@example.com"
-            startIcon={<Mail className="w-4.5 h-4.5 text-[var(--color-muted)]" />}
+            startIcon={<Mail className="w-4 h-4 text-[var(--color-muted)]" />}
             fullWidth
           />
         </motion.div>
       </div>
 
-      {/* Inputs Grid: Row 2 - Password & Confirm Password */}
+      {/* Row 2: Password & Confirm Password */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
-        <motion.div
-          initial={{ opacity: 0, x: -16 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.25 }}
-        >
+        <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.25 }}>
           <TextField
             label={t('register.password')}
             type="password"
@@ -169,17 +162,13 @@ export default function EmailRegisterForm({ theme, callbackUrl, onSelectPhoneFlo
             required
             value={formData.password}
             onChange={handleChange}
-            placeholder={t('register.min8Chars') || "Min 8 characters"}
-            startIcon={<Lock className="w-4.5 h-4.5 text-[var(--color-muted)]" />}
+            placeholder={t('register.min8Chars') || 'Min 8 characters'}
+            startIcon={<Lock className="w-4 h-4 text-[var(--color-muted)]" />}
             fullWidth
           />
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, x: -16 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.3 }}
-        >
+        <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>
           <TextField
             label={t('register.confirmPassword')}
             type="password"
@@ -188,42 +177,34 @@ export default function EmailRegisterForm({ theme, callbackUrl, onSelectPhoneFlo
             value={formData.confirmPassword}
             onChange={handleChange}
             placeholder={t('register.confirmPassword')}
-            startIcon={<Lock className="w-4.5 h-4.5 text-[var(--color-muted)]" />}
+            startIcon={<Lock className="w-4 h-4 text-[var(--color-muted)]" />}
             fullWidth
           />
         </motion.div>
       </div>
 
       {/* Invite Code (Optional) */}
-      <motion.div
-        initial={{ opacity: 0, x: -16 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.35 }}
-      >
+      <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.35 }}>
         <TextField
           label={`${t('register.inviteCode')} (${t('register.optional')})`}
           type="text"
           name="inviteCode"
           value={formData.inviteCode}
           onChange={handleChange}
-          placeholder={t('register.enterInviteCode') || "Enter invite code (optional)"}
-          startIcon={<Building2 className="w-4.5 h-4.5 text-[var(--color-muted)]" />}
+          placeholder={t('register.enterInviteCode') || 'Enter invite code (optional)'}
+          startIcon={<Building2 className="w-4 h-4 text-[var(--color-muted)]" />}
           fullWidth
         />
       </motion.div>
 
       {/* Submit Button */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-      >
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
         <motion.button
           type="submit"
           disabled={isLoading}
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.99 }}
-          className={`w-full flex items-center justify-center py-2.5 sm:py-3 px-5 bg-gradient-to-r ${theme.gradient} text-white font-semibold text-sm sm:text-base rounded-xl shadow-md ${theme.shadow} hover:shadow-lg focus:outline-none focus:ring-2 focus:${theme.shadow} disabled:opacity-60 disabled:cursor-not-allowed transition-all cursor-pointer`}
+          className={`w-full flex items-center justify-center min-h-[44px] py-2.5 sm:py-3 px-5 bg-gradient-to-r ${theme.gradient} text-white font-semibold text-sm sm:text-base rounded-xl shadow-md ${theme.shadow} hover:shadow-lg focus:outline-none focus:ring-2 focus:${theme.shadow} disabled:opacity-60 disabled:cursor-not-allowed transition-all cursor-pointer`}
         >
           {isLoading ? (
             <Loader size="sm" />

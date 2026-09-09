@@ -8,7 +8,7 @@ import { ROUTES } from '@/constants/routes';
 
 export default function AuthHeader() {
   return (
-    <header className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3.5 sm:py-4 bg-transparent">
+    <header className="sticky top-0 left-0 right-0 z-40 w-full flex items-center justify-between px-4 sm:px-6 lg:px-8 h-14 sm:h-16 bg-[var(--color-background)]/75 backdrop-blur-md border-b border-[var(--color-border)]/40 transition-colors">
       {/* Brand Logo */}
       <Link
         href={ROUTES.home}

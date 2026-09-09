@@ -13,6 +13,7 @@ import {
   EyeOff,
   Calendar,
   BookOpen,
+  Edit2,
 } from 'lucide-react';
 import { listCoursesAdmin } from '@/lib/api/courses';
 import { PageSkeleton } from '@/components/ui/Skeleton';
@@ -132,15 +133,23 @@ export default function AdminQuizzesPage() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center gap-3"
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
       >
-        <div className={`p-3 ${theme.activeBg} rounded-xl`}>
-          <HelpCircle className={`w-6 h-6 ${theme.text}`} />
+        <div className="flex items-center gap-3">
+          <div className={`p-3 ${theme.activeBg} rounded-xl`}>
+            <HelpCircle className={`w-6 h-6 ${theme.text}`} />
+          </div>
+          <div>
+            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">{t('common.allQuizzes')}</h1>
+            <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">{t('admin.manageQuizzesDesc')}</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">{t('common.allQuizzes')}</h1>
-          <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">{t('admin.manageQuizzesDesc')}</p>
-        </div>
+        <Button
+          onClick={() => router.push(ROUTES.admin.quizCreate)}
+          className="w-full sm:w-auto"
+        >
+          {t('teacherQuizzes.createQuiz')}
+        </Button>
       </motion.div>
 
       {/* Filters */}
@@ -267,6 +276,15 @@ export default function AdminQuizzesPage() {
 
                 {/* Actions */}
                 <div className="flex gap-2 pt-4 border-t border-[var(--border)]">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => router.push(ROUTES.admin.quizEdit(quiz._id))}
+                    className="flex-1 flex items-center justify-center gap-2"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                    {t('common.edit')}
+                  </Button>
                   <Button
                     type="button"
                     variant={quiz.isPublished ? 'primary' : 'secondary'}

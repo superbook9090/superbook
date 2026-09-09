@@ -14,7 +14,7 @@ import { deleteQuizzesAndQuestions } from '@/lib/cascade/deleteRelated';
 import { resolveQuizPlacement } from '@/lib/quiz/quizPlacement';
 import { invalidatePattern } from '@/lib/redis';
 import { requireFeature } from '@/lib/settingsHelpers';
-import { isStaffRole } from '@/lib/roles';
+import { isStaffRole, isAdmin } from '@/lib/roles';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const logContext: LogContext = { method: 'GET', path: '/api/quizzes/[id]' };
@@ -132,7 +132,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       _id: quiz.course,
       instructor: session.user.id,
     });
-    if (!course && session.user?.role !== 'admin') {
+    if (!course && !isAdmin(session.user?.role)) {
       return NextResponse.json({ message: 'Not authorized to update this quiz' }, { status: 403 });
     }
 
@@ -236,7 +236,7 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
       _id: quiz.course,
       instructor: session.user.id,
     });
-    if (!course && session.user?.role !== 'admin') {
+    if (!course && !isAdmin(session.user?.role)) {
       return NextResponse.json({ message: 'Not authorized to delete this quiz' }, { status: 403 });
     }
 
