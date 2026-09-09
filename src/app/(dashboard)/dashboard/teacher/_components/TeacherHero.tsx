@@ -70,7 +70,7 @@ export default function TeacherHero({
             ) : (
               <Link
                 href={ROUTES.teacher.blogCreate}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-[var(--card-solid)] text-[var(--color-foreground)] border border-[var(--border)] hover:border-[var(--teacher-border)] hover:bg-[var(--teacher-soft)] transition-all shadow-[var(--shadow-sm)] min-h-[44px]"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold antigravity-glass text-[var(--color-foreground)] border border-[var(--border)] hover:border-[var(--teacher-primary)]/50 hover:shadow-md transition-all duration-300 min-h-[44px]"
               >
                 <PenTool className="w-4 h-4 text-[var(--teacher-primary)]" />
                 <span>{t('dashboard.createBlog')}</span>
@@ -83,7 +83,7 @@ export default function TeacherHero({
               <button
                 type="button"
                 onClick={() => onLimitReached('courses', courseLimit)}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)] border border-[var(--border)] cursor-not-allowed min-h-[44px]"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-[var(--surface-muted)] text-[var(--color-muted-foreground)] border border-[var(--border)] cursor-not-allowed min-h-[44px]"
               >
                 <AlertCircle className="w-4 h-4 text-[var(--warning)]" />
                 <span>{t('dashboard.createCourse')}</span>
@@ -93,7 +93,7 @@ export default function TeacherHero({
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 href={ROUTES.teacher.courseCreate}
-                className="btn-premium inline-flex items-center gap-2 text-xs sm:text-sm min-h-[44px] !py-2.5 !px-5"
+                className="btn-premium inline-flex items-center gap-2 text-xs sm:text-sm min-h-[44px] !py-2.5 !px-5 hover:shadow-lg transition-all duration-300"
               >
                 <Plus className="w-4 h-4" />
                 <span>{t('dashboard.createCourse')}</span>

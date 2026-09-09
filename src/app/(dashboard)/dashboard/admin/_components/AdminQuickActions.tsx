@@ -144,32 +144,34 @@ export default function AdminQuickActions({ isSuperAdmin }: AdminQuickActionsPro
         </p>
       </div>
 
-      <ResponsiveGrid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+      <ResponsiveGrid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
         {links.map((link, idx) => (
           <MotionLink
             key={link.href}
             href={link.href}
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35 + idx * 0.03 }}
-            whileHover={{ scale: 1.02 }}
+            transition={{ delay: 0.3 + idx * 0.02, duration: 0.25 }}
+            whileHover={{ y: -3, scale: 1.01 }}
             whileTap={{ scale: 0.98 }}
-            className="card-surface card-body flex items-center justify-between p-3 sm:p-4 rounded-xl border border-[var(--border)] hover:border-[var(--teacher-border)] hover:shadow-[var(--shadow-md)] transition-all group min-h-[56px]"
+            className="antigravity-glass antigravity-card flex items-center justify-between p-3.5 sm:p-4 rounded-2xl border border-[var(--border)] hover:border-[var(--primary)]/40 hover:shadow-lg transition-all duration-300 group min-h-[58px]"
           >
             <div className="flex items-center gap-3 min-w-0">
-              <div className={`p-2 sm:p-2.5 rounded-xl shrink-0 ${link.iconBg}`}>
-                <link.icon className="w-5 h-5" />
+              <div className={`p-2.5 rounded-xl shrink-0 ${link.iconBg} group-hover:scale-105 transition-transform duration-300 shadow-sm border border-black/5 dark:border-white/10`}>
+                <link.icon className="w-4.5 h-4.5" />
               </div>
               <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--color-muted)] truncate">
+                <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[var(--color-muted)] truncate">
                   {t(link.labelKey)}
                 </p>
-                <p className="text-sm font-bold text-[var(--color-foreground)] truncate group-hover:text-[var(--teacher-primary)] transition-colors">
+                <p className="text-xs sm:text-sm font-bold text-[var(--color-foreground)] truncate group-hover:text-[var(--primary)] transition-colors">
                   {t(link.titleKey)}
                 </p>
               </div>
             </div>
-            <ArrowRight className="w-4 h-4 text-[var(--color-muted)] opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
+            <div className="w-7 h-7 rounded-lg bg-[var(--surface-muted)] group-hover:bg-[var(--primary-soft)] flex items-center justify-center shrink-0 ml-2 transition-colors">
+              <ArrowRight className="w-3.5 h-3.5 text-[var(--color-muted-foreground)] group-hover:text-[var(--primary)] group-hover:translate-x-0.5 transition-all" />
+            </div>
           </MotionLink>
         ))}
       </ResponsiveGrid>

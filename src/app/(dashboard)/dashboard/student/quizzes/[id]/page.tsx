@@ -146,13 +146,13 @@ export default function QuizDetailPage() {
           <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-[var(--color-foreground)]">{quiz.title}</h1>
           <p className="text-[var(--color-muted-foreground)] mb-6 max-w-2xl">{quiz.description || t('quiz.noDescription')}</p>
 
-          <div className="flex flex-wrap items-center gap-6 text-sm text-[var(--color-muted-foreground)]">
-            <div className="flex items-center gap-2">
-              <HelpCircle className="w-5 h-5 text-[var(--primary)]" />
+          <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm font-semibold text-[var(--color-muted-foreground)]">
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[var(--surface-muted)]/60 border border-[var(--border)] shadow-xs">
+              <HelpCircle className="w-4 h-4 text-[var(--student-primary)]" />
               <span>{quiz.questionCount ?? 0} {t('quiz.questions')}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-[var(--primary)]" />
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[var(--surface-muted)]/60 border border-[var(--border)] shadow-xs">
+              <Clock className="w-4 h-4 text-[var(--student-primary)]" />
               <span>{quiz.timeLimit} {t('quiz.min')}</span>
             </div>
           </div>

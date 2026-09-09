@@ -149,13 +149,7 @@ export function UserProfileInfoSection({
                 {t('adminAnalytics.platform') || 'Platform Used'}
               </p>
               <p className="text-xs sm:text-sm font-bold text-[var(--color-foreground)] truncate capitalize">
-                {user.lastPlatform === 'android'
-                  ? 'Android App'
-                  : user.lastPlatform === 'ios'
-                    ? 'iOS App'
-                    : user.lastPlatform === 'web'
-                      ? 'Website (Browser)'
-                      : t('common.none') || 'None'}
+                {user.lastPlatform === 'android' ? 'Android App' : user.lastPlatform === 'ios' ? 'iOS App' : user.lastPlatform === 'web' ? 'Website (Browser)' : t('common.none') || 'None'}
               </p>
             </div>
           </div>

@@ -817,10 +817,18 @@ h4 {
   .hero-fade-in,
   .aurora-blob,
   .dashboard-aurora__blob,
-  .hero-scroll-hint>div {
+  .hero-scroll-hint>div,
+  .antigravity-float,
+  .antigravity-float-delayed,
+  .antigravity-pulse-glow {
     animation: none !important;
     opacity: 1;
     transform: none;
+  }
+
+  .antigravity-card:hover,
+  .card-surface:hover {
+    transform: none !important;
   }
 }
 
@@ -941,6 +949,168 @@ pre,
   border: 1px solid var(--border);
   box-shadow: var(--shadow-md);
   border-radius: 16px;
+}
+
+/* Antigravity Design System Utilities */
+.antigravity-glass {
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(255, 255, 255, 0.35) inset;
+}
+
+:where([data-theme="dark"], .dark) .antigravity-glass {
+  background: color-mix(in srgb, var(--card-solid) 60%, transparent);
+  box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+}
+
+.antigravity-card {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+  will-change: transform;
+}
+
+.antigravity-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 24px 48px -12px rgba(124, 58, 237, 0.15), 0 0 0 1px color-mix(in srgb, var(--primary) 30%, transparent);
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.transform-3d {
+  transform-style: preserve-3d;
+}
+
+@keyframes antigravity-float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-9px) rotate(0.6deg);
+  }
+}
+
+@keyframes antigravity-float-delayed {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(8px) rotate(-0.6deg);
+  }
+}
+
+@keyframes antigravity-pulse-glow {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+}
+
+.antigravity-float {
+  animation: antigravity-float 6s ease-in-out infinite;
+}
+
+.antigravity-float-delayed {
+  animation: antigravity-float-delayed 7s ease-in-out infinite 1.5s;
+}
+
+.antigravity-pulse-glow {
+  animation: antigravity-pulse-glow 5s ease-in-out infinite;
+}
+
+/* Antigravity Student UI Utilities */
+.antigravity-tab-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem;
+  border-radius: var(--radius-2xl);
+  background: color-mix(in srgb, var(--card) 65%, transparent);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  box-shadow: 0 10px 25px -10px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+}
+
+:where([data-theme="dark"], .dark) .antigravity-tab-group {
+  background: color-mix(in srgb, var(--card-solid) 55%, transparent);
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+}
+
+.antigravity-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-xl);
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  color: var(--color-muted-foreground);
+  border: 1px solid transparent;
+}
+
+.antigravity-tab-btn:hover {
+  color: var(--color-foreground);
+  background: color-mix(in srgb, var(--surface-muted) 60%, transparent);
+}
+
+.antigravity-tab-btn--active {
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary-soft) 80%, var(--surface));
+  border-color: color-mix(in srgb, var(--primary) 35%, transparent);
+  box-shadow: 0 4px 12px -2px color-mix(in srgb, var(--primary) 25%, transparent);
+}
+
+.antigravity-quiz-option {
+  position: relative;
+  width: 100%;
+  text-align: left;
+  padding: 0.875rem 1rem;
+  border-radius: var(--radius-xl);
+  background: color-mix(in srgb, var(--card-solid) 75%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.antigravity-quiz-option:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--student-primary) 50%, transparent);
+  box-shadow: 0 8px 20px -6px color-mix(in srgb, var(--student-primary) 15%, transparent);
+}
+
+.antigravity-quiz-option--selected {
+  border-color: var(--student-primary);
+  background: color-mix(in srgb, var(--student-soft) 70%, var(--card-solid));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--student-primary) 40%, transparent), 0 10px 25px -8px color-mix(in srgb, var(--student-primary) 30%, transparent);
+}
+
+.antigravity-certificate-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-2xl);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--card-solid) 85%, transparent), color-mix(in srgb, var(--surface) 60%, transparent));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(234, 179, 8, 0.28);
+  box-shadow: 0 16px 36px -12px rgba(234, 179, 8, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.antigravity-certificate-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 24px 48px -12px rgba(234, 179, 8, 0.22), 0 0 0 1px rgba(234, 179, 8, 0.5) inset;
 }
 
 /* Dark glass for use on gradient/colored surfaces (e.g. sidebar footer card) */
@@ -1527,10 +1697,24 @@ select:-webkit-autofill:focus {
 }
 
 .card-surface {
-  background: var(--card-solid);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  backdrop-filter: blur(16px) saturate(170%);
+  -webkit-backdrop-filter: blur(16px) saturate(170%);
+  border: 1px solid color-mix(in srgb, var(--border) 65%, transparent);
+  border-radius: var(--radius-2xl);
+  box-shadow: 0 15px 35px -12px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+  will-change: transform;
+}
+
+:where([data-theme="dark"], .dark) .card-surface {
+  background: color-mix(in srgb, var(--card-solid) 65%, transparent);
+  box-shadow: 0 15px 40px -12px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+}
+
+.card-surface:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 22px 45px -12px rgba(124, 58, 237, 0.12), 0 0 0 1px color-mix(in srgb, var(--primary) 30%, transparent);
 }
 
 /* Compact filter panel + controls (mobile-first) */
@@ -1887,14 +2071,19 @@ select:-webkit-autofill:focus {
 .hero-banner {
   position: relative;
   overflow: hidden;
-  border-radius: var(--radius-xl);
-  padding: var(--space-3) var(--space-4);
-  background: var(--card);
-  backdrop-filter: var(--blur-glass) saturate(160%);
-  -webkit-backdrop-filter: var(--blur-glass) saturate(160%);
-  border: 1px solid var(--border);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-4) var(--space-5);
+  background: color-mix(in srgb, var(--surface) 75%, transparent);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
   color: var(--foreground);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.07), 0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+}
+
+:where([data-theme="dark"], .dark) .hero-banner {
+  background: color-mix(in srgb, var(--card-solid) 65%, transparent);
+  box-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
 }
 
 .hero-banner::before {
@@ -1903,10 +2092,10 @@ select:-webkit-autofill:focus {
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(40rem 18rem at 106% -40%,
-      color-mix(in srgb, var(--primary) 18%, transparent), transparent 62%),
-    radial-gradient(30rem 16rem at -8% 140%,
-      color-mix(in srgb, var(--primary-accent) 12%, transparent), transparent 60%);
+    radial-gradient(42rem 20rem at 106% -40%,
+      color-mix(in srgb, var(--primary) 22%, transparent), transparent 64%),
+    radial-gradient(32rem 18rem at -8% 140%,
+      color-mix(in srgb, var(--primary-accent) 15%, transparent), transparent 62%);
 }
 
 .hero-banner>* {
@@ -1926,27 +2115,36 @@ select:-webkit-autofill:focus {
 
 @media (min-width: 640px) {
   .hero-banner {
-    padding: var(--space-4) var(--space-5);
+    padding: var(--space-5) var(--space-6);
   }
 }
 
 @media (min-width: 1024px) {
   .hero-banner {
-    padding: var(--space-5) var(--space-6);
+    padding: var(--space-6) var(--space-8);
   }
 }
 
 .card-panel {
-  border-radius: var(--radius-xl);
-  background: var(--card-solid);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-2xl);
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  backdrop-filter: blur(16px) saturate(170%);
+  -webkit-backdrop-filter: blur(16px) saturate(170%);
+  border: 1px solid color-mix(in srgb, var(--border) 65%, transparent);
+  box-shadow: 0 15px 35px -12px rgba(0, 0, 0, 0.06);
   overflow: hidden;
+  transition: border-color 0.25s ease, box-shadow 0.35s ease;
+}
+
+:where([data-theme="dark"], .dark) .card-panel {
+  background: color-mix(in srgb, var(--card-solid) 65%, transparent);
+  box-shadow: 0 15px 40px -12px rgba(0, 0, 0, 0.35);
 }
 
 .card-panel-header {
   padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  background: color-mix(in srgb, var(--surface) 40%, transparent);
 }
 
 .card-panel-body {

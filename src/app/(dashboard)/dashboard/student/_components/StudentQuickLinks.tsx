@@ -39,7 +39,8 @@ export default function StudentQuickLinks() {
         </p>
       </div>
 
-      <ResponsiveGrid variant="cards">
+      <div className="perspective-1000">
+        <ResponsiveGrid variant="cards">
         {enableCourses && (
           <QuickActionCard
             icon={Compass}
@@ -104,6 +105,7 @@ export default function StudentQuickLinks() {
           />
         )}
       </ResponsiveGrid>
+    </div>
     </motion.section>
   );
 }

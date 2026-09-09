@@ -61,7 +61,7 @@ export default function StudentActivity({ enrollments, attempts }: StudentActivi
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.4 }}
       aria-labelledby="recent-activity-heading"
-      className="card-surface rounded-2xl border border-[var(--border)] overflow-hidden"
+      className="card-surface rounded-3xl border border-[var(--border)] overflow-hidden shadow-lg"
     >
       <div className="card-panel-header flex items-center justify-between p-4 sm:p-5 border-b border-[var(--border)]">
         <div>
@@ -72,7 +72,7 @@ export default function StudentActivity({ enrollments, attempts }: StudentActivi
             {t('dashboard.recentActivityDesc')}
           </p>
         </div>
-        <div className="p-2 rounded-xl bg-[var(--student-soft)] text-[var(--student-primary)]">
+        <div className="p-2.5 rounded-2xl bg-gradient-to-br from-[var(--student-soft)] to-[var(--student-primary)]/15 text-[var(--student-primary)] border border-[var(--student-border)] shadow-sm">
           <Activity className="w-5 h-5" />
         </div>
       </div>
@@ -80,7 +80,7 @@ export default function StudentActivity({ enrollments, attempts }: StudentActivi
       <div className="divide-y divide-[var(--border)]">
         {recentActivity.length === 0 ? (
           <div className="card-panel-body text-center py-10 px-4">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 rounded-2xl bg-[var(--color-surface-muted)] flex items-center justify-center text-[var(--color-muted)]">
+            <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-[var(--student-soft)] to-[var(--student-primary)]/15 border border-[var(--student-border)] flex items-center justify-center text-[var(--student-primary)] shadow-sm">
               <Clock className="w-6 h-6" />
             </div>
             <h3 className="text-sm sm:text-base font-semibold text-[var(--color-foreground)] mb-1">

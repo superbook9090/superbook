@@ -118,7 +118,7 @@ export default function EnrolledStudentsList({
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-[var(--card-solid)] rounded-2xl shadow-sm overflow-hidden hidden sm:block"
+            className="bg-[var(--card-solid)] antigravity-glass rounded-3xl border border-[var(--border)] shadow-sm overflow-hidden hidden sm:block"
           >
             <table className="min-w-full divide-y divide-[var(--border)]">
               <thead className="bg-[var(--color-surface-muted)]">

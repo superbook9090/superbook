@@ -56,7 +56,8 @@ export function OrganizationCard({
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04, duration: 0.25 }}
-      className="bg-[var(--card-solid)] border border-[var(--border)] rounded-2xl p-5 shadow-[var(--shadow-sm)] hover:shadow-md transition-all duration-200 flex flex-col justify-between group hover:border-[var(--primary)]/30"
+      whileHover={{ y: -4 }}
+      className="antigravity-glass antigravity-card border border-[var(--border)] rounded-3xl p-5 sm:p-6 shadow-md hover:shadow-2xl transition-all duration-300 flex flex-col justify-between group hover:border-[var(--primary)]/40"
     >
       <div>
         {/* Card Header: Avatar, Name, Status */}

@@ -89,8 +89,10 @@ export function ContestCard({ contest, isTeacher = false }: ContestCardProps) {
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`rounded-2xl border bg-[var(--card-solid)] shadow-sm hover:shadow-md transition-all flex flex-col justify-between overflow-hidden relative group ${
-        state === 'live' ? 'border-[var(--error)]/40 ring-1 ring-[var(--error)]/20' : 'border-[var(--border)]'
+      whileHover={{ y: -5, rotateX: 1, rotateY: -1 }}
+      transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+      className={`rounded-2xl border antigravity-glass antigravity-card hover:shadow-xl transition-all flex flex-col justify-between overflow-hidden relative group transform-3d ${
+        state === 'live' ? 'border-[var(--error)]/50 ring-1 ring-[var(--error)]/30 shadow-[0_0_20px_rgba(239,68,68,0.15)]' : 'border-[var(--border)]'
       }`}
     >
       {/* Top Banner Stripe */}

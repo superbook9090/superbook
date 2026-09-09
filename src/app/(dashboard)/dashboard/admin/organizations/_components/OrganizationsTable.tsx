@@ -46,11 +46,11 @@ export function OrganizationsTable({
   const { t } = useTranslation();
 
   return (
-    <div className="bg-[var(--card-solid)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-[var(--shadow-sm)]">
+    <div className="antigravity-glass border border-[var(--border)] rounded-3xl overflow-hidden shadow-lg">
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm border-collapse">
           <thead>
-            <tr className="border-b border-[var(--border)] bg-[var(--color-surface-muted)]/50 text-[11px] font-bold uppercase tracking-wider text-[var(--color-muted-foreground)]">
+            <tr className="border-b border-[var(--border)] bg-[var(--surface-muted)]/70 text-[11px] font-bold uppercase tracking-wider text-[var(--color-muted-foreground)]">
               <th className="py-3.5 px-4 font-bold">{t('organizations.organizationName')}</th>
               <th className="py-3.5 px-4 font-bold">{t('organizations.status')}</th>
               <th className="py-3.5 px-4 font-bold">{t('organizations.code')}</th>

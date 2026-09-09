@@ -150,11 +150,11 @@ export function FeatureTogglesSection({
           key={cat.id}
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          className="card-surface rounded-xl border border-[var(--border)] overflow-hidden shadow-xs"
+          className="antigravity-glass rounded-3xl border border-[var(--border)] overflow-hidden shadow-lg"
         >
-          <div className="p-4 sm:p-5 border-b border-[var(--border)]/70 bg-[var(--color-surface-muted)]/30">
-            <h3 className="text-sm sm:text-base font-bold text-[var(--color-foreground)]">{t(cat.titleKey)}</h3>
-            <p className="text-xs text-[var(--color-muted-foreground)] mt-0.5">{t(cat.descKey)}</p>
+          <div className="p-5 sm:p-6 border-b border-[var(--border)]/70 bg-[var(--surface-muted)]/50">
+            <h3 className="text-base sm:text-lg font-bold text-[var(--color-foreground)]">{t(cat.titleKey)}</h3>
+            <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] mt-0.5">{t(cat.descKey)}</p>
           </div>
 
           <div className="divide-y divide-[var(--border)]/60">

@@ -72,22 +72,23 @@ export function UsersStats({ stats, isLoading }: UsersStatsProps) {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.05, duration: 0.25 }}
-          className={`bg-[var(--card-solid)] rounded-xl sm:rounded-2xl p-3.5 sm:p-4 border ${card.border} shadow-[var(--shadow-sm)] hover:shadow-md transition-all duration-200 flex flex-col justify-between`}
+          whileHover={{ y: -2 }}
+          className="antigravity-glass antigravity-card rounded-2xl p-4 sm:p-5 border border-[var(--border)] hover:border-[var(--primary)]/40 hover:shadow-lg transition-all duration-300 flex flex-col justify-between group"
         >
-          <div className="flex items-center justify-between gap-2 mb-2">
-            <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-[var(--color-muted)] truncate">
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[var(--color-muted)] truncate">
               {card.label}
             </span>
-            <div className={`p-2 rounded-lg ${card.iconBg} shrink-0`}>
+            <div className={`p-2 sm:p-2.5 rounded-xl ${card.iconBg} shrink-0 group-hover:scale-105 transition-transform duration-300 shadow-sm border border-black/5 dark:border-white/10`}>
               <card.icon className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
             </div>
           </div>
 
           <div className="flex items-baseline justify-between gap-2">
             {isLoading ? (
-              <div className="h-7 sm:h-8 w-16 bg-[var(--color-surface-muted)] rounded animate-pulse" />
+              <div className="h-7 sm:h-8 w-16 bg-[var(--surface-muted-strong)] rounded-lg animate-pulse" />
             ) : (
-              <span className="text-xl sm:text-2xl lg:text-3xl font-extrabold tabular-nums font-[family-name:var(--font-display)] text-[var(--color-foreground)]">
+              <span className="text-xl sm:text-2xl lg:text-3xl font-black tabular-nums font-[family-name:var(--font-display)] text-[var(--color-foreground)]">
                 {card.value.toLocaleString()}
               </span>
             )}
@@ -95,7 +96,7 @@ export function UsersStats({ stats, isLoading }: UsersStatsProps) {
           </div>
 
           {card.subtitle && (
-            <p className="text-[11px] text-[var(--color-muted-foreground)] mt-1 truncate">
+            <p className="text-[11px] font-medium text-[var(--color-muted-foreground)] mt-1.5 truncate">
               {card.subtitle}
             </p>
           )}

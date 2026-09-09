@@ -67,9 +67,9 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
 
   return (
     <motion.div
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.25 }}
-      className="group h-full flex flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card-solid)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-lg)] hover:border-[var(--student-primary)]/40 transition-all duration-300"
+      whileHover={{ y: -6, rotateX: 1, rotateY: -1 }}
+      transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+      className="group h-full flex flex-col overflow-hidden rounded-2xl border border-[var(--border)] antigravity-glass antigravity-card hover:border-[var(--student-primary)]/50 hover:shadow-xl transition-all duration-300 transform-3d"
     >
       {/* Thumbnail Container */}
       <div className="relative h-40 sm:h-44 w-full overflow-hidden bg-[var(--color-surface-muted)]">
@@ -145,16 +145,16 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
         {/* Bottom Area: Progress & Actions */}
         <div className="space-y-3 pt-2">
           {type === 'enrolled' && enrollment && (
-            <div className="p-3 bg-[var(--color-surface-muted)] rounded-xl border border-[var(--border)]">
+            <div className="p-3 bg-[var(--color-surface-muted)]/60 rounded-xl border border-[var(--border)]">
               <div className="flex items-center justify-between text-xs font-bold mb-1.5">
                 <span className="text-[var(--color-muted-foreground)]">{t('courses.progress')}</span>
-                <span className="text-[var(--student-primary)] tabular-nums">{enrollment.progress}%</span>
+                <span className="text-[var(--student-primary)] tabular-nums font-black">{enrollment.progress}%</span>
               </div>
-              <div className="w-full bg-[var(--border)] rounded-full h-2 overflow-hidden">
+              <div className="w-full bg-[var(--border)]/70 rounded-full h-2 overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${enrollment.progress}%` }}
-                  className="h-full rounded-full bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)]"
+                  className="h-full rounded-full bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)] shadow-[0_0_8px_var(--student-primary)]"
                 />
               </div>
             </div>

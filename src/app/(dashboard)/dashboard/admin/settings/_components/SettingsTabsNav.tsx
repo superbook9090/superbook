@@ -30,8 +30,8 @@ export function SettingsTabsNav({
 
   return (
     <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
-      {/* Scrollable Tab bar on mobile */}
-      <div className="flex items-center gap-1.5 p-1 bg-[var(--color-surface-muted)] rounded-xl overflow-x-auto no-scrollbar border border-[var(--border)] shrink-0">
+      {/* Scrollable Tab bar */}
+      <div className="flex items-center gap-1.5 p-1.5 antigravity-glass rounded-2xl overflow-x-auto no-scrollbar border border-[var(--border)] shrink-0 shadow-xs">
         {tabs.map(({ id, label, icon: Icon }) => {
           const isActive = activeTab === id;
           return (
@@ -39,13 +39,13 @@ export function SettingsTabsNav({
               key={id}
               type="button"
               onClick={() => onTabChange(id)}
-              className={`flex items-center gap-2 px-3 sm:px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all shrink-0 min-h-[38px] ${
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 min-h-[40px] cursor-pointer ${
                 isActive
-                  ? 'bg-[var(--card-solid)] text-[var(--primary)] shadow-xs border border-[var(--border)]'
-                  : 'text-[var(--color-muted)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted-strong)]/50'
+                  ? 'bg-[var(--primary)] text-white shadow-md'
+                  : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--surface-muted)]'
               }`}
             >
-              <Icon className={`w-4 h-4 ${isActive ? 'text-[var(--primary)]' : 'text-[var(--color-muted-foreground)]'}`} />
+              <Icon className="w-4 h-4 shrink-0" />
               <span>{label}</span>
             </button>
           );
@@ -54,22 +54,22 @@ export function SettingsTabsNav({
 
       {/* Live Search input */}
       <div className="relative flex-1 max-w-full md:max-w-xs">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted-foreground)] pointer-events-none" />
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted-foreground)] pointer-events-none" />
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder={t('adminSettings.searchPlaceholder') || 'Search settings...'}
-          className="w-full pl-9 pr-8 py-2 text-xs sm:text-sm rounded-xl bg-[var(--card-solid)] border border-[var(--border)] text-[var(--color-foreground)] placeholder-[var(--color-muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent transition-all min-h-[40px]"
+          className="w-full pl-10 pr-9 py-2 text-xs sm:text-sm rounded-2xl antigravity-glass border border-[var(--border)] text-[var(--color-foreground)] placeholder-[var(--color-muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent transition-all min-h-[44px] shadow-xs"
         />
         {searchQuery && (
           <button
             type="button"
             onClick={() => onSearchChange('')}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] rounded-md"
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] rounded-md cursor-pointer"
             aria-label={t('adminSettings.clearSearch') || 'Clear Search'}
           >
-            <X className="w-3.5 h-3.5" />
+            <X className="w-4 h-4" />
           </button>
         )}
       </div>

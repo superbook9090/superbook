@@ -161,8 +161,8 @@ export function QuizResultOverview({
   const { t } = useTranslation();
 
   return (
-    <div className="bg-[var(--card-solid)] rounded-2xl border border-[var(--color-border)] overflow-hidden mb-4">
-      <div className="p-3 sm:p-5 lg:p-6">
+    <div className="antigravity-glass rounded-3xl border border-[var(--border)] shadow-xl overflow-hidden mb-6">
+      <div className="p-4 sm:p-6 lg:p-8">
         <div className="grid lg:grid-cols-[1fr_auto] lg:gap-10 xl:gap-12 lg:items-center">
           <div className="min-w-0">
             <div className="grid grid-cols-3 gap-0.5 sm:gap-2 border-b border-[var(--color-border)] pb-3 sm:pb-4 mb-3 sm:mb-4">

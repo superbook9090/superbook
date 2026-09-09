@@ -5,7 +5,6 @@ import { ROUTES } from '@/constants/routes';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
-import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useQuiz } from '@/contexts/QuizContext';
 import { useAlert } from '@/components/ui/AlertContainer';
 import { useSubmitQuizAttempt, useStartQuizAttempt } from '@/lib/react-query/hooks';
@@ -34,7 +33,6 @@ export default function TakeQuizPage() {
   const searchParams = useSearchParams();
   const attemptId = searchParams.get('attemptId');
   const { t } = useTranslation();
-  const { theme } = useRoleTheme();
   const { addAlert } = useAlert();
   const submitQuizMutation = useSubmitQuizAttempt();
   const startQuizMutation = useStartQuizAttempt();
@@ -413,7 +411,6 @@ export default function TakeQuizPage() {
         currentQ={currentQ as unknown as Question}
         answers={answers}
         handleAnswer={handleAnswer}
-        theme={theme}
       />
       
       {/* Navigation */}

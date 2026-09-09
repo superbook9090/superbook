@@ -1,3 +1,4 @@
+// src/app/(dashboard)/dashboard/admin/organizations/page.tsx
 'use client';
 
 import React from 'react';
@@ -7,24 +8,22 @@ import {
   RefreshCw,
   LayoutGrid,
   List,
-  CheckCircle2,
-  SlidersHorizontal,
 } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
-import { PageWrapper, PageHeader, EmptyState } from '@/components/layout';
+import { PageWrapper, EmptyState } from '@/components/layout';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import Button from '@/components/ui/Button';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import Tooltip from '@/components/ui/Tooltip';
 import DashboardListFilters, { FilterPanel } from '@/components/filters/DashboardListFilters';
 import { useAdminOrganizations } from './_hooks/useAdminOrganizations';
+import { useOrganizationsFilterChips } from './_hooks/useOrganizationsFilterChips';
 import { OrganizationsStats } from './_components/OrganizationsStats';
 import { OrganizationCard } from './_components/OrganizationCard';
 import { OrganizationsTable } from './_components/OrganizationsTable';
 import { OrganizationsMobileList } from './_components/OrganizationsMobileList';
 import { OrganizationFormModal } from './_components/OrganizationFormModal';
 import { OrganizationDetailModal } from './_components/OrganizationDetailModal';
-import type { OrgSortOption, OrgStatusFilter } from './_components/types';
 
 export default function OrganizationsPage() {
   const { t } = useTranslation();
@@ -67,37 +66,16 @@ export default function OrganizationsPage() {
     handleDelete,
   } = useAdminOrganizations();
 
+  const filterChips = useOrganizationsFilterChips({
+    statusFilter,
+    setStatusFilter,
+    sortOption,
+    setSortOption,
+  });
+
   if (status === 'loading' || (isLoading && stats.total === 0)) {
     return <PageSkeleton />;
   }
-
-  const filterChips = [
-    {
-      label: t('organizations.status'),
-      icon: <CheckCircle2 className="w-3.5 h-3.5" aria-hidden />,
-      value: statusFilter,
-      onChange: (val: string) => setStatusFilter(val as OrgStatusFilter),
-      neutralValue: 'all',
-      options: [
-        { id: 'all', label: t('organizations.allStatus') || 'All Status' },
-        { id: 'active', label: t('organizations.activeStatus') || 'Active' },
-        { id: 'inactive', label: t('organizations.inactiveStatus') || 'Inactive' },
-      ],
-    },
-    {
-      label: t('organizations.sortBy'),
-      icon: <SlidersHorizontal className="w-3.5 h-3.5" aria-hidden />,
-      value: sortOption,
-      onChange: (val: string) => setSortOption(val as OrgSortOption),
-      neutralValue: 'newest',
-      options: [
-        { id: 'newest', label: t('organizations.sortNewest') || 'Newest' },
-        { id: 'name', label: t('organizations.sortName') || 'Name (A-Z)' },
-        { id: 'users', label: t('organizations.sortUsers') || 'Most Users' },
-        { id: 'courses', label: t('organizations.sortCourses') || 'Most Content' },
-      ],
-    },
-  ];
 
   const handleResetFilters = () => {
     setSearchQuery('');
@@ -106,49 +84,49 @@ export default function OrganizationsPage() {
   };
 
   return (
-    <PageWrapper>
-      {/* Header */}
-      <PageHeader
-        title={
-          <span className="flex items-center gap-3">
-            <span className="p-2.5 bg-[var(--primary)]/10 text-[var(--primary)] rounded-xl shrink-0 inline-flex shadow-xs">
-              <Building2 className="w-6 h-6" />
-            </span>
-            <span>{t('organizations.title')}</span>
-          </span>
-        }
-        description={t('organizations.description')}
-        actions={
-          <div className="flex items-center gap-2">
-            <Tooltip label={t('analytics.refresh') || 'Refresh'}>
-              <Button
-                onClick={() => fetchOrganizations()}
-                variant="secondary"
-                size="sm"
-                className="flex items-center gap-2"
-                aria-label="Refresh"
-              >
-                <RefreshCw className="w-4 h-4" />
-                <span className="hidden sm:inline">{t('analytics.refresh') || 'Refresh'}</span>
-              </Button>
-            </Tooltip>
-            <Button
-              onClick={openCreateModal}
-              variant="primary"
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              <span>{t('organizations.createOrganization')}</span>
-            </Button>
+    <PageWrapper className="space-y-6">
+      {/* Hero Banner Header */}
+      <div className="hero-banner flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 sm:p-8 rounded-3xl">
+        <div className="space-y-1.5 max-w-xl">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[var(--primary)]/15 text-[var(--primary)] border border-[var(--primary)]/25 shadow-xs">
+            <Building2 className="w-3.5 h-3.5" />
+            <span>{t('organizations.title') || 'Multi-Tenant Organizations'}</span>
           </div>
-        }
-      />
+          <h1 className="heading-xl">{t('organizations.title')}</h1>
+          <p className="text-sm sm:text-base text-[var(--color-muted-foreground)]">
+            {t('organizations.description')}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <Tooltip label={t('analytics.refresh') || 'Refresh'}>
+            <Button
+              onClick={() => fetchOrganizations()}
+              variant="secondary"
+              size="sm"
+              className="flex items-center gap-2 min-h-[44px] px-3.5 shadow-xs"
+              aria-label="Refresh"
+            >
+              <RefreshCw className="w-4 h-4" />
+              <span className="hidden sm:inline">{t('analytics.refresh') || 'Refresh'}</span>
+            </Button>
+          </Tooltip>
+          <Button
+            onClick={openCreateModal}
+            variant="primary"
+            size="sm"
+            className="flex items-center gap-2 min-h-[44px] px-5 font-bold shadow-md"
+          >
+            <Plus className="w-4 h-4" />
+            <span>{t('organizations.createOrganization')}</span>
+          </Button>
+        </div>
+      </div>
 
       {/* Top Executive Stats */}
       <OrganizationsStats stats={stats} isLoading={isLoading} />
 
-      {/* Filters, Search & View Switcher */}
+      {/* Filters & View Switcher */}
       <FilterPanel>
         <DashboardListFilters
           searchQuery={searchQuery}
@@ -157,37 +135,31 @@ export default function OrganizationsPage() {
           searchPlaceholder={t('organizations.searchPlaceholder')}
           chipGroups={filterChips}
           headerAside={
-            <div className="hidden md:flex items-center gap-1 bg-[var(--color-surface-muted)] p-1 rounded-xl border border-[var(--border)]">
-              <Tooltip label={t('organizations.gridView')}>
-                <button
-                  type="button"
-                  onClick={() => setViewMode('grid')}
-                  aria-pressed={viewMode === 'grid'}
-                  aria-label={t('organizations.gridView')}
-                  className={`p-2 rounded-lg transition-colors ${
-                    viewMode === 'grid'
-                      ? 'bg-[var(--card-solid)] text-[var(--primary)] shadow-xs'
-                      : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]'
-                  }`}
-                >
-                  <LayoutGrid className="w-4 h-4" />
-                </button>
-              </Tooltip>
-              <Tooltip label={t('organizations.tableView')}>
-                <button
-                  type="button"
-                  onClick={() => setViewMode('table')}
-                  aria-pressed={viewMode === 'table'}
-                  aria-label={t('organizations.tableView')}
-                  className={`p-2 rounded-lg transition-colors ${
-                    viewMode === 'table'
-                      ? 'bg-[var(--card-solid)] text-[var(--primary)] shadow-xs'
-                      : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]'
-                  }`}
-                >
-                  <List className="w-4 h-4" />
-                </button>
-              </Tooltip>
+            <div className="hidden md:flex items-center gap-1 bg-[var(--surface-muted)] p-1 rounded-2xl border border-[var(--border)] shadow-xs">
+              <button
+                type="button"
+                onClick={() => setViewMode('grid')}
+                className={`p-2 rounded-xl transition-colors cursor-pointer ${
+                  viewMode === 'grid'
+                    ? 'bg-[var(--primary)] text-white shadow-xs'
+                    : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]'
+                }`}
+                title={t('organizations.gridView')}
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('table')}
+                className={`p-2 rounded-xl transition-colors cursor-pointer ${
+                  viewMode === 'table'
+                    ? 'bg-[var(--primary)] text-white shadow-xs'
+                    : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]'
+                }`}
+                title={t('organizations.tableView')}
+              >
+                <List className="w-4 h-4" />
+              </button>
             </div>
           }
         />
@@ -196,32 +168,16 @@ export default function OrganizationsPage() {
       {/* Organization List / Grid / Empty State */}
       {filteredOrganizations.length === 0 ? (
         <EmptyState
-          title={
-            stats.total === 0
-              ? t('organizations.noOrganizations')
-              : t('organizations.noFilteredResults') || 'No matching organizations'
-          }
-          description={
-            stats.total === 0
-              ? t('organizations.noOrganizationsDesc')
-              : t('organizations.noFilteredResultsDesc') || 'Try adjusting your search query or status filter.'
-          }
+          title={stats.total === 0 ? t('organizations.noOrganizations') : t('organizations.noFilteredResults') || 'No matching organizations'}
+          description={stats.total === 0 ? t('organizations.noOrganizationsDesc') : t('organizations.noFilteredResultsDesc') || 'Try adjusting your search query or status filter.'}
           action={
-            stats.total === 0 ? (
-              <Button onClick={openCreateModal} variant="primary" className="flex items-center gap-2">
-                <Plus className="w-4 h-4" />
-                {t('organizations.createOrganization')}
-              </Button>
-            ) : (
-              <Button onClick={handleResetFilters} variant="secondary">
-                {t('common.reset') || 'Reset Filters'}
-              </Button>
-            )
+            <Button onClick={stats.total === 0 ? openCreateModal : handleResetFilters} variant="secondary">
+              {stats.total === 0 ? t('organizations.createOrganization') : (t('common.reset') || 'Reset Filters')}
+            </Button>
           }
         />
       ) : (
         <>
-          {/* Desktop Table View */}
           {viewMode === 'table' && (
             <div className="hidden md:block">
               <OrganizationsTable
@@ -236,7 +192,6 @@ export default function OrganizationsPage() {
             </div>
           )}
 
-          {/* Desktop Grid View */}
           {viewMode === 'grid' && (
             <div className="hidden md:grid md:grid-cols-2 xl:grid-cols-3 gap-4">
               {filteredOrganizations.map((org, index) => (
@@ -255,7 +210,6 @@ export default function OrganizationsPage() {
             </div>
           )}
 
-          {/* Mobile Optimized View */}
           <OrganizationsMobileList
             organizations={filteredOrganizations}
             copiedCode={copiedCode}
@@ -268,7 +222,7 @@ export default function OrganizationsPage() {
         </>
       )}
 
-      {/* Create Modal */}
+      {/* Modals */}
       <OrganizationFormModal
         isOpen={showCreateModal}
         isEdit={false}
@@ -282,7 +236,6 @@ export default function OrganizationsPage() {
         onClose={() => setShowCreateModal(false)}
       />
 
-      {/* Edit Modal */}
       <OrganizationFormModal
         isOpen={showEditModal}
         isEdit={true}
@@ -296,7 +249,6 @@ export default function OrganizationsPage() {
         onClose={() => setShowEditModal(false)}
       />
 
-      {/* Detail Modal */}
       <OrganizationDetailModal
         isOpen={showDetailModal}
         organization={selectedOrg}
@@ -308,15 +260,10 @@ export default function OrganizationsPage() {
         onClose={() => setShowDetailModal(false)}
       />
 
-      {/* Delete Confirmation Modal */}
       <ConfirmModal
         isOpen={showDeleteDialog}
         title={t('organizations.deleteOrgTitle') || 'Delete Organization'}
-        message={
-          deleteTargetOrg
-            ? t('organizations.deleteOrgConfirm')
-            : t('organizations.deleteConfirm')
-        }
+        message={deleteTargetOrg ? t('organizations.deleteOrgConfirm') : t('organizations.deleteConfirm')}
         confirmText={t('admin.delete') || 'Delete'}
         cancelText={t('common.cancel') || 'Cancel'}
         onConfirm={handleDelete}

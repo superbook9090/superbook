@@ -13,6 +13,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { isBlogContentEmpty, type BlogFormData } from '@/features/blogs/components/BlogEditorForm';
 import { LazyBlogEditorForm } from '@/lib/lazy';
 import { isAdmin } from '@/lib/roles';
+import { PageWrapper } from '@/components/layout';
 
 export default function EditBlogPage() {
   const { session, status } = useSessionStore();
@@ -112,14 +113,14 @@ export default function EditBlogPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
+    <PageWrapper className="max-w-4xl space-y-6">
+      <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}>
         <BackButton
           href={blogsHome}
           label={t('blog.backToBlogs')}
           className="text-[var(--teacher-primary)] hover:text-[var(--teacher-primary)]/80 mb-3"
         />
-        <h1 className="text-lg sm:text-xl font-bold text-[var(--color-foreground)]">{t('editBlogPage.title')}</h1>
+        <h1 className="heading-xl text-[var(--color-foreground)]">{t('editBlogPage.title')}</h1>
         <p className="text-sm text-[var(--color-muted-foreground)] mt-0.5">{t('editBlogPage.description')}</p>
       </motion.div>
 
@@ -135,6 +136,6 @@ export default function EditBlogPage() {
           }
         />
       </motion.div>
-    </div>
+    </PageWrapper>
   );
 }

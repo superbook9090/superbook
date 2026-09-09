@@ -62,11 +62,11 @@ export default function AdminSystemOverview() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.45 }}
       aria-labelledby="system-modules-heading"
-      className="card-surface card-body rounded-2xl border border-[var(--border)] space-y-3.5"
+      className="card-surface card-body rounded-3xl border border-[var(--border)] space-y-4 shadow-lg"
     >
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="p-2 rounded-xl bg-[var(--teacher-soft)] text-[var(--teacher-primary)]">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2.5 rounded-2xl bg-gradient-to-br from-[var(--teacher-soft)] to-[var(--teacher-primary)]/15 text-[var(--teacher-primary)] border border-[var(--teacher-border)] shadow-sm">
             <Sliders className="w-4 h-4" />
           </div>
           <div>
@@ -77,39 +77,41 @@ export default function AdminSystemOverview() {
         </div>
       </div>
 
-      <ResponsiveGrid className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-        {modules.map((mod) => (
-          <div
-            key={mod.name}
-            className="p-3 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--border)] flex flex-col justify-between"
-          >
-            <div className="flex items-center justify-between gap-1.5 mb-2">
-              <div
-                className="p-1.5 rounded-lg"
-                style={{ backgroundColor: `color-mix(in srgb, ${mod.color} 15%, transparent)`, color: mod.color }}
-              >
-                <mod.icon className="w-4 h-4" />
+      <div className="perspective-1000">
+        <ResponsiveGrid className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+          {modules.map((mod) => (
+            <div
+              key={mod.name}
+              className="p-3.5 rounded-2xl antigravity-glass border border-[var(--border)] hover:border-[var(--primary)]/40 transition-all duration-300 flex flex-col justify-between shadow-sm group"
+            >
+              <div className="flex items-center justify-between gap-1.5 mb-2">
+                <div
+                  className="p-2 rounded-xl group-hover:scale-105 transition-transform duration-300 shadow-sm"
+                  style={{ backgroundColor: `color-mix(in srgb, ${mod.color} 15%, transparent)`, color: mod.color }}
+                >
+                  <mod.icon className="w-4 h-4" />
+                </div>
+                {mod.enabled ? (
+                  <CheckCircle2 className="w-4 h-4 text-[var(--success)] shrink-0" />
+                ) : (
+                  <XCircle className="w-4 h-4 text-[var(--color-muted-foreground)] shrink-0" />
+                )}
               </div>
-              {mod.enabled ? (
-                <CheckCircle2 className="w-4 h-4 text-[var(--success)] shrink-0" />
-              ) : (
-                <XCircle className="w-4 h-4 text-[var(--color-muted-foreground)] shrink-0" />
-              )}
-            </div>
 
-            <div>
-              <p className="text-xs font-bold text-[var(--color-foreground)] truncate">{mod.name}</p>
-              <p
-                className={`text-[11px] font-medium mt-0.5 ${
-                  mod.enabled ? 'text-[var(--success)]' : 'text-[var(--color-muted-foreground)]'
-                }`}
-              >
-                {mod.enabled ? t('dashboard.active') : t('dashboard.inactive')}
-              </p>
+              <div>
+                <p className="text-xs font-bold text-[var(--color-foreground)] truncate">{mod.name}</p>
+                <p
+                  className={`text-[11px] font-semibold mt-0.5 ${
+                    mod.enabled ? 'text-[var(--success)]' : 'text-[var(--color-muted-foreground)]'
+                  }`}
+                >
+                  {mod.enabled ? t('dashboard.active') : t('dashboard.inactive')}
+                </p>
+              </div>
             </div>
-          </div>
-        ))}
-      </ResponsiveGrid>
+          ))}
+        </ResponsiveGrid>
+      </div>
     </motion.section>
   );
 }

@@ -103,7 +103,7 @@ export function NotificationComposer({
   return (
     <form
       onSubmit={onSend}
-      className="bg-[var(--card-solid)] border border-[var(--color-border)] rounded-2xl p-4 sm:p-6 shadow-[var(--shadow-sm)] space-y-5"
+      className="antigravity-glass border border-[var(--border)] rounded-3xl p-5 sm:p-7 shadow-lg space-y-5"
     >
       {/* Header & Language Tab Selector */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--color-border)]">

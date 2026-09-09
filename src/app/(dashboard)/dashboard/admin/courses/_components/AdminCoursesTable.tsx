@@ -20,11 +20,11 @@ export default function AdminCoursesTable({ courses, isSuperAdmin }: AdminCourse
   const router = useRouter();
 
   return (
-    <div className="bg-[var(--card-solid)] border border-[var(--border)] rounded-2xl shadow-[var(--shadow-sm)] overflow-hidden">
+    <div className="antigravity-glass border border-[var(--border)] rounded-3xl shadow-lg overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs sm:text-sm border-collapse">
           <thead>
-            <tr className="border-b border-[var(--border)] bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)] font-bold uppercase text-[11px] tracking-wider">
+            <tr className="border-b border-[var(--border)] bg-[var(--surface-muted)]/70 text-[var(--color-muted-foreground)] font-bold uppercase text-[11px] tracking-wider">
               <th className="py-3.5 px-4">{t('admin.courseTitle')}</th>
               <th className="py-3.5 px-4">{t('admin.instructor')}</th>
               <th className="py-3.5 px-4">{t('admin.status')}</th>

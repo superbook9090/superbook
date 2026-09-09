@@ -16,8 +16,10 @@ export interface Blog {
   topic: string;
   content: string;
   language: string;
+  locale?: string;
+  readTime?: number;
   isPublished: boolean;
-  author: { _id: string; name: string };
+  author: { _id: string; name: string; email?: string };
   createdAt: string;
   updatedAt: string;
 }

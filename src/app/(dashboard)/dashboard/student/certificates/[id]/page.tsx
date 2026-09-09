@@ -90,7 +90,7 @@ export default function CertificateDetailPage({
         </Link>
         <button
           onClick={() => window.print()}
-          className="inline-flex items-center gap-2 min-h-[44px] px-5 py-2.5 text-sm font-medium rounded-xl text-white bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)] hover:opacity-90 transition-opacity"
+          className="btn-premium inline-flex items-center gap-2 min-h-[44px] px-6 py-2.5 text-sm font-bold shadow-lg shadow-[var(--student-primary)]/25"
         >
           <Printer className="w-4 h-4" />
           {t('certificates.printDownload')}
@@ -99,7 +99,7 @@ export default function CertificateDetailPage({
 
       <div
         id="certificate-sheet"
-        className="mt-6 mx-auto max-w-3xl bg-white text-gray-900 rounded-lg shadow-xl overflow-hidden"
+        className="mt-6 mx-auto max-w-3xl bg-white text-gray-900 rounded-3xl shadow-2xl overflow-hidden border border-amber-500/20 ring-8 ring-amber-500/10"
       >
         <div className="border-[12px] border-double border-amber-600/70 m-3 sm:m-4 px-6 py-10 sm:px-12 sm:py-14 text-center">
           <div className="flex justify-center mb-4">

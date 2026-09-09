@@ -116,7 +116,7 @@ export default function BrowseCoursesPage() {
               </p>
             </div>
 
-            <div className="flex items-center gap-4 bg-[var(--card-solid)] border border-[var(--border)] rounded-2xl p-4 shadow-sm min-w-[200px]">
+            <div className="flex items-center gap-4 antigravity-glass border border-[var(--border)] rounded-2xl p-4 shadow-sm min-w-[200px]">
               <div className="text-right flex-1">
                 <p className="text-[10px] font-black uppercase tracking-widest text-[var(--color-muted-foreground)]">
                   {t('courses.availableCourses')}
@@ -125,7 +125,7 @@ export default function BrowseCoursesPage() {
                   {availableCourses.length}
                 </p>
               </div>
-              <div className="w-10 h-10 rounded-xl bg-[var(--student-primary)] text-white flex items-center justify-center shadow-sm">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--student-primary)] to-[var(--student-accent)] text-white flex items-center justify-center shadow-xs">
                 <Sparkles className="w-5 h-5" />
               </div>
             </div>
@@ -154,40 +154,45 @@ export default function BrowseCoursesPage() {
       </FilterPanel>
 
       {/* Grid Content */}
-      <ResponsiveGrid variant="cards">
-        {filteredCourses.length === 0 ? (
-          <div className="col-span-full text-center py-20 bg-[var(--card-solid)] border border-dashed border-[var(--border)] rounded-2xl p-8">
-            <BookOpen className="w-12 h-12 text-[var(--muted)] mx-auto mb-4 opacity-30" />
-            <h3 className="heading-md text-[var(--color-foreground)] mb-1">
-              {t('courses.noAvailableCourses')}
-            </h3>
-            <p className="text-sm text-[var(--color-muted-foreground)] mb-6">
-              {t('courses.tryAdjustingFilters')}
-            </p>
-            <button
-              onClick={clearFilters}
-              className="px-6 py-2.5 bg-[var(--student-primary)] text-white rounded-xl text-xs sm:text-sm font-bold hover:bg-[var(--student-hover)] transition-colors shadow-sm"
-            >
-              {t('common.reset')}
-            </button>
-          </div>
-        ) : (
-          filteredCourses.map((course) => (
-            <motion.div
-              key={course._id}
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.2 }}
-            >
-              <LazyCourseCard
-                course={course}
-                type="available"
-                onEnroll={handleEnroll}
-              />
-            </motion.div>
-          ))
-        )}
-      </ResponsiveGrid>
+      <div className="perspective-1000">
+        <ResponsiveGrid variant="cards">
+          {filteredCourses.length === 0 ? (
+            <div className="col-span-full text-center py-16 antigravity-glass border border-dashed border-[var(--border)] rounded-3xl p-8 shadow-sm">
+              <div className="w-16 h-16 rounded-2xl bg-[var(--student-primary)]/10 text-[var(--student-primary)] flex items-center justify-center mx-auto mb-4">
+                <BookOpen className="w-8 h-8" />
+              </div>
+              <h3 className="heading-md text-[var(--color-foreground)] mb-1 font-bold">
+                {t('courses.noAvailableCourses')}
+              </h3>
+              <p className="text-sm text-[var(--color-muted-foreground)] mb-6 max-w-sm mx-auto">
+                {t('courses.tryAdjustingFilters')}
+              </p>
+              <button
+                onClick={clearFilters}
+                className="btn-premium px-6 py-2.5 font-bold shadow-md shadow-[var(--student-primary)]/25"
+              >
+                {t('common.reset')}
+              </button>
+            </div>
+          ) : (
+            filteredCourses.map((course, idx) => (
+              <motion.div
+                key={course._id}
+                initial={{ opacity: 0, y: 16, rotateX: 4 }}
+                animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                transition={{ duration: 0.35, delay: Math.min(idx * 0.05, 0.3) }}
+                className="transform-3d"
+              >
+                <LazyCourseCard
+                  course={course}
+                  type="available"
+                  onEnroll={handleEnroll}
+                />
+              </motion.div>
+            ))
+          )}
+        </ResponsiveGrid>
+      </div>
     </PageWrapper>
   );
 }

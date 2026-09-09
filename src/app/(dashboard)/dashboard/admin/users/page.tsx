@@ -5,7 +5,7 @@ import { ROUTES } from '@/constants/routes';
 import { useEffect } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { motion } from 'framer-motion';
-import { Users, Shield, ChevronLeft, ChevronRight, RefreshCw, Building2, Smartphone, Activity } from 'lucide-react';
+import { Users, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import Tooltip from '@/components/ui/Tooltip';
 import Button from '@/components/ui/Button';
@@ -18,7 +18,8 @@ import { UsersTable } from './_components/UsersTable';
 import { UsersMobileList } from './_components/UsersMobileList';
 import { UserDetailModal } from './_components/UserDetailModal';
 import { useAdminUsers } from './_hooks/useAdminUsers';
-import { PageWrapper, PageHeader, EmptyState } from '@/components/layout';
+import { useUsersFilterChips } from './_hooks/useUsersFilterChips';
+import { PageWrapper, EmptyState } from '@/components/layout';
 
 export default function AdminUsersPage() {
   const router = useRouter();
@@ -63,7 +64,6 @@ export default function AdminUsersPage() {
     handleDelete,
   } = useAdminUsers();
 
-  // Role guard
   useEffect(() => {
     if (status === 'loading') return;
     if (!session) {
@@ -75,68 +75,24 @@ export default function AdminUsersPage() {
     }
   }, [session, status, router]);
 
+  const isSuper = isSuperAdmin(session?.user?.role);
+  const filterChips = useUsersFilterChips({
+    roleFilter,
+    setRoleFilter,
+    platformFilter,
+    setPlatformFilter,
+    activityFilter,
+    setActivityFilter,
+    orgFilter,
+    setOrgFilter,
+    setPage,
+    isSuper,
+    organizations,
+  });
+
   if (status === 'loading' || isLoading) {
     return <PageSkeleton />;
   }
-
-  const isSuper = isSuperAdmin(session?.user?.role);
-  const filterChips = [
-    {
-      label: t('admin.role'),
-      icon: <Shield className="w-3.5 h-3.5" aria-hidden />,
-      value: roleFilter,
-      onChange: (val: string) => { setRoleFilter(val); setPage(1); },
-      neutralValue: 'all',
-      options: [
-        { id: 'all', label: t('admin.allRoles') || 'All Roles' },
-        { id: 'student', label: t('roles.student') || 'Students' },
-        { id: 'teacher', label: t('roles.teacher') || 'Teachers' },
-        { id: 'admin', label: t('roles.admin') || 'Admins' },
-      ],
-    },
-    {
-      label: t('adminAnalytics.platform') || 'Platform',
-      icon: <Smartphone className="w-3.5 h-3.5" aria-hidden />,
-      value: platformFilter,
-      onChange: (val: string) => { setPlatformFilter(val); setPage(1); },
-      neutralValue: 'all',
-      options: [
-        { id: 'all', label: t('adminAnalytics.allPlatforms') || 'All Platforms' },
-        { id: 'app', label: t('adminAnalytics.platformApp') || 'Mobile App' },
-        { id: 'web', label: t('adminAnalytics.platformWeb') || 'Website' },
-        { id: 'android', label: 'Android' },
-        { id: 'ios', label: 'iOS' },
-      ],
-    },
-    {
-      label: t('adminAnalytics.activity') || 'Activity',
-      icon: <Activity className="w-3.5 h-3.5" aria-hidden />,
-      value: activityFilter,
-      onChange: (val: string) => { setActivityFilter(val); setPage(1); },
-      neutralValue: 'all',
-      options: [
-        { id: 'all', label: t('adminAnalytics.allActivity') || 'All Activity' },
-        { id: 'today', label: t('adminAnalytics.activeToday') || 'Active Today' },
-        { id: 'week', label: t('adminAnalytics.activeThisWeek') || 'Active 7 Days' },
-        { id: 'month', label: t('adminAnalytics.activeThisMonth') || 'Active 30 Days' },
-        { id: 'inactive', label: t('adminAnalytics.inactiveUsers') || 'Inactive (>30d)' },
-      ],
-    },
-    ...(isSuper && organizations.length > 0
-      ? [{
-          label: t('adminUsers.organization') || 'Organization',
-          icon: <Building2 className="w-3.5 h-3.5" aria-hidden />,
-          value: orgFilter,
-          onChange: (val: string) => { setOrgFilter(val); setPage(1); },
-          neutralValue: 'all',
-          options: [
-            { id: 'all', label: t('adminUsers.allOrganizations') || 'All Organizations' },
-            { id: 'none', label: t('adminUsers.noOrganization') || 'Public (No Org)' },
-            ...organizations.map((org) => ({ id: org._id, label: org.name })),
-          ],
-        }]
-      : []),
-  ];
 
   const handleResetFilters = () => {
     setSearchQuery('');
@@ -148,29 +104,28 @@ export default function AdminUsersPage() {
   };
 
   return (
-    <PageWrapper>
-      <PageHeader
-        title={
-          <span className="flex items-center gap-3">
-            <span className="p-2.5 bg-[var(--info-light)] rounded-xl text-[var(--info)] shrink-0 inline-flex shadow-xs">
-              <Users className="w-6 h-6" />
-            </span>
+    <PageWrapper className="space-y-6">
+      {/* Hero Banner Header */}
+      <div className="hero-banner flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 sm:p-8 rounded-3xl">
+        <div className="space-y-1.5 max-w-xl">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[var(--info-light)] text-[var(--info)] border border-[var(--info)]/20 shadow-xs">
+            <Users className="w-3.5 h-3.5" />
             <span>{t('admin.userManagement')}</span>
-          </span>
-        }
-        description={t('admin.userDesc')}
-        actions={
-          <Button
-            onClick={() => fetchUsers()}
-            variant="secondary"
-            size="sm"
-            className="flex items-center gap-2"
-          >
-            <RefreshCw className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('analytics.refresh') || 'Refresh'}</span>
-          </Button>
-        }
-      />
+          </div>
+          <h1 className="heading-xl">{t('admin.userManagement')}</h1>
+          <p className="text-sm sm:text-base text-[var(--color-muted-foreground)]">{t('admin.userDesc')}</p>
+        </div>
+
+        <Button
+          onClick={() => fetchUsers()}
+          variant="secondary"
+          size="sm"
+          className="flex items-center gap-2 self-start sm:self-auto min-h-[44px] px-4 shadow-sm"
+        >
+          <RefreshCw className="w-4 h-4" />
+          <span>{t('analytics.refresh') || 'Refresh'}</span>
+        </Button>
+      </div>
 
       <UsersStats stats={stats} isLoading={isLoading} />
 
@@ -215,9 +170,9 @@ export default function AdminUsersPage() {
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex justify-between items-center bg-[var(--card-solid)] border border-[var(--border)] rounded-xl px-4 py-2.5 shadow-xs"
+          className="flex justify-between items-center antigravity-glass border border-[var(--border)] rounded-2xl px-5 py-3 shadow-md"
         >
-          <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)]">
+          <p className="text-xs sm:text-sm font-medium text-[var(--color-muted-foreground)]">
             {t('admin.showing').replace('{current}', String(users.length)).replace('{total}', String(pagination.total))}
           </p>
           <div className="flex items-center gap-2">
@@ -228,12 +183,12 @@ export default function AdminUsersPage() {
                 aria-label={t('common.previous')}
                 variant="secondary"
                 size="sm"
-                className="p-2 rounded-lg"
+                className="p-2 rounded-xl"
               >
                 <ChevronLeft className="w-4 h-4" />
               </Button>
             </Tooltip>
-            <span className="px-2 text-xs sm:text-sm font-semibold text-[var(--color-foreground)]">
+            <span className="px-3 text-xs sm:text-sm font-bold text-[var(--color-foreground)]">
               {t('admin.page').replace('{current}', String(page)).replace('{total}', String(pagination.totalPages))}
             </span>
             <Tooltip label={t('common.next')}>
@@ -243,7 +198,7 @@ export default function AdminUsersPage() {
                 aria-label={t('common.next')}
                 variant="secondary"
                 size="sm"
-                className="p-2 rounded-lg"
+                className="p-2 rounded-xl"
               >
                 <ChevronRight className="w-4 h-4" />
               </Button>

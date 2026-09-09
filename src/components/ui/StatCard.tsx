@@ -72,14 +72,14 @@ export default function StatCard({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay }}
-      className="rounded-xl bg-[var(--card-solid)] border border-[var(--color-border)] card-body shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5 transition-all duration-300"
+      transition={{ delay, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      className="group relative rounded-2xl antigravity-glass antigravity-card border border-[var(--border)] card-body hover:border-[var(--primary)]/40 overflow-hidden"
     >
       <div className="flex items-start justify-between gap-2.5 mb-2">
-        <div className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-[var(--color-muted)] pt-0.5">
+        <div className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[var(--color-muted)] pt-0.5">
           {label}
         </div>
-        <div className={`p-1.5 sm:p-2 rounded-lg ${config.bg} ${config.text} shrink-0`}>
+        <div className={`p-2 sm:p-2.5 rounded-xl ${config.bg} ${config.text} shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-sm border border-black/5 dark:border-white/10`}>
           <Icon className="w-4 h-4" />
         </div>
       </div>
@@ -87,12 +87,12 @@ export default function StatCard({
         {value}{suffix}
       </div>
       {description && (
-        <div className="text-xs text-[var(--color-muted-foreground)] mt-0.5">{description}</div>
+        <div className="text-xs text-[var(--color-muted-foreground)] mt-0.5 font-medium">{description}</div>
       )}
       {showProgress && progress !== undefined && (
-        <div className="w-full bg-[var(--color-surface-muted-strong)] rounded-full h-1.5 mt-2">
+        <div className="w-full bg-[var(--surface-muted-strong)] rounded-full h-2 mt-3 overflow-hidden">
           <div
-            className="h-1.5 rounded-full transition-all"
+            className="h-2 rounded-full transition-all duration-500 shadow-sm"
             style={{ width: `${Math.min(progress, 100)}%`, background: config.bar }}
           />
         </div>

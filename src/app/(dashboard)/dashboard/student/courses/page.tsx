@@ -193,37 +193,42 @@ export default function StudentCoursesPage() {
       </FilterPanel>
 
       {/* Enrolled Courses Grid */}
-      <ResponsiveGrid variant="dense">
-        {filteredEnrollments.length === 0 ? (
-          <div className="col-span-full text-center py-20 bg-[var(--card-solid)] border border-dashed border-[var(--border)] rounded-2xl p-8">
-            <BookOpen className="w-12 h-12 text-[var(--muted)] mx-auto mb-4 opacity-30" />
-            <h3 className="heading-md text-[var(--color-foreground)] mb-1">
-              {t('courses.noCoursesFound')}
-            </h3>
-            <p className="text-sm text-[var(--color-muted-foreground)] mb-6">
-              {t('courses.tryAdjustingFilters')}
-            </p>
-            <Button onClick={clearFilters} variant="primary">
-              {t('common.reset')}
-            </Button>
-          </div>
-        ) : (
-          filteredEnrollments.map((enrollment) => (
-            <motion.div
-              key={enrollment._id}
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.2 }}
-            >
-              <LazyCourseCard
-                course={enrollment}
-                type="enrolled"
-                onDrop={handleDrop}
-              />
-            </motion.div>
-          ))
-        )}
-      </ResponsiveGrid>
+      <div className="perspective-1000">
+        <ResponsiveGrid variant="dense">
+          {filteredEnrollments.length === 0 ? (
+            <div className="col-span-full text-center py-16 antigravity-glass border border-dashed border-[var(--border)] rounded-3xl p-8 shadow-sm">
+              <div className="w-16 h-16 rounded-2xl bg-[var(--student-primary)]/10 text-[var(--student-primary)] flex items-center justify-center mx-auto mb-4 shadow-inner">
+                <BookOpen className="w-8 h-8" />
+              </div>
+              <h3 className="heading-md text-[var(--color-foreground)] mb-1 font-bold">
+                {t('courses.noCoursesFound')}
+              </h3>
+              <p className="text-sm text-[var(--color-muted-foreground)] mb-6 max-w-md mx-auto">
+                {t('courses.tryAdjustingFilters')}
+              </p>
+              <Button onClick={clearFilters} variant="primary" className="btn-premium">
+                {t('common.reset')}
+              </Button>
+            </div>
+          ) : (
+            filteredEnrollments.map((enrollment, idx) => (
+              <motion.div
+                key={enrollment._id}
+                initial={{ opacity: 0, y: 16, rotateX: 4 }}
+                animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                transition={{ duration: 0.35, delay: Math.min(idx * 0.05, 0.3) }}
+                className="transform-3d"
+              >
+                <LazyCourseCard
+                  course={enrollment}
+                  type="enrolled"
+                  onDrop={handleDrop}
+                />
+              </motion.div>
+            ))
+          )}
+        </ResponsiveGrid>
+      </div>
 
       <LazyConfirmModal
         isOpen={isDropModalOpen}
@@ -231,10 +236,7 @@ export default function StudentCoursesPage() {
         message={t('courses.dropCourseConfirm')}
         onConfirm={confirmDrop}
         cancelText={t('common.no')}
-        onCancel={() => {
-          setIsDropModalOpen(false);
-          setEnrollmentToDrop(null);
-        }}
+        onCancel={() => { setIsDropModalOpen(false); setEnrollmentToDrop(null); }}
         type="warning"
         isLoading={dropEnrollment.isPending}
       />

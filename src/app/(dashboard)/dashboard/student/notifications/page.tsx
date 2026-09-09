@@ -100,32 +100,37 @@ export default function StudentNotificationsPage() {
       {notifications.length === 0 ? (
         <EmptyState icon={Bell} title={t('notifications.inbox.empty')} />
       ) : (
-        <div className="card-list">
+        <div className="space-y-3">
           {notifications.map((item) => (
             <button
               key={item._id}
               type="button"
               onClick={() => void handleNotificationClick(item)}
-              className={`card-list-item focus-ring ${
+              className={`w-full text-left rounded-2xl p-4 sm:p-5 transition-all duration-200 border focus-ring ${
                 item.read
-                  ? 'bg-[var(--card-solid)]'
-                  : 'bg-[var(--primary-soft)] border-[var(--primary)]/20'
+                  ? 'antigravity-glass border-[var(--border)]/80 hover:border-[var(--student-primary)]/40 hover:-translate-y-0.5 shadow-xs'
+                  : 'antigravity-glass border-[var(--student-primary)]/40 bg-[var(--student-soft)]/25 hover:-translate-y-0.5 shadow-sm shadow-[var(--student-primary)]/10'
               }`}
             >
               <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="font-semibold text-[var(--color-foreground)]">
-                    {localizedText(item.title, lang)}
-                  </p>
-                  <p className="text-sm text-[var(--color-muted-foreground)] mt-1">
-                    {localizedText(item.body, lang)}
-                  </p>
+                <div className="flex items-start gap-3">
+                  {!item.read && (
+                    <span className="w-2 h-2 rounded-full bg-[var(--student-primary)] shadow-[0_0_8px_var(--student-primary)] mt-1.5 shrink-0 animate-pulse" />
+                  )}
+                  <div>
+                    <p className={`text-sm sm:text-base font-bold text-[var(--color-foreground)] ${!item.read ? 'text-[var(--student-primary)]' : ''}`}>
+                      {localizedText(item.title, lang)}
+                    </p>
+                    <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] mt-1 leading-relaxed">
+                      {localizedText(item.body, lang)}
+                    </p>
+                  </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <span className="text-xs font-medium text-[var(--primary)]">
+                  <span className="text-xs font-bold text-[var(--student-primary)] px-2.5 py-0.5 rounded-full bg-[var(--student-soft)] border border-[var(--student-primary)]/20 inline-block mb-1">
                     {t(`notifications.categories.${item.category}`)}
                   </span>
-                  <span className="text-xs text-[var(--color-muted-foreground)] block mt-1">
+                  <span className="text-[11px] text-[var(--color-muted-foreground)] block">
                     {formatWhen(item.createdAt, lang)}
                   </span>
                 </div>

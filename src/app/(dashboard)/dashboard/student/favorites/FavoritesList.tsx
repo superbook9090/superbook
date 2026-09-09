@@ -72,107 +72,109 @@ export default function FavoritesList({ initialFavorites, totalCount }: Favorite
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="rounded-xl p-3.5 sm:p-4 bg-[var(--card-solid)] border border-[var(--color-border)] shadow-[var(--shadow-sm)]"
+        className="rounded-2xl p-4 antigravity-glass border border-[var(--border)] shadow-xs"
       >
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-[var(--error-light)] text-[var(--error)] rounded-lg flex items-center justify-center shrink-0">
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 bg-[var(--error-light)] text-[var(--error)] rounded-xl flex items-center justify-center shrink-0 shadow-xs">
             <Bookmark className="w-5 h-5 fill-current" />
           </div>
           <div>
-            <p className="text-xl sm:text-2xl font-bold tabular-nums font-[family-name:var(--font-display)] text-[var(--color-foreground)]">{totalCount}</p>
-            <p className="text-xs text-[var(--color-muted-foreground)]">{t('favorites.savedArticles')}</p>
+            <p className="text-xl sm:text-2xl font-black tabular-nums font-[family-name:var(--font-display)] text-[var(--color-foreground)]">{totalCount}</p>
+            <p className="text-xs text-[var(--color-muted-foreground)] font-medium">{t('favorites.savedArticles')}</p>
           </div>
         </div>
       </motion.div>
 
       {/* Favorites List */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4"
-      >
-        {favorites.length === 0 ? (
-          <div className="col-span-full text-center py-10 card-panel">
-            <Bookmark className="w-10 h-10 text-[var(--color-muted-foreground)] mx-auto mb-2.5" />
-            <h3 className="text-base font-semibold text-[var(--color-foreground)] mb-1">
-              {t('favorites.noFavoritesYet')}
-            </h3>
-            <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] mb-4">
-              {t('favorites.startExploring')}
-            </p>
-            <Link
-              href={ROUTES.student.blogs}
-              className="btn-premium focus-ring"
-            >
-              <BookOpen className="w-4 h-4 mr-1.5" />
-              {t('favorites.exploreBlogs')}
-            </Link>
-          </div>
-        ) : (
-          favorites.map((favorite, index) => {
-            const blog = favorite.blog;
-            const excerptSource = blog.excerpt ?? (blog.content ? blog.content.replace(/<[^>]*>/g, '') : '');
-            const excerpt =
-              excerptSource.substring(0, 100) + (excerptSource.length > 100 ? '...' : '');
-
-            return (
-              <motion.div
-                key={favorite._id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * index }}
-                className="bg-[var(--card-solid)] rounded-xl border border-[var(--color-border)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5 transition-all overflow-hidden group"
+      <div className="perspective-1000">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="grid grid-cols-1 md:grid-cols-2 gap-4"
+        >
+          {favorites.length === 0 ? (
+            <div className="col-span-full text-center py-14 antigravity-glass rounded-3xl border border-dashed border-[var(--border)] p-8">
+              <div className="w-14 h-14 rounded-2xl bg-[var(--error-light)] text-[var(--error)] flex items-center justify-center mx-auto mb-3">
+                <Bookmark className="w-7 h-7" />
+              </div>
+              <h3 className="text-base font-bold text-[var(--color-foreground)] mb-1">
+                {t('favorites.noFavoritesYet')}
+              </h3>
+              <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] mb-5 max-w-sm mx-auto">
+                {t('favorites.startExploring')}
+              </p>
+              <Link
+                href={ROUTES.student.blogs}
+                className="btn-premium inline-flex items-center"
               >
-                <div className="p-3.5 sm:p-4">
-                  {/* Header */}
-                  <div className="flex items-start justify-between mb-2">
-                    <Badge variant="primary" size="sm">
-                      {blog.topic}
-                    </Badge>
-                    <Tooltip label={t('favorites.removeFromFavorites')}>
-                      <button
-                        onClick={() => removeFavorite(favorite._id, blog._id)}
-                        className="p-1.5 rounded-full text-[var(--error)] hover:bg-[var(--error-light)] transition-colors"
-                        aria-label={t('favorites.removeFromFavorites')}
+                <BookOpen className="w-4 h-4 mr-1.5" />
+                {t('favorites.exploreBlogs')}
+              </Link>
+            </div>
+          ) : (
+            favorites.map((favorite, index) => {
+              const blog = favorite.blog;
+              const excerptSource = blog.excerpt ?? (blog.content ? blog.content.replace(/<[^>]*>/g, '') : '');
+              const excerpt =
+                excerptSource.substring(0, 100) + (excerptSource.length > 100 ? '...' : '');
+
+              return (
+                <motion.div
+                  key={favorite._id}
+                  initial={{ opacity: 0, y: 16, rotateX: 4 }}
+                  animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                  transition={{ delay: 0.05 * index }}
+                  className="antigravity-glass antigravity-card rounded-2xl border border-[var(--border)] shadow-xs hover:shadow-xl hover:border-[var(--student-primary)]/40 transition-all overflow-hidden group transform-3d"
+                >
+                  <div className="p-4 sm:p-5">
+                    {/* Header */}
+                    <div className="flex items-start justify-between mb-2.5">
+                      <Badge variant="primary" size="sm">
+                        {blog.topic}
+                      </Badge>
+                      <Tooltip label={t('favorites.removeFromFavorites')}>
+                        <button
+                          onClick={() => removeFavorite(favorite._id, blog._id)}
+                          className="p-1.5 rounded-full text-[var(--error)] hover:bg-[var(--error-light)] transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center"
+                          aria-label={t('favorites.removeFromFavorites')}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </Tooltip>
+                    </div>
+
+                    {/* Title */}
+                    <h3 className="text-sm sm:text-base font-bold text-[var(--color-foreground)] mb-1 line-clamp-1 group-hover:text-[var(--student-primary)] transition-colors">
+                      {blog.title}
+                    </h3>
+
+                    {/* Excerpt */}
+                    <p className="text-[var(--color-muted-foreground)] text-xs sm:text-sm mb-3.5 line-clamp-2 leading-relaxed">
+                      {excerpt}
+                    </p>
+
+                    {/* Meta & Read More */}
+                    <div className="flex items-center justify-between text-xs pt-2 border-t border-[var(--border)] text-[var(--color-muted-foreground)]">
+                      <span className="flex items-center">
+                        <User className="w-3.5 h-3.5 mr-1" />
+                        {blog.author?.name || t('blog.teacher')}
+                      </span>
+                      <Link
+                        href={ROUTES.student.blog(blog._id)}
+                        className="inline-flex items-center text-xs font-bold text-[var(--student-primary)] hover:opacity-80 transition-opacity"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </Tooltip>
+                        {t('favorites.readArticle')}
+                        <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
+                      </Link>
+                    </div>
                   </div>
-
-                  {/* Title */}
-                  <h3 className="text-sm sm:text-base font-bold text-[var(--color-foreground)] mb-1 line-clamp-1">
-                    {blog.title}
-                  </h3>
-
-                  {/* Excerpt */}
-                  <p className="text-[var(--color-muted-foreground)] text-xs sm:text-sm mb-3 line-clamp-2">
-                    {excerpt}
-                  </p>
-
-                  {/* Meta */}
-                  <div className="flex items-center justify-between text-xs text-[var(--color-muted-foreground)]">
-                    <span className="flex items-center">
-                      <User className="w-3.5 h-3.5 mr-1" />
-                      {blog.author?.name || t('blog.teacher')}
-                    </span>
-                  </div>
-
-                  {/* Read More */}
-                  <Link
-                    href={ROUTES.student.blog(blog._id)}
-                    className="mt-3 inline-flex items-center text-xs sm:text-sm text-[var(--student-primary)] font-semibold hover:text-[var(--student-primary)]/80 transition-colors"
-                  >
-                    {t('favorites.readArticle')}
-                    <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
-                  </Link>
-                </div>
-              </motion.div>
-            );
-          })
-        )}
-      </motion.div>
+                </motion.div>
+              );
+            })
+          )}
+        </motion.div>
+      </div>
     </PageWrapper>
   );
 }

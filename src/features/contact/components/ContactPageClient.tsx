@@ -172,24 +172,31 @@ export default function ContactPageClient() {
 
         <ContactHero />
 
-        <section className="relative -mt-16 sm:-mt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 z-20 w-full">
-          <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+        <section className="relative -mt-12 sm:-mt-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 z-20 w-full">
+          <div className="grid lg:grid-cols-12 gap-8 lg:gap-10 items-start perspective-1000">
             <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-              className="lg:col-span-7 glass border border-white/10 dark:border-white/5 rounded-[2rem] p-6 sm:p-10 lg:p-12 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] backdrop-blur-2xl relative overflow-hidden bg-white/40 dark:bg-[#101319]/60"
+              initial={{ opacity: 0, y: 30, rotateX: 2 }}
+              animate={{ opacity: 1, y: 0, rotateX: 0 }}
+              transition={{ duration: 0.6, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+              className="lg:col-span-7 antigravity-glass border border-[var(--border)] rounded-3xl p-6 sm:p-8 lg:p-10 shadow-2xl relative overflow-hidden transform-3d"
             >
-              <div className="absolute top-0 inset-x-0 h-1.5 bg-[var(--primary-gradient)] opacity-90" />
-              <div className="absolute inset-0 bg-gradient-to-b from-white/40 to-transparent dark:from-white/5 opacity-50 pointer-events-none" />
+              <div
+                className="absolute top-0 inset-x-0 h-1.5 shadow-[0_0_12px_var(--primary)]"
+                style={{ background: 'var(--primary-gradient)' }}
+              />
               
               <div className="relative z-10">
-                <h2 className="text-2xl sm:text-3xl font-black mb-3 text-[var(--color-foreground)] uppercase tracking-tight">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[var(--primary-soft)] text-[var(--primary)] border border-[var(--primary-border)]/50">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>{t('contact.responseTime')}</span>
+                  </span>
+                </div>
+
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-black mb-6 text-[var(--color-foreground)] tracking-tight">
                   {t('contact.heroSubtitle')}
                 </h2>
-                <p className="text-[var(--color-muted-foreground)] text-sm sm:text-base mb-10 font-medium">
-                  {t('contact.responseTime')}
-                </p>
+
                 <ContactForm
                   form={form}
                   errors={errors}
@@ -203,10 +210,10 @@ export default function ContactPageClient() {
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="lg:col-span-5 space-y-6 lg:space-y-8"
+              initial={{ opacity: 0, y: 30, rotateX: 2 }}
+              animate={{ opacity: 1, y: 0, rotateX: 0 }}
+              transition={{ duration: 0.6, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              className="lg:col-span-5 space-y-6"
             >
               <ContactInfo />
             </motion.div>

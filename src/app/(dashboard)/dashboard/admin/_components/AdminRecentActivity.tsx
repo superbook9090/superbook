@@ -25,15 +25,15 @@ export default function AdminRecentActivity({ stats }: AdminRecentActivityProps)
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.4 }}
-      className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6"
+      className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 perspective-1000"
     >
       {/* Top Courses */}
       {topCourses.length > 0 && (
-        <div className="card-surface rounded-2xl border border-[var(--border)] p-4 sm:p-5 flex flex-col justify-between">
+        <div className="card-surface rounded-3xl border border-[var(--border)] p-5 sm:p-6 flex flex-col justify-between shadow-lg">
           <div>
-            <div className="flex items-center justify-between pb-3 mb-3 border-b border-[var(--border)]">
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-[var(--teacher-soft)] text-[var(--teacher-primary)]">
+            <div className="flex items-center justify-between pb-3 mb-3 border-b border-[var(--border)]/60">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-[var(--teacher-soft)] text-[var(--teacher-primary)] border border-[var(--teacher-border)] shadow-sm">
                   <Award className="w-4 h-4" />
                 </div>
                 <h3 className="font-bold text-sm sm:text-base text-[var(--color-foreground)]">
@@ -42,7 +42,7 @@ export default function AdminRecentActivity({ stats }: AdminRecentActivityProps)
               </div>
               <Link
                 href={ROUTES.admin.courses}
-                className="text-xs font-semibold text-[var(--teacher-primary)] hover:underline flex items-center gap-1"
+                className="text-xs font-bold text-[var(--teacher-primary)] hover:underline flex items-center gap-1"
               >
                 <span>{t('dashboard.viewAll')}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -53,13 +53,13 @@ export default function AdminRecentActivity({ stats }: AdminRecentActivityProps)
               {topCourses.slice(0, 4).map((course, idx) => (
                 <div
                   key={course._id || idx}
-                  className="flex items-center justify-between p-2.5 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--border)]"
+                  className="flex items-center justify-between p-3 rounded-2xl antigravity-glass border border-[var(--border)] hover:border-[var(--teacher-primary)]/40 transition-all duration-300"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <span className="w-6 h-6 rounded-lg bg-[var(--teacher-soft)] text-[var(--teacher-primary)] text-xs font-bold flex items-center justify-center shrink-0">
                       {idx + 1}
                     </span>
-                    <span className="text-xs sm:text-sm font-semibold text-[var(--color-foreground)] truncate">
+                    <span className="text-xs sm:text-sm font-bold text-[var(--color-foreground)] truncate">
                       {course.title}
                     </span>
                   </div>
@@ -76,11 +76,11 @@ export default function AdminRecentActivity({ stats }: AdminRecentActivityProps)
 
       {/* Recent Platform Activity */}
       {recentActivity.length > 0 && (
-        <div className="card-surface rounded-2xl border border-[var(--border)] p-4 sm:p-5 flex flex-col justify-between">
+        <div className="card-surface rounded-3xl border border-[var(--border)] p-5 sm:p-6 flex flex-col justify-between shadow-lg">
           <div>
-            <div className="flex items-center justify-between pb-3 mb-3 border-b border-[var(--border)]">
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-[var(--info-light)] text-[var(--info)]">
+            <div className="flex items-center justify-between pb-3 mb-3 border-b border-[var(--border)]/60">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-[var(--info-light)] text-[var(--info)] border border-[var(--info)]/20 shadow-sm">
                   <Activity className="w-4 h-4" />
                 </div>
                 <h3 className="font-bold text-sm sm:text-base text-[var(--color-foreground)]">
@@ -89,7 +89,7 @@ export default function AdminRecentActivity({ stats }: AdminRecentActivityProps)
               </div>
               <Link
                 href={ROUTES.admin.analytics}
-                className="text-xs font-semibold text-[var(--info)] hover:underline flex items-center gap-1"
+                className="text-xs font-bold text-[var(--info)] hover:underline flex items-center gap-1"
               >
                 <span>{t('admin.analytics')}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -100,14 +100,14 @@ export default function AdminRecentActivity({ stats }: AdminRecentActivityProps)
               {recentActivity.slice(0, 4).map((item, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center justify-between p-2.5 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--border)]"
+                  className="flex items-center justify-between p-3 rounded-2xl antigravity-glass border border-[var(--border)] hover:border-[var(--info)]/40 transition-all duration-300"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="p-1.5 rounded-lg bg-[var(--card-solid)] text-[var(--color-foreground)] shrink-0">
+                    <div className="p-1.5 rounded-lg bg-[var(--surface-muted)] text-[var(--color-foreground)] shrink-0">
                       <BookOpen className="w-3.5 h-3.5 text-[var(--info)]" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-xs sm:text-sm font-semibold text-[var(--color-foreground)] truncate">
+                      <p className="text-xs sm:text-sm font-bold text-[var(--color-foreground)] truncate">
                         {item.user}
                       </p>
                       <p className="text-[11px] text-[var(--color-muted-foreground)] truncate">
@@ -116,7 +116,7 @@ export default function AdminRecentActivity({ stats }: AdminRecentActivityProps)
                     </div>
                   </div>
                   {item.date && (
-                    <span className="text-[11px] text-[var(--color-muted-foreground)] shrink-0 ml-2">
+                    <span className="text-[11px] text-[var(--color-muted-foreground)] shrink-0 ml-2 font-medium">
                       {new Date(item.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                     </span>
                   )}

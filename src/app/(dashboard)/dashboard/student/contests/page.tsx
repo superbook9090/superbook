@@ -46,25 +46,21 @@ export default function StudentContestsPage() {
       />
 
       {/* Tabs Row */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border-b border-[var(--border)] pb-4">
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pb-2">
+        <div className="antigravity-tab-group overflow-x-auto no-scrollbar">
           <button
             type="button"
             onClick={() => setActiveTab('live')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 ${
+            className={`antigravity-tab-btn ${
               activeTab === 'live'
-                ? 'bg-[var(--error)] text-white shadow-sm'
-                : 'bg-[var(--card-solid)] text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] border border-[var(--border)]'
+                ? 'antigravity-tab-btn--active text-[var(--error)] border-[var(--error)]/40 shadow-[var(--error)]/20'
+                : ''
             }`}
           >
-            <Flame className={`w-4 h-4 ${activeTab === 'live' ? 'animate-pulse' : ''}`} />
+            <Flame className={`w-4 h-4 text-[var(--error)] ${activeTab === 'live' ? 'animate-pulse' : ''}`} />
             <span>{t('contest.liveContests') || 'Live Contests'}</span>
             {stats.liveCount > 0 && (
-              <span
-                className={`px-1.5 py-0.2 rounded-full text-[11px] font-extrabold ${
-                  activeTab === 'live' ? 'bg-white/20 text-white' : 'bg-[var(--error-light)] text-[var(--error)]'
-                }`}
-              >
+              <span className="px-1.5 py-0.2 rounded-full text-[11px] font-extrabold bg-[var(--error-light)] text-[var(--error)]">
                 {stats.liveCount}
               </span>
             )}
@@ -73,22 +69,12 @@ export default function StudentContestsPage() {
           <button
             type="button"
             onClick={() => setActiveTab('upcoming')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 ${
-              activeTab === 'upcoming'
-                ? 'bg-[var(--primary)] text-white shadow-sm'
-                : 'bg-[var(--card-solid)] text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] border border-[var(--border)]'
-            }`}
+            className={`antigravity-tab-btn ${activeTab === 'upcoming' ? 'antigravity-tab-btn--active' : ''}`}
           >
-            <Clock className="w-4 h-4" />
+            <Clock className="w-4 h-4 text-[var(--info)]" />
             <span>{t('contest.upcomingContests') || 'Upcoming'}</span>
             {stats.upcomingCount > 0 && (
-              <span
-                className={`px-1.5 py-0.2 rounded-full text-[11px] font-extrabold ${
-                  activeTab === 'upcoming'
-                    ? 'bg-white/20 text-white'
-                    : 'bg-[var(--info-light)] text-[var(--info)]'
-                }`}
-              >
+              <span className="px-1.5 py-0.2 rounded-full text-[11px] font-extrabold bg-[var(--info-light)] text-[var(--info)]">
                 {stats.upcomingCount}
               </span>
             )}
@@ -97,13 +83,9 @@ export default function StudentContestsPage() {
           <button
             type="button"
             onClick={() => setActiveTab('completed')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 ${
-              activeTab === 'completed'
-                ? 'bg-[var(--student-primary)] text-white shadow-sm'
-                : 'bg-[var(--card-solid)] text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] border border-[var(--border)]'
-            }`}
+            className={`antigravity-tab-btn ${activeTab === 'completed' ? 'antigravity-tab-btn--active' : ''}`}
           >
-            <CheckCircle className="w-4 h-4" />
+            <CheckCircle className="w-4 h-4 text-[var(--success)]" />
             <span>{t('contest.completedContests') || 'Completed'}</span>
           </button>
         </div>
@@ -150,11 +132,13 @@ export default function StudentContestsPage() {
           description={getEmptyStateDescription()}
         />
       ) : (
-        <ResponsiveGrid variant="cards">
-          {contests.map((c) => (
-            <ContestCard key={c._id} contest={c} />
-          ))}
-        </ResponsiveGrid>
+        <div className="perspective-1000">
+          <ResponsiveGrid variant="cards">
+            {contests.map((c) => (
+              <ContestCard key={c._id} contest={c} />
+            ))}
+          </ResponsiveGrid>
+        </div>
       )}
     </PageWrapper>
   );

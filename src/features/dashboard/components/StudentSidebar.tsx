@@ -43,8 +43,8 @@ export default function StudentSidebar({ user }: { user: User | null }) {
 
         {/* Role Badge */}
         <div className="mt-4 sm:mt-6 px-4 sm:px-6">
-          <span className="rail-chip">
-            <span className="w-1.5 h-1.5 rounded-full bg-[var(--success)] mr-2 animate-pulse" />
+          <span className="rail-chip inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[var(--student-soft)] text-[var(--student-primary)] border border-[var(--student-primary)]/20 shadow-xs">
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--student-primary)] mr-2 shadow-[0_0_8px_var(--student-primary)] animate-pulse" />
             {t('common.student')}
           </span>
         </div>
@@ -64,14 +64,18 @@ export default function StudentSidebar({ user }: { user: User | null }) {
               >
                 <Link
                   href={item.href}
-                  className={`rail-link ${isActive ? 'rail-link--active' : ''}`}
+                  className={`rail-link group transition-all duration-200 ${
+                    isActive 
+                      ? 'rail-link--active bg-[var(--student-soft)] text-[var(--student-primary)] font-semibold shadow-xs' 
+                      : 'hover:translate-x-1'
+                  }`}
                 >
-                  <Icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                  <Icon className={`w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 transition-transform group-hover:scale-110 ${isActive ? 'text-[var(--student-primary)]' : ''}`} />
                   <span className="truncate">{t(item.nameKey)}</span>
                   {isActive && (
                     <motion.div
                       layoutId="studentSidebarActiveIndicator"
-                      className="rail-link__dot"
+                      className="w-1.5 h-1.5 rounded-full bg-[var(--student-primary)] ml-auto shrink-0 shadow-[0_0_10px_var(--student-primary)]"
                     />
                   )}
                 </Link>
@@ -84,14 +88,14 @@ export default function StudentSidebar({ user }: { user: User | null }) {
       {/* User Profile & Download App Section - Fixed at Bottom */}
       <div className="flex-shrink-0 p-3 sm:p-4 space-y-2">
         <DownloadAppSidebarCard />
-        <div className="card-surface rounded-2xl p-3 sm:p-4">
+        <div className="antigravity-glass rounded-2xl p-3 sm:p-4 shadow-sm hover:shadow-md transition-all border border-[var(--border)]/80">
           <div className="flex items-center">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full gradient-bg flex items-center justify-center text-white font-semibold">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-[var(--student-primary)] to-[var(--student-accent)] flex items-center justify-center text-white font-bold shadow-xs">
               {user?.name?.charAt(0)?.toUpperCase() || 'S'}
             </div>
-            <div className="flex-1 min-w-0 ml-2 sm:ml-3">
-              <div className="text-xs sm:text-sm font-semibold text-[var(--color-foreground)] truncate">{user?.name ? user.name.charAt(0).toUpperCase() + user.name.slice(1) : user?.name}</div>
-              <div className="text-xs text-[var(--color-muted-foreground)] truncate">
+            <div className="flex-1 min-w-0 ml-2.5 sm:ml-3">
+              <div className="text-xs sm:text-sm font-bold text-[var(--color-foreground)] truncate">{user?.name ? user.name.charAt(0).toUpperCase() + user.name.slice(1) : user?.name}</div>
+              <div className="text-[11px] text-[var(--color-muted-foreground)] truncate">
                 {user?.email?.toUpperCase()}
               </div>
             </div>

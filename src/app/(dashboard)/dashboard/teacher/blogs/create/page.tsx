@@ -14,6 +14,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { isBlogContentEmpty, type BlogFormData } from '@/features/blogs/components/BlogEditorForm';
 import { LazyBlogEditorForm } from '@/lib/lazy';
 import { isAdmin, isStaffRole } from '@/lib/roles';
+import { PageWrapper } from '@/components/layout';
 
 export default function CreateBlogPage() {
   const { session, status } = useSessionStore();
@@ -64,14 +65,14 @@ export default function CreateBlogPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
+    <PageWrapper className="max-w-4xl space-y-6">
+      <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}>
         <BackButton
           href={blogsHome}
           label={t('blog.backToBlogs')}
           className="text-[var(--teacher-primary)] hover:text-[var(--teacher-primary)]/80 mb-3"
         />
-        <h1 className="text-lg sm:text-xl font-bold text-[var(--color-foreground)]">{t('createBlogPage.title')}</h1>
+        <h1 className="heading-xl text-[var(--color-foreground)]">{t('createBlogPage.title')}</h1>
         <p className="text-sm text-[var(--color-muted-foreground)] mt-0.5">{t('createBlogPage.description')}</p>
       </motion.div>
 
@@ -90,13 +91,13 @@ export default function CreateBlogPage() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="mt-4 bg-[var(--success-light)] rounded-lg p-3"
+        className="card-surface antigravity-glass rounded-2xl p-4 border border-[var(--teacher-border)] bg-[var(--teacher-soft)]/30"
       >
-        <h4 className="text-sm font-semibold text-[var(--success)] mb-1.5 flex items-center">
-          <BookOpen className="w-3.5 h-3.5 mr-1.5" />
+        <h4 className="text-sm font-bold text-[var(--teacher-primary)] mb-2 flex items-center">
+          <BookOpen className="w-4 h-4 mr-2" />
           {t('createBlogPage.tipsTitle')}
         </h4>
-        <ul className="text-xs text-[var(--success)] flex flex-col gap-0.5">
+        <ul className="text-xs text-[var(--color-muted-foreground)] space-y-1 pl-6 list-disc">
           <li>{t('createBlogPage.tipTitle')}</li>
           <li>{t('createBlogPage.tipSections')}</li>
           <li>{t('createBlogPage.tipLists')}</li>
@@ -104,6 +105,6 @@ export default function CreateBlogPage() {
           <li>{t('createBlogPage.tipProofread')}</li>
         </ul>
       </motion.div>
-    </div>
+    </PageWrapper>
   );
 }

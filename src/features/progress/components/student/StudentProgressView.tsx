@@ -127,13 +127,14 @@ export function StudentProgressView() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 perspective-1000">
             {filteredCourses.map((item) => (
-              <StudentCourseProgressCard
-                key={item.enrollment._id}
-                item={item}
-                onViewQuizHistory={(selected) => setSelectedCourseForModal(selected)}
-              />
+              <div key={item.enrollment._id} className="transform-3d">
+                <StudentCourseProgressCard
+                  item={item}
+                  onViewQuizHistory={(selected) => setSelectedCourseForModal(selected)}
+                />
+              </div>
             ))}
           </div>
         )}

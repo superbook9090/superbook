@@ -55,7 +55,7 @@ export function OrganizationsMobileList({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.03, duration: 0.2 }}
-            className="bg-[var(--card-solid)] border border-[var(--border)] rounded-xl p-4 shadow-[var(--shadow-sm)] flex flex-col gap-3"
+            className="antigravity-glass border border-[var(--border)] rounded-2xl p-4 sm:p-5 shadow-md flex flex-col gap-3"
           >
             {/* Header: Avatar, Name, Status, Detail chevron */}
             <div className="flex items-start justify-between gap-2">

@@ -1,9 +1,8 @@
 'use client';
 
-import React from 'react';
 import { Settings, RefreshCw, Save } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
-import { PageWrapper, PageHeader } from '@/components/layout';
+import { PageWrapper } from '@/components/layout';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import Button from '@/components/ui/Button';
 import Tooltip from '@/components/ui/Tooltip';
@@ -56,45 +55,45 @@ export default function AdminSettingsPage() {
 
   return (
     <PageWrapper className="max-w-6xl space-y-6">
-      {/* Header */}
-      <PageHeader
-        title={
-          <span className="flex items-center gap-3">
-            <span className="p-2.5 bg-[var(--primary)]/10 text-[var(--primary)] rounded-xl shrink-0 inline-flex shadow-xs">
-              <Settings className="w-6 h-6" />
-            </span>
+      {/* Hero Banner */}
+      <div className="hero-banner flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 sm:p-8 rounded-3xl">
+        <div className="space-y-1.5 max-w-xl">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[var(--primary)]/15 text-[var(--primary)] border border-[var(--primary)]/25 shadow-xs">
+            <Settings className="w-3.5 h-3.5" />
             <span>{t('adminSettings.title')}</span>
-          </span>
-        }
-        description={t('adminSettings.description')}
-        actions={
-          <div className="flex items-center gap-2">
-            <Tooltip label={t('analytics.refresh') || 'Refresh'}>
-              <Button
-                onClick={fetchSettings}
-                variant="secondary"
-                size="sm"
-                className="flex items-center gap-2"
-                aria-label="Refresh"
-              >
-                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-                <span className="hidden sm:inline">{t('analytics.refresh') || 'Refresh'}</span>
-              </Button>
-            </Tooltip>
-            <Button
-              onClick={handleSave}
-              variant="primary"
-              size="sm"
-              isLoading={isSaving}
-              disabled={isSaving || !isDirty}
-              className="flex items-center gap-2"
-            >
-              {!isSaving && <Save className="w-4 h-4" />}
-              <span>{isSaving ? t('adminSettings.saving') : t('adminSettings.saveSettings')}</span>
-            </Button>
           </div>
-        }
-      />
+          <h1 className="heading-xl">{t('adminSettings.title')}</h1>
+          <p className="text-sm sm:text-base text-[var(--color-muted-foreground)]">
+            {t('adminSettings.description')}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <Tooltip label={t('analytics.refresh') || 'Refresh'}>
+            <Button
+              onClick={fetchSettings}
+              variant="secondary"
+              size="sm"
+              className="flex items-center gap-2 min-h-[44px] px-3.5 shadow-xs"
+              aria-label="Refresh"
+            >
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">{t('analytics.refresh') || 'Refresh'}</span>
+            </Button>
+          </Tooltip>
+          <Button
+            onClick={handleSave}
+            variant="primary"
+            size="sm"
+            isLoading={isSaving}
+            disabled={isSaving || !isDirty}
+            className="flex items-center gap-2 min-h-[44px] px-5 font-bold shadow-md"
+          >
+            {!isSaving && <Save className="w-4 h-4" />}
+            <span>{isSaving ? t('adminSettings.saving') : t('adminSettings.saveSettings')}</span>
+          </Button>
+        </div>
+      </div>
 
       {/* System Status Overview */}
       <SettingsOverviewStats stats={stats} />

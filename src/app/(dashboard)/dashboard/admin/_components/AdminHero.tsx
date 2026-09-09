@@ -59,20 +59,20 @@ export default function AdminHero({
 
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 pt-2 md:pt-0">
           {isSuperAdmin && (
-            <div className="flex items-center gap-2 bg-[var(--card-solid)] border border-[var(--border)] rounded-xl px-3 py-2 text-sm shadow-[var(--shadow-sm)]">
+            <div className="flex items-center gap-2 antigravity-glass border border-[var(--border)] rounded-2xl px-3.5 py-2 text-sm shadow-sm">
               <input
                 type="date"
                 value={dateRange.startDate}
                 onChange={(e) => onDateRangeChange({ ...dateRange, startDate: e.target.value })}
-                className="bg-transparent text-[var(--color-foreground)] border-none outline-none cursor-pointer"
+                className="bg-transparent text-[var(--color-foreground)] border-none outline-none cursor-pointer text-xs sm:text-sm font-medium"
                 aria-label="Start Date"
               />
-              <span className="text-[var(--color-muted-foreground)]">to</span>
+              <span className="text-[var(--color-muted-foreground)] text-xs">to</span>
               <input
                 type="date"
                 value={dateRange.endDate}
                 onChange={(e) => onDateRangeChange({ ...dateRange, endDate: e.target.value })}
-                className="bg-transparent text-[var(--color-foreground)] border-none outline-none cursor-pointer"
+                className="bg-transparent text-[var(--color-foreground)] border-none outline-none cursor-pointer text-xs sm:text-sm font-medium"
                 aria-label="End Date"
               />
             </div>
@@ -81,7 +81,7 @@ export default function AdminHero({
             type="button"
             onClick={onRefresh}
             disabled={isRefreshing}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-[var(--card-solid)] text-[var(--color-foreground)] border border-[var(--border)] hover:border-[var(--teacher-border)] hover:bg-[var(--teacher-soft)] transition-all shadow-[var(--shadow-sm)] min-h-[44px]"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold antigravity-glass text-[var(--color-foreground)] border border-[var(--border)] hover:border-[var(--teacher-primary)]/50 hover:shadow-md transition-all duration-300 min-h-[44px] cursor-pointer"
           >
             <RefreshCw className={`w-4 h-4 text-[var(--teacher-primary)] ${isRefreshing ? 'animate-spin' : ''}`} />
             <span>{isRefreshing ? t('dashboard.refreshing') : t('dashboard.refresh')}</span>

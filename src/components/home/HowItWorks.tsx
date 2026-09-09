@@ -34,18 +34,18 @@ export default function HowItWorks() {
           <p className={landing.subtitle}>{t('home.howItWorks.subtitle')}</p>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-8 lg:gap-10">
+        <div className="grid md:grid-cols-3 gap-6 lg:gap-8 perspective-1000">
           {steps.map((step, index) => (
             <motion.div
               key={step.key}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 30, rotateX: 6 }}
+              whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.12 }}
-              className="relative text-center md:text-left"
+              transition={{ duration: 0.6, delay: index * 0.14, ease: [0.16, 1, 0.3, 1] }}
+              className="relative text-center md:text-left antigravity-glass antigravity-card p-6 sm:p-7 rounded-3xl border border-[var(--border)] hover:border-[var(--student-primary)]/40 h-full flex flex-col justify-between"
             >
               <div className="flex flex-col md:flex-row md:items-start gap-4">
-                <div className="mx-auto md:mx-0 flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[var(--student-soft)] border border-[var(--student-border)]">
+                <div className="mx-auto md:mx-0 flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--student-soft)] to-[var(--student-primary)]/15 border border-[var(--student-border)] shadow-sm group-hover:scale-105 transition-transform duration-300">
                   <HomeHowItWorksIcon
                     step={step.key}
                     className="h-7 w-7 text-[var(--student-primary)]"
@@ -53,10 +53,11 @@ export default function HowItWorks() {
                   />
                 </div>
                 <div>
-                  <span className="inline-block text-xs font-bold uppercase tracking-wider text-[var(--student-primary)] mb-2">
-                    {t('home.howItWorks.stepLabel')} {step.number}
-                  </span>
-                  <h3 className="text-xl font-semibold text-[var(--color-foreground)] mb-2">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--student-soft)] text-[var(--student-primary)] text-xs font-bold uppercase tracking-wider mb-2 border border-[var(--student-border)]/50">
+                    <span>{t('home.howItWorks.stepLabel')}</span>
+                    <span>{step.number}</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-[var(--color-foreground)] mb-2">
                     {t(`home.howItWorks.${step.key}Title`)}
                   </h3>
                   <p className="text-sm text-[var(--color-muted-foreground)] leading-relaxed">
@@ -66,9 +67,11 @@ export default function HowItWorks() {
               </div>
               {index < steps.length - 1 ? (
                 <div
-                  className="hidden md:block absolute top-7 -right-5 lg:-right-8 w-10 lg:w-16 border-t-2 border-dashed border-[var(--student-border)]"
+                  className="hidden md:block absolute -right-3 lg:-right-4 top-1/2 -translate-y-1/2 z-10 w-6 h-6 rounded-full bg-[var(--surface)] border border-[var(--border)] shadow-sm flex items-center justify-center text-[var(--muted)] text-xs font-bold"
                   aria-hidden
-                />
+                >
+                  →
+                </div>
               ) : null}
             </motion.div>
           ))}

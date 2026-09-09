@@ -1,14 +1,17 @@
+// src/app/(dashboard)/dashboard/admin/videos/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
-
 import { motion } from 'framer-motion';
-import { Video, User, BookOpen, Calendar, ExternalLink } from 'lucide-react';
+import { Video, User, BookOpen, Calendar, Play, Clock } from 'lucide-react';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import Tooltip from '@/components/ui/Tooltip';
 import { useAlert } from '@/components/ui/AlertContainer';
 import DashboardListFilters, { FilterPanel } from '@/components/filters/DashboardListFilters';
+import { PageWrapper, ResponsiveGrid, EmptyState } from '@/components/layout';
+import StatCard from '@/components/ui/StatCard';
+import Button from '@/components/ui/Button';
 
 interface VideoLecture {
   _id: string;
@@ -25,7 +28,6 @@ interface VideoLecture {
 
 export default function AdminVideosPage() {
   const { t } = useTranslation();
-
   const [videos, setVideos] = useState<VideoLecture[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -58,14 +60,15 @@ export default function AdminVideosPage() {
     }
   }, [error, addAlert]);
 
-  const filteredVideos = videos.filter((vid) => {
-    const q = searchQuery.toLowerCase();
-    return (
+  const filteredVideos = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return videos;
+    return videos.filter((vid) =>
       vid.title.toLowerCase().includes(q) ||
       (vid.course?.title || '').toLowerCase().includes(q) ||
       (vid.uploadedBy?.name || '').toLowerCase().includes(q)
     );
-  });
+  }, [videos, searchQuery]);
 
   const formatDuration = (seconds?: number) => {
     if (!seconds) return '0:00';
@@ -74,141 +77,156 @@ export default function AdminVideosPage() {
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   };
 
+  const totalDurationMinutes = useMemo(() => {
+    const totalSec = videos.reduce((acc, v) => acc + (v.duration || 0), 0);
+    return Math.round(totalSec / 60);
+  }, [videos]);
+
+  const uniqueCoursesCount = useMemo(() => {
+    const set = new Set(videos.map((v) => v.course?.title).filter(Boolean));
+    return set.size;
+  }, [videos]);
+
   if (isLoading) return <PageSkeleton />;
 
   return (
-    <div className="stack-page overflow-x-hidden">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center gap-3"
-      >
-        <div className="p-3 bg-[var(--info-light)] rounded-xl">
-          <Video className="w-6 h-6 text-[var(--info)]" />
-        </div>
-        <div>
-          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">
-            {t('admin.videoManagement') || 'Video Lectures'}
-          </h1>
-          <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] mt-1">
-            {t('admin.videoDesc') || 'Monitor centrally hosted unlisted YouTube video lectures.'}
+    <PageWrapper className="space-y-6">
+      {/* Hero Banner */}
+      <div className="hero-banner flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 sm:p-8 rounded-3xl">
+        <div className="space-y-1.5 max-w-xl">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[var(--error-light)] text-[var(--error)] border border-[var(--error)]/20 shadow-xs">
+            <Video className="w-3.5 h-3.5" />
+            <span>{t('admin.videoManagement') || 'Video Lectures'}</span>
+          </div>
+          <h1 className="heading-xl">{t('admin.videoManagement') || 'Video Lecture Management'}</h1>
+          <p className="text-sm sm:text-base text-[var(--color-muted-foreground)]">
+            {t('admin.videoDesc') || 'Monitor centrally hosted unlisted YouTube video lectures across all courses.'}
           </p>
         </div>
-      </motion.div>
+      </div>
 
-      {/* Alert */}
-      {error && (
-        <div className="p-4 rounded-xl bg-[var(--color-error)]/10 text-[var(--color-error)] border border-[var(--color-error)]/20 mb-4 w-full">
-          {error}
-        </div>
-      )}
+      {/* KPI Stats */}
+      <ResponsiveGrid variant="cards">
+        <StatCard
+          icon={Video}
+          value={videos.length}
+          label={t('admin.videoManagement') || 'Total Lectures'}
+          color="error"
+          delay={0.05}
+        />
+        <StatCard
+          icon={Clock}
+          value={`${totalDurationMinutes}m`}
+          label="Total Duration"
+          color="warning"
+          delay={0.1}
+          description="Content runtime"
+        />
+        <StatCard
+          icon={BookOpen}
+          value={uniqueCoursesCount}
+          label="Courses With Video"
+          color="info"
+          delay={0.15}
+          description="Covered curriculum"
+        />
+      </ResponsiveGrid>
 
-      {/* Filters */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-      >
-        <FilterPanel>
-          <DashboardListFilters
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            onClear={clearFilters}
-            searchPlaceholder={t('admin.searchVideos') || 'Search lectures by title, course, or instructor...'}
-          />
-        </FilterPanel>
-      </motion.div>
+      {/* Search Filter */}
+      <FilterPanel>
+        <DashboardListFilters
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          onClear={clearFilters}
+          searchPlaceholder={t('admin.searchVideos') || 'Search lectures by title, course, or instructor...'}
+        />
+      </FilterPanel>
 
-      {/* Video Inventory Grid */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[var(--card-gap)]"
-      >
-        {filteredVideos.length > 0 ? (
-          filteredVideos.map((vid, idx) => (
+      {/* Video Cards Grid */}
+      {filteredVideos.length === 0 ? (
+        <EmptyState
+          title={t('admin.noVideosFound') || 'No video lectures found'}
+          description={t('admin.noVideosDesc') || 'Instructors have not uploaded any videos yet, or no matches found.'}
+          action={
+            <Button onClick={clearFilters} variant="secondary">
+              {t('common.reset') || 'Reset Filters'}
+            </Button>
+          }
+        />
+      ) : (
+        <ResponsiveGrid variant="cards">
+          {filteredVideos.map((vid, idx) => (
             <motion.div
               key={vid._id}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 + idx * 0.05 }}
-              className="bg-[var(--card-solid)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between"
+              transition={{ delay: 0.05 * idx, duration: 0.25 }}
+              whileHover={{ y: -4 }}
+              className="antigravity-glass antigravity-card rounded-3xl border border-[var(--border)] overflow-hidden shadow-md hover:shadow-2xl hover:border-[var(--primary)]/40 transition-all duration-300 flex flex-col justify-between group"
             >
-              {/* Thumbnail preview */}
-              <div className="relative aspect-video bg-black flex items-center justify-center group overflow-hidden">
+              {/* Thumbnail preview with play overlay */}
+              <div className="relative aspect-video bg-black flex items-center justify-center overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={vid.thumbnail}
                   alt={vid.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Tooltip label={t('admin.openOnYouTube')}>
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-xs">
+                  <Tooltip label={t('admin.openOnYouTube') || 'Open on YouTube'}>
                     <a
                       href={`https://youtube.com/watch?v=${vid.youtubeVideoId}`}
                       target="_blank"
                       rel="noreferrer"
-                      aria-label={t('admin.openOnYouTube')}
-                      className="p-3 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/40 transition-colors"
+                      aria-label={t('admin.openOnYouTube') || 'Open on YouTube'}
+                      className="p-3.5 bg-white/25 backdrop-blur-md rounded-2xl text-white hover:bg-white/40 transition-colors shadow-lg border border-white/20"
                     >
-                      <ExternalLink className="w-5 h-5" />
+                      <Play className="w-5 h-5 fill-current" />
                     </a>
                   </Tooltip>
                 </div>
                 {vid.duration ? (
-                  <span className="absolute bottom-2 right-2 px-2 py-1 bg-black/75 text-white text-xs font-medium rounded">
+                  <span className="absolute bottom-2.5 right-2.5 px-2 py-0.5 bg-black/80 backdrop-blur-sm text-white text-xs font-bold rounded-lg tabular-nums">
                     {formatDuration(vid.duration)}
                   </span>
                 ) : null}
               </div>
 
               {/* Body details */}
-              <div className="card-body flex-1 flex flex-col justify-between gap-4">
-                <div>
-                  <h3 className="font-semibold text-[var(--color-foreground)] line-clamp-1">
+              <div className="p-5 flex-1 flex flex-col justify-between gap-4">
+                <div className="space-y-1.5">
+                  <h3 className="font-bold text-base text-[var(--color-foreground)] line-clamp-1 group-hover:text-[var(--primary)] transition-colors">
                     {vid.title}
                   </h3>
-                  <p className="text-xs text-[var(--color-muted-foreground)] mt-1 flex items-center gap-1.5">
-                    <BookOpen className="w-3.5 h-3.5" />
-                    <span className="truncate">{vid.course?.title || 'Unknown Course'}</span>
-                  </p>
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-[var(--surface-muted)] text-xs text-[var(--color-muted-foreground)] font-semibold truncate max-w-full">
+                    <BookOpen className="w-3.5 h-3.5 text-[var(--primary)] shrink-0" />
+                    <span className="truncate">{vid.course?.title || 'Course Lecture'}</span>
+                  </div>
                 </div>
 
-                <div className="pt-3 border-t border-[var(--border)] flex flex-col gap-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-[var(--color-muted-foreground)] flex items-center gap-1">
-                      <User className="w-3.5 h-3.5" /> Instructor
+                <div className="pt-3 border-t border-[var(--border)]/60 flex flex-col gap-2 text-xs text-[var(--color-muted-foreground)]">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-1.5 font-medium">
+                      <User className="w-3.5 h-3.5 text-[var(--teacher-primary)]" /> Instructor
                     </span>
-                    <span className="font-medium text-[var(--color-foreground)] truncate max-w-[150px]">
+                    <span className="font-semibold text-[var(--color-foreground)] truncate max-w-[150px]">
                       {vid.uploadedBy?.name || 'Unknown'}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-[var(--color-muted-foreground)] flex items-center gap-1">
+                  <div className="flex items-center justify-between text-[11px] text-[var(--color-muted)]">
+                    <span className="flex items-center gap-1">
                       <Calendar className="w-3.5 h-3.5" /> Uploaded
                     </span>
-                    <span className="text-[var(--color-foreground)]">
-                      {vid.uploadedAt ? new Date(vid.uploadedAt).toLocaleDateString() : 'N/A'}
+                    <span>
+                      {vid.uploadedAt ? new Date(vid.uploadedAt).toLocaleDateString() : '—'}
                     </span>
                   </div>
                 </div>
               </div>
             </motion.div>
-          ))
-        ) : (
-          <div className="col-span-full py-12 flex flex-col items-center justify-center text-center bg-[var(--card-solid)] border border-[var(--border)] rounded-2xl">
-            <Video className="w-12 h-12 text-[var(--color-muted-foreground)] mb-3" />
-            <p className="text-sm font-medium text-[var(--color-foreground)]">
-              {t('admin.noVideosFound') || 'No video lectures found'}
-            </p>
-            <p className="text-xs text-[var(--color-muted-foreground)] mt-1">
-              {t('admin.noVideosDesc') || 'Instructors have not uploaded any videos yet.'}
-            </p>
-          </div>
-        )}
-      </motion.div>
-    </div>
+          ))}
+        </ResponsiveGrid>
+      )}
+    </PageWrapper>
   );
 }

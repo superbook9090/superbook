@@ -57,13 +57,14 @@ export interface Quiz {
   _id: string;
   title: string;
   description: string;
-  courseId: string;
-  course?: Course;
+  courseId?: string;
+  course?: Pick<Course, '_id' | 'title'> & Partial<Course>;
   timeLimit: number;
-  questions: QuizQuestion[];
+  questions?: QuizQuestion[];
   isPublished: boolean;
+  passingScore?: number;
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
 }
 
 export interface QuizQuestion {

@@ -59,36 +59,36 @@ export default function HomeQuizMakerSeo() {
           {t('home.quizMakerSeo.intro')}
         </p>
 
-        <div className="grid sm:grid-cols-2 gap-6 mb-10">
-          <div className="rounded-xl border border-[var(--border)] p-5">
-            <h3 className="font-semibold text-[var(--color-foreground)] mb-2">
+        <div className="grid sm:grid-cols-2 gap-6 mb-10 perspective-1000">
+          <div className="rounded-2xl border border-[var(--border)] antigravity-glass antigravity-card p-6">
+            <h3 className="font-bold text-[var(--color-foreground)] mb-2">
               {t('home.quizMakerSeo.cards.onlineQuizMaker.title')}
             </h3>
-            <p className="text-sm text-[var(--color-muted-foreground)]">
+            <p className="text-sm text-[var(--color-muted-foreground)] leading-relaxed">
               {t('home.quizMakerSeo.cards.onlineQuizMaker.description')}
             </p>
           </div>
-          <div className="rounded-xl border border-[var(--border)] p-5">
-            <h3 className="font-semibold text-[var(--color-foreground)] mb-2">
+          <div className="rounded-2xl border border-[var(--border)] antigravity-glass antigravity-card p-6">
+            <h3 className="font-bold text-[var(--color-foreground)] mb-2">
               {t('home.quizMakerSeo.cards.aiQuizGenerator.title')}
             </h3>
-            <p className="text-sm text-[var(--color-muted-foreground)]">
+            <p className="text-sm text-[var(--color-muted-foreground)] leading-relaxed">
               {t('home.quizMakerSeo.cards.aiQuizGenerator.description')}
             </p>
           </div>
-          <div className="rounded-xl border border-[var(--border)] p-5">
-            <h3 className="font-semibold text-[var(--color-foreground)] mb-2">
+          <div className="rounded-2xl border border-[var(--border)] antigravity-glass antigravity-card p-6">
+            <h3 className="font-bold text-[var(--color-foreground)] mb-2">
               {t('home.quizMakerSeo.cards.testSeries.title')}
             </h3>
-            <p className="text-sm text-[var(--color-muted-foreground)]">
+            <p className="text-sm text-[var(--color-muted-foreground)] leading-relaxed">
               {t('home.quizMakerSeo.cards.testSeries.description')}
             </p>
           </div>
-          <div className="rounded-xl border border-[var(--border)] p-5">
-            <h3 className="font-semibold text-[var(--color-foreground)] mb-2">
+          <div className="rounded-2xl border border-[var(--border)] antigravity-glass antigravity-card p-6">
+            <h3 className="font-bold text-[var(--color-foreground)] mb-2">
               {t('home.quizMakerSeo.cards.coursesQuizzes.title')}
             </h3>
-            <p className="text-sm text-[var(--color-muted-foreground)]">
+            <p className="text-sm text-[var(--color-muted-foreground)] leading-relaxed">
               {t('home.quizMakerSeo.cards.coursesQuizzes.description')}
             </p>
           </div>
@@ -97,21 +97,21 @@ export default function HomeQuizMakerSeo() {
         <div className="flex flex-wrap gap-3 mb-10">
           <Link
             href="/quiz-maker-free"
-            className="inline-flex items-center px-6 py-3 rounded-xl border border-[var(--border)] text-[var(--color-foreground)] font-semibold hover:bg-[var(--color-surface-muted)] transition-colors"
+            className="inline-flex items-center px-6 py-3 rounded-xl border border-[var(--border)] antigravity-glass text-[var(--color-foreground)] font-semibold hover:border-[var(--student-primary)]/50 hover:shadow-md transition-all duration-300"
           >
             {t('home.quizMakerSeo.cta.tryQuizMaker')}
           </Link>
           <Link
             href="/ai-quiz-generator"
-            className="inline-flex items-center px-6 py-3 rounded-xl border border-[var(--border)] text-[var(--color-foreground)] font-semibold hover:bg-[var(--color-surface-muted)] transition-colors"
+            className="inline-flex items-center px-6 py-3 rounded-xl border border-[var(--border)] antigravity-glass text-[var(--color-foreground)] font-semibold hover:border-[var(--student-primary)]/50 hover:shadow-md transition-all duration-300"
           >
             {t('home.quizMakerSeo.cta.aiQuizGenerator')}
           </Link>
           <Link
-            href={ROUTES.register}
-            className="inline-flex items-center px-6 py-3 rounded-xl bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)] text-white font-semibold shadow-md hover:shadow-lg transition-shadow"
+            href="/test-series-maker"
+            className="inline-flex items-center px-6 py-3 rounded-xl border border-[var(--border)] antigravity-glass text-[var(--color-foreground)] font-semibold hover:border-[var(--student-primary)]/50 hover:shadow-md transition-all duration-300"
           >
-            {t('home.quizMakerSeo.cta.createAccount')}
+            {t('home.quizMakerSeo.cta.testSeriesMaker')}
           </Link>
         </div>
 

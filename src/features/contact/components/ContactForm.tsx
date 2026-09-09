@@ -1,5 +1,8 @@
+'use client';
+
+import React from 'react';
 import { motion } from 'framer-motion';
-import { Send } from 'lucide-react';
+import { Send, User, Mail, Tag, MessageSquare } from 'lucide-react';
 import { TextField } from '@/components/ui/TextField';
 import Button from '@/components/ui/Button';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -27,15 +30,17 @@ export function ContactForm({
   const { t } = useTranslation();
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 lg:space-y-8" noValidate>
-      <div className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6" noValidate>
+      <div className="space-y-4 sm:space-y-5">
         <TextField
           id="name"
           name="name"
           label={
-            <>
-              {t('contact.form.name')} <span className="text-[var(--color-error)]">*</span>
-            </>
+            <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[var(--color-foreground)]">
+              <User className="w-3.5 h-3.5 text-[var(--primary)]" />
+              <span>{t('contact.form.name')}</span>
+              <span className="text-[var(--color-error)]">*</span>
+            </span>
           }
           type="text"
           value={form.name}
@@ -45,16 +50,18 @@ export function ContactForm({
           disabled={isSubmitting}
           error={touched.name && errors.name ? errors.name : undefined}
           fullWidth
-          className="bg-white/50 dark:bg-black/20 backdrop-blur-md focus-within:ring-2 focus-within:ring-[var(--primary)]/50 transition-all duration-300"
+          className="antigravity-glass rounded-xl border border-[var(--border)] focus-within:ring-2 focus-within:ring-[var(--primary)]/40 focus-within:border-[var(--primary)] transition-all duration-200"
         />
 
         <TextField
           id="email"
           name="email"
           label={
-            <>
-              {t('contact.form.email')} <span className="text-[var(--color-error)]">*</span>
-            </>
+            <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[var(--color-foreground)]">
+              <Mail className="w-3.5 h-3.5 text-[var(--primary)]" />
+              <span>{t('contact.form.email')}</span>
+              <span className="text-[var(--color-error)]">*</span>
+            </span>
           }
           type="email"
           value={form.email}
@@ -64,16 +71,18 @@ export function ContactForm({
           disabled={isSubmitting}
           error={touched.email && errors.email ? errors.email : undefined}
           fullWidth
-          className="bg-white/50 dark:bg-black/20 backdrop-blur-md focus-within:ring-2 focus-within:ring-[var(--primary)]/50 transition-all duration-300"
+          className="antigravity-glass rounded-xl border border-[var(--border)] focus-within:ring-2 focus-within:ring-[var(--primary)]/40 focus-within:border-[var(--primary)] transition-all duration-200"
         />
 
         <TextField
           id="subject"
           name="subject"
           label={
-            <>
-              {t('contact.form.subject')} <span className="text-[var(--color-error)]">*</span>
-            </>
+            <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[var(--color-foreground)]">
+              <Tag className="w-3.5 h-3.5 text-[var(--primary)]" />
+              <span>{t('contact.form.subject')}</span>
+              <span className="text-[var(--color-error)]">*</span>
+            </span>
           }
           type="text"
           value={form.subject}
@@ -83,16 +92,18 @@ export function ContactForm({
           disabled={isSubmitting}
           error={touched.subject && errors.subject ? errors.subject : undefined}
           fullWidth
-          className="bg-white/50 dark:bg-black/20 backdrop-blur-md focus-within:ring-2 focus-within:ring-[var(--primary)]/50 transition-all duration-300"
+          className="antigravity-glass rounded-xl border border-[var(--border)] focus-within:ring-2 focus-within:ring-[var(--primary)]/40 focus-within:border-[var(--primary)] transition-all duration-200"
         />
 
         <TextField
           id="message"
           name="message"
           label={
-            <>
-              {t('contact.form.message')} <span className="text-[var(--color-error)]">*</span>
-            </>
+            <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[var(--color-foreground)]">
+              <MessageSquare className="w-3.5 h-3.5 text-[var(--primary)]" />
+              <span>{t('contact.form.message')}</span>
+              <span className="text-[var(--color-error)]">*</span>
+            </span>
           }
           multiline
           rows={5}
@@ -103,22 +114,21 @@ export function ContactForm({
           disabled={isSubmitting}
           error={touched.message && errors.message ? errors.message : undefined}
           fullWidth
-          className="bg-white/50 dark:bg-black/20 backdrop-blur-md focus-within:ring-2 focus-within:ring-[var(--primary)]/50 transition-all duration-300"
+          className="antigravity-glass rounded-xl border border-[var(--border)] focus-within:ring-2 focus-within:ring-[var(--primary)]/40 focus-within:border-[var(--primary)] transition-all duration-200"
         />
       </div>
 
-      <div className="pt-4">
+      <div className="pt-2">
         <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
           <Button
             type="submit"
             fullWidth
             isLoading={isSubmitting}
-            className="group relative overflow-hidden py-4 text-sm font-black tracking-widest uppercase shadow-[0_10px_30px_rgba(var(--primary-rgb),0.3)] bg-[var(--primary-gradient)] text-white rounded-2xl hover:brightness-110 active:brightness-95 transition-all duration-300 border border-white/20"
+            className="btn-premium group relative overflow-hidden py-3.5 text-xs sm:text-sm font-black tracking-wider uppercase rounded-2xl shadow-lg shadow-[var(--primary)]/25"
           >
-            <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.2)_50%,transparent_75%)] bg-[length:250%_250%,100%_100%] bg-[position:200%_0,0_0] bg-no-repeat group-hover:bg-[position:-20%_0,0_0] transition-[background-position] duration-700 ease-in-out" />
-            <span className="relative z-10 flex items-center justify-center">
-              <Send className="w-5 h-5 mr-2 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300" />
-              {isSubmitting ? t('contact.form.sending') : t('contact.form.submit')}
+            <span className="relative z-10 flex items-center justify-center gap-2">
+              <Send className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform duration-200" />
+              <span>{isSubmitting ? t('contact.form.sending') : t('contact.form.submit')}</span>
             </span>
           </Button>
         </motion.div>

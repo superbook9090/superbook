@@ -59,39 +59,42 @@ export default function StudentCertificatesPage() {
             description={t('certificates.noCertificatesHint')}
           />
         ) : (
-          <ResponsiveGrid variant="dense">
-            {certificates.map((certificate) => (
-              <Link
-                key={certificate._id}
-                href={ROUTES.student.certificate(certificate._id)}
-                className="block bg-[var(--card-solid)] rounded-xl border border-[var(--color-border)] shadow-[var(--shadow-sm)] overflow-hidden hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5 transition-all group"
-              >
-                <div className="h-[3px]" style={{ background: 'var(--primary-gradient)' }} aria-hidden />
-                <div className="card-body">
-                  <div className="flex items-start gap-2.5">
-                    <div className="p-2 rounded-lg bg-[var(--primary-soft)] text-[var(--primary)] shrink-0">
-                      <Award className="w-5 h-5" />
+          <div className="perspective-1000">
+            <ResponsiveGrid variant="dense">
+              {certificates.map((certificate) => (
+                <Link
+                  key={certificate._id}
+                  href={ROUTES.student.certificate(certificate._id)}
+                  className="block antigravity-certificate-card overflow-hidden group transform-3d"
+                >
+                  <div className="h-[3px] w-full bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 shadow-[0_0_10px_rgba(234,179,8,0.5)]" aria-hidden />
+                  <div className="p-5 sm:p-6">
+                    <div className="flex items-start gap-3.5">
+                      <div className="p-3 rounded-2xl bg-amber-500/15 text-amber-500 border border-amber-500/25 shrink-0 shadow-xs group-hover:scale-110 transition-transform">
+                        <Award className="w-6 h-6" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-base sm:text-lg font-bold text-[var(--color-foreground)] truncate group-hover:text-amber-500 transition-colors">
+                          {certificate.courseTitle}
+                        </h3>
+                        <p className="text-xs text-[var(--color-muted-foreground)] mt-1">
+                          {t('certificates.issuedOn')}{' '}
+                          {new Date(certificate.issuedAt).toLocaleDateString()}
+                        </p>
+                        <p className="text-[11px] text-[var(--color-muted-foreground)] mt-1 font-mono tracking-wider truncate bg-[var(--surface-muted)]/50 px-2 py-0.5 rounded-md inline-block">
+                          ID: {certificate.certificateId}
+                        </p>
+                      </div>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="text-sm sm:text-base font-bold text-[var(--color-foreground)] truncate group-hover:text-[var(--primary)] transition-colors">
-                        {certificate.courseTitle}
-                      </h3>
-                      <p className="text-xs text-[var(--color-muted-foreground)] mt-0.5">
-                        {t('certificates.issuedOn')}{' '}
-                        {new Date(certificate.issuedAt).toLocaleDateString()}
-                      </p>
-                      <p className="text-[11px] text-[var(--color-muted-foreground)] mt-1 font-mono truncate">
-                        {certificate.certificateId}
-                      </p>
+                    <div className="mt-4 pt-3 border-t border-amber-500/15 text-xs font-bold text-amber-500 flex items-center justify-between">
+                      <span>{t('certificates.viewCertificate')}</span>
+                      <span className="group-hover:translate-x-1 transition-transform">→</span>
                     </div>
                   </div>
-                  <div className="mt-3 text-xs font-semibold text-[var(--primary)] flex items-center">
-                    {t('certificates.viewCertificate')} →
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </ResponsiveGrid>
+                </Link>
+              ))}
+            </ResponsiveGrid>
+          </div>
         )}
       </div>
     </PageWrapper>

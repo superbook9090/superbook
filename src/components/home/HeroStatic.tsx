@@ -8,6 +8,7 @@ import {
   HomeHighlightGlyph,
   type HomeHighlightKey,
 } from '@/components/home/marketingGlyphs';
+import HeroSpatialDeck from '@/components/home/HeroSpatialDeck';
 
 const highlightKeys: HomeHighlightKey[] = ['courses', 'quizzes', 'languages'];
 
@@ -74,29 +75,32 @@ export default function HeroStatic() {
         <div className="hero-fade-in hero-fade-in-delay-5 flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link
             href={ROUTES.register}
-            className="group flex items-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)] text-white font-semibold shadow-lg hover:shadow-xl transition-shadow duration-300"
+            className="group flex items-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)] text-white font-semibold shadow-lg hover:shadow-xl hover:scale-102 transition-all duration-300"
           >
             <span data-i18n-key="home.register">{t('home.register')}</span>
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </Link>
           <Link
             href="/quiz-maker-free"
-            className="flex items-center gap-2 px-8 py-4 rounded-full border border-[var(--color-border)] bg-[var(--color-card)] backdrop-blur-sm text-[var(--foreground)] font-semibold hover:bg-[var(--color-surface-muted)] transition-colors duration-300"
+            className="flex items-center gap-2 px-8 py-4 rounded-full border border-[var(--color-border)] antigravity-glass text-[var(--foreground)] font-semibold hover:border-[var(--primary)]/50 transition-colors duration-300"
           >
             Free Quiz Maker
           </Link>
           <Link
             href={ROUTES.login}
-            className="flex items-center gap-2 px-8 py-4 rounded-full border border-[var(--color-border)] bg-[var(--color-card)] backdrop-blur-sm text-[var(--foreground)] font-semibold hover:bg-[var(--color-surface-muted)] transition-colors duration-300"
+            className="flex items-center gap-2 px-8 py-4 rounded-full border border-[var(--color-border)] antigravity-glass text-[var(--foreground)] font-semibold hover:border-[var(--primary)]/50 transition-colors duration-300"
             data-i18n-key="home.login"
           >
             {t('home.login')}
           </Link>
         </div>
 
-        <div className="hero-fade-in hero-fade-in-delay-6 grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mt-16 max-w-3xl mx-auto">
+        {/* 3D Antigravity Floating Spatial Deck */}
+        <HeroSpatialDeck />
+
+        <div className="hero-fade-in hero-fade-in-delay-6 grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mt-8 max-w-3xl mx-auto">
           {highlightKeys.map((key) => (
-            <div key={key} className={landing.highlightCard}>
+            <div key={key} className={`${landing.highlightCard} antigravity-card`}>
               <div className={landing.highlightIconWrap}>
                 <HomeHighlightGlyph highlightKey={key} className={landing.highlightIcon} />
               </div>

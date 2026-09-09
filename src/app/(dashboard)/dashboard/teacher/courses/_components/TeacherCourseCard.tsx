@@ -25,9 +25,9 @@ export default function TeacherCourseCard({ course }: TeacherCourseCardProps) {
     <motion.div
       initial={{ opacity: 0, scale: 0.96 }}
       animate={{ opacity: 1, scale: 1 }}
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.25 }}
-      className="group bg-[var(--card-solid)] rounded-2xl border border-[var(--border)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-lg)] hover:border-[var(--teacher-primary)]/40 transition-all duration-300 overflow-hidden flex flex-col h-full"
+      whileHover={{ y: -6, scale: 1.01 }}
+      transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+      className="group bg-[var(--card-solid)] antigravity-glass rounded-3xl border border-[var(--border)] shadow-[var(--shadow-sm)] hover:shadow-xl hover:border-[var(--teacher-primary)]/50 transition-all duration-300 overflow-hidden flex flex-col h-full"
     >
       {/* Thumbnail Area */}
       <div className="relative h-40 sm:h-44 w-full bg-[var(--color-surface-muted)] overflow-hidden">
@@ -125,7 +125,7 @@ export default function TeacherCourseCard({ course }: TeacherCourseCardProps) {
             <Button
               onClick={() => router.push(ROUTES.teacher.courseEdit(course._id))}
               variant="primary"
-              className="flex-1 min-h-[40px] text-xs sm:text-sm"
+              className="flex-1 min-h-[44px] text-xs sm:text-sm font-bold shadow-sm hover:shadow-md transition-all"
             >
               <Edit className="w-3.5 h-3.5 mr-1.5" />
               <span>{t('teacherCourses.edit')}</span>
@@ -133,7 +133,7 @@ export default function TeacherCourseCard({ course }: TeacherCourseCardProps) {
 
             <Link
               href={ROUTES.teacher.courseStudents(course._id)}
-              className="p-2.5 min-h-[40px] min-w-[40px] rounded-xl border border-[var(--border)] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] hover:bg-[var(--teacher-soft)] hover:text-[var(--teacher-primary)] hover:border-[var(--teacher-border)] flex items-center justify-center transition-colors"
+              className="p-2.5 min-h-[44px] min-w-[44px] rounded-xl border border-[var(--border)] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] hover:bg-[var(--teacher-soft)] hover:text-[var(--teacher-primary)] hover:border-[var(--teacher-border)] flex items-center justify-center transition-colors shadow-xs"
               title={t('teacherCourses.viewStudents')}
             >
               <UserCheck className="w-4 h-4" />

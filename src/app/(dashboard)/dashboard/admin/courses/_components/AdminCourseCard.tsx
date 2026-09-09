@@ -33,9 +33,9 @@ export default function AdminCourseCard({ course, isSuperAdmin }: AdminCourseCar
     <motion.div
       initial={{ opacity: 0, scale: 0.96 }}
       animate={{ opacity: 1, scale: 1 }}
-      whileHover={{ y: -4 }}
+      whileHover={{ y: -5 }}
       transition={{ duration: 0.25 }}
-      className="bg-[var(--card-solid)] rounded-2xl border border-[var(--border)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-lg)] transition-all duration-300 overflow-hidden flex flex-col h-full"
+      className="antigravity-glass antigravity-card rounded-3xl border border-[var(--border)] shadow-md hover:shadow-2xl hover:border-[var(--primary)]/40 transition-all duration-300 overflow-hidden flex flex-col h-full group"
     >
       {/* Thumbnail */}
       <div className="relative h-36 sm:h-40 w-full bg-[var(--color-surface-muted)] overflow-hidden">

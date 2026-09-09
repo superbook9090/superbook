@@ -20,10 +20,10 @@ export default function AdminStatsGrid({ stats, isLoading }: AdminStatsGridProps
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
-            className="rounded-xl bg-[var(--card-solid)] border border-[var(--color-border)] p-4 h-28 animate-pulse"
+            className="rounded-2xl antigravity-glass border border-[var(--border)] p-4 sm:p-5 h-28 animate-pulse flex flex-col justify-between shadow-sm"
           >
-            <div className="h-4 bg-[var(--color-surface-muted-strong)] rounded w-1/3 mb-3" />
-            <div className="h-7 bg-[var(--color-surface-muted-strong)] rounded w-1/2" />
+            <div className="h-4 bg-[var(--surface-muted-strong)] rounded-lg w-1/3 mb-3" />
+            <div className="h-7 bg-[var(--surface-muted-strong)] rounded-lg w-1/2" />
           </div>
         ))}
       </ResponsiveGrid>

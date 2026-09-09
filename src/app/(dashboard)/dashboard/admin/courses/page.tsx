@@ -14,7 +14,7 @@ import { ApiClientError } from '@/lib/api/http';
 import DashboardListFilters, { FilterPanel } from '@/components/filters/DashboardListFilters';
 import { buildPublishStatusOptions, type PublishStatusFilter } from '@/components/filters/publishStatusOptions';
 import { isSuperAdmin } from '@/lib/roles';
-import { PageWrapper, PageHeader, ResponsiveGrid, EmptyState } from '@/components/layout';
+import { PageWrapper, ResponsiveGrid, EmptyState } from '@/components/layout';
 import AdminCoursesStats from './_components/AdminCoursesStats';
 import AdminCourseCard from './_components/AdminCourseCard';
 import AdminCoursesTable from './_components/AdminCoursesTable';
@@ -83,39 +83,45 @@ export default function AdminCoursesPage() {
   }
 
   return (
-    <PageWrapper>
-      <PageHeader
-        title={t('admin.allCourses')}
-        description={t('admin.manageCoursesDesc')}
-        actions={
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--border)]">
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
-                viewMode === 'grid'
-                  ? 'bg-[var(--card-solid)] text-[var(--color-foreground)] shadow-sm'
-                  : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]'
-              }`}
-              title={t('admin.viewGrid')}
-            >
-              <LayoutGrid className="w-4 h-4" />
-              <span className="hidden sm:inline">{t('admin.viewGrid')}</span>
-            </button>
-            <button
-              onClick={() => setViewMode('table')}
-              className={`p-2 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
-                viewMode === 'table'
-                  ? 'bg-[var(--card-solid)] text-[var(--color-foreground)] shadow-sm'
-                  : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]'
-              }`}
-              title={t('admin.viewTable')}
-            >
-              <TableIcon className="w-4 h-4" />
-              <span className="hidden sm:inline">{t('admin.viewTable')}</span>
-            </button>
+    <PageWrapper className="space-y-6">
+      {/* Hero Banner */}
+      <div className="hero-banner flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 sm:p-8 rounded-3xl">
+        <div className="space-y-1.5 max-w-xl">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[var(--teacher-soft)] text-[var(--teacher-primary)] border border-[var(--teacher-border)] shadow-xs">
+            <BookOpen className="w-3.5 h-3.5" />
+            <span>{t('admin.allCourses')}</span>
           </div>
-        }
-      />
+          <h1 className="heading-xl">{t('admin.allCourses')}</h1>
+          <p className="text-sm sm:text-base text-[var(--color-muted-foreground)]">{t('admin.manageCoursesDesc')}</p>
+        </div>
+
+        <div className="flex items-center gap-1.5 p-1.5 rounded-2xl antigravity-glass border border-[var(--border)] self-start sm:self-auto shadow-sm">
+          <button
+            onClick={() => setViewMode('grid')}
+            className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all min-h-[40px] cursor-pointer ${
+              viewMode === 'grid'
+                ? 'bg-[var(--primary)] text-white shadow-md'
+                : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--surface-muted)]'
+            }`}
+            title={t('admin.viewGrid')}
+          >
+            <LayoutGrid className="w-4 h-4" />
+            <span className="hidden sm:inline">{t('admin.viewGrid')}</span>
+          </button>
+          <button
+            onClick={() => setViewMode('table')}
+            className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all min-h-[40px] cursor-pointer ${
+              viewMode === 'table'
+                ? 'bg-[var(--primary)] text-white shadow-md'
+                : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--surface-muted)]'
+            }`}
+            title={t('admin.viewTable')}
+          >
+            <TableIcon className="w-4 h-4" />
+            <span className="hidden sm:inline">{t('admin.viewTable')}</span>
+          </button>
+        </div>
+      </div>
 
       {/* KPI Stats */}
       <AdminCoursesStats courses={courses} />

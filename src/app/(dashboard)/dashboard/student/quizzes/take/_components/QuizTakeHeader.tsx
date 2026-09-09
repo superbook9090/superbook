@@ -26,7 +26,7 @@ export function QuizTakeHeader({
   t,
 }: Props) {
   return (
-    <div className="card-surface card-body mb-4 sm:mb-6">
+    <div className="antigravity-glass rounded-3xl p-5 sm:p-6 mb-4 sm:mb-6 shadow-md border border-[var(--border)]">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
         <div className="min-w-0">
           <h1 className="text-base sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)] line-clamp-2">
@@ -34,16 +34,18 @@ export function QuizTakeHeader({
           </h1>
         </div>
         <div
-          className={`shrink-0 rounded-xl border px-4 py-2 text-right ${
+          className={`shrink-0 rounded-2xl border px-4 py-2.5 text-right transition-all duration-300 ${
             timeRemaining < 60
-              ? 'border-[var(--error)]/30 bg-[var(--error-light)] text-[var(--error)]'
-              : 'border-[var(--color-border)] bg-[var(--color-surface-muted)]/50 text-[var(--color-foreground)]'
+              ? 'border-[var(--error)] bg-[var(--error-light)] text-[var(--error)] shadow-[0_0_15px_var(--error)] animate-pulse'
+              : 'border-[var(--student-primary)]/30 bg-[var(--student-soft)]/40 text-[var(--color-foreground)] shadow-xs'
           }`}
         >
-          <p className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--color-muted-foreground)]">
+          <p className="text-[10px] sm:text-xs uppercase font-bold tracking-wider text-[var(--color-muted-foreground)]">
             {t('quiz.timeRemaining')}
           </p>
-          <p className="text-xl sm:text-2xl font-bold font-mono tabular-nums">{formatTime(timeRemaining)}</p>
+          <p className="text-xl sm:text-2xl font-black font-mono tabular-nums text-[var(--student-primary)]">
+            {formatTime(timeRemaining)}
+          </p>
         </div>
       </div>
 

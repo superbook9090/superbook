@@ -23,7 +23,7 @@ export function StudentCourseProgressCard({
   const isCompleted = item.enrollment.status === 'completed' || item.enrollment.progress >= 100;
 
   return (
-    <div className="card-surface rounded-2xl border border-[var(--border)] overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow">
+    <div className="antigravity-glass antigravity-card rounded-2xl border border-[var(--border)] overflow-hidden flex flex-col justify-between hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
       <div className="p-4 sm:p-5">
         {/* Top Header: Thumbnail + Title + Status */}
         <div className="flex items-start gap-3.5">
@@ -37,7 +37,7 @@ export function StudentCourseProgressCard({
               />
             </div>
           ) : (
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-gradient-to-br from-[var(--student-primary)] to-[var(--student-accent)] shrink-0 flex items-center justify-center text-white">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-gradient-to-br from-[var(--student-primary)] to-[var(--student-accent)] shrink-0 flex items-center justify-center text-white shadow-xs">
               <BookOpen className="w-7 h-7" />
             </div>
           )}
@@ -45,12 +45,12 @@ export function StudentCourseProgressCard({
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2 flex-wrap mb-1">
               {item.course.category && (
-                <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[var(--student-soft)] text-[var(--student-primary)]">
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[var(--student-soft)] text-[var(--student-primary)] border border-[var(--student-primary)]/20">
                   {item.course.category}
                 </span>
               )}
               <span
-                className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${
+                className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
                   isCompleted
                     ? 'bg-[var(--success-light)] text-[var(--success)]'
                     : 'bg-[var(--warning-light)] text-[var(--warning)]'
@@ -76,16 +76,16 @@ export function StudentCourseProgressCard({
 
         {/* Progress Bar & Metric */}
         <div className="mt-4">
-          <div className="flex items-center justify-between text-xs font-semibold mb-1.5">
+          <div className="flex items-center justify-between text-xs font-bold mb-1.5">
             <span className="text-[var(--color-muted-foreground)]">{t('progress.courseProgress')}</span>
-            <span className="text-[var(--student-primary)] text-sm">{item.enrollment.progress}%</span>
+            <span className="text-[var(--student-primary)] text-sm font-black tabular-nums">{item.enrollment.progress}%</span>
           </div>
-          <div className="w-full bg-[var(--color-surface-muted)] rounded-full h-2.5 overflow-hidden">
+          <div className="w-full bg-[var(--color-surface-muted)]/70 rounded-full h-2.5 overflow-hidden">
             <div
               className={`h-2.5 rounded-full transition-all duration-500 ${
                 isCompleted
-                  ? 'bg-[var(--success)]'
-                  : 'bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)]'
+                  ? 'bg-[var(--success)] shadow-[0_0_8px_var(--success)]'
+                  : 'bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)] shadow-[0_0_8px_var(--student-primary)]'
               }`}
               style={{ width: `${Math.min(100, Math.max(0, item.enrollment.progress))}%` }}
             />

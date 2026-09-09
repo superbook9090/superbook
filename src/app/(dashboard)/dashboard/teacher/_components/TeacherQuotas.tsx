@@ -70,7 +70,7 @@ export default function TeacherQuotas({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.35 }}
       aria-labelledby="quotas-heading"
-      className="card-surface card-body rounded-2xl border border-[var(--border)] space-y-4"
+      className="card-surface card-body rounded-3xl border border-[var(--border)] space-y-4 shadow-lg"
     >
       <div className="flex items-center justify-between">
         <div>
@@ -83,65 +83,67 @@ export default function TeacherQuotas({
         </div>
       </div>
 
-      <ResponsiveGrid variant="cards">
-        {quotaItems.map((item) => {
-          const percentage = Math.min(100, Math.round((item.current / item.limit) * 100));
-          const isAtLimit = item.current >= item.limit;
-          const isNearLimit = percentage >= 80 && !isAtLimit;
+      <div className="perspective-1000">
+        <ResponsiveGrid variant="cards">
+          {quotaItems.map((item) => {
+            const percentage = Math.min(100, Math.round((item.current / item.limit) * 100));
+            const isAtLimit = item.current >= item.limit;
+            const isNearLimit = percentage >= 80 && !isAtLimit;
 
-          return (
-            <div
-              key={item.key}
-              className="p-3.5 sm:p-4 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--border)] flex flex-col justify-between"
-            >
-              <div className="flex items-center justify-between gap-2 mb-2">
-                <div className="flex items-center gap-2">
-                  <div
-                    className="p-1.5 rounded-lg"
-                    style={{ backgroundColor: `color-mix(in srgb, ${item.color} 15%, transparent)`, color: item.color }}
-                  >
-                    <item.icon className="w-4 h-4" />
+            return (
+              <div
+                key={item.key}
+                className="p-4 rounded-2xl antigravity-glass border border-[var(--border)] hover:border-[var(--teacher-primary)]/40 transition-all duration-300 flex flex-col justify-between shadow-sm group"
+              >
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="p-2 rounded-xl group-hover:scale-105 transition-transform duration-300 shadow-sm"
+                      style={{ backgroundColor: `color-mix(in srgb, ${item.color} 15%, transparent)`, color: item.color }}
+                    >
+                      <item.icon className="w-4 h-4" />
+                    </div>
+                    <span className="font-bold text-xs sm:text-sm text-[var(--color-foreground)]">
+                      {item.label}
+                    </span>
                   </div>
-                  <span className="font-semibold text-xs sm:text-sm text-[var(--color-foreground)]">
-                    {item.label}
+                  <span className="text-xs font-bold tabular-nums text-[var(--color-foreground)]">
+                    {item.current} / {item.limit}
                   </span>
                 </div>
-                <span className="text-xs font-bold tabular-nums text-[var(--color-foreground)]">
-                  {item.current} / {item.limit}
-                </span>
-              </div>
 
-              <div className="w-full bg-[var(--color-surface-muted-strong)] rounded-full h-2 my-2 overflow-hidden">
-                <div
-                  className="h-2 rounded-full transition-all duration-500"
-                  style={{
-                    width: `${percentage}%`,
-                    backgroundColor: isAtLimit
-                      ? 'var(--error)'
-                      : isNearLimit
-                      ? 'var(--warning)'
-                      : item.color,
-                  }}
-                />
-              </div>
+                <div className="w-full bg-[var(--surface-muted-strong)] rounded-full h-2 my-2.5 overflow-hidden">
+                  <div
+                    className="h-2 rounded-full transition-all duration-500 shadow-sm"
+                    style={{
+                      width: `${percentage}%`,
+                      backgroundColor: isAtLimit
+                        ? 'var(--error)'
+                        : isNearLimit
+                        ? 'var(--warning)'
+                        : item.color,
+                    }}
+                  />
+                </div>
 
-              <div className="flex items-center justify-between text-[11px] text-[var(--color-muted-foreground)]">
-                <span>{percentage}% {t('dashboard.used')}</span>
-                {isAtLimit ? (
-                  <span className="inline-flex items-center gap-1 font-semibold text-[var(--error)]">
-                    <ShieldAlert className="w-3 h-3" />
-                    {t('dashboard.atLimit')}
-                  </span>
-                ) : isNearLimit ? (
-                  <span className="inline-flex items-center gap-1 font-semibold text-[var(--warning)]">
-                    {t('dashboard.nearLimit')}
-                  </span>
-                ) : null}
+                <div className="flex items-center justify-between text-[11px] text-[var(--color-muted-foreground)] font-medium">
+                  <span>{percentage}% {t('dashboard.used')}</span>
+                  {isAtLimit ? (
+                    <span className="inline-flex items-center gap-1 font-bold text-[var(--error)]">
+                      <ShieldAlert className="w-3.5 h-3.5" />
+                      {t('dashboard.atLimit')}
+                    </span>
+                  ) : isNearLimit ? (
+                    <span className="inline-flex items-center gap-1 font-bold text-[var(--warning)]">
+                      {t('dashboard.nearLimit')}
+                    </span>
+                  ) : null}
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </ResponsiveGrid>
+            );
+          })}
+        </ResponsiveGrid>
+      </div>
     </motion.section>
   );
 }

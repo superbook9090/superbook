@@ -50,7 +50,7 @@ export function TeacherDoubtsTab({ courseId }: TeacherDoubtsTabProps) {
         </div>
       ) : (
         doubts.map((doubt) => (
-          <div key={doubt._id} className="bg-[var(--card-solid)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col gap-4">
+          <div key={doubt._id} className="bg-[var(--card-solid)] antigravity-glass border border-[var(--border)] rounded-3xl p-5 sm:p-6 shadow-sm hover:shadow-md hover:border-[var(--teacher-primary)]/40 transition-all duration-300 flex flex-col gap-4">
             {/* Header */}
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-3">

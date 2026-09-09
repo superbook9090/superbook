@@ -73,7 +73,7 @@ export function UsersMobileList({ users, organizations, handleOpenUserDetail }: 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 + index * 0.04 }}
-            className="bg-[var(--card-solid)] rounded-2xl p-4 border border-[var(--border)] shadow-[var(--shadow-sm)] flex flex-col gap-3 active:bg-[var(--color-surface-muted)] transition-colors cursor-pointer"
+            className="antigravity-glass rounded-2xl p-4 sm:p-5 border border-[var(--border)] shadow-md hover:border-[var(--primary)]/40 active:scale-[0.99] transition-all duration-200 cursor-pointer flex flex-col gap-3"
             onClick={() => handleOpenUserDetail(user)}
           >
             {/* Header: Avatar, Name, Email, Role */}

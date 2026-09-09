@@ -50,10 +50,10 @@ export function NoteCard({
   return (
     <div
       onClick={() => onView(note)}
-      className={`group relative flex flex-col justify-between p-5 rounded-2xl bg-[var(--card-solid)] border ${category.borderClass} shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer overflow-hidden`}
+      className={`group relative flex flex-col justify-between p-5 rounded-2xl antigravity-glass antigravity-card border ${category.borderClass} shadow-xs hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 cursor-pointer overflow-hidden transform-3d`}
     >
       {/* Top Accent Gradient Bar */}
-      <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${category.gradientClass}`} />
+      <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${category.gradientClass} shadow-xs`} />
 
       <div>
         {/* Header: Category Badge & Pin Action */}

@@ -7,6 +7,8 @@ import { PageWrapper, PageHeader } from '@/components/layout';
 import { TeacherContestForm } from '@/features/contests/components/TeacherContestForm';
 import { ArrowLeft } from 'lucide-react';
 
+import { ROUTES } from '@/constants/routes';
+
 export default function EditTeacherContestPage({
   params,
 }: {
@@ -19,8 +21,8 @@ export default function EditTeacherContestPage({
     <PageWrapper className="space-y-6">
       <div className="flex items-center justify-between">
         <Link
-          href={`/dashboard/teacher/contests/${id}`}
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors"
+          href={ROUTES.teacher.contestManage(id)}
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors min-h-[44px]"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>{t('contest.backToDetails') || 'Back to Contest Details'}</span>

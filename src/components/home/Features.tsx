@@ -21,9 +21,19 @@ export default function Features() {
     <section
       id="features"
       aria-labelledby="features-heading"
-      className={`${landing.section} bg-[var(--card-solid)]`}
+      className={`${landing.section} relative overflow-hidden bg-[var(--card-solid)]`}
     >
-      <div className={landing.container}>
+      {/* Ambient background blur for spatial atmosphere */}
+      <div
+        className="absolute top-1/2 -left-48 -translate-y-1/2 w-96 h-96 bg-[var(--student-primary)]/10 rounded-full blur-3xl pointer-events-none antigravity-pulse-glow"
+        aria-hidden
+      />
+      <div
+        className="absolute bottom-0 right-0 w-80 h-80 bg-[var(--teacher-accent)]/8 rounded-full blur-3xl pointer-events-none"
+        aria-hidden
+      />
+
+      <div className={`relative z-10 ${landing.container}`}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -37,21 +47,21 @@ export default function Features() {
           <p className={landing.subtitle}>{t('home.features.subtitle')}</p>
         </motion.div>
 
-        <div className={landing.featureGrid}>
+        <div className={`${landing.featureGrid} perspective-1000`}>
           {featureKeys.map((featureKey, index) => (
             <motion.div
               key={featureKey}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 32, rotateX: 10 }}
+              whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.08 }}
+              transition={{ duration: 0.6, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
               className={landing.featureCard}
             >
               <div className={landing.featureIconWrap}>
                 <HomeFeatureGlyph featureKey={featureKey} className={landing.featureIcon} />
               </div>
 
-              <h3 className="text-lg font-semibold text-[var(--color-foreground)] mb-2">
+              <h3 className="text-lg font-bold text-[var(--color-foreground)] mb-2">
                 {t(`home.features.${featureKey}`)}
               </h3>
               <p className="text-sm text-[var(--color-muted-foreground)] leading-relaxed">

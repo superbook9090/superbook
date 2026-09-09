@@ -153,30 +153,30 @@ export default function StudentQuizzesPage() {
       />
 
       {/* Tabs and Course Filter */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-[var(--border)] pb-2 sm:pb-0">
-        <nav className="-mb-px flex space-x-3 sm:space-x-8 overflow-x-auto">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pb-2 sm:pb-0">
+        <div className="antigravity-tab-group overflow-x-auto no-scrollbar">
           <button
             onClick={() => handleTabChange('available')}
-            className={`${activeTab === 'available'
-              ? 'border-[var(--primary)] text-[var(--primary)] font-bold'
-              : 'border-transparent text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:border-[var(--border)] font-medium'
-              } whitespace-nowrap py-2.5 px-1 border-b-2 text-sm sm:text-base min-h-[40px] flex items-center transition-colors`}
+            className={`antigravity-tab-btn ${activeTab === 'available' ? 'antigravity-tab-btn--active' : ''}`}
           >
-            {t('quiz.available')} ({availableQuizzes.length})
+            <span>{t('quiz.available')}</span>
+            <span className="px-1.5 py-0.2 rounded-full text-[11px] font-bold bg-[var(--student-primary)]/15 text-[var(--student-primary)]">
+              {availableQuizzes.length}
+            </span>
           </button>
           <button
             onClick={() => handleTabChange('completed')}
-            className={`${activeTab === 'completed'
-              ? 'border-[var(--primary)] text-[var(--primary)] font-bold'
-              : 'border-transparent text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:border-[var(--border)] font-medium'
-              } whitespace-nowrap py-2.5 px-1 border-b-2 text-sm sm:text-base min-h-[40px] flex items-center transition-colors`}
+            className={`antigravity-tab-btn ${activeTab === 'completed' ? 'antigravity-tab-btn--active' : ''}`}
           >
-            {t('quiz.completed')} ({completedAttempts.length})
+            <span>{t('quiz.completed')}</span>
+            <span className="px-1.5 py-0.2 rounded-full text-[11px] font-bold bg-[var(--student-primary)]/15 text-[var(--student-primary)]">
+              {completedAttempts.length}
+            </span>
           </button>
-        </nav>
+        </div>
 
         {enrollments.length > 0 && (
-          <div className="w-full sm:w-64 pb-1 sm:pb-2">
+          <div className="w-full sm:w-64">
             <Dropdown
               id="course-filter"
               startIcon={<BookOpen className="w-4 h-4" />}
@@ -191,10 +191,7 @@ export default function StudentQuizzesPage() {
                         ? enrollment.course
                         : null;
                     if (!course) return null;
-                    return {
-                      value: course._id.toString(),
-                      label: course.title,
-                    };
+                    return { value: course._id.toString(), label: course.title };
                   })
                   .filter((item): item is { value: string; label: string } => item !== null),
               ]}
@@ -204,47 +201,41 @@ export default function StudentQuizzesPage() {
         )}
       </div>
 
-      <div>
+      <div className="perspective-1000">
         {activeTab === 'available' ? (
           availableQuizzes.length === 0 ? (
-            <div className="card-surface p-6 sm:p-10 text-center">
-              <p className="text-[var(--color-muted-foreground)] mb-4">
+            <div className="antigravity-glass rounded-3xl p-8 sm:p-12 text-center border border-dashed border-[var(--border)]">
+              <div className="w-16 h-16 rounded-2xl bg-[var(--student-primary)]/10 text-[var(--student-primary)] flex items-center justify-center mx-auto mb-4">
+                <BookOpen className="w-8 h-8" />
+              </div>
+              <p className="text-base font-semibold text-[var(--color-foreground)] mb-1">
                 {t('quiz.enrollCourse')}
               </p>
-              <Link
-                href={ROUTES.student.browse}
-                className="btn-premium w-full sm:w-auto min-h-[44px]"
-              >
+              <p className="text-xs text-[var(--color-muted-foreground)] mb-6 max-w-sm mx-auto">
+                Join a course to unlock curated quizzes and skill assessments.
+              </p>
+              <Link href={ROUTES.student.browse} className="btn-premium inline-flex items-center min-h-[44px]">
                 {t('courses.browseMore')}
               </Link>
             </div>
           ) : (
             <ResponsiveGrid variant="dense">
               {availableQuizzes.map((quiz: Quiz) => (
-                <div key={quiz._id} className="min-w-0">
-                  <LazyQuizCard
-                    quiz={quiz}
-                    type="available"
-                    onStart={handleStartQuiz}
-                  />
+                <div key={quiz._id} className="min-w-0 transform-3d">
+                  <LazyQuizCard quiz={quiz} type="available" onStart={handleStartQuiz} />
                 </div>
               ))}
             </ResponsiveGrid>
           )
         ) : completedAttempts.length === 0 ? (
-          <div className="card-surface p-6 sm:p-10 text-center">
+          <div className="antigravity-glass rounded-3xl p-8 sm:p-12 text-center border border-dashed border-[var(--border)]">
             <p className="text-[var(--color-muted-foreground)]">{t('quiz.noCompleted')}</p>
           </div>
         ) : (
           <ResponsiveGrid variant="dense">
             {completedAttempts.map((attempt: QuizAttempt) => (
-              <div key={attempt._id} className="h-full min-w-0">
-                <LazyQuizCard
-                  quiz={attempt.quiz}
-                  attempt={attempt}
-                  type="attempted"
-                  onStart={handleStartQuiz}
-                />
+              <div key={attempt._id} className="h-full min-w-0 transform-3d">
+                <LazyQuizCard quiz={attempt.quiz} attempt={attempt} type="attempted" onStart={handleStartQuiz} />
               </div>
             ))}
           </ResponsiveGrid>

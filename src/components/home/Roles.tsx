@@ -31,34 +31,37 @@ export default function Roles() {
           <p className={landing.subtitle}>{t('home.roles.subtitle')}</p>
         </motion.div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 perspective-1000">
           {roleKeys.map((roleKey, index) => {
             const theme = roleThemes[roleKey];
             return (
               <motion.div
                 key={roleKey}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, y: 32, rotateX: 8 }}
+                whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="group relative p-6 bg-[var(--card-solid)] rounded-2xl hover:shadow-xl transition-all duration-300 border border-[var(--color-border)]"
+                transition={{ duration: 0.6, delay: index * 0.12, ease: [0.16, 1, 0.3, 1] }}
+                className="group relative p-7 antigravity-glass antigravity-card rounded-3xl border border-[var(--border)] hover:border-[var(--primary)]/40 overflow-hidden flex flex-col justify-between"
               >
+                {/* Luminous Top Edge Accent */}
                 <div
-                  className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${theme.gradient} rounded-t-2xl`}
+                  className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${theme.gradient}`}
                 />
 
-                <div
-                  className={`w-14 h-14 ${theme.activeBg} rounded-xl flex items-center justify-center mb-4`}
-                >
-                  <HomeRoleIcon roleKey={roleKey} className={`w-7 h-7 ${theme.text}`} />
-                </div>
+                <div>
+                  <div
+                    className={`w-14 h-14 ${theme.activeBg} rounded-2xl flex items-center justify-center mb-5 group-hover:scale-105 transition-transform duration-300 shadow-sm border border-black/5 dark:border-white/10`}
+                  >
+                    <HomeRoleIcon roleKey={roleKey} className={`w-7 h-7 ${theme.text}`} />
+                  </div>
 
-                <h3 className="text-lg font-semibold text-[var(--color-foreground)] mb-2">
-                  {t(`home.roles.${roleKey}`)}
-                </h3>
-                <p className="text-sm text-[var(--color-muted-foreground)] leading-relaxed">
-                  {t(`home.roles.${roleKey}Desc`)}
-                </p>
+                  <h3 className="text-xl font-bold text-[var(--color-foreground)] mb-2.5">
+                    {t(`home.roles.${roleKey}`)}
+                  </h3>
+                  <p className="text-sm text-[var(--color-muted-foreground)] leading-relaxed">
+                    {t(`home.roles.${roleKey}Desc`)}
+                  </p>
+                </div>
               </motion.div>
             );
           })}
