@@ -26,8 +26,11 @@ export type NativeToWebMessage =
       error?: string;
     };
 
+import { persistIsMobileApp } from './mobileDetection';
+
 export const sendToWebView = (message: WebToNativeMessage) => {
   if (typeof window !== 'undefined') {
+    persistIsMobileApp();
     // Check for Android JavascriptInterface
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ((window as any).AndroidBridge && (window as any).AndroidBridge.postMessage) {
@@ -89,9 +92,15 @@ export const openInternalLinkViaNativeApp = (url: string) => openLinkViaNativeAp
 
 export const onWebViewMessage = (callback: (data: NativeToWebMessage) => void) => {
   if (typeof window !== 'undefined') {
+    if (isNativeWebViewBridgeAvailable()) {
+      persistIsMobileApp();
+    }
     const handler = (event: MessageEvent) => {
       try {
         const data = (typeof event.data === 'string' ? JSON.parse(event.data) : event.data) as NativeToWebMessage;
+        if (data && typeof data === 'object' && 'action' in data) {
+          persistIsMobileApp();
+        }
         callback(data);
       } catch (e) {
         console.error("Failed to parse message", e);

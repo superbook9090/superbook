@@ -22,6 +22,7 @@ export default function DownloadAppPopup() {
     setIsVisible(false);
     try {
       sessionStorage.setItem(DISMISSED_STORAGE_KEY, 'true');
+      localStorage.setItem(DISMISSED_STORAGE_KEY, 'true');
     } catch {
       // Storage unavailable
     }
@@ -31,6 +32,7 @@ export default function DownloadAppPopup() {
     try {
       sendGAEvent({ event: 'download_app_popup_click', source: 'post_login_popup' });
       sessionStorage.setItem(DISMISSED_STORAGE_KEY, 'true');
+      localStorage.setItem(DISMISSED_STORAGE_KEY, 'true');
     } catch {
       // Ignore analytics error
     }
@@ -40,10 +42,21 @@ export default function DownloadAppPopup() {
 
   useEffect(() => {
     if (!enableDownloadAppPopup) return;
-    if (isMobileApp()) return;
+    if (isMobileApp()) {
+      try {
+        sessionStorage.setItem(DISMISSED_STORAGE_KEY, 'true');
+        localStorage.setItem(DISMISSED_STORAGE_KEY, 'true');
+      } catch {
+        // Storage unavailable
+      }
+      return;
+    }
 
     try {
-      if (sessionStorage.getItem(DISMISSED_STORAGE_KEY) === 'true') {
+      if (
+        sessionStorage.getItem(DISMISSED_STORAGE_KEY) === 'true' ||
+        localStorage.getItem(DISMISSED_STORAGE_KEY) === 'true'
+      ) {
         return;
       }
 
@@ -68,12 +81,42 @@ export default function DownloadAppPopup() {
       }
 
       const timer = setTimeout(() => {
+        // Strict guard: if running inside app, do NOT trigger download popup
+        if (isMobileApp()) {
+          sessionStorage.removeItem(LOGIN_TIME_KEY);
+          sessionStorage.removeItem(JUST_LOGGED_IN_KEY);
+          try {
+            sessionStorage.setItem(DISMISSED_STORAGE_KEY, 'true');
+            localStorage.setItem(DISMISSED_STORAGE_KEY, 'true');
+          } catch {
+            // Storage error
+          }
+          return;
+        }
+
         setIsVisible(true);
         sessionStorage.removeItem(LOGIN_TIME_KEY);
         sessionStorage.removeItem(JUST_LOGGED_IN_KEY);
       }, delayMs);
 
-      return () => clearTimeout(timer);
+      // Intercept late native bridge injection or late query/storage detection
+      const checkInterval = setInterval(() => {
+        if (isMobileApp()) {
+          clearTimeout(timer);
+          clearInterval(checkInterval);
+          try {
+            sessionStorage.setItem(DISMISSED_STORAGE_KEY, 'true');
+            localStorage.setItem(DISMISSED_STORAGE_KEY, 'true');
+          } catch {
+            // Storage error
+          }
+        }
+      }, 500);
+
+      return () => {
+        clearTimeout(timer);
+        clearInterval(checkInterval);
+      };
     } catch {
       // Session storage error
     }
@@ -91,7 +134,7 @@ export default function DownloadAppPopup() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isVisible, handleDismiss]);
 
-  if (!isVisible) return null;
+  if (!isVisible || isMobileApp()) return null;
 
   return (
     <AnimatePresence>

@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { isMobileApp } from '@/lib/mobile/mobileDetection';
+import { isMobileApp, persistIsMobileApp } from '@/lib/mobile/mobileDetection';
 import { ROUTES } from '@/constants/routes';
 
 export default function MobileWebviewGuard() {
@@ -12,9 +12,12 @@ export default function MobileWebviewGuard() {
     if (typeof window !== 'undefined') {
       const searchParams = new URLSearchParams(window.location.search);
       const isWebviewParam =
-        searchParams.get('webview') === 'true' || searchParams.get('app') === 'true';
+        searchParams.get('webview') === 'true' ||
+        searchParams.get('app') === 'true' ||
+        searchParams.get('isApp') === 'true';
 
       if (isMobileApp() || isWebviewParam) {
+        persistIsMobileApp();
         router.replace(ROUTES.login);
       }
     }

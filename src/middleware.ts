@@ -4,7 +4,7 @@ import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import { ROUTES } from '@/constants/routes';
 import { authRateLimiter, generalRateLimiter, adminRateLimiter, publicBlogRateLimiter } from '@/lib/rateLimiter';
-import { isMobileAppUserAgent } from '@/lib/mobile/mobileDetection';
+import { isMobileAppUserAgent, APP_STORAGE_KEY } from '@/lib/mobile/mobileDetection';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -82,10 +82,20 @@ export async function middleware(request: NextRequest) {
     const userAgent = request.headers.get('user-agent');
     const isWebviewParam =
       request.nextUrl.searchParams.get('webview') === 'true' ||
-      request.nextUrl.searchParams.get('app') === 'true';
+      request.nextUrl.searchParams.get('app') === 'true' ||
+      request.nextUrl.searchParams.get('isApp') === 'true';
+    const isAppCookie = request.cookies.get(APP_STORAGE_KEY)?.value === 'true';
 
-    if (isWebviewParam || isMobileAppUserAgent(userAgent)) {
-      return NextResponse.redirect(new URL(ROUTES.login, request.url));
+    if (isWebviewParam || isAppCookie || isMobileAppUserAgent(userAgent)) {
+      const response = NextResponse.redirect(new URL(ROUTES.login, request.url));
+      if (!isAppCookie) {
+        response.cookies.set(APP_STORAGE_KEY, 'true', {
+          maxAge: 60 * 60 * 24 * 365,
+          path: '/',
+          sameSite: 'lax',
+        });
+      }
+      return response;
     }
 
     return NextResponse.next();

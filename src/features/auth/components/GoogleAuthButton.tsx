@@ -7,6 +7,8 @@ import { signIn } from 'next-auth/react';
 import { motion } from 'framer-motion';
 import { sendGAEvent } from '@next/third-parties/google';
 
+import { isMobileApp, persistIsMobileApp } from '@/lib/mobile/mobileDetection';
+
 interface GoogleAuthButtonProps {
   callbackUrl: string;
   role?: string;
@@ -25,7 +27,7 @@ export default function GoogleAuthButton({ callbackUrl, role, isRegistration }: 
   const [showGoogleAuth, setShowGoogleAuth] = useState(true);
 
   useEffect(() => {
-    const isApp = typeof window !== 'undefined' && !!window.ReactNativeWebView;
+    const isApp = typeof window !== 'undefined' && (isMobileApp() || !!window.ReactNativeWebView);
     setShowGoogleAuth(isApp ? enableGoogleAuthApp : enableGoogleAuthWeb);
   }, [enableGoogleAuthApp, enableGoogleAuthWeb]);
 
@@ -36,15 +38,19 @@ export default function GoogleAuthButton({ callbackUrl, role, isRegistration }: 
       document.cookie = `google-auth-role=${role}; path=/; max-age=300`; // expires in 5 minutes
     }
     
-    if (typeof window !== 'undefined' && window.ReactNativeWebView) {
+    if (typeof window !== 'undefined' && (window.ReactNativeWebView || isMobileApp())) {
+      persistIsMobileApp();
       sessionStorage.setItem('quizdo_just_logged_in', 'true');
       sessionStorage.setItem('quizdo_login_time', Date.now().toString());
-      window.ReactNativeWebView.postMessage(JSON.stringify({ action: 'REQUEST_GOOGLE_SIGN_IN' }));
-    } else {
-      sessionStorage.setItem('quizdo_just_logged_in', 'true');
-      sessionStorage.setItem('quizdo_login_time', Date.now().toString());
-      signIn('google', { callbackUrl });
+      if (window.ReactNativeWebView) {
+        window.ReactNativeWebView.postMessage(JSON.stringify({ action: 'REQUEST_GOOGLE_SIGN_IN' }));
+        return;
+      }
     }
+    
+    sessionStorage.setItem('quizdo_just_logged_in', 'true');
+    sessionStorage.setItem('quizdo_login_time', Date.now().toString());
+    signIn('google', { callbackUrl });
   };
 
   if (!showGoogleAuth) return null;
