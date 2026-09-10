@@ -14,8 +14,13 @@ export const revalidate = 300;
 export const dynamicParams = true; // slugs not in generateStaticParams are rendered on first visit and cached
 
 export async function generateStaticParams() {
-  const slugs = await listPublicBlogSlugs(50);
-  return slugs.map((slug) => ({ slug }));
+  try {
+    const slugs = await listPublicBlogSlugs(50);
+    return slugs.map((slug) => ({ slug }));
+  } catch (error) {
+    console.warn('[generateStaticParams] Could not prefetch blog slugs at build time. Falling back to on-demand generation.', error);
+    return [];
+  }
 }
 
 export async function generateMetadata(

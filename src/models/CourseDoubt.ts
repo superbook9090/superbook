@@ -38,7 +38,6 @@ const courseDoubtSchema = new Schema<ICourseDoubt>(
 );
 
 // Indexes
-courseDoubtSchema.index({ courseId: 1 });
 courseDoubtSchema.index({ 'doubts.studentId': 1 });
 courseDoubtSchema.index({ 'doubts.status': 1 });
 

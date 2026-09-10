@@ -19,10 +19,16 @@ function topicFromSlug(slug: string, topics: string[]): string | null {
 
 export const dynamic = 'force-static';
 export const revalidate = 300;
+export const dynamicParams = true;
 
 export async function generateStaticParams() {
-  const topics = await listPublicBlogTopics();
-  return topics.map((topic) => ({ topic: blogTopicSlug(topic) }));
+  try {
+    const topics = await listPublicBlogTopics();
+    return topics.map((topic) => ({ topic: blogTopicSlug(topic) }));
+  } catch (error) {
+    console.warn('[generateStaticParams] Could not prefetch blog topics at build time. Falling back to on-demand generation.', error);
+    return [];
+  }
 }
 
 export async function generateMetadata({
