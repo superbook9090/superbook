@@ -174,6 +174,7 @@ export default function PhoneRegisterForm({ theme, callbackUrl, onBackToEmail, a
       await fetchSession(true);
       sendGAEvent({ event: 'sign_up', method: 'phone' });
       sessionStorage.setItem('quizdo_just_logged_in', 'true');
+      sessionStorage.setItem('quizdo_login_time', Date.now().toString());
       await new Promise(resolve => setTimeout(resolve, 500));
 
       const redirectTo =

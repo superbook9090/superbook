@@ -180,6 +180,10 @@ export async function PATCH(req: NextRequest) {
           isSuper && featureToggles.enableContestMarketingPopup !== undefined
             ? featureToggles.enableContestMarketingPopup
             : (existingToggles.enableContestMarketingPopup ?? false),
+        enableDownloadAppPopup:
+          featureToggles.enableDownloadAppPopup !== undefined
+            ? featureToggles.enableDownloadAppPopup
+            : (existingToggles.enableDownloadAppPopup ?? true),
         enableQuizSolutionAnalysis:
           isSuper && featureToggles.enableQuizSolutionAnalysis !== undefined
             ? featureToggles.enableQuizSolutionAnalysis

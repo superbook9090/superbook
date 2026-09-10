@@ -31,6 +31,7 @@ const defaultSettings: AppSettings = {
     enableGoogleAuthWeb: true,
     enableNotes: true,
     enableAiQuizGen: true,
+    enableDownloadAppPopup: true,
   },
   platformConfig: {
     siteName: 'Quiz Do',

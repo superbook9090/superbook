@@ -82,6 +82,7 @@ export default function EmailLoginForm({ theme, callbackUrl, onSelectPhoneFlow }
       sendGAEvent({ event: 'login', method: 'email' });
 
       sessionStorage.setItem('quizdo_just_logged_in', 'true');
+      sessionStorage.setItem('quizdo_login_time', Date.now().toString());
       await fetchSession(true);
       await new Promise(resolve => setTimeout(resolve, 500));
       router.push(callbackUrl);

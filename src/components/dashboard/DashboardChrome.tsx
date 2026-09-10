@@ -22,6 +22,11 @@ const LazyContestMarketingPopup = dynamic(
   { ssr: false }
 );
 
+const LazyDownloadAppPopup = dynamic(
+  () => import('@/components/marketing/DownloadAppPopup'),
+  { ssr: false }
+);
+
 type DashboardChromeProps = {
   session: Session;
   isStaff: boolean;
@@ -80,6 +85,7 @@ export default function DashboardChrome({
             <DashboardContent>
               <LazyPushNotificationManager />
               <LazyContestMarketingPopup />
+              <LazyDownloadAppPopup />
               {children}
             </DashboardContent>
           </RoleThemeProvider>

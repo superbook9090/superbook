@@ -38,9 +38,11 @@ export default function GoogleAuthButton({ callbackUrl, role, isRegistration }: 
     
     if (typeof window !== 'undefined' && window.ReactNativeWebView) {
       sessionStorage.setItem('quizdo_just_logged_in', 'true');
+      sessionStorage.setItem('quizdo_login_time', Date.now().toString());
       window.ReactNativeWebView.postMessage(JSON.stringify({ action: 'REQUEST_GOOGLE_SIGN_IN' }));
     } else {
       sessionStorage.setItem('quizdo_just_logged_in', 'true');
+      sessionStorage.setItem('quizdo_login_time', Date.now().toString());
       signIn('google', { callbackUrl });
     }
   };

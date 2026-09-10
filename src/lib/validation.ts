@@ -188,6 +188,7 @@ export const updateSettingsSchema = z.object({
     enableCourseDoubts: z.boolean().optional(),
     enableContests: z.boolean().optional(),
     enableContestMarketingPopup: z.boolean().optional(),
+    enableDownloadAppPopup: z.boolean().optional(),
   }).optional(),
   platformConfig: z.object({
     siteName: z.string().max(100).optional(),

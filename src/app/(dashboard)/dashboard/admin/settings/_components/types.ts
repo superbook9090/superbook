@@ -30,6 +30,7 @@ export interface AppSettings {
     enableCourseDoubts?: boolean;
     enableContests?: boolean;
     enableContestMarketingPopup?: boolean;
+    enableDownloadAppPopup?: boolean;
   };
   platformConfig: {
     siteName?: string;

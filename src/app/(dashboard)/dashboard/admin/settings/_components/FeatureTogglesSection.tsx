@@ -98,6 +98,7 @@ export function FeatureTogglesSection({
       items: [
         { key: 'enablePullToRefresh', labelKey: 'adminSettings.enablePullToRefresh', descKey: 'adminSettings.enablePullToRefreshDesc', icon: RefreshCw, iconBg: 'bg-[var(--info-light)]', iconColor: 'text-[var(--info)]' },
         { key: 'enableEnrollmentManagement', labelKey: 'adminSettings.enableEnrollmentManagement', descKey: 'adminSettings.enableEnrollmentManagementDesc', icon: Users, iconBg: 'bg-[var(--primary-soft)]', iconColor: 'text-[var(--primary)]', isSuperAdminOnly: true },
+        { key: 'enableDownloadAppPopup', labelKey: 'adminSettings.enableDownloadAppPopup', descKey: 'adminSettings.enableDownloadAppPopupDesc', icon: Smartphone, iconBg: 'bg-[var(--success-light)]', iconColor: 'text-[var(--success)]' },
       ],
     },
     {

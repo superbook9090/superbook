@@ -30,6 +30,7 @@ export interface IAppSettings extends Document {
     enableCourseDoubts?: boolean;
     enableContests?: boolean;
     enableContestMarketingPopup?: boolean;
+    enableDownloadAppPopup?: boolean;
   };
   platformConfig: {
     maintenanceMode: boolean;
@@ -147,6 +148,10 @@ const appSettingsSchema = new Schema<IAppSettings>(
       enableContestMarketingPopup: {
         type: Boolean,
         default: false,
+      },
+      enableDownloadAppPopup: {
+        type: Boolean,
+        default: true,
       },
     },
     platformConfig: {

@@ -95,6 +95,7 @@ export default function EmailRegisterForm({
 
       sendGAEvent({ event: 'sign_up', method: 'email' });
       sessionStorage.setItem('quizdo_just_logged_in', 'true');
+      sessionStorage.setItem('quizdo_login_time', Date.now().toString());
 
       await fetchSession(true);
       await new Promise((resolve) => setTimeout(resolve, 500));

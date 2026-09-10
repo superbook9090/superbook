@@ -60,6 +60,7 @@ export async function GET() {
         enableGoogleAdsense: true,
         enableCourseDoubts: true,
         enableContests: false,
+        enableDownloadAppPopup: true,
       },
       platformConfig: {
         siteName: 'Quiz Do',

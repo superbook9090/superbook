@@ -19,6 +19,7 @@ export type FeatureToggleKey =
   | 'enableGoogleAdsense'
   | 'enableContests'
   | 'enableContestMarketingPopup'
+  | 'enableDownloadAppPopup'
   | 'enableCourseDoubts';
 
 export type TeacherLimitKey = 'courses' | 'quizzes' | 'blogs' | 'aiQuizGenerations';
@@ -65,6 +66,7 @@ export const defaultPublicAppSettings: PublicAppSettings = {
     enableCourseDoubts: true,
     enableContests: false,
     enableContestMarketingPopup: false,
+    enableDownloadAppPopup: true,
   },
   platformConfig: {
     maintenanceMode: false,
