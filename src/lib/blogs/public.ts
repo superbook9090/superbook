@@ -54,7 +54,7 @@ function estimateReadingTime(content: string): number {
 }
 
 function buildCanonicalPath(slug: string) {
-  return `/blogs/${slug}`;
+  return `/blog/${slug}`;
 }
 
 function buildMetaTitle(title: string, explicit?: string | null) {
@@ -211,9 +211,12 @@ export async function listPublicBlogs(params: {
 export async function getPublicBlogBySlug(slug: string): Promise<PublicBlogDetail | null> {
   await dbConnect();
 
+  const isObjectId = mongoose.Types.ObjectId.isValid(slug);
   const row = await Blog.findOne({
     ...publicVisibilityFilter(),
-    slug: slug.toLowerCase(),
+    ...(isObjectId
+      ? { $or: [{ slug: slug.toLowerCase() }, { _id: new mongoose.Types.ObjectId(slug) }] }
+      : { slug: slug.toLowerCase() }),
   })
     .select('title slug topic language excerpt metaTitle metaDescription content createdAt updatedAt isFeatured viewCount author')
     .populate('author', 'name')

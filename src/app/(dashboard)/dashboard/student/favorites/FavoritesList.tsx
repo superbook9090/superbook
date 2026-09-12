@@ -161,7 +161,7 @@ export default function FavoritesList({ initialFavorites, totalCount }: Favorite
                         {blog.author?.name || t('blog.teacher')}
                       </span>
                       <Link
-                        href={ROUTES.student.blog(blog._id)}
+                        href={ROUTES.student.blog(blog.slug || blog._id)}
                         className="inline-flex items-center text-xs font-bold text-[var(--student-primary)] hover:opacity-80 transition-opacity"
                       >
                         {t('favorites.readArticle')}

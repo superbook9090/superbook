@@ -6,12 +6,20 @@ export type NativeSharePayload = {
 
 export type NativeOpenLinkTarget = 'internal' | 'external';
 
+export type NativeGoogleSignInPayload = {
+  webClientId?: string;
+  scopes?: string[];
+  offlineAccess?: boolean;
+  selectAccount?: boolean;
+};
+
 export type WebToNativeMessage =
   | { action: 'REQUEST_NATIVE_TOKEN'; payload?: Record<string, never> }
   | { action: 'REQUEST_SHARE'; payload?: NativeSharePayload }
   | { action: 'REQUEST_OPEN_LINK'; payload: { url: string; target?: NativeOpenLinkTarget } }
   | { action: 'SET_BADGE_COUNT'; payload: { count: number } }
-  | { action: 'REQUEST_GOOGLE_SIGN_IN'; payload?: Record<string, never> };
+  | { action: 'REQUEST_GOOGLE_SIGN_IN'; payload?: NativeGoogleSignInPayload }
+  | { action: 'REQUEST_GOOGLE_SIGN_OUT'; payload?: Record<string, never> };
 
 export type NativeToWebMessage =
   | { action: 'NATIVE_TOKEN_RECEIVED'; token: string }
@@ -89,6 +97,14 @@ export const openLinkViaNativeApp = (url: string, target: NativeOpenLinkTarget =
 export const openExternalLinkViaNativeApp = (url: string) => openLinkViaNativeApp(url, 'external');
 
 export const openInternalLinkViaNativeApp = (url: string) => openLinkViaNativeApp(url, 'internal');
+
+export const requestGoogleSignOutViaNativeApp = () => {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+  sendToWebView({ action: 'REQUEST_GOOGLE_SIGN_OUT' });
+  return true;
+};
 
 export const onWebViewMessage = (callback: (data: NativeToWebMessage) => void) => {
   if (typeof window !== 'undefined') {

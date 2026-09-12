@@ -9,6 +9,7 @@ type FavoriteIdsLean = { blogs?: Types.ObjectId[] };
 type BlogListLean = {
   _id: Types.ObjectId;
   title: string;
+  slug?: string | null;
   topic: string;
   content?: string;
   language?: string;
@@ -26,6 +27,7 @@ function excerptFromHtml(html: string | undefined, max = 160): string {
 export interface FavoriteBlogSummary {
   _id: string;
   title: string;
+  slug?: string | null;
   topic: string;
   excerpt: string;
   /** Only when `includeContent` is requested (legacy / detail use). */
@@ -75,7 +77,7 @@ export async function listFavoritesPage(
   const [total, blogs] = await Promise.all([
     Blog.countDocuments(filter),
     Blog.find(filter)
-      .select('title topic content language createdAt author')
+      .select('title slug topic content language createdAt author')
       .populate('author', 'name')
       .sort({ createdAt: -1 })
       .skip(options.skip)
@@ -91,6 +93,7 @@ export async function listFavoritesPage(
     const summary: FavoriteBlogSummary = {
       _id: id,
       title: b.title,
+      slug: b.slug ?? null,
       topic: b.topic,
       excerpt: excerptFromHtml(b.content),
       language: b.language,

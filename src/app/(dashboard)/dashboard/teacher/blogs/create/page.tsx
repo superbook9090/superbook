@@ -27,6 +27,7 @@ export default function CreateBlogPage() {
     content: '',
     language: 'en',
     visibility: 'organization',
+    slug: '',
     metaTitle: '',
     metaDescription: '',
     isFeatured: false,
@@ -55,6 +56,7 @@ export default function CreateBlogPage() {
     try {
       await createBlogMutation.mutateAsync({
         ...formData,
+        slug: formData.slug?.trim() || undefined,
         isPublished: !asDraft,
       });
       router.push(blogsHome);

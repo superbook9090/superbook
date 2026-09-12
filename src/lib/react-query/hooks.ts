@@ -131,6 +131,7 @@ export interface Favorite {
     excerpt?: string;
     topic: string;
     language?: string;
+    slug?: string | null;
     author?: { name: string };
     createdAt: string;
   };

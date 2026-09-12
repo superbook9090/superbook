@@ -350,9 +350,21 @@ export async function POST(req: NextRequest) {
     const user = session.user as any;
     const organizationId = user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null;
     const normalizedVisibility = visibility ?? (organizationId ? 'organization' : 'public');
-    const resolvedSlug = normalizedVisibility === 'public'
-      ? await generateUniqueBlogSlug(slug || title)
-      : undefined;
+    const userSlug = slug?.trim() ? slugifyBlogTitle(slug) : undefined;
+    let resolvedSlug: string | undefined;
+
+    if (userSlug) {
+      const existing = await Blog.findOne({ slug: userSlug }).select('_id').lean();
+      if (existing) {
+        return NextResponse.json(
+          { message: 'This custom URL is already in use. Please choose a different one.' },
+          { status: 400 }
+        );
+      }
+      resolvedSlug = userSlug;
+    } else if (normalizedVisibility === 'public') {
+      resolvedSlug = await generateUniqueBlogSlug(title);
+    }
 
     const blog = await Blog.create({
       title,

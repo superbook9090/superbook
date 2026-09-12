@@ -27,10 +27,10 @@ export type CreateBlogInput = {
   content: string;
   language?: string;
   isPublished?: boolean;
-  slug?: string;
-  excerpt?: string;
-  metaTitle?: string;
-  metaDescription?: string;
+  slug?: string | null;
+  excerpt?: string | null;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
   visibility?: 'public' | 'organization';
   isFeatured?: boolean;
 };

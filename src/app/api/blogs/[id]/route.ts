@@ -68,15 +68,10 @@ export async function GET(
 
     const { id } = await params;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json(
-        { message: 'Invalid blog ID' },
-        { status: 400 }
-      );
-    }
-
-    const blog = await Blog.findById(id)
-      .populate('author', 'name');
+    const isObjectId = mongoose.Types.ObjectId.isValid(id);
+    const blog = await Blog.findOne(
+      isObjectId ? { _id: id } : { slug: id.toLowerCase() }
+    ).populate('author', 'name');
 
     if (!blog) {
       return NextResponse.json(
@@ -229,12 +224,31 @@ export async function PATCH(
     } else if (content) {
       blog.metaDescription = deriveExcerpt(blog.content, blog.excerpt);
     }
-    if (blog.visibility === 'public') {
-      if (slug !== undefined || title) {
-        blog.slug = await generateUniqueBlogSlug(slug || blog.title, blog._id.toString());
+    if (slug !== undefined) {
+      const cleanSlug = slug?.trim() ? slugifyBlogTitle(slug) : '';
+      if (cleanSlug) {
+        const existing = await Blog.findOne({
+          slug: cleanSlug,
+          _id: { $ne: blog._id },
+        })
+          .select('_id')
+          .lean();
+
+        if (existing) {
+          return NextResponse.json(
+            { message: 'This custom URL is already in use. Please choose a different one.' },
+            { status: 400 }
+          );
+        }
+        blog.slug = cleanSlug;
+      } else if (blog.visibility === 'public') {
+        blog.slug = await generateUniqueBlogSlug(title || blog.title, blog._id.toString());
+      } else {
+        blog.slug = undefined;
       }
-    } else {
-      blog.slug = undefined;
+    } else if (blog.visibility === 'public' && !blog.slug) {
+      blog.slug = await generateUniqueBlogSlug(title || blog.title, blog._id.toString());
+    } else if (blog.visibility !== 'public' && !blog.slug) {
       blog.isFeatured = false;
     }
 

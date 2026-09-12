@@ -36,7 +36,14 @@ export const createBlogSchema = z.object({
   topic: z.string().min(1, 'Topic is required'),
   language: z.enum(['en', 'hi']).optional(),
   isPublished: z.boolean().optional(),
-  slug: z.string().trim().min(1).max(240).optional(),
+  slug: z.preprocess(
+    (val) => {
+      if (typeof val !== 'string') return undefined;
+      const trimmed = val.trim().toLowerCase();
+      return trimmed === '' ? undefined : trimmed;
+    },
+    z.string().max(240).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug can only contain lowercase alphanumeric characters and hyphens').optional()
+  ),
   excerpt: z.string().trim().max(320).optional(),
   metaTitle: z.string().trim().max(70).optional(),
   metaDescription: z.string().trim().max(180).optional(),

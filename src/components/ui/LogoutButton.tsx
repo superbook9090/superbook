@@ -6,6 +6,7 @@ import { ROUTES } from '@/constants/routes';
 import { useTranslation } from '@/hooks/useTranslation';
 import { LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { requestGoogleSignOutViaNativeApp } from '@/lib/mobile/webviewBridge';
 
 type LogoutButtonVariant = 'sidebar' | 'mobile' | 'profile';
 
@@ -28,6 +29,7 @@ const variantStyles: Record<LogoutButtonVariant, string> = {
 export default function LogoutButton({ variant = 'profile', className }: LogoutButtonProps) {
   const { t } = useTranslation();
   const handleSignOut = useCallback(() => {
+    requestGoogleSignOutViaNativeApp();
     const callbackUrl = typeof window !== 'undefined' ? `${window.location.origin}${ROUTES.login}` : ROUTES.login;
     signOut({ callbackUrl });
   }, []);

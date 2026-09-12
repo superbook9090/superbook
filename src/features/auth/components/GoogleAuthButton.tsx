@@ -43,7 +43,12 @@ export default function GoogleAuthButton({ callbackUrl, role, isRegistration }: 
       sessionStorage.setItem('quizdo_just_logged_in', 'true');
       sessionStorage.setItem('quizdo_login_time', Date.now().toString());
       if (window.ReactNativeWebView) {
-        window.ReactNativeWebView.postMessage(JSON.stringify({ action: 'REQUEST_GOOGLE_SIGN_IN' }));
+        window.ReactNativeWebView.postMessage(
+          JSON.stringify({
+            action: 'REQUEST_GOOGLE_SIGN_IN',
+            payload: { selectAccount: true },
+          })
+        );
         return;
       }
     }

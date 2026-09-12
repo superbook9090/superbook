@@ -81,6 +81,35 @@ export default function BlogDetailPage() {
     }
   };
 
+  const handleShare = async () => {
+    if (!blog) return;
+    const shareSlug = blog.slug || blog._id;
+    const shareUrl = `${window.location.origin}/blog/${shareSlug}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: blog.title,
+          text: blog.title,
+          url: shareUrl,
+        });
+        return;
+      } catch {
+        // User cancelled or share unsupported, continue to clipboard
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      addAlert({
+        type: 'success',
+        message: t('createBlogPage.urlCopied') || 'Blog URL copied to clipboard!',
+      });
+    } catch {
+      addAlert({ type: 'error', message: 'Failed to copy URL' });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh] px-4">
@@ -184,6 +213,7 @@ export default function BlogDetailPage() {
             <Button
               type="button"
               variant="primary"
+              onClick={handleShare}
               className="flex items-center justify-center gap-2"
             >
               <Share2 className="w-4 h-4" />

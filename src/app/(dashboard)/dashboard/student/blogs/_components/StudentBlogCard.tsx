@@ -101,7 +101,7 @@ export function StudentBlogCard({
 
           {/* Read More Link */}
           <Link
-            href={ROUTES.student.blog(blog._id)}
+            href={ROUTES.student.blog(blog.slug || blog._id)}
             className={`inline-flex items-center ${themeText} text-xs sm:text-sm font-bold hover:opacity-80 transition-opacity touch-manipulation`}
           >
             {t('blog.readMore')}

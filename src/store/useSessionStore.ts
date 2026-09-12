@@ -6,6 +6,7 @@ import type { Session } from '@/types';
 import { authSignOut, fetchAuthSessionJson } from '@/lib/api/auth';
 import { listFavoriteIds } from '@/lib/api/favorites';
 import { clearStoredDeviceRegistration } from '@/lib/notifications/push/deviceRegistrationStorage';
+import { requestGoogleSignOutViaNativeApp } from '@/lib/mobile/webviewBridge';
 
 interface SessionState {
   session: Session | null;
@@ -120,6 +121,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
   clearSession: () => set({ session: null, status: 'unauthenticated', lastFetched: null }),
 
   logout: async () => {
+    requestGoogleSignOutViaNativeApp();
     await authSignOut();
     clearStoredDeviceRegistration();
     set({

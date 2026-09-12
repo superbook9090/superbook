@@ -111,7 +111,7 @@ There is an existing `.env` file in the repo. Do not print secrets into chat.
 Detailed rules and operational runbooks are maintained in `.agents/`:
 
 - **Skills** (`.agents/skills/`): `feature-toggles`, `lms-role-routing`, `lms-api-endpoint`, `i18n-localization`, `mobile-responsive-ui`
-- **Rules** (`.agents/rules/`): `code-quality.md`, `mobile-and-styling.md`, `backend-api-and-db.md`, `roles-and-security.md`, `i18n-localization.md`
+- **Rules** (`.agents/rules/`): `code-quality.md`, `mobile-and-styling.md`, `backend-api-and-db.md`, `roles-and-security.md`, `i18n-localization.md`, `mobile-shell-zero-publish.md`
 
 ## Verification
 

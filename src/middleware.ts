@@ -57,7 +57,12 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  if (pathname === '/blogs' || pathname.startsWith('/blogs/')) {
+  if (
+    pathname === '/blogs' ||
+    pathname.startsWith('/blogs/') ||
+    pathname === '/blog' ||
+    pathname.startsWith('/blog/')
+  ) {
     const ip =
       request.headers.get('x-forwarded-for') ||
       request.headers.get('x-real-ip') ||
@@ -79,22 +84,31 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL(ROUTES.dashboard, request.url));
     }
 
-    const userAgent = request.headers.get('user-agent');
+    const userAgent = request.headers.get('user-agent') || '';
     const isWebviewParam =
       request.nextUrl.searchParams.get('webview') === 'true' ||
       request.nextUrl.searchParams.get('app') === 'true' ||
       request.nextUrl.searchParams.get('isApp') === 'true';
-    const isAppCookie = request.cookies.get(APP_STORAGE_KEY)?.value === 'true';
+    const isWebParam =
+      request.nextUrl.searchParams.get('web') === 'true' ||
+      request.nextUrl.searchParams.get('app') === 'false';
 
-    if (isWebviewParam || isAppCookie || isMobileAppUserAgent(userAgent)) {
+    const isNativeApp = !isWebParam && (isWebviewParam || isMobileAppUserAgent(userAgent));
+
+    if (isNativeApp) {
       const response = NextResponse.redirect(new URL(ROUTES.login, request.url));
-      if (!isAppCookie) {
-        response.cookies.set(APP_STORAGE_KEY, 'true', {
-          maxAge: 60 * 60 * 24 * 365,
-          path: '/',
-          sameSite: 'lax',
-        });
-      }
+      response.cookies.set(APP_STORAGE_KEY, 'true', {
+        maxAge: 60 * 60 * 24 * 30,
+        path: '/',
+        sameSite: 'lax',
+      });
+      return response;
+    }
+
+    // Clean up stale quizdo_is_app cookie if the browser is NOT in the native app
+    if (request.cookies.has(APP_STORAGE_KEY)) {
+      const response = NextResponse.next();
+      response.cookies.delete(APP_STORAGE_KEY);
       return response;
     }
 
@@ -148,6 +162,7 @@ export const config = {
     '/',
     '/api/:path*',
     '/blogs/:path*',
+    '/blog/:path*',
     '/dashboard/:path*',
     '/login',
     '/register',

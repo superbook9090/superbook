@@ -18,6 +18,8 @@ export interface Blog {
   language: string;
   locale?: string;
   readTime?: number;
+  slug?: string | null;
+  visibility?: 'public' | 'organization';
   isPublished: boolean;
   author: { _id: string; name: string; email?: string };
   createdAt: string;

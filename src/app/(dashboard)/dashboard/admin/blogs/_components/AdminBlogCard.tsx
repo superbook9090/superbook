@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Calendar, Edit2, Eye, EyeOff, Trash2, Tag, User } from 'lucide-react';
+import { Calendar, Edit2, Eye, EyeOff, Trash2, Tag, User, ExternalLink } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import Tooltip from '@/components/ui/Tooltip';
 import { ROUTES } from '@/constants/routes';
@@ -75,6 +75,11 @@ export function AdminBlogCard({
               <Calendar className="w-3 h-3" />
               <span>{formatDate(blog.createdAt)}</span>
             </span>
+            {blog.slug && (
+              <span className="font-mono text-[11px] text-[var(--primary)] bg-[var(--surface-muted)] px-1.5 py-0.5 rounded truncate max-w-[160px]">
+                /blog/{blog.slug}
+              </span>
+            )}
             {blog.readTime && <span>{blog.readTime} min read</span>}
           </div>
         </div>
@@ -105,6 +110,20 @@ export function AdminBlogCard({
               <Edit2 className="w-4 h-4" />
             </Link>
           </Tooltip>
+
+          {blog.isPublished && (
+            <Tooltip label={t('createBlogPage.viewPublicBlog')}>
+              <Link
+                href={ROUTES.blog(blog.slug || blog._id)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 min-h-[40px] min-w-[40px] bg-[var(--surface-muted)] text-[var(--color-foreground)] rounded-xl hover:bg-[var(--teacher-soft)] hover:text-[var(--teacher-primary)] flex items-center justify-center transition-colors"
+                aria-label={t('createBlogPage.viewPublicBlog')}
+              >
+                <ExternalLink className="w-4 h-4" />
+              </Link>
+            </Tooltip>
+          )}
         </div>
 
         <Tooltip label={t('common.delete') || 'Delete'}>

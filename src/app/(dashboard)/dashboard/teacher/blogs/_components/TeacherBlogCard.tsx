@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Calendar, Edit2, Eye, EyeOff, Trash2, Tag } from 'lucide-react';
+import { Calendar, Edit2, Eye, EyeOff, Trash2, Tag, ExternalLink } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import Tooltip from '@/components/ui/Tooltip';
@@ -56,9 +56,16 @@ export default function TeacherBlogCard({
         </div>
 
         {/* Meta Info */}
-        <div className="flex items-center gap-2 text-xs font-medium text-[var(--color-muted-foreground)]">
-          <Calendar className="w-3.5 h-3.5" />
-          <span>{formatDate(blog.createdAt)}</span>
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-medium text-[var(--color-muted-foreground)]">
+          <div className="flex items-center gap-2">
+            <Calendar className="w-3.5 h-3.5" />
+            <span>{formatDate(blog.createdAt)}</span>
+          </div>
+          {blog.slug && (
+            <span className="font-mono text-[11px] text-[var(--teacher-primary)] bg-[var(--teacher-soft)] px-2 py-0.5 rounded-md border border-[var(--teacher-border)]/40 truncate max-w-[200px]">
+              /blog/{blog.slug}
+            </span>
+          )}
         </div>
       </div>
 
@@ -86,6 +93,20 @@ export default function TeacherBlogCard({
               <Edit2 className="w-4 h-4" />
             </Link>
           </Tooltip>
+
+          {blog.isPublished && (
+            <Tooltip label={t('createBlogPage.viewPublicBlog')}>
+              <Link
+                href={ROUTES.blog(blog.slug || blog._id)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2.5 min-h-[44px] min-w-[44px] bg-[var(--color-surface-muted)] text-[var(--color-foreground)] rounded-xl hover:bg-[var(--teacher-soft)] hover:text-[var(--teacher-primary)] hover:border-[var(--teacher-border)] border border-[var(--border)] flex items-center justify-center transition-colors shadow-xs"
+                aria-label={t('createBlogPage.viewPublicBlog')}
+              >
+                <ExternalLink className="w-4 h-4" />
+              </Link>
+            </Tooltip>
+          )}
         </div>
 
         <Tooltip label={t('blog.delete')}>

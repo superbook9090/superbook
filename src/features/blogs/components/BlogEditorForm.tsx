@@ -2,7 +2,7 @@
 
 import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
-import { Eye, EyeOff, BookOpen, Hash, FileText, Type, Globe, Star } from 'lucide-react';
+import { Eye, EyeOff, BookOpen, Hash, FileText, Type, Globe, Star, Link2, Sparkles } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { EditorField } from '@/components/ui/editor/EditorField';
@@ -22,6 +22,7 @@ export type BlogFormData = {
   content: string;
   language: string;
   visibility: 'public' | 'organization';
+  slug?: string;
   metaTitle: string;
   metaDescription: string;
   isFeatured: boolean;
@@ -42,6 +43,17 @@ export function isBlogContentEmpty(html: string) {
   return html.replace(/<[^>]*>/g, '').trim().length === 0;
 }
 
+function sanitizeSlugInput(input: string): string {
+  return input
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .slice(0, 200);
+}
+
 export default function BlogEditorForm({
   formData,
   onChange,
@@ -55,6 +67,8 @@ export default function BlogEditorForm({
   const { t } = useTranslation();
 
   const patch = (partial: Partial<BlogFormData>) => onChange({ ...formData, ...partial });
+
+  const previewSlug = formData.slug?.trim() || (formData.title.trim() ? sanitizeSlugInput(formData.title) : 'your-custom-url');
 
   return (
     <div className="bg-[var(--card-solid)] rounded-xl shadow-sm p-4 sm:p-5">
@@ -74,6 +88,51 @@ export default function BlogEditorForm({
           maxLength={200}
           fullWidth
         />
+
+        {/* Custom URL (Slug) field */}
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between gap-2">
+            <label className="text-sm font-medium text-[var(--color-foreground)] flex items-center gap-1.5">
+              <Link2 className="w-3.5 h-3.5 text-[var(--teacher-primary)]" />
+              {t('createBlogPage.customUrl')}
+              <span className="text-xs font-normal text-[var(--color-muted-foreground)]">
+                ({t('common.optional') || 'Optional'})
+              </span>
+            </label>
+            {formData.title.trim() && (
+              <button
+                type="button"
+                onClick={() => patch({ slug: sanitizeSlugInput(formData.title) })}
+                className="text-xs font-medium text-[var(--teacher-primary)] hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                <Sparkles className="w-3 h-3" />
+                {t('createBlogPage.generateSlugFromTitle')}
+              </button>
+            )}
+          </div>
+
+          <div className="relative flex items-center rounded-xl border border-[var(--border)] bg-[var(--color-surface)] focus-within:border-[var(--teacher-primary)] focus-within:ring-1 focus-within:ring-[var(--teacher-primary)] transition-all overflow-hidden">
+            <span className="hidden sm:inline-flex items-center px-3 py-2 text-xs font-mono text-[var(--color-muted-foreground)] bg-[var(--color-surface-muted)] border-r border-[var(--border)] select-none whitespace-nowrap">
+              quizdo.in/blog/
+            </span>
+            <input
+              type="text"
+              value={formData.slug || ''}
+              onChange={(e) => patch({ slug: sanitizeSlugInput(e.target.value) })}
+              placeholder={t('createBlogPage.customUrlPlaceholder')}
+              maxLength={200}
+              className="w-full px-3 py-2 text-sm text-[var(--color-foreground)] bg-transparent outline-none font-mono placeholder:font-sans placeholder:text-[var(--color-muted-foreground)]/60"
+            />
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--color-muted-foreground)]">
+            <p>{t('createBlogPage.customUrlHelper')}</p>
+            <div className="flex items-center gap-1 font-mono text-[11px] text-[var(--teacher-primary)] bg-[var(--teacher-soft)] px-2 py-0.5 rounded-md truncate max-w-full">
+              <span className="font-sans font-semibold">Preview:</span>
+              <span className="truncate">/blog/{previewSlug}</span>
+            </div>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Dropdown

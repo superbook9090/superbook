@@ -30,6 +30,7 @@ const nextConfig = {
       { source: '/quiz', destination: '/quiz-maker-free', permanent: true },
       { source: '/quiz-maker', destination: '/quiz-maker-free', permanent: true },
       { source: '/free-quiz-maker', destination: '/quiz-maker-free', permanent: true },
+      { source: '/blog', destination: '/blogs', permanent: true },
     ];
   },
   async headers() {
