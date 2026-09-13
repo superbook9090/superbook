@@ -35,7 +35,7 @@ export interface PublicAppSettings {
   featureToggles: Record<FeatureToggleKey, boolean>;
   challengeConfig?: {
     allowGuestChallenges: boolean;
-    guestQuestionLimit: number;
+    guestQuestionLimit?: number;
     challengeExpiryDays: number;
   };
   platformConfig: {
@@ -77,7 +77,6 @@ export const defaultPublicAppSettings: PublicAppSettings = {
   },
   challengeConfig: {
     allowGuestChallenges: true,
-    guestQuestionLimit: 5,
     challengeExpiryDays: 7,
   },
   platformConfig: {

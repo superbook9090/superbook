@@ -65,7 +65,6 @@ export async function GET() {
       },
       challengeConfig: {
         allowGuestChallenges: true,
-        guestQuestionLimit: 5,
         challengeExpiryDays: 7,
       },
       platformConfig: {

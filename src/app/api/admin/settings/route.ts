@@ -222,12 +222,10 @@ export async function PATCH(req: NextRequest) {
     if (body.challengeConfig && isSuper) {
       const existingConfig = settings.challengeConfig || {
         allowGuestChallenges: true,
-        guestQuestionLimit: 5,
         challengeExpiryDays: 7,
       };
       settings.challengeConfig = {
         allowGuestChallenges: body.challengeConfig.allowGuestChallenges ?? existingConfig.allowGuestChallenges ?? true,
-        guestQuestionLimit: body.challengeConfig.guestQuestionLimit ?? existingConfig.guestQuestionLimit ?? 5,
         challengeExpiryDays: body.challengeConfig.challengeExpiryDays ?? existingConfig.challengeExpiryDays ?? 7,
       };
     }

@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'Quiz not found' }, { status: 404 });
     }
 
-    const { guestQuestionLimit, challengeExpiryDays } = await getChallengeSettings();
+    const { challengeExpiryDays } = await getChallengeSettings();
 
     // Check if challenge already exists for this attempt
     const existing = (await Challenge.findOne({
@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Determine question subset for the challenge
+    // Determine questions for the challenge (full quiz)
     let selectedQuestionIds: Array<{ toString(): string }> = [];
     if (attempt.answers && attempt.answers.length > 0) {
       selectedQuestionIds = attempt.answers.map((a) => a.question);
@@ -113,11 +113,9 @@ export async function POST(req: NextRequest) {
       selectedQuestionIds = dbQuestions.map((q) => q._id);
     }
 
-    // Slice to guestQuestionLimit if questions exceed limit
-    const limit = Math.max(1, guestQuestionLimit || 5);
-    const chosenQuestionIds = selectedQuestionIds.slice(0, limit);
+    const chosenQuestionIds = selectedQuestionIds;
 
-    // Calculate challenger's score for this subset
+    // Calculate challenger's score for the full question set
     let subsetCorrect = 0;
     if (attempt.answers && attempt.answers.length > 0) {
       const chosenSet = new Set(chosenQuestionIds.map((id) => id.toString()));
@@ -128,7 +126,9 @@ export async function POST(req: NextRequest) {
       subsetCorrect = attempt.correctCount;
     }
 
-    const targetScore = Math.round((subsetCorrect / chosenQuestionIds.length) * 100);
+    const targetScore = chosenQuestionIds.length > 0
+      ? Math.round((subsetCorrect / chosenQuestionIds.length) * 100)
+      : 0;
     const expiresAt = new Date(Date.now() + (challengeExpiryDays || 7) * 24 * 60 * 60 * 1000);
 
     // Generate unique slug

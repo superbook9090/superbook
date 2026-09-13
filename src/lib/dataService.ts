@@ -39,7 +39,6 @@ const DEFAULT_SETTINGS = {
   },
   challengeConfig: {
     allowGuestChallenges: true,
-    guestQuestionLimit: 5,
     challengeExpiryDays: 7,
   },
   platformConfig: {

@@ -35,7 +35,7 @@ export interface IAppSettings extends Document {
   };
   challengeConfig?: {
     allowGuestChallenges: boolean;
-    guestQuestionLimit: number;
+    guestQuestionLimit?: number;
     challengeExpiryDays: number;
   };
   platformConfig: {
@@ -171,9 +171,7 @@ const appSettingsSchema = new Schema<IAppSettings>(
       },
       guestQuestionLimit: {
         type: Number,
-        default: 5,
-        min: 1,
-        max: 20,
+        required: false,
       },
       challengeExpiryDays: {
         type: Number,

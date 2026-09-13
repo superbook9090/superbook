@@ -205,59 +205,12 @@ export function PlatformConfigSection({
                     ...prev,
                     challengeConfig: {
                       allowGuestChallenges,
-                      guestQuestionLimit: prev.challengeConfig?.guestQuestionLimit ?? 5,
                       challengeExpiryDays: prev.challengeConfig?.challengeExpiryDays ?? 7,
                     },
                   }))
                 }
                 label={t('adminSettings.allowGuestChallenges')}
               />
-            </div>
-
-            {/* Guest Question Limit */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 sm:p-4 hover:bg-[var(--color-surface-muted)]/30 transition-colors">
-              <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
-                <div className="p-2.5 rounded-xl bg-[var(--warning-light)] text-[var(--warning)] shrink-0 shadow-xs">
-                  <Swords className="w-4 h-4 sm:w-5 sm:h-5" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h4 className="font-semibold text-xs sm:text-sm text-[var(--color-foreground)]">
-                    {t('adminSettings.guestQuestionLimit')}
-                  </h4>
-                  <p className="text-xs text-[var(--color-muted-foreground)] mt-0.5 leading-relaxed">
-                    {t('adminSettings.guestQuestionLimitDesc')}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 self-end sm:self-center">
-                {[3, 5, 10].map((limit) => {
-                  const currentLimit = settings.challengeConfig?.guestQuestionLimit ?? 5;
-                  const isSelected = currentLimit === limit;
-                  return (
-                    <button
-                      key={limit}
-                      type="button"
-                      onClick={() =>
-                        setSettings((prev) => ({
-                          ...prev,
-                          challengeConfig: {
-                            allowGuestChallenges: prev.challengeConfig?.allowGuestChallenges ?? true,
-                            guestQuestionLimit: limit,
-                            challengeExpiryDays: prev.challengeConfig?.challengeExpiryDays ?? 7,
-                          },
-                        }))
-                      }
-                      className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all ${
-                        isSelected
-                          ? 'bg-[var(--primary)] text-white border-[var(--primary)] shadow-xs'
-                          : 'card-surface text-[var(--color-muted)] border-[var(--border)] hover:text-[var(--color-foreground)]'
-                      }`}
-                    >
-                      {limit} {t('common.questions')}
-                    </button>
-                  );
-                })}
-              </div>
             </div>
 
             {/* Challenge Expiration Days */}
@@ -288,7 +241,6 @@ export function PlatformConfigSection({
                           ...prev,
                           challengeConfig: {
                             allowGuestChallenges: prev.challengeConfig?.allowGuestChallenges ?? true,
-                            guestQuestionLimit: prev.challengeConfig?.guestQuestionLimit ?? 5,
                             challengeExpiryDays: days,
                           },
                         }))

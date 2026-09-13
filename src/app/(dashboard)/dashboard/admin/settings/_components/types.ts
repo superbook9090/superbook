@@ -35,7 +35,7 @@ export interface AppSettings {
   };
   challengeConfig?: {
     allowGuestChallenges: boolean;
-    guestQuestionLimit: number;
+    guestQuestionLimit?: number;
     challengeExpiryDays: number;
   };
   platformConfig: {

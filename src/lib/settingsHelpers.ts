@@ -168,7 +168,7 @@ export async function checkTeacherLimit(
 
 export interface ChallengeSettings {
   allowGuestChallenges: boolean;
-  guestQuestionLimit: number;
+  guestQuestionLimit?: number;
   challengeExpiryDays: number;
 }
 
@@ -176,7 +176,7 @@ export async function getChallengeSettings(): Promise<ChallengeSettings> {
   const settings = await getSettingsWithDefaults();
   return {
     allowGuestChallenges: settings?.challengeConfig?.allowGuestChallenges ?? true,
-    guestQuestionLimit: settings?.challengeConfig?.guestQuestionLimit ?? 5,
+    guestQuestionLimit: settings?.challengeConfig?.guestQuestionLimit,
     challengeExpiryDays: settings?.challengeConfig?.challengeExpiryDays ?? 7,
   };
 }

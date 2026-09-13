@@ -114,7 +114,7 @@ export async function generateMetadata({ params }: ChallengePageProps): Promise<
 
   return createPageMetadata({
     title: `⚔️ Can you beat ${challengerName}'s ${challenge.targetScore}% in ${quizTitle}?`,
-    description: `${challengerName} scored ${challenge.targetScore}% in "${quizTitle}". Take this 5-question speed quiz challenge on Quizdo — no login required!`,
+    description: `${challengerName} scored ${challenge.targetScore}% in "${quizTitle}". Take this ${challenge.totalQuestions ? `${challenge.totalQuestions}-question ` : ''}quiz challenge on Quizdo — no login required!`,
     path: `/challenge/${slug}`,
     keywords: ['quiz challenge', 'beat friend quiz', 'online mock test challenge', quizTitle],
   });

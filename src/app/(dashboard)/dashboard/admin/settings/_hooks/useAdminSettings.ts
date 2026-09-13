@@ -36,7 +36,6 @@ const defaultSettings: AppSettings = {
   },
   challengeConfig: {
     allowGuestChallenges: true,
-    guestQuestionLimit: 5,
     challengeExpiryDays: 7,
   },
   platformConfig: {
