@@ -5,7 +5,7 @@ import { isFeatureEnabled, getChallengeSettings } from '@/lib/settingsHelpers';
 import { Challenge, QuizQuestion, Quiz, User } from '@/models';
 
 export async function GET(
-  req: NextRequest,
+  _req: NextRequest,
   context: { params: Promise<{ slug: string }> }
 ) {
   const params = await context.params;

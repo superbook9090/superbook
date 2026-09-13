@@ -47,7 +47,7 @@ const challengeAttemptSchema = new Schema<IChallengeAttempt>(
     totalQuestions: { type: Number, required: true, min: 1 },
     timeTaken: { type: Number, default: 0 },
     isWon: { type: Boolean, default: false },
-    claimToken: { type: String, required: true, unique: true, index: true },
+    claimToken: { type: String, required: true, unique: true },
     converted: { type: Boolean, default: false, index: true },
     answers: [challengeAnswerSchema],
   },

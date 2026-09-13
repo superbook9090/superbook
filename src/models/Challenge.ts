@@ -31,7 +31,7 @@ const challengeSchema = new Schema<IChallenge>(
     totalQuestions: { type: Number, required: true, min: 1 },
     timeTaken: { type: Number, default: 0 },
     selectedQuestions: [{ type: Schema.Types.ObjectId, ref: 'QuizQuestion' }],
-    slug: { type: String, required: true, unique: true, index: true },
+    slug: { type: String, required: true, unique: true },
     status: {
       type: String,
       enum: ['active', 'expired', 'disabled'],

@@ -29,7 +29,7 @@ export function ScorecardCanvasModal({ isOpen, onClose, data }: ScorecardCanvasM
 
     let mounted = true;
     renderScorecardToCanvas(canvas, data)
-      .catch((err) => console.error('Canvas render error:', err))
+      .catch(() => {})
       .finally(() => {
         if (mounted) setIsRendering(false);
       });

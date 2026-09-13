@@ -67,17 +67,19 @@ export async function POST(
 
     // Fetch questions to evaluate answers securely on the server
     const questionIds = answers.map((a) => a.questionId);
-    const questions = await QuizQuestion.find({
-      _id: { $in: questionIds },
-    })
-      .select('_id correctOption')
     interface GradedQuestionDoc {
       _id: { toString(): string };
       correctOption: number;
     }
 
+    const questions = (await QuizQuestion.find({
+      _id: { $in: questionIds },
+    })
+      .select('_id correctOption')
+      .lean()) as unknown as GradedQuestionDoc[];
+
     const questionMap = new Map<string, GradedQuestionDoc>(
-      (questions as unknown as GradedQuestionDoc[]).map((q) => [q._id.toString(), q])
+      questions.map((q) => [q._id.toString(), q])
     );
 
     let correctCount = 0;

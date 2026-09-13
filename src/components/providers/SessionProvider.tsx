@@ -39,7 +39,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ claimToken }),
-        }).catch((err) => console.error('Auto-claim challenge error:', err));
+        }).catch(() => {});
       }
     }
   }, [status, session]);

@@ -231,8 +231,8 @@ export async function renderScorecardToCanvas(
     ctx.fill();
     ctx.drawImage(qrImg, qrX, qrY, 210, 210);
     ctx.restore();
-  } catch (err) {
-    console.error('Failed to draw QR code on scorecard:', err);
+  } catch {
+    // QR code generation failure fallback (scorecard continues to render)
   }
 
   // 9. Footer Watermark
