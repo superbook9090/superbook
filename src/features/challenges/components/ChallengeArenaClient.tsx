@@ -1,35 +1,51 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
-import { Swords, Sparkles, User, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
-import Button from '@/components/ui/Button';
+import { useRouter } from 'next/navigation';
+import { AlertCircle, Loader2 } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useSessionStore } from '@/store/useSessionStore';
+import { ChallengeIntroCard } from './ChallengeIntroCard';
 import { ChallengeQuestionView } from './ChallengeQuestionView';
 import { ChallengeResultView } from './ChallengeResultView';
 import type { PublicChallengeData, ChallengeSubmissionResult } from '../types';
 
 interface ChallengeArenaClientProps {
   challenge: PublicChallengeData;
+  initialResult?: ChallengeSubmissionResult | null;
+  initialGuestName?: string;
 }
 
-export function ChallengeArenaClient({ challenge }: ChallengeArenaClientProps) {
+export function ChallengeArenaClient({
+  challenge,
+  initialResult,
+  initialGuestName,
+}: ChallengeArenaClientProps) {
   const { t } = useTranslation();
-  const [step, setStep] = useState<'intro' | 'playing' | 'submitting' | 'result'>('intro');
-  const [guestName, setGuestName] = useState('');
+  const router = useRouter();
+  const session = useSessionStore((s) => s.session);
+
+  const [step, setStep] = useState<'intro' | 'playing' | 'submitting' | 'result'>(
+    initialResult ? 'result' : 'intro'
+  );
+  const [guestName, setGuestName] = useState(initialGuestName || '');
   const [guestSessionId, setGuestSessionId] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
-  const [submissionResult, setSubmissionResult] = useState<ChallengeSubmissionResult | null>(null);
+  const [submissionResult, setSubmissionResult] = useState<ChallengeSubmissionResult | null>(
+    initialResult || null
+  );
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isStarting, setIsStarting] = useState(false);
+  const [startError, setStartError] = useState<string | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Initialize guest session ID and prefill stored name
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedName = localStorage.getItem('quizdo_guest_name') || '';
-      if (storedName) setGuestName(storedName);
+      if (storedName && !guestName) setGuestName(storedName);
 
       let sid = sessionStorage.getItem('quizdo_guest_sid');
       if (!sid) {
@@ -38,7 +54,7 @@ export function ChallengeArenaClient({ challenge }: ChallengeArenaClientProps) {
       }
       setGuestSessionId(sid);
     }
-  }, []);
+  }, [guestName]);
 
   // Timer runner
   useEffect(() => {
@@ -54,7 +70,31 @@ export function ChallengeArenaClient({ challenge }: ChallengeArenaClientProps) {
     };
   }, [step]);
 
-  const handleStart = () => {
+  const handleStart = async () => {
+    if (session?.user) {
+      setIsStarting(true);
+      setStartError(null);
+      try {
+        const res = await fetch(`/api/challenges/${encodeURIComponent(challenge.slug)}/start`, {
+          method: 'POST',
+        });
+        const data = await res.json();
+        if (data.success && data.attemptId) {
+          router.push(
+            `/dashboard/student/quizzes/take?attemptId=${encodeURIComponent(data.attemptId)}&challengeSlug=${encodeURIComponent(challenge.slug)}`
+          );
+          return;
+        } else {
+          setStartError(data.message || t('challenge.failedToStart') || 'Failed to start challenge');
+          setIsStarting(false);
+        }
+      } catch {
+        setStartError(t('challenge.networkError'));
+        setIsStarting(false);
+      }
+      return;
+    }
+
     const finalName = guestName.trim() || 'Challenger Guest';
     if (typeof window !== 'undefined') {
       localStorage.setItem('quizdo_guest_name', finalName);
@@ -110,70 +150,14 @@ export function ChallengeArenaClient({ challenge }: ChallengeArenaClientProps) {
   return (
     <div className="min-h-screen py-8 px-4 sm:px-6 flex flex-col justify-center items-center">
       {step === 'intro' && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.96 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="w-full max-w-lg card-surface rounded-3xl border border-[var(--color-border)] shadow-2xl p-6 sm:p-8 flex flex-col items-center text-center"
-        >
-          {/* Arena Badge */}
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white shadow-xl shadow-orange-500/25 mb-4">
-            <Swords className="w-8 h-8" />
-          </div>
-
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 text-xs font-bold uppercase tracking-wider mb-2">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>{t('challenge.title')}</span>
-          </div>
-
-          <h1 className="text-xl sm:text-2xl font-black text-[var(--color-foreground)] leading-tight">
-            {t('challenge.canYouBeat', { name: challenge.challenger.name || 'Quizdo Scholar' })}
-          </h1>
-
-          <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] mt-2">
-            {t('challenge.theyScored', {
-              score: String(challenge.targetScore),
-              correct: String(challenge.correctCount),
-              total: String(challenge.totalQuestions),
-            })}
-          </p>
-
-          <div className="w-full my-4 p-3.5 rounded-2xl bg-[var(--color-muted)]/15 border border-[var(--color-border)] text-center">
-            <span className="text-sm sm:text-base font-bold text-[var(--color-foreground)] line-clamp-2">
-              {challenge.quiz.title}
-            </span>
-          </div>
-
-          {/* Name Input */}
-          <div className="w-full flex flex-col gap-1.5 text-left mb-5">
-            <label className="text-xs font-semibold text-[var(--color-foreground)] flex items-center gap-1.5">
-              <User className="w-3.5 h-3.5 text-[var(--color-muted-foreground)]" />
-              {t('challenge.yourNickname')}
-            </label>
-            <input
-              type="text"
-              placeholder={t('challenge.nicknamePlaceholder')}
-              value={guestName}
-              onChange={(e) => setGuestName(e.target.value)}
-              maxLength={40}
-              className="w-full px-4 py-3 rounded-xl bg-[var(--color-background)] border border-[var(--color-border)] text-sm text-[var(--color-foreground)] focus:border-indigo-500 outline-none transition-colors"
-            />
-          </div>
-
-          <Button
-            variant="primary"
-            onClick={handleStart}
-            className="w-full py-3.5 px-6 text-sm font-bold rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-indigo-600 hover:from-amber-600 hover:to-indigo-700 text-white border-0 shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2"
-          >
-            <span>{t('challenge.acceptChallenge')}</span>
-            <ArrowRight className="w-4 h-4" />
-          </Button>
-
-          <div className="flex items-center gap-4 text-[11px] text-[var(--color-muted-foreground)] mt-4">
-            <span>{t('challenge.noSignupRequired')}</span>
-            <span>·</span>
-            <span>{t('challenge.questionsCount', { count: String(challenge.totalQuestions) })}</span>
-          </div>
-        </motion.div>
+        <ChallengeIntroCard
+          challenge={challenge}
+          guestName={guestName}
+          setGuestName={setGuestName}
+          onAccept={handleStart}
+          isStarting={isStarting}
+          startError={startError}
+        />
       )}
 
       {step === 'playing' && currentQ && (

@@ -1,16 +1,19 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { getServerSession } from 'next-auth';
 import dbConnect from '@/lib/db';
-import { Challenge, Quiz, QuizQuestion, User } from '@/models';
+import { authOptions } from '@/lib/auth';
+import { Challenge, Quiz, QuizQuestion, User, ChallengeAttempt } from '@/models';
 import { createPageMetadata } from '@/lib/seo/metadata';
 import MarketingHeader from '@/components/home/MarketingHeader';
 import Footer from '@/components/home/Footer';
 import { ChallengeArenaClient } from '@/features/challenges/components/ChallengeArenaClient';
 import { ExpiredChallengeView } from '@/features/challenges/components/ExpiredChallengeView';
-import type { PublicChallengeData } from '@/features/challenges/types';
+import type { PublicChallengeData, ChallengeSubmissionResult } from '@/features/challenges/types';
 
 interface ChallengePageProps {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ attemptId?: string; playAgain?: string }>;
 }
 
 interface ChallengePopulatedDoc {
@@ -120,8 +123,9 @@ export async function generateMetadata({ params }: ChallengePageProps): Promise<
   });
 }
 
-export default async function ChallengePage({ params }: ChallengePageProps) {
+export default async function ChallengePage({ params, searchParams }: ChallengePageProps) {
   const { slug } = await params;
+  const sParams = searchParams ? await searchParams : {};
   const data = await getChallenge(slug);
 
   if (!data) {
@@ -129,6 +133,74 @@ export default async function ChallengePage({ params }: ChallengePageProps) {
   }
 
   const { challenge, isExpired } = data;
+  const session = await getServerSession(authOptions);
+
+  let initialResult: ChallengeSubmissionResult | null = null;
+  let initialGuestName = '';
+
+  if (!isExpired && sParams.playAgain !== 'true') {
+    const attemptQuery: Record<string, unknown> = { challenge: challenge.id };
+    const orConditions: Array<Record<string, unknown>> = [];
+
+    if (sParams.attemptId) {
+      orConditions.push({ _id: sParams.attemptId });
+    }
+    if (session?.user?.id) {
+      orConditions.push({ opponentUser: session.user.id });
+    }
+
+    if (orConditions.length > 0) {
+      attemptQuery.$or = orConditions;
+      interface AttemptFoundDoc {
+        _id: { toString(): string };
+        claimToken: string;
+        guestName: string;
+        score: number;
+        correctCount: number;
+        totalQuestions: number;
+        timeTaken: number;
+        isWon: boolean;
+        converted: boolean;
+        answers?: Array<{
+          questionId: { toString(): string };
+          order: number;
+          selectedOption: number;
+          isCorrect: boolean;
+        }>;
+      }
+
+      const existingAttempt = (await ChallengeAttempt.findOne(attemptQuery)
+        .sort({ createdAt: -1 })
+        .lean()) as unknown as AttemptFoundDoc | null;
+
+      if (existingAttempt) {
+        initialGuestName = existingAttempt.guestName || session?.user?.name || '';
+        initialResult = {
+          attemptId: existingAttempt._id.toString(),
+          claimToken: existingAttempt.claimToken,
+          score: existingAttempt.score,
+          correctCount: existingAttempt.correctCount,
+          totalQuestions: existingAttempt.totalQuestions,
+          timeTaken: existingAttempt.timeTaken,
+          targetScore: challenge.targetScore,
+          challengerCorrectCount: challenge.correctCount,
+          challengerTimeTaken: challenge.timeTaken,
+          isWon: existingAttempt.isWon,
+          isDraw:
+            existingAttempt.score === challenge.targetScore &&
+            existingAttempt.timeTaken === challenge.timeTaken,
+          converted: existingAttempt.converted,
+          answers: (existingAttempt.answers || []).map((a) => ({
+            questionId: a.questionId?.toString(),
+            order: a.order,
+            selectedOption: a.selectedOption,
+            correctOption: null,
+            isCorrect: a.isCorrect,
+          })),
+        };
+      }
+    }
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-[var(--color-background)]">
@@ -138,7 +210,11 @@ export default async function ChallengePage({ params }: ChallengePageProps) {
         {isExpired ? (
           <ExpiredChallengeView />
         ) : (
-          <ChallengeArenaClient challenge={challenge} />
+          <ChallengeArenaClient
+            challenge={challenge}
+            initialResult={initialResult}
+            initialGuestName={initialGuestName}
+          />
         )}
       </main>
 

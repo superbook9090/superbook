@@ -112,7 +112,17 @@ export default function TakeQuizPage() {
 
         quizSecurity.stopQuiz();
         setQuizActive(false);
-        router.replace(ROUTES.student.quizResult(data.attempt._id));
+
+        const challengeSlug =
+          searchParams.get('challengeSlug') ||
+          (data as { challengeSlug?: string }).challengeSlug ||
+          (data.attempt as { challengeSlug?: string })?.challengeSlug;
+
+        if (challengeSlug) {
+          router.replace(`/challenge/${encodeURIComponent(challengeSlug)}?attemptId=${encodeURIComponent(data.attempt._id)}`);
+        } else {
+          router.replace(ROUTES.student.quizResult(data.attempt._id));
+        }
       } catch (err) {
         console.error('Error submitting quiz:', err);
         const errorMsg = options.forceSubmit
@@ -123,7 +133,7 @@ export default function TakeQuizPage() {
         setIsAutoSubmitting(false);
       }
     },
-    [router, submitQuizMutation, quizSecurity, setQuizActive, t, addAlert]
+    [router, submitQuizMutation, quizSecurity, setQuizActive, t, addAlert, searchParams]
   );
 
   // Force submit quiz on security violation

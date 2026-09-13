@@ -31,14 +31,9 @@ export function ChallengeResultView({ challenge, result, guestName }: ChallengeR
   };
 
   const handleClaimAccount = (provider?: 'google') => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('quizdo_claim_token', result.claimToken);
-    }
-    if (provider === 'google') {
-      signIn('google', { callbackUrl: '/dashboard/student' });
-    } else {
-      router.push(`/register?claimToken=${result.claimToken}`);
-    }
+    if (typeof window !== 'undefined') localStorage.setItem('quizdo_claim_token', result.claimToken);
+    if (provider === 'google') signIn('google', { callbackUrl: '/dashboard/student' });
+    else router.push(`/register?claimToken=${result.claimToken}`);
   };
 
   return (
@@ -167,6 +162,20 @@ export function ChallengeResultView({ challenge, result, guestName }: ChallengeR
           {showReview ? t('challenge.hideReview') : t('challenge.reviewQuestions')}
         </Button>
       </div>
+
+      {session?.user && challenge.quiz?.id && (
+        <Button
+          variant="outline"
+          onClick={() =>
+            router.push(
+              `/dashboard/student/quizzes/${challenge.quiz.id}/result?attemptId=${encodeURIComponent(result.attemptId)}`
+            )
+          }
+          className="w-full py-3 px-4 text-xs sm:text-sm font-semibold rounded-xl flex items-center justify-center gap-2"
+        >
+          <span>{t('challenge.viewFullAnalysis')}</span>
+        </Button>
+      )}
 
       {/* 5. Question Review Accordion */}
       {showReview && (

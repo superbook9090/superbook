@@ -1,12 +1,14 @@
-// src/app/api/quiz-attempts/route.ts — greenfield: normalized QuizQuestion + compact attempts
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
+import crypto from 'crypto';
 import '@/models';
 import QuizAttempt from '@/models/QuizAttempt';
 import Quiz from '@/models/Quiz';
 import Enrollment from '@/models/Enrollment';
+import Challenge from '@/models/Challenge';
+import ChallengeAttempt from '@/models/ChallengeAttempt';
 import { createQuizAttemptSchema } from '@/lib/validation';
 import { logInfo, logError, logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
@@ -184,10 +186,6 @@ export async function POST(request: NextRequest) {
     }
     if (session.user) logContext.userId = session.user.id;
 
-    if (session.user?.role !== 'student') {
-      return NextResponse.json({ message: 'Only students can attempt quizzes' }, { status: 403 });
-    }
-
     await dbConnect();
 
     const body = await request.json();
@@ -200,6 +198,18 @@ export async function POST(request: NextRequest) {
     }
 
     const { quizId, action, answers, timeTaken } = validationResult.data;
+
+    if (session.user?.role !== 'student') {
+      const challengeAttempt = await QuizAttempt.findOne({
+        student: session.user.id,
+        quiz: quizId,
+        status: 'in_progress',
+        challenge: { $ne: null },
+      });
+      if (!challengeAttempt) {
+        return NextResponse.json({ message: 'Only students can attempt quizzes' }, { status: 403 });
+      }
+    }
 
     const quiz = (await Quiz.findById(quizId).populate('course', '_id').lean()) as {
       _id: Types.ObjectId;
@@ -329,14 +339,64 @@ export async function POST(request: NextRequest) {
       // teacher-completed course. Idempotent; never throws.
       await checkAndIssueCertificate(session.user.id, String(courseId));
 
+      // If this attempt is linked to a challenge, record the ChallengeAttempt
+      let challengeSlug: string | undefined;
+      if (attempt.challenge) {
+        try {
+          const challenge = await Challenge.findById(attempt.challenge);
+          if (challenge) {
+            challengeSlug = challenge.slug;
+            let isWon = false;
+            if (score > challenge.targetScore) {
+              isWon = true;
+            } else if (
+              score === challenge.targetScore &&
+              attempt.timeTaken > 0 &&
+              challenge.timeTaken > 0 &&
+              attempt.timeTaken < challenge.timeTaken
+            ) {
+              isWon = true;
+            }
+
+            const claimToken = `clm_${crypto.randomBytes(16).toString('hex')}`;
+            await ChallengeAttempt.create({
+              challenge: challenge._id,
+              challenger: challenge.creator,
+              opponentUser: session.user.id,
+              guestSessionId: `usr_${session.user.id}`,
+              guestName: session.user.name || 'Quizdo Scholar',
+              score,
+              correctCount,
+              totalQuestions,
+              timeTaken: attempt.timeTaken,
+              isWon,
+              claimToken,
+              converted: true,
+              answers: gradedAnswers.map((a) => ({
+                questionId: a.question,
+                order: a.order,
+                selectedOption: a.selectedOption,
+                isCorrect: a.isCorrect,
+              })),
+            });
+
+            await Challenge.updateOne({ _id: challenge._id }, { $inc: { attemptsCount: 1 } });
+          }
+        } catch (challErr) {
+          logError('Failed to record challenge attempt', logContext, { error: challErr });
+        }
+      }
+
       await invalidatePattern(`quiz-attempts:${session.user.id}:*`);
       await invalidatePattern(`dashboard:${session.user.id}:*`);
 
       return NextResponse.json(
         {
           message: 'Quiz submitted successfully',
+          challengeSlug,
           attempt: {
             ...attempt.toObject(),
+            challengeSlug,
             answers: gradedAnswers.map((a) => ({
               question: a.question.toString(),
               order: a.order,

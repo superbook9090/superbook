@@ -10,7 +10,8 @@ export interface IGradedAnswer {
 export interface IQuizAttempt extends Document {
   student: mongoose.Types.ObjectId;
   quiz: mongoose.Types.ObjectId;
-  course: mongoose.Types.ObjectId;
+  course?: mongoose.Types.ObjectId | null;
+  challenge?: mongoose.Types.ObjectId | null;
   quizVersion: number;
   answers: IGradedAnswer[];
   score: number;
@@ -38,7 +39,8 @@ const quizAttemptSchema = new Schema<IQuizAttempt>(
   {
     student: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     quiz: { type: Schema.Types.ObjectId, ref: 'Quiz', required: true },
-    course: { type: Schema.Types.ObjectId, ref: 'Course', required: true },
+    course: { type: Schema.Types.ObjectId, ref: 'Course', default: null },
+    challenge: { type: Schema.Types.ObjectId, ref: 'Challenge', default: null, index: true },
     quizVersion: { type: Number, required: true, default: 1 },
     answers: [gradedAnswerSchema],
     score: { type: Number, default: 0, min: 0, max: 100 },
