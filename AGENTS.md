@@ -130,7 +130,7 @@ There is an existing `.env` file in the repo. Do not print secrets into chat.
   - Educational articles must be substantive (minimum 600–1,000+ words).
   - Empty or single-dummy-post categories are automatically omitted from `listPublicBlogTopics()`.
 - **Dynamic Sitemap Timestamps**: `src/app/sitemap.ts` pulls real DB `updatedAt || createdAt` timestamps for blogs and courses, and uses a stable reference timestamp for static marketing pages.
-- **Production Seeding**: Use `scripts/seed-adsense-articles.mjs` to seed authoritative educational guides and unpublish test posts on production.
+- **Educational Content**: Authoritative educational guides and study articles are persisted in the database; test posts are unpublished for AdSense compliance.
 
 ## Customization Rules & Skills
 

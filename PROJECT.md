@@ -1566,7 +1566,7 @@ interface IAppSettings {
 ### Thin Content & Test Post Guardrails
 - **Automated Query Filters**: In `src/lib/blogs/public.ts` and `src/app/api/blogs/route.ts`, public blog queries enforce `title: { $not: /^test\d*$/i }`.
 - **Category Pruning**: `listPublicBlogTopics()` filters out empty categories and categories that only contain test drafts.
-- **Production Seeding**: `scripts/seed-adsense-articles.mjs` allows administrators to seed 8+ comprehensive, long-form educational guides (800–1,200 words each) into production MongoDB.
+- **Educational Content**: 8+ comprehensive, long-form educational guides (800–1,200 words each) provisioned into database to meet Google AdSense minimum publisher quality guidelines.
 
 ### Dynamic Sitemap Architecture (`src/app/sitemap.ts`)
 - Real MongoDB `updatedAt || createdAt` timestamps for blog articles (`listPublicBlogSitemapEntries`) and courses (`listPublicCourseSitemapEntries`).

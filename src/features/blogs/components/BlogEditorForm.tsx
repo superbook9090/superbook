@@ -136,6 +136,10 @@ export default function BlogEditorForm({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Dropdown
+            searchable
+            allowCustom
+            searchPlaceholder={t('createBlogPage.searchTopic') || 'Search or enter custom topic...'}
+            customLabelPrefix={t('createBlogPage.useCustomTopic') || 'Use custom'}
             label={
               <>
                 <Hash className="w-3.5 h-3.5 inline mr-1.5" />
