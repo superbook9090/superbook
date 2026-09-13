@@ -39,6 +39,15 @@ Use this file as the default orientation for agents working in this repo. For fu
 ## Important Routes
 
 - `/`: landing page
+- `/about`: dedicated publisher & mission page (AdSense & E-E-A-T compliant)
+- `/terms`: terms of service & user agreement
+- `/privacy`: privacy policy with AdSense DoubleClick DART cookie disclosures
+- `/contact`: contact & support channels
+- `/blogs`: public blog directory & category filter
+- `/blog/[slug]`: canonical blog article route (wrapped with `src/app/blog/layout.tsx`)
+- `/blogs/[slug]`: legacy route (issues permanent 301 redirect to `/blog/[slug]`)
+- `/tools`: public tool index & SEO landing pages
+- `/courses`: public courses catalog
 - `/login`, `/register`: auth pages
 - `/dashboard`: redirects to role home (`getDashboardHomePath`)
 - `/dashboard/student`, `/dashboard/teacher`, `/dashboard/admin`: role dashboards
@@ -106,12 +115,29 @@ There is an existing `.env` file in the repo. Do not print secrets into chat.
 - Firebase Admin: use `getAdminMessaging()` lazily; no top-level init in modules imported at build time.
 - When editing TSX with many JSX tags, prefer careful small edits — bulk writes can corrupt `<>` fragments.
 
+## SEO, Sitemap & Publisher Compliance (Google AdSense)
+
+- **Root `ads.txt`**: Maintained in `public/ads.txt` with the authorized publisher ID (`google.com, pub-3910555435236193, DIRECT, f08c47fec0942fa0`). Never delete or overwrite this file.
+- **Client Script**: Loaded via `src/components/providers/AdsenseInit.tsx` in `src/app/layout.tsx` asynchronously.
+- **Mandatory Publisher Pages**: `/about`, `/terms`, `/privacy`, and `/contact` must always be live, returning HTTP 200, and linked in `Footer.tsx`.
+- **DART Cookie Disclosures**: `/privacy` must always include the Google AdSense and third-party advertising cookie disclosure in both `en.ts` and `hi.ts`.
+- **Blog Route Canonicalization**:
+  - Primary canonical route is `/blog/[slug]`.
+  - `/blogs/[slug]` is a legacy alias that permanently redirects (301) to `/blog/[slug]`.
+  - `/blog/layout.tsx` wraps every blog post with `MarketingHeader`, `Footer`, and `QueryProvider` to prevent orphaned/naked templates.
+- **Thin Content & Test Post Guardrails**:
+  - In `src/lib/blogs/public.ts` and `src/app/api/blogs/route.ts`, public blog queries enforce `title: { $not: /^test\d*$/i }`.
+  - Educational articles must be substantive (minimum 600–1,000+ words).
+  - Empty or single-dummy-post categories are automatically omitted from `listPublicBlogTopics()`.
+- **Dynamic Sitemap Timestamps**: `src/app/sitemap.ts` pulls real DB `updatedAt || createdAt` timestamps for blogs and courses, and uses a stable reference timestamp for static marketing pages.
+- **Production Seeding**: Use `scripts/seed-adsense-articles.mjs` to seed authoritative educational guides and unpublish test posts on production.
+
 ## Customization Rules & Skills
 
 Detailed rules and operational runbooks are maintained in `.agents/`:
 
-- **Skills** (`.agents/skills/`): `feature-toggles`, `lms-role-routing`, `lms-api-endpoint`, `i18n-localization`, `mobile-responsive-ui`
-- **Rules** (`.agents/rules/`): `code-quality.md`, `mobile-and-styling.md`, `backend-api-and-db.md`, `roles-and-security.md`, `i18n-localization.md`, `mobile-shell-zero-publish.md`
+- **Skills** (`.agents/skills/`): `feature-toggles`, `lms-role-routing`, `lms-api-endpoint`, `i18n-localization`, `mobile-responsive-ui`, `seo-publisher-compliance`
+- **Rules** (`.agents/rules/`): `code-quality.md`, `mobile-and-styling.md`, `backend-api-and-db.md`, `roles-and-security.md`, `i18n-localization.md`, `mobile-shell-zero-publish.md`, `seo-and-publisher-compliance.md`
 
 ## Verification
 

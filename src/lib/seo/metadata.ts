@@ -19,6 +19,8 @@ export type PageSeoOptions = {
   index?: boolean;
   /** Open Graph type; default `website` */
   ogType?: 'website' | 'article';
+  /** Custom OpenGraph / Twitter preview images */
+  images?: string[];
 };
 
 function mergeKeywords(extra?: string[]): string[] {
@@ -71,9 +73,9 @@ export function createRootMetadata(): Metadata {
       description: DEFAULT_DESCRIPTION,
       images: [
         {
-          url: '/logo.svg',
-          width: 512,
-          height: 512,
+          url: '/og-image.png',
+          width: 1200,
+          height: 630,
           alt: `${SITE_NAME} — online learning management system`,
         },
       ],
@@ -82,7 +84,7 @@ export function createRootMetadata(): Metadata {
       card: 'summary_large_image',
       title: DEFAULT_TITLE,
       description: DEFAULT_DESCRIPTION,
-      images: ['/logo.svg'],
+      images: ['/og-image.png'],
       creator: TWITTER_HANDLE,
     },
     appLinks: {
@@ -116,6 +118,7 @@ export function createPageMetadata(options: PageSeoOptions = {}): Metadata {
   const title = options.title;
   const description = options.description ?? DEFAULT_DESCRIPTION;
   const index = options.index !== false;
+  const previewImages = options.images && options.images.length > 0 ? options.images : ['/og-image.png'];
 
   return {
     title,
@@ -133,13 +136,13 @@ export function createPageMetadata(options: PageSeoOptions = {}): Metadata {
       title: title ?? DEFAULT_TITLE,
       description,
       siteName: SITE_NAME,
-      images: ['/logo.svg'],
+      images: previewImages,
     },
     twitter: {
       card: 'summary_large_image',
       title: title ?? DEFAULT_TITLE,
       description,
-      images: ['/logo.svg'],
+      images: previewImages,
     },
   };
 }

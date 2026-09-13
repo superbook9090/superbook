@@ -21,6 +21,7 @@ export const dynamic = 'force-dynamic';
 
 function publicBlogAccessFilter() {
   return {
+    title: { $not: /^test\d*$/i },
     $or: [
       { visibility: 'public' },
       {

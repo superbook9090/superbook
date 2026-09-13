@@ -54,7 +54,7 @@ export default function AdminBlogsPage() {
   }, [status, router]);
 
   const orgId = (session?.user as { organizationId?: string })?.organizationId || 'public';
-  const { data, isLoading } = usePaginatedBlogs({
+  const { data, isLoading, refetch } = usePaginatedBlogs({
     orgId,
     page,
     limit: PAGE_SIZE,
@@ -98,7 +98,7 @@ export default function AdminBlogsPage() {
   return (
     <PageWrapper className="space-y-6">
       {/* Hero Banner */}
-      <AdminBlogsHero />
+      <AdminBlogsHero onSeedSuccess={() => refetch()} />
 
       {/* KPI Stats Overview */}
       <AdminBlogsStats stats={stats} />

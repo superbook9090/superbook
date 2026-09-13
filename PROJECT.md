@@ -1542,7 +1542,40 @@ interface IAppSettings {
 
 ---
 
-## 25. Future Roadmap
+## 26. SEO, Publisher Compliance & AdSense Architecture (2026)
+
+### Google AdSense Compliance Infrastructure
+- **Root `ads.txt`**: Maintained in `public/ads.txt` declaring authorized digital seller ID:
+  ```
+  google.com, pub-3910555435236193, DIRECT, f08c47fec0942fa0
+  ```
+- **Async Client Script**: `src/components/providers/AdsenseInit.tsx` injects the official Google AdSense script (`pagead2.googlesyndication.com`) non-blockingly into `src/app/layout.tsx`.
+- **Publisher Trust Pages**:
+  - `/about` (`src/app/about/page.tsx` + `src/features/about/components/AboutPageClient.tsx`): Detailed publisher identification, educational mission, platform capabilities, and editorial review standards.
+  - `/terms` (`src/app/terms/page.tsx` + `src/features/terms/components/TermsPageClient.tsx`): Complete Terms of Service, user accounts, intellectual property, and advertising disclaimers.
+  - `/privacy` (`src/features/privacy/components/PrivacyPageClient.tsx`): Updated with third-party advertising clauses, Google DoubleClick DART cookie policy, and opt-out links (`adssettings.google.com`).
+  - `/contact`: Direct support channels and user inquiries.
+  - All four trust pages are linked in `Footer.tsx` and indexed in `sitemap.ts`.
+
+### Blog Canonicalization & Layout Shell
+- **Primary Canonical URL**: All public blog posts reside at `/blog/[slug]`.
+- **Legacy Route 301 Redirect**: `src/app/blogs/[slug]/page.tsx` executes a permanent 301/308 redirect to `/blog/[slug]` to prevent route cannibalization.
+- **Marketing Shell**: `src/app/blog/layout.tsx` wraps all individual article pages with `MarketingHeader`, `Footer`, and `QueryProvider`, ensuring no article renders as an orphaned template.
+- **E-E-A-T & Schema.org**: Every blog post outputs compliant `Article` and `BreadcrumbList` JSON-LD structured data with 1200x630 OpenGraph assets.
+
+### Thin Content & Test Post Guardrails
+- **Automated Query Filters**: In `src/lib/blogs/public.ts` and `src/app/api/blogs/route.ts`, public blog queries enforce `title: { $not: /^test\d*$/i }`.
+- **Category Pruning**: `listPublicBlogTopics()` filters out empty categories and categories that only contain test drafts.
+- **Production Seeding**: `scripts/seed-adsense-articles.mjs` allows administrators to seed 8+ comprehensive, long-form educational guides (800–1,200 words each) into production MongoDB.
+
+### Dynamic Sitemap Architecture (`src/app/sitemap.ts`)
+- Real MongoDB `updatedAt || createdAt` timestamps for blog articles (`listPublicBlogSitemapEntries`) and courses (`listPublicCourseSitemapEntries`).
+- Stable reference timestamp (`STATIC_PAGES_LASTMOD`) for static marketing pages.
+- Inclusion of `/about`, `/terms`, `/privacy`, `/contact`, `/blogs`, `/tools`, and `/courses`.
+
+---
+
+## 27. Future Roadmap
 
 ### Short Term (1-3 months)
 - **Real-time Features**: WebSocket integration for live updates

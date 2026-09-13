@@ -120,6 +120,7 @@ async function ensurePublicSlug(
 function publicVisibilityFilter() {
   return {
     isPublished: true,
+    title: { $not: /^test\d*$/i },
     $or: [
       { visibility: 'public' },
       {
@@ -274,6 +275,52 @@ export async function listPublicBlogSlugs(limit = 100) {
     return slug;
   }));
   return slugs.filter(Boolean);
+}
+
+export function extractFirstImageFromHtml(html?: string | null): string | null {
+  if (!html) return null;
+  const match = html.match(/<img[^>]+src=["']([^"']+)["']/i);
+  return match ? match[1] : null;
+}
+
+export type PublicBlogSitemapEntry = {
+  slug: string;
+  lastModified: Date;
+};
+
+export async function listPublicBlogSitemapEntries(limit = 500): Promise<PublicBlogSitemapEntry[]> {
+  await dbConnect();
+  const rows = await Blog.find(publicVisibilityFilter())
+    .select('slug title createdAt updatedAt')
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .lean();
+
+  const entries = await Promise.all(
+    rows.map(async (row) => {
+      const typed = row as unknown as {
+        _id: mongoose.Types.ObjectId;
+        title: string;
+        slug?: string | null;
+        createdAt?: Date;
+        updatedAt?: Date;
+      };
+      let slug = typed.slug;
+      if (!slug) {
+        slug = `${slugifyBlogTitle(typed.title)}-${typed._id.toString().slice(-6)}`;
+        await Blog.updateOne(
+          { _id: typed._id, $or: [{ slug: null }, { slug: { $exists: false } }, { slug: '' }] },
+          { $set: { slug } }
+        );
+      }
+      return {
+        slug,
+        lastModified: typed.updatedAt || typed.createdAt || new Date(),
+      };
+    })
+  );
+
+  return entries.filter((e) => Boolean(e.slug));
 }
 
 export function buildPublicBlogCanonical(slug: string) {

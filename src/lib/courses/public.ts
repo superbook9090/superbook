@@ -196,6 +196,45 @@ export async function listPublicCourseSlugs(limit = 200) {
   return slugs.filter(Boolean);
 }
 
+export type PublicCourseSitemapEntry = {
+  slug: string;
+  lastModified: Date;
+};
+
+export async function listPublicCourseSitemapEntries(limit = 200): Promise<PublicCourseSitemapEntry[]> {
+  await dbConnect();
+  const rows = await Course.find(publicVisibilityFilter())
+    .select('slug title createdAt updatedAt')
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .lean();
+
+  const entries = await Promise.all(
+    rows.map(async (row) => {
+      const typed = row as unknown as {
+        _id: mongoose.Types.ObjectId;
+        title: string;
+        slug?: string | null;
+        createdAt?: Date;
+        updatedAt?: Date;
+      };
+      let slug = typed.slug;
+      if (!slug) {
+        slug = `${slugifyTitle(typed.title)}-${typed._id.toString().slice(-6)}`;
+        await Course.updateOne(
+          { _id: typed._id, $or: [{ slug: null }, { slug: { $exists: false } }, { slug: '' }] },
+          { $set: { slug } }
+        );
+      }
+      return {
+        slug,
+        lastModified: typed.updatedAt || typed.createdAt || new Date(),
+      };
+    })
+  );
+  return entries.filter((e) => Boolean(e.slug));
+}
+
 export function buildPublicCoursePath(slug: string) {
   return `/courses/${slug}`;
 }

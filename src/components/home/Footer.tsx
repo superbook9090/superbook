@@ -14,7 +14,7 @@ const getFooterLinks = (t: (key: string) => string) => ({
     { label: t('home.howItWorksPage.title'), href: ROUTES.howItWorks },
     { label: t('home.features.title'), href: '#features' },
     { label: t('home.roles.title'), href: '#roles' },
-    { label: t('home.about.title'), href: '#about' },
+    { label: t('home.about.title'), href: ROUTES.about },
     { label: t('contact.title'), href: ROUTES.contact },
   ],
   resources: [
@@ -127,12 +127,25 @@ export default function Footer() {
           </motion.div>
         </div>
 
-        <div className="pt-8 border-t border-[var(--border)] flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="pt-8 border-t border-[var(--border)] flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
           <p className="text-[var(--color-muted)] text-sm" suppressHydrationWarning>
             {t('home.footer.copyright', { year: currentYear, siteName: SITE_NAME })}{' '}
             {t('home.footer.rights')}
           </p>
-          <p className="text-[var(--color-muted)] text-sm flex items-center gap-1">
+          <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-[var(--color-muted)]">
+            <Link href={ROUTES.privacy} className="hover:text-[var(--foreground)] transition-colors">
+              {t('home.footer.privacyPolicy') || 'Privacy Policy'}
+            </Link>
+            <span>•</span>
+            <Link href={ROUTES.terms} className="hover:text-[var(--foreground)] transition-colors">
+              {t('home.footer.termsOfService') || 'Terms of Service'}
+            </Link>
+            <span>•</span>
+            <Link href={ROUTES.contact} className="hover:text-[var(--foreground)] transition-colors">
+              {t('contact.title') || 'Contact Us'}
+            </Link>
+          </div>
+          <p className="text-[var(--color-muted)] text-sm flex items-center justify-center gap-1">
             {t('home.footer.madeWith')}{' '}
             <Heart className="w-4 h-4 text-[var(--color-error)] fill-[var(--color-error)]" aria-hidden />{' '}
             {t('home.footer.inIndia')}

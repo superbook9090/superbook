@@ -1,0 +1,12 @@
+{
+  "quality-gate": {
+    "enabled": true,
+    "Stop": [
+      {
+        "type": "command",
+        "command": "node -e 'console.log(JSON.stringify({ message: \"Antigravity task completed. Run npm run check:push to verify builds.\" }))'",
+        "timeout": 10
+      }
+    ]
+  }
+}
