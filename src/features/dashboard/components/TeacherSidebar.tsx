@@ -1,7 +1,6 @@
 // src/features/dashboard/components/TeacherSidebar.tsx
 'use client';
 
-import { ROUTES } from '@/constants/routes';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -9,7 +8,8 @@ import { useTranslation } from '@/hooks/useTranslation';
 import PremiumLogo from '@/components/ui/PremiumLogo';
 import LogoutButton from '@/components/ui/LogoutButton';
 import { useQuiz } from '@/contexts/QuizContext';
-import { isAdmin, isSuperAdmin } from '@/lib/roles';
+import { Crown, Shield, GraduationCap } from 'lucide-react';
+import { getDashboardHomePath, isAdmin, isSuperAdmin } from '@/lib/roles';
 import { ADMIN_NAV, TEACHER_NAV } from '@/constants/navigation';
 import { getNavIcon } from '@/lib/navigation/icons';
 import { useDashboardNav } from '@/hooks/useDashboardNav';
@@ -28,6 +28,7 @@ export default function TeacherSidebar({ user }: { user: User | null }) {
   const { isQuizActive } = useQuiz();
   const isAdminUser = isAdmin(user?.role);
   const isSuperAdminUser = isSuperAdmin(user?.role);
+  const homePath = getDashboardHomePath(user?.role);
 
   const filteredTeacherNavigation = useDashboardNav(TEACHER_NAV);
   const filteredAdminNavigation = useDashboardNav(ADMIN_NAV, { isSuperAdmin: isSuperAdminUser });
@@ -40,57 +41,36 @@ export default function TeacherSidebar({ user }: { user: User | null }) {
       <div className="flex-1 flex flex-col min-h-0 overflow-y-auto pt-4 sm:pt-6 pb-4">
         {/* Logo */}
         <div className="flex items-center flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4">
-          <Link href={ROUTES.teacher.root} className="flex items-center gap-2 sm:gap-3 group">
+          <Link href={homePath} className="flex items-center gap-2 sm:gap-3 group">
             <PremiumLogo size="xl" />
           </Link>
         </div>
 
         {/* Role Badge */}
         <div className="mt-4 sm:mt-6 px-4 sm:px-6">
-          <span className={`rail-chip ${isAdminUser
-            ? 'bg-[var(--color-error-light)] text-[var(--color-error)] border-[var(--color-error)]/25'
-            : ''
-            }`}>
-            <span className={`w-1.5 h-1.5 rounded-full mr-2 animate-pulse ${isAdminUser ? 'bg-[var(--color-error)]' : 'bg-[var(--primary)]'}`} />
-            {isAdminUser ? t('common.administrator') : t('common.teacher')}
-          </span>
+          {isSuperAdminUser ? (
+            <span className="rail-chip inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-500 border border-amber-500/25 shadow-xs">
+              <Crown className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
+              <span>{t('admin.superadminTier') || 'Superadmin'}</span>
+            </span>
+          ) : isAdminUser ? (
+            <span className="rail-chip inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[var(--teacher-soft)] text-[var(--teacher-primary)] border border-[var(--teacher-border)] shadow-xs">
+              <Shield className="w-3.5 h-3.5" />
+              <span>{t('common.administrator')}</span>
+            </span>
+          ) : (
+            <span className="rail-chip">
+              <span className="w-1.5 h-1.5 rounded-full mr-2 animate-pulse bg-[var(--primary)]" />
+              {t('common.teacher')}
+            </span>
+          )}
         </div>
 
         {/* Navigation - Scrollable */}
         <nav className="mt-6 sm:mt-8 flex-1 px-3 sm:px-4 space-y-1 min-h-0 overflow-y-auto">
-          {filteredTeacherNavigation.map((item, index) => {
-            const isActive = pathname === item.href;
-            const Icon = getNavIcon(item.icon);
-
-            return (
-              <motion.div
-                key={item.nameKey}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05 }}
-              >
-                <Link
-                  href={item.href}
-                  className={`rail-link ${isActive ? 'rail-link--active' : ''}`}
-                >
-                  <Icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
-                  <span className="truncate">{t(item.nameKey)}</span>
-                  {isActive && (
-                    <motion.div
-                      layoutId="sidebarActiveIndicator"
-                      className="rail-link__dot"
-                    />
-                  )}
-                </Link>
-              </motion.div>
-            );
-          })}
-
-          {isAdminUser && (
-            <div className="pt-3 sm:pt-4 mt-3 sm:mt-4 border-t border-[var(--border)]">
-              <p className="rail-section-label">
-                {t('common.administration')}
-              </p>
+          {isAdminUser ? (
+            <>
+              {/* Primary Admin Navigation */}
               <div className="space-y-1">
                 {filteredAdminNavigation.map((item, index) => {
                   const isActive = pathname === item.href;
@@ -99,9 +79,9 @@ export default function TeacherSidebar({ user }: { user: User | null }) {
                   return (
                     <motion.div
                       key={item.nameKey}
-                      initial={{ opacity: 0, x: -20 }}
+                      initial={{ opacity: 0, x: -16 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: (filteredTeacherNavigation.length + index) * 0.05 }}
+                      transition={{ delay: index * 0.03 }}
                     >
                       <Link
                         href={item.href}
@@ -120,7 +100,67 @@ export default function TeacherSidebar({ user }: { user: User | null }) {
                   );
                 })}
               </div>
-            </div>
+
+              {/* Teacher Workspace Section */}
+              <div className="pt-4 mt-4 border-t border-[var(--border)]">
+                <div className="flex items-center gap-1.5 px-2 pb-1 text-[11px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
+                  <GraduationCap className="w-3.5 h-3.5" />
+                  <span>{t('admin.teacherWorkspace') || 'Teacher Workspace'}</span>
+                </div>
+                <div className="space-y-1">
+                  {filteredTeacherNavigation.slice(0, 5).map((item, index) => {
+                    const isActive = pathname === item.href;
+                    const Icon = getNavIcon(item.icon);
+
+                    return (
+                      <motion.div
+                        key={item.nameKey}
+                        initial={{ opacity: 0, x: -16 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: (filteredAdminNavigation.length + index) * 0.03 }}
+                      >
+                        <Link
+                          href={item.href}
+                          className={`rail-link text-xs ${isActive ? 'rail-link--active' : ''}`}
+                        >
+                          <Icon className="w-4 h-4 flex-shrink-0" />
+                          <span className="truncate">{t(item.nameKey)}</span>
+                        </Link>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
+          ) : (
+            /* Regular Teacher Navigation */
+            filteredTeacherNavigation.map((item, index) => {
+              const isActive = pathname === item.href;
+              const Icon = getNavIcon(item.icon);
+
+              return (
+                <motion.div
+                  key={item.nameKey}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.04 }}
+                >
+                  <Link
+                    href={item.href}
+                    className={`rail-link ${isActive ? 'rail-link--active' : ''}`}
+                  >
+                    <Icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                    <span className="truncate">{t(item.nameKey)}</span>
+                    {isActive && (
+                      <motion.div
+                        layoutId="sidebarActiveIndicator"
+                        className="rail-link__dot"
+                      />
+                    )}
+                  </Link>
+                </motion.div>
+              );
+            })
           )}
         </nav>
       </div>

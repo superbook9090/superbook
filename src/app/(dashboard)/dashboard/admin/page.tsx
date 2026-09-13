@@ -8,6 +8,7 @@ import { isSuperAdmin as checkIsSuperAdmin } from '@/lib/roles';
 import { PageWrapper } from '@/components/layout';
 import { useAdminAnalytics } from './analytics/_hooks/useAdminAnalytics';
 import AdminHero from './_components/AdminHero';
+import SuperadminExecutiveSuite from './_components/SuperadminExecutiveSuite';
 import AdminStatsGrid from './_components/AdminStatsGrid';
 import AdminQuickActions from './_components/AdminQuickActions';
 import AdminRecentActivity from './_components/AdminRecentActivity';
@@ -34,7 +35,7 @@ export default function AdminDashboardPage() {
   const isSuperAdmin = checkIsSuperAdmin(session.user?.role);
 
   return (
-    <PageWrapper className="space-y-6">
+    <PageWrapper compact className="pb-10">
       <AdminHero
         userName={session.user?.name}
         isSuperAdmin={isSuperAdmin}
@@ -43,6 +44,8 @@ export default function AdminDashboardPage() {
         dateRange={dateRange}
         onDateRangeChange={setDateRange}
       />
+
+      {isSuperAdmin && <SuperadminExecutiveSuite stats={stats} />}
 
       <AdminStatsGrid
         stats={stats}

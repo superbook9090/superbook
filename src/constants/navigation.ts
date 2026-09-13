@@ -20,7 +20,9 @@ export type NavIconName =
   | 'Newspaper'
   | 'Award'
   | 'Notebook'
-  | 'Trophy';
+  | 'Trophy'
+  | 'Video'
+  | 'Settings';
 
 export type NavFeatureFlag = 'enableBlogs' | 'enableQuizzes' | 'enableCourses' | 'enableAnalytics' | 'enableNotes' | 'enableContests';
 
@@ -63,17 +65,19 @@ export const TEACHER_NAV: DashboardNavItem[] = [
 ];
 
 export const ADMIN_NAV: DashboardNavItem[] = [
+  { nameKey: 'common.dashboard', href: ROUTES.admin.root, icon: 'LayoutDashboard' },
   { nameKey: 'common.users', href: ROUTES.admin.users, icon: 'Users' },
   { nameKey: 'common.organizations', href: ROUTES.admin.organizations, icon: 'Building2', superadminOnly: true },
   { nameKey: 'common.allCourses', href: ROUTES.admin.courses, icon: 'Library', feature: 'enableCourses' },
   { nameKey: 'common.allQuizzes', href: ROUTES.admin.quizzes, icon: 'HelpCircle', feature: 'enableQuizzes' },
   { nameKey: 'common.allBlogs', href: ROUTES.admin.blogs, icon: 'Newspaper', feature: 'enableBlogs' },
+  { nameKey: 'admin.videoManagement', href: ROUTES.admin.videos, icon: 'Video' },
   { nameKey: 'common.files', href: ROUTES.admin.files, icon: 'Folder', superadminOnly: true },
   { nameKey: 'common.notes', href: ROUTES.admin.notes, icon: 'Notebook', feature: 'enableNotes' },
   { nameKey: 'common.analytics', href: ROUTES.admin.analytics, icon: 'BarChart3', feature: 'enableAnalytics' },
   { nameKey: 'common.progress', href: ROUTES.admin.progress, icon: 'TrendingUp' },
   { nameKey: 'common.notifications', href: ROUTES.admin.notifications, icon: 'Bell', superadminOnly: true },
-  { nameKey: 'common.settings', href: ROUTES.admin.settings, icon: 'User' },
+  { nameKey: 'common.settings', href: ROUTES.admin.settings, icon: 'Settings' },
   { nameKey: 'common.profile', href: ROUTES.admin.profile, icon: 'User' },
 ];
 

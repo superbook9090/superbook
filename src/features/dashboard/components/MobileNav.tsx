@@ -14,6 +14,7 @@ import { Menu, X, Bell } from 'lucide-react';
 import type { DashboardNavItem } from '@/constants/navigation';
 import { getNavIcon } from '@/lib/navigation/icons';
 import { useDashboardNav } from '@/hooks/useDashboardNav';
+import { getDashboardHomePath } from '@/lib/roles';
 import { cn } from '@/lib/utils';
 import DownloadAppSidebarCard from '@/components/ui/DownloadAppSidebarCard';
 
@@ -40,6 +41,7 @@ function MobileNavComponent({
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const isStaff = ['teacher', 'admin', 'superadmin'].includes(user?.role || '');
+  const homePath = getDashboardHomePath(user?.role);
   const { t } = useTranslation();
 
   const mainItems = useDashboardNav(navigation);
@@ -67,7 +69,7 @@ function MobileNavComponent({
       <div className={cn(headerBg, 'md:hidden fixed top-0 left-0 right-0 z-50 safe-area-pt-compact shadow-[var(--shadow-sm)] border-b border-[var(--border)]')}>
         <div className="mobile-header-bar flex items-center justify-between px-4 sm:px-5">
           <Link
-            href={isStaff ? ROUTES.teacher.root : ROUTES.student.root}
+            href={homePath}
             className="flex items-center gap-2 shrink-0 my-auto"
           >
             <PremiumLogo size="sm" />
