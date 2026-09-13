@@ -1,14 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import { Globe, UserPlus, GraduationCap, AlertTriangle, ShieldAlert, Languages, Sparkles, Check, Loader2 } from 'lucide-react';
+import { Globe, UserPlus, GraduationCap, AlertTriangle, ShieldAlert, Languages } from 'lucide-react';
 import ToggleSwitch from '@/components/ui/ToggleSwitch';
-import ConfirmModal from '@/components/ui/ConfirmModal';
-import { useAlert } from '@/components/ui/AlertContainer';
-import { useSessionStore } from '@/store/useSessionStore';
-import { useQueryClient } from '@tanstack/react-query';
-import { isSuperAdmin, isAdmin } from '@/lib/roles';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { AppSettings } from './types';
 
@@ -26,59 +21,6 @@ export function PlatformConfigSection({
   searchQuery = '',
 }: Props) {
   const { t } = useTranslation();
-  const { session } = useSessionStore();
-  const { addAlert } = useAlert();
-  const queryClient = useQueryClient();
-
-  const [showSeedConfirm, setShowSeedConfirm] = useState(false);
-  const [isSeeding, setIsSeeding] = useState(false);
-  const [hasSeeded, setHasSeeded] = useState(false);
-
-  const canSeed = isSuperAdmin(session?.user?.role) || isAdmin(session?.user?.role);
-
-  useEffect(() => {
-    if (!canSeed) return;
-    let isMounted = true;
-    fetch('/api/admin/blogs/seed')
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (isMounted && data?.isSeeded) {
-          setHasSeeded(true);
-        }
-      })
-      .catch(() => {});
-    return () => {
-      isMounted = false;
-    };
-  }, [canSeed]);
-
-  const handleSeedArticles = async () => {
-    setIsSeeding(true);
-    setShowSeedConfirm(false);
-    try {
-      const res = await fetch('/api/admin/blogs/seed', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || 'Failed to seed articles');
-      }
-      setHasSeeded(true);
-      addAlert({
-        type: 'success',
-        message: data.message || 'Successfully seeded 8 educational articles for Google AdSense compliance!',
-      });
-      await queryClient.invalidateQueries({ queryKey: ['blogs'] });
-    } catch (err) {
-      addAlert({
-        type: 'error',
-        message: (err as Error).message || 'Failed to seed articles',
-      });
-    } finally {
-      setIsSeeding(false);
-    }
-  };
 
   const query = searchQuery.trim().toLowerCase();
 
@@ -89,19 +31,12 @@ export function PlatformConfigSection({
     t('adminSettings.allowTeacherRegistration').toLowerCase().includes(query) ||
     t('adminSettings.defaultLanguage').toLowerCase().includes(query);
 
-  const matchesPublisher =
-    !query ||
-    'adsense'.includes(query) ||
-    'articles'.includes(query) ||
-    'seed'.includes(query) ||
-    'content compliance'.includes(query);
-
   const matchesDanger =
     !query ||
     t('adminSettings.dangerZone').toLowerCase().includes(query) ||
     t('adminSettings.maintenanceMode').toLowerCase().includes(query);
 
-  if (!matchesGeneral && !matchesPublisher && !matchesDanger) return null;
+  if (!matchesGeneral && !matchesDanger) return null;
 
   return (
     <div className="space-y-6">
@@ -222,63 +157,6 @@ export function PlatformConfigSection({
         </motion.div>
       )}
 
-      {/* AdSense Publisher Compliance Seeding */}
-      {canSeed && matchesPublisher && (
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="card-surface rounded-xl border border-[var(--border)] overflow-hidden shadow-xs"
-        >
-          <div className="p-4 sm:p-5 border-b border-[var(--border)]/70 bg-[var(--color-surface-muted)]/30">
-            <h3 className="text-sm sm:text-base font-bold text-[var(--color-foreground)] flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-[var(--primary)]" />
-              <span>AdSense Content Seeding (Super Admin)</span>
-            </h3>
-            <p className="text-xs text-[var(--color-muted-foreground)] mt-0.5">
-              One-click provisioning of authoritative educational articles required for Google AdSense publisher compliance.
-            </p>
-          </div>
-
-          <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="min-w-0 flex-1">
-              <h4 className="font-semibold text-xs sm:text-sm text-[var(--color-foreground)]">
-                Seed 8 Authoritative Educational Articles
-              </h4>
-              <p className="text-xs text-[var(--color-muted-foreground)] mt-0.5 leading-relaxed">
-                Inserts 8 comprehensive study guides (800+ words each across Math, Science, Physics, Biology, and Pedagogy) and automatically unpublishes dummy test drafts to satisfy Google AdSense Low-Value Content policies. Designed to run once.
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setShowSeedConfirm(true)}
-              disabled={isSeeding || hasSeeded}
-              className={`shrink-0 inline-flex items-center justify-center gap-2 min-h-[42px] px-5 py-2.5 text-xs sm:text-sm font-bold rounded-xl border transition-all ${
-                hasSeeded
-                  ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30 cursor-default'
-                  : 'bg-[var(--primary)] text-white border-transparent hover:opacity-90 shadow-md'
-              }`}
-            >
-              {isSeeding ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Seeding Articles...</span>
-                </>
-              ) : hasSeeded ? (
-                <>
-                  <Check className="w-4 h-4" />
-                  <span>Articles Seeded ✓</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-4 h-4" />
-                  <span>Seed AdSense Articles</span>
-                </>
-              )}
-            </button>
-          </div>
-        </motion.div>
-      )}
 
       {/* Danger Zone */}
       {matchesDanger && (
@@ -325,18 +203,6 @@ export function PlatformConfigSection({
           </div>
         </motion.div>
       )}
-
-      <ConfirmModal
-        isOpen={showSeedConfirm}
-        title="Seed High-Quality Educational Articles"
-        message="This will seed 8 comprehensive educational articles (800+ words each across Math, Science, Physics, Biology, and Pedagogy) and automatically unpublish test/placeholder drafts for Google AdSense compliance. This is designed to run once."
-        confirmText="Seed Articles Now"
-        cancelText="Cancel"
-        type="info"
-        isLoading={isSeeding}
-        onConfirm={handleSeedArticles}
-        onCancel={() => setShowSeedConfirm(false)}
-      />
     </div>
   );
 }
