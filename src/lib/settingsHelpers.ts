@@ -20,6 +20,7 @@ interface FeatureToggles {
   enableNotes?: boolean;
   enableAiQuizGen?: boolean;
   enableCourseDoubts?: boolean;
+  enableQuizChallenges?: boolean;
 }
 
 interface TeacherLimits {
@@ -45,6 +46,7 @@ const DEFAULT_FEATURE_TOGGLES: Partial<Record<keyof FeatureToggles, boolean>> = 
   enableNotes: true,
   enableAiQuizGen: true,
   enableCourseDoubts: true,
+  enableQuizChallenges: true,
 };
 
 export async function isFeatureEnabled(feature: keyof FeatureToggles): Promise<boolean> {
@@ -163,3 +165,19 @@ export async function checkTeacherLimit(
   }
   return null;
 }
+
+export interface ChallengeSettings {
+  allowGuestChallenges: boolean;
+  guestQuestionLimit: number;
+  challengeExpiryDays: number;
+}
+
+export async function getChallengeSettings(): Promise<ChallengeSettings> {
+  const settings = await getSettingsWithDefaults();
+  return {
+    allowGuestChallenges: settings?.challengeConfig?.allowGuestChallenges ?? true,
+    guestQuestionLimit: settings?.challengeConfig?.guestQuestionLimit ?? 5,
+    challengeExpiryDays: settings?.challengeConfig?.challengeExpiryDays ?? 7,
+  };
+}
+

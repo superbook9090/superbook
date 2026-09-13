@@ -22,9 +22,10 @@ export type NavIconName =
   | 'Notebook'
   | 'Trophy'
   | 'Video'
+  | 'Swords'
   | 'Settings';
 
-export type NavFeatureFlag = 'enableBlogs' | 'enableQuizzes' | 'enableCourses' | 'enableAnalytics' | 'enableNotes' | 'enableContests';
+export type NavFeatureFlag = 'enableBlogs' | 'enableQuizzes' | 'enableCourses' | 'enableAnalytics' | 'enableNotes' | 'enableContests' | 'enableQuizChallenges';
 
 export interface DashboardNavItem {
   /** i18n key, e.g. `common.dashboard` */
@@ -71,6 +72,7 @@ export const ADMIN_NAV: DashboardNavItem[] = [
   { nameKey: 'common.allCourses', href: ROUTES.admin.courses, icon: 'Library', feature: 'enableCourses' },
   { nameKey: 'common.allQuizzes', href: ROUTES.admin.quizzes, icon: 'HelpCircle', feature: 'enableQuizzes' },
   { nameKey: 'common.allBlogs', href: ROUTES.admin.blogs, icon: 'Newspaper', feature: 'enableBlogs' },
+  { nameKey: 'admin.challenges', href: ROUTES.admin.challenges, icon: 'Swords', superadminOnly: true },
   { nameKey: 'admin.videoManagement', href: ROUTES.admin.videos, icon: 'Video' },
   { nameKey: 'common.files', href: ROUTES.admin.files, icon: 'Folder', superadminOnly: true },
   { nameKey: 'common.notes', href: ROUTES.admin.notes, icon: 'Notebook', feature: 'enableNotes' },

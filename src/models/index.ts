@@ -26,6 +26,8 @@ import './Note';
 import './CourseDoubt';
 import './Contest';
 import './ContestAttempt';
+import './Challenge';
+import './ChallengeAttempt';
 
 export { default as User } from './User';
 export { default as Organization } from './Organization';
@@ -52,3 +54,5 @@ export { default as Note } from './Note';
 export { default as CourseDoubt } from './CourseDoubt';
 export { default as Contest } from './Contest';
 export { default as ContestAttempt } from './ContestAttempt';
+export { default as Challenge } from './Challenge';
+export { default as ChallengeAttempt } from './ChallengeAttempt';

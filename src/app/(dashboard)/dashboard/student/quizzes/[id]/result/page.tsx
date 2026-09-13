@@ -18,11 +18,9 @@ import {
   LazyQuizRankPredictor,
   LazyQuizResultOverview,
 } from '@/lib/lazy';
-import {
-  QuizSolutionsFilter,
-  type SolutionFilter,
-} from '@/features/quizzes/components/QuizSolutionsFilter';
+import { QuizSolutionsFilter, type SolutionFilter } from '@/features/quizzes/components/QuizSolutionsFilter';
 import { QuizSolutionAnalysis } from '@/features/quizzes/components/QuizSolutionAnalysis';
+import { QuizChallengeBanner } from '@/features/quizzes/components/QuizChallengeBanner';
 import { cn } from '@/lib/utils';
 
 interface Question {
@@ -198,6 +196,21 @@ export default function QuizResultPage() {
           </h1>
         </div>
       </div>
+
+      <QuizChallengeBanner
+        quizAttemptId={attempt.attempt._id}
+        quizTitle={attempt.quiz.title?.trim() || t('quizResult.quizCompleted')}
+        studentName={session?.user?.name || undefined}
+        score={score}
+        correctCount={safeNumber(attempt.attempt.correctCount)}
+        totalQuestions={safeNumber(
+          attempt.attempt.totalQuestions,
+          attempt.quiz.questions?.length ?? 0
+        )}
+        timeTaken={safeNumber(attempt.attempt.timeTaken)}
+        percentile={comparison?.percentile}
+        rank={comparison?.rank}
+      />
 
       {comparison && (
         <>

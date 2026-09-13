@@ -30,6 +30,17 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       if (isNewPhoneReg || isDefaultPhoneUser) {
         setShowUsernameModal(true);
       }
+
+      // Check and claim any pending guest challenge attempt
+      const claimToken = localStorage.getItem('quizdo_claim_token');
+      if (claimToken) {
+        localStorage.removeItem('quizdo_claim_token');
+        fetch('/api/challenges/claim', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ claimToken }),
+        }).catch((err) => console.error('Auto-claim challenge error:', err));
+      }
     }
   }, [status, session]);
 

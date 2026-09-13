@@ -92,6 +92,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     const { teacherLimits, notesLimits, featureToggles, platformConfig } = validationResult.data;
+    const isSuper = isSuperAdmin(session.user.role);
 
     await dbConnect();
 
@@ -208,9 +209,27 @@ export async function PATCH(req: NextRequest) {
           isSuper && featureToggles.enableGoogleAuthWeb !== undefined
             ? featureToggles.enableGoogleAuthWeb
             : (existingToggles.enableGoogleAuthWeb ?? true),
+        enableQuizChallenges:
+          isSuper && featureToggles.enableQuizChallenges !== undefined
+            ? featureToggles.enableQuizChallenges
+            : (existingToggles.enableQuizChallenges ?? true),
       };
 
       settings.featureToggles = mergedToggles;
+    }
+
+    // Update challenge config if provided (superadmin only)
+    if (body.challengeConfig && isSuper) {
+      const existingConfig = settings.challengeConfig || {
+        allowGuestChallenges: true,
+        guestQuestionLimit: 5,
+        challengeExpiryDays: 7,
+      };
+      settings.challengeConfig = {
+        allowGuestChallenges: body.challengeConfig.allowGuestChallenges ?? existingConfig.allowGuestChallenges ?? true,
+        guestQuestionLimit: body.challengeConfig.guestQuestionLimit ?? existingConfig.guestQuestionLimit ?? 5,
+        challengeExpiryDays: body.challengeConfig.challengeExpiryDays ?? existingConfig.challengeExpiryDays ?? 7,
+      };
     }
 
     // Update platform config if provided

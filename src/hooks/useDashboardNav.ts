@@ -21,6 +21,7 @@ export function useDashboardNav(
   const enableAnalytics = useFeature('enableAnalytics');
   const enableNotes = useFeature('enableNotes');
   const enableContests = useFeature('enableContests');
+  const enableQuizChallenges = useFeature('enableQuizChallenges');
 
   const features = useMemo<Record<NavFeatureFlag, boolean>>(
     () => ({
@@ -30,8 +31,9 @@ export function useDashboardNav(
       enableAnalytics,
       enableNotes,
       enableContests,
+      enableQuizChallenges,
     }),
-    [enableBlogs, enableQuizzes, enableCourses, enableAnalytics, enableNotes, enableContests]
+    [enableBlogs, enableQuizzes, enableCourses, enableAnalytics, enableNotes, enableContests, enableQuizChallenges]
   );
 
   return useMemo(() => {

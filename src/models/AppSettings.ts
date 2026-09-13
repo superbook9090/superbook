@@ -31,6 +31,12 @@ export interface IAppSettings extends Document {
     enableContests?: boolean;
     enableContestMarketingPopup?: boolean;
     enableDownloadAppPopup?: boolean;
+    enableQuizChallenges?: boolean;
+  };
+  challengeConfig?: {
+    allowGuestChallenges: boolean;
+    guestQuestionLimit: number;
+    challengeExpiryDays: number;
   };
   platformConfig: {
     maintenanceMode: boolean;
@@ -152,6 +158,28 @@ const appSettingsSchema = new Schema<IAppSettings>(
       enableDownloadAppPopup: {
         type: Boolean,
         default: true,
+      },
+      enableQuizChallenges: {
+        type: Boolean,
+        default: true,
+      },
+    },
+    challengeConfig: {
+      allowGuestChallenges: {
+        type: Boolean,
+        default: true,
+      },
+      guestQuestionLimit: {
+        type: Number,
+        default: 5,
+        min: 1,
+        max: 20,
+      },
+      challengeExpiryDays: {
+        type: Number,
+        default: 7,
+        min: 1,
+        max: 60,
       },
     },
     platformConfig: {

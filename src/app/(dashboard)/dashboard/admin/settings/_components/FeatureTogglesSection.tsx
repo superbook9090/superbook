@@ -17,6 +17,7 @@ import {
   Users,
   Sparkles,
   Trophy,
+  Swords,
 } from 'lucide-react';
 import ToggleSwitch from '@/components/ui/ToggleSwitch';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -68,6 +69,7 @@ export function FeatureTogglesSection({
         { key: 'enableCourseDoubts', labelKey: 'adminSettings.enableCourseDoubts', descKey: 'adminSettings.enableCourseDoubtsDesc', icon: FileText, iconBg: 'bg-[var(--success-light)]', iconColor: 'text-[var(--success)]' },
         { key: 'enableContests', labelKey: 'adminSettings.enableContests', descKey: 'adminSettings.enableContestsDesc', icon: Trophy, iconBg: 'bg-[var(--primary-soft)]', iconColor: 'text-[var(--primary)]', isSuperAdminOnly: true },
         { key: 'enableContestMarketingPopup', labelKey: 'adminSettings.enableContestMarketingPopup', descKey: 'adminSettings.enableContestMarketingPopupDesc', icon: Sparkles, iconBg: 'bg-[var(--warning-light)]', iconColor: 'text-[var(--warning)]', isSuperAdminOnly: true },
+        { key: 'enableQuizChallenges', labelKey: 'adminSettings.enableQuizChallenges', descKey: 'adminSettings.enableQuizChallengesDesc', icon: Swords, iconBg: 'bg-[var(--primary-soft)]', iconColor: 'text-[var(--primary)]', isSuperAdminOnly: true },
       ],
     },
     {

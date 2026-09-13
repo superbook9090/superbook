@@ -32,6 +32,12 @@ const defaultSettings: AppSettings = {
     enableNotes: true,
     enableAiQuizGen: true,
     enableDownloadAppPopup: true,
+    enableQuizChallenges: true,
+  },
+  challengeConfig: {
+    allowGuestChallenges: true,
+    guestQuestionLimit: 5,
+    challengeExpiryDays: 7,
   },
   platformConfig: {
     siteName: 'Quiz Do',

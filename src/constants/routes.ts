@@ -92,6 +92,7 @@ export const ROUTES = {
     analytics: '/dashboard/admin/analytics',
     progress: '/dashboard/admin/progress',
     notifications: '/dashboard/admin/notifications',
+    challenges: '/dashboard/admin/challenges',
     settings: '/dashboard/admin/settings',
     profile: '/dashboard/admin/profile',
     videos: '/dashboard/admin/videos',

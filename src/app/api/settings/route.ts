@@ -61,6 +61,12 @@ export async function GET() {
         enableCourseDoubts: true,
         enableContests: false,
         enableDownloadAppPopup: true,
+        enableQuizChallenges: true,
+      },
+      challengeConfig: {
+        allowGuestChallenges: true,
+        guestQuestionLimit: 5,
+        challengeExpiryDays: 7,
       },
       platformConfig: {
         siteName: 'Quiz Do',

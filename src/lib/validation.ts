@@ -196,6 +196,12 @@ export const updateSettingsSchema = z.object({
     enableContests: z.boolean().optional(),
     enableContestMarketingPopup: z.boolean().optional(),
     enableDownloadAppPopup: z.boolean().optional(),
+    enableQuizChallenges: z.boolean().optional(),
+  }).optional(),
+  challengeConfig: z.object({
+    allowGuestChallenges: z.boolean().optional(),
+    guestQuestionLimit: z.number().int().min(1).max(20).optional(),
+    challengeExpiryDays: z.number().int().min(1).max(60).optional(),
   }).optional(),
   platformConfig: z.object({
     siteName: z.string().max(100).optional(),
@@ -380,5 +386,27 @@ export const createContestAttemptSchema = z.object({
   ).optional(),
   timeTaken: z.number().int().min(0).nullable().optional(),
   violationCount: z.number().int().min(0).optional(),
+});
+
+// Challenge validation schemas
+export const createChallengeSchema = z.object({
+  quizAttemptId: objectIdSchema,
+});
+
+export const submitChallengeSchema = z.object({
+  guestName: z.string().trim().min(1, 'Name is required').max(60, 'Name cannot exceed 60 characters'),
+  guestSessionId: z.string().min(1).max(100),
+  timeTaken: z.number().int().min(0).default(0),
+  answers: z.array(
+    z.object({
+      questionId: objectIdSchema,
+      order: z.number().int().min(0).optional(),
+      selectedOption: z.number().int().min(-1).max(10),
+    })
+  ).min(1, 'At least one answer must be submitted'),
+});
+
+export const claimChallengeSchema = z.object({
+  claimToken: z.string().min(1, 'Claim token is required'),
 });
 

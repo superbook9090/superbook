@@ -20,7 +20,8 @@ export type FeatureToggleKey =
   | 'enableContests'
   | 'enableContestMarketingPopup'
   | 'enableDownloadAppPopup'
-  | 'enableCourseDoubts';
+  | 'enableCourseDoubts'
+  | 'enableQuizChallenges';
 
 export type TeacherLimitKey = 'courses' | 'quizzes' | 'blogs' | 'aiQuizGenerations';
 
@@ -32,6 +33,11 @@ export interface PublicAppSettings {
     aiQuizGenerations?: number;
   };
   featureToggles: Record<FeatureToggleKey, boolean>;
+  challengeConfig?: {
+    allowGuestChallenges: boolean;
+    guestQuestionLimit: number;
+    challengeExpiryDays: number;
+  };
   platformConfig: {
     maintenanceMode: boolean;
     allowRegistration: boolean;
@@ -67,6 +73,12 @@ export const defaultPublicAppSettings: PublicAppSettings = {
     enableContests: false,
     enableContestMarketingPopup: false,
     enableDownloadAppPopup: true,
+    enableQuizChallenges: true,
+  },
+  challengeConfig: {
+    allowGuestChallenges: true,
+    guestQuestionLimit: 5,
+    challengeExpiryDays: 7,
   },
   platformConfig: {
     maintenanceMode: false,

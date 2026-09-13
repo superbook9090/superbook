@@ -31,6 +31,12 @@ export interface AppSettings {
     enableContests?: boolean;
     enableContestMarketingPopup?: boolean;
     enableDownloadAppPopup?: boolean;
+    enableQuizChallenges?: boolean;
+  };
+  challengeConfig?: {
+    allowGuestChallenges: boolean;
+    guestQuestionLimit: number;
+    challengeExpiryDays: number;
   };
   platformConfig: {
     siteName?: string;
