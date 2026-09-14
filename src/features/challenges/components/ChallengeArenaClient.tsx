@@ -148,7 +148,7 @@ export function ChallengeArenaClient({
   const isLastQuestion = currentIndex === challenge.questions.length - 1;
 
   return (
-    <div className="min-h-screen py-8 px-4 sm:px-6 flex flex-col justify-center items-center">
+    <div className="flex-1 w-full py-8 sm:py-12 px-4 sm:px-6 flex flex-col justify-center items-center">
       {step === 'intro' && (
         <ChallengeIntroCard
           challenge={challenge}

@@ -3,11 +3,13 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
-import { CheckCircle2, XCircle, Share2, Sparkles, UserPlus } from 'lucide-react';
+import { Share2, Sparkles, UserPlus, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useTranslation } from '@/hooks/useTranslation';
 import { ScorecardCanvasModal } from '@/features/quizzes/components/ScorecardCanvasModal';
+import { ChallengeHeadToHeadCard } from './ChallengeHeadToHeadCard';
+import { ChallengeReviewAccordion } from './ChallengeReviewAccordion';
 import type { ChallengeSubmissionResult, PublicChallengeData } from '../types';
 
 interface ChallengeResultViewProps {
@@ -24,6 +26,8 @@ export function ChallengeResultView({ challenge, result, guestName }: ChallengeR
   const [showReview, setShowReview] = useState(false);
 
   const challengerName = challenge.challenger.name || 'Quizdo Scholar';
+  const opponentDisplayName = guestName || (session?.user?.name ? session.user.name : t('challenge.youGuest'));
+
   const formatTime = (secs: number) => {
     const m = Math.floor(secs / 60);
     const s = secs % 60;
@@ -36,23 +40,65 @@ export function ChallengeResultView({ challenge, result, guestName }: ChallengeR
     else router.push(`/register?claimToken=${result.claimToken}`);
   };
 
+  const getHeroSubtitle = () => {
+    if (result.score === result.targetScore) {
+      if (result.isWon) {
+        const timeDiff = Math.max(1, result.challengerTimeTaken - result.timeTaken);
+        return t('challenge.victoryTiebreakDesc', {
+          score: String(result.score),
+          timeDiff: formatTime(timeDiff),
+        });
+      }
+      if (!result.isDraw) {
+        const timeDiff = Math.max(1, result.timeTaken - result.challengerTimeTaken);
+        return t('challenge.defeatTiebreakDesc', {
+          score: String(result.score),
+          name: challengerName,
+          timeDiff: formatTime(timeDiff),
+        });
+      }
+      return t('challenge.drawDesc', { score: String(result.score) });
+    }
+
+    if (result.isWon) {
+      return t('challenge.victoryDesc', {
+        score: String(result.score),
+        targetScore: String(result.targetScore),
+      });
+    }
+
+    return t('challenge.defeatDesc', {
+      score: String(result.score),
+      name: challengerName,
+      targetScore: String(result.targetScore),
+    });
+  };
+
   return (
-    <div className="flex flex-col gap-6 w-full max-w-2xl mx-auto pb-12">
+    <div className="flex flex-col gap-6 w-full max-w-xl mx-auto pb-12 px-2 sm:px-0">
       {/* 1. Hero Outcome Banner */}
       <div
-        className={`relative overflow-hidden rounded-3xl p-6 sm:p-8 text-center border shadow-xl ${
+        className={`relative overflow-hidden rounded-3xl p-6 sm:p-8 text-center border shadow-2xl transition-all ${
           result.isWon
-            ? 'border-emerald-500/30 bg-gradient-to-b from-emerald-950/40 via-[var(--color-surface)] to-[var(--color-surface)]'
+            ? 'border-emerald-500/30 bg-gradient-to-b from-emerald-950/50 via-[var(--color-surface)] to-[var(--color-surface)]'
             : result.isDraw
-            ? 'border-amber-500/30 bg-gradient-to-b from-amber-950/40 via-[var(--color-surface)] to-[var(--color-surface)]'
-            : 'border-rose-500/30 bg-gradient-to-b from-rose-950/40 via-[var(--color-surface)] to-[var(--color-surface)]'
+            ? 'border-amber-500/30 bg-gradient-to-b from-amber-950/50 via-[var(--color-surface)] to-[var(--color-surface)]'
+            : 'border-rose-500/30 bg-gradient-to-b from-rose-950/50 via-[var(--color-surface)] to-[var(--color-surface)]'
         }`}
       >
-        <div className="w-16 h-16 mx-auto mb-3 rounded-2xl flex items-center justify-center text-3xl shadow-lg bg-[var(--color-surface)] border border-[var(--color-border)]">
+        <div
+          className={`w-16 h-16 mx-auto mb-3 rounded-2xl flex items-center justify-center text-3xl shadow-lg border ${
+            result.isWon
+              ? 'bg-emerald-500/20 border-emerald-500/40 shadow-emerald-500/20'
+              : result.isDraw
+              ? 'bg-amber-500/20 border-amber-500/40 shadow-amber-500/20'
+              : 'bg-rose-500/20 border-rose-500/40 shadow-rose-500/20'
+          }`}
+        >
           {result.isWon ? '🏆' : result.isDraw ? '🤝' : '⚔️'}
         </div>
 
-        <h1 className="text-xl sm:text-2xl font-black text-[var(--color-foreground)]">
+        <h1 className="text-xl sm:text-2xl font-black text-[var(--color-foreground)] tracking-tight">
           {result.isWon
             ? t('challenge.victory', { name: challengerName })
             : result.isDraw
@@ -60,51 +106,29 @@ export function ChallengeResultView({ challenge, result, guestName }: ChallengeR
             : t('challenge.defeat', { name: challengerName })}
         </h1>
 
-        <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] mt-1.5 max-w-md mx-auto">
-          {result.isWon
-            ? t('challenge.victoryDesc', { score: String(result.score), targetScore: String(result.targetScore) })
-            : result.isDraw
-            ? t('challenge.drawDesc', { score: String(result.score) })
-            : t('challenge.defeatDesc', { score: String(result.score), name: challengerName, targetScore: String(result.targetScore) })}
+        <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] mt-2 max-w-md mx-auto leading-relaxed">
+          {getHeroSubtitle()}
         </p>
       </div>
 
-      {/* 2. Head-to-Head Comparison Card */}
-      <div className="card-surface p-5 sm:p-6 rounded-2xl border border-[var(--color-border)] shadow-md">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-muted-foreground)] mb-4 text-center">
-          {t('challenge.headToHead')}
-        </h3>
-
-        <div className="grid grid-cols-2 gap-4 divide-x divide-[var(--color-border)]">
-          {/* You */}
-          <div className="flex flex-col items-center text-center pr-2">
-            <span className="text-xs font-semibold text-[var(--color-primary)]">
-              {guestName || t('challenge.youGuest')}
-            </span>
-            <span className="text-3xl sm:text-4xl font-black text-[var(--color-foreground)] mt-1">
-              {result.score}%
-            </span>
-            <div className="flex flex-col gap-0.5 text-[11px] text-[var(--color-muted-foreground)] mt-2">
-              <span>{t('challenge.correctCountDesc', { correct: String(result.correctCount), total: String(result.totalQuestions) })}</span>
-              <span>⏱️ {formatTime(result.timeTaken)}</span>
-            </div>
-          </div>
-
-          {/* Challenger */}
-          <div className="flex flex-col items-center text-center pl-2">
-            <span className="text-xs font-semibold text-amber-500">
-              {challengerName}
-            </span>
-            <span className="text-3xl sm:text-4xl font-black text-[var(--color-foreground)] mt-1">
-              {result.targetScore}%
-            </span>
-            <div className="flex flex-col gap-0.5 text-[11px] text-[var(--color-muted-foreground)] mt-2">
-              <span>{t('challenge.correctCountDesc', { correct: String(result.challengerCorrectCount), total: String(result.totalQuestions) })}</span>
-              <span>⏱️ {formatTime(result.challengerTimeTaken)}</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* 2. Head-to-Head Scoreboard */}
+      <ChallengeHeadToHeadCard
+        challengerName={challengerName}
+        challengerImage={challenge.challenger.image}
+        opponentName={opponentDisplayName}
+        opponentImage={session?.user?.image}
+        opponentScore={result.score}
+        opponentCorrect={result.correctCount}
+        opponentTotal={result.totalQuestions}
+        opponentTime={result.timeTaken}
+        challengerScore={result.targetScore}
+        challengerCorrect={result.challengerCorrectCount}
+        challengerTotal={challenge.totalQuestions}
+        challengerTime={result.challengerTimeTaken}
+        isWon={result.isWon}
+        isDraw={result.isDraw}
+        formatTime={formatTime}
+      />
 
       {/* 3. Soft-Wall Conversion / Signup Card */}
       {!session?.user && (
@@ -143,101 +167,64 @@ export function ChallengeResultView({ challenge, result, guestName }: ChallengeR
         </div>
       )}
 
-      {/* 4. Action Buttons: Scorecard & Review */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <Button
-          variant="secondary"
-          onClick={() => setIsScorecardOpen(true)}
-          className="flex-1 py-3 px-4 text-xs sm:text-sm font-semibold rounded-xl flex items-center justify-center gap-2"
-        >
-          <Share2 className="w-4 h-4 text-indigo-400" />
-          <span>{t('challenge.bragSocial')}</span>
-        </Button>
+      {/* 4. Action Buttons */}
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button
+            variant="primary"
+            onClick={() => setIsScorecardOpen(true)}
+            className="flex-1 py-3 px-4 text-xs sm:text-sm font-semibold rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:opacity-90 text-white border-0 shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2"
+          >
+            <Share2 className="w-4 h-4" />
+            <span>{t('challenge.bragSocial')}</span>
+          </Button>
 
-        <Button
-          variant="secondary"
-          onClick={() => setShowReview(!showReview)}
-          className="flex-1 py-3 px-4 text-xs sm:text-sm font-semibold rounded-xl"
-        >
-          {showReview ? t('challenge.hideReview') : t('challenge.reviewQuestions')}
-        </Button>
+          <Button
+            variant="secondary"
+            onClick={() => setShowReview(!showReview)}
+            className="flex-1 py-3 px-4 text-xs sm:text-sm font-semibold rounded-xl flex items-center justify-center gap-2"
+          >
+            {showReview ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            <span>{showReview ? t('challenge.hideReview') : t('challenge.reviewQuestions')}</span>
+          </Button>
+        </div>
+
+        {session?.user && challenge.quiz?.id && (
+          <Button
+            variant="outline"
+            onClick={() =>
+              router.push(
+                `/dashboard/student/quizzes/${challenge.quiz.id}/result?attemptId=${encodeURIComponent(result.attemptId)}`
+              )
+            }
+            className="w-full py-3.5 px-4 text-xs sm:text-sm font-bold rounded-xl border border-[var(--color-border)] hover:bg-[var(--color-muted)]/10 text-[var(--color-foreground)] flex items-center justify-center gap-2 transition-all shadow-sm"
+          >
+            <span>{t('challenge.viewFullAnalysis')}</span>
+            <ArrowRight className="w-4 h-4 text-indigo-400" />
+          </Button>
+        )}
       </div>
-
-      {session?.user && challenge.quiz?.id && (
-        <Button
-          variant="outline"
-          onClick={() =>
-            router.push(
-              `/dashboard/student/quizzes/${challenge.quiz.id}/result?attemptId=${encodeURIComponent(result.attemptId)}`
-            )
-          }
-          className="w-full py-3 px-4 text-xs sm:text-sm font-semibold rounded-xl flex items-center justify-center gap-2"
-        >
-          <span>{t('challenge.viewFullAnalysis')}</span>
-        </Button>
-      )}
 
       {/* 5. Question Review Accordion */}
       {showReview && (
-        <div className="flex flex-col gap-3 pt-2">
-          <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--color-foreground)]">
-            {t('challenge.reviewBreakdown')}
-          </h4>
-          {challenge.questions.map((q, idx) => {
-            const graded = result.answers.find((a) => a.questionId === q.id);
-            const isCorrect = graded?.isCorrect ?? false;
-            const selectedOpt = graded?.selectedOption ?? -1;
-            const correctOpt = graded?.correctOption ?? -1;
-
-            return (
-              <div
-                key={q.id}
-                className="p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-xs flex flex-col gap-2"
-              >
-                <div className="flex items-start gap-2">
-                  {isCorrect ? (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                  ) : (
-                    <XCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                  )}
-                  <span className="font-semibold text-[var(--color-foreground)] leading-normal">
-                    {t('challenge.questionPromptNumber', { number: String(idx + 1), prompt: q.prompt })}
-                  </span>
-                </div>
-
-                <div className="pl-6 flex flex-col gap-1 text-[11px]">
-                  <p className={isCorrect ? 'text-emerald-400' : 'text-rose-400'}>
-                    {t('challenge.yourChoice')}{' '}
-                    <span className="font-semibold">
-                      {selectedOpt >= 0 && q.options[selectedOpt]
-                        ? q.options[selectedOpt]
-                        : t('challenge.skipped')}
-                    </span>
-                  </p>
-                  {!isCorrect && correctOpt >= 0 && (
-                    <p className="text-emerald-400">
-                      {t('challenge.correctAnswer')} <span className="font-semibold">{q.options[correctOpt]}</span>
-                    </p>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <ChallengeReviewAccordion
+          questions={challenge.questions}
+          answers={result.answers}
+        />
       )}
 
-      {/* Scorecard Modal for Guest */}
+      {/* Share Scorecard Canvas Modal */}
       <ScorecardCanvasModal
         isOpen={isScorecardOpen}
         onClose={() => setIsScorecardOpen(false)}
         data={{
-          studentName: guestName || 'Quizdo Challenger',
+          studentName: opponentDisplayName,
           quizTitle: challenge.quiz.title,
           score: result.score,
           correctCount: result.correctCount,
           totalQuestions: result.totalQuestions,
           timeTaken: result.timeTaken,
-          shareUrl: typeof window !== 'undefined' ? window.location.href : 'https://quizdo.in',
+          shareUrl: `${typeof window !== 'undefined' ? window.location.origin : ''}/challenge/${challenge.slug}`,
         }}
       />
     </div>

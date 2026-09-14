@@ -206,16 +206,19 @@ export default async function ChallengePage({ params, searchParams }: ChallengeP
     <div className="min-h-screen flex flex-col bg-[var(--color-background)]">
       <MarketingHeader forceScrolled />
 
-      <main className="flex-1 flex flex-col pt-16 sm:pt-20">
-        {isExpired ? (
-          <ExpiredChallengeView />
-        ) : (
-          <ChallengeArenaClient
-            challenge={challenge}
-            initialResult={initialResult}
-            initialGuestName={initialGuestName}
-          />
-        )}
+      <main className="flex-1 flex flex-col pt-16 sm:pt-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-transparent to-transparent pointer-events-none" />
+        <div className="relative z-10 flex-1 flex flex-col">
+          {isExpired ? (
+            <ExpiredChallengeView />
+          ) : (
+            <ChallengeArenaClient
+              challenge={challenge}
+              initialResult={initialResult}
+              initialGuestName={initialGuestName}
+            />
+          )}
+        </div>
       </main>
 
       <Footer />
