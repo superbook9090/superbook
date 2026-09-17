@@ -21,6 +21,8 @@ import {
   Shield,
   Layers,
   Save,
+  CalendarDays,
+  Timer,
 } from 'lucide-react';
 import { ApiClientError } from '@/lib/api/http';
 import type { ContestPrize } from '@/lib/api/contests';
@@ -119,16 +121,24 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
         const allLoadedQuestions: FormQuestion[] = [];
         for (const group of c.questionsForEditor) {
           for (const q of (group.questions as Array<{
-            question: string;
+            // DB stores fields as prompt/correctOption
+            prompt?: string;
+            question?: string;
             options: string[];
+            correctOption?: number;
             correctAnswer?: number;
             points?: number;
             negativePoints?: number;
           }> || [])) {
             allLoadedQuestions.push({
-              question: q.question || '',
+              // Support both legacy (question/correctAnswer) and current (prompt/correctOption) field names
+              question: q.prompt || q.question || '',
               options: q.options || ['', '', '', ''],
-              correctAnswer: typeof q.correctAnswer === 'number' ? q.correctAnswer : 0,
+              correctAnswer: typeof q.correctOption === 'number'
+                ? q.correctOption
+                : typeof q.correctAnswer === 'number'
+                ? q.correctAnswer
+                : 0,
               points: q.points || 1,
               negativePoints: q.negativePoints,
             });
@@ -143,15 +153,21 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
         setPrizes(c.prizes);
       }
 
-      // Format ISO string to datetime-local input
+      // Format UTC ISO string to local datetime-local value (YYYY-MM-DDTHH:mm)
+      const toLocalDateTimeInput = (isoStr: string) => {
+        const d = new Date(isoStr);
+        const pad = (n: number) => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      };
+
       if (c.startTime) {
-        setStartTime(new Date(c.startTime).toISOString().slice(0, 16));
+        setStartTime(toLocalDateTimeInput(String(c.startTime)));
       }
       if (c.endTime) {
-        setEndTime(new Date(c.endTime).toISOString().slice(0, 16));
+        setEndTime(toLocalDateTimeInput(String(c.endTime)));
       }
       if (c.solutionsReleaseAt) {
-        setSolutionsReleaseAt(new Date(c.solutionsReleaseAt).toISOString().slice(0, 16));
+        setSolutionsReleaseAt(toLocalDateTimeInput(String(c.solutionsReleaseAt)));
       }
     }
   }, [isEdit, existingData]);
@@ -443,60 +459,75 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-semibold text-[var(--color-foreground)] mb-1">
-              {t('contest.startTime') || 'Fixed Start Date & Time *'}
+          {/* Start Time */}
+          <div className="group">
+            <label className="block text-xs font-semibold text-[var(--color-muted-foreground)] mb-1.5 group-focus-within:text-[var(--primary)] transition-colors">
+              {t('contest.startTime') || 'Start Date & Time *'}
             </label>
-            <input
-              type="datetime-local"
-              value={startTime}
-              onChange={(e) => setStartTime(e.target.value)}
-              required
-              className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-[var(--color-surface-muted)] border border-[var(--border)] text-[var(--color-foreground)] focus:outline-none"
-            />
+            <div className="relative">
+              <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted-foreground)] group-focus-within:text-[var(--primary)] pointer-events-none transition-colors" />
+              <input
+                type="datetime-local"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                required
+                className="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm rounded-xl bg-[var(--color-surface-muted)] border border-[var(--border)] text-[var(--color-foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/40 focus:border-[var(--primary)] transition-all [color-scheme:light] dark:[color-scheme:dark]"
+              />
+            </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-[var(--color-foreground)] mb-1">
-              {t('contest.endTime') || 'Fixed End Date & Time *'}
+          {/* End Time */}
+          <div className="group">
+            <label className="block text-xs font-semibold text-[var(--color-muted-foreground)] mb-1.5 group-focus-within:text-[var(--primary)] transition-colors">
+              {t('contest.endTime') || 'End Date & Time *'}
             </label>
-            <input
-              type="datetime-local"
-              value={endTime}
-              onChange={(e) => setEndTime(e.target.value)}
-              required
-              className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-[var(--color-surface-muted)] border border-[var(--border)] text-[var(--color-foreground)] focus:outline-none"
-            />
+            <div className="relative">
+              <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted-foreground)] group-focus-within:text-[var(--primary)] pointer-events-none transition-colors" />
+              <input
+                type="datetime-local"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                required
+                className="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm rounded-xl bg-[var(--color-surface-muted)] border border-[var(--border)] text-[var(--color-foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/40 focus:border-[var(--primary)] transition-all [color-scheme:light] dark:[color-scheme:dark]"
+              />
+            </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-[var(--color-foreground)] mb-1">
+          {/* Duration */}
+          <div className="group">
+            <label className="block text-xs font-semibold text-[var(--color-muted-foreground)] mb-1.5 group-focus-within:text-[var(--primary)] transition-colors">
               {t('contest.durationMinutes') || 'Attempt Duration (Minutes) *'}
             </label>
-            <input
-              type="number"
-              min="1"
-              max="1440"
-              value={duration}
-              onChange={(e) => setDuration(e.target.value)}
-              required
-              className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-[var(--color-surface-muted)] border border-[var(--border)] text-[var(--color-foreground)] focus:outline-none"
-            />
+            <div className="relative">
+              <Timer className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted-foreground)] group-focus-within:text-[var(--primary)] pointer-events-none transition-colors" />
+              <input
+                type="number"
+                min="1"
+                max="1440"
+                value={duration}
+                onChange={(e) => setDuration(e.target.value)}
+                required
+                className="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm rounded-xl bg-[var(--color-surface-muted)] border border-[var(--border)] text-[var(--color-foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/40 focus:border-[var(--primary)] transition-all"
+              />
+            </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-[var(--color-foreground)] mb-1">
+          {/* Solutions Release */}
+          <div className="group">
+            <label className="block text-xs font-semibold text-[var(--color-muted-foreground)] mb-1.5 group-focus-within:text-[var(--primary)] transition-colors">
               {t('contest.solutionsReleaseTime') || 'Solutions Unlock Time (Optional)'}
             </label>
-            <input
-              type="datetime-local"
-              value={solutionsReleaseAt}
-              onChange={(e) => setSolutionsReleaseAt(e.target.value)}
-              placeholder="Defaults to Contest End Time"
-              className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-[var(--color-surface-muted)] border border-[var(--border)] text-[var(--color-foreground)] focus:outline-none"
-            />
+            <div className="relative">
+              <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted-foreground)] group-focus-within:text-[var(--primary)] pointer-events-none transition-colors" />
+              <input
+                type="datetime-local"
+                value={solutionsReleaseAt}
+                onChange={(e) => setSolutionsReleaseAt(e.target.value)}
+                className="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm rounded-xl bg-[var(--color-surface-muted)] border border-[var(--border)] text-[var(--color-foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/40 focus:border-[var(--primary)] transition-all [color-scheme:light] dark:[color-scheme:dark]"
+              />
+            </div>
             <span className="text-[11px] text-[var(--color-muted)] mt-1 block">
-              {t('contest.solutionsLockedHint') || 'Answers remain strictly locked for students until this exact time.'}
+              {t('contest.solutionsLockedHint') || 'Answers remain locked for students until this time. Defaults to end time.'}
             </span>
           </div>
         </div>
