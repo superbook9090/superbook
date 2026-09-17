@@ -9,6 +9,7 @@ import {
   Trash2,
   Eye,
   EyeOff,
+  Trophy,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import Tooltip from '@/components/ui/Tooltip';
@@ -123,6 +124,16 @@ export function AdminQuizTableView({
                         }`}
                       >
                         {quiz.isPublished ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                      </button>
+                    </Tooltip>
+
+                    <Tooltip label={t('quiz.leaderboard.title') || 'Leaderboard'}>
+                      <button
+                        type="button"
+                        onClick={() => router.push(`${ROUTES.admin.quizEdit(quiz._id)}?tab=leaderboard`)}
+                        className="p-2 rounded-xl text-[var(--color-muted-foreground)] hover:text-[var(--warning)] hover:bg-[var(--warning-light)] transition-colors cursor-pointer"
+                      >
+                        <Trophy className="w-4 h-4" />
                       </button>
                     </Tooltip>
 

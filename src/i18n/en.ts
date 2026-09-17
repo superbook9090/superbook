@@ -2347,6 +2347,7 @@ export const en = {
 
   curriculum: {
     title: 'Course Curriculum',
+    noModulesYet: 'No modules added yet. Click "Add Topic" above to start building your course curriculum.',
     addTopic: 'Add Topic',
     addSubTopic: 'Add Sub-topic',
     addLesson: 'Add Lesson',
@@ -2547,15 +2548,6 @@ export const en = {
     medium: 'Medium',
     hard: 'Hard',
     languageLabel: 'Language',
-    modelLabel: 'AI Model',
-    autoModel: 'Auto (Recommended - Switch on limit)',
-    modelNextGpt: 'NExT-GPT Pro (Free)',
-    modelDots3: 'Dots-3 Note (Free)',
-    modelNemotron35: 'NVIDIA Nemotron 3.5 (Free)',
-    modelNemotron120b: 'NVIDIA 120B Super (Free)',
-    modelCohere: 'Cohere North Mini (Free)',
-    autoSwitchLabel: 'Auto-switch to other free model if limit reached',
-    autoSwitchHint: 'Automatically tries alternative free models if the selected model reaches quota or rate limits.',
     instructionsLabel: 'Additional Context / Prompt (Optional)',
     instructionsPlaceholder: 'e.g., Focus on light-dependent reactions and ATP synthesis',
     generating: 'Generating Quiz...',

@@ -35,12 +35,19 @@ export default function TeacherCourseCard({ course }: TeacherCourseCardProps) {
           <>
             <Image
               src={course.thumbnail}
+              alt=""
+              fill
+              aria-hidden
+              className="object-cover blur-md opacity-25 scale-110"
+            />
+            <Image
+              src={course.thumbnail}
               alt={course.title}
               fill
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              className="object-contain p-1 group-hover:scale-105 transition-transform duration-500"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
           </>
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-[var(--teacher-soft)] via-[var(--teacher-border)] to-[var(--color-surface-muted)] flex flex-col items-center justify-center p-4">

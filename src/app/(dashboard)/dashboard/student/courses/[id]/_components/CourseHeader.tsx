@@ -103,10 +103,18 @@ export function CourseHeader({
               <div className="relative w-full sm:w-36 md:w-44 h-24 sm:h-24 rounded-xl overflow-hidden shrink-0 border border-[var(--border)] shadow-xs bg-[var(--surface-muted)]">
                 <Image
                   src={thumbnail!}
+                  alt=""
+                  fill
+                  aria-hidden
+                  unoptimized
+                  className="object-cover blur-md opacity-25 scale-110"
+                />
+                <Image
+                  src={thumbnail!}
                   alt={courseTitle}
                   fill
                   unoptimized
-                  className="object-cover"
+                  className="object-contain p-1"
                 />
               </div>
             )}

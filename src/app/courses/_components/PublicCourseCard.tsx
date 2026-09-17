@@ -27,13 +27,22 @@ export default function PublicCourseCard({ course }: PublicCourseCardProps) {
       {/* Thumbnail area */}
       <div className="relative h-44 sm:h-48 w-full overflow-hidden bg-[var(--color-surface-muted)]">
         {course.thumbnail ? (
-          <Image
-            src={course.thumbnail}
-            alt={course.title}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          />
+          <>
+            <Image
+              src={course.thumbnail}
+              alt=""
+              fill
+              aria-hidden
+              className="object-cover blur-md opacity-25 scale-110"
+            />
+            <Image
+              src={course.thumbnail}
+              alt={course.title}
+              fill
+              className="object-contain p-1 group-hover:scale-105 transition-transform duration-500"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            />
+          </>
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-[var(--student-soft)] via-[var(--teacher-soft)] to-[var(--color-surface-muted)] flex flex-col items-center justify-center p-4">
             <div className="w-12 h-12 rounded-2xl bg-[var(--student-primary)]/10 text-[var(--student-primary)] flex items-center justify-center mb-2 shadow-sm">

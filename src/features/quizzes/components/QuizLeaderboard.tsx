@@ -33,14 +33,21 @@ export default function QuizLeaderboard({
 }: QuizLeaderboardProps) {
   const { t } = useTranslation();
   const [leaderboard, setLeaderboard] = useState<QuizLeaderboardEntry[]>([]);
+  const [fetchedQuizTitle, setFetchedQuizTitle] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchLeaderboard = useCallback(async () => {
     try {
       setLoading(true);
-      const data = (await fetchQuizLeaderboard(quizId)) as { leaderboard?: QuizLeaderboardEntry[] };
+      const data = (await fetchQuizLeaderboard(quizId)) as {
+        leaderboard?: QuizLeaderboardEntry[];
+        quiz?: { title?: string };
+      };
       setLeaderboard(data.leaderboard || []);
+      if (data.quiz?.title) {
+        setFetchedQuizTitle(data.quiz.title);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : t('errors.leaderboardLoadFailed'));
     } finally {
@@ -76,6 +83,8 @@ export default function QuizLeaderboard({
     );
   }
 
+  const effectiveTitle = quizTitle || fetchedQuizTitle;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -85,8 +94,8 @@ export default function QuizLeaderboard({
       <Leaderboard
         data={leaderboard}
         title={
-          quizTitle
-            ? `${quizTitle} — ${t('quiz.leaderboard.title')}`
+          effectiveTitle
+            ? `${effectiveTitle} — ${t('quiz.leaderboard.title')}`
             : t('quiz.leaderboard.quizLeaderboard')
         }
         subtitle={t('quiz.firstAttemptResults')}

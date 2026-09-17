@@ -13,6 +13,7 @@ import {
   Eye,
   EyeOff,
   Calendar,
+  Trophy,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
@@ -125,11 +126,21 @@ export function AdminQuizCard({
         </Tooltip>
 
         <div className="flex items-center gap-1.5">
+          <Tooltip label={t('quiz.leaderboard.title') || 'Leaderboard'}>
+            <button
+              type="button"
+              onClick={() => router.push(`${ROUTES.admin.quizEdit(quiz._id)}?tab=leaderboard`)}
+              className="p-2 rounded-xl text-[var(--color-muted-foreground)] hover:text-[var(--warning)] hover:bg-[var(--warning-light)] transition-colors cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center"
+            >
+              <Trophy className="w-4 h-4" />
+            </button>
+          </Tooltip>
+
           <Button
             variant="secondary"
             size="sm"
             onClick={() => router.push(ROUTES.admin.quizEdit(quiz._id))}
-            className="flex items-center gap-1.5 min-h-[38px] text-xs font-semibold px-3"
+            className="flex items-center gap-1.5 min-h-[38px] text-xs font-semibold px-3 cursor-pointer"
           >
             <Edit2 className="w-3.5 h-3.5" />
             <span>{t('common.edit')}</span>

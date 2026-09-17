@@ -101,9 +101,17 @@ export const ImageUpload = ({
           <>
             <Image
               src={value}
+              alt=""
+              fill
+              aria-hidden
+              className="object-cover blur-md opacity-25 scale-110"
+              unoptimized
+            />
+            <Image
+              src={value}
               alt="Uploaded"
               fill
-              className="object-cover rounded-xl"
+              className="object-contain p-1 rounded-xl"
               unoptimized
             />
             <div className="absolute inset-0 bg-[var(--color-foreground)]/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5">

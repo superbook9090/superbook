@@ -49,7 +49,7 @@ export default function AdminCoursesTable({ courses, isSuperAdmin }: AdminCourse
                           src={course.thumbnail}
                           alt={course.title}
                           fill
-                          className="object-cover"
+                          className="object-contain p-0.5"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-[var(--info)]/10 text-[var(--info)]">

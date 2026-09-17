@@ -2347,6 +2347,7 @@ export const hi = {
 
   curriculum: {
     title: 'कोर्स पाठ्यक्रम',
+    noModulesYet: 'अभी तक कोई मॉड्यूल नहीं जोड़ा गया है। पाठ्यक्रम निर्माण शुरू करने के लिए ऊपर "विषय जोड़ें" पर क्लिक करें।',
     addTopic: 'विषय जोड़ें',
     addSubTopic: 'उप-विषय जोड़ें',
     addLesson: 'पाठ जोड़ें',
@@ -2547,15 +2548,6 @@ export const hi = {
     medium: 'मध्यम (Medium)',
     hard: 'कठिन (Hard)',
     languageLabel: 'भाषा',
-    modelLabel: 'AI मॉडल',
-    autoModel: 'ऑटो (अनुशंसित - सीमा पूरी होने पर स्विच)',
-    modelNextGpt: 'NExT-GPT Pro (मुफ़्त)',
-    modelDots3: 'Dots-3 Note (मुफ़्त)',
-    modelNemotron35: 'NVIDIA Nemotron 3.5 (मुफ़्त)',
-    modelNemotron120b: 'NVIDIA 120B Super (मुफ़्त)',
-    modelCohere: 'Cohere North Mini (मुफ़्त)',
-    autoSwitchLabel: 'सीमा पूरी होने पर दूसरे मुफ़्त मॉडल पर स्विच करें',
-    autoSwitchHint: 'यदि चयनित मॉडल की सीमा या कोटा समाप्त होता है, तो स्वतः दूसरा मुफ़्त मॉडल आज़माएँ।',
     instructionsLabel: 'अतिरिक्त विवरण / निर्देश (वैकल्पिक)',
     instructionsPlaceholder: 'जैसे: प्रकाश-निर्भर प्रतिक्रियाओं और एटीपी संश्लेषण पर ध्यान दें',
     generating: 'क्विज़ जनरेट हो रहा है...',

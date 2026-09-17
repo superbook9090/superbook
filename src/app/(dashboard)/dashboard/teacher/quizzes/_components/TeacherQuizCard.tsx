@@ -2,9 +2,11 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { HelpCircle, Clock, BookOpen, Edit, Eye, EyeOff, Trash2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { HelpCircle, Clock, BookOpen, Edit, Eye, EyeOff, Trash2, Trophy } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import Button from '@/components/ui/Button';
+import { ROUTES } from '@/constants/routes';
 import { toIdString } from '@/lib/id';
 import type { Quiz } from '@/lib/react-query/hooks';
 
@@ -24,6 +26,7 @@ export default function TeacherQuizCard({
   onDelete,
 }: TeacherQuizCardProps) {
   const { t } = useTranslation();
+  const router = useRouter();
   const quizId = toIdString(quiz._id);
 
   return (
@@ -88,6 +91,16 @@ export default function TeacherQuizCard({
         >
           <Edit className="w-3.5 h-3.5 mr-1.5" />
           <span>{t('teacherQuizzes.edit')}</span>
+        </Button>
+
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => router.push(`${ROUTES.teacher.quizEdit(quizId)}?tab=leaderboard`)}
+          className="min-h-[44px] px-3.5 text-xs sm:text-sm font-bold shadow-xs hover:shadow-sm transition-all"
+          title={t('quiz.leaderboard.title')}
+        >
+          <Trophy className="w-4 h-4 text-[var(--warning)]" />
         </Button>
 
         <Button

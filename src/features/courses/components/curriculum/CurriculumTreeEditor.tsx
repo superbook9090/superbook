@@ -191,13 +191,20 @@ export default function CurriculumTreeEditor({
       >
         <SortableContext items={topicIds} strategy={verticalListSortingStrategy}>
           <div className="space-y-4">
-            {displayTree.map((topic) => (
-              <SortableTopic
-                key={topic._id}
-                topic={topic as Chapter & CurriculumChapterNode}
-                courseId={courseId}
-                expanded={!!expanded[topic._id]}
-                onToggle={() => toggleExpanded(setExpanded, topic._id)}
+            {displayTree.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-[var(--color-border)] p-8 text-center bg-[var(--color-surface)]">
+                <p className="text-sm font-medium text-[var(--color-muted-foreground)]">
+                  {t('curriculum.noModulesYet')}
+                </p>
+              </div>
+            ) : (
+              displayTree.map((topic) => (
+                <SortableTopic
+                  key={topic._id}
+                  topic={topic as Chapter & CurriculumChapterNode}
+                  courseId={courseId}
+                  expanded={!!expanded[topic._id]}
+                  onToggle={() => toggleExpanded(setExpanded, topic._id)}
                 editingId={editingId}
                 setEditingId={setEditingId}
                 isExpanded={(id) => !!expanded[id]}
@@ -210,7 +217,7 @@ export default function CurriculumTreeEditor({
                 onAddLesson={onAddLesson}
                 onDeleteQuiz={handleRequestDeleteQuiz}
               />
-            ))}
+            )))}
 
             <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
               <h3 className="text-sm font-semibold text-[var(--color-foreground)] mb-3">

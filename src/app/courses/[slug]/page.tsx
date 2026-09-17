@@ -112,12 +112,19 @@ export default async function PublicCourseDetailPage({
         </nav>
 
         {course.thumbnail && (
-          <div className="relative h-56 sm:h-72 rounded-2xl overflow-hidden mb-8">
+          <div className="relative h-56 sm:h-72 rounded-2xl overflow-hidden mb-8 bg-[var(--color-surface-muted)]">
+            <Image
+              src={course.thumbnail}
+              alt=""
+              fill
+              aria-hidden
+              className="object-cover blur-md opacity-25 scale-110"
+            />
             <Image
               src={course.thumbnail}
               alt={course.title}
               fill
-              className="object-cover"
+              className="object-contain p-2"
               priority
               sizes="(max-width: 768px) 100vw, 896px"
             />

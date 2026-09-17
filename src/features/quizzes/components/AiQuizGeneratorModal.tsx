@@ -45,8 +45,6 @@ export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme, entity
   const [numQuestions, setNumQuestions] = useState<number>(() => Math.min(maxAllowedQuestions, 10));
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const [language, setLanguage] = useState('English');
-  const [model, setModel] = useState('auto');
-  const [autoSwitchOnLimit, setAutoSwitchOnLimit] = useState(true);
   const [instructions, setInstructions] = useState('');
 
   const [isGenerating, setIsGenerating] = useState(false);
@@ -83,8 +81,6 @@ export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme, entity
           difficulty,
           language,
           instructions: instructions.trim() || undefined,
-          model: model !== 'auto' ? model : undefined,
-          autoSwitchOnLimit,
           entityType,
         }),
       });
@@ -207,32 +203,32 @@ export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme, entity
               />
             </div>
 
-            {/* Number of Questions & Difficulty Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Number of Questions */}
-              <div>
-                <label className="block text-xs sm:text-sm font-bold text-[var(--color-foreground)] mb-1.5">
-                  <span className="flex items-center gap-1.5">
-                    <SlidersHorizontal className="w-4 h-4 text-[var(--color-primary)]" />
-                    {t('aiQuiz.numQuestionsLabel') || 'Number of Questions'} (Max {maxAllowedQuestions})
-                  </span>
-                </label>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="range"
-                    min={1}
-                    max={maxAllowedQuestions}
-                    value={Math.min(numQuestions, maxAllowedQuestions)}
-                    disabled={isGenerating}
-                    onChange={(e) => setNumQuestions(parseInt(e.target.value))}
-                    className="w-full accent-[var(--color-primary)] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-                  />
-                  <span className="w-8 h-8 flex items-center justify-center rounded-lg bg-[var(--color-surface-muted)] text-sm font-bold text-[var(--color-foreground)] shrink-0 border border-[var(--color-border)]">
-                    {Math.min(numQuestions, maxAllowedQuestions)}
-                  </span>
-                </div>
+            {/* Number of Questions Slider */}
+            <div>
+              <label className="block text-xs sm:text-sm font-bold text-[var(--color-foreground)] mb-1.5">
+                <span className="flex items-center gap-1.5">
+                  <SlidersHorizontal className="w-4 h-4 text-[var(--color-primary)]" />
+                  {t('aiQuiz.numQuestionsLabel') || 'Number of Questions'} (Max {maxAllowedQuestions})
+                </span>
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="range"
+                  min={1}
+                  max={maxAllowedQuestions}
+                  value={Math.min(numQuestions, maxAllowedQuestions)}
+                  disabled={isGenerating}
+                  onChange={(e) => setNumQuestions(parseInt(e.target.value))}
+                  className="w-full accent-[var(--color-primary)] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                />
+                <span className="w-8 h-8 flex items-center justify-center rounded-lg bg-[var(--color-surface-muted)] text-sm font-bold text-[var(--color-foreground)] shrink-0 border border-[var(--color-border)]">
+                  {Math.min(numQuestions, maxAllowedQuestions)}
+                </span>
               </div>
+            </div>
 
+            {/* Difficulty Level & Language Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Difficulty Level */}
               <div>
                 <label className="block text-xs sm:text-sm font-bold text-[var(--color-foreground)] mb-1.5">
@@ -252,10 +248,7 @@ export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme, entity
                   <option value="hard">{t('aiQuiz.hard') || 'Hard'}</option>
                 </select>
               </div>
-            </div>
 
-            {/* Language & Model Selection Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Language Selection */}
               <div>
                 <label className="block text-xs sm:text-sm font-bold text-[var(--color-foreground)] mb-1.5">
@@ -278,47 +271,6 @@ export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme, entity
                   <option value="German">German (Deutsch)</option>
                 </select>
               </div>
-
-              {/* AI Model Selection */}
-              <div>
-                <label className="block text-xs sm:text-sm font-bold text-[var(--color-foreground)] mb-1.5">
-                  <span className="flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4 text-[var(--color-primary)]" />
-                    {t('aiQuiz.modelLabel') || 'AI Model'}
-                  </span>
-                </label>
-                <select
-                  value={model}
-                  disabled={isGenerating}
-                  onChange={(e) => setModel(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-foreground)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  <option value="auto">{t('aiQuiz.autoModel') || 'Auto (Recommended - Switch on limit)'}</option>
-                  <option value="nex-agi/nex-n2.5-pro:free">{t('aiQuiz.modelNextGpt') || 'NExT-GPT Pro (Free)'}</option>
-                  <option value="dots-studio/dots-3-note-preview:free">{t('aiQuiz.modelDots3') || 'Dots-3 Note (Free)'}</option>
-                  <option value="nvidia/nemotron-3.5-lightning:free">{t('aiQuiz.modelNemotron35') || 'NVIDIA Nemotron 3.5 (Free)'}</option>
-                  <option value="nvidia/nemotron-3-super-120b-a12b:free">{t('aiQuiz.modelNemotron120b') || 'NVIDIA 120B Super (Free)'}</option>
-                  <option value="cohere/north-mini-code:free">{t('aiQuiz.modelCohere') || 'Cohere North Mini (Free)'}</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Auto Switch Option */}
-            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-[var(--color-surface-muted)]/60 border border-[var(--color-border)]">
-              <input
-                id="autoSwitchOnLimit"
-                type="checkbox"
-                checked={autoSwitchOnLimit}
-                disabled={isGenerating}
-                onChange={(e) => setAutoSwitchOnLimit(e.target.checked)}
-                className="mt-0.5 h-4 w-4 rounded border-[var(--color-border)] text-[var(--color-primary)] accent-[var(--color-primary)] focus:ring-[var(--color-primary)] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-              />
-              <label htmlFor="autoSwitchOnLimit" className="text-xs text-[var(--color-foreground)] cursor-pointer select-none">
-                <span className="font-semibold block">{t('aiQuiz.autoSwitchLabel') || 'Auto-switch to other free model if limit reached'}</span>
-                <span className="text-[var(--color-muted-foreground)] block mt-0.5">
-                  {t('aiQuiz.autoSwitchHint') || 'Automatically tries alternative free models if the selected model reaches quota or rate limits.'}
-                </span>
-              </label>
             </div>
 
             {/* Additional Instructions */}

@@ -11,7 +11,6 @@ import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
 import { getAccessFilter } from '@/lib/accessControl';
 import { getCachedData, setCachedData, invalidatePattern } from '@/lib/redis';
-import { createDefaultChapter } from '@/domain/learning/courseBootstrap';
 import { revalidateTag } from 'next/cache';
 import {
   publicCourseFilter,
@@ -265,7 +264,6 @@ export async function POST(request: NextRequest) {
     });
 
     await course.save();
-    await createDefaultChapter(course._id as mongoose.Types.ObjectId);
 
     // Invalidate cache for this organization
     await invalidatePattern(`courses:${orgId}:*`);

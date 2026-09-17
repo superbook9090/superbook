@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import mongoose from 'mongoose';
 import dbConnect from '@/lib/db';
+import Quiz from '@/models/Quiz';
 import QuizAttempt from '@/models/QuizAttempt';
 
 export async function GET(
@@ -16,10 +17,14 @@ export async function GET(
     }
 
     const { quizId } = await params;
+    if (!quizId || !mongoose.Types.ObjectId.isValid(quizId)) {
+      return NextResponse.json({ error: 'Invalid quiz ID' }, { status: 400 });
+    }
+
     await dbConnect();
 
-    // Check if user has access to this quiz
-    const quiz = await QuizAttempt.findOne({ quiz: quizId }).lean();
+    // Verify the quiz exists
+    const quiz = (await Quiz.findById(quizId).select('title').lean()) as { title?: string } | null;
     if (!quiz) {
       return NextResponse.json({ error: 'Quiz not found' }, { status: 404 });
     }
@@ -78,6 +83,7 @@ export async function GET(
       leaderboard: rankedLeaderboard,
       quiz: {
         id: quizId,
+        title: quiz.title,
         totalAttempts,
       },
     });

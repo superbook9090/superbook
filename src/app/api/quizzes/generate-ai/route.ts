@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { topic, numQuestions, difficulty, language, instructions, model, autoSwitchOnLimit, entityType } = parseResult.data;
+    const { topic, numQuestions, difficulty, language, instructions, model, entityType } = parseResult.data;
 
     // 4. Database & Teacher Quota Limit Check
     await dbConnect();
@@ -255,7 +255,7 @@ function sanitizeParsedQuestions(parsed: unknown[], numQuestions: number): Gener
         ],
         {
           model: model && model !== 'auto' ? model : undefined,
-          autoSwitchOnLimit,
+          autoSwitchOnLimit: true,
           validateOutput: (text) => parseQuestionsFromAiOutput(text, numQuestions).length > 0,
         }
       );
