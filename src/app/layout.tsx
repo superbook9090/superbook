@@ -17,8 +17,8 @@ import { AnimatedCursor } from '@/components/layout';
 export const metadata: Metadata = {
   ...createRootMetadata(),
   icons: {
-    icon: '/logo.svg',
-    apple: '/logo.svg',
+    icon: '/favicon.png',
+    apple: '/favicon.png',
   },
 };
 
@@ -39,6 +39,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={fontVariables} data-theme="dark" suppressHydrationWarning>
       <body className="antialiased text-sm sm:text-base">
+        <a href="#main-content" className="skip-link absolute left-[-9999px] top-0 focus-visible:left-0 focus-visible:top-0 p-2 bg-white text-black z-50" onKeyDown={(e)=>{if(e.key==='Enter'||e.key===' ') e.currentTarget.click();}}>Skip to main content</a>
         <script
           dangerouslySetInnerHTML={{
             __html:

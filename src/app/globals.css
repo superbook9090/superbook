@@ -136,6 +136,13 @@
   --color-info-light: var(--info-light);
 }
 
+/* Focus-visible outline */
+.focus-visible:focus-visible {
+  outline: 2px solid var(--focus-color, #2563eb);
+  outline-offset: 2px;
+}
+.focus-visible { /* utility class for Tailwind */ }
+
 @media (min-width: 640px) {
   :root {
     --gutter-x: var(--space-5);
