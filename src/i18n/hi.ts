@@ -2196,6 +2196,11 @@ export const hi = {
     discard: 'रद्द करें',
     preset: 'प्रीसेट',
     extraQuestionsHighlighted: 'प्लेटफ़ॉर्म डिफ़ॉल्ट (10) से अधिक कॉन्फ़िगर किए गए प्रश्न क्विज़ जनरेशन के दौरान हाइलाइट किए जाते हैं।',
+    tabFeatureAccess: 'सुविधा एक्सेस',
+    tabContentQuotas: 'सामग्री कोटा',
+    tabAiIntelligence: 'AI इंटेलिजेंस',
+    stepperDecrease: 'सीमा घटाएं',
+    stepperIncrease: 'सीमा बढ़ाएं',
   },
 
   // Organization Management

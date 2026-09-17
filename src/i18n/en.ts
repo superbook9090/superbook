@@ -2196,6 +2196,11 @@ export const en = {
     discard: 'Discard',
     preset: 'Preset',
     extraQuestionsHighlighted: 'Questions configured above platform default (10) are highlighted during quiz generation.',
+    tabFeatureAccess: 'Feature Access',
+    tabContentQuotas: 'Content Quotas',
+    tabAiIntelligence: 'AI Intelligence',
+    stepperDecrease: 'Decrease limit',
+    stepperIncrease: 'Increase limit',
   },
 
   // Organization Management
