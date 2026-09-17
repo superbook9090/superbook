@@ -412,6 +412,37 @@ export const SEO_TOOLS_DATA: Record<string, SeoToolData> = {
     ],
     callToAction: 'Start CTET Practice'
   },
+  'free-test-series-for-pat-exam-2026': {
+    slug: 'free-test-series-for-pat-exam-2026',
+    title: 'Free Test Series for PAT Exam 2026 | Mock Tests & MCQs — Quiz Do',
+    description: 'Practice with free test series for PAT Exam 2026. Full-length mock tests, subject-wise MCQs, previous year pattern questions, instant grading, and negative marking analysis on Quiz Do.',
+    h1: 'Free Test Series for PAT Exam 2026',
+    h2: 'Comprehensive Online Mock Tests & Subject-Wise Practice for PAT 2026',
+    intro: 'Ace the PAT Exam 2026 (Pre-Agriculture Test / Polytechnic Admission Test) with Quiz Do\'s comprehensive free online test series. Built according to the latest official syllabus and examination trends, our platform provides timed full-length mock tests and chapter-wise MCQs across Physics, Chemistry, Mathematics, Biology, and Agriculture. Benefit from realistic computer-based test simulations, negative marking calculations, instant score reports, and comprehensive answer explanations.',
+    features: [
+      { title: 'Exam-Pattern Mock Tests', description: 'Simulate the actual PAT 2026 test with timed, full-length papers strictly aligned with the latest syllabus.', iconName: 'Clock' },
+      { title: 'Subject & Topic-Wise MCQs', description: 'Targeted practice across Physics, Chemistry, Mathematics, Biology, and Agriculture modules.', iconName: 'BookOpen' },
+      { title: 'Instant Scoring & Negative Marking', description: 'Detailed scorecards with accuracy percentages, negative marking penalty tracking, and question analysis.', iconName: 'Zap' }
+    ],
+    benefits: [
+      { title: 'Boost Speed & Exam Stamina', description: 'Master time management and question selection strategy in a realistic online test environment.' },
+      { title: 'Targeted Weak Area Revision', description: 'Identify topic-specific mistakes with detailed question-by-question solutions and hints.' },
+      { title: '100% Free for Aspirants & Coaching', description: 'Practice without paywalls, while teachers and coaching institutes can host custom test series for batches.' }
+    ],
+    howItWorks: [
+      { step: 1, title: 'Choose Mock Test or Subject', description: 'Select a full-length PAT mock test or focus on specific subject question banks.' },
+      { step: 2, title: 'Attempt Under Exam Conditions', description: 'Solve questions with realistic countdown timers, question palettes, and negative marking rules.' },
+      { step: 3, title: 'Analyze Performance & Solutions', description: 'Review instant grading, detailed explanations, and performance metrics to accelerate your score.' }
+    ],
+    faqs: [
+      { question: 'What is the PAT Exam 2026?', answer: 'The Pre-Agriculture Test (PAT) / Polytechnic Admission Test is an entrance examination conducted for admissions into professional degree courses including B.Sc. (Hons) Agriculture, Horticulture, Forestry, and Diploma Engineering programs across various state boards and universities.' },
+      { question: 'Are the PAT 2026 mock tests on Quiz Do completely free?', answer: 'Yes! All PAT 2026 practice tests, subject quizzes, and full-length mock exams on Quiz Do are 100% free with no subscription required.' },
+      { question: 'Does the PAT test series include negative marking practice?', answer: 'Yes. In accordance with competitive entrance standards, tests support optional negative marking evaluation so students can practice calculated risk-taking and avoid penalty deductions.' },
+      { question: 'Which subjects are covered in the PAT 2026 test series?', answer: 'Our test series encompasses Physics, Chemistry, Mathematics (PCM), Biology (PCB), and Agriculture (Ag 1, 2, 3), covering concepts relevant to MP PAT, CG PAT, Assam PAT, and state entrance exams.' },
+      { question: 'Can teachers and coaching institutes publish PAT test series on Quiz Do?', answer: 'Yes. Teachers and coaching educators can create a free account, upload question sets via Excel or AI, configure time limits and negative marking, and share tests with their students.' }
+    ],
+    callToAction: 'Start Free PAT 2026 Test Series'
+  },
   'quiz': {
     slug: 'quiz',
     title: 'Online Quiz Platform | Free Quizzes, Tests & Practice — Quiz Do',

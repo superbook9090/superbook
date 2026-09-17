@@ -4,6 +4,7 @@ export interface Question {
   correctAnswer: number;
   points?: number;
   negativePoints?: number;
+  explanation?: string;
 }
 
 export interface ExcelRow {
@@ -13,4 +14,5 @@ export interface ExcelRow {
   optionC: string;
   optionD: string;
   correctAnswer: number; // 0-3 representing A-D
+  explanation?: string;
 }

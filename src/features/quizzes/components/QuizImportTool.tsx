@@ -4,6 +4,7 @@ import { Sparkles } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { AiQuizGeneratorModal } from './AiQuizGeneratorModal';
+import { parseRawTextQuestions } from '../utils/rawTextQuizParser';
 import type { Question, ExcelRow } from './types';
 
 type Props = {
@@ -166,14 +167,36 @@ export function QuizImportTool({ theme, onImport }: Props) {
     setPreviewData([]);
 
     try {
-      const lines = importText.split('\n').map(line => line.trim()).filter(line => line);
+      const trimmed = importText.trim();
+      const lines = trimmed.split('\n').map((line) => line.trim()).filter((line) => line);
       if (lines.length === 0) {
         setUploadError(t('createQuizForm.fileEmpty'));
         setIsParsing(false);
         return;
       }
 
-      const firstLineCols = lines[0].split('|').map(h => h.trim().toLowerCase());
+      // Check whether user pasted pipe-delimited text or raw question text
+      const hasPipes = lines.some((l) => l.split('|').length >= 5);
+
+      if (!hasPipes) {
+        // Automatically parse raw question text (numbered questions, options A-D, answer keys/explanations)
+        const rawResult = parseRawTextQuestions(trimmed);
+        if (rawResult.questions.length > 0) {
+          setPreviewData(rawResult.questions);
+          setShowTextImport(false);
+          setImportText('');
+          if (rawResult.errors.length > 0) {
+            setUploadError(rawResult.errors.join('\n'));
+          }
+          return;
+        } else if (rawResult.errors.length > 0) {
+          setUploadError(rawResult.errors.join('\n'));
+          return;
+        }
+      }
+
+      // Process pipe-delimited format
+      const firstLineCols = lines[0].split('|').map((h) => h.trim().toLowerCase());
       const requiredColumns = ['question', 'optiona', 'optionb', 'optionc', 'optiond', 'correctanswer'];
       const isHeader = requiredColumns.every((col) =>
         firstLineCols.some((h) => h === col || h === col.replace('option', 'option_'))
@@ -213,7 +236,7 @@ export function QuizImportTool({ theme, onImport }: Props) {
       const errors: string[] = [];
 
       for (let i = startIndex; i < lines.length; i++) {
-        const row = lines[i].split('|').map(cell => cell.trim());
+        const row = lines[i].split('|').map((cell) => cell.trim());
         if (row.every((cell) => !cell)) continue;
 
         const question = row[colMap.question];
@@ -241,7 +264,7 @@ export function QuizImportTool({ theme, onImport }: Props) {
         if (['A', 'B', 'C', 'D'].includes(ca)) {
           correctIndex = ca.charCodeAt(0) - 65;
         } else {
-          correctIndex = parseInt(ca) - 1;
+          correctIndex = parseInt(ca, 10) - 1;
         }
 
         if (isNaN(correctIndex) || correctIndex < 0 || correctIndex > 3) {
@@ -259,8 +282,23 @@ export function QuizImportTool({ theme, onImport }: Props) {
         });
       }
 
+      // If pipe parsing found nothing but user typed something, attempt raw parsing as a smart fallback
+      if (parsed.length === 0) {
+        const fallbackRaw = parseRawTextQuestions(trimmed);
+        if (fallbackRaw.questions.length > 0) {
+          setPreviewData(fallbackRaw.questions);
+          setShowTextImport(false);
+          setImportText('');
+          return;
+        }
+      }
+
       if (errors.length > 0) {
-        setUploadError(`${t('createQuizForm.validationErrors')}\n${errors.slice(0, 5).join('\n')}${errors.length > 5 ? `\n${t('createQuizForm.andMoreErrors').replace('{count}', (errors.length - 5).toString())}` : ''}`);
+        setUploadError(
+          `${t('createQuizForm.validationErrors')}\n${errors.slice(0, 5).join('\n')}${
+            errors.length > 5 ? `\n${t('createQuizForm.andMoreErrors').replace('{count}', (errors.length - 5).toString())}` : ''
+          }`
+        );
       }
 
       if (parsed.length === 0) {
@@ -282,6 +320,7 @@ export function QuizImportTool({ theme, onImport }: Props) {
       question: row.question,
       options: [row.optionA, row.optionB, row.optionC, row.optionD],
       correctAnswer: row.correctAnswer,
+      ...(row.explanation ? { explanation: row.explanation } : {}),
     }));
 
     onImport(importedQuestions);
@@ -411,6 +450,13 @@ export function QuizImportTool({ theme, onImport }: Props) {
             </div>
           )}
           <div className="p-4">
+            <div className="mb-2 flex items-center gap-2 text-xs text-[var(--color-muted-foreground)]">
+              <span className="inline-block w-2 h-2 rounded-full bg-[var(--color-success)]" />
+              <span>
+                {t('createQuizForm.supportsRawAndPipeText') ||
+                  'Auto-detects pasted questions with options (A, B, C, D) & answer key or pipe-separated format.'}
+              </span>
+            </div>
             <textarea
               value={importText}
               onChange={(e) => setImportText(e.target.value)}
@@ -505,6 +551,11 @@ export function QuizImportTool({ theme, onImport }: Props) {
                   <th className="px-3 py-2 text-left text-xs font-medium text-[var(--color-muted-foreground)] uppercase">{t('createQuizForm.question')}</th>
                   <th className="px-3 py-2 text-left text-xs font-medium text-[var(--color-muted-foreground)] uppercase">{t('createQuizForm.options')}</th>
                   <th className="px-3 py-2 text-left text-xs font-medium text-[var(--color-muted-foreground)] uppercase">{t('createQuizForm.answer')}</th>
+                  {previewData.some((r) => !!r.explanation) && (
+                    <th className="px-3 py-2 text-left text-xs font-medium text-[var(--color-muted-foreground)] uppercase">
+                      {t('createQuizForm.explanation') || 'Explanation'}
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--color-border)]">
@@ -516,11 +567,19 @@ export function QuizImportTool({ theme, onImport }: Props) {
                     <td className="px-3 py-2 text-sm font-medium text-[var(--color-success)]">
                       {['A', 'B', 'C', 'D'][typeof row.correctAnswer === 'number' ? row.correctAnswer : 0]}
                     </td>
+                    {previewData.some((r) => !!r.explanation) && (
+                      <td className="px-3 py-2 text-sm text-[var(--color-muted-foreground)] max-w-xs truncate" title={row.explanation || ''}>
+                        {row.explanation || '-'}
+                      </td>
+                    )}
                   </tr>
                 ))}
                 {previewData.length > 5 && (
                   <tr>
-                    <td colSpan={4} className="px-3 py-2 text-sm text-[var(--color-muted-foreground)] text-center italic">
+                    <td
+                      colSpan={previewData.some((r) => !!r.explanation) ? 5 : 4}
+                      className="px-3 py-2 text-sm text-[var(--color-muted-foreground)] text-center italic"
+                    >
                       ... {t('createQuizForm.moreQuestions').replace('{count}', (previewData.length - 5).toString())}
                     </td>
                   </tr>

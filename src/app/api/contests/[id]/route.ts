@@ -4,12 +4,13 @@ import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import '@/models';
 import Contest, { IContest } from '@/models/Contest';
+import Quiz from '@/models/Quiz';
 import ContestAttempt from '@/models/ContestAttempt';
 import { updateContestSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
 import { invalidatePattern } from '@/lib/redis';
-import { listQuestionsForQuiz } from '@/domain/learning/quizContent';
+import { listQuestionsForQuiz, setQuizQuestions } from '@/domain/learning/quizContent';
 import {
   getContestComputedState,
 } from '@/lib/contest/contestHelpers';

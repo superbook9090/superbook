@@ -27,6 +27,7 @@ export const PRIMARY_SEO_LANDINGS: SeoLandingRoute[] = [
   { path: '/online-learning-platform', toolSlug: 'course-builder-online', label: 'Online Learning Platform' },
   { path: '/uptet-quiz', toolSlug: 'uptet-quiz', label: 'UPTET Quiz' },
   { path: '/ctet-quiz', toolSlug: 'ctet-quiz', label: 'CTET Quiz' },
+  { path: '/free-test-series-for-pat-exam-2026', toolSlug: 'free-test-series-for-pat-exam-2026', label: 'Free Test Series for PAT Exam 2026' },
 ];
 
 const pathToRoute = new Map(PRIMARY_SEO_LANDINGS.map((r) => [r.path, r]));

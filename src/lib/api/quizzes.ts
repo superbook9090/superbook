@@ -80,6 +80,8 @@ export type QuizEditQuestion = {
   question: string;
   options: string[];
   correctAnswer?: number;
+  points?: number;
+  negativePoints?: number;
 };
 
 export type QuizEditResponse = {
@@ -91,6 +93,8 @@ export type QuizEditResponse = {
     isPublished: boolean;
     course?: string | { _id: string; title?: string };
     chapter?: string | { _id: string; title?: string } | null;
+    enableNegativeMarking?: boolean;
+    negativeMarks?: number;
   };
   questions?: QuizEditQuestion[];
 };

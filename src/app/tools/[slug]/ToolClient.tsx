@@ -44,6 +44,7 @@ const EXPLORE_LINKS = [
   { slug: 'mcq-generator-free', path: '/mcq-generator' },
   { slug: 'course-maker-free', path: '/course-maker-free' },
   { slug: 'test-series-maker-free', path: '/test-series-maker-free' },
+  { slug: 'free-test-series-for-pat-exam-2026', path: '/free-test-series-for-pat-exam-2026' },
 ] as const;
 
 type ToolClientProps = {

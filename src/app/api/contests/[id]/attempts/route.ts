@@ -185,6 +185,7 @@ export async function POST(
         question: string;
         options: string[];
         points: number;
+        negativePoints?: number;
       }> = [];
 
       for (const qRef of contest.quizzes || []) {
