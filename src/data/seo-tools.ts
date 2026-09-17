@@ -296,6 +296,36 @@ export const SEO_TOOLS_DATA: Record<string, SeoToolData> = {
     ],
     callToAction: 'Start Creating Quizzes'
   },
+  'ai-quiz-generator-for-teachers': {
+    slug: 'ai-quiz-generator-for-teachers',
+    title: 'AI Quiz Generator for Teachers - Create Multiple-Choice Tests in Seconds | Quiz Do',
+    description: 'The smart AI quiz generator built specifically for teachers and educators. Instantly generate standards-aligned MCQs, customize question limits, set difficulty, and create classroom tests in English or Hindi.',
+    h1: 'AI Quiz Generator for Teachers',
+    h2: 'Generate High-Quality Classroom Quizzes in Seconds with AI',
+    intro: 'Eliminate hours of manual question drafting. Quiz Do’s AI Quiz Generator allows educators, tutors, and coaching institutes to generate high-quality, syllabus-aligned multiple-choice questions in seconds. With multi-language support (English, Hindi, Hinglish), flexible question quotas, and automatic difficulty tuning, you can create engaging assessments with zero friction.',
+    features: [
+      { title: 'Intelligent MCQ Generation', description: 'Advanced AI crafts plausible distractors, accurate answer keys, and pedagogical questions from any topic.', iconName: 'Sparkles' },
+      { title: 'Multi-Language Support', description: 'Generate bilingual classroom tests in English, Hindi (Devanagari), Hinglish, Spanish, French, and German.', iconName: 'Globe' },
+      { title: 'Custom Teacher Quotas', description: 'Granular question limits per generation with institutional super-admin overrides for power educators.', iconName: 'Brain' }
+    ],
+    benefits: [
+      { title: 'Reclaim 5+ Hours Weekly', description: 'Spend less time drafting question distractors and more time mentoring and teaching students.' },
+      { title: 'Differentiated Difficulty', description: 'Create Easy, Medium, or Hard assessments tailored to diverse student skill levels.' },
+      { title: 'One-Click Integration', description: 'Directly import generated questions into LMS courses, live student challenges, and timed contests.' }
+    ],
+    howItWorks: [
+      { step: 1, title: 'Enter Topic & Select Level', description: 'Type any syllabus topic or chapter name and choose difficulty and preferred language.' },
+      { step: 2, title: 'AI Formulates Questions', description: 'Our resilient multi-model AI pipeline crafts distinct questions with 4 balanced options in seconds.' },
+      { step: 3, title: 'Review & Assign to Class', description: 'Fine-tune, add marks, and publish directly as homework, practice tests, or competitive contests.' }
+    ],
+    faqs: [
+      { question: 'How does the AI Quiz Generator for teachers work?', answer: 'Simply enter a subject or chapter name, select the desired question count (up to your teacher limit), and pick your language and difficulty. Our education-tuned AI instantly generates a complete multiple-choice quiz.' },
+      { question: 'Can teachers generate questions in Hindi or Hinglish?', answer: 'Yes! Quiz Do natively supports English, Hindi (हिंदी), and Hinglish (Hindi in Roman script), making it ideal for CBSE, State Board, UPTET, CTET, and competitive exam preparation.' },
+      { question: 'Can administrators grant extra question quotas to teachers?', answer: 'Yes. Platform super-administrators can configure global limits for all teachers and grant individual teachers custom elevated question allowances directly from the user management dashboard.' },
+      { question: 'Is Quiz Do’s AI Quiz Generator free for teachers?', answer: 'Yes. Teachers can sign up for free and begin generating AI-assisted quizzes and classroom assessments immediately.' }
+    ],
+    callToAction: 'Generate Quiz with AI Free'
+  },
   'course-builder-online': {
     slug: 'course-builder-online',
     title: 'Online Learning Platform - Courses, Quizzes & LMS | Quiz Do',

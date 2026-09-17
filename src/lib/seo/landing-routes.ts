@@ -23,6 +23,7 @@ export const PRIMARY_SEO_LANDINGS: SeoLandingRoute[] = [
   { path: '/online-exam-creator', toolSlug: 'online-exam-maker', label: 'Online Exam Creator' },
   { path: '/practice-test-generator', toolSlug: 'practice-test-generator', label: 'Practice Test Generator' },
   { path: '/quiz-creator-for-teachers', toolSlug: 'quiz-creator-for-teachers', label: 'Quiz Creator for Teachers' },
+  { path: '/ai-quiz-generator-for-teachers', toolSlug: 'ai-quiz-generator-for-teachers', label: 'AI Quiz Generator for Teachers' },
   { path: '/lms-platform', toolSlug: 'lms-course-creator', label: 'LMS Platform' },
   { path: '/online-learning-platform', toolSlug: 'course-builder-online', label: 'Online Learning Platform' },
   { path: '/uptet-quiz', toolSlug: 'uptet-quiz', label: 'UPTET Quiz' },

@@ -408,6 +408,7 @@ export const en = {
       rights: 'All rights reserved.',
       freeQuizMaker: 'Free Quiz Maker',
       aiQuizGenerator: 'AI Quiz Generator',
+      aiQuizGeneratorForTeachers: 'AI Quiz for Teachers',
       mcqGenerator: 'MCQ Generator',
       courseMaker: 'Course Maker',
       educationalBlogs: 'Educational Blogs',

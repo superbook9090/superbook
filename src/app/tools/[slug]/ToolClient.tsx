@@ -41,6 +41,7 @@ const EXPLORE_LINKS = [
   { slug: 'quiz-generator-from-pdf', path: '/quiz-generator-from-pdf' },
   { slug: 'quiz-maker-free', path: '/quiz-maker-free' },
   { slug: 'ai-quiz-maker-free', path: '/ai-quiz-generator' },
+  { slug: 'ai-quiz-generator-for-teachers', path: '/ai-quiz-generator-for-teachers' },
   { slug: 'mcq-generator-free', path: '/mcq-generator' },
   { slug: 'course-maker-free', path: '/course-maker-free' },
   { slug: 'test-series-maker-free', path: '/test-series-maker-free' },

@@ -20,6 +20,7 @@ const getFooterLinks = (t: (key: string) => string) => ({
   resources: [
     { label: t('home.footer.freeQuizMaker'), href: '/quiz-maker-free' },
     { label: t('home.footer.aiQuizGenerator'), href: '/ai-quiz-generator' },
+    { label: t('home.footer.aiQuizGeneratorForTeachers'), href: '/ai-quiz-generator-for-teachers' },
     { label: t('home.footer.mcqGenerator'), href: '/mcq-generator' },
     { label: t('home.footer.courseMaker'), href: '/course-maker-free' },
     { label: t('home.footer.educationalBlogs'), href: ROUTES.blogs },

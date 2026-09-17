@@ -408,6 +408,7 @@ export const hi = {
       rights: 'सर्वाधिकार सुरक्षित।',
       freeQuizMaker: 'मुफ़्त क्विज़ मेकर',
       aiQuizGenerator: 'AI क्विज़ जनरेटर',
+      aiQuizGeneratorForTeachers: 'शिक्षकों के लिए AI क्विज़',
       mcqGenerator: 'MCQ जनरेटर',
       courseMaker: 'कोर्स मेकर',
       educationalBlogs: 'शैक्षिक ब्लॉग',
