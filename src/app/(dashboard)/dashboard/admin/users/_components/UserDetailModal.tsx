@@ -90,6 +90,16 @@ export function UserDetailModal({
     }
   };
 
+  const onResetLimits = () => {
+    setLimitsForm({
+      courses: selectedUser.limits?.courses ? String(selectedUser.limits.courses) : '',
+      quizzes: selectedUser.limits?.quizzes ? String(selectedUser.limits.quizzes) : '',
+      blogs: selectedUser.limits?.blogs ? String(selectedUser.limits.blogs) : '',
+      aiQuizGenerations: selectedUser.limits?.aiQuizGenerations ? String(selectedUser.limits.aiQuizGenerations) : '',
+      aiQuizMaxQuestions: selectedUser.limits?.aiQuizMaxQuestions ? String(selectedUser.limits.aiQuizMaxQuestions) : '',
+    });
+  };
+
   const onToggleSuspend = async (isSuspended: boolean) => {
     setIsSuspending(true);
     try {
@@ -121,7 +131,7 @@ export function UserDetailModal({
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.96, opacity: 0, y: 15 }}
         transition={{ duration: 0.2 }}
-        className="bg-[var(--card-solid)] border border-[var(--border)] rounded-2xl shadow-2xl w-full max-w-2xl max-h-[min(90vh,calc(100dvh-1.5rem))] sm:max-h-[min(88dvh,850px)] overflow-hidden flex flex-col"
+        className="bg-[var(--card-solid)] border border-[var(--border)] rounded-2xl shadow-2xl w-full max-w-3xl max-h-[min(90vh,calc(100dvh-1.5rem))] sm:max-h-[min(88dvh,850px)] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header - Fixed & Pinned to Top */}
@@ -208,6 +218,7 @@ export function UserDetailModal({
             limitsForm={limitsForm}
             onLimitsChange={(field, val) => setLimitsForm((prev) => ({ ...prev, [field]: val }))}
             onSaveLimits={onSaveLimits}
+            onResetLimits={onResetLimits}
             isSavingLimits={isSavingLimits}
           />
 

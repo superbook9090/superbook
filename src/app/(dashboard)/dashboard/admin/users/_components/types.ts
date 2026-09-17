@@ -30,6 +30,7 @@ export interface User {
   lastUserAgent?: string;
   canCreateContests?: boolean;
   canGenerateAiQuizzes?: boolean;
+  aiQuizGenerationsCount?: number;
   createdAt: string;
   updatedAt?: string;
 }
