@@ -16,6 +16,7 @@ declare module 'next-auth' {
       organizationId?: string | null;
       canUploadVideos?: boolean;
       canCreateContests?: boolean;
+      canGenerateAiQuizzes?: boolean;
     } & DefaultSession['user'];
   }
 
@@ -26,6 +27,7 @@ declare module 'next-auth' {
     organizationId?: string | null;
     canUploadVideos?: boolean;
     canCreateContests?: boolean;
+    canGenerateAiQuizzes?: boolean;
   }
 }
 
@@ -38,6 +40,7 @@ declare module 'next-auth/jwt' {
     organizationId?: string | null;
     canUploadVideos?: boolean;
     canCreateContests?: boolean;
+    canGenerateAiQuizzes?: boolean;
   }
 }
 
@@ -109,6 +112,7 @@ export const authOptions: AuthOptions = {
               organizationId: dbUser.organizationId?.toString() || null,
               canUploadVideos: dbUser.canUploadVideos || false,
               canCreateContests: dbUser.canCreateContests || false,
+              canGenerateAiQuizzes: dbUser.canGenerateAiQuizzes || false,
             };
           } catch (e) {
             console.error('Firebase token verification failed', e);
@@ -174,6 +178,7 @@ export const authOptions: AuthOptions = {
               organizationId: dbUser.organizationId?.toString() || null,
               canUploadVideos: dbUser.canUploadVideos || false,
               canCreateContests: dbUser.canCreateContests || false,
+              canGenerateAiQuizzes: dbUser.canGenerateAiQuizzes || false,
             };
           } catch (e) {
             console.error('Native Google token verification failed', e);
@@ -217,6 +222,7 @@ export const authOptions: AuthOptions = {
           organizationId: user.organizationId?.toString() || null,
           canUploadVideos: user.canUploadVideos || false,
           canCreateContests: user.canCreateContests || false,
+          canGenerateAiQuizzes: user.canGenerateAiQuizzes || false,
         };
       }
     })
@@ -267,6 +273,7 @@ export const authOptions: AuthOptions = {
         user.organizationId = dbUser.organizationId?.toString() || null;
         user.canUploadVideos = dbUser.canUploadVideos || false;
         user.canCreateContests = dbUser.canCreateContests || false;
+        user.canGenerateAiQuizzes = dbUser.canGenerateAiQuizzes || false;
         user.phone = dbUser.phone || '';
 
         return true;
@@ -283,6 +290,7 @@ export const authOptions: AuthOptions = {
         token.organizationId = user.organizationId || null;
         token.canUploadVideos = user.canUploadVideos || false;
         token.canCreateContests = user.canCreateContests || false;
+        token.canGenerateAiQuizzes = user.canGenerateAiQuizzes || false;
         token.phone = user.phone || '';
       }
       if (trigger === 'update' && session) {
@@ -303,6 +311,7 @@ export const authOptions: AuthOptions = {
         session.user.organizationId = token.organizationId || null;
         session.user.canUploadVideos = token.canUploadVideos || false;
         session.user.canCreateContests = token.canCreateContests || false;
+        session.user.canGenerateAiQuizzes = token.canGenerateAiQuizzes || false;
       }
       return session;
     }

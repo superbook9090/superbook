@@ -8,6 +8,7 @@ import {
   Building2,
   Video,
   Globe,
+  Sparkles,
   ChevronRight,
   UserX,
   Shield,
@@ -206,6 +207,13 @@ export function UsersTableRow({
                 <Tooltip label="Public course creation enabled">
                   <span className="p-1 rounded bg-[var(--info-light)] text-[var(--info)]">
                     <Globe className="w-3 h-3" />
+                  </span>
+                </Tooltip>
+              )}
+              {user.canGenerateAiQuizzes && (
+                <Tooltip label="AI quiz generation enabled">
+                  <span className="p-1 rounded bg-[var(--primary-soft)] text-[var(--color-primary)]">
+                    <Sparkles className="w-3 h-3" />
                   </span>
                 </Tooltip>
               )}

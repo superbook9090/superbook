@@ -28,6 +28,7 @@ interface TeacherLimits {
   quizzes: number;
   blogs: number;
   aiQuizGenerations?: number;
+  aiQuizMaxQuestions?: number;
 }
 
 const DEFAULT_FEATURE_TOGGLES: Partial<Record<keyof FeatureToggles, boolean>> = {
@@ -180,4 +181,25 @@ export async function getChallengeSettings(): Promise<ChallengeSettings> {
     challengeExpiryDays: settings?.challengeConfig?.challengeExpiryDays ?? 7,
   };
 }
+
+/**
+ * Checks if a teacher/staff user is permitted to use AI quiz generation.
+ * Superadmin and admin always have access; teachers require canGenerateAiQuizzes: true.
+ */
+export async function canTeacherGenerateAiQuizzes(
+  userId: string,
+  role?: string
+): Promise<boolean> {
+  if (role === 'superadmin' || role === 'admin') {
+    return true;
+  }
+  if (role !== 'teacher') {
+    return false;
+  }
+
+  const user = await User.findById(userId).select('canGenerateAiQuizzes role').lean();
+  if (!user) return false;
+  return Boolean(user.canGenerateAiQuizzes);
+}
+
 

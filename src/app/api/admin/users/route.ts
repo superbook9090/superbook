@@ -332,6 +332,14 @@ export async function PATCH(request: NextRequest) {
       }
     }
 
+    // Validate canGenerateAiQuizzes if provided
+    if (updates.canGenerateAiQuizzes !== undefined && typeof updates.canGenerateAiQuizzes !== 'boolean') {
+      return NextResponse.json(
+        { message: 'canGenerateAiQuizzes must be a boolean' },
+        { status: 400 }
+      );
+    }
+
     // Validate limits if provided
     if (updates.limits) {
       if (updates.limits.courses !== undefined && (typeof updates.limits.courses !== 'number' || updates.limits.courses < 1)) {
@@ -358,6 +366,15 @@ export async function PATCH(request: NextRequest) {
       ) {
         return NextResponse.json(
           { message: 'AI Quiz Generations limit must be a positive integer' },
+          { status: 400 }
+        );
+      }
+      if (
+        updates.limits.aiQuizMaxQuestions !== undefined &&
+        (typeof updates.limits.aiQuizMaxQuestions !== 'number' || updates.limits.aiQuizMaxQuestions < 1)
+      ) {
+        return NextResponse.json(
+          { message: 'AI Quiz Max Questions limit must be a positive integer' },
           { status: 400 }
         );
       }

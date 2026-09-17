@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, X, Loader2, AlertCircle, HelpCircle, Globe, SlidersHorizontal, BookOpen } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import type { Question } from './types';
 
 type Props = {
@@ -11,15 +12,41 @@ type Props = {
   onClose: () => void;
   onSuccess: (questions: Question[]) => void;
   theme: { gradient: string; activeBg: string; activeText: string };
+  entityType?: 'quiz' | 'contest';
 };
 
-export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme }: Props) {
+function sanitizeAiErrorMessage(rawMsg: string, fallback: string): string {
+  if (!rawMsg) return fallback;
+  const isTechnical =
+    rawMsg.includes('models/') ||
+    rawMsg.includes('API version') ||
+    rawMsg.includes('gemini-') ||
+    rawMsg.includes('openrouter') ||
+    rawMsg.includes('Provider returned error') ||
+    rawMsg.includes('RESOURCE_EXHAUSTED') ||
+    rawMsg.includes('prepayment credits') ||
+    rawMsg.includes('Interactions API') ||
+    rawMsg.includes('fetch failed') ||
+    rawMsg.includes('HTTP ') ||
+    rawMsg.includes('Failed to generate quiz:');
+
+  return isTechnical ? fallback : rawMsg;
+}
+
+export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme, entityType = 'quiz' }: Props) {
   const { t } = useTranslation();
+  const isContest = entityType === 'contest';
+  const configuredMaxQuestions = useSettingsStore(
+    (s) => s.settings.teacherLimits?.aiQuizMaxQuestions ?? 10
+  );
+  const maxAllowedQuestions = Math.max(1, configuredMaxQuestions);
 
   const [topic, setTopic] = useState('');
-  const [numQuestions, setNumQuestions] = useState<number>(5);
+  const [numQuestions, setNumQuestions] = useState<number>(() => Math.min(maxAllowedQuestions, 10));
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const [language, setLanguage] = useState('English');
+  const [model, setModel] = useState('auto');
+  const [autoSwitchOnLimit, setAutoSwitchOnLimit] = useState(true);
   const [instructions, setInstructions] = useState('');
 
   const [isGenerating, setIsGenerating] = useState(false);
@@ -33,8 +60,13 @@ export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme }: Prop
       e.preventDefault();
       e.stopPropagation();
     }
+    if (isGenerating) return;
     if (!topic.trim()) {
-      setErrorMsg(t('aiQuiz.topicRequired') || 'Please enter a quiz topic or subject.');
+      setErrorMsg(
+        isContest
+          ? t('contest.topicRequired') || 'Please enter a contest topic or subject.'
+          : t('aiQuiz.topicRequired') || 'Please enter a quiz topic or subject.'
+      );
       return;
     }
 
@@ -47,17 +79,23 @@ export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme }: Prop
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           topic: topic.trim(),
-          numQuestions: Math.min(10, Math.max(1, numQuestions)),
+          numQuestions: Math.min(maxAllowedQuestions, Math.max(1, numQuestions)),
           difficulty,
           language,
           instructions: instructions.trim() || undefined,
+          model: model !== 'auto' ? model : undefined,
+          autoSwitchOnLimit,
+          entityType,
         }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+      const fallbackError = isContest
+        ? t('contest.generationFailed') || 'Unable to generate contest questions at this moment. Please try again in a few moments.'
+        : t('aiQuiz.generationFailed') || 'Unable to generate quiz at this moment. Please try again in a few moments.';
 
       if (!res.ok) {
-        throw new Error(data.message || t('aiQuiz.generationFailed') || 'Failed to generate quiz.');
+        throw new Error(sanitizeAiErrorMessage(data?.message, fallbackError));
       }
 
       if (data.usage) {
@@ -71,7 +109,11 @@ export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme }: Prop
         throw new Error(t('aiQuiz.noQuestionsReturned') || 'No questions returned from AI generator.');
       }
     } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : t('aiQuiz.generationError') || 'An error occurred during generation.');
+      const raw = err instanceof Error ? err.message : '';
+      const fallbackError = isContest
+        ? t('contest.generationFailed') || 'Unable to generate contest questions at this moment. Please try again in a few moments.'
+        : t('aiQuiz.generationFailed') || 'Unable to generate quiz at this moment. Please try again in a few moments.';
+      setErrorMsg(sanitizeAiErrorMessage(raw, fallbackError));
     } finally {
       setIsGenerating(false);
     }
@@ -94,10 +136,14 @@ export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme }: Prop
               </div>
               <div>
                 <h3 className="text-lg font-bold leading-tight">
-                  {t('aiQuiz.modalTitle') || 'Generate Quiz with AI'}
+                  {isContest
+                    ? t('contest.aiModalTitle') || 'Generate Contest Questions with AI'
+                    : t('aiQuiz.modalTitle') || 'Generate Quiz with AI'}
                 </h3>
                 <p className="text-xs text-white/80">
-                  {t('aiQuiz.modalSubtitle') || 'Instantly create multiple choice questions using Google Gemini'}
+                  {isContest
+                    ? t('contest.aiModalSubtitle') || 'Instantly create competitive contest questions using AI'
+                    : t('aiQuiz.modalSubtitle') || 'Instantly create multiple choice questions using AI'}
                 </p>
               </div>
             </div>
@@ -134,47 +180,55 @@ export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme }: Prop
               <label className="block text-xs sm:text-sm font-bold text-[var(--color-foreground)] mb-1.5">
                 <span className="flex items-center gap-1.5">
                   <BookOpen className="w-4 h-4 text-[var(--color-primary)]" />
-                  {t('aiQuiz.topicLabel') || 'Quiz Topic / Subject'} <span className="text-[var(--color-error)]">*</span>
+                  {isContest
+                    ? t('contest.topicLabel') || 'Contest Topic / Subject'
+                    : t('aiQuiz.topicLabel') || 'Quiz Topic / Subject'} <span className="text-[var(--color-error)]">*</span>
                 </span>
               </label>
               <input
                 type="text"
                 value={topic}
+                disabled={isGenerating}
                 onChange={(e) => setTopic(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
                     e.stopPropagation();
-                    void handleGenerate(e);
+                    if (!isGenerating) void handleGenerate(e);
                   }
                 }}
-                placeholder={t('aiQuiz.topicPlaceholder') || 'e.g., Photosynthesis and Cellular Respiration'}
+                placeholder={
+                  isContest
+                    ? t('contest.topicPlaceholder') || 'e.g., Advanced DSA, System Design, or General Science'
+                    : t('aiQuiz.topicPlaceholder') || 'e.g., Photosynthesis and Cellular Respiration'
+                }
                 required
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-foreground)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-foreground)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] disabled:opacity-60 disabled:cursor-not-allowed"
               />
             </div>
 
             {/* Number of Questions & Difficulty Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Number of Questions (Max 10) */}
+              {/* Number of Questions */}
               <div>
                 <label className="block text-xs sm:text-sm font-bold text-[var(--color-foreground)] mb-1.5">
                   <span className="flex items-center gap-1.5">
                     <SlidersHorizontal className="w-4 h-4 text-[var(--color-primary)]" />
-                    {t('aiQuiz.numQuestionsLabel') || 'Number of Questions'} (Max 10)
+                    {t('aiQuiz.numQuestionsLabel') || 'Number of Questions'} (Max {maxAllowedQuestions})
                   </span>
                 </label>
                 <div className="flex items-center gap-3">
                   <input
                     type="range"
                     min={1}
-                    max={10}
-                    value={numQuestions}
+                    max={maxAllowedQuestions}
+                    value={Math.min(numQuestions, maxAllowedQuestions)}
+                    disabled={isGenerating}
                     onChange={(e) => setNumQuestions(parseInt(e.target.value))}
-                    className="w-full accent-[var(--color-primary)] cursor-pointer"
+                    className="w-full accent-[var(--color-primary)] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                   />
                   <span className="w-8 h-8 flex items-center justify-center rounded-lg bg-[var(--color-surface-muted)] text-sm font-bold text-[var(--color-foreground)] shrink-0 border border-[var(--color-border)]">
-                    {numQuestions}
+                    {Math.min(numQuestions, maxAllowedQuestions)}
                   </span>
                 </div>
               </div>
@@ -189,8 +243,9 @@ export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme }: Prop
                 </label>
                 <select
                   value={difficulty}
+                  disabled={isGenerating}
                   onChange={(e) => setDifficulty(e.target.value as 'easy' | 'medium' | 'hard')}
-                  className="w-full px-3 py-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-foreground)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                  className="w-full px-3 py-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-foreground)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <option value="easy">{t('aiQuiz.easy') || 'Easy'}</option>
                   <option value="medium">{t('aiQuiz.medium') || 'Medium'}</option>
@@ -199,26 +254,71 @@ export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme }: Prop
               </div>
             </div>
 
-            {/* Language Selection */}
-            <div>
-              <label className="block text-xs sm:text-sm font-bold text-[var(--color-foreground)] mb-1.5">
-                <span className="flex items-center gap-1.5">
-                  <Globe className="w-4 h-4 text-[var(--color-primary)]" />
-                  {t('aiQuiz.languageLabel') || 'Language'}
+            {/* Language & Model Selection Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Language Selection */}
+              <div>
+                <label className="block text-xs sm:text-sm font-bold text-[var(--color-foreground)] mb-1.5">
+                  <span className="flex items-center gap-1.5">
+                    <Globe className="w-4 h-4 text-[var(--color-primary)]" />
+                    {t('aiQuiz.languageLabel') || 'Language'}
+                  </span>
+                </label>
+                <select
+                  value={language}
+                  disabled={isGenerating}
+                  onChange={(e) => setLanguage(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-foreground)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  <option value="English">English</option>
+                  <option value="Hindi">Hindi (हिंदी)</option>
+                  <option value="Hinglish">Hinglish (Hindi in Roman script)</option>
+                  <option value="Spanish">Spanish (Español)</option>
+                  <option value="French">French (Français)</option>
+                  <option value="German">German (Deutsch)</option>
+                </select>
+              </div>
+
+              {/* AI Model Selection */}
+              <div>
+                <label className="block text-xs sm:text-sm font-bold text-[var(--color-foreground)] mb-1.5">
+                  <span className="flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-[var(--color-primary)]" />
+                    {t('aiQuiz.modelLabel') || 'AI Model'}
+                  </span>
+                </label>
+                <select
+                  value={model}
+                  disabled={isGenerating}
+                  onChange={(e) => setModel(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-foreground)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  <option value="auto">{t('aiQuiz.autoModel') || 'Auto (Recommended - Switch on limit)'}</option>
+                  <option value="nex-agi/nex-n2.5-pro:free">{t('aiQuiz.modelNextGpt') || 'NExT-GPT Pro (Free)'}</option>
+                  <option value="dots-studio/dots-3-note-preview:free">{t('aiQuiz.modelDots3') || 'Dots-3 Note (Free)'}</option>
+                  <option value="nvidia/nemotron-3.5-lightning:free">{t('aiQuiz.modelNemotron35') || 'NVIDIA Nemotron 3.5 (Free)'}</option>
+                  <option value="nvidia/nemotron-3-super-120b-a12b:free">{t('aiQuiz.modelNemotron120b') || 'NVIDIA 120B Super (Free)'}</option>
+                  <option value="cohere/north-mini-code:free">{t('aiQuiz.modelCohere') || 'Cohere North Mini (Free)'}</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Auto Switch Option */}
+            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-[var(--color-surface-muted)]/60 border border-[var(--color-border)]">
+              <input
+                id="autoSwitchOnLimit"
+                type="checkbox"
+                checked={autoSwitchOnLimit}
+                disabled={isGenerating}
+                onChange={(e) => setAutoSwitchOnLimit(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-[var(--color-border)] text-[var(--color-primary)] accent-[var(--color-primary)] focus:ring-[var(--color-primary)] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+              />
+              <label htmlFor="autoSwitchOnLimit" className="text-xs text-[var(--color-foreground)] cursor-pointer select-none">
+                <span className="font-semibold block">{t('aiQuiz.autoSwitchLabel') || 'Auto-switch to other free model if limit reached'}</span>
+                <span className="text-[var(--color-muted-foreground)] block mt-0.5">
+                  {t('aiQuiz.autoSwitchHint') || 'Automatically tries alternative free models if the selected model reaches quota or rate limits.'}
                 </span>
               </label>
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-foreground)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-              >
-                <option value="English">English</option>
-                <option value="Hindi">Hindi (हिंदी)</option>
-                <option value="Hinglish">Hinglish (Hindi in Roman script)</option>
-                <option value="Spanish">Spanish (Español)</option>
-                <option value="French">French (Français)</option>
-                <option value="German">German (Deutsch)</option>
-              </select>
             </div>
 
             {/* Additional Instructions */}
@@ -228,10 +328,11 @@ export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme }: Prop
               </label>
               <textarea
                 value={instructions}
+                disabled={isGenerating}
                 onChange={(e) => setInstructions(e.target.value)}
                 rows={2}
                 placeholder={t('aiQuiz.instructionsPlaceholder') || 'e.g., Focus on light-dependent reactions and ATP synthesis'}
-                className="w-full px-3.5 py-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-foreground)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] resize-none"
+                className="w-full px-3.5 py-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-foreground)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] resize-none disabled:opacity-60 disabled:cursor-not-allowed"
               />
             </div>
 
@@ -255,12 +356,20 @@ export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme }: Prop
                 {isGenerating ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>{t('aiQuiz.generating') || 'Generating Quiz...'}</span>
+                    <span>
+                      {isContest
+                        ? t('contest.generating') || 'Generating Contest Questions...'
+                        : t('aiQuiz.generating') || 'Generating Quiz...'}
+                    </span>
                   </>
                 ) : (
                   <>
                     <Sparkles className="w-4 h-4" />
-                    <span>{t('aiQuiz.generateBtn') || 'Generate Questions'}</span>
+                    <span>
+                      {isContest
+                        ? t('contest.generateBtn') || 'Generate Contest Questions'
+                        : t('aiQuiz.generateBtn') || 'Generate Questions'}
+                    </span>
                   </>
                 )}
               </button>

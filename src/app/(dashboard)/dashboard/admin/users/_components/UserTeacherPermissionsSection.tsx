@@ -12,8 +12,9 @@ interface UserTeacherPermissionsSectionProps {
   onToggleVideo: (currentVal: boolean) => void;
   onTogglePublicCourse: (currentVal: boolean) => void;
   onToggleContest?: (currentVal: boolean) => void;
-  limitsForm: { courses: string; quizzes: string; blogs: string; aiQuizGenerations?: string };
-  onLimitsChange: (field: 'courses' | 'quizzes' | 'blogs' | 'aiQuizGenerations', value: string) => void;
+  onToggleAiQuizGen?: (currentVal: boolean) => void;
+  limitsForm: { courses: string; quizzes: string; blogs: string; aiQuizGenerations?: string; aiQuizMaxQuestions?: string };
+  onLimitsChange: (field: 'courses' | 'quizzes' | 'blogs' | 'aiQuizGenerations' | 'aiQuizMaxQuestions', value: string) => void;
   onSaveLimits: () => void;
   isSavingLimits?: boolean;
 }
@@ -23,6 +24,7 @@ export function UserTeacherPermissionsSection({
   onToggleVideo,
   onTogglePublicCourse,
   onToggleContest,
+  onToggleAiQuizGen,
   limitsForm,
   onLimitsChange,
   onSaveLimits,
@@ -38,7 +40,8 @@ export function UserTeacherPermissionsSection({
     limitsForm.courses !== String(user.limits?.courses ?? '') ||
     limitsForm.quizzes !== String(user.limits?.quizzes ?? '') ||
     limitsForm.blogs !== String(user.limits?.blogs ?? '') ||
-    limitsForm.aiQuizGenerations !== String(user.limits?.aiQuizGenerations ?? '');
+    limitsForm.aiQuizGenerations !== String(user.limits?.aiQuizGenerations ?? '') ||
+    limitsForm.aiQuizMaxQuestions !== String(user.limits?.aiQuizMaxQuestions ?? '');
 
   return (
     <div className="flex flex-col gap-4 p-4 rounded-xl bg-[var(--color-surface-muted)]/40 border border-[var(--border)]">
@@ -126,6 +129,32 @@ export function UserTeacherPermissionsSection({
             <div className="w-11 h-6 bg-[var(--color-surface-muted-strong)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[var(--color-border)] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--warning)]" />
           </label>
         </div>
+
+        {/* AI Quiz Generator Permission */}
+        <div className="flex items-center justify-between gap-3 p-3.5 rounded-xl bg-[var(--card-solid)] border border-[var(--border)]">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="p-2 rounded-lg bg-[var(--primary-soft)] text-[var(--primary)] shrink-0">
+              <Sparkles className="w-4 h-4" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs sm:text-sm font-semibold text-[var(--color-foreground)] truncate">
+                {t('adminUsers.canGenerateAiQuizzes') || 'AI Quiz Generation'}
+              </p>
+              <p className="text-[11px] sm:text-xs text-[var(--color-muted-foreground)] truncate">
+                {t('adminUsers.canGenerateAiQuizzesDesc') || 'Allow teacher to generate quiz questions using AI.'}
+              </p>
+            </div>
+          </div>
+          <label className="relative inline-flex items-center cursor-pointer shrink-0">
+            <input
+              type="checkbox"
+              checked={Boolean(user.canGenerateAiQuizzes)}
+              onChange={() => onToggleAiQuizGen?.(Boolean(user.canGenerateAiQuizzes))}
+              className="sr-only peer"
+            />
+            <div className="w-11 h-6 bg-[var(--color-surface-muted-strong)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[var(--color-border)] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--color-primary)]" />
+          </label>
+        </div>
       </div>
 
       {/* Resource Quotas */}
@@ -139,7 +168,7 @@ export function UserTeacherPermissionsSection({
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
           <TextField
             label={t('adminUsers.courses') || 'Courses'}
             type="number"
@@ -178,6 +207,17 @@ export function UserTeacherPermissionsSection({
             value={limitsForm.aiQuizGenerations || ''}
             onChange={(e) => onLimitsChange('aiQuizGenerations', e.target.value)}
             placeholder={t('adminUsers.globalDefault') || 'Global Default (5)'}
+            fullWidth
+          />
+          <TextField
+            label={t('adminUsers.aiQuizMaxQuestions') || 'Max Questions / Gen'}
+            type="number"
+            min="1"
+            max="50"
+            startIcon={<Sparkles className="w-4 h-4 text-[var(--color-muted)]" />}
+            value={limitsForm.aiQuizMaxQuestions || ''}
+            onChange={(e) => onLimitsChange('aiQuizMaxQuestions', e.target.value)}
+            placeholder={t('adminUsers.globalDefaultTen') || 'Global Default (10)'}
             fullWidth
           />
         </div>

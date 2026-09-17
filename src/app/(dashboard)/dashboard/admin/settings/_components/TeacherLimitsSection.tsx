@@ -67,6 +67,16 @@ export function TeacherLimitsSection({ settings, setSettings, searchQuery = '' }
       presets: [3, 5, 10, 20, 50],
       min: 1,
     },
+    {
+      key: 'aiQuizMaxQuestions',
+      titleKey: 'adminSettings.aiQuizMaxQuestionsLimit',
+      descKey: 'adminSettings.aiQuizMaxQuestionsLimitDesc',
+      icon: Sparkles,
+      iconBg: 'bg-[var(--primary-soft)]',
+      iconColor: 'text-[var(--primary)]',
+      presets: [5, 10, 15, 20, 25],
+      min: 1,
+    },
   ];
 
   const query = searchQuery.trim().toLowerCase();

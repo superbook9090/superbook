@@ -23,7 +23,7 @@ export type FeatureToggleKey =
   | 'enableCourseDoubts'
   | 'enableQuizChallenges';
 
-export type TeacherLimitKey = 'courses' | 'quizzes' | 'blogs' | 'aiQuizGenerations';
+export type TeacherLimitKey = 'courses' | 'quizzes' | 'blogs' | 'aiQuizGenerations' | 'aiQuizMaxQuestions';
 
 export interface PublicAppSettings {
   teacherLimits: {
@@ -31,6 +31,7 @@ export interface PublicAppSettings {
     quizzes: number;
     blogs: number;
     aiQuizGenerations?: number;
+    aiQuizMaxQuestions?: number;
   };
   featureToggles: Record<FeatureToggleKey, boolean>;
   challengeConfig?: {
@@ -52,6 +53,7 @@ export const defaultPublicAppSettings: PublicAppSettings = {
     quizzes: 10,
     blogs: 2,
     aiQuizGenerations: 5,
+    aiQuizMaxQuestions: 10,
   },
   featureToggles: {
     enableBlogs: true,

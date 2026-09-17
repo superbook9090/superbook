@@ -5,10 +5,11 @@ import { isStaffRole } from '@/lib/roles';
 import { requireFeature, getTeacherLimit } from '@/lib/settingsHelpers';
 import dbConnect from '@/lib/db';
 import User from '@/models/User';
-import { logApiError, logInfo } from '@/lib/logger';
+import { logApiError, logError } from '@/lib/logger';
 import z from 'zod';
 
 import { fetchStockanlyzerChat } from '@/lib/stockanlyzer/chat';
+import { fetchOpenRouterChat } from '@/lib/ai/openrouter';
 
 const generateAiQuizSchema = z.object({
   topic: z.string().min(2, 'Topic is required').max(300, 'Topic is too long'),
@@ -16,11 +17,14 @@ const generateAiQuizSchema = z.object({
     .number()
     .int()
     .min(1, 'At least 1 question is required')
-    .max(10, 'Maximum 10 questions can be generated at a time')
+    .max(50, 'Maximum 50 questions can be generated at a time')
     .default(5),
   difficulty: z.enum(['easy', 'medium', 'hard']).optional().default('medium'),
   language: z.string().optional().default('English'),
   instructions: z.string().max(500, 'Instructions too long').optional(),
+  model: z.string().optional(),
+  autoSwitchOnLimit: z.boolean().optional().default(true),
+  entityType: z.enum(['quiz', 'contest']).optional().default('quiz'),
 });
 
 interface GeneratedQuestion {
@@ -45,34 +49,14 @@ export async function POST(req: NextRequest) {
     const userRole = session.user.role;
     if (!isStaffRole(userRole)) {
       return NextResponse.json(
-        { message: 'Forbidden. Only teachers and staff can generate AI quizzes.' },
+        { message: 'Forbidden. Only teachers and staff can generate AI questions.' },
         { status: 403 }
       );
     }
 
     const userId = session.user.id;
 
-    // 3. Database & Teacher Quota Limit Check
-    await dbConnect();
-    const user = await User.findById(userId).select('limits aiQuizGenerationsCount').lean();
-    if (!user) {
-      return NextResponse.json({ message: 'User not found' }, { status: 404 });
-    }
-
-    const effectiveLimit = await getTeacherLimit('aiQuizGenerations', userId);
-    const currentCount = user.aiQuizGenerationsCount ?? 0;
-
-    if (currentCount >= effectiveLimit) {
-      return NextResponse.json(
-        {
-          message: `You have reached your limit of ${effectiveLimit} AI quiz generation(s). Please contact super admin to increase your quota.`,
-          usage: { used: currentCount, limit: effectiveLimit, remaining: 0 },
-        },
-        { status: 403 }
-      );
-    }
-
-    // 4. Input Validation
+    // 3. Input Validation
     const body = await req.json().catch(() => ({}));
     const parseResult = generateAiQuizSchema.safeParse(body);
     if (!parseResult.success) {
@@ -82,7 +66,52 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { topic, numQuestions, difficulty, language, instructions } = parseResult.data;
+    const { topic, numQuestions, difficulty, language, instructions, model, autoSwitchOnLimit, entityType } = parseResult.data;
+
+    // 4. Database & Teacher Quota Limit Check
+    await dbConnect();
+    const user = await User.findById(userId).select('limits aiQuizGenerationsCount canGenerateAiQuizzes canCreateContests role').lean();
+    if (!user) {
+      return NextResponse.json({ message: 'User not found' }, { status: 404 });
+    }
+
+    // 4a. Per-Teacher Feature Toggle Check (superadmin & admin bypass this check)
+    const isSuperOrAdmin = userRole === 'superadmin' || userRole === 'admin';
+    const hasContestPermission = entityType === 'contest' && Boolean(user.canCreateContests);
+    if (!isSuperOrAdmin && !user.canGenerateAiQuizzes && !hasContestPermission) {
+      return NextResponse.json(
+        {
+          message:
+            entityType === 'contest'
+              ? 'AI contest question generation is not enabled for your teacher account. Please contact an administrator to activate it.'
+              : 'AI quiz generation is not enabled for your teacher account. Please contact an administrator to activate it.',
+        },
+        { status: 403 }
+      );
+    }
+
+    const effectiveLimit = await getTeacherLimit('aiQuizGenerations', userId);
+    const currentCount = user.aiQuizGenerationsCount ?? 0;
+
+    if (!isSuperOrAdmin && currentCount >= effectiveLimit) {
+      return NextResponse.json(
+        {
+          message: `You have reached your limit of ${effectiveLimit} AI generation(s). Please contact super admin to increase your quota.`,
+          usage: { used: currentCount, limit: effectiveLimit, remaining: 0 },
+        },
+        { status: 403 }
+      );
+    }
+
+    const maxAllowedQuestions = (await getTeacherLimit('aiQuizMaxQuestions', userId).catch(() => 10)) || 10;
+    if (numQuestions > maxAllowedQuestions) {
+      return NextResponse.json(
+        {
+          message: `Maximum ${maxAllowedQuestions} question(s) can be generated at a time. This limit is set by the administrator.`,
+        },
+        { status: 400 }
+      );
+    }
 
     // 5. AI Generation Logic
     let questions: GeneratedQuestion[] = [];
@@ -98,8 +127,9 @@ export async function POST(req: NextRequest) {
       scriptInstruction = `Write all questions and options strictly in ${language}.`;
     }
 
+    const entityLabel = entityType === 'contest' ? 'competitive contest multiple-choice questions' : 'multiple-choice quiz';
     const prompt = `You are a master teacher and expert educational content creator.
-Generate a high-quality, realistic, and pedagogically sound multiple-choice quiz with EXACTLY ${numQuestions} questions on the topic: "${topic}".
+Generate a high-quality, realistic, and pedagogically sound ${entityLabel} with EXACTLY ${numQuestions} questions on the topic: "${topic}".
 
 CRITICAL LANGUAGE REQUIREMENT:
 - Target Language: ${language}
@@ -129,7 +159,11 @@ CRITICAL QUALITY REQUIREMENTS:
 function parseQuestionsFromAiOutput(rawText: string, numQuestions: number): GeneratedQuestion[] {
   if (!rawText || !rawText.trim()) return [];
 
-  let cleaned = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+  let cleaned = rawText
+    .replace(/<think>[\s\S]*?<\/think>/gi, '')
+    .replace(/```json/gi, '')
+    .replace(/```/g, '')
+    .trim();
 
   const jsonStart = cleaned.indexOf('[');
   const jsonEnd = cleaned.lastIndexOf(']');
@@ -206,16 +240,49 @@ function sanitizeParsedQuestions(parsed: unknown[], numQuestions: number): Gener
     .filter((q) => q.question.length > 0);
 }
 
-// Attempt 1: Use primary AI_API_URL service
+    let modelUsed = '';
+    let switchedModel = false;
+
+    // Attempt 1: Use OpenRouter service (with multi-model fallback & auto-switch)
     try {
-      const reply = await fetchStockanlyzerChat(prompt, 1, 3000);
-      questions = parseQuestionsFromAiOutput(reply, numQuestions);
+      const openRouterResult = await fetchOpenRouterChat(
+        [
+          {
+            role: 'system',
+            content: 'You are an expert educational content creator that outputs strictly valid JSON arrays.',
+          },
+          { role: 'user', content: prompt },
+        ],
+        {
+          model: model && model !== 'auto' ? model : undefined,
+          autoSwitchOnLimit,
+          validateOutput: (text) => parseQuestionsFromAiOutput(text, numQuestions).length > 0,
+        }
+      );
+      modelUsed = openRouterResult.modelUsed;
+      switchedModel = openRouterResult.switched;
+      questions = parseQuestionsFromAiOutput(openRouterResult.content, numQuestions);
     } catch (err) {
-      lastErrorMessage = err instanceof Error ? err.message : 'AI_API_URL fetch failed';
-      console.warn('[AI_QUIZ_GEN] Primary AI_API_URL service failed, attempting fallback:', lastErrorMessage);
+      lastErrorMessage = err instanceof Error ? err.message : 'OpenRouter fetch failed';
+      console.warn('[AI_QUIZ_GEN] OpenRouter service failed, attempting fallback:', lastErrorMessage);
     }
 
-    // Attempt 2: Fallback to Gemini API if primary AI_API_URL didn't yield questions
+    // Attempt 2: Fallback to stockanlyzer service if OpenRouter didn't yield questions
+    if (questions.length === 0) {
+      try {
+        const reply = await fetchStockanlyzerChat(prompt, 1, 3000);
+        questions = parseQuestionsFromAiOutput(reply, numQuestions);
+        if (questions.length > 0) {
+          modelUsed = 'stockanlyzer';
+          switchedModel = true;
+        }
+      } catch (err) {
+        lastErrorMessage = err instanceof Error ? err.message : 'AI_API_URL fetch failed';
+        console.warn('[AI_QUIZ_GEN] Fallback AI_API_URL service failed, attempting Gemini:', lastErrorMessage);
+      }
+    }
+
+    // Attempt 3: Fallback to Gemini API if primary models didn't yield questions
     if (questions.length === 0) {
       const apiKey =
         process.env.GEMINI_API_KEY ||
@@ -223,18 +290,20 @@ function sanitizeParsedQuestions(parsed: unknown[], numQuestions: number): Gener
         process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 
       if (apiKey) {
+        const configuredGeminiModel = process.env.GEMINI_MODEL;
         const modelsToTry = [
-          'gemini-1.5-flash',
-          'gemini-2.0-flash',
-          'gemini-1.5-pro',
+          ...(configuredGeminiModel ? [configuredGeminiModel] : []),
+          'gemini-3.6-flash',
+          'gemini-3.5-flash',
+          'gemini-3.5-flash-lite',
         ];
 
-        for (const model of modelsToTry) {
+        for (const m of modelsToTry) {
           if (questions.length > 0) break;
 
           try {
             const res = await fetch(
-              `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+              `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${apiKey}`,
               {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -256,9 +325,17 @@ function sanitizeParsedQuestions(parsed: unknown[], numQuestions: number): Gener
               const rawText: string =
                 resData.candidates?.[0]?.content?.parts?.[0]?.text || '';
               questions = parseQuestionsFromAiOutput(rawText, numQuestions);
+              if (questions.length > 0) {
+                modelUsed = m;
+                switchedModel = true;
+              }
             } else {
               const errorData = await res.json().catch(() => ({}));
               lastErrorMessage = errorData?.error?.message || res.statusText;
+              // If account quota/credits are exhausted, further model attempts with the same key will also fail
+              if (res.status === 429) {
+                break;
+              }
             }
           } catch (err) {
             lastErrorMessage = err instanceof Error ? err.message : 'Gemini fetch error';
@@ -268,10 +345,15 @@ function sanitizeParsedQuestions(parsed: unknown[], numQuestions: number): Gener
     }
 
     if (!questions || questions.length === 0) {
-      logInfo('[AI_QUIZ_GEN] All AI generation attempts failed', logContext, { lastErrorMessage });
+      logError('[AI_QUIZ_GEN] All AI generation attempts failed', logContext, { lastErrorMessage, entityType });
       return NextResponse.json(
-        { message: `Failed to generate quiz: ${lastErrorMessage || 'AI service is temporarily unavailable.'}` },
-        { status: 500 }
+        {
+          message:
+            entityType === 'contest'
+              ? 'Unable to generate contest questions at this moment. The AI service is currently busy or unavailable. Please try again in a few moments.'
+              : 'Unable to generate quiz at this moment. The AI service is currently busy or unavailable. Please try again in a few moments.',
+        },
+        { status: 503 }
       );
     }
 
@@ -286,6 +368,8 @@ function sanitizeParsedQuestions(parsed: unknown[], numQuestions: number): Gener
     return NextResponse.json({
       success: true,
       questions,
+      modelUsed,
+      switchedModel,
       usage: {
         used: newCount,
         limit: effectiveLimit,
@@ -295,7 +379,7 @@ function sanitizeParsedQuestions(parsed: unknown[], numQuestions: number): Gener
   } catch (error) {
     logApiError(error as Error, 'POST', '/api/quizzes/generate-ai', logContext);
     return NextResponse.json(
-      { message: 'Failed to generate quiz. Please try again.' },
+      { message: 'Failed to generate questions. Please try again.' },
       { status: 500 }
     );
   }

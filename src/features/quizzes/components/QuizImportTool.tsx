@@ -1,6 +1,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import * as XLSX from 'xlsx';
 import { Sparkles } from 'lucide-react';
+import { useSessionStore } from '@/store/useSessionStore';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { AiQuizGeneratorModal } from './AiQuizGeneratorModal';
@@ -10,13 +11,21 @@ import type { Question, ExcelRow } from './types';
 type Props = {
   theme: { gradient: string; activeBg: string; activeText: string };
   onImport: (questions: Question[]) => void;
+  entityType?: 'quiz' | 'contest';
 };
 
-export function QuizImportTool({ theme, onImport }: Props) {
+export function QuizImportTool({ theme, onImport, entityType = 'quiz' }: Props) {
   const { t } = useTranslation();
+  const session = useSessionStore((s) => s.session);
   const enableAiQuizGen = useSettingsStore(
     (s) => s.settings.featureToggles.enableAiQuizGen ?? true
   );
+  const canUseAi =
+    enableAiQuizGen &&
+    (session?.user?.role === 'superadmin' ||
+      session?.user?.role === 'admin' ||
+      Boolean(session?.user?.canGenerateAiQuizzes) ||
+      (entityType === 'contest' && Boolean(session?.user?.canCreateContests)));
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showImportHelp, setShowImportHelp] = useState(false);
@@ -366,14 +375,18 @@ export function QuizImportTool({ theme, onImport }: Props) {
       />
 
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
-        {enableAiQuizGen && (
+        {canUseAi && (
           <button
             type="button"
             onClick={() => setShowAiModal(true)}
             className={`inline-flex flex-1 sm:flex-none items-center justify-center gap-2 min-h-[44px] px-5 py-2.5 text-sm font-semibold rounded-lg text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 transition-opacity shadow-sm`}
           >
             <Sparkles className="w-4 h-4 text-yellow-300 animate-pulse" />
-            <span>{t('createQuizForm.generateAi') || 'Generate with AI'}</span>
+            <span>
+              {entityType === 'contest'
+                ? t('contest.generateAiQuestions') || 'Generate Contest Questions with AI'
+                : t('createQuizForm.generateAi') || 'Generate with AI'}
+            </span>
           </button>
         )}
         <button
@@ -413,6 +426,7 @@ export function QuizImportTool({ theme, onImport }: Props) {
         onClose={() => setShowAiModal(false)}
         onSuccess={(imported) => onImport(imported)}
         theme={theme}
+        entityType={entityType}
       />
 
       <h3 className="text-lg font-medium text-[var(--color-foreground)] mb-4">{t('createQuizForm.questions')}</h3>

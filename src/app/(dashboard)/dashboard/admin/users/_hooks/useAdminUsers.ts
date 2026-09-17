@@ -135,6 +135,21 @@ export function useAdminUsers() {
     }
   };
 
+  const handleToggleAiQuizGenPermission = async (userId: string, currentVal: boolean) => {
+    try {
+      const newVal = !currentVal;
+      await patchAdminUser({ userId, updates: { canGenerateAiQuizzes: newVal } });
+      setUsers((prev) => prev.map((u) => (u._id === userId ? { ...u, canGenerateAiQuizzes: newVal } : u)));
+      if (selectedUser?._id === userId) setSelectedUser((prev) => (prev ? { ...prev, canGenerateAiQuizzes: newVal } : null));
+      addAlert({ type: 'success', message: t('adminUsers.aiQuizPermissionUpdated') || 'AI quiz generation permission updated successfully' });
+    } catch (err) {
+      addAlert({
+        type: 'error',
+        message: err instanceof ApiClientError ? err.message : t('adminSettings.errorUpdatingUser'),
+      });
+    }
+  };
+
   const handleSaveLimits = async (
     userId: string,
     limits: { courses?: number; quizzes?: number; blogs?: number; aiQuizGenerations?: number }
@@ -234,6 +249,7 @@ export function useAdminUsers() {
     handleToggleVideoUpload,
     handleTogglePublicCoursePermission,
     handleToggleContestPermission,
+    handleToggleAiQuizGenPermission,
     handleSaveLimits,
     handleSaveOrgAssign,
     handleToggleSuspend,

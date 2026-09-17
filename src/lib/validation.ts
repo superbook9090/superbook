@@ -175,6 +175,7 @@ export const updateSettingsSchema = z.object({
     quizzes: z.number().int().min(1, 'Quizzes limit must be at least 1'),
     blogs: z.number().int().min(1, 'Blogs limit must be at least 1'),
     aiQuizGenerations: z.number().int().min(1, 'AI Quiz Generations limit must be at least 1').optional(),
+    aiQuizMaxQuestions: z.number().int().min(1, 'Max questions limit must be at least 1').max(50, 'Max questions limit cannot exceed 50').optional(),
   }).optional(),
   notesLimits: z.object({
     maxPagesPerUser: z.number().int().min(1, 'Max pages limit must be at least 1'),

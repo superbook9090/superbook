@@ -6,6 +6,7 @@ export interface AppSettings {
     quizzes: number;
     blogs: number;
     aiQuizGenerations: number;
+    aiQuizMaxQuestions?: number;
   };
   notesLimits?: {
     maxPagesPerUser: number;

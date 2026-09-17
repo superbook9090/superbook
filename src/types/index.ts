@@ -352,6 +352,8 @@ export interface SessionUser {
   phone?: string;
   organizationId?: string;
   canUploadVideos?: boolean;
+  canCreateContests?: boolean;
+  canGenerateAiQuizzes?: boolean;
 }
 
 export interface Session {

@@ -6,6 +6,7 @@ export interface IAppSettings extends Document {
     quizzes: number;
     blogs: number;
     aiQuizGenerations?: number;
+    aiQuizMaxQuestions?: number;
   };
   notesLimits?: {
     maxPagesPerUser: number;
@@ -67,6 +68,11 @@ const appSettingsSchema = new Schema<IAppSettings>(
       aiQuizGenerations: {
         type: Number,
         default: 5,
+        min: 1,
+      },
+      aiQuizMaxQuestions: {
+        type: Number,
+        default: 10,
         min: 1,
       },
     },

@@ -744,7 +744,7 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
           </div>
 
           {/* Import Questions Tool (Identical to Quiz Creator: Excel/CSV, pipe text, AI generator) */}
-          <QuizImportTool theme={theme} onImport={handleImportQuestions} />
+          <QuizImportTool theme={theme} onImport={handleImportQuestions} entityType="contest" />
 
           <div className="space-y-6">
             {questions.map((q, qIdx) => (

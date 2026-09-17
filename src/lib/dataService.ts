@@ -11,6 +11,7 @@ const DEFAULT_SETTINGS = {
     quizzes: 10,
     blogs: 2,
     aiQuizGenerations: 5,
+    aiQuizMaxQuestions: 10,
   },
   notesLimits: {
     maxPagesPerUser: 5,

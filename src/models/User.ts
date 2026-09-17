@@ -19,6 +19,7 @@ export interface IUser extends Document {
     quizzes: number;
     blogs: number;
     aiQuizGenerations?: number;
+    aiQuizMaxQuestions?: number;
   };
   aiQuizGenerationsCount?: number;
   canUploadVideos: boolean;
@@ -27,6 +28,7 @@ export interface IUser extends Document {
   lastPlatform?: 'android' | 'ios' | 'web';
   lastUserAgent?: string;
   canCreateContests?: boolean;
+  canGenerateAiQuizzes?: boolean;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -48,6 +50,7 @@ const userSchema = new Schema<IUser>(
       quizzes: { type: Number, default: undefined },
       blogs: { type: Number, default: undefined },
       aiQuizGenerations: { type: Number, default: undefined },
+      aiQuizMaxQuestions: { type: Number, default: undefined },
     },
     aiQuizGenerationsCount: { type: Number, default: 0 },
     canUploadVideos: { type: Boolean, default: false },
@@ -56,6 +59,7 @@ const userSchema = new Schema<IUser>(
     lastPlatform: { type: String, enum: ['android', 'ios', 'web'] },
     lastUserAgent: String,
     canCreateContests: { type: Boolean, default: false },
+    canGenerateAiQuizzes: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
@@ -95,6 +99,7 @@ userSchema.index({ lastActiveAt: -1 });
 userSchema.index({ lastPlatform: 1 });
 userSchema.index({ organizationId: 1, lastActiveAt: -1 });
 userSchema.index({ canCreateContests: 1 });
+userSchema.index({ canGenerateAiQuizzes: 1 });
 
 const User: mongoose.Model<IUser> =
   (mongoose.models.User as mongoose.Model<IUser>) ||

@@ -22,6 +22,7 @@ type Props = {
   handleToggleVideoUpload: (userId: string, currentVal: boolean) => void;
   handleTogglePublicCoursePermission: (userId: string, currentVal: boolean) => void;
   handleToggleContestPermission?: (userId: string, currentVal: boolean) => void;
+  handleToggleAiQuizGenPermission?: (userId: string, currentVal: boolean) => void;
   handleSaveLimits: (userId: string, limits: { courses?: number; quizzes?: number; blogs?: number; aiQuizGenerations?: number }) => Promise<void>;
   handleToggleSuspend: (userId: string, isSuspended: boolean) => Promise<void>;
   handleDeleteClick: (userId: string) => void;
@@ -30,7 +31,7 @@ type Props = {
 export function UserDetailModal({
   selectedUser, session, organizations, handleCloseUserDetail, handleRoleChange,
   handleSaveOrgAssign, handleToggleVideoUpload, handleTogglePublicCoursePermission,
-  handleToggleContestPermission,
+  handleToggleContestPermission, handleToggleAiQuizGenPermission,
   handleSaveLimits, handleToggleSuspend, handleDeleteClick,
 }: Props) {
   const { t } = useTranslation();
@@ -42,6 +43,7 @@ export function UserDetailModal({
     quizzes: selectedUser.limits?.quizzes ? String(selectedUser.limits.quizzes) : '',
     blogs: selectedUser.limits?.blogs ? String(selectedUser.limits.blogs) : '',
     aiQuizGenerations: selectedUser.limits?.aiQuizGenerations ? String(selectedUser.limits.aiQuizGenerations) : '',
+    aiQuizMaxQuestions: selectedUser.limits?.aiQuizMaxQuestions ? String(selectedUser.limits.aiQuizMaxQuestions) : '',
   });
   const [isSavingOrg, setIsSavingOrg] = useState(false);
   const [isSavingLimits, setIsSavingLimits] = useState(false);
@@ -54,6 +56,7 @@ export function UserDetailModal({
       quizzes: selectedUser.limits?.quizzes ? String(selectedUser.limits.quizzes) : '',
       blogs: selectedUser.limits?.blogs ? String(selectedUser.limits.blogs) : '',
       aiQuizGenerations: selectedUser.limits?.aiQuizGenerations ? String(selectedUser.limits.aiQuizGenerations) : '',
+      aiQuizMaxQuestions: selectedUser.limits?.aiQuizMaxQuestions ? String(selectedUser.limits.aiQuizMaxQuestions) : '',
     });
   }, [selectedUser]);
 
@@ -75,11 +78,12 @@ export function UserDetailModal({
   const onSaveLimits = async () => {
     setIsSavingLimits(true);
     try {
-      const parsed: { courses?: number; quizzes?: number; blogs?: number; aiQuizGenerations?: number } = {};
+      const parsed: { courses?: number; quizzes?: number; blogs?: number; aiQuizGenerations?: number; aiQuizMaxQuestions?: number } = {};
       if (limitsForm.courses) parsed.courses = parseInt(limitsForm.courses, 10);
       if (limitsForm.quizzes) parsed.quizzes = parseInt(limitsForm.quizzes, 10);
       if (limitsForm.blogs) parsed.blogs = parseInt(limitsForm.blogs, 10);
       if (limitsForm.aiQuizGenerations) parsed.aiQuizGenerations = parseInt(limitsForm.aiQuizGenerations, 10);
+      if (limitsForm.aiQuizMaxQuestions) parsed.aiQuizMaxQuestions = parseInt(limitsForm.aiQuizMaxQuestions, 10);
       await handleSaveLimits(selectedUser._id, parsed);
     } finally {
       setIsSavingLimits(false);
@@ -200,6 +204,7 @@ export function UserDetailModal({
             onToggleVideo={(val) => handleToggleVideoUpload(selectedUser._id, val)}
             onTogglePublicCourse={(val) => handleTogglePublicCoursePermission(selectedUser._id, val)}
             onToggleContest={(val) => handleToggleContestPermission?.(selectedUser._id, val)}
+            onToggleAiQuizGen={(val) => handleToggleAiQuizGenPermission?.(selectedUser._id, val)}
             limitsForm={limitsForm}
             onLimitsChange={(field, val) => setLimitsForm((prev) => ({ ...prev, [field]: val }))}
             onSaveLimits={onSaveLimits}

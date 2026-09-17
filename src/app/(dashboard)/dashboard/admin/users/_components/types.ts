@@ -3,6 +3,7 @@ export interface UserLimits {
   quizzes?: number;
   blogs?: number;
   aiQuizGenerations?: number;
+  aiQuizMaxQuestions?: number;
 }
 
 export interface User {
@@ -28,6 +29,7 @@ export interface User {
   lastPlatform?: 'android' | 'ios' | 'web';
   lastUserAgent?: string;
   canCreateContests?: boolean;
+  canGenerateAiQuizzes?: boolean;
   createdAt: string;
   updatedAt?: string;
 }

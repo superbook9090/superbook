@@ -131,11 +131,21 @@ export async function PATCH(req: NextRequest) {
           { status: 400 }
         );
       }
+      if (
+        teacherLimits.aiQuizMaxQuestions !== undefined &&
+        (typeof teacherLimits.aiQuizMaxQuestions !== 'number' || teacherLimits.aiQuizMaxQuestions < 1)
+      ) {
+        return NextResponse.json(
+          { message: 'aiQuizMaxQuestions limit must be a positive number' },
+          { status: 400 }
+        );
+      }
       settings.teacherLimits = {
         courses: teacherLimits.courses,
         quizzes: teacherLimits.quizzes,
         blogs: teacherLimits.blogs,
         aiQuizGenerations: teacherLimits.aiQuizGenerations ?? settings.teacherLimits?.aiQuizGenerations ?? 5,
+        aiQuizMaxQuestions: teacherLimits.aiQuizMaxQuestions ?? settings.teacherLimits?.aiQuizMaxQuestions ?? 10,
       };
     }
 
@@ -170,7 +180,10 @@ export async function PATCH(req: NextRequest) {
         enableClarity: featureToggles.enableClarity ?? existingToggles.enableClarity ?? true,
         enablePhoneAuth: featureToggles.enablePhoneAuth ?? existingToggles.enablePhoneAuth ?? true,
         enableNotes: featureToggles.enableNotes ?? existingToggles.enableNotes ?? true,
-        enableAiQuizGen: featureToggles.enableAiQuizGen ?? existingToggles.enableAiQuizGen ?? true,
+        enableAiQuizGen:
+          isSuper && featureToggles.enableAiQuizGen !== undefined
+            ? featureToggles.enableAiQuizGen
+            : (existingToggles.enableAiQuizGen ?? true),
         enableGoogleAdsense: featureToggles.enableGoogleAdsense ?? existingToggles.enableGoogleAdsense ?? true,
         enableCourseDoubts: featureToggles.enableCourseDoubts ?? existingToggles.enableCourseDoubts ?? true,
         enableContests:
