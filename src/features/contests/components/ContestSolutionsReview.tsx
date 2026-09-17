@@ -115,7 +115,11 @@ export function ContestSolutionsReview({
                     ) : (
                       <>
                         <XCircle className="w-3.5 h-3.5" />
-                        <span>{t('contest.incorrectPoints') || 'Incorrect (0 pts)'}</span>
+                        <span>
+                          {typeof q.pointsEarned === 'number' && q.pointsEarned < 0
+                            ? `Incorrect (${q.pointsEarned} pts)`
+                            : t('contest.incorrectPoints') || 'Incorrect (0 pts)'}
+                        </span>
                       </>
                     )}
                   </span>

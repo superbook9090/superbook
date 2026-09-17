@@ -307,12 +307,24 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
                 {currentQ.quizTitle ? `${currentQ.quizTitle} • ` : ''}
                 {t('quiz.question')} {currentIndex + 1} of {totalQ}
               </span>
-              <span className="px-2 py-0.5 rounded text-xs font-bold bg-[var(--primary-light)] text-[var(--primary)]">
-                +{currentQ.points || 1}{' '}
-                {currentQ.points === 1
-                  ? t('contest.point') || 'Point'
-                  : t('contest.points') || 'Points'}
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="px-2 py-0.5 rounded text-xs font-bold bg-[var(--primary-light)] text-[var(--primary)]">
+                  +{currentQ.points || 1}{' '}
+                  {currentQ.points === 1
+                    ? t('contest.point') || 'Point'
+                    : t('contest.points') || 'Points'}
+                </span>
+                {(currentQ.negativePoints !== undefined
+                  ? currentQ.negativePoints > 0
+                  : Boolean(contest?.enableNegativeMarking)) && (
+                  <span
+                    className="px-2 py-0.5 rounded text-xs font-bold bg-[var(--error-light)] text-[var(--error)]"
+                    title={t('contest.negativeMarksHint') || 'Penalty for wrong answer'}
+                  >
+                    -{currentQ.negativePoints ?? contest?.negativeMarks ?? 0.25}
+                  </span>
+                )}
+              </div>
             </div>
 
             <h2 className="text-base sm:text-lg font-bold text-[var(--color-foreground)] leading-relaxed">

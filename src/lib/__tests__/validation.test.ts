@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import {
   createCourseSchema,
   createQuizSchema,
+  createContestSchema,
   resetPasswordSchema
 } from '../validation';
 
@@ -71,6 +72,55 @@ describe('validation', () => {
       };
       const result = createQuizSchema.safeParse(validQuiz);
       expect(result.success).toBe(true);
+    });
+
+    it('validates a quiz with negative marking options', () => {
+      const validQuizWithNeg = {
+        title: 'Competitive Quiz',
+        course: validObjectId,
+        chapter: validObjectId,
+        enableNegativeMarking: true,
+        negativeMarks: 0.33,
+        questions: [
+          { question: 'Q1', options: ['A', 'B'], correctAnswer: 0, points: 2, negativePoints: 0.66 }
+        ]
+      };
+      const result = createQuizSchema.safeParse(validQuizWithNeg);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.enableNegativeMarking).toBe(true);
+        expect(result.data.negativeMarks).toBe(0.33);
+        expect(result.data.questions[0].negativePoints).toBe(0.66);
+      }
+    });
+  });
+
+  describe('createContestSchema', () => {
+    it('validates a contest with negative marking and imported questions', () => {
+      const contestData = {
+        title: 'Grand Olympiad 2026',
+        startTime: new Date().toISOString(),
+        endTime: new Date(Date.now() + 3600000).toISOString(),
+        duration: 45,
+        enableNegativeMarking: true,
+        negativeMarks: 0.25,
+        questions: [
+          {
+            question: 'What is 2+2?',
+            options: ['3', '4', '5'],
+            correctAnswer: 1,
+            points: 1,
+            negativePoints: 0.25,
+          },
+        ],
+      };
+      const result = createContestSchema.safeParse(contestData);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.enableNegativeMarking).toBe(true);
+        expect(result.data.negativeMarks).toBe(0.25);
+        expect(result.data.questions?.[0].negativePoints).toBe(0.25);
+      }
     });
   });
 

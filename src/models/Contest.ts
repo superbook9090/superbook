@@ -36,6 +36,8 @@ export interface IContest extends Document {
   leaderboardVisibility: 'live' | 'after_end' | 'hidden';
   questionCount: number;
   totalPoints: number;
+  enableNegativeMarking?: boolean;
+  negativeMarks?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -102,6 +104,8 @@ const contestSchema = new Schema<IContest>(
     },
     questionCount: { type: Number, default: 0 },
     totalPoints: { type: Number, default: 0 },
+    enableNegativeMarking: { type: Boolean, default: false },
+    negativeMarks: { type: Number, default: 0, min: 0 },
   },
   { timestamps: true }
 );

@@ -16,6 +16,8 @@ export interface IQuiz extends Document {
   version: number;
   timeLimit: number;
   isPublished: boolean;
+  enableNegativeMarking?: boolean;
+  negativeMarks?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -33,6 +35,8 @@ const quizSchema = new Schema<IQuiz>(
     version: { type: Number, default: 1 },
     timeLimit: { type: Number, default: 30 },
     isPublished: { type: Boolean, default: false },
+    enableNegativeMarking: { type: Boolean, default: false },
+    negativeMarks: { type: Number, default: 0, min: 0 },
   },
   { timestamps: true }
 );

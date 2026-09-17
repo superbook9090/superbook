@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
  * - Applies consistent focus-visible outline styles
  * - Allows passing any ARIA props
  */
-export const AccessibleButton = forwardRef<HTMLElement, React.ButtonHTMLAttributes<HTMLButtonElement>>(
+export const AccessibleButton = forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement>>(
   function AccessibleButton(props, ref) {
     const { className, onClick, children, type = 'button', ...rest } = props;
 
@@ -22,7 +22,7 @@ export const AccessibleButton = forwardRef<HTMLElement, React.ButtonHTMLAttribut
 
     return (
       <button
-        ref={ref as any}
+        ref={ref}
         type={type}
         className={cn('focus-visible', className)}
         onClick={onClick}

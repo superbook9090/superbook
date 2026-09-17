@@ -216,6 +216,8 @@ export async function POST(request: NextRequest) {
       isPublished: boolean;
       course: { _id: Types.ObjectId };
       version: number;
+      enableNegativeMarking?: boolean;
+      negativeMarks?: number;
     } | null;
     if (!quiz) {
       return NextResponse.json({ message: 'Quiz not found' }, { status: 404 });
@@ -235,7 +237,13 @@ export async function POST(request: NextRequest) {
     }
 
     const qRows = await listQuestionsForQuiz(quiz._id);
-    const questionList = qRows as unknown as { _id: Types.ObjectId; order: number; correctOption: number }[];
+    const questionList = qRows as unknown as {
+      _id: Types.ObjectId;
+      order: number;
+      correctOption: number;
+      points?: number;
+      negativePoints?: number;
+    }[];
     const totalQuestions = questionList.length;
 
     if (action === 'start') {
@@ -297,9 +305,30 @@ export async function POST(request: NextRequest) {
 
       const isForceSubmit = (body as { forceSubmit?: boolean }).forceSubmit === true;
 
+      let correctCount = 0;
+      let totalPointsAwarded = 0;
+      let totalPossiblePoints = 0;
+
+      questionList.forEach((q) => {
+        totalPossiblePoints += q.points || 1;
+      });
+
       const gradedAnswers = answers.map((answer) => {
         const q = byId.get(answer.questionId)!;
-        const isCorrect = answer.selectedOption !== -1 && answer.selectedOption === q.correctOption;
+        const isAttempted = answer.selectedOption !== -1;
+        const isCorrect = isAttempted && answer.selectedOption === q.correctOption;
+
+        if (isCorrect) {
+          correctCount++;
+          totalPointsAwarded += q.points || 1;
+        } else if (isAttempted && quiz.enableNegativeMarking) {
+          const penalty =
+            typeof q.negativePoints === 'number' && q.negativePoints > 0
+              ? q.negativePoints
+              : (quiz.negativeMarks || 0);
+          totalPointsAwarded -= penalty;
+        }
+
         return {
           question: q._id,
           order: q.order,
@@ -308,8 +337,9 @@ export async function POST(request: NextRequest) {
         };
       });
 
-      const correctCount = gradedAnswers.filter((a) => a.isCorrect).length;
-      const score = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
+      const score = totalPossiblePoints > 0
+        ? Math.max(0, Math.min(100, Math.round((totalPointsAwarded / totalPossiblePoints) * 100)))
+        : 0;
 
       attempt.answers = gradedAnswers;
       attempt.correctCount = correctCount;

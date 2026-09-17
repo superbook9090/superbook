@@ -122,6 +122,8 @@ export async function GET(
           title: contest.title,
           description: contest.description,
           solutionsReleaseAt: contest.solutionsReleaseAt,
+          enableNegativeMarking: contest.enableNegativeMarking,
+          negativeMarks: contest.negativeMarks,
         },
         questionReviews,
       },

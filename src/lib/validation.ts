@@ -75,9 +75,13 @@ export const createQuizSchema = z
     question: z.string().min(1, 'Question is required').max(500, 'Question must be less than 500 characters'),
     options: z.array(z.string().min(1, 'Option cannot be empty')).min(2, 'At least 2 options required').max(6, 'Maximum 6 options allowed'),
     correctAnswer: z.number().int().min(0, 'Correct answer must be a valid option index'),
+    points: z.number().min(0).optional(),
+    negativePoints: z.number().min(0).optional(),
   })).min(1, 'At least 1 question is required'),
   timeLimit: z.number().int().min(1, 'Time limit must be at least 1 minute').max(180, 'Time limit must be at most 180 minutes').optional(),
   isPublished: z.boolean().optional(),
+  enableNegativeMarking: z.boolean().optional(),
+  negativeMarks: z.number().min(0).max(100).optional(),
 })
   .refine((data) => !(data.chapter && data.lesson), {
     message: 'Assign quiz to either a chapter or a lesson, not both',
@@ -343,7 +347,8 @@ export const contestQuestionSchema = z.object({
   question: z.string().min(1, 'Question prompt is required').max(1000),
   options: z.array(z.string().min(1, 'Option text is required')).min(2, 'At least 2 options required').max(6),
   correctAnswer: z.number().int().min(0, 'Valid correct answer index required'),
-  points: z.number().min(1).optional(),
+  points: z.number().min(0).optional(),
+  negativePoints: z.number().min(0).optional(),
 });
 
 export const contestQuizInputSchema = z.object({
@@ -367,6 +372,8 @@ export const createContestSchema = z.object({
   maxParticipants: z.number().int().min(1).nullable().optional(),
   visibility: z.enum(['public', 'organization', 'unlisted']).optional(),
   leaderboardVisibility: z.enum(['live', 'after_end', 'hidden']).optional(),
+  enableNegativeMarking: z.boolean().optional(),
+  negativeMarks: z.number().min(0).max(100).optional(),
   quizzes: z.array(contestQuizInputSchema).optional(),
   questions: z.array(contestQuestionSchema).optional(),
 });

@@ -244,8 +244,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { title, description, course, chapter, lesson, questions, timeLimit, isPublished } =
-      validationResult.data;
+    const {
+      title,
+      description,
+      course,
+      chapter,
+      lesson,
+      questions,
+      timeLimit,
+      isPublished,
+      enableNegativeMarking,
+      negativeMarks,
+    } = validationResult.data;
 
     // Check teacher limits (skip for admins)
     if (session.user?.role === 'teacher') {
@@ -310,6 +320,8 @@ export async function POST(request: NextRequest) {
       organizationId,
       timeLimit: timeLimit || 30,
       isPublished: isPublished || false,
+      enableNegativeMarking: !!enableNegativeMarking,
+      negativeMarks: typeof negativeMarks === 'number' ? negativeMarks : 0,
       questionCount: 0,
       version: 1,
     });
@@ -321,6 +333,8 @@ export async function POST(request: NextRequest) {
         question: q.question,
         options: q.options,
         correctAnswer: q.correctAnswer,
+        points: q.points,
+        negativePoints: q.negativePoints,
       })),
       { bumpVersion: false }
     );

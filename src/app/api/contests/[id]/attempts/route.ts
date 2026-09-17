@@ -191,7 +191,7 @@ export async function POST(
         const qId = qRef.quiz?._id || qRef.quiz;
         if (qId) {
           const rows = await listQuestionsForQuiz(qId as mongoose.Types.ObjectId);
-          (rows as unknown as Array<{ _id: mongoose.Types.ObjectId; prompt: string; options: string[]; order: number; points?: number }>).forEach((q) => {
+          (rows as unknown as Array<{ _id: mongoose.Types.ObjectId; prompt: string; options: string[]; order: number; points?: number; negativePoints?: number }>).forEach((q) => {
             allQuestions.push({
               _id: q._id.toString(),
               quizId: qId.toString(),
@@ -200,6 +200,9 @@ export async function POST(
               question: q.prompt,
               options: q.options,
               points: q.points || 1,
+              negativePoints: typeof q.negativePoints === 'number' && q.negativePoints > 0
+                ? q.negativePoints
+                : (contest.enableNegativeMarking ? contest.negativeMarks || 0 : 0),
             });
           });
         }
@@ -275,6 +278,8 @@ export async function POST(
             timeRemaining: remainingSeconds,
             duration: contest.duration,
             endTime: contest.endTime,
+            enableNegativeMarking: contest.enableNegativeMarking,
+            negativeMarks: contest.negativeMarks,
           });
         } else {
           // Time expired, mark timed_out
@@ -330,6 +335,8 @@ export async function POST(
           timeRemaining,
           duration: contest.duration,
           endTime: contest.endTime,
+          enableNegativeMarking: contest.enableNegativeMarking,
+          negativeMarks: contest.negativeMarks,
         },
         { status: 201 }
       );
@@ -411,6 +418,7 @@ export async function POST(
         options: string[];
         correctOption: number;
         points?: number;
+        negativePoints?: number;
       }>;
 
       const questionMap = new Map(questionDocs.map((q) => [q._id.toString(), q]));
@@ -428,9 +436,21 @@ export async function POST(
       submittedAnswers.forEach((ans) => {
         const qDoc = questionMap.get(ans.questionId);
         if (qDoc) {
-          const isCorrect = ans.selectedOption === qDoc.correctOption;
-          const pointsEarned = isCorrect ? (qDoc.points || 1) : 0;
-          if (isCorrect) correctCount++;
+          const isAttempted = typeof ans.selectedOption === 'number' && ans.selectedOption !== -1;
+          const isCorrect = isAttempted && ans.selectedOption === qDoc.correctOption;
+          let pointsEarned = 0;
+
+          if (isCorrect) {
+            pointsEarned = qDoc.points || 1;
+            correctCount++;
+          } else if (isAttempted && contest.enableNegativeMarking) {
+            const penalty =
+              typeof qDoc.negativePoints === 'number' && qDoc.negativePoints > 0
+                ? qDoc.negativePoints
+                : (contest.negativeMarks || 0);
+            pointsEarned = -penalty;
+          }
+
           totalPointsAwarded += pointsEarned;
 
           gradedAnswers.push({
@@ -447,11 +467,11 @@ export async function POST(
       });
 
       const percentage = totalPossiblePoints > 0
-        ? Math.round((totalPointsAwarded / totalPossiblePoints) * 1000) / 10
+        ? Math.max(0, Math.min(100, Math.round((totalPointsAwarded / totalPossiblePoints) * 1000) / 10))
         : 0;
 
       attempt.answers = gradedAnswers;
-      attempt.score = totalPointsAwarded;
+      attempt.score = Math.max(0, Math.round(totalPointsAwarded * 100) / 100);
       attempt.percentage = percentage;
       attempt.correctCount = correctCount;
       attempt.totalQuestions = questionDocs.length > 0 ? questionDocs.length : (submittedAnswers.length || 1);

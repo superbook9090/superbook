@@ -2,6 +2,8 @@ export interface Question {
   question: string;
   options: string[];
   correctAnswer: number;
+  points?: number;
+  negativePoints?: number;
 }
 
 export interface ExcelRow {

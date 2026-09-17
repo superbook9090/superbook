@@ -8,6 +8,7 @@ export interface IQuizQuestion extends Document {
   options: string[];
   correctOption: number;
   points: number;
+  negativePoints?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -20,6 +21,7 @@ const quizQuestionSchema = new Schema<IQuizQuestion>(
     options: [{ type: String, required: true }],
     correctOption: { type: Number, required: true, min: 0 },
     points: { type: Number, default: 1, min: 0 },
+    negativePoints: { type: Number, default: 0, min: 0 },
   },
   { timestamps: true }
 );

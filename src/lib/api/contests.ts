@@ -46,6 +46,8 @@ export interface ContestItem {
   leaderboardVisibility: 'live' | 'after_end' | 'hidden';
   questionCount: number;
   totalPoints: number;
+  enableNegativeMarking?: boolean;
+  negativeMarks?: number;
   userAttempt?: {
     _id?: string;
     status: string;
@@ -53,6 +55,19 @@ export interface ContestItem {
     percentage: number;
   } | null;
   attemptCount?: number;
+  questionsForEditor?: Array<{
+    quizId: string;
+    quizTitle: string;
+    questions: Array<{
+      _id?: string;
+      question: string;
+      options: string[];
+      correctAnswer?: number;
+      points?: number;
+      negativePoints?: number;
+      explanation?: string;
+    }>;
+  }>;
   createdAt: string;
 }
 
@@ -78,6 +93,7 @@ export interface ContestQuestionItem {
   question: string;
   options: string[];
   points: number;
+  negativePoints?: number;
   order: number;
 }
 
@@ -97,6 +113,8 @@ export interface ContestStartResponse {
     duration: number;
     endTime: string;
     totalPoints: number;
+    enableNegativeMarking?: boolean;
+    negativeMarks?: number;
   };
 }
 

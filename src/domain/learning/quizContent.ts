@@ -6,6 +6,8 @@ export type IncomingQuestion = {
   question: string;
   options: string[];
   correctAnswer: number;
+  points?: number;
+  negativePoints?: number;
 };
 
 /** Replace all questions for a quiz. Optionally bump quiz.version (content change). */
@@ -28,6 +30,8 @@ export async function setQuizQuestions(
     prompt: q.question,
     options: q.options,
     correctOption: q.correctAnswer,
+    points: typeof q.points === 'number' && q.points >= 0 ? q.points : 1,
+    negativePoints: typeof q.negativePoints === 'number' && q.negativePoints >= 0 ? q.negativePoints : 0,
   }));
   await QuizQuestion.insertMany(docs);
   await Quiz.updateOne(

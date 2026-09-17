@@ -58,6 +58,8 @@ export default function CreateQuizForm({ quizId }: Props) {
     lesson: '',
     timeLimit: '30',
     isPublished: true,
+    enableNegativeMarking: false,
+    negativeMarks: '0.25',
   });
   const [chapterOptions, setChapterOptions] = useState<ChapterSelectOption[]>([]);
   const [lessonOptions, setLessonOptions] = useState<LessonSelectOption[]>([]);
@@ -118,6 +120,8 @@ export default function CreateQuizForm({ quizId }: Props) {
             lesson: lessonRef ?? '',
             timeLimit: String(quiz.timeLimit ?? 30),
             isPublished: !!quiz.isPublished,
+            enableNegativeMarking: !!quiz.enableNegativeMarking,
+            negativeMarks: String(quiz.negativeMarks ?? '0.25'),
           });
           if (apiQuestions && apiQuestions.length > 0) {
             setQuestions(
@@ -355,6 +359,8 @@ export default function CreateQuizForm({ quizId }: Props) {
           lesson: lessonPayload,
           timeLimit: Number(formData.timeLimit),
           isPublished: formData.isPublished,
+          enableNegativeMarking: formData.enableNegativeMarking,
+          negativeMarks: formData.enableNegativeMarking ? parseFloat(formData.negativeMarks || '0.25') : 0,
           questions,
         });
         addAlert({
@@ -371,6 +377,8 @@ export default function CreateQuizForm({ quizId }: Props) {
           lesson: lessonPayload,
           timeLimit: Number(formData.timeLimit),
           isPublished: formData.isPublished,
+          enableNegativeMarking: formData.enableNegativeMarking,
+          negativeMarks: formData.enableNegativeMarking ? parseFloat(formData.negativeMarks || '0.25') : 0,
           questions,
         });
         sendGAEvent({ event: 'create_quiz', quiz_title: formData.title });

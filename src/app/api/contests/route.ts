@@ -252,6 +252,8 @@ export async function POST(request: NextRequest) {
       maxParticipants = null,
       visibility = 'public',
       leaderboardVisibility = 'live',
+      enableNegativeMarking,
+      negativeMarks,
       quizzes: rawQuizzes = [],
       questions: rawQuestions = [],
     } = validationResult.data;
@@ -294,6 +296,8 @@ export async function POST(request: NextRequest) {
         organizationId: session.user.organizationId || null,
         timeLimit: duration,
         isPublished: true,
+        enableNegativeMarking: !!enableNegativeMarking,
+        negativeMarks: typeof negativeMarks === 'number' ? negativeMarks : 0,
         questionCount: rawQuestions.length,
         version: 1,
       });
@@ -305,6 +309,8 @@ export async function POST(request: NextRequest) {
           question: q.question,
           options: q.options,
           correctAnswer: q.correctAnswer,
+          points: q.points,
+          negativePoints: q.negativePoints,
         })),
         { bumpVersion: false }
       );
@@ -349,6 +355,8 @@ export async function POST(request: NextRequest) {
             organizationId: session.user.organizationId || null,
             timeLimit: duration,
             isPublished: true,
+            enableNegativeMarking: !!enableNegativeMarking,
+            negativeMarks: typeof negativeMarks === 'number' ? negativeMarks : 0,
             questionCount: item.questions.length,
             version: 1,
           });
@@ -360,6 +368,8 @@ export async function POST(request: NextRequest) {
               question: q.question,
               options: q.options,
               correctAnswer: q.correctAnswer,
+              points: q.points,
+              negativePoints: q.negativePoints,
             })),
             { bumpVersion: false }
           );
@@ -402,6 +412,8 @@ export async function POST(request: NextRequest) {
       maxParticipants,
       visibility,
       leaderboardVisibility,
+      enableNegativeMarking: !!enableNegativeMarking,
+      negativeMarks: typeof negativeMarks === 'number' ? negativeMarks : 0,
       questionCount: totalQuestions,
       totalPoints,
     });

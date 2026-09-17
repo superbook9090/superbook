@@ -192,6 +192,56 @@ export async function PATCH(
     if (updates.visibility) contest.visibility = updates.visibility;
     if (updates.leaderboardVisibility) contest.leaderboardVisibility = updates.leaderboardVisibility;
     if (updates.status) contest.status = updates.status;
+    if (updates.enableNegativeMarking !== undefined) contest.enableNegativeMarking = updates.enableNegativeMarking;
+    if (updates.negativeMarks !== undefined) contest.negativeMarks = updates.negativeMarks;
+
+    // Update questions if provided and contest has not started yet
+    if (updates.questions && updates.questions.length > 0 && currentState !== 'live' && currentState !== 'completed') {
+      let targetQuizId: mongoose.Types.ObjectId | null = null;
+      if (contest.quizzes && contest.quizzes.length > 0) {
+        const firstQuiz = contest.quizzes[0].quiz as mongoose.Types.ObjectId;
+        targetQuizId = firstQuiz;
+      } else {
+        const standaloneQuiz = new Quiz({
+          title: `${contest.title} - Quiz`,
+          description: contest.description || 'Contest Question Set',
+          course: new mongoose.Types.ObjectId(),
+          instructor: contest.instructor,
+          organizationId: contest.organizationId,
+          timeLimit: contest.duration,
+          isPublished: true,
+          enableNegativeMarking: contest.enableNegativeMarking,
+          negativeMarks: contest.negativeMarks,
+          questionCount: updates.questions.length,
+          version: 1,
+        });
+        await standaloneQuiz.save();
+        targetQuizId = standaloneQuiz._id as mongoose.Types.ObjectId;
+        contest.quizzes = [{
+          quiz: targetQuizId,
+          title: contest.title,
+          order: 0,
+          weight: 1,
+        }];
+      }
+
+      if (targetQuizId) {
+        await setQuizQuestions(
+          targetQuizId,
+          updates.questions.map((q) => ({
+            question: q.question,
+            options: q.options,
+            correctAnswer: q.correctAnswer,
+            points: q.points,
+            negativePoints: q.negativePoints,
+          })),
+          { bumpVersion: true }
+        );
+
+        contest.questionCount = updates.questions.length;
+        contest.totalPoints = updates.questions.reduce((acc, q) => acc + (q.points || 1), 0);
+      }
+    }
 
     await contest.save();
     await invalidatePattern('contests:*');

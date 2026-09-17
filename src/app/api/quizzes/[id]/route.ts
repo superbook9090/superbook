@@ -71,6 +71,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         order: q.order,
         question: q.prompt,
         options: q.options,
+        points: (q as unknown as { points?: number }).points ?? 1,
+        negativePoints: (q as unknown as { negativePoints?: number }).negativePoints ?? 0,
         ...(include.includes('answers') && staff
           ? { correctAnswer: (q as unknown as { correctOption: number }).correctOption }
           : {}),
@@ -109,8 +111,17 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       return NextResponse.json({ message: 'Invalid input', errors: validationResult.error.issues }, { status: 400 });
     }
 
-    const { title, description, chapter, lesson, questions, timeLimit, isPublished } =
-      validationResult.data;
+    const {
+      title,
+      description,
+      chapter,
+      lesson,
+      questions,
+      timeLimit,
+      isPublished,
+      enableNegativeMarking,
+      negativeMarks,
+    } = validationResult.data;
 
     const quiz = await Quiz.findById(id);
     if (!quiz) {
@@ -140,6 +151,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (description !== undefined) quiz.description = description;
     if (timeLimit !== undefined) quiz.timeLimit = timeLimit;
     if (isPublished !== undefined) quiz.isPublished = isPublished;
+    if (enableNegativeMarking !== undefined) quiz.enableNegativeMarking = enableNegativeMarking;
+    if (negativeMarks !== undefined) quiz.negativeMarks = negativeMarks;
 
     if (chapter !== undefined || lesson !== undefined) {
       const nextChapter =
@@ -178,9 +191,16 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
           );
         }
       }
+
       await setQuizQuestions(
         quiz._id as mongoose.Types.ObjectId,
-        questions.map((q) => ({ question: q.question, options: q.options, correctAnswer: q.correctAnswer })),
+        questions.map((q) => ({
+          question: q.question,
+          options: q.options,
+          correctAnswer: q.correctAnswer,
+          points: q.points,
+          negativePoints: q.negativePoints,
+        })),
         { bumpVersion: true }
       );
     }

@@ -24,6 +24,9 @@ import {
 } from 'lucide-react';
 import { ApiClientError } from '@/lib/api/http';
 import type { ContestPrize } from '@/lib/api/contests';
+import { useRoleTheme } from '@/contexts/RoleThemeContext';
+import { QuizImportTool } from '@/features/quizzes/components/QuizImportTool';
+import type { Question } from '@/features/quizzes/components/types';
 
 interface TeacherContestFormProps {
   contestId?: string;
@@ -34,12 +37,14 @@ interface FormQuestion {
   options: string[];
   correctAnswer: number;
   points: number;
+  negativePoints?: number;
 }
 
 export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
   const { t } = useTranslation();
   const router = useRouter();
   const { addAlert } = useAlert();
+  const { theme } = useRoleTheme();
 
   const isEdit = Boolean(contestId);
   const { data: existingData, isLoading: fetchingExisting } = useContest(contestId);
@@ -63,6 +68,15 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
   const [maxParticipants, setMaxParticipants] = useState('');
   const [visibility, setVisibility] = useState<'public' | 'organization' | 'unlisted'>('public');
   const [leaderboardVisibility, setLeaderboardVisibility] = useState<'live' | 'after_end' | 'hidden'>('live');
+  const [enableNegativeMarking, setEnableNegativeMarking] = useState(false);
+  const [negativeMarks, setNegativeMarks] = useState('0.25');
+
+  // Questions are editable when creating or when contest is in draft or upcoming status
+  const canEditQuestions =
+    !isEdit ||
+    (existingData?.contest?.computedState !== 'live' &&
+      existingData?.contest?.computedState !== 'completed' &&
+      existingData?.contest?.computedState !== 'cancelled');
 
   // Prizes State
   const [prizes, setPrizes] = useState<ContestPrize[]>([
@@ -94,6 +108,37 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
       setMaxParticipants(c.maxParticipants ? String(c.maxParticipants) : '');
       setVisibility(c.visibility || 'public');
       setLeaderboardVisibility(c.leaderboardVisibility || 'live');
+      if (c.enableNegativeMarking !== undefined) {
+        setEnableNegativeMarking(Boolean(c.enableNegativeMarking));
+      }
+      if (c.negativeMarks !== undefined) {
+        setNegativeMarks(String(c.negativeMarks));
+      }
+
+      if (c.questionsForEditor && c.questionsForEditor.length > 0) {
+        const allLoadedQuestions: FormQuestion[] = [];
+        for (const group of c.questionsForEditor) {
+          for (const q of (group.questions as Array<{
+            question: string;
+            options: string[];
+            correctAnswer?: number;
+            points?: number;
+            negativePoints?: number;
+          }> || [])) {
+            allLoadedQuestions.push({
+              question: q.question || '',
+              options: q.options || ['', '', '', ''],
+              correctAnswer: typeof q.correctAnswer === 'number' ? q.correctAnswer : 0,
+              points: q.points || 1,
+              negativePoints: q.negativePoints,
+            });
+          }
+        }
+        if (allLoadedQuestions.length > 0) {
+          setQuestions(allLoadedQuestions);
+        }
+      }
+
       if (c.prizes && c.prizes.length > 0) {
         setPrizes(c.prizes);
       }
@@ -134,8 +179,52 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
   const handleAddQuestion = () => {
     setQuestions((prev) => [
       ...prev,
-      { question: '', options: ['', '', '', ''], correctAnswer: 0, points: 1 },
+      {
+        question: '',
+        options: ['', '', '', ''],
+        correctAnswer: 0,
+        points: 1,
+        negativePoints: enableNegativeMarking ? parseFloat(negativeMarks) || 0.25 : undefined,
+      },
     ]);
+  };
+
+  const handleImportQuestions = (imported: Question[]) => {
+    const defaultNeg = enableNegativeMarking ? parseFloat(negativeMarks) || 0.25 : undefined;
+    const formatted: FormQuestion[] = imported.map((q) => ({
+      question: q.question,
+      options: q.options && q.options.length >= 2 ? q.options : ['', ''],
+      correctAnswer: typeof q.correctAnswer === 'number' ? q.correctAnswer : 0,
+      points: q.points && q.points > 0 ? q.points : 1,
+      negativePoints: q.negativePoints !== undefined ? q.negativePoints : defaultNeg,
+    }));
+
+    setQuestions((prev) => {
+      const isDefaultSingleEmpty =
+        prev.length === 1 &&
+        !prev[0].question.trim() &&
+        prev[0].options.every((opt) => !opt.trim());
+      return isDefaultSingleEmpty ? formatted : [...prev, ...formatted];
+    });
+
+    addAlert({
+      type: 'success',
+      message: (
+        t('contest.importQuestionsSuccess') || 'Successfully loaded {count} questions!'
+      ).replace('{count}', String(formatted.length)),
+    });
+  };
+
+  const handlePointsChange = (qIndex: number, val: number) => {
+    setQuestions((prev) =>
+      prev.map((q, idx) => (idx === qIndex ? { ...q, points: Math.max(0.5, val) } : q))
+    );
+  };
+
+  const handleNegativePointsChange = (qIndex: number, val: number) => {
+    setQuestions((prev) =>
+      prev.map((q, idx) => (idx === qIndex ? { ...q, negativePoints: Math.max(0, val) } : q))
+    );
   };
 
   const handleQuestionChange = (index: number, text: string) => {
@@ -207,7 +296,7 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
       return;
     }
 
-    if (!isEdit) {
+    if (!isEdit || canEditQuestions) {
       // Validate questions
       for (let i = 0; i < questions.length; i++) {
         const q = questions[i];
@@ -239,14 +328,19 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
       maxParticipants: maxParticipants ? parseInt(maxParticipants, 10) : null,
       visibility,
       leaderboardVisibility,
+      enableNegativeMarking,
+      negativeMarks: enableNegativeMarking ? parseFloat(negativeMarks) || 0.25 : undefined,
       prizes,
-      ...(!isEdit
+      ...((!isEdit || canEditQuestions)
         ? {
             questions: questions.map((q) => ({
               question: q.question.trim(),
               options: q.options.map((o) => o.trim()),
               correctAnswer: q.correctAnswer,
               points: q.points || 1,
+              negativePoints: enableNegativeMarking
+                ? (q.negativePoints !== undefined ? q.negativePoints : parseFloat(negativeMarks) || 0.25)
+                : undefined,
             })),
           }
         : {}),
@@ -567,11 +661,77 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
               <option value="hidden">Hidden (Teacher only)</option>
             </select>
           </div>
+
+          {/* Negative Marking Configuration */}
+          <div className="sm:col-span-2 p-4 rounded-2xl border border-[var(--border)] bg-[var(--color-surface-muted)]/50 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <label htmlFor="enableNegativeMarking" className="text-xs sm:text-sm font-semibold text-[var(--color-foreground)] flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    id="enableNegativeMarking"
+                    name="enableNegativeMarking"
+                    checked={enableNegativeMarking}
+                    onChange={(e) => setEnableNegativeMarking(e.target.checked)}
+                    className="h-4 w-4 text-[var(--primary)] focus:ring-[var(--primary)] border-[var(--border)] rounded cursor-pointer"
+                  />
+                  <span>{t('contest.enableNegativeMarking') || 'Enable Negative Marking'}</span>
+                </label>
+                <p className="text-[11px] sm:text-xs text-[var(--color-muted-foreground)] mt-0.5 ml-6">
+                  {t('contest.negativeMarkingDesc') || 'Deduct marks for incorrect answers to simulate competitive exam grading.'}
+                </p>
+              </div>
+            </div>
+
+            {enableNegativeMarking && (
+              <div className="pt-2 border-t border-[var(--border)] space-y-3 ml-6">
+                <div>
+                  <label className="block text-xs font-semibold text-[var(--color-foreground)] mb-1.5">
+                    {t('contest.negativeMarks') || 'Penalty per incorrect answer'}
+                  </label>
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    {[
+                      { label: t('contest.negativeMarksPresetQuarter') || '1/4 (-0.25)', value: '0.25' },
+                      { label: t('contest.negativeMarksPresetThird') || '1/3 (-0.33)', value: '0.33' },
+                      { label: t('contest.negativeMarksPresetHalf') || '1/2 (-0.5)', value: '0.5' },
+                      { label: t('contest.negativeMarksPresetOne') || '1 (-1.0)', value: '1' },
+                    ].map((preset) => (
+                      <button
+                        key={preset.value}
+                        type="button"
+                        onClick={() => setNegativeMarks(preset.value)}
+                        className={`px-2.5 py-1 text-xs font-medium rounded-lg border transition-colors ${
+                          negativeMarks === preset.value
+                            ? 'bg-[var(--primary)] text-white border-transparent'
+                            : 'bg-[var(--card-solid)] text-[var(--color-foreground)] border-[var(--border)] hover:bg-[var(--color-surface-muted)]'
+                        }`}
+                      >
+                        {preset.label}
+                      </button>
+                    ))}
+                  </div>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max="10"
+                    value={negativeMarks}
+                    onChange={(e) => setNegativeMarks(e.target.value)}
+                    placeholder="0.25"
+                    className="w-32 px-3 py-1.5 text-xs sm:text-sm rounded-xl border border-[var(--border)] bg-[var(--card-solid)] text-[var(--color-foreground)] focus:ring-1 focus:ring-[var(--primary)]"
+                  />
+                  <span className="text-[11px] text-[var(--color-muted)] block mt-1">
+                    {t('contest.negativeMarksHint') || 'Unattempted / skipped questions receive 0 deduction.'}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* 5. Questions Builder (only when creating or draft) */}
-      {!isEdit && (
+      {/* 5. Questions Builder */}
+      {canEditQuestions ? (
         <div className="p-6 rounded-3xl bg-[var(--card-solid)] border border-[var(--border)] shadow-xs space-y-6">
           <div className="flex items-center justify-between pb-3 border-b border-[var(--border)]">
             <div className="flex items-center gap-2 text-sm font-bold text-[var(--color-foreground)]">
@@ -582,6 +742,9 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
               {questions.length} {t('common.questions') || 'Questions'}
             </span>
           </div>
+
+          {/* Import Questions Tool (Identical to Quiz Creator: Excel/CSV, pipe text, AI generator) */}
+          <QuizImportTool theme={theme} onImport={handleImportQuestions} />
 
           <div className="space-y-6">
             {questions.map((q, qIdx) => (
@@ -664,6 +827,40 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
                     </button>
                   )}
                 </div>
+
+                {/* Question Points and Negative Penalty */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-[var(--border)]">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-[var(--color-foreground)] mb-1">
+                      {t('contest.questionPoints') || 'Positive Points'}
+                    </label>
+                    <input
+                      type="number"
+                      step="0.5"
+                      min="0.5"
+                      max="100"
+                      value={q.points || 1}
+                      onChange={(e) => handlePointsChange(qIdx, parseFloat(e.target.value) || 1)}
+                      className="w-32 px-3 py-1.5 text-xs rounded-xl bg-[var(--card-solid)] border border-[var(--border)] text-[var(--color-foreground)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
+                    />
+                  </div>
+                  {enableNegativeMarking && (
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[var(--color-foreground)] mb-1">
+                        {t('contest.negativePoints') || 'Negative Penalty'}
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        max="100"
+                        value={q.negativePoints !== undefined ? q.negativePoints : (parseFloat(negativeMarks) || 0.25)}
+                        onChange={(e) => handleNegativePointsChange(qIdx, parseFloat(e.target.value) || 0)}
+                        className="w-32 px-3 py-1.5 text-xs rounded-xl bg-[var(--card-solid)] border border-[var(--border)] text-[var(--color-foreground)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
 
@@ -676,6 +873,16 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
               <span>{t('contest.addAnotherQuestion') || 'Add Another Question'}</span>
             </button>
           </div>
+        </div>
+      ) : (
+        <div className="p-6 rounded-3xl bg-[var(--card-solid)] border border-[var(--border)] shadow-xs space-y-2">
+          <div className="flex items-center gap-2 text-sm font-bold text-[var(--color-foreground)]">
+            <Layers className="w-4 h-4 text-[var(--primary)]" />
+            <span>{t('contest.questionsBuilder') || '5. Contest Questions'}</span>
+          </div>
+          <p className="text-xs text-[var(--color-muted-foreground)]">
+            {t('contest.questionsLockedDuringContest') || 'Questions cannot be modified once the contest has started or completed.'}
+          </p>
         </div>
       )}
 
