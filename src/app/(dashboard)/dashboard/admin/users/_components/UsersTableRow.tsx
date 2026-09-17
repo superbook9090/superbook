@@ -15,6 +15,8 @@ import {
   Trash2,
   Smartphone,
   Clock,
+  Sliders,
+  Trophy,
 } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { formatDateTime, getRelativeTime } from '@/lib/dateUtils';
@@ -190,36 +192,84 @@ export function UsersTableRow({
 
       {/* Quotas & Capabilities */}
       <td className="px-5 py-3.5">
-        {user.role === 'teacher' ? (
-          <div className="flex flex-col gap-1 text-xs">
-            <span className="font-mono text-[11px] text-[var(--color-foreground)] font-semibold">
-              C: {user.limits?.courses ?? '∞'} | Q: {user.limits?.quizzes ?? '∞'} | B: {user.limits?.blogs ?? '∞'}
-            </span>
-            <div className="flex items-center gap-1.5">
-              {user.canUploadVideos && (
-                <Tooltip label="Video uploads enabled">
-                  <span className="p-1 rounded bg-[var(--teacher-soft)] text-[var(--teacher-primary)]">
-                    <Video className="w-3 h-3" />
-                  </span>
-                </Tooltip>
-              )}
-              {user.canCreatePublicCourses && (
-                <Tooltip label="Public course creation enabled">
-                  <span className="p-1 rounded bg-[var(--info-light)] text-[var(--info)]">
-                    <Globe className="w-3 h-3" />
-                  </span>
-                </Tooltip>
-              )}
-              {user.canGenerateAiQuizzes && (
-                <Tooltip label="AI quiz generation enabled">
-                  <span className="p-1 rounded bg-[var(--primary-soft)] text-[var(--color-primary)]">
-                    <Sparkles className="w-3 h-3" />
-                  </span>
-                </Tooltip>
-              )}
+        {user.role === 'teacher' ? (() => {
+          const hasCustomLimits = Boolean(
+            (user.limits?.courses !== undefined && user.limits?.courses !== null) ||
+            (user.limits?.quizzes !== undefined && user.limits?.quizzes !== null) ||
+            (user.limits?.blogs !== undefined && user.limits?.blogs !== null) ||
+            (user.limits?.aiQuizGenerations !== undefined && user.limits?.aiQuizGenerations !== null) ||
+            (user.limits?.aiQuizMaxQuestions !== undefined && user.limits?.aiQuizMaxQuestions !== null)
+          );
+
+          const customParts: string[] = [];
+          if (user.limits?.courses !== undefined && user.limits?.courses !== null) {
+            customParts.push(`Courses: ${user.limits.courses}`);
+          }
+          if (user.limits?.quizzes !== undefined && user.limits?.quizzes !== null) {
+            customParts.push(`Quizzes: ${user.limits.quizzes}`);
+          }
+          if (user.limits?.blogs !== undefined && user.limits?.blogs !== null) {
+            customParts.push(`Blogs: ${user.limits.blogs}`);
+          }
+          if (user.limits?.aiQuizGenerations !== undefined && user.limits?.aiQuizGenerations !== null) {
+            customParts.push(`AI Runs: ${user.limits.aiQuizGenerations}`);
+          }
+          if (user.limits?.aiQuizMaxQuestions !== undefined && user.limits?.aiQuizMaxQuestions !== null) {
+            customParts.push(`Max Qs: ${user.limits.aiQuizMaxQuestions}`);
+          }
+          const customLimitsSummary = customParts.join(' • ');
+
+          return (
+            <div className="flex flex-col gap-1.5 text-xs">
+              <div>
+                {hasCustomLimits ? (
+                  <Tooltip label={customLimitsSummary}>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 cursor-default">
+                      <Sliders className="w-3 h-3" />
+                      <span>{t('adminUsers.customLimits') || 'Custom Limits'}</span>
+                    </span>
+                  </Tooltip>
+                ) : (
+                  <Tooltip label={t('adminUsers.platformDefaultsTooltip') || 'Platform defaults: 5 Courses, 10 Quizzes, 2 Blogs'}>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-[var(--color-surface-muted-strong)] text-[var(--color-muted-foreground)] cursor-default">
+                      <span>{t('adminUsers.standardLimits') || 'Standard Limits'}</span>
+                    </span>
+                  </Tooltip>
+                )}
+              </div>
+              <div className="flex items-center gap-1.5">
+                {user.canUploadVideos && (
+                  <Tooltip label={t('adminUsers.videoUploadPermission') || 'Video uploads enabled'}>
+                    <span className="p-1 rounded bg-violet-500/10 text-violet-600 dark:text-violet-400">
+                      <Video className="w-3 h-3" />
+                    </span>
+                  </Tooltip>
+                )}
+                {user.canCreatePublicCourses && (
+                  <Tooltip label={t('adminUsers.canCreatePublicCourses') || 'Public course creation enabled'}>
+                    <span className="p-1 rounded bg-sky-500/10 text-sky-600 dark:text-sky-400">
+                      <Globe className="w-3 h-3" />
+                    </span>
+                  </Tooltip>
+                )}
+                {user.canCreateContests && (
+                  <Tooltip label={t('adminUsers.canCreateContests') || 'Contests creator enabled'}>
+                    <span className="p-1 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                      <Trophy className="w-3 h-3" />
+                    </span>
+                  </Tooltip>
+                )}
+                {user.canGenerateAiQuizzes && (
+                  <Tooltip label={t('adminUsers.canGenerateAiQuizzes') || 'AI quiz generation enabled'}>
+                    <span className="p-1 rounded bg-[var(--primary-soft)] text-[var(--color-primary)]">
+                      <Sparkles className="w-3 h-3" />
+                    </span>
+                  </Tooltip>
+                )}
+              </div>
             </div>
-          </div>
-        ) : (
+          );
+        })() : (
           <span className="text-xs text-[var(--color-muted)] italic">
             {user.role === 'student' ? 'Student defaults' : 'Staff level'}
           </span>

@@ -13,6 +13,10 @@ import {
   Smartphone,
   Globe,
   Clock,
+  Sliders,
+  Trophy,
+  Video,
+  Sparkles,
 } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { formatDate, getRelativeTime } from '@/lib/dateUtils';
@@ -164,14 +168,57 @@ export function UsersMobileList({ users, organizations, handleOpenUserDetail }: 
               </div>
 
               {/* Teacher limits if teacher */}
-              {user.role === 'teacher' && (
-                <div className="flex items-center justify-between">
-                  <span className="text-[var(--color-muted-foreground)]">{t('adminUsers.limits') || 'Quotas'}</span>
-                  <span className="font-mono font-semibold text-[var(--color-foreground)] text-[11px]">
-                    C: {user.limits?.courses ?? '∞'} | Q: {user.limits?.quizzes ?? '∞'} | B: {user.limits?.blogs ?? '∞'}
-                  </span>
-                </div>
-              )}
+              {user.role === 'teacher' && (() => {
+                const hasCustomLimits = Boolean(
+                  (user.limits?.courses !== undefined && user.limits?.courses !== null) ||
+                  (user.limits?.quizzes !== undefined && user.limits?.quizzes !== null) ||
+                  (user.limits?.blogs !== undefined && user.limits?.blogs !== null) ||
+                  (user.limits?.aiQuizGenerations !== undefined && user.limits?.aiQuizGenerations !== null) ||
+                  (user.limits?.aiQuizMaxQuestions !== undefined && user.limits?.aiQuizMaxQuestions !== null)
+                );
+
+                return (
+                  <div className="flex flex-col gap-1.5 py-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[var(--color-muted-foreground)]">
+                        {t('adminUsers.capabilitiesAndLimits') || 'Quotas'}
+                      </span>
+                      {hasCustomLimits ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                          <Sliders className="w-3 h-3" />
+                          <span>{t('adminUsers.customLimits') || 'Custom Limits'}</span>
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-[var(--color-surface-muted-strong)] text-[var(--color-muted-foreground)]">
+                          {t('adminUsers.standardLimits') || 'Standard Limits'}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-end gap-1.5 pt-0.5">
+                      {user.canUploadVideos && (
+                        <span className="p-1 rounded bg-violet-500/10 text-violet-600 dark:text-violet-400" title="Video Uploads">
+                          <Video className="w-3 h-3" />
+                        </span>
+                      )}
+                      {user.canCreatePublicCourses && (
+                        <span className="p-1 rounded bg-sky-500/10 text-sky-600 dark:text-sky-400" title="Public Courses">
+                          <Globe className="w-3 h-3" />
+                        </span>
+                      )}
+                      {user.canCreateContests && (
+                        <span className="p-1 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400" title="Contest Creator">
+                          <Trophy className="w-3 h-3" />
+                        </span>
+                      )}
+                      {user.canGenerateAiQuizzes && (
+                        <span className="p-1 rounded bg-[var(--primary-soft)] text-[var(--color-primary)]" title="AI Quiz Generator">
+                          <Sparkles className="w-3 h-3" />
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Joined */}
               <div className="flex items-center justify-between">

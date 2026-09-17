@@ -2201,6 +2201,9 @@ export const hi = {
     tabAiIntelligence: 'AI इंटेलिजेंस',
     stepperDecrease: 'सीमा घटाएं',
     stepperIncrease: 'सीमा बढ़ाएं',
+    standardLimits: 'मानक सीमाएं',
+    customLimits: 'कस्टम सीमाएं',
+    platformDefaultsTooltip: 'प्लेटफ़ॉर्म डिफ़ॉल्ट लागू (5 पाठ्यक्रम, 10 क्विज़, 2 ब्लॉग)',
   },
 
   // Organization Management

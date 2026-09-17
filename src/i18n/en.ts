@@ -2201,6 +2201,9 @@ export const en = {
     tabAiIntelligence: 'AI Intelligence',
     stepperDecrease: 'Decrease limit',
     stepperIncrease: 'Increase limit',
+    standardLimits: 'Standard Limits',
+    customLimits: 'Custom Limits',
+    platformDefaultsTooltip: 'Platform defaults applied (5 Courses, 10 Quizzes, 2 Blogs)',
   },
 
   // Organization Management
