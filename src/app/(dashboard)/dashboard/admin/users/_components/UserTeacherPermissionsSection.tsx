@@ -3,6 +3,7 @@
 import React from 'react';
 import { Video, Globe, Sliders, Check, BookOpen, HelpCircle, FileText, Sparkles, Trophy } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import Button from '@/components/ui/Button';
 import { TextField } from '@/components/ui/TextField';
 import type { User } from './types';
@@ -31,6 +32,12 @@ export function UserTeacherPermissionsSection({
   isSavingLimits,
 }: UserTeacherPermissionsSectionProps) {
   const { t } = useTranslation();
+  const globalGenerationsLimit = useSettingsStore(
+    (s) => s.settings.teacherLimits?.aiQuizGenerations ?? 5
+  );
+  const globalMaxQuestions = useSettingsStore(
+    (s) => s.settings.teacherLimits?.aiQuizMaxQuestions ?? 10
+  );
 
   if (user.role !== 'teacher') {
     return null;
@@ -206,7 +213,7 @@ export function UserTeacherPermissionsSection({
             startIcon={<Sparkles className="w-4 h-4 text-[var(--color-muted)]" />}
             value={limitsForm.aiQuizGenerations || ''}
             onChange={(e) => onLimitsChange('aiQuizGenerations', e.target.value)}
-            placeholder={t('adminUsers.globalDefault') || 'Global Default (5)'}
+            placeholder={`${t('adminUsers.globalDefault') || 'Global Default'} (${globalGenerationsLimit})`}
             fullWidth
           />
           <TextField
@@ -217,7 +224,7 @@ export function UserTeacherPermissionsSection({
             startIcon={<Sparkles className="w-4 h-4 text-[var(--color-muted)]" />}
             value={limitsForm.aiQuizMaxQuestions || ''}
             onChange={(e) => onLimitsChange('aiQuizMaxQuestions', e.target.value)}
-            placeholder={t('adminUsers.globalDefaultTen') || 'Global Default (10)'}
+            placeholder={`${t('adminUsers.globalDefault') || 'Global Default'} (${globalMaxQuestions})`}
             fullWidth
           />
         </div>

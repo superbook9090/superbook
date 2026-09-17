@@ -2543,6 +2543,7 @@ export const en = {
     topicPlaceholder: 'e.g., Photosynthesis and Cellular Respiration',
     topicRequired: 'Please enter a quiz topic or subject.',
     numQuestionsLabel: 'Number of Questions',
+    customLimitActive: 'Extra Questions Allowed',
     difficultyLabel: 'Difficulty Level',
     easy: 'Easy',
     medium: 'Medium',

@@ -152,7 +152,7 @@ export function useAdminUsers() {
 
   const handleSaveLimits = async (
     userId: string,
-    limits: { courses?: number; quizzes?: number; blogs?: number; aiQuizGenerations?: number }
+    limits: { courses?: number; quizzes?: number; blogs?: number; aiQuizGenerations?: number; aiQuizMaxQuestions?: number }
   ) => {
     try {
       await patchAdminUser({ userId, updates: { limits } });

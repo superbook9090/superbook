@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { isStaffRole } from '@/lib/roles';
 import { requireFeature, getTeacherLimit } from '@/lib/settingsHelpers';
+import { getSettingsWithDefaults } from '@/lib/dataService';
 import dbConnect from '@/lib/db';
 import User from '@/models/User';
 import { logApiError, logError } from '@/lib/logger';
@@ -384,3 +385,57 @@ function sanitizeParsedQuestions(parsed: unknown[], numQuestions: number): Gener
     );
   }
 }
+
+export async function GET() {
+  const logContext = { path: '/api/quizzes/generate-ai', method: 'GET' };
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    const userId = session.user.id;
+    const userRole = session.user.role;
+    if (!isStaffRole(userRole)) {
+      return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
+    }
+
+    await dbConnect();
+    const user = await User.findById(userId)
+      .select('limits aiQuizGenerationsCount canGenerateAiQuizzes canCreateContests role')
+      .lean();
+
+    if (!user) {
+      return NextResponse.json({ message: 'User not found' }, { status: 404 });
+    }
+
+    const isSuperOrAdmin = userRole === 'superadmin' || userRole === 'admin';
+    const hasCustomMaxQuestions =
+      user.limits?.aiQuizMaxQuestions !== undefined && user.limits.aiQuizMaxQuestions !== null;
+
+    const effectiveMaxQuestions = await getTeacherLimit('aiQuizMaxQuestions', userId).catch(() => 10);
+    const effectiveGenerationsLimit = await getTeacherLimit('aiQuizGenerations', userId).catch(() => 5);
+    const currentCount = user.aiQuizGenerationsCount ?? 0;
+
+    const settings = await getSettingsWithDefaults();
+    const globalMaxQuestions = settings?.teacherLimits?.aiQuizMaxQuestions ?? 10;
+
+    return NextResponse.json({
+      maxQuestions: effectiveMaxQuestions,
+      globalMaxQuestions,
+      hasCustomMaxQuestions,
+      customMaxQuestions: hasCustomMaxQuestions ? user.limits?.aiQuizMaxQuestions : null,
+      usage: {
+        used: currentCount,
+        limit: effectiveGenerationsLimit,
+        remaining: Math.max(0, effectiveGenerationsLimit - currentCount),
+      },
+      canGenerate:
+        isSuperOrAdmin || Boolean(user.canGenerateAiQuizzes) || Boolean(user.canCreateContests),
+    });
+  } catch (error) {
+    logApiError(error as Error, 'GET', '/api/quizzes/generate-ai', logContext);
+    return NextResponse.json({ message: 'Failed to fetch AI quiz limits' }, { status: 500 });
+  }
+}
+

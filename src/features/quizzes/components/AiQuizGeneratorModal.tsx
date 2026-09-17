@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, X, Loader2, AlertCircle, HelpCircle, Globe, SlidersHorizontal, BookOpen } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -36,10 +36,11 @@ function sanitizeAiErrorMessage(rawMsg: string, fallback: string): string {
 export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme, entityType = 'quiz' }: Props) {
   const { t } = useTranslation();
   const isContest = entityType === 'contest';
-  const configuredMaxQuestions = useSettingsStore(
+  const globalMaxQuestions = useSettingsStore(
     (s) => s.settings.teacherLimits?.aiQuizMaxQuestions ?? 10
   );
-  const maxAllowedQuestions = Math.max(1, configuredMaxQuestions);
+  const [maxAllowedQuestions, setMaxAllowedQuestions] = useState<number>(() => Math.max(1, globalMaxQuestions));
+  const [hasCustomLimit, setHasCustomLimit] = useState(false);
 
   const [topic, setTopic] = useState('');
   const [numQuestions, setNumQuestions] = useState<number>(() => Math.min(maxAllowedQuestions, 10));
@@ -50,6 +51,38 @@ export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme, entity
   const [isGenerating, setIsGenerating] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [usageInfo, setUsageInfo] = useState<{ used: number; limit: number; remaining: number } | null>(null);
+
+  // Sync with global store fallback if no custom override is set
+  useEffect(() => {
+    if (!hasCustomLimit) {
+      setMaxAllowedQuestions(Math.max(1, globalMaxQuestions));
+    }
+  }, [globalMaxQuestions, hasCustomLimit]);
+
+  // Fetch teacher's live quota and custom allowed questions from server
+  useEffect(() => {
+    if (!isOpen) return;
+    let isMounted = true;
+    fetch('/api/quizzes/generate-ai')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!isMounted || !data) return;
+        if (typeof data.maxQuestions === 'number' && data.maxQuestions >= 1) {
+          setMaxAllowedQuestions(data.maxQuestions);
+          if (data.hasCustomMaxQuestions) {
+            setHasCustomLimit(true);
+          }
+        }
+        if (data.usage) {
+          setUsageInfo(data.usage);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -205,12 +238,20 @@ export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme, entity
 
             {/* Number of Questions Slider */}
             <div>
-              <label className="block text-xs sm:text-sm font-bold text-[var(--color-foreground)] mb-1.5">
-                <span className="flex items-center gap-1.5">
-                  <SlidersHorizontal className="w-4 h-4 text-[var(--color-primary)]" />
-                  {t('aiQuiz.numQuestionsLabel') || 'Number of Questions'} (Max {maxAllowedQuestions})
-                </span>
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs sm:text-sm font-bold text-[var(--color-foreground)]">
+                  <span className="flex items-center gap-1.5">
+                    <SlidersHorizontal className="w-4 h-4 text-[var(--color-primary)]" />
+                    {t('aiQuiz.numQuestionsLabel') || 'Number of Questions'} (Max {maxAllowedQuestions})
+                  </span>
+                </label>
+                {hasCustomLimit && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--primary-soft)] text-[var(--color-primary)] text-[10px] font-bold border border-[var(--color-primary)]/20 shadow-2xs">
+                    <Sparkles className="w-3 h-3" />
+                    {t('aiQuiz.customLimitActive') || 'Extra Questions Allowed'}
+                  </span>
+                )}
+              </div>
               <div className="flex items-center gap-3">
                 <input
                   type="range"

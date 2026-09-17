@@ -17,6 +17,13 @@ declare module 'next-auth' {
       canUploadVideos?: boolean;
       canCreateContests?: boolean;
       canGenerateAiQuizzes?: boolean;
+      limits?: {
+        courses?: number;
+        quizzes?: number;
+        blogs?: number;
+        aiQuizGenerations?: number;
+        aiQuizMaxQuestions?: number;
+      };
     } & DefaultSession['user'];
   }
 
@@ -28,6 +35,13 @@ declare module 'next-auth' {
     canUploadVideos?: boolean;
     canCreateContests?: boolean;
     canGenerateAiQuizzes?: boolean;
+    limits?: {
+      courses?: number;
+      quizzes?: number;
+      blogs?: number;
+      aiQuizGenerations?: number;
+      aiQuizMaxQuestions?: number;
+    };
   }
 }
 
@@ -41,6 +55,13 @@ declare module 'next-auth/jwt' {
     canUploadVideos?: boolean;
     canCreateContests?: boolean;
     canGenerateAiQuizzes?: boolean;
+    limits?: {
+      courses?: number;
+      quizzes?: number;
+      blogs?: number;
+      aiQuizGenerations?: number;
+      aiQuizMaxQuestions?: number;
+    };
   }
 }
 
@@ -223,6 +244,7 @@ export const authOptions: AuthOptions = {
           canUploadVideos: user.canUploadVideos || false,
           canCreateContests: user.canCreateContests || false,
           canGenerateAiQuizzes: user.canGenerateAiQuizzes || false,
+          limits: user.limits,
         };
       }
     })
@@ -275,6 +297,7 @@ export const authOptions: AuthOptions = {
         user.canCreateContests = dbUser.canCreateContests || false;
         user.canGenerateAiQuizzes = dbUser.canGenerateAiQuizzes || false;
         user.phone = dbUser.phone || '';
+        user.limits = dbUser.limits;
 
         return true;
       }
@@ -292,6 +315,7 @@ export const authOptions: AuthOptions = {
         token.canCreateContests = user.canCreateContests || false;
         token.canGenerateAiQuizzes = user.canGenerateAiQuizzes || false;
         token.phone = user.phone || '';
+        token.limits = user.limits || token.limits;
       }
       if (trigger === 'update' && session) {
         if (session.name) token.name = session.name;
@@ -312,6 +336,7 @@ export const authOptions: AuthOptions = {
         session.user.canUploadVideos = token.canUploadVideos || false;
         session.user.canCreateContests = token.canCreateContests || false;
         session.user.canGenerateAiQuizzes = token.canGenerateAiQuizzes || false;
+        session.user.limits = token.limits;
       }
       return session;
     }

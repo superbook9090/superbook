@@ -23,7 +23,7 @@ type Props = {
   handleTogglePublicCoursePermission: (userId: string, currentVal: boolean) => void;
   handleToggleContestPermission?: (userId: string, currentVal: boolean) => void;
   handleToggleAiQuizGenPermission?: (userId: string, currentVal: boolean) => void;
-  handleSaveLimits: (userId: string, limits: { courses?: number; quizzes?: number; blogs?: number; aiQuizGenerations?: number }) => Promise<void>;
+  handleSaveLimits: (userId: string, limits: { courses?: number; quizzes?: number; blogs?: number; aiQuizGenerations?: number; aiQuizMaxQuestions?: number }) => Promise<void>;
   handleToggleSuspend: (userId: string, isSuspended: boolean) => Promise<void>;
   handleDeleteClick: (userId: string) => void;
 };

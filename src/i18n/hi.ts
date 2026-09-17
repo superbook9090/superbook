@@ -2543,6 +2543,7 @@ export const hi = {
     topicPlaceholder: 'जैसे: प्रकाश संश्लेषण (Photosynthesis) और कोशिकीय श्वसन',
     topicRequired: 'कृपया क्विज़ का विषय दर्ज करें।',
     numQuestionsLabel: 'प्रश्नों की संख्या',
+    customLimitActive: 'अतिरिक्त प्रश्न अनुमत',
     difficultyLabel: 'कठिनाई स्तर',
     easy: 'आसान (Easy)',
     medium: 'मध्यम (Medium)',
