@@ -93,13 +93,9 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
   const stopQuizRef = useRef(quizSecurity.stopQuiz);
   stopQuizRef.current = quizSecurity.stopQuiz;
 
-  // Submit Attempt
+  // Submit Attempt — the API identifies the attempt server-side by session + contest ID
   const handleSubmit = useCallback(async () => {
     if (isSubmittingRef.current) return;
-    if (!attemptId) {
-      addAlert({ type: 'error', message: 'Contest attempt not found. Please refresh and try again.' });
-      return;
-    }
     isSubmittingRef.current = true;
     setIsSubmitting(true);
 
@@ -131,7 +127,7 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
         message: err instanceof ApiClientError ? err.message : 'Failed to submit contest',
       });
     }
-  }, [id, attemptId, questions, answers, router, addAlert, setQuizActive]);
+  }, [id, questions, answers, router, addAlert, setQuizActive]);
 
   // Handle violation continue / re-enter fullscreen
   const handleViolationContinue = useCallback(async () => {
@@ -212,12 +208,16 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  // Handle Answer Selection
+  // Handle Answer Selection — clicking the same option again unselects it
   const handleSelectOption = (questionId: string, optionIndex: number) => {
-    setAnswers((prev) => ({
-      ...prev,
-      [questionId]: optionIndex,
-    }));
+    setAnswers((prev) => {
+      if (prev[questionId] === optionIndex) {
+        // Same option clicked → remove selection
+        const { [questionId]: _, ...rest } = prev;
+        return rest;
+      }
+      return { ...prev, [questionId]: optionIndex };
+    });
   };
 
   if (isLoading || !contest) {
