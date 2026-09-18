@@ -72,6 +72,7 @@ export const ADMIN_NAV: DashboardNavItem[] = [
   { nameKey: 'common.allCourses', href: ROUTES.admin.courses, icon: 'Library', feature: 'enableCourses' },
   { nameKey: 'common.allQuizzes', href: ROUTES.admin.quizzes, icon: 'HelpCircle', feature: 'enableQuizzes' },
   { nameKey: 'common.allBlogs', href: ROUTES.admin.blogs, icon: 'Newspaper', feature: 'enableBlogs' },
+  { nameKey: 'common.contests', href: ROUTES.admin.contests, icon: 'Trophy', feature: 'enableContests', superadminOnly: true },
   { nameKey: 'admin.challenges', href: ROUTES.admin.challenges, icon: 'Swords', superadminOnly: true },
   { nameKey: 'admin.videoManagement', href: ROUTES.admin.videos, icon: 'Video' },
   { nameKey: 'common.files', href: ROUTES.admin.files, icon: 'Folder', superadminOnly: true },

@@ -97,6 +97,9 @@ export const ROUTES = {
     profile: '/dashboard/admin/profile',
     videos: '/dashboard/admin/videos',
     notes: '/dashboard/admin/notes',
+    contests: '/dashboard/admin/contests',
+    contestManage: (id: string) => `/dashboard/admin/contests/${id}`,
+    contestEdit: (id: string) => `/dashboard/admin/contests/${id}/edit`,
   },
 } as const;
 

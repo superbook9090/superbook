@@ -42,10 +42,13 @@ export async function GET(request: NextRequest) {
 
     const orgId = session?.user?.organizationId || 'public';
     const isTeacherSelf = instructor === 'self' && session?.user?.id;
+    const isAdminAll =
+      instructor === 'all' &&
+      (session?.user?.role === 'superadmin' || session?.user?.role === 'admin');
 
     // Cache key for public/general listings
     const cacheKey = `contests:${orgId}:${tab || 'all'}:${scheduleType || 'all'}:${instructor || 'all'}:${search || ''}:${page}:${limit}`;
-    if (!isTeacherSelf && !search) {
+    if (!isTeacherSelf && !isAdminAll && !search) {
       const cached = await getCachedData(cacheKey);
       if (cached) {
         return NextResponse.json(cached);
@@ -56,8 +59,11 @@ export async function GET(request: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const query: Record<string, any> = {};
 
-    // Teacher self-management query
-    if (isTeacherSelf) {
+    if (isAdminAll) {
+      // Superadmin / admin: see ALL contests regardless of status or instructor
+      // No additional filters applied here
+    } else if (isTeacherSelf) {
+      // Teacher self-management query
       query.instructor = session.user.id;
     } else {
       // General student / public view: only published contests (exclude drafts/cancelled)
@@ -89,10 +95,10 @@ export async function GET(request: NextRequest) {
     if (tab === 'live') {
       query.startTime = { $lte: now };
       query.endTime = { $gte: now };
-      if (!isTeacherSelf) query.status = 'published';
+      if (!isTeacherSelf && !isAdminAll) query.status = 'published';
     } else if (tab === 'upcoming') {
       query.startTime = { $gt: now };
-      if (!isTeacherSelf) query.status = 'published';
+      if (!isTeacherSelf && !isAdminAll) query.status = 'published';
     } else if (tab === 'completed') {
       query.$or = [{ endTime: { $lt: now } }, { status: 'completed' }];
     }
@@ -143,7 +149,9 @@ export async function GET(request: NextRequest) {
     });
 
     // Counts for tabs overview
-    const baseCountQuery = isTeacherSelf
+    const baseCountQuery = isAdminAll
+      ? {}
+      : isTeacherSelf
       ? { instructor: session.user.id }
       : {
           status: { $in: ['published', 'completed'] },
@@ -190,7 +198,7 @@ export async function GET(request: NextRequest) {
       },
     };
 
-    if (!isTeacherSelf && !search) {
+    if (!isTeacherSelf && !isAdminAll && !search) {
       await setCachedData(cacheKey, responseData, 60); // 60 seconds TTL
     }
 

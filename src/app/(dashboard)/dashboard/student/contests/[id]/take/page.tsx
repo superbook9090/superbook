@@ -47,6 +47,7 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
   const [violationMessage, setViolationMessage] = useState('');
   const violationCountRef = useRef(0);
   const isSubmittingRef = useRef(false);
+  const attemptStartedAtRef = useRef<number>(Date.now());
 
   // Map security reason to localized message
   const getSecurityReasonMessage = useCallback(
@@ -94,7 +95,11 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
 
   // Submit Attempt
   const handleSubmit = useCallback(async () => {
-    if (isSubmittingRef.current || !attemptId) return;
+    if (isSubmittingRef.current) return;
+    if (!attemptId) {
+      addAlert({ type: 'error', message: 'Contest attempt not found. Please refresh and try again.' });
+      return;
+    }
     isSubmittingRef.current = true;
     setIsSubmitting(true);
 
@@ -105,8 +110,11 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
         selectedOption: answers[q._id] !== undefined ? answers[q._id] : -1,
       }));
 
+      const timeTakenSeconds = Math.floor((Date.now() - attemptStartedAtRef.current) / 1000);
+
       await submitContestAttempt(id, {
         answers: formattedAnswers,
+        timeTaken: timeTakenSeconds,
         violationCount: violationCountRef.current,
       });
 
@@ -182,6 +190,7 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
         setAttemptId(res.attempt._id);
         setQuestions(res.questions);
         setEndTime(new Date(Date.now() + res.timeRemaining * 1000));
+        attemptStartedAtRef.current = Date.now();
 
         // Enter fullscreen mode and lock dev tools
         await startQuizRef.current();
@@ -264,10 +273,12 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
             type="button"
             onClick={() => setShowSubmitModal(true)}
             disabled={isSubmitting}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-[var(--primary)] to-[var(--student-primary)] text-white shadow-xs hover:shadow-md transition-all shrink-0"
+            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-[var(--primary)] to-[var(--student-primary)] text-white shadow-xs hover:shadow-md transition-all shrink-0 ${
+              isSubmitting ? 'opacity-60 cursor-not-allowed' : ''
+            }`}
           >
             <Send className="w-3.5 h-3.5" />
-            <span>{isSubmitting ? 'Submitting...' : t('contest.submitContest') || 'Submit'}</span>
+            <span>{isSubmitting ? (t('common.loading') || 'Submitting…') : (t('contest.submitContest') || 'Submit')}</span>
           </button>
         </div>
       </header>

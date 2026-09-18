@@ -14,6 +14,10 @@ interface TeacherContestHeaderProps {
   state: ContestItem['computedState'];
   onEndContest: () => void;
   onDeleteContest: () => void;
+  /** Override back link destination (default: teacher contests list) */
+  backPath?: string;
+  /** Override edit link destination (default: teacher edit route) */
+  editPath?: string;
 }
 
 export default function TeacherContestHeader({
@@ -21,6 +25,8 @@ export default function TeacherContestHeader({
   state,
   onEndContest,
   onDeleteContest,
+  backPath,
+  editPath,
 }: TeacherContestHeaderProps) {
   const { t } = useTranslation();
 
@@ -29,7 +35,7 @@ export default function TeacherContestHeader({
       {/* Top Breadcrumb & Action Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <Link
-          href={ROUTES.teacher.contests}
+          href={backPath || ROUTES.teacher.contests}
           className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors min-h-[44px]"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -39,7 +45,7 @@ export default function TeacherContestHeader({
         <div className="flex items-center gap-2">
           {state === 'upcoming' && (
             <Link
-              href={ROUTES.teacher.contestEdit(contest._id)}
+              href={editPath || ROUTES.teacher.contestEdit(contest._id)}
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[var(--color-surface-muted)] hover:bg-[var(--color-surface-muted-strong)] text-[var(--color-foreground)] border border-[var(--border)] shadow-xs transition-colors min-h-[44px]"
             >
               <Edit className="w-3.5 h-3.5" />

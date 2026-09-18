@@ -24,9 +24,11 @@ interface ContestCardProps {
   contest: ContestItem;
   isTeacher?: boolean;
   onManageClick?: () => void;
+  /** Override the manage/detail link (e.g. for admin context) */
+  managePath?: string;
 }
 
-export function ContestCard({ contest, isTeacher = false }: ContestCardProps) {
+export function ContestCard({ contest, isTeacher = false, managePath }: ContestCardProps) {
   const { t } = useTranslation();
 
   const state = contest.computedState || 'upcoming';
@@ -80,7 +82,7 @@ export function ContestCard({ contest, isTeacher = false }: ContestCardProps) {
   const userAttempt = contest.userAttempt;
 
   const targetLink = isTeacher
-    ? `/dashboard/teacher/contests/${contest._id}`
+    ? (managePath || `/dashboard/teacher/contests/${contest._id}`)
     : state === 'live'
     ? `/dashboard/student/contests/${contest._id}/take`
     : `/dashboard/student/contests/${contest._id}/result`;
