@@ -98,6 +98,11 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
     isSubmittingRef.current = true;
     setIsSubmitting(true);
 
+    // Stop security monitoring immediately so that the fullscreen exit and
+    // window-blur events triggered by the modal / submit flow don't count as violations.
+    stopQuizRef.current();
+    setQuizActive(false);
+
     try {
       const formattedAnswers = questions.map((q) => ({
         quizId: q.quizId,
@@ -113,9 +118,6 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
         violationCount: violationCountRef.current,
       });
 
-      stopQuizRef.current();
-      setQuizActive(false);
-
       addAlert({ type: 'success', message: 'Contest attempt submitted successfully!' });
       router.replace(`/dashboard/student/contests/${id}/result`);
     } catch (err) {
@@ -130,6 +132,12 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
 
   // Handle violation continue / re-enter fullscreen
   const handleViolationContinue = useCallback(async () => {
+    // Don't process violation continuation if submission is already underway
+    if (isSubmittingRef.current) {
+      setShowViolationModal(false);
+      return;
+    }
+
     // Check if dev tools is still open via window size delta
     const widthDiff = window.outerWidth - window.innerWidth;
     const heightDiff = window.outerHeight - window.innerHeight;
@@ -191,10 +199,17 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
         setQuizActive(true);
       } catch (err) {
         if (cancelled) return;
-        console.error('[TakeContestPage] Failed to initialize contest:', err);
-        const msg = err instanceof ApiClientError ? err.message : 'Failed to start contest attempt';
-        addAlert({ type: 'error', message: msg });
-        router.push(`/dashboard/student/contests`);
+        
+        if (err instanceof ApiClientError && err.message.includes('maximum allowed attempts')) {
+          console.warn('[TakeContestPage] Attempts exhausted:', err.message);
+          addAlert({ type: 'info', message: t('contest.attemptsExhausted') || 'You have already completed this contest.' });
+          router.replace(`/dashboard/student/contests/${id}/result`);
+        } else {
+          console.error('[TakeContestPage] Failed to initialize contest:', err);
+          const msg = err instanceof ApiClientError ? err.message : 'Failed to start contest attempt';
+          addAlert({ type: 'error', message: msg });
+          router.push(`/dashboard/student/contests`);
+        }
       } finally {
         if (!cancelled) setIsLoading(false);
       }

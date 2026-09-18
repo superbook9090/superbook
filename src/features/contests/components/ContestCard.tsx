@@ -81,9 +81,12 @@ export function ContestCard({ contest, isTeacher = false, managePath }: ContestC
 
   const userAttempt = contest.userAttempt;
 
+  const hasSubmitted =
+    userAttempt?.status === 'completed' || userAttempt?.status === 'timed_out';
+
   const targetLink = isTeacher
     ? (managePath || `/dashboard/teacher/contests/${contest._id}`)
-    : state === 'live'
+    : state === 'live' && !hasSubmitted
     ? `/dashboard/student/contests/${contest._id}/take`
     : `/dashboard/student/contests/${contest._id}/result`;
 
@@ -192,7 +195,7 @@ export function ContestCard({ contest, isTeacher = false, managePath }: ContestC
         <Link
           href={targetLink}
           className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xs ${
-            state === 'live'
+            state === 'live' && !hasSubmitted
               ? 'bg-gradient-to-r from-[var(--error)] to-[var(--primary)] text-white hover:shadow-md hover:scale-[1.02]'
               : 'bg-[var(--card-solid)] border border-[var(--border)] text-[var(--color-foreground)] hover:bg-[var(--primary)] hover:text-white'
           }`}
@@ -208,6 +211,11 @@ export function ContestCard({ contest, isTeacher = false, managePath }: ContestC
                 <>
                   <RotateCcw className="w-3.5 h-3.5" />
                   <span>{t('contest.resumeAttempt') || 'Resume'}</span>
+                </>
+              ) : hasSubmitted ? (
+                <>
+                  <Trophy className="w-3.5 h-3.5 text-[var(--warning)]" />
+                  <span>{t('contest.viewResults') || 'View Results'}</span>
                 </>
               ) : (
                 <>

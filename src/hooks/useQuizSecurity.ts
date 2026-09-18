@@ -328,12 +328,10 @@ export function useQuizSecurity({
     };
   }, [enabled, handleFullscreenChange, handleVisibilityChange, handleWindowBlur, handleBeforeUnload, handleKeyDown, handleContextMenu, handleResize, checkDuplicateTab, handleViolation, setActiveSession]);
 
-  // Reset submitting flag when not active
-  useEffect(() => {
-    if (!state.isActive) {
-      isSubmittingRef.current = false;
-    }
-  }, [state.isActive]);
+  // Note: isSubmittingRef is intentionally NOT reset when isActive goes false.
+  // stopQuiz() sets isSubmittingRef=true and isActive=false simultaneously; resetting
+  // the flag on the same state change would race against pending DOM events
+  // (fullscreenchange, blur) and re-enable violation detection during teardown.
 
   return {
     state,
