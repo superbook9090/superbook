@@ -274,7 +274,7 @@ export async function POST(
           const questions = await loadAllSanitizedQuestions();
           return NextResponse.json({
             message: 'Resuming contest attempt',
-            attempt: serialize(existingInProgress),
+            attempt: serialize(existingInProgress.toObject()),
             questions,
             timeRemaining: remainingSeconds,
             duration: contest.duration,
@@ -331,7 +331,7 @@ export async function POST(
       return NextResponse.json(
         {
           message: 'Contest attempt started',
-          attempt: serialize(newAttempt),
+          attempt: serialize(newAttempt.toObject()),
           questions,
           timeRemaining,
           duration: contest.duration,

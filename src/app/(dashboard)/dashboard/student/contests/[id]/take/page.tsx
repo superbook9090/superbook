@@ -36,7 +36,6 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
 
   const [contest, setContest] = useState<ContestItem | null>(null);
   const [questions, setQuestions] = useState<ContestQuestionItem[]>([]);
-  const [attemptId, setAttemptId] = useState<string | null>(null);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [endTime, setEndTime] = useState<Date | null>(null);
@@ -183,7 +182,6 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
         const res = await startContestAttempt(id);
         if (cancelled) return;
 
-        setAttemptId(res.attempt._id);
         setQuestions(res.questions);
         setEndTime(new Date(Date.now() + res.timeRemaining * 1000));
         attemptStartedAtRef.current = Date.now();
@@ -193,9 +191,10 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
         setQuizActive(true);
       } catch (err) {
         if (cancelled) return;
+        console.error('[TakeContestPage] Failed to initialize contest:', err);
         const msg = err instanceof ApiClientError ? err.message : 'Failed to start contest attempt';
         addAlert({ type: 'error', message: msg });
-        router.push(`/dashboard/student/contests/${id}/result`);
+        router.push(`/dashboard/student/contests`);
       } finally {
         if (!cancelled) setIsLoading(false);
       }
@@ -213,7 +212,8 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
     setAnswers((prev) => {
       if (prev[questionId] === optionIndex) {
         // Same option clicked → remove selection
-        const { [questionId]: _, ...rest } = prev;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { [questionId]: _removed, ...rest } = prev;
         return rest;
       }
       return { ...prev, [questionId]: optionIndex };
