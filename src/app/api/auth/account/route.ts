@@ -40,7 +40,7 @@ export async function GET() {
         session.user.id,
         session.user.role
       ),
-      canCreateContests: Boolean(user.canCreateContests || session.user.role === 'superadmin'),
+      canCreateContests: Boolean(user.canCreateContests || user.organizationId || session.user.role === 'superadmin'),
       organizationName,
     });
   } catch (error) {

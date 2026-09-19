@@ -88,8 +88,9 @@ export async function canTeacherManageContests(
     return false;
   }
 
-  const user = await User.findById(userId).select('canCreateContests role').lean();
+  const user = await User.findById(userId).select('canCreateContests organizationId role').lean();
   if (!user) return false;
   if (user.role === 'superadmin') return true;
+  if (user.organizationId) return true;
   return Boolean(user.canCreateContests);
 }

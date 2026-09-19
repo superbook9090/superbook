@@ -132,7 +132,7 @@ export const authOptions: AuthOptions = {
               phone: dbUser.phone || '',
               organizationId: dbUser.organizationId?.toString() || null,
               canUploadVideos: dbUser.canUploadVideos || false,
-              canCreateContests: dbUser.canCreateContests || false,
+              canCreateContests: dbUser.canCreateContests || Boolean(dbUser.organizationId) || false,
               canGenerateAiQuizzes: dbUser.canGenerateAiQuizzes || false,
             };
           } catch (e) {
@@ -198,7 +198,7 @@ export const authOptions: AuthOptions = {
               phone: dbUser.phone || '',
               organizationId: dbUser.organizationId?.toString() || null,
               canUploadVideos: dbUser.canUploadVideos || false,
-              canCreateContests: dbUser.canCreateContests || false,
+              canCreateContests: dbUser.canCreateContests || Boolean(dbUser.organizationId) || false,
               canGenerateAiQuizzes: dbUser.canGenerateAiQuizzes || false,
             };
           } catch (e) {
@@ -242,7 +242,7 @@ export const authOptions: AuthOptions = {
           phone: user.phone || '',
           organizationId: user.organizationId?.toString() || null,
           canUploadVideos: user.canUploadVideos || false,
-          canCreateContests: user.canCreateContests || false,
+          canCreateContests: user.canCreateContests || Boolean(user.organizationId) || false,
           canGenerateAiQuizzes: user.canGenerateAiQuizzes || false,
           limits: user.limits,
         };
@@ -294,7 +294,7 @@ export const authOptions: AuthOptions = {
         user.role = dbUser.role;
         user.organizationId = dbUser.organizationId?.toString() || null;
         user.canUploadVideos = dbUser.canUploadVideos || false;
-        user.canCreateContests = dbUser.canCreateContests || false;
+        user.canCreateContests = dbUser.canCreateContests || Boolean(dbUser.organizationId) || false;
         user.canGenerateAiQuizzes = dbUser.canGenerateAiQuizzes || false;
         user.phone = dbUser.phone || '';
         user.limits = dbUser.limits;

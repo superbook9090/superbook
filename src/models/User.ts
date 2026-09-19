@@ -59,7 +59,7 @@ const userSchema = new Schema<IUser>(
     lastPlatform: { type: String, enum: ['android', 'ios', 'web'] },
     lastUserAgent: String,
     canCreateContests: { type: Boolean, default: false },
-    canGenerateAiQuizzes: { type: Boolean, default: false },
+    canGenerateAiQuizzes: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
