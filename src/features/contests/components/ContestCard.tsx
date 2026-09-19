@@ -17,6 +17,7 @@ import {
 import { useTranslation } from '@/hooks/useTranslation';
 import { ContestCountdown } from './ContestCountdown';
 import { ContestPrizesShowcase } from './ContestPrizesShowcase';
+import { ContestShareButton } from './ContestShareButton';
 import type { ContestItem } from '@/lib/api/contests';
 import { formatDateTime } from '@/lib/dateUtils';
 
@@ -192,9 +193,11 @@ export function ContestCard({ contest, isTeacher = false, managePath }: ContestC
           )}
         </div>
 
-        <Link
-          href={targetLink}
-          className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xs ${
+        <div className="flex items-center gap-2">
+          <ContestShareButton contestId={contest._id} className="bg-[var(--card-solid)] border border-[var(--border)] hover:bg-[var(--color-surface-muted)]" />
+          <Link
+            href={targetLink}
+            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xs ${
             state === 'live' && !hasSubmitted
               ? 'bg-gradient-to-r from-[var(--error)] to-[var(--primary)] text-white hover:shadow-md hover:scale-[1.02]'
               : 'bg-[var(--card-solid)] border border-[var(--border)] text-[var(--color-foreground)] hover:bg-[var(--primary)] hover:text-white'
@@ -236,6 +239,7 @@ export function ContestCard({ contest, isTeacher = false, managePath }: ContestC
             </>
           )}
         </Link>
+        </div>
       </div>
     </motion.div>
   );

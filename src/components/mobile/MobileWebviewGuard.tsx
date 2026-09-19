@@ -28,7 +28,6 @@ export default function MobileWebviewGuard() {
 
       if (isNativeApp) {
         persistIsMobileApp();
-        router.replace(ROUTES.login);
       } else {
         clearMobileAppPersistence();
       }

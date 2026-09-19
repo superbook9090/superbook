@@ -92,7 +92,10 @@ export async function canUserCreatePublicCourses(userId: string, role: string): 
     return true;
   }
 
-  const user = await User.findById(userId).select('canCreatePublicCourses').lean();
+  const user = await User.findById(userId).select('canCreatePublicCourses organizationId').lean();
+  if (user?.organizationId) {
+    return true;
+  }
   return Boolean(user?.canCreatePublicCourses);
 }
 

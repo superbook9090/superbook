@@ -96,7 +96,7 @@ export async function middleware(request: NextRequest) {
     const isNativeApp = !isWebParam && (isWebviewParam || isMobileAppUserAgent(userAgent));
 
     if (isNativeApp) {
-      const response = NextResponse.redirect(new URL(ROUTES.login, request.url));
+      const response = NextResponse.next();
       response.cookies.set(APP_STORAGE_KEY, 'true', {
         maxAge: 60 * 60 * 24 * 30,
         path: '/',
@@ -130,7 +130,9 @@ export async function middleware(request: NextRequest) {
   // =========================
   if (pathname.startsWith('/dashboard/admin')) {
     if (!token) {
-      return NextResponse.redirect(new URL(ROUTES.login, request.url));
+      const loginUrl = new URL(ROUTES.login, request.url);
+      loginUrl.searchParams.set('callbackUrl', request.nextUrl.pathname + request.nextUrl.search);
+      return NextResponse.redirect(loginUrl);
     }
 
     // Only admin and superadmin can access admin routes
@@ -146,7 +148,9 @@ export async function middleware(request: NextRequest) {
   // =========================
   if (pathname.startsWith('/dashboard')) {
     if (!token) {
-      return NextResponse.redirect(new URL(ROUTES.login, request.url));
+      const loginUrl = new URL(ROUTES.login, request.url);
+      loginUrl.searchParams.set('callbackUrl', request.nextUrl.pathname + request.nextUrl.search);
+      return NextResponse.redirect(loginUrl);
     }
 
     // ❗ DO NOT redirect based on role here
