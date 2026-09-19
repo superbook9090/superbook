@@ -12,6 +12,10 @@ import Image from '@tiptap/extension-image';
 import CharacterCount from '@tiptap/extension-character-count';
 import Typography from '@tiptap/extension-typography';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import { Table } from '@tiptap/extension-table';
+import { TableRow } from '@tiptap/extension-table-row';
+import { TableHeader } from '@tiptap/extension-table-header';
+import { TableCell } from '@tiptap/extension-table-cell';
 import { common, createLowlight } from 'lowlight';
 
 import { Toolbar } from './editor/Toolbar';
@@ -81,6 +85,23 @@ export default function RichTextEditor({
       }),
       CodeBlockLowlight.configure({ lowlight }),
       CharacterCount.configure({ limit: 50000 }),
+      Table.configure({
+        resizable: true,
+        HTMLAttributes: {
+          class: 'border-collapse table-auto w-full border border-[var(--color-border)] my-4',
+        },
+      }),
+      TableRow,
+      TableHeader.configure({
+        HTMLAttributes: {
+          class: 'border border-[var(--color-border)] bg-[var(--color-surface-muted)] p-2 font-bold text-left',
+        },
+      }),
+      TableCell.configure({
+        HTMLAttributes: {
+          class: 'border border-[var(--color-border)] p-2',
+        },
+      }),
       PreserveTreePaste,
     ],
     content,
@@ -192,6 +213,30 @@ export default function RichTextEditor({
             font-family: inherit;
             font-size: inherit;
             color: var(--color-foreground);
+          }
+          .ProseMirror table {
+            border-collapse: collapse;
+            table-layout: fixed;
+            width: 100%;
+            margin: 0;
+            overflow: hidden;
+          }
+          .ProseMirror table td,
+          .ProseMirror table th {
+            min-width: 1em;
+            border: 1px solid var(--color-border);
+            padding: 0.25rem 0.5rem;
+            vertical-align: top;
+            box-sizing: border-box;
+            position: relative;
+          }
+          .ProseMirror table th {
+            font-weight: bold;
+            text-align: left;
+            background-color: var(--color-surface-muted);
+          }
+          .ProseMirror table p {
+            margin: 0;
           }
         `}</style>
       </div>

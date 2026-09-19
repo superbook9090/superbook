@@ -174,12 +174,13 @@ export async function PATCH(req: NextRequest) {
 
     // Verify organization ownership
     if (!isSuper && organizationId) {
-      if (!targetChallenge.course) {
+      const challengeCourse = (targetChallenge as { course?: string | mongoose.Types.ObjectId }).course;
+      if (!challengeCourse) {
         // If a challenge somehow has no course, a normal admin shouldn't mutate it
         return NextResponse.json({ message: 'Forbidden: Cannot modify global challenges' }, { status: 403 });
       }
-      const course = await mongoose.model('Course').findById(targetChallenge.course).select('organizationId').lean();
-      if (!course || String(course.organizationId) !== String(organizationId)) {
+      const course = await mongoose.model('Course').findById(challengeCourse).select('organizationId').lean();
+      if (!course || String((course as { organizationId?: mongoose.Types.ObjectId | string }).organizationId) !== String(organizationId)) {
         return NextResponse.json({ message: 'Forbidden: Challenge belongs to another organization' }, { status: 403 });
       }
     }
