@@ -95,20 +95,13 @@ export default function AdminContestManagePage({
 
   return (
     <PageWrapper className="space-y-6">
-      {/* Back link */}
-      <Link
-        href={ROUTES.admin.contests}
-        className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors min-h-[44px]"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        <span>{t('contest.backToAllContests') || 'Back to All Contests'}</span>
-      </Link>
 
       {/* Header Banner & Action Bar */}
       <TeacherContestHeader
         contest={contest}
         state={state}
         editPath={ROUTES.admin.contestEdit(id)}
+        backPath={ROUTES.admin.contests}
         onEndContest={() => setShowEndModal(true)}
         onDeleteContest={() => setShowDeleteModal(true)}
       />

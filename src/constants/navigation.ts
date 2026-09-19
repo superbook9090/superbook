@@ -80,7 +80,7 @@ export const ADMIN_NAV: DashboardNavItem[] = [
   { nameKey: 'common.analytics', href: ROUTES.admin.analytics, icon: 'BarChart3', feature: 'enableAnalytics' },
   { nameKey: 'common.progress', href: ROUTES.admin.progress, icon: 'TrendingUp' },
   { nameKey: 'common.notifications', href: ROUTES.admin.notifications, icon: 'Bell', superadminOnly: true },
-  { nameKey: 'common.settings', href: ROUTES.admin.settings, icon: 'Settings' },
+  { nameKey: 'common.settings', href: ROUTES.admin.settings, icon: 'Settings', superadminOnly: true },
   { nameKey: 'common.profile', href: ROUTES.admin.profile, icon: 'User' },
 ];
 

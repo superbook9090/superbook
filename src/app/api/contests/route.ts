@@ -77,6 +77,7 @@ export async function GET(request: NextRequest) {
         ];
       } else {
         query.visibility = { $in: ['public', 'unlisted'] };
+        query.organizationId = null;
       }
     }
 
@@ -162,7 +163,7 @@ export async function GET(request: NextRequest) {
                   { organizationId: session.user.organizationId },
                 ],
               }
-            : { visibility: { $in: ['public', 'unlisted'] } }),
+            : { visibility: { $in: ['public', 'unlisted'] }, organizationId: null }),
         };
 
     const [liveCount, upcomingCount, completedCount] = await Promise.all([

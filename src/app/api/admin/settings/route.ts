@@ -28,9 +28,9 @@ export async function GET() {
 
     logContext.userId = session.user.id;
 
-    if (session.user.role !== 'admin' && session.user.role !== 'superadmin') {
+    if (session.user.role !== 'superadmin') {
       return NextResponse.json(
-        { message: 'Only admins can access settings' },
+        { message: 'Only superadmins can access settings' },
         { status: 403 }
       );
     }
@@ -73,9 +73,9 @@ export async function PATCH(req: NextRequest) {
 
     logContext.userId = session.user.id;
 
-    if (session.user.role !== 'admin' && session.user.role !== 'superadmin') {
+    if (session.user.role !== 'superadmin') {
       return NextResponse.json(
-        { message: 'Only admins can update settings' },
+        { message: 'Only superadmins can update settings' },
         { status: 403 }
       );
     }

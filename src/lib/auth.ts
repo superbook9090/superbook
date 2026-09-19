@@ -320,6 +320,13 @@ export const authOptions: AuthOptions = {
       if (trigger === 'update' && session) {
         if (session.name) token.name = session.name;
         if (session.phone) token.phone = session.phone;
+        if (session.organizationId !== undefined) {
+          token.organizationId = session.organizationId;
+          if (session.organizationId) {
+            token.canCreateContests = true;
+            token.canGenerateAiQuizzes = true;
+          }
+        }
       }
       return token;
     },
