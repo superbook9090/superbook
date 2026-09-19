@@ -1,7 +1,7 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
-import { isAdmin, isSuperAdmin } from '@/lib/roles';
+import { isSuperAdmin } from '@/lib/roles';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { jsonSuccess, jsonApiError } from '@/lib/server/api-response';
 import UserNotification from '@/models/UserNotification';
@@ -39,8 +39,8 @@ export async function GET() {
     }
 
     const role = session.user.role;
-    if (!isAdmin(role)) {
-      return jsonApiError('FORBIDDEN', 'Forbidden: Admin access required', 403);
+    if (!isSuperAdmin(role)) {
+      return jsonApiError('FORBIDDEN', 'Forbidden: Superadmin access required', 403);
     }
 
     logContext.userId = session.user.id;

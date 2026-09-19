@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
@@ -44,8 +45,22 @@ export async function GET() {
 
     await dbConnect();
 
+    const userRole = session.user.role;
+    const organizationId = session.user.organizationId;
+    const isSuper = userRole === 'superadmin';
+
+    // Build course filter if organizational admin
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let matchStage: any = {};
+    if (!isSuper && organizationId) {
+      const courses = await dbConnect().then(() => mongoose.model('Course').find({ organizationId }).select('_id').lean());
+      const courseIds = courses.map((c) => c._id);
+      matchStage = { course: { $in: courseIds } };
+    }
+
     // Aggregate overall metrics
     const [totals] = await Challenge.aggregate([
+      { $match: matchStage },
       {
         $group: {
           _id: null,
@@ -67,7 +82,7 @@ export async function GET() {
       totalAttempts > 0 ? ((totalConversions / totalAttempts) * 100).toFixed(1) + '%' : '0.0%';
 
     // Fetch recent 50 challenges
-    const challenges = await Challenge.find()
+    const challenges = await Challenge.find(matchStage)
       .sort({ createdAt: -1 })
       .limit(50)
       .populate({ path: 'creator', model: User, select: 'name email' })
@@ -147,6 +162,27 @@ export async function PATCH(req: NextRequest) {
     }
 
     await dbConnect();
+
+    const targetChallenge = await Challenge.findById(challengeId).lean();
+    if (!targetChallenge) {
+      return NextResponse.json({ message: 'Challenge not found' }, { status: 404 });
+    }
+
+    const userRole = session.user.role;
+    const organizationId = session.user.organizationId;
+    const isSuper = userRole === 'superadmin';
+
+    // Verify organization ownership
+    if (!isSuper && organizationId) {
+      if (!targetChallenge.course) {
+        // If a challenge somehow has no course, a normal admin shouldn't mutate it
+        return NextResponse.json({ message: 'Forbidden: Cannot modify global challenges' }, { status: 403 });
+      }
+      const course = await mongoose.model('Course').findById(targetChallenge.course).select('organizationId').lean();
+      if (!course || String(course.organizationId) !== String(organizationId)) {
+        return NextResponse.json({ message: 'Forbidden: Challenge belongs to another organization' }, { status: 403 });
+      }
+    }
 
     const updated = await Challenge.findByIdAndUpdate(
       challengeId,

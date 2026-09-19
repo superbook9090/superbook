@@ -140,8 +140,11 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL(ROUTES.dashboard, request.url));
     }
 
-    // Settings is strictly for superadmin only
-    if (pathname.startsWith('/dashboard/admin/settings')) {
+    // Settings and Notifications are strictly for superadmin only
+    if (
+      pathname.startsWith('/dashboard/admin/settings') ||
+      pathname.startsWith('/dashboard/admin/notifications')
+    ) {
       if (token.role !== 'superadmin') {
         return NextResponse.redirect(new URL('/dashboard/admin', request.url));
       }

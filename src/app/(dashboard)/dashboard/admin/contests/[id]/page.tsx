@@ -16,10 +16,10 @@ import {
 import { ContestLeaderboard } from '@/features/contests/components/ContestLeaderboard';
 import { ContestPrizesShowcase } from '@/features/contests/components/ContestPrizesShowcase';
 import { LazyConfirmModal } from '@/lib/lazy';
-import { Trophy, Users, Layers, ArrowLeft } from 'lucide-react';
+import { Trophy, Users, Layers } from 'lucide-react';
 import { ApiClientError } from '@/lib/api/http';
 import { ROUTES } from '@/constants/routes';
-import Link from 'next/link';
+
 import TeacherContestHeader from '@/app/(dashboard)/dashboard/teacher/contests/[id]/_components/TeacherContestHeader';
 import TeacherContestStats from '@/app/(dashboard)/dashboard/teacher/contests/[id]/_components/TeacherContestStats';
 import TeacherContestAttemptsTable from '@/app/(dashboard)/dashboard/teacher/contests/[id]/_components/TeacherContestAttemptsTable';

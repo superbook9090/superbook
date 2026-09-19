@@ -3,6 +3,7 @@ import Enrollment from '@/models/Enrollment';
 import QuizAttempt from '@/models/QuizAttempt';
 import Course from '@/models/Course';
 import User from '@/models/User';
+import Quiz from '@/models/Quiz';
 
 export async function aggregateAdminProgress(opts: {
   organizationId?: string | null;
@@ -17,16 +18,22 @@ export async function aggregateAdminProgress(opts: {
     ? { organizationId: opts.organizationId }
     : { organizationId: null };
 
-  const [
-    totalUsers,
-    totalCourses,
-    allCourses,
-    enrollmentsAgg,
-    attemptStats,
-  ] = await Promise.all([
+  const [totalUsers, totalCourses, allCourses, allQuizzes] = await Promise.all([
     User.countDocuments({ ...orgFilter, role: 'student' }),
     Course.countDocuments(orgFilter),
     Course.find(orgFilter).select('_id title thumbnail category isPublished').lean(),
+    opts.isSuperAdmin ? Promise.resolve([]) : Quiz.find(orgFilter).select('_id').lean(),
+  ]);
+
+  const courseIds = allCourses.map((c) => c._id);
+  const quizIds = allQuizzes.map((q) => q._id);
+
+  const enrollmentMatch = opts.isSuperAdmin ? {} : { course: { $in: courseIds } };
+  const attemptMatch = opts.isSuperAdmin
+    ? { status: 'completed' }
+    : { status: 'completed', quiz: { $in: quizIds } };
+
+  const [enrollmentsAgg, attemptStats, courseHealthAgg] = await Promise.all([
     Enrollment.aggregate<{
       _id: null;
       total: number;
@@ -34,6 +41,7 @@ export async function aggregateAdminProgress(opts: {
       completed: number;
       avgProgress: number;
     }>([
+      ...(opts.isSuperAdmin ? [] : [{ $match: enrollmentMatch }]),
       {
         $facet: {
           metrics: [
@@ -50,7 +58,15 @@ export async function aggregateAdminProgress(opts: {
         },
       },
       { $unwind: { path: '$metrics', preserveNullAndEmptyArrays: true } },
-      { $project: { _id: 0, total: '$metrics.total', active: '$metrics.active', completed: '$metrics.completed', avgProgress: '$metrics.avgProgress' } },
+      {
+        $project: {
+          _id: 0,
+          total: '$metrics.total',
+          active: '$metrics.active',
+          completed: '$metrics.completed',
+          avgProgress: '$metrics.avgProgress',
+        },
+      },
     ]),
     QuizAttempt.aggregate<{
       _id: null;
@@ -58,7 +74,7 @@ export async function aggregateAdminProgress(opts: {
       avgScore: number;
       passedAttempts: number;
     }>([
-      { $match: { status: 'completed' } },
+      { $match: attemptMatch },
       {
         $group: {
           _id: null,
@@ -68,27 +84,24 @@ export async function aggregateAdminProgress(opts: {
         },
       },
     ]),
-  ]);
-
-  const courseIds = allCourses.map((c) => c._id);
-
-  const courseHealthAgg = await Enrollment.aggregate<{
-    _id: Types.ObjectId;
-    total: number;
-    completed: number;
-    avgProgress: number;
-  }>([
-    { $match: { course: { $in: courseIds } } },
-    {
-      $group: {
-        _id: '$course',
-        total: { $sum: 1 },
-        completed: { $sum: { $cond: [{ $eq: ['$status', 'completed'] }, 1, 0] } },
-        avgProgress: { $avg: '$progress' },
+    Enrollment.aggregate<{
+      _id: Types.ObjectId;
+      total: number;
+      completed: number;
+      avgProgress: number;
+    }>([
+      { $match: { course: { $in: courseIds } } },
+      {
+        $group: {
+          _id: '$course',
+          total: { $sum: 1 },
+          completed: { $sum: { $cond: [{ $eq: ['$status', 'completed'] }, 1, 0] } },
+          avgProgress: { $avg: '$progress' },
+        },
       },
-    },
-    { $sort: { total: -1 } },
-    { $limit: 10 },
+      { $sort: { total: -1 } },
+      { $limit: 10 },
+    ]),
   ]);
 
   const courseMap = new Map(allCourses.map((c) => [c._id.toString(), c]));
@@ -106,39 +119,62 @@ export async function aggregateAdminProgress(opts: {
     };
   });
 
-  const enrollmentsQuery = Enrollment.find({})
-    .populate('student', 'name email avatar')
-    .populate('course', 'title thumbnail category')
-    .sort({ enrolledAt: -1 });
+  const skip = opts.skip || 0;
+  const limit = opts.limit || 20;
 
-  const rawEnrollments = await enrollmentsQuery.limit(200).lean();
-  let studentRoster = rawEnrollments.filter((e) => Boolean(e.student));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rosterPipeline: any[] = [
+    { $match: enrollmentMatch },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'student',
+        foreignField: '_id',
+        as: 'student',
+      },
+    },
+    { $unwind: '$student' }, // Filters out enrollments without a valid student
+    {
+      $lookup: {
+        from: 'courses',
+        localField: 'course',
+        foreignField: '_id',
+        as: 'course',
+      },
+    },
+    { $unwind: { path: '$course', preserveNullAndEmptyArrays: true } },
+    { $sort: { enrolledAt: -1 } },
+  ];
 
   if (opts.search) {
-    const q = opts.search.toLowerCase().trim();
-    studentRoster = studentRoster.filter((e) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const s = e.student as any;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const c = e.course as any;
-      return (
-        s?.name?.toLowerCase().includes(q) ||
-        s?.email?.toLowerCase().includes(q) ||
-        c?.title?.toLowerCase().includes(q)
-      );
+    const q = opts.search.trim();
+    const searchRegex = new RegExp(q, 'i');
+    rosterPipeline.push({
+      $match: {
+        $or: [
+          { 'student.name': searchRegex },
+          { 'student.email': searchRegex },
+          { 'course.title': searchRegex },
+        ],
+      },
     });
   }
 
-  const total = studentRoster.length;
-  const skip = opts.skip || 0;
-  const limit = opts.limit || 20;
-  const paged = studentRoster.slice(skip, skip + limit);
+  rosterPipeline.push({
+    $facet: {
+      data: [{ $skip: skip }, { $limit: limit }],
+      totalCount: [{ $count: 'count' }],
+    },
+  });
 
-  const studentRows = paged.map((e) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const s = e.student as any;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const c = e.course as any;
+  const rosterResult = await Enrollment.aggregate(rosterPipeline);
+  const paged = rosterResult[0]?.data || [];
+  const total = rosterResult[0]?.totalCount[0]?.count || 0;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const studentRows = paged.map((e: any) => {
+    const s = e.student;
+    const c = e.course;
     return {
       enrollmentId: String(e._id),
       student: {
@@ -148,7 +184,7 @@ export async function aggregateAdminProgress(opts: {
         avatar: s.avatar,
       },
       course: {
-        _id: String(c._id),
+        _id: String(c?._id || ''),
         title: c?.title || 'Course',
         thumbnail: c?.thumbnail,
       },

@@ -1,7 +1,7 @@
 // src/app/(dashboard)/dashboard/admin/videos/page.tsx
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { motion } from 'framer-motion';
 import { Video, User, BookOpen, Calendar, Play, Clock } from 'lucide-react';
@@ -30,45 +30,79 @@ export default function AdminVideosPage() {
   const { t } = useTranslation();
   const [videos, setVideos] = useState<VideoLecture[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { addAlert } = useAlert();
   const [searchQuery, setSearchQuery] = useState('');
+  
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [stats, setStats] = useState({ totalDurationMinutes: 0, uniqueCoursesCount: 0, totalVideos: 0 });
 
-  const clearFilters = () => setSearchQuery('');
+  const clearFilters = () => {
+    setSearchQuery('');
+    setPage(1);
+  };
 
   useEffect(() => {
-    async function fetchVideos() {
+    let isMounted = true;
+    
+    async function fetchVideos(reset = false) {
+      if (reset) {
+        setIsLoading(true);
+      } else {
+        setIsFetchingMore(true);
+      }
+      
+      const currentPage = reset ? 1 : page;
+      
       try {
-        const res = await fetch('/api/admin/videos');
-        if (!res.ok) {
-          throw new Error('Failed to load videos');
-        }
+        const q = new URLSearchParams({ page: String(currentPage), limit: '20' });
+        if (searchQuery) q.set('search', searchQuery);
+        
+        const res = await fetch(`/api/admin/videos?${q.toString()}`);
+        if (!res.ok) throw new Error('Failed to load videos');
+        
         const data = await res.json();
-        setVideos(data.videos || []);
+        
+        if (isMounted) {
+          setVideos((prev) => (reset ? (data.videos || []) : [...prev, ...(data.videos || [])]));
+          setStats(data.stats || { totalDurationMinutes: 0, uniqueCoursesCount: 0, totalVideos: 0 });
+          setHasMore(data.pagination?.page < data.pagination?.totalPages);
+        }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error fetching video inventory');
+        if (isMounted) {
+          setError(err instanceof Error ? err.message : 'Error fetching video inventory');
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+          setIsFetchingMore(false);
+        }
       }
     }
-    fetchVideos();
-  }, []);
+    
+    if (page === 1) {
+      fetchVideos(true);
+    } else {
+      fetchVideos(false);
+    }
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [searchQuery, page]);
+
+  useEffect(() => {
+    // Reset page when search changes
+    setPage(1);
+  }, [searchQuery]);
 
   useEffect(() => {
     if (error) {
       addAlert({ type: 'error', message: error });
     }
   }, [error, addAlert]);
-
-  const filteredVideos = useMemo(() => {
-    const q = searchQuery.toLowerCase().trim();
-    if (!q) return videos;
-    return videos.filter((vid) =>
-      vid.title.toLowerCase().includes(q) ||
-      (vid.course?.title || '').toLowerCase().includes(q) ||
-      (vid.uploadedBy?.name || '').toLowerCase().includes(q)
-    );
-  }, [videos, searchQuery]);
 
   const formatDuration = (seconds?: number) => {
     if (!seconds) return '0:00';
@@ -77,17 +111,7 @@ export default function AdminVideosPage() {
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   };
 
-  const totalDurationMinutes = useMemo(() => {
-    const totalSec = videos.reduce((acc, v) => acc + (v.duration || 0), 0);
-    return Math.round(totalSec / 60);
-  }, [videos]);
-
-  const uniqueCoursesCount = useMemo(() => {
-    const set = new Set(videos.map((v) => v.course?.title).filter(Boolean));
-    return set.size;
-  }, [videos]);
-
-  if (isLoading) return <PageSkeleton />;
+  if (isLoading && page === 1) return <PageSkeleton />;
 
   return (
     <PageWrapper className="space-y-6">
@@ -109,14 +133,14 @@ export default function AdminVideosPage() {
       <ResponsiveGrid variant="cards">
         <StatCard
           icon={Video}
-          value={videos.length}
+          value={stats.totalVideos}
           label={t('admin.videoManagement') || 'Total Lectures'}
           color="error"
           delay={0.05}
         />
         <StatCard
           icon={Clock}
-          value={`${totalDurationMinutes}m`}
+          value={`${stats.totalDurationMinutes}m`}
           label="Total Duration"
           color="warning"
           delay={0.1}
@@ -124,7 +148,7 @@ export default function AdminVideosPage() {
         />
         <StatCard
           icon={BookOpen}
-          value={uniqueCoursesCount}
+          value={stats.uniqueCoursesCount}
           label="Courses With Video"
           color="info"
           delay={0.15}
@@ -143,7 +167,7 @@ export default function AdminVideosPage() {
       </FilterPanel>
 
       {/* Video Cards Grid */}
-      {filteredVideos.length === 0 ? (
+      {videos.length === 0 ? (
         <EmptyState
           title={t('admin.noVideosFound') || 'No video lectures found'}
           description={t('admin.noVideosDesc') || 'Instructors have not uploaded any videos yet, or no matches found.'}
@@ -154,8 +178,9 @@ export default function AdminVideosPage() {
           }
         />
       ) : (
-        <ResponsiveGrid variant="cards">
-          {filteredVideos.map((vid, idx) => (
+        <div className="space-y-8">
+          <ResponsiveGrid variant="cards">
+            {videos.map((vid, idx) => (
             <motion.div
               key={vid._id}
               initial={{ opacity: 0, y: 15 }}
@@ -225,7 +250,21 @@ export default function AdminVideosPage() {
               </div>
             </motion.div>
           ))}
-        </ResponsiveGrid>
+          </ResponsiveGrid>
+          
+          {hasMore && (
+            <div className="flex justify-center pt-4 pb-8">
+              <Button
+                variant="secondary"
+                onClick={() => setPage((p) => p + 1)}
+                isLoading={isFetchingMore}
+                className="min-w-[140px]"
+              >
+                Load More
+              </Button>
+            </div>
+          )}
+        </div>
       )}
     </PageWrapper>
   );
