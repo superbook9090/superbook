@@ -64,7 +64,7 @@ const optionalLessonSchema = z.preprocess(
   z.union([z.null(), objectIdSchema]).optional()
 );
 
-export const createQuizSchema = z
+const baseQuizSchema = z
   .object({
   title: z.string().min(1, 'Title is required').max(200, 'Title must be less than 200 characters'),
   description: z.string().max(1000, 'Description must be less than 1000 characters').optional(),
@@ -82,13 +82,19 @@ export const createQuizSchema = z
   isPublished: z.boolean().optional(),
   enableNegativeMarking: z.boolean().optional(),
   negativeMarks: z.number().min(0).max(100).optional(),
-})
+});
+
+export const createQuizSchema = baseQuizSchema
   .refine((data) => !(data.chapter && data.lesson), {
     message: 'Assign quiz to either a chapter or a lesson, not both',
     path: ['lesson'],
   });
 
-export const updateQuizSchema = createQuizSchema.partial();
+export const updateQuizSchema = baseQuizSchema.partial()
+  .refine((data) => !(data.chapter && data.lesson), {
+    message: 'Assign quiz to either a chapter or a lesson, not both',
+    path: ['lesson'],
+  });
 
 // Enrollment validation schemas
 export const createEnrollmentSchema = z.object({

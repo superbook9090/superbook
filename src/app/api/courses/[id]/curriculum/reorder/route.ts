@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import { Chapter, Lesson } from '@/models';
 import { ensureChapterIndexes } from '@/models/Chapter';
+import { Types } from 'mongoose';
 import { reorderCurriculumSchema } from '@/lib/validation';
 import { authorizeCourseEditor } from '@/lib/curriculum/authorize';
 import { logApiError, type LogContext } from '@/lib/logger';
@@ -76,11 +77,11 @@ export async function POST(
 
       const chapterOps = chapters.map((item) => ({
         updateOne: {
-          filter: { _id: item.id, course: courseId },
+          filter: { _id: new Types.ObjectId(item.id), course: new Types.ObjectId(courseId) },
           update: {
             $set: {
               order: item.order,
-              parentChapter: item.parentChapter ?? null,
+              parentChapter: item.parentChapter ? new Types.ObjectId(item.parentChapter) : null,
             },
           },
         },
@@ -105,8 +106,8 @@ export async function POST(
 
       const lessonOps = lessons.map((item) => ({
         updateOne: {
-          filter: { _id: item.id, course: courseId },
-          update: { $set: { order: item.order, chapter: item.chapterId } },
+          filter: { _id: new Types.ObjectId(item.id), course: new Types.ObjectId(courseId) },
+          update: { $set: { order: item.order, chapter: new Types.ObjectId(item.chapterId) } },
         },
       }));
       await Lesson.bulkWrite(lessonOps);
