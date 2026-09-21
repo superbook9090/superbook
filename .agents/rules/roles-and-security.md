@@ -20,3 +20,7 @@ All role-dependent functionality and navigation items must follow these standard
 ## 3. Server vs Client Security
 - Client-side checks (`FeatureGate`, `FeatureRouteGuard`, navigation hiding) are strictly for UX.
 - All authorization, role verification, and feature flag enforcement **must be securely executed at the API route layer**.
+
+## 4. Resource Quotas & AI Limits
+- Verification of a user's quotas (e.g., maximum courses, storage limits, and custom AI question generation limits) is a core security requirement.
+- **Never rely on the client** to enforce limits. Always fetch the user's specific limits on the backend and reject operations (e.g., 403 Forbidden or 429 Too Many Requests) if the quota is exceeded.

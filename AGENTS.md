@@ -51,7 +51,9 @@ Use this file as the default orientation for agents working in this repo. For fu
 - `/login`, `/register`: auth pages
 - `/dashboard`: redirects to role home (`getDashboardHomePath`)
 - `/dashboard/student`, `/dashboard/teacher`, `/dashboard/admin`: role dashboards
+- `/dashboard/student/contests`, `/dashboard/teacher/contests`: live contest arena & management
 - `/dashboard/admin/*`: admin-only area (middleware protected)
+- `/dashboard/admin/challenges`: viral challenges management (superadmin only)
 - `/dashboard/student/notifications`: student in-app notification inbox
 - `/dashboard/admin/notifications`: admin push broadcast (superadmin nav)
 - `/api/*`: backend routes
@@ -69,6 +71,7 @@ Use helpers from `src/lib/roles.ts` — do not hardcode role checks or dashboard
 - `withDashboardHome(navItems, role)` — patches the dashboard nav item href
 
 Navigation arrays live in `src/constants/navigation.ts` (`STUDENT_NAV`, `TEACHER_NAV`, `ADMIN_NAV`).
+Feature toggles (`enableContests`, `enableQuizChallenges`, etc.) control visibility dynamically.
 
 ## Layout & spacing
 

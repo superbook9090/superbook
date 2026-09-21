@@ -2757,6 +2757,13 @@ export const en = {
     value: 'Value',
     noReviewAvailable: 'No solution review data available.',
     solutionsLockedHint: 'Answers remain strictly locked for students until this exact time.',
+    aiGeneratingInfo: 'Generating 20 GK questions via AI. Please wait...',
+    dailyQuizDesc: 'A daily 20-question General Knowledge quiz designed to test your awareness. Medium difficulty level.',
+    dailyQuizInstructions: '1. All questions are compulsory.\n2. Each question carries 1 mark.\n3. There is a negative marking of 0.25 for incorrect answers.\n4. Complete the quiz within 24 hours.',
+    aiAutofillSuccess: 'GK Contest details and AI questions auto-filled successfully!',
+    aiAutofillError: 'Failed to generate AI questions. Please try again.',
+    generatingBtn: 'Generating...',
+    autoFillGkBtn: 'Auto-fill GK Quiz',
   },
 
   // Auth

@@ -27,8 +27,10 @@ import {
 import { ApiClientError } from '@/lib/api/http';
 import type { ContestPrize } from '@/lib/api/contests';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
+import { isSuperAdmin } from '@/lib/roles';
 import { QuizImportTool } from '@/features/quizzes/components/QuizImportTool';
 import type { Question } from '@/features/quizzes/components/types';
+import { Zap, Loader2 } from 'lucide-react'; // Added Zap icon for the quick-fill button
 
 interface TeacherContestFormProps {
   contestId?: string;
@@ -46,7 +48,9 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
   const { t } = useTranslation();
   const router = useRouter();
   const { addAlert } = useAlert();
-  const { theme } = useRoleTheme();
+  const { theme, role } = useRoleTheme();
+
+  const [isGeneratingAi, setIsGeneratingAi] = useState(false);
 
   const isEdit = Boolean(contestId);
   const { data: existingData, isLoading: fetchingExisting } = useContest(contestId);
@@ -295,6 +299,103 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
     setQuestions((prev) => prev.filter((_, idx) => idx !== index));
   };
 
+  const handleSuperAdminAutofill = async () => {
+    setIsGeneratingAi(true);
+    addAlert({ type: 'info', message: t('contest.aiGeneratingInfo') || 'Generating 20 GK questions via AI. Please wait...' });
+
+    try {
+      const res = await fetch('/api/quizzes/generate-ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topic: 'General Knowledge',
+          numQuestions: 20,
+          difficulty: 'medium',
+          language: 'English',
+          entityType: 'contest',
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to generate questions');
+      }
+
+      const data = await res.json();
+      if (!data.questions || data.questions.length === 0) {
+        throw new Error('No questions generated');
+      }
+
+      const formatted = data.questions.map((q: any) => ({
+        question: q.question,
+        options: q.options && q.options.length >= 2 ? q.options : ['', ''],
+        correctAnswer: typeof q.correctAnswer === 'number' ? q.correctAnswer : 0,
+        points: q.points && q.points > 0 ? q.points : 1,
+        negativePoints: 0.25,
+      }));
+
+      let contestNumber = 1;
+      try {
+        const notesRes = await fetch('/api/notes');
+        if (notesRes.ok) {
+          const { notes } = await notesRes.json();
+          const counterNote = notes?.find((n: any) => n.title === 'Daily Quiz Counter');
+          
+          if (counterNote) {
+            contestNumber = parseInt(counterNote.content, 10) + 1;
+            if (isNaN(contestNumber)) contestNumber = 1;
+            
+            await fetch(`/api/notes/${counterNote._id}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ content: contestNumber.toString() })
+            });
+          } else {
+            await fetch('/api/notes', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                title: 'Daily Quiz Counter',
+                content: '1'
+              })
+            });
+          }
+        }
+      } catch (e) {
+        contestNumber = Math.floor(Math.random() * 10000) + 1;
+      }
+
+      setTitle(`Daily Quiz Contest ${contestNumber}`);
+      setDescription(t('contest.dailyQuizDesc') || 'A daily 20-question General Knowledge quiz designed to test your awareness. Medium difficulty level.');
+      setInstructions(t('contest.dailyQuizInstructions') || '1. All questions are compulsory.\n2. Each question carries 1 mark.\n3. There is a negative marking of 0.25 for incorrect answers.\n4. Complete the quiz within 24 hours.');
+      setDuration('20'); // 20 minutes
+      
+      const now = new Date();
+      now.setMinutes(0, 0, 0);
+      const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+      
+      const toLocalDateTimeInput = (d: Date) => {
+        const pad = (n: number) => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      };
+      
+      setStartTime(toLocalDateTimeInput(now));
+      setEndTime(toLocalDateTimeInput(tomorrow));
+      setSolutionsReleaseAt(toLocalDateTimeInput(tomorrow)); // After quiz end
+      
+      setLeaderboardVisibility('after_end');
+      setEnableNegativeMarking(true);
+      setNegativeMarks('0.25');
+      
+      setQuestions(formatted);
+      
+      addAlert({ type: 'success', message: t('contest.aiAutofillSuccess') || 'GK Contest details and AI questions auto-filled successfully!' });
+    } catch (error) {
+      addAlert({ type: 'error', message: t('contest.aiAutofillError') || 'Failed to generate AI questions. Please try again.' });
+    } finally {
+      setIsGeneratingAi(false);
+    }
+  };
+
   // Submit Handler
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -387,9 +488,22 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
     <form onSubmit={handleSubmit} className="space-y-8 max-w-4xl">
       {/* 1. Basic Information */}
       <div className="p-6 rounded-3xl bg-[var(--card-solid)] border border-[var(--border)] shadow-xs space-y-4">
-        <div className="flex items-center gap-2 pb-3 border-b border-[var(--border)] text-sm font-bold text-[var(--color-foreground)]">
-          <Trophy className="w-4 h-4 text-[var(--primary)]" />
-          <span>{t('contest.basicInfo') || '1. Contest Overview'}</span>
+        <div className="flex items-center justify-between pb-3 border-b border-[var(--border)]">
+          <div className="flex items-center gap-2 text-sm font-bold text-[var(--color-foreground)]">
+            <Trophy className="w-4 h-4 text-[var(--primary)]" />
+            <span>{t('contest.basicInfo') || '1. Contest Overview'}</span>
+          </div>
+          {isSuperAdmin(role) && !isEdit && (
+            <button
+              type="button"
+              onClick={handleSuperAdminAutofill}
+              disabled={isGeneratingAi}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--primary)]/10 text-[var(--primary)] hover:bg-[var(--primary)]/20 transition-colors text-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isGeneratingAi ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
+              {isGeneratingAi ? (t('contest.generatingBtn') || 'Generating...') : (t('contest.autoFillGkBtn') || 'Auto-fill GK Quiz')}
+            </button>
+          )}
         </div>
 
         <div className="space-y-4">

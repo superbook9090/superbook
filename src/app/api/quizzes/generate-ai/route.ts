@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
     }
 
     const maxAllowedQuestions = (await getTeacherLimit('aiQuizMaxQuestions', userId).catch(() => 10)) || 10;
-    if (numQuestions > maxAllowedQuestions) {
+    if (!isSuperOrAdmin && numQuestions > maxAllowedQuestions) {
       return NextResponse.json(
         {
           message: `Maximum ${maxAllowedQuestions} question(s) can be generated at a time. This limit is set by the administrator.`,

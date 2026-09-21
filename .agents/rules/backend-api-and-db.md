@@ -26,3 +26,8 @@ All backend routes and database operations must adhere to the following standard
 
 ## 6. Feature Gating
 - For toggleable features (blogs, quizzes, courses, notes, analytics), guard the API route with `requireFeature('enableFeature')` from `src/lib/settingsHelpers`.
+
+## 7. Capabilities, Quotas & AI Limits
+- **AI Generation & External APIs**: Before triggering AI operations (e.g. AI quiz generation) or computationally expensive external APIs, ALWAYS check the authenticated user's specific capabilities or limits.
+- **Custom Quotas vs Global Defaults**: Quotas are no longer simple static fallbacks. Validate the user's `customLimits` (if present) as an override to global default limits. Ensure generation is safely denied if limits are exhausted.
+- **Model Selection & Failover**: AI model selection, key rotation, and API failovers must remain strictly internal functions on the backend. Never allow the client/frontend payload to dictate the AI model to be used.
