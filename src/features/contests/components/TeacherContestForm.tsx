@@ -325,7 +325,7 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
         throw new Error('No questions generated');
       }
 
-      const formatted = data.questions.map((q: any) => ({
+      const formatted = data.questions.map((q: { question: string; options: string[]; correctAnswer: number; points?: number; negativePoints?: number }) => ({
         question: q.question,
         options: q.options && q.options.length >= 2 ? q.options : ['', ''],
         correctAnswer: typeof q.correctAnswer === 'number' ? q.correctAnswer : 0,
@@ -338,7 +338,7 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
         const notesRes = await fetch('/api/notes');
         if (notesRes.ok) {
           const { notes } = await notesRes.json();
-          const counterNote = notes?.find((n: any) => n.title === 'Daily Quiz Counter');
+          const counterNote = notes?.find((n: { title: string; _id: string; content: string }) => n.title === 'Daily Quiz Counter');
           
           if (counterNote) {
             contestNumber = parseInt(counterNote.content, 10) + 1;
@@ -360,7 +360,7 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
             });
           }
         }
-      } catch (e) {
+      } catch {
         contestNumber = Math.floor(Math.random() * 10000) + 1;
       }
 
@@ -389,7 +389,7 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
       setQuestions(formatted);
       
       addAlert({ type: 'success', message: t('contest.aiAutofillSuccess') || 'GK Contest details and AI questions auto-filled successfully!' });
-    } catch (error) {
+    } catch {
       addAlert({ type: 'error', message: t('contest.aiAutofillError') || 'Failed to generate AI questions. Please try again.' });
     } finally {
       setIsGeneratingAi(false);
