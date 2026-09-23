@@ -70,6 +70,8 @@ export function FeatureTogglesSection({
         { key: 'enableContests', labelKey: 'adminSettings.enableContests', descKey: 'adminSettings.enableContestsDesc', icon: Trophy, iconBg: 'bg-[var(--primary-soft)]', iconColor: 'text-[var(--primary)]', isSuperAdminOnly: true },
         { key: 'enableContestMarketingPopup', labelKey: 'adminSettings.enableContestMarketingPopup', descKey: 'adminSettings.enableContestMarketingPopupDesc', icon: Sparkles, iconBg: 'bg-[var(--warning-light)]', iconColor: 'text-[var(--warning)]', isSuperAdminOnly: true },
         { key: 'enableQuizChallenges', labelKey: 'adminSettings.enableQuizChallenges', descKey: 'adminSettings.enableQuizChallengesDesc', icon: Swords, iconBg: 'bg-[var(--primary-soft)]', iconColor: 'text-[var(--primary)]', isSuperAdminOnly: true },
+        { key: 'enableAutoDailyAiContestCreation', labelKey: 'adminSettings.enableAutoDailyAiContestCreation', descKey: 'adminSettings.enableAutoDailyAiContestCreationDesc', icon: Sparkles, iconBg: 'bg-[var(--primary-soft)]', iconColor: 'text-[var(--primary)]', isSuperAdminOnly: true, isAiFeature: true },
+        { key: 'enableAutoDeclareResults', labelKey: 'adminSettings.enableAutoDeclareResults', descKey: 'adminSettings.enableAutoDeclareResultsDesc', icon: Trophy, iconBg: 'bg-[var(--primary-soft)]', iconColor: 'text-[var(--primary)]', isSuperAdminOnly: true },
       ],
     },
     {

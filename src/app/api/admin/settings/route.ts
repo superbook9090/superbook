@@ -226,6 +226,14 @@ export async function PATCH(req: NextRequest) {
           isSuper && featureToggles.enableQuizChallenges !== undefined
             ? featureToggles.enableQuizChallenges
             : (existingToggles.enableQuizChallenges ?? true),
+        enableAutoDailyAiContestCreation:
+          isSuper && featureToggles.enableAutoDailyAiContestCreation !== undefined
+            ? featureToggles.enableAutoDailyAiContestCreation
+            : (existingToggles.enableAutoDailyAiContestCreation ?? true),
+        enableAutoDeclareResults:
+          isSuper && featureToggles.enableAutoDeclareResults !== undefined
+            ? featureToggles.enableAutoDeclareResults
+            : (existingToggles.enableAutoDeclareResults ?? true),
       };
 
       settings.featureToggles = mergedToggles;

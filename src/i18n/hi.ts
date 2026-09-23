@@ -2064,6 +2064,10 @@ export const hi = {
     enablePhoneAuthDesc: 'उपयोगकर्ताओं को फायरबेस फोन ओटीपी सत्यापन के माध्यम से साइन इन और पंजीकरण करने की अनुमति दें',
     enableQuizChallenges: 'क्विज़ चुनौतियाँ और वायरल लूप्स',
     enableQuizChallengesDesc: 'छात्रों द्वारा दोस्तों को क्विज़ चुनौती और ब्रांडेड स्कोरकार्ड साझा करना सक्षम करें (केवल सुपरएडमिन)',
+    enableAutoDailyAiContestCreation: 'दैनिक AI प्रतियोगिता निर्माण',
+    enableAutoDailyAiContestCreationDesc: 'OpenRouter का उपयोग करके स्वचालित रूप से दैनिक AI प्रतियोगिता उत्पन्न करें (केवल सुपरएडमिन)',
+    enableAutoDeclareResults: 'स्वचालित परिणाम घोषणा',
+    enableAutoDeclareResultsDesc: 'प्रतियोगिता समाप्त होने पर स्वचालित रूप से परिणाम घोषित करें (केवल सुपरएडमिन)',
     challengeConfig: 'क्विज़ चुनौती और वायरल सेटिंग्स',
     challengeConfigDesc: 'अतिथि खेलने की अनुमति और चुनौती लिंक की समाप्ति अवधि कॉन्फ़िगर करें।',
     challengeViralSettings: 'क्विज़ चुनौती और वायरल सेटिंग्स',
@@ -2764,6 +2768,8 @@ export const hi = {
     aiAutofillError: 'एआई प्रश्न उत्पन्न करने में विफल। कृपया पुनः प्रयास करें।',
     generatingBtn: 'उत्पन्न हो रहा है...',
     autoFillGkBtn: 'GK प्रश्नोत्तरी ऑटो-फिल करें',
+    autoFillDetailsBtn: 'प्रतियोगिता विवरण ऑटो-फिल करें',
+    notifyAllStudents: 'सभी छात्रों को सूचित करें',
   },
 
   // Auth

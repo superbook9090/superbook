@@ -411,9 +411,12 @@ export async function GET() {
 
     const isSuperOrAdmin = userRole === 'superadmin' || userRole === 'admin';
     const hasCustomMaxQuestions =
-      user.limits?.aiQuizMaxQuestions !== undefined && user.limits.aiQuizMaxQuestions !== null;
+      isSuperOrAdmin || (user.limits?.aiQuizMaxQuestions !== undefined && user.limits.aiQuizMaxQuestions !== null);
 
-    const effectiveMaxQuestions = await getTeacherLimit('aiQuizMaxQuestions', userId).catch(() => 10);
+    const effectiveMaxQuestions = isSuperOrAdmin 
+      ? 50 
+      : (await getTeacherLimit('aiQuizMaxQuestions', userId).catch(() => 10));
+    
     const effectiveGenerationsLimit = await getTeacherLimit('aiQuizGenerations', userId).catch(() => 5);
     const currentCount = user.aiQuizGenerationsCount ?? 0;
 
@@ -425,11 +428,13 @@ export async function GET() {
       globalMaxQuestions,
       hasCustomMaxQuestions,
       customMaxQuestions: hasCustomMaxQuestions ? user.limits?.aiQuizMaxQuestions : null,
-      usage: {
-        used: currentCount,
-        limit: effectiveGenerationsLimit,
-        remaining: Math.max(0, effectiveGenerationsLimit - currentCount),
-      },
+      usage: isSuperOrAdmin
+        ? null
+        : {
+            used: currentCount,
+            limit: effectiveGenerationsLimit,
+            remaining: Math.max(0, effectiveGenerationsLimit - currentCount),
+          },
       canGenerate:
         isSuperOrAdmin || Boolean(user.canGenerateAiQuizzes) || Boolean(user.canCreateContests),
     });

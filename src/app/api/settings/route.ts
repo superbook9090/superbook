@@ -63,6 +63,8 @@ export async function GET() {
         enableContests: false,
         enableDownloadAppPopup: true,
         enableQuizChallenges: true,
+        enableAutoDailyAiContestCreation: true,
+        enableAutoDeclareResults: true,
       },
       challengeConfig: {
         allowGuestChallenges: true,

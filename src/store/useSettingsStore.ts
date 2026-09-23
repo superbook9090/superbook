@@ -21,7 +21,9 @@ export type FeatureToggleKey =
   | 'enableContestMarketingPopup'
   | 'enableDownloadAppPopup'
   | 'enableCourseDoubts'
-  | 'enableQuizChallenges';
+  | 'enableQuizChallenges'
+  | 'enableAutoDailyAiContestCreation'
+  | 'enableAutoDeclareResults';
 
 export type TeacherLimitKey = 'courses' | 'quizzes' | 'blogs' | 'aiQuizGenerations' | 'aiQuizMaxQuestions';
 
@@ -76,6 +78,8 @@ export const defaultPublicAppSettings: PublicAppSettings = {
     enableContestMarketingPopup: false,
     enableDownloadAppPopup: true,
     enableQuizChallenges: true,
+    enableAutoDailyAiContestCreation: true,
+    enableAutoDeclareResults: true,
   },
   challengeConfig: {
     allowGuestChallenges: true,

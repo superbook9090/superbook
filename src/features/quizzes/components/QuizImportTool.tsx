@@ -12,9 +12,10 @@ type Props = {
   theme: { gradient: string; activeBg: string; activeText: string };
   onImport: (questions: Question[]) => void;
   entityType?: 'quiz' | 'contest';
+  triggerAiModalOpen?: number;
 };
 
-export function QuizImportTool({ theme, onImport, entityType = 'quiz' }: Props) {
+export function QuizImportTool({ theme, onImport, entityType = 'quiz', triggerAiModalOpen = 0 }: Props) {
   const { t } = useTranslation();
   const session = useSessionStore((s) => s.session);
   const enableAiQuizGen = useSettingsStore(
@@ -37,6 +38,12 @@ export function QuizImportTool({ theme, onImport, entityType = 'quiz' }: Props) 
   const [importText, setImportText] = useState('');
   const [showTextImportHelp, setShowTextImportHelp] = useState(false);
   const [showAiModal, setShowAiModal] = useState(false);
+
+  React.useEffect(() => {
+    if (triggerAiModalOpen > 0) {
+      setShowAiModal(true);
+    }
+  }, [triggerAiModalOpen]);
 
   const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

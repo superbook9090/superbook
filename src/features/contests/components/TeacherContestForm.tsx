@@ -30,7 +30,7 @@ import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { isSuperAdmin } from '@/lib/roles';
 import { QuizImportTool } from '@/features/quizzes/components/QuizImportTool';
 import type { Question } from '@/features/quizzes/components/types';
-import { Zap, Loader2 } from 'lucide-react'; // Added Zap icon for the quick-fill button
+import { Zap } from 'lucide-react'; // Added Zap icon for the quick-fill button
 
 interface TeacherContestFormProps {
   contestId?: string;
@@ -49,8 +49,6 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
   const router = useRouter();
   const { addAlert } = useAlert();
   const { theme, role } = useRoleTheme();
-
-  const [isGeneratingAi, setIsGeneratingAi] = useState(false);
 
   const isEdit = Boolean(contestId);
   const { data: existingData, isLoading: fetchingExisting } = useContest(contestId);
@@ -76,6 +74,8 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
   const [leaderboardVisibility, setLeaderboardVisibility] = useState<'live' | 'after_end' | 'hidden'>('live');
   const [enableNegativeMarking, setEnableNegativeMarking] = useState(false);
   const [negativeMarks, setNegativeMarks] = useState('0.25');
+  const [notifyAllStudents, setNotifyAllStudents] = useState(true);
+  const [triggerAiModalOpen, setTriggerAiModalOpen] = useState(0);
 
   // Questions are editable when creating or when contest is in draft or upcoming status
   const canEditQuestions =
@@ -300,100 +300,62 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
   };
 
   const handleSuperAdminAutofill = async () => {
-    setIsGeneratingAi(true);
-    addAlert({ type: 'info', message: t('contest.aiGeneratingInfo') || 'Generating 20 GK questions via AI. Please wait...' });
-
     try {
-      const res = await fetch('/api/quizzes/generate-ai', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          topic: 'General Knowledge',
-          numQuestions: 20,
-          difficulty: 'medium',
-          language: 'English',
-          entityType: 'contest',
-        }),
-      });
-
-      if (!res.ok) {
-        throw new Error('Failed to generate questions');
-      }
-
-      const data = await res.json();
-      if (!data.questions || data.questions.length === 0) {
-        throw new Error('No questions generated');
-      }
-
-      const formatted = data.questions.map((q: { question: string; options: string[]; correctAnswer: number; points?: number; negativePoints?: number }) => ({
-        question: q.question,
-        options: q.options && q.options.length >= 2 ? q.options : ['', ''],
-        correctAnswer: typeof q.correctAnswer === 'number' ? q.correctAnswer : 0,
-        points: q.points && q.points > 0 ? q.points : 1,
-        negativePoints: 0.25,
-      }));
-
       let contestNumber = 1;
-      try {
-        const notesRes = await fetch('/api/notes');
-        if (notesRes.ok) {
-          const { notes } = await notesRes.json();
-          const counterNote = notes?.find((n: { title: string; _id: string; content: string }) => n.title === 'Daily Quiz Counter');
+      const notesRes = await fetch('/api/notes');
+      if (notesRes.ok) {
+        const { notes } = await notesRes.json();
+        const counterNote = notes?.find((n: { title: string; _id: string; content: string }) => n.title === 'Daily Quiz Counter');
+        
+        if (counterNote) {
+          contestNumber = parseInt(counterNote.content, 10) + 1;
+          if (isNaN(contestNumber)) contestNumber = 1;
           
-          if (counterNote) {
-            contestNumber = parseInt(counterNote.content, 10) + 1;
-            if (isNaN(contestNumber)) contestNumber = 1;
-            
-            await fetch(`/api/notes/${counterNote._id}`, {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ content: contestNumber.toString() })
-            });
-          } else {
-            await fetch('/api/notes', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                title: 'Daily Quiz Counter',
-                content: '1'
-              })
-            });
-          }
+          await fetch(`/api/notes/${counterNote._id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content: contestNumber.toString() })
+          });
+        } else {
+          await fetch('/api/notes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title: 'Daily Quiz Counter',
+              content: '1'
+            })
+          });
         }
-      } catch {
-        contestNumber = Math.floor(Math.random() * 10000) + 1;
       }
-
       setTitle(`Daily Quiz Contest ${contestNumber}`);
-      setDescription(t('contest.dailyQuizDesc') || 'A daily 20-question General Knowledge quiz designed to test your awareness. Medium difficulty level.');
-      setInstructions(t('contest.dailyQuizInstructions') || '1. All questions are compulsory.\n2. Each question carries 1 mark.\n3. There is a negative marking of 0.25 for incorrect answers.\n4. Complete the quiz within 24 hours.');
-      setDuration('20'); // 20 minutes
-      
-      const now = new Date();
-      now.setMinutes(0, 0, 0);
-      const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-      
-      const toLocalDateTimeInput = (d: Date) => {
-        const pad = (n: number) => String(n).padStart(2, '0');
-        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-      };
-      
-      setStartTime(toLocalDateTimeInput(now));
-      setEndTime(toLocalDateTimeInput(tomorrow));
-      setSolutionsReleaseAt(toLocalDateTimeInput(tomorrow)); // After quiz end
-      
-      setLeaderboardVisibility('after_end');
-      setEnableNegativeMarking(true);
-      setNegativeMarks('0.25');
-      
-      setQuestions(formatted);
-      
-      addAlert({ type: 'success', message: t('contest.aiAutofillSuccess') || 'GK Contest details and AI questions auto-filled successfully!' });
     } catch {
-      addAlert({ type: 'error', message: t('contest.aiAutofillError') || 'Failed to generate AI questions. Please try again.' });
-    } finally {
-      setIsGeneratingAi(false);
+      setTitle(`Daily Quiz Contest ${Math.floor(Math.random() * 10000) + 1}`);
     }
+
+    setDescription(t('contest.dailyQuizDesc') || 'A daily 20-question General Knowledge quiz designed to test your awareness. Medium difficulty level.');
+    setInstructions(t('contest.dailyQuizInstructions') || '1. All questions are compulsory.\n2. Each question carries 1 mark.\n3. There is a negative marking of 0.25 for incorrect answers.\n4. Complete the quiz within 24 hours.');
+    setDuration('20'); // 20 minutes
+    
+    const now = new Date();
+    now.setMinutes(0, 0, 0);
+    const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    
+    const toLocalDateTimeInput = (d: Date) => {
+      const pad = (n: number) => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    };
+    
+    setStartTime(toLocalDateTimeInput(now));
+    setEndTime(toLocalDateTimeInput(tomorrow));
+    setSolutionsReleaseAt(toLocalDateTimeInput(tomorrow)); // After quiz end
+    
+    setLeaderboardVisibility('after_end');
+    setEnableNegativeMarking(true);
+    setNegativeMarks('0.25');
+    
+    setTriggerAiModalOpen((prev) => prev + 1);
+    
+    addAlert({ type: 'success', message: t('contest.aiAutofillSuccess') || 'Contest details auto-filled! Please generate your questions.' });
   };
 
   // Submit Handler
@@ -461,6 +423,7 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
             })),
           }
         : {}),
+      notifyAllStudents,
     };
 
     try {
@@ -494,15 +457,25 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
             <span>{t('contest.basicInfo') || '1. Contest Overview'}</span>
           </div>
           {isSuperAdmin(role) && !isEdit && (
-            <button
-              type="button"
-              onClick={handleSuperAdminAutofill}
-              disabled={isGeneratingAi}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--primary)]/10 text-[var(--primary)] hover:bg-[var(--primary)]/20 transition-colors text-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isGeneratingAi ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
-              {isGeneratingAi ? (t('contest.generatingBtn') || 'Generating...') : (t('contest.autoFillGkBtn') || 'Auto-fill GK Quiz')}
-            </button>
+            <div className="flex items-center gap-4">
+              <label className="flex items-center gap-2 text-sm font-medium text-[var(--color-foreground)] cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={notifyAllStudents}
+                  onChange={(e) => setNotifyAllStudents(e.target.checked)}
+                  className="rounded border-[var(--border)] text-[var(--primary)] focus:ring-[var(--primary)]"
+                />
+                {t('contest.notifyAllStudents') || 'Notify all students'}
+              </label>
+              <button
+                type="button"
+                onClick={handleSuperAdminAutofill}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--primary)]/10 text-[var(--primary)] hover:bg-[var(--primary)]/20 transition-colors text-xs font-bold"
+              >
+                <Zap className="w-3.5 h-3.5" />
+                {t('contest.autoFillDetailsBtn') || 'Auto-fill Contest Details'}
+              </button>
+            </div>
           )}
         </div>
 
@@ -889,7 +862,12 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
           </div>
 
           {/* Import Questions Tool (Identical to Quiz Creator: Excel/CSV, pipe text, AI generator) */}
-          <QuizImportTool theme={theme} onImport={handleImportQuestions} entityType="contest" />
+          <QuizImportTool 
+            theme={theme} 
+            onImport={handleImportQuestions} 
+            entityType="contest" 
+            triggerAiModalOpen={triggerAiModalOpen}
+          />
 
           <div className="space-y-6">
             {questions.map((q, qIdx) => (

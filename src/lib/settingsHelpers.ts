@@ -20,7 +20,13 @@ interface FeatureToggles {
   enableNotes?: boolean;
   enableAiQuizGen?: boolean;
   enableCourseDoubts?: boolean;
+  enableContests?: boolean;
+  enableContestMarketingPopup?: boolean;
+  enableDownloadAppPopup?: boolean;
   enableQuizChallenges?: boolean;
+  enableAutoDailyAiContestCreation?: boolean;
+  enableAutoDeclareResults?: boolean;
+  enableGoogleAdsense?: boolean;
 }
 
 interface TeacherLimits {
@@ -47,7 +53,13 @@ const DEFAULT_FEATURE_TOGGLES: Partial<Record<keyof FeatureToggles, boolean>> = 
   enableNotes: true,
   enableAiQuizGen: true,
   enableCourseDoubts: true,
+  enableContests: false,
+  enableContestMarketingPopup: false,
+  enableDownloadAppPopup: true,
   enableQuizChallenges: true,
+  enableAutoDailyAiContestCreation: true,
+  enableAutoDeclareResults: true,
+  enableGoogleAdsense: true,
 };
 
 export async function isFeatureEnabled(feature: keyof FeatureToggles): Promise<boolean> {

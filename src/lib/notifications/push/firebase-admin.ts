@@ -9,7 +9,10 @@ function initializeFirebaseAdmin(): void {
   initAttempted = true;
 
   try {
-    const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n');
+    let privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n');
+    if (privateKey) {
+      privateKey = privateKey.replace(/^"|"$/g, '');
+    }
 
     if (
       privateKey &&

@@ -6,6 +6,8 @@ import '@/models';
 import Contest, { IContest } from '@/models/Contest';
 import Quiz from '@/models/Quiz';
 import ContestAttempt from '@/models/ContestAttempt';
+import User from '@/models/User';
+import { sendAdminBroadcast } from '@/lib/server/services/notifications-service';
 import { createContestSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
@@ -15,9 +17,11 @@ import {
   getContestComputedState,
   canTeacherManageContests,
 } from '@/lib/contest/contestHelpers';
+import { isSuperAdmin } from '@/lib/roles';
 import mongoose from 'mongoose';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 
 // GET /api/contests - List contests with filter tabs & search
 export async function GET(request: NextRequest) {
@@ -28,7 +32,6 @@ export async function GET(request: NextRequest) {
     if (session?.user) {
       logContext.userId = session.user.id;
     }
-
     await dbConnect();
 
     const { searchParams } = new URL(request.url);
@@ -265,6 +268,7 @@ export async function POST(request: NextRequest) {
       negativeMarks,
       quizzes: rawQuizzes = [],
       questions: rawQuestions = [],
+      notifyAllStudents = false,
     } = validationResult.data;
 
     const startDate = new Date(startTime);
@@ -429,6 +433,30 @@ export async function POST(request: NextRequest) {
 
     await contest.save();
     await invalidatePattern('contests:*');
+
+    // Notify all students if requested and authorized
+    if (notifyAllStudents && isSuperAdmin(session.user.role)) {
+      const students = await User.find({ role: 'student' }).select('_id').lean();
+      const studentIds = students.map((s) => String(s._id));
+      
+      if (studentIds.length > 0) {
+        await sendAdminBroadcast(studentIds, {
+          title: {
+            en: `New Contest: ${title}`,
+            hi: `नया कॉन्टेस्ट: ${title}`,
+          },
+          body: {
+            en: 'A new contest is available for you to attempt.',
+            hi: 'आपके प्रयास के लिए एक नया कॉन्टेस्ट उपलब्ध है।',
+          },
+          category: 'quizzes',
+          data: {
+            url: `quizdo://contest/${contest._id}`,
+            contestId: String(contest._id),
+          },
+        }).catch(err => console.error('Failed to broadcast contest notification:', err));
+      }
+    }
 
     const created = await Contest.findById(contest._id)
       .populate('instructor', 'name email avatar')

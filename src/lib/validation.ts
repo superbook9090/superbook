@@ -208,6 +208,8 @@ export const updateSettingsSchema = z.object({
     enableContestMarketingPopup: z.boolean().optional(),
     enableDownloadAppPopup: z.boolean().optional(),
     enableQuizChallenges: z.boolean().optional(),
+    enableAutoDailyAiContestCreation: z.boolean().optional(),
+    enableAutoDeclareResults: z.boolean().optional(),
   }).optional(),
   challengeConfig: z.object({
     allowGuestChallenges: z.boolean().optional(),
@@ -383,6 +385,7 @@ export const createContestSchema = z.object({
   negativeMarks: z.number().min(0).max(100).optional(),
   quizzes: z.array(contestQuizInputSchema).optional(),
   questions: z.array(contestQuestionSchema).optional(),
+  notifyAllStudents: z.boolean().optional(),
 });
 
 export const updateContestSchema = createContestSchema.partial().extend({

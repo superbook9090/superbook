@@ -53,12 +53,20 @@ export const sendPushNotification = async (
   const title = payload.title[language] || payload.title.en;
   const body = payload.body[language] || payload.body.en;
 
+  // FCM requires all data values to be strings
+  const safeData: Record<string, string> = {};
+  if (payload.data) {
+    for (const [key, val] of Object.entries(payload.data)) {
+      safeData[key] = String(val);
+    }
+  }
+
   const message = {
     notification: {
       title,
       body,
     },
-    data: payload.data || {},
+    data: safeData,
     tokens: tokens, // Multicast message
   };
 

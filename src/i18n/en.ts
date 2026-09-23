@@ -2064,6 +2064,10 @@ export const en = {
     enablePhoneAuthDesc: 'Allow users to sign in and register using Firebase phone OTP verification',
     enableQuizChallenges: 'Quiz Challenges & Viral Loops',
     enableQuizChallengesDesc: 'Enable viral student-to-friend quiz challenges and branded scorecards (superadmin only)',
+    enableAutoDailyAiContestCreation: 'Daily AI Contest Generation',
+    enableAutoDailyAiContestCreationDesc: 'Automatically generate a daily AI contest using OpenRouter (superadmin only)',
+    enableAutoDeclareResults: 'Automatic Result Declaration',
+    enableAutoDeclareResultsDesc: 'Automatically declare contest results when they end (superadmin only)',
     challengeConfig: 'Quiz Challenge & Viral Settings',
     challengeConfigDesc: 'Configure guest play permissions, link expiration, and viral loop behaviors for student challenges.',
     challengeViralSettings: 'Quiz Challenge & Viral Settings',
@@ -2764,6 +2768,8 @@ export const en = {
     aiAutofillError: 'Failed to generate AI questions. Please try again.',
     generatingBtn: 'Generating...',
     autoFillGkBtn: 'Auto-fill GK Quiz',
+    autoFillDetailsBtn: 'Auto-fill Contest Details',
+    notifyAllStudents: 'Notify all students',
   },
 
   // Auth

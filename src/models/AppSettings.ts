@@ -33,6 +33,8 @@ export interface IAppSettings extends Document {
     enableContestMarketingPopup?: boolean;
     enableDownloadAppPopup?: boolean;
     enableQuizChallenges?: boolean;
+    enableAutoDailyAiContestCreation?: boolean;
+    enableAutoDeclareResults?: boolean;
   };
   challengeConfig?: {
     allowGuestChallenges: boolean;
@@ -166,6 +168,14 @@ const appSettingsSchema = new Schema<IAppSettings>(
         default: true,
       },
       enableQuizChallenges: {
+        type: Boolean,
+        default: true,
+      },
+      enableAutoDailyAiContestCreation: {
+        type: Boolean,
+        default: true,
+      },
+      enableAutoDeclareResults: {
         type: Boolean,
         default: true,
       },

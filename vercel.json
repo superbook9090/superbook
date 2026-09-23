@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/declare-results",
+      "schedule": "0 17 * * *"
+    },
+    {
+      "path": "/api/cron/generate-daily-contest",
+      "schedule": "0 17 * * *"
+    }
+  ]
+}

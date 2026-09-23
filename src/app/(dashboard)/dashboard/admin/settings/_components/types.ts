@@ -33,6 +33,8 @@ export interface AppSettings {
     enableContestMarketingPopup?: boolean;
     enableDownloadAppPopup?: boolean;
     enableQuizChallenges?: boolean;
+    enableAutoDailyAiContestCreation?: boolean;
+    enableAutoDeclareResults?: boolean;
   };
   challengeConfig?: {
     allowGuestChallenges: boolean;

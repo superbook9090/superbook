@@ -38,6 +38,7 @@ export interface IContest extends Document {
   totalPoints: number;
   enableNegativeMarking?: boolean;
   negativeMarks?: number;
+  resultsDeclared: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -106,6 +107,7 @@ const contestSchema = new Schema<IContest>(
     totalPoints: { type: Number, default: 0 },
     enableNegativeMarking: { type: Boolean, default: false },
     negativeMarks: { type: Number, default: 0, min: 0 },
+    resultsDeclared: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

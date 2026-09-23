@@ -37,6 +37,8 @@ const DEFAULT_SETTINGS = {
     enableContests: false,
     enableDownloadAppPopup: true,
     enableQuizChallenges: true,
+    enableAutoDailyAiContestCreation: true,
+    enableAutoDeclareResults: true,
   },
   challengeConfig: {
     allowGuestChallenges: true,

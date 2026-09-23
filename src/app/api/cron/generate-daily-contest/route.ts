@@ -1,0 +1,234 @@
+import { NextRequest, NextResponse } from 'next/server';
+import dbConnect from '@/lib/db';
+import User from '@/models/User';
+import Course from '@/models/Course';
+import Quiz from '@/models/Quiz';
+import QuizQuestion from '@/models/QuizQuestion';
+import Contest from '@/models/Contest';
+import { logApiError, logError } from '@/lib/logger';
+import { fetchOpenRouterChat } from '@/lib/ai/openrouter';
+import { requireFeature } from '@/lib/settingsHelpers';
+import { invalidatePattern } from '@/lib/redis';
+
+export const dynamic = 'force-dynamic';
+export const maxDuration = 60; // Max execution time for Vercel
+
+interface GeneratedQuestion {
+  question: string;
+  options: string[];
+  correctAnswer: number;
+}
+
+export async function GET(req: NextRequest) {
+  const logContext = { method: 'GET', path: '/api/cron/generate-daily-contest' };
+
+  try {
+    // 1. Verify Vercel Cron Secret (if configured)
+    const authHeader = req.headers.get('authorization');
+    if (
+      process.env.CRON_SECRET &&
+      authHeader !== `Bearer ${process.env.CRON_SECRET}`
+    ) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+    
+    // 1b. Verify feature toggle
+    const featureCheck = await requireFeature('enableAutoDailyAiContestCreation');
+    if (featureCheck) return featureCheck;
+
+    await dbConnect();
+
+    // 2. Database Logic: Find Instructor (superadmin or admin)
+    let instructor = await User.findOne({ role: 'superadmin' }).lean();
+    if (!instructor) {
+      instructor = await User.findOne({ role: 'admin' }).lean();
+    }
+    if (!instructor) {
+      return NextResponse.json({ message: 'No superadmin or admin found to own the contest' }, { status: 400 });
+    }
+
+    // 3. Database Logic: Find/Create "Daily AI Contests" Course
+    let course = await Course.findOne({ slug: 'daily-ai-contests' }).lean();
+    if (!course) {
+      const courseDoc = await Course.create({
+        title: 'Daily AI Contests',
+        description: 'A collection of AI generated daily contests.',
+        instructor: instructor._id,
+        isPublished: false, // Keep the course hidden, contests will be public
+        slug: 'daily-ai-contests',
+        category: 'Contests',
+        locale: 'en',
+      });
+      course = await Course.findById(courseDoc._id).lean();
+    }
+
+    // 4. Implement AI Topic Generation Logic (Focused on India & Competitive Exams)
+    const topicPrompt = `Generate a unique, engaging, and specific quiz topic relevant to India and Indian competitive exams (e.g. UPSC, SSC, Banking, State PSC, Indian GK).
+Topics can cover: Indian History, Indian Geography, Indian Polity & Constitution, Indian Economy, Science & Technology in India, Indian Art & Culture, Famous Personalities of India, Environment & Wildlife of India, or Current Affairs.
+Return ONLY the topic name as a plain string without quotes, bullets, or asterisks.
+Example outputs: "Indian Constitution & Fundamental Rights", "Rivers and Mountain Ranges of India", "Modern Indian Freedom Struggle (1857-1947)", "National Parks and Wildlife Sanctuaries in India", "Inventions & Space Missions of ISRO", "Classical Dances and Folk Arts of India".`;
+    
+    let topic = 'General Knowledge of India';
+    try {
+      const topicResult = await fetchOpenRouterChat([
+        { role: 'user', content: topicPrompt }
+      ], { maxTokens: 50, temperature: 0.8, validateOutput: (text) => text.trim().length > 0 });
+      topic = topicResult.content.replace(/["*]/g, '').trim();
+    } catch (err) {
+      logError('Failed to generate topic, falling back to General Knowledge of India', logContext, { error: err });
+    }
+
+    // 5. Implement AI Question Generation Logic (Indian Context, Medium Level)
+    const numQuestions = 10;
+    const language = 'English';
+    const prompt = `You are a master educator and expert in Indian competitive examinations (such as UPSC, SSC, State PSC, and Banking exams).
+Generate a high-quality, realistic, medium-difficulty competitive contest multiple-choice quiz with EXACTLY ${numQuestions} questions on the topic: "${topic}" focused on India.
+
+CRITICAL QUALITY & PEDAGOGICAL REQUIREMENTS:
+1. INDIAN CONTEXT: All questions and options must be strictly focused on India and relevant to Indian students/aspirants.
+2. DIFFICULTY: Medium level — thought-provoking, competitive, and realistic, avoiding overly simple trivia while also avoiding unreasonably obscure details.
+3. EXACT QUESTION COUNT: Provide EXACTLY ${numQuestions} distinct questions written in ${language}.
+4. 4 OPTIONS: Each question MUST have EXACTLY 4 distinct, plausible multiple-choice options.
+5. RANDOM CORRECT ANSWER: Distribute the "correctAnswer" index (0 for A, 1 for B, 2 for C, 3 for D) randomly across questions so option A is not always the correct answer.
+6. FORMAT: Return ONLY a valid JSON array of question objects matching this exact format without any markdown wrapper, commentary, or extra text:
+[
+  {
+    "question": "Question text",
+    "options": ["Option A", "Option B", "Option C", "Option D"],
+    "correctAnswer": 0
+  }
+]`;
+
+    let parsedQuestions: GeneratedQuestion[] = [];
+    try {
+      const qsResult = await fetchOpenRouterChat([
+         { role: 'system', content: 'You output strictly valid JSON arrays.' },
+         { role: 'user', content: prompt }
+      ], { 
+         maxTokens: 3000, 
+         validateOutput: (text) => text.includes('[') && text.includes(']')
+      });
+      
+      const rawText = qsResult.content;
+      
+      let cleaned = rawText
+        .replace(/<think>[\s\S]*?<\/think>/gi, '')
+        .replace(/```json/gi, '')
+        .replace(/```/g, '')
+        .trim();
+
+      const jsonStart = cleaned.indexOf('[');
+      const jsonEnd = cleaned.lastIndexOf(']');
+      if (jsonStart !== -1 && jsonEnd !== -1) {
+        cleaned = cleaned.substring(jsonStart, jsonEnd + 1);
+      }
+      cleaned = cleaned.replace(/,\s*([\]}])/g, '$1');
+      
+      // Basic fallback to handle unescaped newlines if JSON.parse fails initially
+      try {
+        parsedQuestions = JSON.parse(cleaned);
+      } catch {
+        const relaxed = cleaned.replace(/(?<=:\s*"[^"]*)\n(?=[^"]*")/g, '\\n');
+        parsedQuestions = JSON.parse(relaxed);
+      }
+    } catch (err) {
+       logError('Failed to generate AI questions', logContext, { error: err });
+       return NextResponse.json({ message: 'Failed to generate questions' }, { status: 500 });
+    }
+
+    if (!Array.isArray(parsedQuestions) || parsedQuestions.length === 0) {
+       return NextResponse.json({ message: 'AI returned invalid questions array' }, { status: 500 });
+    }
+
+    parsedQuestions = parsedQuestions.slice(0, numQuestions);
+
+    // 6. Database Logic: Create Quiz & QuizQuestions
+    // Give time is exactly equal to the question count (1 min per question)
+    const timeLimitMinutes = parsedQuestions.length;
+
+    const quizDoc = await Quiz.create({
+      title: `Daily Contest: ${topic}`,
+      description: `An AI-generated daily contest covering: ${topic}.`,
+      course: course!._id,
+      instructor: instructor._id,
+      questionCount: parsedQuestions.length,
+      timeLimit: timeLimitMinutes, // Give time equal to question count
+      isPublished: true,
+      enableNegativeMarking: true,
+      negativeMarks: 2,
+    });
+    
+    const quizId = quizDoc._id;
+
+    const questionDocs = parsedQuestions.map((q, index) => {
+       const opts = Array.isArray(q.options) ? q.options.slice(0, 4) : ['A', 'B', 'C', 'D'];
+       while (opts.length < 4) opts.push(`Option ${opts.length + 1}`);
+       let correct = q.correctAnswer;
+       if (typeof correct !== 'number' || correct < 0 || correct > 3) correct = 0;
+
+       return {
+         quiz: quizId,
+         order: index + 1,
+         prompt: q.question || 'Unknown Question',
+         options: opts,
+         correctOption: correct,
+         points: 10, // 10 points per question
+       };
+    });
+
+    await QuizQuestion.insertMany(questionDocs);
+
+    // 7. Database Logic: Create Contest
+    const now = new Date();
+    const { searchParams } = new URL(req.url);
+    const endInMinutesParam = searchParams.get('endInMinutes');
+    const endMinutes = endInMinutesParam && !isNaN(Number(endInMinutesParam))
+      ? Math.max(1, Number(endInMinutesParam))
+      : 24 * 60;
+
+    const startTime = new Date(now);
+    const endTime = new Date(now.getTime() + endMinutes * 60 * 1000);
+    // Contest duration for a student to attempt is equal to question count
+    const duration = timeLimitMinutes; 
+
+    const contestDoc = await Contest.create({
+      title: `Daily Contest: ${topic}`,
+      description: `Participate in today's AI-generated contest on ${topic}. Test your knowledge and climb the leaderboard!`,
+      instructor: instructor._id,
+      quizzes: [{
+         quiz: quizId,
+         title: topic,
+         order: 1,
+         weight: 1
+      }],
+      scheduleType: 'one_time',
+      status: 'published',
+      startTime,
+      endTime,
+      duration,
+      solutionsReleaseAt: endTime,
+      maxAttempts: 1,
+      visibility: 'public',
+      leaderboardVisibility: 'live',
+      questionCount: parsedQuestions.length,
+      totalPoints: parsedQuestions.length * 10,
+      enableNegativeMarking: true,
+      negativeMarks: 2,
+      resultsDeclared: false
+    });
+
+    // Invalidate contests cache so the new contest is live immediately
+    await invalidatePattern('contests:*');
+
+    return NextResponse.json({
+      message: 'Successfully generated daily contest',
+      contestId: contestDoc._id,
+      topic,
+      questionCount: parsedQuestions.length
+    });
+
+  } catch (error) {
+    logApiError(error as Error, 'GET', '/api/cron/generate-daily-contest', logContext);
+    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+  }
+}
