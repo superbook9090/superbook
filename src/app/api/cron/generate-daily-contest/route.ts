@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import dbConnect from '@/lib/db';
 import User from '@/models/User';
-import Course from '@/models/Course';
 import Quiz from '@/models/Quiz';
 import QuizQuestion from '@/models/QuizQuestion';
 import Contest from '@/models/Contest';
@@ -9,6 +9,7 @@ import { logApiError, logError } from '@/lib/logger';
 import { fetchOpenRouterChat } from '@/lib/ai/openrouter';
 import { requireFeature } from '@/lib/settingsHelpers';
 import { invalidatePattern } from '@/lib/redis';
+import { sendAdminBroadcast } from '@/lib/server/services/notifications-service';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60; // Max execution time for Vercel
@@ -45,21 +46,6 @@ export async function GET(req: NextRequest) {
     }
     if (!instructor) {
       return NextResponse.json({ message: 'No superadmin or admin found to own the contest' }, { status: 400 });
-    }
-
-    // 3. Database Logic: Find/Create "Daily AI Contests" Course
-    let course = await Course.findOne({ slug: 'daily-ai-contests' }).lean();
-    if (!course) {
-      const courseDoc = await Course.create({
-        title: 'Daily AI Contests',
-        description: 'A collection of AI generated daily contests.',
-        instructor: instructor._id,
-        isPublished: false, // Keep the course hidden, contests will be public
-        slug: 'daily-ai-contests',
-        category: 'Contests',
-        locale: 'en',
-      });
-      course = await Course.findById(courseDoc._id).lean();
     }
 
     // 4. Implement AI Topic Generation Logic (Focused on India & Competitive Exams)
@@ -149,7 +135,7 @@ CRITICAL QUALITY & PEDAGOGICAL REQUIREMENTS:
     const quizDoc = await Quiz.create({
       title: `Daily Contest: ${topic}`,
       description: `An AI-generated daily contest covering: ${topic}.`,
-      course: course!._id,
+      course: new mongoose.Types.ObjectId(), // Standalone dummy ObjectId (matches contest pattern)
       instructor: instructor._id,
       questionCount: parsedQuestions.length,
       timeLimit: timeLimitMinutes, // Give time equal to question count
@@ -220,11 +206,44 @@ CRITICAL QUALITY & PEDAGOGICAL REQUIREMENTS:
     // Invalidate contests cache so the new contest is live immediately
     await invalidatePattern('contests:*');
 
+    // Notify all students to join the daily contest
+    let notificationsSent = 0;
+    try {
+      const students = await User.find({ role: 'student' }).select('_id').lean();
+      const studentIds = students.map((s) => String(s._id));
+
+      if (studentIds.length > 0) {
+        await sendAdminBroadcast(studentIds, {
+          title: {
+            en: `🏆 Daily Contest: ${topic}`,
+            hi: `🏆 दैनिक प्रतियोगिता: ${topic}`,
+          },
+          body: {
+            en: `Compete now in today's contest on ${topic} and climb the leaderboard!`,
+            hi: `${topic} पर आज की प्रतियोगिता में भाग लें और लीडरबोर्ड पर आगे बढ़ें!`,
+          },
+          category: 'quizzes',
+          data: {
+            url: `quizdo://contest/${contestDoc._id}`,
+            contestId: String(contestDoc._id),
+          },
+        });
+        notificationsSent = studentIds.length;
+      }
+    } catch (notifyErr) {
+      logError(
+        (notifyErr as Error).message || 'Failed to broadcast daily contest notifications',
+        logContext,
+        { action: 'sendAdminBroadcast', contestId: contestDoc._id, error: notifyErr }
+      );
+    }
+
     return NextResponse.json({
       message: 'Successfully generated daily contest',
       contestId: contestDoc._id,
       topic,
-      questionCount: parsedQuestions.length
+      questionCount: parsedQuestions.length,
+      notificationsSent,
     });
 
   } catch (error) {
