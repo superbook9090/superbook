@@ -170,6 +170,9 @@ export async function POST(request: NextRequest) {
       quizzes: rawQuizzes = [],
       questions: rawQuestions = [],
       notifyAllStudents = false,
+      slug,
+      metaTitle,
+      metaDescription,
     } = validationResult.data;
 
     const startDate = new Date(startTime);
@@ -226,6 +229,9 @@ export async function POST(request: NextRequest) {
       negativeMarks: typeof negativeMarks === 'number' ? negativeMarks : 0,
       questionCount: totalQuestions,
       totalPoints,
+      slug,
+      metaTitle,
+      metaDescription,
     });
 
     await contest.save();

@@ -3,9 +3,10 @@
 import React, { useRef, useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, PictureInPicture } from 'lucide-react';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { isPipSupported } from '@/lib/native/pictureInPicture';
 
 interface SecurePlayerProps {
   youtubeVideoId: string;
@@ -167,6 +168,21 @@ export default function SecurePlayer({
     );
   }
 
+  const handleTogglePip = async () => {
+    try {
+      const videoEl = document.querySelector('.aspect-video video') as HTMLVideoElement | null;
+      if (videoEl && document.pictureInPictureEnabled) {
+        if (document.pictureInPictureElement === videoEl) {
+          await document.exitPictureInPicture();
+        } else {
+          await videoEl.requestPictureInPicture();
+        }
+      }
+    } catch {
+      // Ignored
+    }
+  };
+
   // Construct secure, unlisted YouTube video URL
   const videoUrl = `https://www.youtube.com/watch?v=${youtubeVideoId}`;
 
@@ -212,6 +228,18 @@ export default function SecurePlayer({
             ? t('courses.watchedBy', { email: session.user.email }) 
             : t('courses.secureStreamId', { id: youtubeVideoId })}
         </div>
+
+        {/* Native Picture-in-Picture Button */}
+        {isPipSupported() && (
+          <button
+            type="button"
+            onClick={handleTogglePip}
+            title="Picture in Picture"
+            className="absolute top-3 right-3 pointer-events-auto p-2 rounded-xl bg-black/60 hover:bg-black/80 text-white/80 hover:text-white transition-all backdrop-blur-xs z-20 cursor-pointer"
+          >
+            <PictureInPicture className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
 

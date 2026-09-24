@@ -6,6 +6,9 @@ export interface SubmitContestParams {
   title: string;
   description: string;
   instructions: string;
+  slug: string;
+  metaTitle: string;
+  metaDescription: string;
   scheduleType: ScheduleType;
   startTime: string;
   endTime: string;
@@ -31,7 +34,7 @@ export interface SubmitContestParams {
 
 export async function submitContest(params: SubmitContestParams): Promise<void> {
   const {
-    title, description, instructions, scheduleType, startTime, endTime, duration,
+    title, description, instructions, slug, metaTitle, metaDescription, scheduleType, startTime, endTime, duration,
     solutionsReleaseAt, maxAttempts, maxParticipants, visibility, leaderboardVisibility,
     enableNegativeMarking, negativeMarks, prizes, questions, notifyAllStudents,
     isEdit, contestId, canEditQuestions, createMutation, updateMutation, addAlert, router,
@@ -70,6 +73,9 @@ export async function submitContest(params: SubmitContestParams): Promise<void> 
     title: title.trim(),
     description: description.trim() || undefined,
     instructions: instructions.trim() || undefined,
+    slug: slug.trim() || undefined,
+    metaTitle: metaTitle.trim() || undefined,
+    metaDescription: metaDescription.trim() || undefined,
     scheduleType,
     startTime: new Date(startTime).toISOString(),
     endTime: new Date(endTime).toISOString(),

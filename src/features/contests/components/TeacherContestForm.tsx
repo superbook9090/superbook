@@ -14,6 +14,7 @@ import { ContestScheduleSection } from './teacher-contest-form/ContestScheduleSe
 import { ContestPrizesSection } from './teacher-contest-form/ContestPrizesSection';
 import { ContestSettingsSection } from './teacher-contest-form/ContestSettingsSection';
 import { ContestQuestionsSection } from './teacher-contest-form/ContestQuestionsSection';
+import { ContestSeoSection } from './teacher-contest-form/ContestSeoSection';
 
 export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
   const { t } = useTranslation();
@@ -41,6 +42,15 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
         notifyAllStudents={form.notifyAllStudents}
         setNotifyAllStudents={form.setNotifyAllStudents}
         onSuperAdminAutofill={form.handleSuperAdminAutofill}
+      />
+
+      <ContestSeoSection
+        slug={form.slug}
+        setSlug={form.setSlug}
+        metaTitle={form.metaTitle}
+        setMetaTitle={form.setMetaTitle}
+        metaDescription={form.metaDescription}
+        setMetaDescription={form.setMetaDescription}
       />
 
       <ContestScheduleSection

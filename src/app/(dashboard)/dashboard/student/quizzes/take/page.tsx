@@ -20,6 +20,15 @@ import { QuizTakeHeader } from './_components/QuizTakeHeader';
 import { QuizQuestionCard } from './_components/QuizQuestionCard';
 import { QuizNavigation } from './_components/QuizNavigation';
 import type { Question, Attempt } from './_components/types';
+import { useWakeLock } from '@/hooks/useWakeLock';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+import { haptics } from '@/lib/native/haptics';
+import { playSuccessChime, playViolationWarningSound } from '@/lib/native/soundEffects';
+import {
+  saveLocalAttemptAnswers,
+  loadLocalAttemptAnswers,
+  clearLocalAttemptAnswers,
+} from '@/lib/native/offlineStorage';
 
 import {
   computeQuizTimeRemainingSeconds,
@@ -52,6 +61,9 @@ export default function TakeQuizPage() {
   const forceSubmitQuizRef = useRef<(() => Promise<void>) | null>(null);
   const { setQuizActive } = useQuiz();
 
+  useWakeLock(Boolean(attempt && !isAutoSubmitting && timeRemaining > 0));
+  const { isOnline } = useNetworkStatus();
+
   const getSecurityReasonMessage = useCallback(
     (reason: string) => {
       const keys: Record<string, string> = {
@@ -71,6 +83,8 @@ export default function TakeQuizPage() {
   // Quiz security hook - violation handler
   const handleViolation = useCallback(
     (reason: string) => {
+      haptics.error();
+      playViolationWarningSound();
       setSecurityWarning(getSecurityReasonMessage(reason));
       setShowViolationModal(true);
     },
@@ -112,6 +126,9 @@ export default function TakeQuizPage() {
 
         quizSecurity.stopQuiz();
         setQuizActive(false);
+        clearLocalAttemptAnswers(attemptData._id);
+        haptics.celebration();
+        playSuccessChime();
 
         const challengeSlug =
           searchParams.get('challengeSlug') ||
@@ -266,6 +283,11 @@ export default function TakeQuizPage() {
         setAttempt(merged);
         setTimeRemaining(remaining);
 
+        const localAnswers = loadLocalAttemptAnswers(foundAttempt._id);
+        if (localAnswers && Object.keys(localAnswers).length > 0) {
+          setAnswers(localAnswers);
+        }
+
         if (remaining <= 0) {
           setIsLoading(false);
           await submitAttempt(merged, {}, { forceSubmit: true });
@@ -313,7 +335,13 @@ export default function TakeQuizPage() {
   };
 
   const handleAnswer = (questionId: string, optionIndex: number) => {
-    setAnswers((prev) => ({ ...prev, [questionId]: optionIndex }));
+    setAnswers((prev) => {
+      const next = { ...prev, [questionId]: optionIndex };
+      if (attempt?._id) {
+        saveLocalAttemptAnswers(attempt._id, next);
+      }
+      return next;
+    });
   };
 
   const handleSubmit = useCallback(
@@ -476,6 +504,13 @@ export default function TakeQuizPage() {
         // cancelText="Cancel"
         type="danger"
       />
+
+      {!isOnline && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-amber-500 text-white rounded-full shadow-lg text-xs font-bold flex items-center gap-2 animate-bounce">
+          <span className="w-2 h-2 rounded-full bg-white animate-ping" />
+          Offline mode: answers preserved locally
+        </div>
+      )}
     </div>
   );
 }

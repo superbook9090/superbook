@@ -85,11 +85,15 @@ export function ContestCard({ contest, isTeacher = false, managePath }: ContestC
   const hasSubmitted =
     userAttempt?.status === 'completed' || userAttempt?.status === 'timed_out';
 
-  const targetLink = isTeacher
-    ? (managePath || `/dashboard/teacher/contests/${contest._id}`)
-    : state === 'live' && !hasSubmitted
+  const defaultStudentLink = state === 'live' && !hasSubmitted
     ? `/dashboard/student/contests/${contest._id}/take`
     : `/dashboard/student/contests/${contest._id}/result`;
+
+  const targetLink = isTeacher
+    ? (managePath || `/dashboard/teacher/contests/${contest._id}`)
+    : contest.slug
+    ? `/contests/${contest.slug}`
+    : defaultStudentLink;
 
   return (
     <motion.div

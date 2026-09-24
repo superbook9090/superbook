@@ -1,5 +1,8 @@
 import React from 'react';
 import type { Question } from './types';
+import { haptics } from '@/lib/native/haptics';
+import { playOptionSelectSound } from '@/lib/native/soundEffects';
+import { SpeechReadButton } from '@/components/ui/SpeechReadButton';
 
 type Props = {
   currentQuestionIndex: number;
@@ -16,15 +19,22 @@ export function QuizQuestionCard({
 }: Props) {
   const currentQid = currentQ?._id;
 
+  const speechText = currentQ
+    ? `${currentQ.question}. ${(currentQ.options || []).map((o, idx) => `Option ${String.fromCharCode(65 + idx)}: ${o}`).join('. ')}`
+    : '';
+
   return (
     <div className="antigravity-glass rounded-3xl p-5 sm:p-7 mb-4 sm:mb-6 shadow-md border border-[var(--border)]">
-      <div className="flex items-start gap-3 mb-5">
-        <span className="shrink-0 inline-flex items-center justify-center min-w-[2rem] h-8 px-2 rounded-xl bg-gradient-to-br from-[var(--student-primary)] to-[var(--student-accent)] text-white text-xs font-black shadow-xs">
-          {currentQuestionIndex + 1}
-        </span>
-        <h3 className="text-base sm:text-lg font-bold text-[var(--color-foreground)] leading-snug pt-0.5">
-          {currentQ?.question}
-        </h3>
+      <div className="flex items-start justify-between gap-3 mb-5">
+        <div className="flex items-start gap-3 flex-1">
+          <span className="shrink-0 inline-flex items-center justify-center min-w-[2rem] h-8 px-2 rounded-xl bg-gradient-to-br from-[var(--student-primary)] to-[var(--student-accent)] text-white text-xs font-black shadow-xs">
+            {currentQuestionIndex + 1}
+          </span>
+          <h3 className="text-base sm:text-lg font-bold text-[var(--color-foreground)] leading-snug pt-0.5">
+            {currentQ?.question}
+          </h3>
+        </div>
+        {speechText && <SpeechReadButton text={speechText} />}
       </div>
 
       <div className="flex flex-col gap-3">
@@ -33,7 +43,13 @@ export function QuizQuestionCard({
           return (
             <button
               key={index}
-              onClick={() => currentQid && handleAnswer(currentQid, index)}
+              onClick={() => {
+                if (currentQid) {
+                  haptics.selection();
+                  playOptionSelectSound();
+                  handleAnswer(currentQid, index);
+                }
+              }}
               className={`antigravity-quiz-option group ${isSelected ? 'antigravity-quiz-option--selected' : ''}`}
             >
               <div className="flex items-center w-full">

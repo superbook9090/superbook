@@ -26,6 +26,16 @@ import {
   Maximize2,
 } from 'lucide-react';
 import { ApiClientError } from '@/lib/api/http';
+import { useWakeLock } from '@/hooks/useWakeLock';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+import { haptics } from '@/lib/native/haptics';
+import { playOptionSelectSound, playSuccessChime, playViolationWarningSound } from '@/lib/native/soundEffects';
+import { SpeechReadButton } from '@/components/ui/SpeechReadButton';
+import {
+  saveLocalAttemptAnswers,
+  loadLocalAttemptAnswers,
+  clearLocalAttemptAnswers,
+} from '@/lib/native/offlineStorage';
 
 export default function TakeContestPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -47,6 +57,9 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
   const violationCountRef = useRef(0);
   const isSubmittingRef = useRef(false);
   const attemptStartedAtRef = useRef<number>(Date.now());
+
+  useWakeLock(Boolean(contest && !isSubmitting && questions.length > 0));
+  const { isOnline } = useNetworkStatus();
 
   // Map security reason to localized message
   const getSecurityReasonMessage = useCallback(
@@ -74,6 +87,8 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
   // Security violation handler
   const handleViolation = useCallback(
     (reason: string) => {
+      haptics.error();
+      playViolationWarningSound();
       violationCountRef.current += 1;
       setViolationMessage(getSecurityReasonMessage(reason));
       setShowViolationModal(true);
@@ -117,6 +132,10 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
         timeTaken: timeTakenSeconds,
         violationCount: violationCountRef.current,
       });
+
+      clearLocalAttemptAnswers(`contest_${id}`);
+      haptics.celebration();
+      playSuccessChime();
 
       addAlert({ type: 'success', message: 'Contest attempt submitted successfully!' });
       router.replace(`/dashboard/student/contests/${id}/result`);
@@ -194,6 +213,11 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
         setEndTime(new Date(Date.now() + res.timeRemaining * 1000));
         attemptStartedAtRef.current = Date.now();
 
+        const localAnswers = loadLocalAttemptAnswers(`contest_${id}`);
+        if (localAnswers && Object.keys(localAnswers).length > 0) {
+          setAnswers(localAnswers);
+        }
+
         // Enter fullscreen mode and lock dev tools
         await startQuizRef.current();
         setQuizActive(true);
@@ -224,14 +248,20 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
 
   // Handle Answer Selection — clicking the same option again unselects it
   const handleSelectOption = (questionId: string, optionIndex: number) => {
+    haptics.selection();
+    playOptionSelectSound();
     setAnswers((prev) => {
+      let next: Record<string, number>;
       if (prev[questionId] === optionIndex) {
         // Same option clicked → remove selection
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { [questionId]: _removed, ...rest } = prev;
-        return rest;
+        next = rest;
+      } else {
+        next = { ...prev, [questionId]: optionIndex };
       }
-      return { ...prev, [questionId]: optionIndex };
+      saveLocalAttemptAnswers(`contest_${id}`, next);
+      return next;
     });
   };
 
@@ -353,9 +383,14 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
               </div>
             </div>
 
-            <h2 className="text-base sm:text-lg font-bold text-[var(--color-foreground)] leading-relaxed">
-              {currentQ.question}
-            </h2>
+            <div className="flex items-start justify-between gap-3">
+              <h2 className="text-base sm:text-lg font-bold text-[var(--color-foreground)] leading-relaxed">
+                {currentQ.question}
+              </h2>
+              <SpeechReadButton
+                text={`${currentQ.question}. ${(currentQ.options || []).map((o, idx) => `Option ${String.fromCharCode(65 + idx)}: ${o}`).join('. ')}`}
+              />
+            </div>
 
             {/* Options List */}
             <div className="space-y-3">
@@ -467,6 +502,13 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
               {t('quiz.violationContinue') || 'Continue'}
             </button>
           </div>
+        </div>
+      )}
+
+      {!isOnline && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-amber-500 text-white rounded-full shadow-lg text-xs font-bold flex items-center gap-2 animate-bounce">
+          <span className="w-2 h-2 rounded-full bg-white animate-ping" />
+          Offline mode: answers preserved locally
         </div>
       )}
     </div>

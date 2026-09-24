@@ -23,6 +23,9 @@ export interface ContestQuizRef {
 export interface ContestItem {
   _id: string;
   title: string;
+  slug?: string;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
   description?: string;
   instructions?: string;
   instructor?: {

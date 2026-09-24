@@ -372,6 +372,16 @@ export const createContestSchema = z.object({
   title: z.string().min(1, 'Contest title is required').max(200, 'Title must be less than 200 characters'),
   description: z.string().max(5000).optional(),
   instructions: z.string().max(10000).optional(),
+  slug: z.preprocess(
+    (val) => {
+      if (typeof val !== 'string') return undefined;
+      const trimmed = val.trim().toLowerCase();
+      return trimmed === '' ? undefined : trimmed;
+    },
+    z.string().max(240).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug can only contain lowercase alphanumeric characters and hyphens').optional()
+  ),
+  metaTitle: z.string().trim().max(70).optional(),
+  metaDescription: z.string().trim().max(180).optional(),
   startTime: z.string().or(z.date()),
   endTime: z.string().or(z.date()),
   duration: z.number().int().min(1, 'Duration must be at least 1 minute').max(1440, 'Duration cannot exceed 24 hours'),

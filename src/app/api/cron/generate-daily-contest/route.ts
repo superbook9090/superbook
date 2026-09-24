@@ -51,17 +51,44 @@ export async function GET(req: NextRequest) {
     // 4. Implement AI Topic Generation Logic (Focused on India & Competitive Exams)
     const topicPrompt = `Generate a unique, engaging, and specific quiz topic relevant to India and Indian competitive exams (e.g. UPSC, SSC, Banking, State PSC, Indian GK).
 Topics can cover: Indian History, Indian Geography, Indian Polity & Constitution, Indian Economy, Science & Technology in India, Indian Art & Culture, Famous Personalities of India, Environment & Wildlife of India, or Current Affairs.
-Return ONLY the topic name as a plain string without quotes, bullets, or asterisks.
-Example outputs: "Indian Constitution & Fundamental Rights", "Rivers and Mountain Ranges of India", "Modern Indian Freedom Struggle (1857-1947)", "National Parks and Wildlife Sanctuaries in India", "Inventions & Space Missions of ISRO", "Classical Dances and Folk Arts of India".`;
+Additionally, generate SEO metadata for a contest page about this topic.
+Return ONLY a valid JSON object matching exactly this structure, with no markdown, quotes, or extra text:
+{
+  "topic": "The generated topic name",
+  "slug": "seo-friendly-url-slug",
+  "metaTitle": "SEO meta title (max 60 chars)",
+  "metaDescription": "SEO meta description (max 160 chars)"
+}`;
     
     let topic = 'General Knowledge of India';
+    let slug = 'general-knowledge-of-india';
+    let metaTitle = 'General Knowledge of India Quiz Contest | Quiz-Do';
+    let metaDescription = 'Participate in the General Knowledge of India quiz contest and test your skills against top competitors.';
     try {
       const topicResult = await fetchOpenRouterChat([
         { role: 'user', content: topicPrompt }
-      ], { maxTokens: 50, temperature: 0.8, validateOutput: (text) => text.trim().length > 0 });
-      topic = topicResult.content.replace(/["*]/g, '').trim();
+      ], { maxTokens: 300, temperature: 0.8, validateOutput: (text) => text.includes('{') });
+      
+      const rawText = topicResult.content;
+      let cleaned = rawText
+        .replace(/<think>[\s\S]*?<\/think>/gi, '')
+        .replace(/```json/gi, '')
+        .replace(/```/g, '')
+        .trim();
+        
+      const jsonStart = cleaned.indexOf('{');
+      const jsonEnd = cleaned.lastIndexOf('}');
+      if (jsonStart !== -1 && jsonEnd !== -1) {
+        cleaned = cleaned.substring(jsonStart, jsonEnd + 1);
+      }
+      
+      const parsed = JSON.parse(cleaned);
+      if (parsed.topic) topic = parsed.topic;
+      if (parsed.slug) slug = parsed.slug;
+      if (parsed.metaTitle) metaTitle = parsed.metaTitle;
+      if (parsed.metaDescription) metaDescription = parsed.metaDescription;
     } catch (err) {
-      logError('Failed to generate topic, falling back to General Knowledge of India', logContext, { error: err });
+      logError('Failed to generate topic and SEO, falling back to defaults', logContext, { error: err });
     }
 
     // 5. Implement AI Question Generation Logic (Indian Context, Medium Level)
@@ -179,6 +206,9 @@ CRITICAL QUALITY & PEDAGOGICAL REQUIREMENTS:
 
     const contestDoc = await Contest.create({
       title: `Daily Contest: ${topic}`,
+      slug,
+      metaTitle,
+      metaDescription,
       description: `Participate in today's AI-generated contest on ${topic}. Test your knowledge and climb the leaderboard!`,
       instructor: instructor._id,
       quizzes: [{

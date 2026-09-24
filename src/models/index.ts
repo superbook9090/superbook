@@ -53,7 +53,7 @@ export { default as PasswordResetToken } from './PasswordResetToken';
 export { default as Certificate } from './Certificate';
 export { default as Note } from './Note';
 export { default as CourseDoubt } from './CourseDoubt';
-export { default as Contest } from './Contest';
+export { default as Contest, ensureContestIndexes } from './Contest';
 export { default as ContestAttempt } from './ContestAttempt';
 export { default as Challenge } from './Challenge';
 export { default as ChallengeAttempt } from './ChallengeAttempt';

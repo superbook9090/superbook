@@ -195,6 +195,9 @@ export async function PATCH(
     if (updates.status) contest.status = updates.status;
     if (updates.enableNegativeMarking !== undefined) contest.enableNegativeMarking = updates.enableNegativeMarking;
     if (updates.negativeMarks !== undefined) contest.negativeMarks = updates.negativeMarks;
+    if (updates.slug !== undefined) contest.slug = updates.slug;
+    if (updates.metaTitle !== undefined) contest.metaTitle = updates.metaTitle;
+    if (updates.metaDescription !== undefined) contest.metaDescription = updates.metaDescription;
 
     // Update questions if provided and contest has not started yet
     if (updates.questions && updates.questions.length > 0 && currentState !== 'live' && currentState !== 'completed') {

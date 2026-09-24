@@ -34,6 +34,9 @@ export function useTeacherContestForm(contestId?: string) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [instructions, setInstructions] = useState('');
+  const [slug, setSlug] = useState('');
+  const [metaTitle, setMetaTitle] = useState('');
+  const [metaDescription, setMetaDescription] = useState('');
   const [scheduleType, setScheduleType] = useState<ScheduleType>('one_time');
 
   // Timing State
@@ -68,6 +71,9 @@ export function useTeacherContestForm(contestId?: string) {
       setTitle(c.title || '');
       setDescription(c.description || '');
       setInstructions(c.instructions || '');
+      setSlug(c.slug || '');
+      setMetaTitle(c.metaTitle || '');
+      setMetaDescription(c.metaDescription || '');
       setScheduleType(c.scheduleType || 'one_time');
       setDuration(String(c.duration || 30));
       setMaxAttempts(String(c.maxAttempts || 1));
@@ -146,7 +152,7 @@ export function useTeacherContestForm(contestId?: string) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await submitContest({
-      title, description, instructions, scheduleType, startTime, endTime, duration,
+      title, description, instructions, slug, metaTitle, metaDescription, scheduleType, startTime, endTime, duration,
       solutionsReleaseAt, maxAttempts, maxParticipants, visibility, leaderboardVisibility,
       enableNegativeMarking, negativeMarks, prizes, questions: questionsState.questions,
       notifyAllStudents, isEdit, contestId, canEditQuestions,
@@ -167,6 +173,12 @@ export function useTeacherContestForm(contestId?: string) {
     setDescription,
     instructions,
     setInstructions,
+    slug,
+    setSlug,
+    metaTitle,
+    setMetaTitle,
+    metaDescription,
+    setMetaDescription,
     scheduleType,
     setScheduleType,
     notifyAllStudents,

@@ -20,6 +20,9 @@ export interface IContest extends Document {
   title: string;
   description?: string;
   instructions?: string;
+  slug?: string | null;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
   instructor: mongoose.Types.ObjectId;
   organizationId?: mongoose.Types.ObjectId | null;
   quizzes: IContestQuizRef[];
@@ -73,6 +76,10 @@ const contestSchema = new Schema<IContest>(
     title: { type: String, required: true, trim: true, maxlength: 200 },
     description: { type: String, trim: true, maxlength: 5000 },
     instructions: { type: String, trim: true, maxlength: 10000 },
+    // Omit when unset — do not default to null (breaks unique index on slug).
+    slug: { type: String, trim: true, lowercase: true, maxlength: 240, default: undefined },
+    metaTitle: { type: String, trim: true, maxlength: 70, default: null },
+    metaDescription: { type: String, trim: true, maxlength: 180, default: null },
     instructor: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     organizationId: { type: Schema.Types.ObjectId, ref: 'Organization', default: null },
     quizzes: [contestQuizRefSchema],
@@ -117,5 +124,59 @@ contestSchema.index({ instructor: 1 });
 contestSchema.index({ organizationId: 1, status: 1 });
 contestSchema.index({ scheduleType: 1 });
 contestSchema.index({ createdAt: -1 });
+// Only index non-empty slugs so contests without a slug never collide.
+contestSchema.index(
+  { slug: 1 },
+  {
+    unique: true,
+    name: 'slug_1_unique_nonempty',
+    partialFilterExpression: { slug: { $gt: '' } },
+  }
+);
 
-export default mongoose.models.Contest || mongoose.model<IContest>('Contest', contestSchema);
+contestSchema.pre('save', function stripEmptySlug() {
+  if (this.slug === null || this.slug === '') {
+    this.set('slug', undefined);
+  }
+});
+
+const Contest = (mongoose.models.Contest as mongoose.Model<IContest>) || mongoose.model<IContest>('Contest', contestSchema);
+
+let indexesEnsured = false;
+
+export async function ensureContestIndexes(): Promise<void> {
+  if (indexesEnsured) return;
+
+  const collection = Contest.collection;
+
+  await collection.updateMany(
+    { $or: [{ slug: null }, { slug: '' }] },
+    { $unset: { slug: '' } }
+  );
+
+  const indexes = await collection.indexes();
+  for (const idx of indexes) {
+    const key = idx.key as Record<string, number> | undefined;
+    if (!key || key.slug !== 1 || !idx.unique) continue;
+
+    const hasNonemptyFilter =
+      idx.partialFilterExpression &&
+      typeof idx.partialFilterExpression === 'object' &&
+      'slug' in (idx.partialFilterExpression as Record<string, unknown>) &&
+      (idx.partialFilterExpression as { slug?: { $gt?: string } }).slug?.$gt === '';
+
+    if (!hasNonemptyFilter && idx.name) {
+      try {
+        await collection.dropIndex(idx.name);
+      } catch (error) {
+        const code = (error as { code?: number }).code;
+        if (code !== 27) throw error; // IndexNotFound
+      }
+    }
+  }
+
+  await Contest.syncIndexes();
+  indexesEnsured = true;
+}
+
+export default Contest;
