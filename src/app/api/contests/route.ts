@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
     const [contestsRaw, total] = await Promise.all([
       Contest.find(query)
         .populate('instructor', 'name email avatar')
-        .populate('quizzes.quiz', 'title questionCount timeLimit')
+        .populate('quizzes.quiz', 'title questionCount timeLimit createdAt')
         .sort({ startTime: tab === 'completed' ? -1 : 1, createdAt: -1 })
         .skip(skip)
         .limit(limit)
@@ -84,6 +84,16 @@ export async function GET(request: NextRequest) {
       computedState: getContestComputedState(c, now),
       userAttempt: studentAttemptMap[c._id.toString()] || null,
     }));
+
+  // Compute latest quiz date for each contest and sort descending
+  contests.forEach((contest) => {
+    const quizDates = (contest.quizzes ?? []).map((q) => {
+      const date = q.quiz?.createdAt;
+      return date ? new Date(date).getTime() : 0;
+    });
+    contest.latestQuizTimestamp = quizDates.length ? Math.max(...quizDates) : 0;
+  });
+  contests.sort((a, b) => b.latestQuizTimestamp - a.latestQuizTimestamp);
 
     const { liveCount, upcomingCount, completedCount } = await getContestTabCounts(
       session,
