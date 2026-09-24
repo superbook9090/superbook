@@ -70,7 +70,7 @@ Return ONLY a valid JSON object matching exactly this structure, with no markdow
     try {
       const topicResult = await fetchOpenRouterChat([
         { role: 'user', content: topicPrompt }
-      ], { maxTokens: 300, temperature: 0.8, validateOutput: (text) => text.includes('{') });
+      ], { maxTokens: 300, temperature: 0.8, validateOutput: (text) => text.includes('{'), timeoutMs: 10000 });
 
       const rawText = topicResult.content;
       let cleaned = rawText
@@ -132,6 +132,7 @@ CRITICAL QUALITY & PEDAGOGICAL REQUIREMENTS:
           { role: 'user', content: prompt }
         ], {
           maxTokens: 3000,
+          timeoutMs: 12000,
           validateOutput: (text) => text.includes('[') && text.includes(']')
         });
 
