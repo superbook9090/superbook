@@ -79,21 +79,23 @@ export async function GET(request: NextRequest) {
         ? await getStudentAttemptMap(session.user.id, contestsRaw.map((c) => c._id))
         : {};
 
-    const contests = contestsRaw.map((c) => ({
-      ...c,
-      computedState: getContestComputedState(c, now),
-      userAttempt: studentAttemptMap[c._id.toString()] || null,
-    }));
+    const contests = contestsRaw.map((c) => {
+      const quizDates = (c.quizzes ?? []).map((q) => {
+        const date = (q.quiz as { createdAt?: string | Date })?.createdAt;
+        return date ? new Date(date).getTime() : 0;
+      });
+      const latestQuizTimestamp = quizDates.length ? Math.max(...quizDates) : 0;
 
-  // Compute latest quiz date for each contest and sort descending
-  contests.forEach((contest) => {
-    const quizDates = (contest.quizzes ?? []).map((q) => {
-      const date = q.quiz?.createdAt;
-      return date ? new Date(date).getTime() : 0;
+      return {
+        ...c,
+        computedState: getContestComputedState(c, now),
+        userAttempt: studentAttemptMap[c._id.toString()] || null,
+        latestQuizTimestamp,
+      };
     });
-    contest.latestQuizTimestamp = quizDates.length ? Math.max(...quizDates) : 0;
-  });
-  contests.sort((a, b) => b.latestQuizTimestamp - a.latestQuizTimestamp);
+
+    // Sort descending by latest quiz date
+    contests.sort((a, b) => b.latestQuizTimestamp - a.latestQuizTimestamp);
 
     const { liveCount, upcomingCount, completedCount } = await getContestTabCounts(
       session,
