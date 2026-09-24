@@ -55,29 +55,37 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }));
 
-  const blogEntries = await listPublicBlogSitemapEntries(500);
-  const blogPages: MetadataRoute.Sitemap = blogEntries.map(({ slug, lastModified }) => ({
-    url: `${baseUrl}${buildPublicBlogPath(slug)}`,
-    lastModified: new Date(lastModified),
-    changeFrequency: 'weekly' as const,
-    priority: 0.8,
-  }));
+  let blogPages: MetadataRoute.Sitemap = [];
+  let categoryPages: MetadataRoute.Sitemap = [];
+  let coursePages: MetadataRoute.Sitemap = [];
 
-  const topics = await listPublicBlogTopics();
-  const categoryPages: MetadataRoute.Sitemap = topics.map((topic) => ({
-    url: `${baseUrl}/blogs/category/${blogTopicSlug(topic)}`,
-    lastModified: STATIC_PAGES_LASTMOD,
-    changeFrequency: 'weekly' as const,
-    priority: 0.75,
-  }));
+  try {
+    const blogEntries = await listPublicBlogSitemapEntries(500);
+    blogPages = blogEntries.map(({ slug, lastModified }) => ({
+      url: `${baseUrl}${buildPublicBlogPath(slug)}`,
+      lastModified: new Date(lastModified),
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    }));
 
-  const courseEntries = await listPublicCourseSitemapEntries(200);
-  const coursePages: MetadataRoute.Sitemap = courseEntries.map(({ slug, lastModified }) => ({
-    url: `${baseUrl}${buildPublicCoursePath(slug)}`,
-    lastModified: new Date(lastModified),
-    changeFrequency: 'weekly' as const,
-    priority: 0.85,
-  }));
+    const topics = await listPublicBlogTopics();
+    categoryPages = topics.map((topic) => ({
+      url: `${baseUrl}/blogs/category/${blogTopicSlug(topic)}`,
+      lastModified: STATIC_PAGES_LASTMOD,
+      changeFrequency: 'weekly' as const,
+      priority: 0.75,
+    }));
+
+    const courseEntries = await listPublicCourseSitemapEntries(200);
+    coursePages = courseEntries.map(({ slug, lastModified }) => ({
+      url: `${baseUrl}${buildPublicCoursePath(slug)}`,
+      lastModified: new Date(lastModified),
+      changeFrequency: 'weekly' as const,
+      priority: 0.85,
+    }));
+  } catch (error) {
+    console.warn('[sitemap] Could not fetch dynamic routes for sitemap at build time:', (error as Error).message);
+  }
 
   return [...pages, ...seoLandingPages, ...toolPages, ...blogPages, ...categoryPages, ...coursePages];
 }
