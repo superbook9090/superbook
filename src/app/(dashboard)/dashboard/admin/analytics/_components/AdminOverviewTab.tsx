@@ -8,12 +8,20 @@ import {
   TrendingUp,
   CheckCircle2,
 } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useTranslation } from '@/hooks/useTranslation';
 import StatCard from '@/components/ui/StatCard';
-import { AdminActivityChart } from './AdminActivityChart';
-import { AdminPlatformDistributionChart } from './AdminPlatformDistributionChart';
 import { AdminOverviewHighlights } from './AdminOverviewHighlights';
 import type { AdminStats } from './types';
+
+const AdminActivityChart = dynamic(
+  () => import('./AdminActivityChart').then((m) => m.AdminActivityChart),
+  { ssr: false, loading: () => <div className="h-64 rounded-2xl bg-[var(--card-solid)] border border-[var(--border)] animate-pulse" /> }
+);
+const AdminPlatformDistributionChart = dynamic(
+  () => import('./AdminPlatformDistributionChart').then((m) => m.AdminPlatformDistributionChart),
+  { ssr: false, loading: () => <div className="h-64 rounded-2xl bg-[var(--card-solid)] border border-[var(--border)] animate-pulse" /> }
+);
 
 interface AdminOverviewTabProps {
   stats: AdminStats;

@@ -1,5 +1,3 @@
-import QRCode from 'qrcode';
-
 export interface ScorecardData {
   studentName: string;
   quizTitle: string;
@@ -204,6 +202,7 @@ export async function renderScorecardToCanvas(
 
   // Dynamic QR Code generation on the right
   try {
+    const QRCode = (await import('qrcode')).default;
     const qrDataUrl = await QRCode.toDataURL(data.shareUrl, {
       margin: 1,
       width: 220,

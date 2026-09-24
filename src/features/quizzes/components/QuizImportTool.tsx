@@ -1,5 +1,4 @@
 import React, { useState, useRef, useCallback } from 'react';
-import * as XLSX from 'xlsx';
 import { Sparkles } from 'lucide-react';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -69,6 +68,7 @@ export function QuizImportTool({ theme, onImport, entityType = 'quiz', triggerAi
     setPreviewData([]);
 
     try {
+      const XLSX = await import('xlsx');
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data, { type: 'array' });
       const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -356,7 +356,8 @@ export function QuizImportTool({ theme, onImport, entityType = 'quiz', triggerAi
     fileInputRef.current?.click();
   }, [isParsing]);
 
-  const downloadTemplate = useCallback(() => {
+  const downloadTemplate = useCallback(async () => {
+    const XLSX = await import('xlsx');
     const template = [
       ['question', 'optionA', 'optionB', 'optionC', 'optionD', 'correctAnswer'],
       ['What is 2+2?', '3', '4', '5', '6', 'B'],

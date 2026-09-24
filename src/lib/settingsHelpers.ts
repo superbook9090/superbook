@@ -26,6 +26,7 @@ interface FeatureToggles {
   enableQuizChallenges?: boolean;
   enableAutoDailyAiContestCreation?: boolean;
   enableAutoDeclareResults?: boolean;
+  enableUpPetCourseCron?: boolean;
   enableGoogleAdsense?: boolean;
 }
 
@@ -59,6 +60,7 @@ const DEFAULT_FEATURE_TOGGLES: Partial<Record<keyof FeatureToggles, boolean>> = 
   enableQuizChallenges: true,
   enableAutoDailyAiContestCreation: true,
   enableAutoDeclareResults: true,
+  enableUpPetCourseCron: true,
   enableGoogleAdsense: true,
 };
 

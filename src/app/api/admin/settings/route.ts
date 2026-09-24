@@ -234,6 +234,10 @@ export async function PATCH(req: NextRequest) {
           isSuper && featureToggles.enableAutoDeclareResults !== undefined
             ? featureToggles.enableAutoDeclareResults
             : (existingToggles.enableAutoDeclareResults ?? true),
+        enableUpPetCourseCron:
+          isSuper && featureToggles.enableUpPetCourseCron !== undefined
+            ? featureToggles.enableUpPetCourseCron
+            : (existingToggles.enableUpPetCourseCron ?? true),
       };
 
       settings.featureToggles = mergedToggles;

@@ -3,13 +3,21 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Users, GraduationCap, School, Shield, UserPlus, ArrowUpRight } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { ROUTES } from '@/constants/routes';
 import { useTranslation } from '@/hooks/useTranslation';
 import StatCard from '@/components/ui/StatCard';
-import { AdminRoleDistributionChart } from './AdminRoleDistributionChart';
-import { AdminPlatformDistributionChart } from './AdminPlatformDistributionChart';
 import { AdminActivityEngagementCard } from './AdminActivityEngagementCard';
 import type { AdminStats } from './types';
+
+const AdminRoleDistributionChart = dynamic(
+  () => import('./AdminRoleDistributionChart').then((m) => m.AdminRoleDistributionChart),
+  { ssr: false, loading: () => <div className="h-64 rounded-2xl bg-[var(--card-solid)] border border-[var(--border)] animate-pulse" /> }
+);
+const AdminPlatformDistributionChart = dynamic(
+  () => import('./AdminPlatformDistributionChart').then((m) => m.AdminPlatformDistributionChart),
+  { ssr: false, loading: () => <div className="h-64 rounded-2xl bg-[var(--card-solid)] border border-[var(--border)] animate-pulse" /> }
+);
 
 interface AdminUsersTabProps {
   stats: AdminStats;

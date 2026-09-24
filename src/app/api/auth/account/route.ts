@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+import type { Types } from 'mongoose';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import User from '@/models/User';
@@ -17,7 +18,12 @@ export async function GET() {
     }
 
     await dbConnect();
-    const user = await User.findById(session.user.id).select('password provider organizationId canCreateContests');
+    const user = await User.findById(session.user.id).select('password provider organizationId canCreateContests').lean<{
+      password?: string;
+      provider?: string;
+      organizationId?: Types.ObjectId;
+      canCreateContests?: boolean;
+    }>();
 
     if (!user) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
@@ -26,7 +32,7 @@ export async function GET() {
     let organizationName = null;
     if (user.organizationId) {
       const Organization = (await import('@/models/Organization')).default;
-      const org = await Organization.findById(user.organizationId).select('name');
+      const org = await Organization.findById(user.organizationId).select('name').lean<{ name?: string }>();
       if (org) {
         organizationName = org.name;
       }

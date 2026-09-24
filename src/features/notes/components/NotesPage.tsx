@@ -129,7 +129,7 @@ export function NotesPage() {
       {loading ? (
         <div className="py-16 flex flex-col items-center justify-center gap-3">
           <div className="w-9 h-9 border-4 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
-          <span className="text-xs text-[var(--color-muted)] font-medium">Loading your notes...</span>
+          <span className="text-xs text-[var(--color-muted)] font-medium">{t('notes.loadingNotes')}</span>
         </div>
       ) : rawNotes.length === 0 ? (
         /* No notes at all in database */

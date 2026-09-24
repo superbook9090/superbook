@@ -37,15 +37,24 @@ function resolveTranslationValue(
   return typeof value === 'string' ? value : undefined;
 }
 
+const warnedKeys = new Set<string>();
+
 export function translate(
   language: Language,
   key: TranslationKeyInput,
   params?: Record<string, string | number>
 ): string {
-  let result =
-    resolveTranslationValue(translations[language], key as TranslationKey) ??
-    resolveTranslationValue(translations.en, key as TranslationKey) ??
-    key;
+  const langVal = resolveTranslationValue(translations[language], key as TranslationKey);
+  const enVal = resolveTranslationValue(translations.en, key as TranslationKey);
+
+  if (process.env.NODE_ENV === 'development' && langVal === undefined && enVal === undefined) {
+    if (!warnedKeys.has(key)) {
+      warnedKeys.add(key);
+      console.warn(`[i18n] Missing translation for key: "${key}"`);
+    }
+  }
+
+  let result = langVal ?? enVal ?? key;
 
   if (params) {
     Object.entries(params).forEach(([paramKey, paramValue]) => {

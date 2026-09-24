@@ -126,7 +126,7 @@ export default function StudentCoursesPage() {
           <div className="space-y-1">
             <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--student-primary)]">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>Learning Hub</span>
+              <span>{t('dashboard.learningHub')}</span>
             </div>
             <h1 className="heading-xl">{t('courses.myCourses')}</h1>
             <p className="text-[var(--color-muted-foreground)] text-sm sm:text-base">

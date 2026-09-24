@@ -65,6 +65,7 @@ export async function GET() {
         enableQuizChallenges: true,
         enableAutoDailyAiContestCreation: true,
         enableAutoDeclareResults: true,
+        enableUpPetCourseCron: true,
       },
       challengeConfig: {
         allowGuestChallenges: true,

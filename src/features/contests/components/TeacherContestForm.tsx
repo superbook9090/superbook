@@ -484,7 +484,7 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
             label={t('contest.title') || 'Contest Title *'}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g. National Mathematics Olympiad 2026"
+            placeholder={t('contest.titlePlaceholder') || 'e.g. National Mathematics Olympiad 2026'}
             required
           />
 
@@ -496,7 +496,7 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Brief summary of the competition..."
+              placeholder={t('contest.descPlaceholder') || 'Brief summary of the competition...'}
               className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-[var(--color-surface-muted)] border border-[var(--border)] text-[var(--color-foreground)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
             />
           </div>
@@ -509,7 +509,7 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
               rows={4}
               value={instructions}
               onChange={(e) => setInstructions(e.target.value)}
-              placeholder="Rules, scoring guidelines, time limits, anti-cheat policy..."
+              placeholder={t('contest.instructionsPlaceholder') || 'Rules, scoring guidelines, time limits, anti-cheat policy...'}
               className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-[var(--color-surface-muted)] border border-[var(--border)] text-[var(--color-foreground)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
             />
           </div>
@@ -743,7 +743,7 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
             <input
               type="number"
               min="1"
-              placeholder="Leave blank for unlimited"
+              placeholder={t('contest.unlimitedPlaceholder') || 'Leave blank for unlimited'}
               value={maxParticipants}
               onChange={(e) => setMaxParticipants(e.target.value)}
               className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-[var(--color-surface-muted)] border border-[var(--border)] text-[var(--color-foreground)]"
@@ -759,9 +759,9 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
               onChange={(e) => setVisibility(e.target.value as 'public' | 'organization' | 'unlisted')}
               className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-[var(--color-surface-muted)] border border-[var(--border)] text-[var(--color-foreground)]"
             >
-              <option value="public">Public (Open Platform-wide)</option>
-              <option value="organization">Organization Members Only</option>
-              <option value="unlisted">Unlisted (Direct link only)</option>
+              <option value="public">{t('contest.visibilityPublic') || 'Public (Open Platform-wide)'}</option>
+              <option value="organization">{t('contest.visibilityOrg') || 'Organization Members Only'}</option>
+              <option value="unlisted">{t('contest.visibilityUnlisted') || 'Unlisted (Direct link only)'}</option>
             </select>
           </div>
 
@@ -774,9 +774,9 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
               onChange={(e) => setLeaderboardVisibility(e.target.value as 'live' | 'after_end' | 'hidden')}
               className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-[var(--color-surface-muted)] border border-[var(--border)] text-[var(--color-foreground)]"
             >
-              <option value="live">Live (Real-time ranks during contest)</option>
-              <option value="after_end">After End (Reveal only when contest ends)</option>
-              <option value="hidden">Hidden (Teacher only)</option>
+              <option value="live">{t('contest.leaderboardLive') || 'Live (Real-time ranks during contest)'}</option>
+              <option value="after_end">{t('contest.leaderboardAfterEnd') || 'After End (Reveal only when contest ends)'}</option>
+              <option value="hidden">{t('contest.leaderboardHidden') || 'Hidden (Teacher only)'}</option>
             </select>
           </div>
 

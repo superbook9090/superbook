@@ -8,6 +8,7 @@ export const hi = {
 
   // Common
   common: {
+    optional: 'वैकल्पिक',
     reset: 'रीसेट करें',
     none: 'कोई नहीं',
     loading: 'लोड हो रहा है...',
@@ -817,6 +818,7 @@ export const hi = {
     searchUsers: 'उपयोगकर्ता खोजें...',
     allRoles: 'सभी भूमिकाएं',
     user: 'उपयोगकर्ता',
+    users: 'उपयोगकर्ता',
     role: 'भूमिका',
     joined: 'शामिल हुए',
     actions: 'कार्य',
@@ -1051,6 +1053,7 @@ export const hi = {
 
   // Courses
   courses: {
+    courseCatalog: 'पाठ्यक्रम कैटलॉग',
     totalCourses: 'कुल पाठ्यक्रम',
     clearFilter: 'फ़िल्टर साफ़ करें',
     availableCourses: 'उपलब्ध पाठ्यक्रम',
@@ -2068,6 +2071,8 @@ export const hi = {
     enableAutoDailyAiContestCreationDesc: 'OpenRouter का उपयोग करके स्वचालित रूप से दैनिक AI प्रतियोगिता उत्पन्न करें (केवल सुपरएडमिन)',
     enableAutoDeclareResults: 'स्वचालित परिणाम घोषणा',
     enableAutoDeclareResultsDesc: 'प्रतियोगिता समाप्त होने पर स्वचालित रूप से परिणाम घोषित करें (केवल सुपरएडमिन)',
+    enableUpPetCourseCron: 'यूपी पीईटी AI कोर्स एवं क्विज निर्माण',
+    enableUpPetCourseCronDesc: 'स्वचालित रात्रि जनरेटर जो यूपीएसएसएससी पीईटी पाठ्यक्रम के संपूर्ण नोट्स और क्विज तैयार करता है (केवल सुपरएडमिन)',
     challengeConfig: 'क्विज़ चुनौती और वायरल सेटिंग्स',
     challengeConfigDesc: 'अतिथि खेलने की अनुमति और चुनौती लिंक की समाप्ति अवधि कॉन्फ़िगर करें।',
     challengeViralSettings: 'क्विज़ चुनौती और वायरल सेटिंग्स',
@@ -2504,6 +2509,7 @@ export const hi = {
   },
 
   notes: {
+    loadingNotes: 'आपके नोट्स लोड हो रहे हैं...',
     title: 'मेरे नोट्स',
     subtitle: 'अपने व्यक्तिगत अध्ययन, पाठ योजना और संदर्भ नोट्स बनाएं, व्यवस्थित करें और सहेजें।',
     addNote: 'नोट जोड़ें',
@@ -2668,6 +2674,21 @@ export const hi = {
     noSubmissionsYet: 'अभी तक कोई पूर्ण सबमिशन नहीं हुआ है। सबसे पहले शामिल हों!',
     teacherContests: 'प्रतियोगिता प्रबंधन',
     teacherContestsDesc: 'अपने लाइव छात्र प्रतियोगिताओं, पुरस्कारों और लीडरबोर्ड को बनाएं, शेड्यूल करें और ट्रैक करें।',
+    adminContestsDesc: 'प्लेटफ़ॉर्म पर सभी प्रतियोगिताओं को देखें, प्रबंधित करें और मॉडरेट करें।',
+    noContests: 'कोई प्रतियोगिता नहीं मिली',
+    noContestsAdminDesc: 'प्लेटफ़ॉर्म पर अभी तक कोई प्रतियोगिता नहीं बनाई गई है।',
+    noContestsFilterDesc: 'आपकी वर्तमान खोज और फ़िल्टर मानदंडों से कोई प्रतियोगिता मेल नहीं खाती।',
+    questionsLockedDuringContest: 'प्रतियोगिता शुरू होने या समाप्त होने के बाद प्रश्नों को संशोधित नहीं किया जा सकता है।',
+    titlePlaceholder: 'उदा. राष्ट्रीय गणित ओलंपियाड 2026',
+    descPlaceholder: 'प्रतियोगिता का संक्षिप्त सारांश...',
+    instructionsPlaceholder: 'नियम, अंकन दिशानिर्देश, समय सीमा, निष्पक्षता नीति...',
+    unlimitedPlaceholder: 'असीमित के लिए खाली छोड़ें',
+    visibilityPublic: 'सार्वजनिक (पूरे प्लेटफ़ॉर्म पर खुला)',
+    visibilityOrg: 'केवल संगठन के सदस्य',
+    visibilityUnlisted: 'असूचीबद्ध (केवल सीधे लिंक द्वारा)',
+    leaderboardLive: 'लाइव (प्रतियोगिता के दौरान रीयल-टाइम रैंक)',
+    leaderboardAfterEnd: 'समाप्ति के बाद (प्रतियोगिता समाप्त होने पर प्रकट करें)',
+    leaderboardHidden: 'छिपा हुआ (केवल शिक्षक के लिए)',
     permissionRequired: 'प्रतियोगिता निर्माण अनुमति आवश्यक',
     permissionRequiredDesc: 'प्रतियोगिता निर्माण अधिकृत शिक्षकों तक ही सीमित है। एक सुपर एडमिन उपयोगकर्ता प्रशासन पैनल से आपको अनुमति प्रदान कर सकता है।',
     createNewContest: 'नई प्रतियोगिता बनाएं',

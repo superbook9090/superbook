@@ -210,6 +210,7 @@ export const updateSettingsSchema = z.object({
     enableQuizChallenges: z.boolean().optional(),
     enableAutoDailyAiContestCreation: z.boolean().optional(),
     enableAutoDeclareResults: z.boolean().optional(),
+    enableUpPetCourseCron: z.boolean().optional(),
   }).optional(),
   challengeConfig: z.object({
     allowGuestChallenges: z.boolean().optional(),

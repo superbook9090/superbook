@@ -72,6 +72,7 @@ export function FeatureTogglesSection({
         { key: 'enableQuizChallenges', labelKey: 'adminSettings.enableQuizChallenges', descKey: 'adminSettings.enableQuizChallengesDesc', icon: Swords, iconBg: 'bg-[var(--primary-soft)]', iconColor: 'text-[var(--primary)]', isSuperAdminOnly: true },
         { key: 'enableAutoDailyAiContestCreation', labelKey: 'adminSettings.enableAutoDailyAiContestCreation', descKey: 'adminSettings.enableAutoDailyAiContestCreationDesc', icon: Sparkles, iconBg: 'bg-[var(--primary-soft)]', iconColor: 'text-[var(--primary)]', isSuperAdminOnly: true, isAiFeature: true },
         { key: 'enableAutoDeclareResults', labelKey: 'adminSettings.enableAutoDeclareResults', descKey: 'adminSettings.enableAutoDeclareResultsDesc', icon: Trophy, iconBg: 'bg-[var(--primary-soft)]', iconColor: 'text-[var(--primary)]', isSuperAdminOnly: true },
+        { key: 'enableUpPetCourseCron', labelKey: 'adminSettings.enableUpPetCourseCron', descKey: 'adminSettings.enableUpPetCourseCronDesc', icon: Sparkles, iconBg: 'bg-[var(--success-light)]', iconColor: 'text-[var(--success)]', isSuperAdminOnly: true, isAiFeature: true },
       ],
     },
     {

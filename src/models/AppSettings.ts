@@ -35,6 +35,7 @@ export interface IAppSettings extends Document {
     enableQuizChallenges?: boolean;
     enableAutoDailyAiContestCreation?: boolean;
     enableAutoDeclareResults?: boolean;
+    enableUpPetCourseCron?: boolean;
   };
   challengeConfig?: {
     allowGuestChallenges: boolean;
@@ -176,6 +177,10 @@ const appSettingsSchema = new Schema<IAppSettings>(
         default: true,
       },
       enableAutoDeclareResults: {
+        type: Boolean,
+        default: true,
+      },
+      enableUpPetCourseCron: {
         type: Boolean,
         default: true,
       },

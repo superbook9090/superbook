@@ -8,6 +8,7 @@ export const en = {
 
   // Common
   common: {
+    optional: 'Optional',
     reset: "Reset",
     none: 'None',
     loading: 'Loading...',
@@ -817,6 +818,7 @@ export const en = {
     searchUsers: 'Search users...',
     allRoles: 'All Roles',
     user: 'User',
+    users: 'Users',
     role: 'Role',
     joined: 'Joined',
     actions: 'Actions',
@@ -1051,6 +1053,7 @@ export const en = {
 
   // Courses
   courses: {
+    courseCatalog: 'Course Catalog',
     totalCourses: 'Total Courses',
     clearFilter: 'Clear Filter',
     availableCourses: 'Available Courses',
@@ -2068,6 +2071,8 @@ export const en = {
     enableAutoDailyAiContestCreationDesc: 'Automatically generate a daily AI contest using OpenRouter (superadmin only)',
     enableAutoDeclareResults: 'Automatic Result Declaration',
     enableAutoDeclareResultsDesc: 'Automatically declare contest results when they end (superadmin only)',
+    enableUpPetCourseCron: 'UP PET AI Course & Quiz Generator',
+    enableUpPetCourseCronDesc: 'Automated nightly generator creating the complete UPSSSC PET syllabus course, topic lessons, and quizzes (superadmin only)',
     challengeConfig: 'Quiz Challenge & Viral Settings',
     challengeConfigDesc: 'Configure guest play permissions, link expiration, and viral loop behaviors for student challenges.',
     challengeViralSettings: 'Quiz Challenge & Viral Settings',
@@ -2504,6 +2509,7 @@ export const en = {
   },
 
   notes: {
+    loadingNotes: 'Loading your notes...',
     title: 'My Notes',
     subtitle: 'Create, organize, and store your personal study, lesson plans, and reference notes.',
     addNote: 'Add Note',
@@ -2668,6 +2674,21 @@ export const en = {
     noSubmissionsYet: 'No completed submissions yet. Be the first to join!',
     teacherContests: 'Contests Management',
     teacherContestsDesc: 'Create, schedule, and monitor your live student contests, prizes, and leaderboards.',
+    adminContestsDesc: 'View, manage, and moderate all contests across the platform.',
+    noContests: 'No contests found',
+    noContestsAdminDesc: 'No contests have been created yet on the platform.',
+    noContestsFilterDesc: 'No contests match your current search and filter criteria.',
+    questionsLockedDuringContest: 'Questions cannot be modified once the contest has started or completed.',
+    titlePlaceholder: 'e.g. National Mathematics Olympiad 2026',
+    descPlaceholder: 'Brief summary of the competition...',
+    instructionsPlaceholder: 'Rules, scoring guidelines, time limits, anti-cheat policy...',
+    unlimitedPlaceholder: 'Leave blank for unlimited',
+    visibilityPublic: 'Public (Open Platform-wide)',
+    visibilityOrg: 'Organization Members Only',
+    visibilityUnlisted: 'Unlisted (Direct link only)',
+    leaderboardLive: 'Live (Real-time ranks during contest)',
+    leaderboardAfterEnd: 'After End (Reveal only when contest ends)',
+    leaderboardHidden: 'Hidden (Teacher only)',
     permissionRequired: 'Contest Creation Access Required',
     permissionRequiredDesc: 'Contest hosting is restricted to authorized educators. A Superadmin can grant you contest creation permissions from the user administration panel.',
     createNewContest: 'Create New Contest',

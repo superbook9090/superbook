@@ -35,6 +35,7 @@ export interface AppSettings {
     enableQuizChallenges?: boolean;
     enableAutoDailyAiContestCreation?: boolean;
     enableAutoDeclareResults?: boolean;
+    enableUpPetCourseCron?: boolean;
   };
   challengeConfig?: {
     allowGuestChallenges: boolean;

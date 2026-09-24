@@ -39,6 +39,7 @@ const DEFAULT_SETTINGS = {
     enableQuizChallenges: true,
     enableAutoDailyAiContestCreation: true,
     enableAutoDeclareResults: true,
+    enableUpPetCourseCron: true,
   },
   challengeConfig: {
     allowGuestChallenges: true,

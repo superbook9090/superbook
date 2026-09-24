@@ -108,7 +108,7 @@ export default function BrowseCoursesPage() {
             <div className="flex flex-col gap-1.5">
               <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--student-primary)]">
                 <Compass className="w-3.5 h-3.5" />
-                <span>Course Catalog</span>
+                <span>{t('courses.courseCatalog')}</span>
               </div>
               <h1 className="heading-xl">{t('courses.browseCourses')}</h1>
               <p className="text-[var(--color-muted-foreground)] text-sm sm:text-base max-w-xl">
