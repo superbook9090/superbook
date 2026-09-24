@@ -4,21 +4,24 @@ import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import '@/models';
 import Contest, { IContest } from '@/models/Contest';
-import Quiz from '@/models/Quiz';
-import ContestAttempt from '@/models/ContestAttempt';
-import User from '@/models/User';
-import { sendAdminBroadcast } from '@/lib/server/services/notifications-service';
 import { createContestSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
 import { getCachedData, setCachedData, invalidatePattern } from '@/lib/redis';
-import { setQuizQuestions } from '@/domain/learning/quizContent';
 import {
   getContestComputedState,
   canTeacherManageContests,
 } from '@/lib/contest/contestHelpers';
 import { isSuperAdmin } from '@/lib/roles';
-import mongoose from 'mongoose';
+import {
+  buildContestListQuery,
+  getStudentAttemptMap,
+  getContestTabCounts,
+} from '@/lib/contest/contestQuery';
+import {
+  buildContestQuizRefs,
+  broadcastNewContest,
+} from '@/lib/contest/contestCreation';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -35,8 +38,8 @@ export async function GET(request: NextRequest) {
     await dbConnect();
 
     const { searchParams } = new URL(request.url);
-    const tab = searchParams.get('tab'); // 'live' | 'upcoming' | 'completed'
-    const scheduleType = searchParams.get('scheduleType'); // 'one_time' | 'daily' | 'weekly'
+    const tab = searchParams.get('tab');
+    const scheduleType = searchParams.get('scheduleType');
     const instructor = searchParams.get('instructor');
     const search = searchParams.get('search');
     const page = parseInt(searchParams.get('page') || '1', 10);
@@ -44,67 +47,20 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     const orgId = session?.user?.organizationId || 'public';
-    const isTeacherSelf = instructor === 'self' && session?.user?.id;
-    const isAdminAll =
-      instructor === 'all' &&
-      (session?.user?.role === 'superadmin' || session?.user?.role === 'admin');
+    const now = new Date();
 
-    // Cache key for public/general listings
+    const { query, isTeacherSelf, isAdminAll } = buildContestListQuery(
+      session,
+      { tab, scheduleType, instructor, search },
+      now
+    );
+
     const cacheKey = `contests:${orgId}:${tab || 'all'}:${scheduleType || 'all'}:${instructor || 'all'}:${search || ''}:${page}:${limit}`;
     if (!isTeacherSelf && !isAdminAll && !search) {
       const cached = await getCachedData(cacheKey);
       if (cached) {
         return NextResponse.json(cached);
       }
-    }
-
-    const now = new Date();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const query: Record<string, any> = {};
-
-    if (isAdminAll) {
-      // Superadmin / admin: see ALL contests regardless of status or instructor
-      // No additional filters applied here
-    } else if (isTeacherSelf) {
-      // Teacher self-management query
-      query.instructor = session.user.id;
-    } else {
-      // General student / public view: only published contests (exclude drafts/cancelled)
-      query.status = { $in: ['published', 'completed'] };
-
-      // Organization filter
-      if (session?.user?.organizationId) {
-        query.$or = [
-          { organizationId: null },
-          { organizationId: session.user.organizationId },
-        ];
-      } else {
-        query.visibility = { $in: ['public', 'unlisted'] };
-        query.organizationId = null;
-      }
-    }
-
-    if (scheduleType && ['one_time', 'daily', 'weekly'].includes(scheduleType)) {
-      query.scheduleType = scheduleType;
-    }
-
-    if (search && search.trim()) {
-      query.$or = [
-        { title: { $regex: search.trim(), $options: 'i' } },
-        { description: { $regex: search.trim(), $options: 'i' } },
-      ];
-    }
-
-    // Apply Tab Time Filter
-    if (tab === 'live') {
-      query.startTime = { $lte: now };
-      query.endTime = { $gte: now };
-      if (!isTeacherSelf && !isAdminAll) query.status = 'published';
-    } else if (tab === 'upcoming') {
-      query.startTime = { $gt: now };
-      if (!isTeacherSelf && !isAdminAll) query.status = 'published';
-    } else if (tab === 'completed') {
-      query.$or = [{ endTime: { $lt: now } }, { status: 'completed' }];
     }
 
     const [contestsRaw, total] = await Promise.all([
@@ -118,74 +74,23 @@ export async function GET(request: NextRequest) {
       Contest.countDocuments(query),
     ]);
 
-    // Compute dynamic states & student participation info
-    const studentAttemptMap: Record<string, { status: string; score: number; percentage: number }> = {};
-    if (session?.user?.id && session.user.role === 'student' && contestsRaw.length > 0) {
-      const contestIds = contestsRaw.map((c) => c._id);
-      const studentAttempts = await ContestAttempt.find({
-        student: session.user.id,
-        contest: { $in: contestIds },
-      })
-        .select('contest status score percentage attemptNumber')
-        .sort({ attemptNumber: -1 })
-        .lean();
+    const studentAttemptMap =
+      session?.user?.id && session.user.role === 'student' && contestsRaw.length > 0
+        ? await getStudentAttemptMap(session.user.id, contestsRaw.map((c) => c._id))
+        : {};
 
-      studentAttempts.forEach((att) => {
-        const cId = att.contest.toString();
-        if (!studentAttemptMap[cId]) {
-          studentAttemptMap[cId] = {
-            status: att.status,
-            score: att.score,
-            percentage: att.percentage,
-          };
-        }
-      });
-    }
+    const contests = contestsRaw.map((c) => ({
+      ...c,
+      computedState: getContestComputedState(c, now),
+      userAttempt: studentAttemptMap[c._id.toString()] || null,
+    }));
 
-    const contests = contestsRaw.map((c) => {
-      const computedState = getContestComputedState(c, now);
-      const userAttempt = studentAttemptMap[c._id.toString()] || null;
-      return {
-        ...c,
-        computedState,
-        userAttempt,
-      };
-    });
-
-    // Counts for tabs overview
-    const baseCountQuery = isAdminAll
-      ? {}
-      : isTeacherSelf
-      ? { instructor: session.user.id }
-      : {
-          status: { $in: ['published', 'completed'] },
-          ...(session?.user?.organizationId
-            ? {
-                $or: [
-                  { organizationId: null },
-                  { organizationId: session.user.organizationId },
-                ],
-              }
-            : { visibility: { $in: ['public', 'unlisted'] }, organizationId: null }),
-        };
-
-    const [liveCount, upcomingCount, completedCount] = await Promise.all([
-      Contest.countDocuments({
-        ...baseCountQuery,
-        startTime: { $lte: now },
-        endTime: { $gte: now },
-        status: 'published',
-      }),
-      Contest.countDocuments({
-        ...baseCountQuery,
-        startTime: { $gt: now },
-        status: 'published',
-      }),
-      Contest.countDocuments({
-        ...baseCountQuery,
-        $or: [{ endTime: { $lt: now } }, { status: 'completed' }],
-      }),
-    ]);
+    const { liveCount, upcomingCount, completedCount } = await getContestTabCounts(
+      session,
+      Boolean(isTeacherSelf),
+      Boolean(isAdminAll),
+      now
+    );
 
     const responseData = {
       contests: serialize(contests),
@@ -203,7 +108,7 @@ export async function GET(request: NextRequest) {
     };
 
     if (!isTeacherSelf && !isAdminAll && !search) {
-      await setCachedData(cacheKey, responseData, 60); // 60 seconds TTL
+      await setCachedData(cacheKey, responseData, 60);
     }
 
     return NextResponse.json(responseData, { status: 200 });
@@ -227,11 +132,7 @@ export async function POST(request: NextRequest) {
     }
     logContext.userId = session.user.id;
 
-    // Strict Superadmin-controlled permission check
-    const isAuthorized = await canTeacherManageContests(
-      session.user.id,
-      session.user.role
-    );
+    const isAuthorized = await canTeacherManageContests(session.user.id, session.user.role);
     if (!isAuthorized) {
       return NextResponse.json(
         { message: 'You do not have permission to create contests. Please contact a Superadmin.' },
@@ -279,126 +180,22 @@ export async function POST(request: NextRequest) {
     }
 
     if (endDate <= startDate) {
-      return NextResponse.json(
-        { message: 'End time must be after start time' },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: 'End time must be after start time' }, { status: 400 });
     }
 
-    const solutionDate = solutionsReleaseAt
-      ? new Date(solutionsReleaseAt)
-      : endDate;
+    const solutionDate = solutionsReleaseAt ? new Date(solutionsReleaseAt) : endDate;
 
-    const contestQuizRefs: Array<{
-      quiz: mongoose.Types.ObjectId;
-      title?: string;
-      order: number;
-      weight?: number;
-    }> = [];
-
-    let totalQuestions = 0;
-    let totalPoints = 0;
-
-    // Handle Direct Question Set (creates a standalone quiz linked to the contest)
-    if (rawQuestions && rawQuestions.length > 0) {
-      const standaloneQuiz = new Quiz({
-        title: `${title} - Quiz`,
-        description: description || 'Contest Question Set',
-        course: new mongoose.Types.ObjectId(), // Standalone dummy ObjectId
-        instructor: session.user.id,
-        organizationId: session.user.organizationId || null,
-        timeLimit: duration,
-        isPublished: true,
-        enableNegativeMarking: !!enableNegativeMarking,
-        negativeMarks: typeof negativeMarks === 'number' ? negativeMarks : 0,
-        questionCount: rawQuestions.length,
-        version: 1,
-      });
-      await standaloneQuiz.save();
-
-      await setQuizQuestions(
-        standaloneQuiz._id as mongoose.Types.ObjectId,
-        rawQuestions.map((q) => ({
-          question: q.question,
-          options: q.options,
-          correctAnswer: q.correctAnswer,
-          points: q.points,
-          negativePoints: q.negativePoints,
-        })),
-        { bumpVersion: false }
-      );
-
-      contestQuizRefs.push({
-        quiz: standaloneQuiz._id as mongoose.Types.ObjectId,
-        title: title,
-        order: 0,
-        weight: 1,
-      });
-
-      totalQuestions += rawQuestions.length;
-      totalPoints += rawQuestions.reduce((acc, q) => acc + (q.points || 1), 0);
-    }
-
-    // Handle Multiple Quizzes (if provided)
-    if (rawQuizzes && rawQuizzes.length > 0) {
-      for (let i = 0; i < rawQuizzes.length; i++) {
-        const item = rawQuizzes[i];
-        if (item.quizId) {
-          const existingQuiz = await Quiz.findById(item.quizId).lean<{
-            _id: mongoose.Types.ObjectId;
-            title: string;
-            questionCount?: number;
-          }>();
-          if (existingQuiz) {
-            contestQuizRefs.push({
-              quiz: existingQuiz._id,
-              title: item.title || existingQuiz.title,
-              order: item.order ?? contestQuizRefs.length,
-              weight: 1,
-            });
-            totalQuestions += existingQuiz.questionCount || 0;
-            totalPoints += existingQuiz.questionCount || 0;
-          }
-        } else if (item.questions && item.questions.length > 0) {
-          const multiQuiz = new Quiz({
-            title: item.title || `${title} - Round ${i + 1}`,
-            description: `Contest Section ${i + 1}`,
-            course: new mongoose.Types.ObjectId(),
-            instructor: session.user.id,
-            organizationId: session.user.organizationId || null,
-            timeLimit: duration,
-            isPublished: true,
-            enableNegativeMarking: !!enableNegativeMarking,
-            negativeMarks: typeof negativeMarks === 'number' ? negativeMarks : 0,
-            questionCount: item.questions.length,
-            version: 1,
-          });
-          await multiQuiz.save();
-
-          await setQuizQuestions(
-            multiQuiz._id as mongoose.Types.ObjectId,
-            item.questions.map((q) => ({
-              question: q.question,
-              options: q.options,
-              correctAnswer: q.correctAnswer,
-              points: q.points,
-              negativePoints: q.negativePoints,
-            })),
-            { bumpVersion: false }
-          );
-
-          contestQuizRefs.push({
-            quiz: multiQuiz._id as mongoose.Types.ObjectId,
-            title: item.title || multiQuiz.title,
-            order: item.order ?? contestQuizRefs.length,
-            weight: 1,
-          });
-
-          totalQuestions += item.questions.length;
-          totalPoints += item.questions.reduce((acc, q) => acc + (q.points || 1), 0);
-        }
-      }
-    }
+    const { contestQuizRefs, totalQuestions, totalPoints } = await buildContestQuizRefs({
+      title,
+      description,
+      duration,
+      enableNegativeMarking,
+      negativeMarks,
+      userId: session.user.id,
+      organizationId: session.user.organizationId,
+      rawQuestions,
+      rawQuizzes,
+    });
 
     if (contestQuizRefs.length === 0 || totalQuestions === 0) {
       return NextResponse.json(
@@ -434,28 +231,8 @@ export async function POST(request: NextRequest) {
     await contest.save();
     await invalidatePattern('contests:*');
 
-    // Notify all students if requested and authorized
     if (notifyAllStudents && isSuperAdmin(session.user.role)) {
-      const students = await User.find({ role: 'student' }).select('_id').lean();
-      const studentIds = students.map((s) => String(s._id));
-      
-      if (studentIds.length > 0) {
-        await sendAdminBroadcast(studentIds, {
-          title: {
-            en: `New Contest: ${title}`,
-            hi: `नया कॉन्टेस्ट: ${title}`,
-          },
-          body: {
-            en: 'A new contest is available for you to attempt.',
-            hi: 'आपके प्रयास के लिए एक नया कॉन्टेस्ट उपलब्ध है।',
-          },
-          category: 'quizzes',
-          data: {
-            url: `quizdo://contest/${contest._id}`,
-            contestId: String(contest._id),
-          },
-        }).catch(err => console.error('Failed to broadcast contest notification:', err));
-      }
+      await broadcastNewContest(contest._id, title);
     }
 
     const created = await Contest.findById(contest._id)

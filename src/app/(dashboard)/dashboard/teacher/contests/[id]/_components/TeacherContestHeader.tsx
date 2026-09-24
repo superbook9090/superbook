@@ -106,11 +106,11 @@ export default function TeacherContestHeader({
           </h1>
 
           <div className="flex flex-wrap items-center gap-3 text-xs font-medium text-[var(--color-muted-foreground)]">
-            <span>Start: {formatDateTime(contest.startTime)}</span>
+            <span>{t('contest.start') || 'Start'}: {formatDateTime(contest.startTime)}</span>
             <span>•</span>
-            <span>End: {formatDateTime(contest.endTime)}</span>
+            <span>{t('contest.end') || 'End'}: {formatDateTime(contest.endTime)}</span>
             <span>•</span>
-            <span>Duration: {contest.duration} mins</span>
+            <span>{t('contest.duration') || 'Duration'}: {contest.duration} {t('common.mins') || 'mins'}</span>
           </div>
         </div>
 

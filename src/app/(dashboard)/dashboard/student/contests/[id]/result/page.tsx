@@ -3,6 +3,7 @@
 import React, { useState, use } from 'react';
 import Link from 'next/link';
 import { useTranslation } from '@/hooks/useTranslation';
+import { ROUTES } from '@/constants/routes';
 import { PageWrapper } from '@/components/layout';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import {
@@ -50,7 +51,7 @@ export default function ContestResultPage({ params }: { params: Promise<{ id: st
     <PageWrapper className="space-y-6">
       <div className="flex items-center justify-between">
         <Link
-          href="/dashboard/student/contests"
+          href={ROUTES.student.contests}
           className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />

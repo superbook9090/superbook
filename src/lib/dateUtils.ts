@@ -86,3 +86,55 @@ export function getRelativeTime(date: string | Date | null | undefined): string 
 
   return formatDate(d);
 }
+
+/** Returns a date set to the start of the day (00:00:00.000) */
+export function startOfDay(date: string | Date = new Date()): Date {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+/** Returns a date set to the end of the day (23:59:59.999) */
+export function endOfDay(date: string | Date = new Date()): Date {
+  const d = new Date(date);
+  d.setHours(23, 59, 59, 999);
+  return d;
+}
+
+/** Returns a date N days in the past at the start of that day */
+export function daysAgo(days: number): Date {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+/** Parses start and end date query params with safe fallbacks */
+export function parseDateRange(
+  startDateStr?: string | null,
+  endDateStr?: string | null,
+  defaultDaysAgo: number = 13
+): { rangeStart: Date; rangeEnd: Date; trendStart: Date } {
+  let rangeStart = new Date();
+  rangeStart.setDate(1);
+  rangeStart.setHours(0, 0, 0, 0);
+
+  let rangeEnd = new Date();
+  let trendStart = daysAgo(defaultDaysAgo);
+
+  const customStartDate = startDateStr ? new Date(startDateStr) : null;
+  const customEndDate = endDateStr ? new Date(endDateStr) : null;
+
+  if (customStartDate && !Number.isNaN(customStartDate.getTime())) {
+    customStartDate.setHours(0, 0, 0, 0);
+    rangeStart = customStartDate;
+    trendStart = customStartDate;
+  }
+
+  if (customEndDate && !Number.isNaN(customEndDate.getTime())) {
+    customEndDate.setHours(23, 59, 59, 999);
+    rangeEnd = customEndDate;
+  }
+
+  return { rangeStart, rangeEnd, trendStart };
+}

@@ -93,7 +93,7 @@ export function AdminPlatformDistributionChart({
         {platformStats?.activeApp !== undefined && (
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)] text-[11px] font-medium shrink-0 self-start sm:self-auto">
             <Radio className="w-3 h-3 text-[var(--success)] animate-pulse" />
-            <span>{platformStats.activeApp} active in App (30d)</span>
+            <span>{platformStats.activeApp} {t('adminAnalytics.activeInApp30d') || 'active in App (30d)'}</span>
           </div>
         )}
       </div>

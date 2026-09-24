@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { CheckCircle2, Flame, Award, Zap, Timer } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 const mockOptions = [
   { id: 'A', text: 'Photosynthesis', isCorrect: false },
@@ -11,6 +12,7 @@ const mockOptions = [
 ];
 
 export default function HeroSpatialDeck() {
+  const { t } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
   const [selectedId, setSelectedId] = useState<string>('B');
 
@@ -131,7 +133,7 @@ export default function HeroSpatialDeck() {
           className="hidden md:inline-flex items-center gap-1.5 absolute -top-3 right-12 px-3 py-1.5 rounded-full antigravity-glass shadow-md border border-[var(--border)] text-xs font-semibold text-[var(--student-primary)] z-20 pointer-events-none"
         >
           <Zap className="w-3.5 h-3.5 fill-current" />
-          <span>Real-time Scoring</span>
+          <span>{t('home.realTimeScoring') || 'Real-time Scoring'}</span>
         </motion.div>
       </div>
     </div>

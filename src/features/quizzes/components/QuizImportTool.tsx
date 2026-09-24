@@ -1,11 +1,18 @@
-import React, { useState, useRef, useCallback } from 'react';
+'use client';
+
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Sparkles } from 'lucide-react';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { AiQuizGeneratorModal } from './AiQuizGeneratorModal';
-import { parseRawTextQuestions } from '../utils/rawTextQuizParser';
 import type { Question, ExcelRow } from './types';
+import { parseExcelQuizFile } from './quiz-import/fileImportParser';
+import { parsePastedQuizText } from './quiz-import/textImportParser';
+import { downloadQuizTemplate } from './quiz-import/templateUtils';
+import { ImportPreviewTable } from './quiz-import/ImportPreviewTable';
+import { TextImportDrawer } from './quiz-import/TextImportDrawer';
+import { FileImportHelpDrawer } from './quiz-import/FileImportHelpDrawer';
 
 type Props = {
   theme: { gradient: string; activeBg: string; activeText: string };
@@ -35,10 +42,9 @@ export function QuizImportTool({ theme, onImport, entityType = 'quiz', triggerAi
 
   const [showTextImport, setShowTextImport] = useState(false);
   const [importText, setImportText] = useState('');
-  const [showTextImportHelp, setShowTextImportHelp] = useState(false);
   const [showAiModal, setShowAiModal] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (triggerAiModalOpen > 0) {
       setShowAiModal(true);
     }
@@ -68,106 +74,11 @@ export function QuizImportTool({ theme, onImport, entityType = 'quiz', triggerAi
     setPreviewData([]);
 
     try {
-      const XLSX = await import('xlsx');
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data, { type: 'array' });
-      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-      const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 }) as string[][];
-
-      if (jsonData.length < 2) {
-        setUploadError(t('createQuizForm.fileEmpty'));
-        setIsParsing(false);
-        return;
+      const result = await parseExcelQuizFile(file, t);
+      if (result.error) {
+        setUploadError(result.error);
       }
-
-      const headers = jsonData[0].map((h) => h.toString().toLowerCase().trim());
-      const requiredColumns = ['question', 'optiona', 'optionb', 'optionc', 'optiond', 'correctanswer'];
-      const hasAllColumns = requiredColumns.every((col) =>
-        headers.some((h) => h === col || h === col.replace('option', 'option_'))
-      );
-
-      if (!hasAllColumns) {
-        setUploadError(t('createQuizForm.invalidFormat').replace('{columns}', headers.join(', ')));
-        setIsParsing(false);
-        return;
-      }
-
-      const getColIndex = (names: string[]) => {
-        for (const name of names) {
-          const idx = headers.findIndex((h) => h === name.toLowerCase());
-          if (idx !== -1) return idx;
-        }
-        return -1;
-      };
-
-      const colMap = {
-        question: getColIndex(['question']),
-        optionA: getColIndex(['optiona', 'option_a']),
-        optionB: getColIndex(['optionb', 'option_b']),
-        optionC: getColIndex(['optionc', 'option_c']),
-        optionD: getColIndex(['optiond', 'option_d']),
-        correctAnswer: getColIndex(['correctanswer', 'correct_answer']),
-      };
-
-      const parsed: ExcelRow[] = [];
-      const errors: string[] = [];
-
-      for (let i = 1; i < jsonData.length; i++) {
-        const row = jsonData[i];
-        if (row.every((cell) => !cell)) continue;
-
-        const question = row[colMap.question]?.toString().trim();
-        const optionA = row[colMap.optionA]?.toString().trim();
-        const optionB = row[colMap.optionB]?.toString().trim();
-        const optionC = row[colMap.optionC]?.toString().trim();
-        const optionD = row[colMap.optionD]?.toString().trim();
-        const correctAnswer = row[colMap.correctAnswer];
-
-        if (!question) {
-          errors.push(t('createQuizForm.questionRequired').replace('{number}', (i + 1).toString()));
-          continue;
-        }
-        if (!optionA || !optionB || !optionC || !optionD) {
-          errors.push(t('createQuizForm.optionsRequired').replace('{number}', (i + 1).toString()));
-          continue;
-        }
-        if (correctAnswer === undefined || correctAnswer === null || correctAnswer === '') {
-          errors.push(t('createQuizForm.correctAnswerRequired'));
-          continue;
-        }
-
-        let correctIndex: number;
-        const ca = correctAnswer.toString().trim().toUpperCase();
-        if (['A', 'B', 'C', 'D'].includes(ca)) {
-          correctIndex = ca.charCodeAt(0) - 65;
-        } else {
-          correctIndex = parseInt(ca) - 1;
-        }
-
-        if (isNaN(correctIndex) || correctIndex < 0 || correctIndex > 3) {
-          errors.push(t('createQuizForm.correctAnswerInvalid'));
-          continue;
-        }
-
-        parsed.push({
-          question,
-          optionA,
-          optionB,
-          optionC,
-          optionD,
-          correctAnswer: correctIndex,
-        });
-      }
-
-      if (errors.length > 0) {
-        setUploadError(`${t('createQuizForm.validationErrors')}\n${errors.slice(0, 5).join('\n')}${errors.length > 5 ? `\n${t('createQuizForm.andMoreErrors').replace('{count}', (errors.length - 5).toString())}` : ''}`);
-      }
-
-      if (parsed.length === 0) {
-        setUploadError((prev) => prev || t('createQuizForm.noValidQuestions'));
-      } else {
-        setPreviewData(parsed);
-      }
+      setPreviewData(result.data);
     } catch {
       setUploadError(t('createQuizForm.parsingError'));
     } finally {
@@ -183,144 +94,12 @@ export function QuizImportTool({ theme, onImport, entityType = 'quiz', triggerAi
     setPreviewData([]);
 
     try {
-      const trimmed = importText.trim();
-      const lines = trimmed.split('\n').map((line) => line.trim()).filter((line) => line);
-      if (lines.length === 0) {
-        setUploadError(t('createQuizForm.fileEmpty'));
-        setIsParsing(false);
-        return;
+      const result = parsePastedQuizText(importText, t);
+      if (result.error) {
+        setUploadError(result.error);
       }
-
-      // Check whether user pasted pipe-delimited text or raw question text
-      const hasPipes = lines.some((l) => l.split('|').length >= 5);
-
-      if (!hasPipes) {
-        // Automatically parse raw question text (numbered questions, options A-D, answer keys/explanations)
-        const rawResult = parseRawTextQuestions(trimmed);
-        if (rawResult.questions.length > 0) {
-          setPreviewData(rawResult.questions);
-          setShowTextImport(false);
-          setImportText('');
-          if (rawResult.errors.length > 0) {
-            setUploadError(rawResult.errors.join('\n'));
-          }
-          return;
-        } else if (rawResult.errors.length > 0) {
-          setUploadError(rawResult.errors.join('\n'));
-          return;
-        }
-      }
-
-      // Process pipe-delimited format
-      const firstLineCols = lines[0].split('|').map((h) => h.trim().toLowerCase());
-      const requiredColumns = ['question', 'optiona', 'optionb', 'optionc', 'optiond', 'correctanswer'];
-      const isHeader = requiredColumns.every((col) =>
-        firstLineCols.some((h) => h === col || h === col.replace('option', 'option_'))
-      );
-
-      let startIndex = 0;
-      let colMap = {
-        question: 0,
-        optionA: 1,
-        optionB: 2,
-        optionC: 3,
-        optionD: 4,
-        correctAnswer: 5,
-      };
-
-      if (isHeader) {
-        startIndex = 1;
-        const getColIndex = (names: string[]) => {
-          for (const name of names) {
-            const idx = firstLineCols.findIndex((h) => h === name.toLowerCase());
-            if (idx !== -1) return idx;
-          }
-          return -1;
-        };
-
-        colMap = {
-          question: getColIndex(['question']),
-          optionA: getColIndex(['optiona', 'option_a']),
-          optionB: getColIndex(['optionb', 'option_b']),
-          optionC: getColIndex(['optionc', 'option_c']),
-          optionD: getColIndex(['optiond', 'option_d']),
-          correctAnswer: getColIndex(['correctanswer', 'correct_answer']),
-        };
-      }
-
-      const parsed: ExcelRow[] = [];
-      const errors: string[] = [];
-
-      for (let i = startIndex; i < lines.length; i++) {
-        const row = lines[i].split('|').map((cell) => cell.trim());
-        if (row.every((cell) => !cell)) continue;
-
-        const question = row[colMap.question];
-        const optionA = row[colMap.optionA];
-        const optionB = row[colMap.optionB];
-        const optionC = row[colMap.optionC];
-        const optionD = row[colMap.optionD];
-        const correctAnswer = row[colMap.correctAnswer];
-
-        if (!question) {
-          errors.push(t('createQuizForm.questionRequired').replace('{number}', (i + 1).toString()));
-          continue;
-        }
-        if (!optionA || !optionB || !optionC || !optionD) {
-          errors.push(t('createQuizForm.optionsRequired').replace('{number}', (i + 1).toString()));
-          continue;
-        }
-        if (correctAnswer === undefined || correctAnswer === null || correctAnswer === '') {
-          errors.push(t('createQuizForm.correctAnswerRequired'));
-          continue;
-        }
-
-        let correctIndex: number;
-        const ca = correctAnswer.toString().toUpperCase();
-        if (['A', 'B', 'C', 'D'].includes(ca)) {
-          correctIndex = ca.charCodeAt(0) - 65;
-        } else {
-          correctIndex = parseInt(ca, 10) - 1;
-        }
-
-        if (isNaN(correctIndex) || correctIndex < 0 || correctIndex > 3) {
-          errors.push(t('createQuizForm.correctAnswerInvalid'));
-          continue;
-        }
-
-        parsed.push({
-          question,
-          optionA,
-          optionB,
-          optionC,
-          optionD,
-          correctAnswer: correctIndex,
-        });
-      }
-
-      // If pipe parsing found nothing but user typed something, attempt raw parsing as a smart fallback
-      if (parsed.length === 0) {
-        const fallbackRaw = parseRawTextQuestions(trimmed);
-        if (fallbackRaw.questions.length > 0) {
-          setPreviewData(fallbackRaw.questions);
-          setShowTextImport(false);
-          setImportText('');
-          return;
-        }
-      }
-
-      if (errors.length > 0) {
-        setUploadError(
-          `${t('createQuizForm.validationErrors')}\n${errors.slice(0, 5).join('\n')}${
-            errors.length > 5 ? `\n${t('createQuizForm.andMoreErrors').replace('{count}', (errors.length - 5).toString())}` : ''
-          }`
-        );
-      }
-
-      if (parsed.length === 0) {
-        setUploadError((prev) => prev || t('createQuizForm.noValidQuestions'));
-      } else {
-        setPreviewData(parsed);
+      if (result.data.length > 0) {
+        setPreviewData(result.data);
         setShowTextImport(false);
         setImportText('');
       }
@@ -355,21 +134,6 @@ export function QuizImportTool({ theme, onImport, entityType = 'quiz', triggerAi
     setUploadError('');
     fileInputRef.current?.click();
   }, [isParsing]);
-
-  const downloadTemplate = useCallback(async () => {
-    const XLSX = await import('xlsx');
-    const template = [
-      ['question', 'optionA', 'optionB', 'optionC', 'optionD', 'correctAnswer'],
-      ['What is 2+2?', '3', '4', '5', '6', 'B'],
-      ['What is the capital of France?', 'London', 'Berlin', 'Paris', 'Madrid', 'C'],
-      ['Which planet is closest to the Sun?', 'Venus', 'Earth', 'Mercury', 'Mars', 'C'],
-    ];
-
-    const ws = XLSX.utils.aoa_to_sheet(template);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Quiz Template');
-    XLSX.writeFile(wb, 'quiz_template.xlsx');
-  }, []);
 
   return (
     <>
@@ -439,100 +203,20 @@ export function QuizImportTool({ theme, onImport, entityType = 'quiz', triggerAi
 
       <h3 className="text-lg font-medium text-[var(--color-foreground)] mb-4">{t('createQuizForm.questions')}</h3>
 
-      {showTextImport && (
-        <div className="mb-6 rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] overflow-hidden">
-          <div className="flex items-start justify-between gap-3 px-4 py-3 border-b border-[var(--color-border)] bg-[var(--color-accent)]">
-            <h4 className="font-medium text-[var(--color-foreground)]">{t('createQuizForm.pasteText')}</h4>
-            <div className="flex shrink-0 gap-2 items-center">
-              <button
-                type="button"
-                onClick={() => setShowTextImportHelp((open) => !open)}
-                className="text-sm font-medium text-[var(--color-primary)] hover:opacity-80 px-2 py-1"
-              >
-                {t('createQuizForm.howToUseTextImport')}
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowTextImport(false)}
-                className="text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] text-lg leading-none px-1"
-                aria-label={t('createQuizForm.closeHelp')}
-              >
-                ×
-              </button>
-            </div>
-          </div>
-          {showTextImportHelp && (
-            <div className="p-4 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)]">
-              <p className="text-sm text-[var(--color-muted-foreground)] whitespace-pre-wrap">
-                {t('createQuizForm.textImportInstructions')}
-              </p>
-              <p className="text-sm text-[var(--color-muted-foreground)] mt-2">
-                {t('createQuizForm.importHelpCorrectAnswer')}
-              </p>
-            </div>
-          )}
-          <div className="p-4">
-            <div className="mb-2 flex items-center gap-2 text-xs text-[var(--color-muted-foreground)]">
-              <span className="inline-block w-2 h-2 rounded-full bg-[var(--color-success)]" />
-              <span>
-                {t('createQuizForm.supportsRawAndPipeText') ||
-                  'Auto-detects pasted questions with options (A, B, C, D) & answer key or pipe-separated format.'}
-              </span>
-            </div>
-            <textarea
-              value={importText}
-              onChange={(e) => setImportText(e.target.value)}
-              placeholder={t('createQuizForm.pasteTextPlaceholder')}
-              className="w-full h-40 p-3 text-sm rounded-md border-[var(--color-border)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] bg-[var(--color-surface)] text-[var(--color-foreground)] font-mono resize-y"
-            />
-            <div className="mt-3 flex justify-end">
-              <button
-                type="button"
-                onClick={handleTextImport}
-                disabled={isParsing || !importText.trim()}
-                className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-[var(--color-primary)] hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {isParsing ? t('createQuizForm.parsingFile') : t('createQuizForm.parseText')}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <TextImportDrawer
+        isOpen={showTextImport}
+        onClose={() => setShowTextImport(false)}
+        importText={importText}
+        setImportText={setImportText}
+        onParse={handleTextImport}
+        isParsing={isParsing}
+      />
 
-      {showImportHelp && (
-        <div className="mb-6 rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] overflow-hidden">
-          <div className="flex items-start justify-between gap-3 px-4 py-3 border-b border-[var(--color-border)] bg-[var(--color-accent)]">
-            <h4 className="font-medium text-[var(--color-foreground)]">{t('createQuizForm.howToUseImport')}</h4>
-            <button
-              type="button"
-              onClick={() => setShowImportHelp(false)}
-              className="text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] text-lg leading-none px-1"
-              aria-label={t('createQuizForm.closeHelp')}
-            >
-              ×
-            </button>
-          </div>
-          <div className="p-4 space-y-4">
-            <div>
-              <p className="text-sm font-medium text-[var(--color-foreground)]">
-                {t('createQuizForm.importQuestionsFromExcel')}
-              </p>
-              <p className="text-sm text-[var(--color-muted-foreground)] mt-1">
-                {t('createQuizForm.importInstructions')}
-              </p>
-            </div>
-            <p className="text-sm text-[var(--color-muted-foreground)]">{t('createQuizForm.importHelpFormats')}</p>
-            <p className="text-sm text-[var(--color-muted-foreground)]">{t('createQuizForm.importHelpCorrectAnswer')}</p>
-            <button
-              type="button"
-              onClick={downloadTemplate}
-              className="inline-flex items-center justify-center min-h-[36px] px-4 py-2 text-sm font-medium rounded-lg border border-[var(--color-border)] text-[var(--color-primary)] bg-[var(--color-card)] hover:bg-[var(--color-accent)] transition-colors"
-            >
-              {t('createQuizForm.downloadTemplate')}
-            </button>
-          </div>
-        </div>
-      )}
+      <FileImportHelpDrawer
+        isOpen={showImportHelp}
+        onClose={() => setShowImportHelp(false)}
+        onDownloadTemplate={downloadQuizTemplate}
+      />
 
       {uploadError && (
         <div className="mb-4 bg-[var(--color-error-light)] border border-[var(--color-error)]/30 rounded-md p-3">
@@ -540,77 +224,12 @@ export function QuizImportTool({ theme, onImport, entityType = 'quiz', triggerAi
         </div>
       )}
 
-      {previewData.length > 0 && (
-        <div className="mb-6 bg-[var(--color-card)] rounded-lg border border-[var(--color-border)] overflow-hidden">
-          <div className={`px-4 py-3 ${theme.activeBg} border-b border-[var(--color-border)]`}>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <h4 className={`font-medium ${theme.activeText}`}>
-                {t('createQuizForm.preview')}: {previewData.length} {t('createQuizForm.questionsFound')}
-              </h4>
-              <div className="flex shrink-0 gap-2">
-                <button
-                  type="button"
-                  onClick={handleCancelImport}
-                  className="text-sm text-[var(--color-muted)] hover:text-[var(--color-foreground)] px-3 py-1.5 rounded border border-[var(--color-border)] hover:bg-[var(--color-accent)]"
-                >
-                  {t('createQuizForm.cancel')}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleConfirmImport}
-                  className={`text-sm text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 px-3 py-1.5 rounded`}
-                >
-                  {t('createQuizForm.confirmImport')}
-                </button>
-              </div>
-            </div>
-          </div>
-          <div className="max-h-60 overflow-y-auto">
-            <table className="min-w-full divide-y divide-[var(--color-border)]">
-              <thead className="bg-[var(--color-accent)] sticky top-0">
-                <tr>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-[var(--color-muted-foreground)] uppercase">#</th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-[var(--color-muted-foreground)] uppercase">{t('createQuizForm.question')}</th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-[var(--color-muted-foreground)] uppercase">{t('createQuizForm.options')}</th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-[var(--color-muted-foreground)] uppercase">{t('createQuizForm.answer')}</th>
-                  {previewData.some((r) => !!r.explanation) && (
-                    <th className="px-3 py-2 text-left text-xs font-medium text-[var(--color-muted-foreground)] uppercase">
-                      {t('createQuizForm.explanation') || 'Explanation'}
-                    </th>
-                  )}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--color-border)]">
-                {previewData.slice(0, 5).map((row, idx) => (
-                  <tr key={idx}>
-                    <td className="px-3 py-2 text-sm text-[var(--color-foreground)]">{idx + 1}</td>
-                    <td className="px-3 py-2 text-sm text-[var(--color-foreground)] max-w-xs truncate">{row.question}</td>
-                    <td className="px-3 py-2 text-sm text-[var(--color-muted-foreground)]">A, B, C, D</td>
-                    <td className="px-3 py-2 text-sm font-medium text-[var(--color-success)]">
-                      {['A', 'B', 'C', 'D'][typeof row.correctAnswer === 'number' ? row.correctAnswer : 0]}
-                    </td>
-                    {previewData.some((r) => !!r.explanation) && (
-                      <td className="px-3 py-2 text-sm text-[var(--color-muted-foreground)] max-w-xs truncate" title={row.explanation || ''}>
-                        {row.explanation || '-'}
-                      </td>
-                    )}
-                  </tr>
-                ))}
-                {previewData.length > 5 && (
-                  <tr>
-                    <td
-                      colSpan={previewData.some((r) => !!r.explanation) ? 5 : 4}
-                      className="px-3 py-2 text-sm text-[var(--color-muted-foreground)] text-center italic"
-                    >
-                      ... {t('createQuizForm.moreQuestions').replace('{count}', (previewData.length - 5).toString())}
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+      <ImportPreviewTable
+        previewData={previewData}
+        theme={theme}
+        onCancel={handleCancelImport}
+        onConfirm={handleConfirmImport}
+      />
     </>
   );
 }

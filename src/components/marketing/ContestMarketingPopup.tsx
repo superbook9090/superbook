@@ -6,8 +6,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, X, ChevronRight } from 'lucide-react';
 import { useFeature } from '@/contexts/AppSettingsContext';
 import { ROUTES } from '@/constants/routes';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function ContestMarketingPopup() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
   const enableContestMarketingPopup = useFeature('enableContestMarketingPopup');
@@ -86,7 +88,7 @@ export default function ContestMarketingPopup() {
               }}
               className="w-full flex items-center justify-center gap-2 py-3.5 px-6 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-white font-bold rounded-xl shadow-[0_4px_14px_0_rgba(249,115,22,0.39)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.23)] hover:scale-[1.02] active:scale-[0.98] transition-all group"
             >
-              <span>View Contests</span>
+              <span>{t('marketing.viewContests') || 'View Contests'}</span>
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
           </div>

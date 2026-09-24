@@ -67,7 +67,7 @@ export function CurriculumTab({
               className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] bg-[var(--surface-muted)]/70 hover:bg-[var(--surface-muted)] border border-[var(--border)] transition-all cursor-pointer shadow-2xs"
             >
               <ChevronsUpDown className="w-3.5 h-3.5" />
-              <span>{allExpanded ? 'Collapse All' : 'Expand All'}</span>
+              <span>{allExpanded ? t('common.collapseAll') || 'Collapse All' : t('common.expandAll') || 'Expand All'}</span>
             </button>
           )}
 
@@ -134,9 +134,9 @@ export function CurriculumTab({
                       {chapter.title}
                     </h3>
                     <div className="flex items-center gap-2.5 text-xs text-[var(--color-muted-foreground)] mt-0.5">
-                      <span>{lessonCount} {lessonCount === 1 ? 'Lesson' : 'Lessons'}</span>
+                      <span>{lessonCount} {lessonCount === 1 ? t('common.lesson') || 'Lesson' : t('common.lessons') || 'Lessons'}</span>
                       {quizCount > 0 && (
-                        <span>• {quizCount} {quizCount === 1 ? 'Quiz' : 'Quizzes'}</span>
+                        <span>• {quizCount} {quizCount === 1 ? t('common.quiz') || 'Quiz' : t('common.quizzes') || 'Quizzes'}</span>
                       )}
                     </div>
                   </div>

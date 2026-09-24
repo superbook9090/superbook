@@ -2,36 +2,29 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
-import crypto from 'crypto';
 import '@/models';
 import QuizAttempt from '@/models/QuizAttempt';
 import Quiz from '@/models/Quiz';
 import Enrollment from '@/models/Enrollment';
-import Challenge from '@/models/Challenge';
-import ChallengeAttempt from '@/models/ChallengeAttempt';
 import { createQuizAttemptSchema } from '@/lib/validation';
 import { logInfo, logError, logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
 import { getCachedData, setCachedData, invalidatePattern } from '@/lib/redis';
 import { requireFeature } from '@/lib/settingsHelpers';
 import { listQuestionsForQuiz } from '@/domain/learning/quizContent';
-import { finalizeExpiredQuizAttemptIfNeeded } from '@/domain/learning/finalizeExpiredQuizAttempt';
-import { checkAndIssueCertificate } from '@/domain/learning/certificateIssuance';
+import {
+  toClientQuestions,
+  loadSanitizedQuestions,
+  startNewQuizAttempt,
+  finalizeExpiredAttemptIfNeeded,
+} from '@/lib/quizzes/quizAttemptQueries';
+import {
+  gradeQuizAnswers,
+  updateCourseEnrollmentProgress,
+  recordChallengeAttemptIfLinked,
+  QuestionGradingDoc,
+} from '@/lib/quizzes/quizAttemptEvaluation';
 import type { Types } from 'mongoose';
-
-function toClientQuestions(rows: { _id: Types.ObjectId; order: number; prompt: string; options: string[] }[]) {
-  return rows.map((q) => ({
-    _id: q._id.toString(),
-    order: q.order,
-    question: q.prompt,
-    options: q.options,
-  }));
-}
-
-async function loadSanitizedQuestions(quizId: Types.ObjectId) {
-  const rows = await listQuestionsForQuiz(quizId);
-  return toClientQuestions(rows as unknown as { _id: Types.ObjectId; order: number; prompt: string; options: string[] }[]);
-}
 
 // GET /api/quiz-attempts
 export async function GET(request: NextRequest) {
@@ -97,45 +90,15 @@ export async function GET(request: NextRequest) {
       .limit(limit)
       .lean();
 
-    if (attemptId && attempts[0]) {
-      const raw = attempts[0] as unknown as {
-        _id: Types.ObjectId;
-        status: string;
-        startedAt: Date;
-        quiz: Types.ObjectId | { _id: Types.ObjectId };
-        course: Types.ObjectId;
-        quizVersion: number;
-        totalQuestions: number;
-        violationCount?: number;
-      };
-      const quizRef = raw.quiz;
-      const quizId =
-        typeof quizRef === 'object' && quizRef !== null && '_id' in quizRef
-          ? quizRef._id
-          : (quizRef as Types.ObjectId);
-
-      const finalized = await finalizeExpiredQuizAttemptIfNeeded({
-        _id: raw._id,
-        status: raw.status,
-        startedAt: raw.startedAt,
-        quiz: quizId,
-        course: raw.course,
-        quizVersion: raw.quizVersion,
-        totalQuestions: raw.totalQuestions,
-        violationCount: raw.violationCount,
-      });
-
-      if (finalized) {
-        await invalidatePattern(`quiz-attempts:${session.user.id}:*`);
-        attempts = await QuizAttempt.find(query, selectFields)
-          .populate('quiz', 'title description timeLimit questionCount version course')
-          .populate('course', 'title description')
-          .populate('student', 'name email')
-          .sort({ startedAt: -1 })
-          .skip(skip)
-          .limit(limit)
-          .lean();
-      }
+    if (attemptId) {
+      attempts = await finalizeExpiredAttemptIfNeeded(
+        attempts,
+        session.user.id,
+        query,
+        selectFields,
+        skip,
+        limit
+      );
     }
 
     const sanitizedAttempts = attempts.map((attempt) => {
@@ -172,7 +135,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST — start | submit
+// POST /api/quiz-attempts - start | submit
 export async function POST(request: NextRequest) {
   const logContext: LogContext = { method: 'POST', path: '/api/quiz-attempts' };
 
@@ -237,40 +200,17 @@ export async function POST(request: NextRequest) {
     }
 
     const qRows = await listQuestionsForQuiz(quiz._id);
-    const questionList = qRows as unknown as {
-      _id: Types.ObjectId;
-      order: number;
-      correctOption: number;
-      points?: number;
-      negativePoints?: number;
-    }[];
+    const questionList = qRows as unknown as QuestionGradingDoc[];
     const totalQuestions = questionList.length;
 
     if (action === 'start') {
-      const attemptCount = await QuizAttempt.countDocuments({ student: session.user.id, quiz: quizId });
-      const existingAttempt = await QuizAttempt.findOne({
-        student: session.user.id,
-        quiz: quizId,
-        status: 'in_progress',
-      });
-      if (existingAttempt) {
-        existingAttempt.status = 'abandoned';
-        await existingAttempt.save();
-      }
-
-      const attempt = new QuizAttempt({
-        student: session.user.id,
-        quiz: quizId,
-        course: courseId,
+      const attempt = await startNewQuizAttempt({
+        studentId: session.user.id,
+        quizId,
+        courseId,
         quizVersion: quiz.version,
-        answers: [],
         totalQuestions,
-        startedAt: new Date(),
-        status: 'in_progress',
-        attemptNumber: attemptCount + 1,
-        violationCount: 0,
       });
-      await attempt.save();
 
       const questions = toClientQuestions(
         qRows as unknown as { _id: Types.ObjectId; order: number; prompt: string; options: string[] }[]
@@ -304,42 +244,12 @@ export async function POST(request: NextRequest) {
       }
 
       const isForceSubmit = (body as { forceSubmit?: boolean }).forceSubmit === true;
-
-      let correctCount = 0;
-      let totalPointsAwarded = 0;
-      let totalPossiblePoints = 0;
-
-      questionList.forEach((q) => {
-        totalPossiblePoints += q.points || 1;
-      });
-
-      const gradedAnswers = answers.map((answer) => {
-        const q = byId.get(answer.questionId)!;
-        const isAttempted = answer.selectedOption !== -1;
-        const isCorrect = isAttempted && answer.selectedOption === q.correctOption;
-
-        if (isCorrect) {
-          correctCount++;
-          totalPointsAwarded += q.points || 1;
-        } else if (isAttempted && quiz.enableNegativeMarking) {
-          const penalty =
-            typeof q.negativePoints === 'number' && q.negativePoints > 0
-              ? q.negativePoints
-              : (quiz.negativeMarks || 0);
-          totalPointsAwarded -= penalty;
-        }
-
-        return {
-          question: q._id,
-          order: q.order,
-          selectedOption: answer.selectedOption,
-          isCorrect: !!isCorrect,
-        };
-      });
-
-      const score = totalPossiblePoints > 0
-        ? Math.max(0, Math.min(100, Math.round((totalPointsAwarded / totalPossiblePoints) * 100)))
-        : 0;
+      const { gradedAnswers, correctCount, score } = gradeQuizAnswers(
+        questionList,
+        answers,
+        quiz.enableNegativeMarking,
+        quiz.negativeMarks
+      );
 
       attempt.answers = gradedAnswers;
       attempt.correctCount = correctCount;
@@ -350,72 +260,16 @@ export async function POST(request: NextRequest) {
       attempt.submittedAt = new Date();
       await attempt.save();
 
-      const courseQuizzes = await Quiz.countDocuments({ course: courseId, isPublished: true });
-      const completedDistinct = await QuizAttempt.distinct('quiz', {
-        student: session.user.id,
-        course: courseId,
-        status: { $in: ['completed', 'force_submitted'] },
-      });
-      const completedQuizzes = completedDistinct.length;
-      const quizProgress = courseQuizzes > 0 ? (completedQuizzes / courseQuizzes) * 100 : 0;
-      enrollment.progress = Math.min(100, Math.round(quizProgress));
-      if (enrollment.progress >= 100) {
-        enrollment.status = 'completed';
-        enrollment.completedAt = new Date();
-      }
-      await enrollment.save();
+      await updateCourseEnrollmentProgress(session.user.id, courseId);
 
-      // Issue a certificate if this was the last requirement of a
-      // teacher-completed course. Idempotent; never throws.
-      await checkAndIssueCertificate(session.user.id, String(courseId));
-
-      // If this attempt is linked to a challenge, record the ChallengeAttempt
-      let challengeSlug: string | undefined;
-      if (attempt.challenge) {
-        try {
-          const challenge = await Challenge.findById(attempt.challenge);
-          if (challenge) {
-            challengeSlug = challenge.slug;
-            let isWon = false;
-            if (score > challenge.targetScore) {
-              isWon = true;
-            } else if (
-              score === challenge.targetScore &&
-              attempt.timeTaken > 0 &&
-              challenge.timeTaken > 0 &&
-              attempt.timeTaken < challenge.timeTaken
-            ) {
-              isWon = true;
-            }
-
-            const claimToken = `clm_${crypto.randomBytes(16).toString('hex')}`;
-            await ChallengeAttempt.create({
-              challenge: challenge._id,
-              challenger: challenge.creator,
-              opponentUser: session.user.id,
-              guestSessionId: `usr_${session.user.id}`,
-              guestName: session.user.name || 'Quizdo Scholar',
-              score,
-              correctCount,
-              totalQuestions,
-              timeTaken: attempt.timeTaken,
-              isWon,
-              claimToken,
-              converted: true,
-              answers: gradedAnswers.map((a) => ({
-                questionId: a.question,
-                order: a.order,
-                selectedOption: a.selectedOption,
-                isCorrect: a.isCorrect,
-              })),
-            });
-
-            await Challenge.updateOne({ _id: challenge._id }, { $inc: { attemptsCount: 1 } });
-          }
-        } catch (challErr) {
-          logError('Failed to record challenge attempt', logContext, { error: challErr });
-        }
-      }
+      const challengeSlug = await recordChallengeAttemptIfLinked(
+        attempt,
+        session.user,
+        score,
+        correctCount,
+        totalQuestions,
+        gradedAnswers
+      );
 
       await invalidatePattern(`quiz-attempts:${session.user.id}:*`);
       await invalidatePattern(`dashboard:${session.user.id}:*`);
