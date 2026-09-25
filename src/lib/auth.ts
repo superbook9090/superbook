@@ -336,7 +336,9 @@ export const authOptions: AuthOptions = {
         session.user.role = token.role;
         session.user.email = token.email;
         if (token.name) {
-          session.user.name = token.name;
+          session.user.name = typeof token.name === 'string' 
+            ? token.name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')
+            : token.name;
         }
         session.user.phone = token.phone || '';
         session.user.organizationId = token.organizationId || null;

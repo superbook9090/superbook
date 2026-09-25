@@ -34,7 +34,11 @@ export interface IUser extends Document {
 
 const userSchema = new Schema<IUser>(
   {
-    name: { type: String, required: true },
+    name: { 
+      type: String, 
+      required: true,
+      set: (v: string) => v ? v.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ') : v
+    },
     email: { type: String, required: true, unique: true },
     phone: { type: String, unique: true, sparse: true },
     password: { type: String, required: false },
