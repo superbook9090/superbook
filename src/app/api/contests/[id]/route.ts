@@ -303,20 +303,22 @@ export async function DELETE(
       );
     }
 
-    const attemptCount = await ContestAttempt.countDocuments({ contest: id });
+    // Hard-delete all associated student attempts
+    await ContestAttempt.deleteMany({ contest: id });
 
-    // If attempts already exist, soft-cancel rather than hard-deleting
-    if (attemptCount > 0) {
-      contest.status = 'cancelled';
-      await contest.save();
-    } else {
-      await Contest.findByIdAndDelete(id);
+    // Delete standalone quizzes created for this contest
+    if (contest.quizzes && contest.quizzes.length > 0) {
+      const quizIds = contest.quizzes.map((q) => q.quiz);
+      await Quiz.deleteMany({ _id: { $in: quizIds } });
     }
+
+    // Delete the contest itself
+    await Contest.findByIdAndDelete(id);
 
     await invalidatePattern('contests:*');
 
     return NextResponse.json(
-      { message: attemptCount > 0 ? 'Contest has been cancelled' : 'Contest deleted successfully' },
+      { message: 'Contest deleted successfully' },
       { status: 200 }
     );
   } catch (error) {

@@ -2,15 +2,7 @@
   "crons": [
     {
       "path": "/api/cron/declare-results",
-      "schedule": "30 11 * * *"
-    },
-    {
-      "path": "/api/cron/generate-daily-contest",
-      "schedule": "30 11 * * *"
-    },
-    {
-      "path": "/api/cron/generate-up-pet-course",
-      "schedule": "0 18 * * *"
+      "schedule": "*/30 * * * *"
     }
   ]
 }

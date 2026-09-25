@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Search, X, Layers, ToggleLeft, GraduationCap, Notebook, Globe } from 'lucide-react';
+import { Search, X, Layers, ToggleLeft, GraduationCap, Notebook, Globe, Zap } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { SettingsTab } from './types';
 
@@ -22,6 +22,7 @@ export function SettingsTabsNav({
 
   const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
     { id: 'all', label: t('adminSettings.allTab') || 'All Settings', icon: Layers },
+    { id: 'jobs', label: 'Manual Jobs', icon: Zap },
     { id: 'features', label: t('adminSettings.featureTogglesTab') || 'Feature Toggles', icon: ToggleLeft },
     { id: 'teacher_limits', label: t('adminSettings.contentLimitsTab') || 'Teacher Limits', icon: GraduationCap },
     { id: 'notes_limits', label: t('adminSettings.notesLimitsTab') || 'Notes Limits', icon: Notebook },

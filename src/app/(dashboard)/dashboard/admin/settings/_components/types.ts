@@ -1,4 +1,4 @@
-export type SettingsTab = 'all' | 'features' | 'teacher_limits' | 'notes_limits' | 'platform';
+export type SettingsTab = 'all' | 'features' | 'teacher_limits' | 'notes_limits' | 'platform' | 'jobs';
 
 export interface AppSettings {
   teacherLimits: {

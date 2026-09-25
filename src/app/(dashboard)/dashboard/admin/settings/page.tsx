@@ -16,6 +16,7 @@ import { TeacherLimitsSection } from './_components/TeacherLimitsSection';
 import { NotesLimitsSection } from './_components/NotesLimitsSection';
 import { PlatformConfigSection } from './_components/PlatformConfigSection';
 import { SettingsActionBar } from './_components/SettingsActionBar';
+import { CronJobsSection } from './_components/CronJobsSection';
 
 export default function AdminSettingsPage() {
   const { t } = useTranslation();
@@ -52,6 +53,7 @@ export default function AdminSettingsPage() {
   const showTeacherLimits = activeTab === 'all' || activeTab === 'teacher_limits';
   const showNotesLimits = activeTab === 'all' || activeTab === 'notes_limits';
   const showPlatform = activeTab === 'all' || activeTab === 'platform';
+  const showJobs = activeTab === 'all' || activeTab === 'jobs';
 
   return (
     <PageWrapper className="max-w-6xl space-y-6">
@@ -140,6 +142,9 @@ export default function AdminSettingsPage() {
             onToggleMaintenance={handleToggleMaintenance}
             searchQuery={searchQuery}
           />
+        )}
+        { showJobs && (
+          <CronJobsSection />
         )}
       </div>
 

@@ -45,6 +45,7 @@ function normalizeInstructor(instructor: unknown): { _id: string; name: string |
 function publicVisibilityFilter() {
   return {
     isPublished: true,
+    title: { $not: /^test\d*$/i },
     ...publicCourseFilter(),
     organizationId: null,
   };
