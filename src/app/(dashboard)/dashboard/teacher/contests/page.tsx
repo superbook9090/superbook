@@ -28,7 +28,7 @@ export default function TeacherContestsPage() {
   const isAuthorized =
     user?.role === 'superadmin' || Boolean(user?.canCreateContests);
 
-  const [activeTab, setActiveTab] = useState<'all' | 'live' | 'upcoming' | 'completed'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'live' | 'upcoming' | 'completed'>('live');
 
   const { data, isLoading } = useContests({
     instructor: 'self',

@@ -11,10 +11,11 @@ import { LazyQuizCard } from '@/lib/lazy';
 import { useSessionStore } from '@/store/useSessionStore';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { useStartQuizAttempt, useEnrollments, useQuizAttempts, useQuizzes, type QuizAttempt, type Quiz } from '@/lib/react-query/hooks';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, Trophy } from 'lucide-react';
 import { ApiClientError } from '@/lib/api/http';
 import { Dropdown } from '@/components/ui/Dropdown';
 import { PageWrapper, PageHeader, ResponsiveGrid } from '@/components/layout';
+import { useFeature } from '@/contexts/AppSettingsContext';
 
 export default function StudentQuizzesPage() {
   const session = useSessionStore((s) => s.session);
@@ -22,6 +23,7 @@ export default function StudentQuizzesPage() {
   const router = useRouter();
   const { t } = useTranslation();
   const { addAlert } = useAlert();
+  const enableContests = useFeature('enableContests');
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const tabParam = searchParams.get('tab');
@@ -150,6 +152,14 @@ export default function StudentQuizzesPage() {
       <PageHeader
         title={t('quiz.myQuizzes')}
         description={t('quiz.quizzesDesc')}
+        actions={
+          enableContests ? (
+            <Link href={ROUTES.student.contests} className="btn-primary inline-flex items-center gap-2 px-4 py-2 bg-[var(--student-primary)] text-white rounded-lg hover:bg-[var(--student-primary)]/90 transition-colors">
+              <Trophy className="w-4 h-4" />
+              <span className="font-semibold text-sm">{t('common.contests') || 'Live Contests'}</span>
+            </Link>
+          ) : null
+        }
       />
 
       {/* Tabs and Course Filter */}

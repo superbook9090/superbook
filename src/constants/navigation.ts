@@ -89,7 +89,7 @@ export const MOBILE_BOTTOM_NAV_KEYS = [
   'common.myCourses',
   'common.browse',
   'common.quizzes',
-  'common.profile',
+  'common.contests',
 ] as const;
 
 /** Primary items shown in mobile bottom bar for Admin/SuperAdmin (max 5). */

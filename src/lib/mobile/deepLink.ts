@@ -25,7 +25,7 @@ function resolveDeepLinkPath(url: string): string | null {
       if (!id) return ROUTES.student.contests;
       if (sub === 'result') return ROUTES.student.contestResult(id);
       if (sub === 'take') return ROUTES.student.contestTake(id);
-      return `/dashboard/student/contests/${id}`;
+      return ROUTES.student.contestTake(id);
     case 'certificate':
       return id ? ROUTES.student.certificate(id) : ROUTES.student.certificates;
     default:

@@ -66,6 +66,11 @@ export const sendPushNotification = async (
       title,
       body,
     },
+    webpush: {
+      notification: {
+        icon: '/notification-icon.svg',
+      }
+    },
     data: safeData,
     tokens: tokens, // Multicast message
   };

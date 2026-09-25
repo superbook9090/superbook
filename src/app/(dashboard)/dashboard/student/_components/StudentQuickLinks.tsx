@@ -10,6 +10,7 @@ import {
   TrendingUp,
   Award,
   Newspaper,
+  Trophy,
 } from 'lucide-react';
 import { useFeature } from '@/contexts/AppSettingsContext';
 import { ResponsiveGrid } from '@/components/layout';
@@ -21,6 +22,7 @@ export default function StudentQuickLinks() {
   const enableQuizzes = useFeature('enableQuizzes');
   const enableNotes = useFeature('enableNotes');
   const enableBlogs = useFeature('enableBlogs');
+  const enableContests = useFeature('enableContests');
 
   return (
     <motion.section
@@ -60,6 +62,17 @@ export default function StudentQuickLinks() {
             href={ROUTES.student.quizzes}
             color="success"
             delay={0.15}
+          />
+        )}
+
+        {enableContests && (
+          <QuickActionCard
+            icon={Trophy}
+            title={t('common.contests') || 'Contests'}
+            description={t('contest.contestsHubDesc') || 'Participate in live challenges'}
+            href={ROUTES.student.contests}
+            color="error"
+            delay={0.18}
           />
         )}
 

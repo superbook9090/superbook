@@ -3,7 +3,7 @@ import { ROUTES } from '@/constants/routes';
 
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Bell } from 'lucide-react';
+import { Bell, BookOpen, BrainCircuit, ClipboardList, Megaphone, Settings, Trophy, Video } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useAlert } from '@/components/ui/AlertContainer';
@@ -15,6 +15,7 @@ import {
   type UserNotificationItem,
 } from '@/lib/api/notifications';
 import { handleDeepLink } from '@/lib/mobile/deepLink';
+import type { NotificationCategory } from '@/lib/notifications/push/notificationPayload';
 
 function localizedText(value: { en: string; hi?: string }, lang: string): string {
   if (lang === 'hi' && value.hi) return value.hi;
@@ -29,6 +30,20 @@ function formatWhen(iso: string, lang: string): string {
     }).format(new Date(iso));
   } catch {
     return iso;
+  }
+}
+
+function getCategoryIcon(category: NotificationCategory | string) {
+  switch (category) {
+    case 'lessons': return <BookOpen className="w-5 h-5 text-blue-500" />;
+    case 'quizzes': return <BrainCircuit className="w-5 h-5 text-purple-500" />;
+    case 'assignments': return <ClipboardList className="w-5 h-5 text-orange-500" />;
+    case 'liveClasses': return <Video className="w-5 h-5 text-red-500" />;
+    case 'announcements': return <Megaphone className="w-5 h-5 text-yellow-500" />;
+    case 'contests': return <Trophy className="w-5 h-5 text-emerald-500" />;
+    case 'system':
+    default:
+      return <Settings className="w-5 h-5 text-gray-500" />;
   }
 }
 
@@ -114,9 +129,14 @@ export default function StudentNotificationsPage() {
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-3">
-                  {!item.read && (
-                    <span className="w-2 h-2 rounded-full bg-[var(--student-primary)] shadow-[0_0_8px_var(--student-primary)] mt-1.5 shrink-0 animate-pulse" />
-                  )}
+                  <div className="relative mt-1 shrink-0">
+                    <div className="p-2 bg-[var(--card-solid)] border border-[var(--border)] rounded-xl shadow-xs">
+                      {getCategoryIcon(item.category)}
+                    </div>
+                    {!item.read && (
+                      <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[var(--student-primary)] shadow-[0_0_8px_var(--student-primary)] animate-pulse border border-[var(--background)]" />
+                    )}
+                  </div>
                   <div>
                     <p className={`text-sm sm:text-base font-bold text-[var(--color-foreground)] ${!item.read ? 'text-[var(--student-primary)]' : ''}`}>
                       {localizedText(item.title, lang)}

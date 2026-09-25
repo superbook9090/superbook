@@ -20,7 +20,7 @@ import { ROUTES } from '@/constants/routes';
 
 export default function AdminContestsPage() {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<'all' | 'live' | 'upcoming' | 'completed'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'live' | 'upcoming' | 'completed'>('live');
   const [search, setSearch] = useState('');
 
   const { data, isLoading } = useContests({
