@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const title = request.nextUrl.searchParams.get('title');
+    const title = request.nextUrl.searchParams.get('title') || 'Untitled';
     const description = request.nextUrl.searchParams.get('description') || '';
 
     // Validate content type
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
     await pipeline(nodeStream, passThrough, writeStream);
 
     // Upload to YouTube
-    const result = await uploadVideoToYouTube(tempFilePath, { title, description });
+    const result = await uploadVideoToYouTube(tempFilePath!, { title, description });
 
     // Clean up local temp file
     if (tempFilePath && fs.existsSync(tempFilePath)) {

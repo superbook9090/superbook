@@ -80,7 +80,7 @@ function buildTopicFilter(topic: string) {
 
 // GET /api/blogs - List blogs with server-side filters and pagination
 export async function GET(req: NextRequest) {
-  const requestId = req.headers.get('X-Request-ID');
+  const requestId = req.headers.get('X-Request-ID') || undefined;
   const logContext: LogContext = {
     requestId,
     method: 'GET',
@@ -280,7 +280,7 @@ export async function GET(req: NextRequest) {
 
 // POST /api/blogs - Create a new blog (teacher only)
 export async function POST(req: NextRequest) {
-  const requestId = req.headers.get('X-Request-ID');
+  const requestId = req.headers.get('X-Request-ID') || undefined;
   const logContext: LogContext = {
     requestId,
     method: 'POST',

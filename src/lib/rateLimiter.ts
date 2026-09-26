@@ -105,7 +105,7 @@ export function getRequestIp(req: Request): string {
   if (forwarded) {
     return forwarded.split(',')[0]?.trim() || 'unknown';
   }
-  return req.headers.get('x-real-ip');
+  return req.headers.get('x-real-ip') || 'unknown';
 }
 
 export function rateLimitExceededMessage(): string {

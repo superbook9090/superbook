@@ -60,7 +60,7 @@ export default function PublicBlogsClient({
 
   const applyUrlFilters = (
     newSearch: string,
-    newTopic: string,
+    newTopic: string | null,
     newLang: BlogLanguageType,
     newSort: BlogSortType,
     newPage = 1
@@ -149,7 +149,7 @@ export default function PublicBlogsClient({
       {/* Dynamic Topic & Filter Navigation */}
       <BlogTopicTabs
         topics={topics}
-        selectedTopic={selectedTopic}
+        selectedTopic={selectedTopic || 'All'}
         onSelectTopic={handleTopicChange}
         searchQuery={searchQuery}
         onSearchChange={handleSearchChange}
