@@ -2,11 +2,11 @@ import { en } from './src/i18n/en';
 import * as fs from 'fs';
 import * as path from 'path';
 
-function getKeys(obj: any, prefix = ''): string[] {
+function getKeys(obj: Record<string, unknown>, prefix = ''): string[] {
   let keys: string[] = [];
   for (const key in obj) {
     if (typeof obj[key] === 'object' && obj[key] !== null) {
-      keys = keys.concat(getKeys(obj[key], prefix + key + '.'));
+      keys = keys.concat(getKeys(obj[key] as Record<string, unknown>, prefix + key + '.'));
     } else {
       keys.push(prefix + key);
     }
