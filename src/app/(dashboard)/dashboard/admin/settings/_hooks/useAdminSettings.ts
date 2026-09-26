@@ -98,7 +98,7 @@ export function useAdminSettings() {
       router.push(ROUTES.login);
       return;
     }
-    if (!isSuperAdmin(session.user?.role) && session.user?.role !== 'admin') {
+    if (!isSuperAdmin(session.user?.role)) {
       router.push(ROUTES.dashboard);
       return;
     }

@@ -135,7 +135,7 @@ export default function AdminSettingsPage() {
           />
         )}
 
-        {showPlatform && (
+        { showPlatform && (
           <PlatformConfigSection
             settings={settings}
             setSettings={setSettings}
