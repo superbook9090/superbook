@@ -101,6 +101,33 @@ export function CronJobsSection() {
             </div>
           )}
         </div>
+        {/* Declare Results Job */}
+        <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface-muted)]/30 space-y-4">
+          <div className="space-y-1">
+            <h3 className="font-semibold text-sm text-[var(--color-foreground)]">Declare Contest Results</h3>
+            <p className="text-xs text-[var(--color-muted-foreground)] leading-relaxed">
+              Manually triggers the result declaration for all completed contests and sends notifications to participants.
+            </p>
+          </div>
+          
+          <Button
+            onClick={() => runJob('declare_results', '/api/cron/declare-results')}
+            disabled={loadingJob !== null}
+            variant="secondary"
+            size="sm"
+            className="w-full flex items-center justify-center gap-2"
+          >
+            {loadingJob === 'declare_results' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
+            Run Task Now
+          </Button>
+
+          {result?.job === 'declare_results' && (
+            <div className={`flex items-start gap-2 p-3 rounded-lg text-xs ${result.success ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+              {result.success ? <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" /> : <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />}
+              <span>{result.message}</span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
