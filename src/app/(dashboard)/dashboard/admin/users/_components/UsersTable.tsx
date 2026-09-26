@@ -33,25 +33,25 @@ export function UsersTable({
           <thead className="bg-[var(--surface-muted)]/70">
             <tr>
               <th className="px-5 py-4 text-left text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider">
-                {t('admin.user') || 'User'}
+                {t('admin.user')}
               </th>
               <th className="px-5 py-4 text-left text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider">
-                {t('admin.role') || 'Role & Status'}
+                {t('admin.role')}
               </th>
               <th className="px-5 py-4 text-left text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider">
-                {t('adminAnalytics.platform') || 'Platform'}
+                {t('adminAnalytics.platform')}
               </th>
               <th className="px-5 py-4 text-left text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider">
-                {t('adminUsers.lastOpened') || 'Last Opened'}
+                {t('adminUsers.lastOpened')}
               </th>
               <th className="px-5 py-4 text-left text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider">
-                {t('adminUsers.organization') || 'Organization'}
+                {t('adminUsers.organization')}
               </th>
               <th className="px-5 py-4 text-left text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider">
-                {t('adminUsers.capabilitiesAndLimits') || 'Quotas & Capabilities'}
+                {t('adminUsers.capabilitiesAndLimits')}
               </th>
               <th className="px-5 py-4 text-right text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider">
-                {t('admin.actions') || 'Actions'}
+                {t('admin.actions')}
               </th>
             </tr>
           </thead>

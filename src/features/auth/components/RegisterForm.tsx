@@ -104,7 +104,7 @@ function RegisterFormInner() {
             {/* Header */}
             <div className="mb-3.5 space-y-1">
               <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--student-soft)] text-[var(--student-primary)] text-xs font-semibold">
-                <span>🚀 {t('auth.freeAccount') || 'Free Account'}</span>
+                <span>🚀 {t('auth.freeAccount')}</span>
               </div>
               <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-[var(--color-foreground)]">
                 {t('register.createAccount')}

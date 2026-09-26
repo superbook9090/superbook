@@ -35,7 +35,7 @@ export default function AboutPageClient() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <BackButton
             href={ROUTES.home}
-            label={t('about.backToHome') || 'Back to Home'}
+            label={t('about.backToHome')}
             className="hover:text-[var(--primary)] mb-8"
           />
 
@@ -49,11 +49,10 @@ export default function AboutPageClient() {
               <span>{t('about.badge') || `About ${SITE_NAME}`}</span>
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-[var(--color-foreground)]">
-              {t('about.title') || 'Empowering Teachers. Inspiring Learners.'}
+              {t('about.title')}
             </h1>
             <p className="text-[var(--color-muted-foreground)] font-medium text-lg max-w-2xl">
-              {t('about.subtitle') ||
-                'Quiz Do is an interactive educational assessment and e-learning platform built to make high-quality test creation, practice exams, and learning resources freely accessible to all.'}
+              {t('about.subtitle')}
             </p>
           </motion.div>
 
@@ -70,16 +69,14 @@ export default function AboutPageClient() {
                   <Target className="w-6 h-6" />
                 </div>
                 <h2 className="text-2xl font-bold text-[var(--color-foreground)]">
-                  {t('about.missionTitle') || 'Our Mission & Vision'}
+                  {t('about.missionTitle')}
                 </h2>
               </div>
               <p className="text-[var(--color-muted-foreground)] leading-relaxed">
-                {t('about.missionText1') ||
-                  'At Quiz Do, our mission is to simplify digital assessment and exam preparation for educators and students across India and beyond. We believe that regular, interactive testing—supported by cognitive research on the "testing effect"—is one of the most effective ways to solidify knowledge and achieve mastery.'}
+                {t('about.missionText1')}
               </p>
               <p className="text-[var(--color-muted-foreground)] leading-relaxed">
-                {t('about.missionText2') ||
-                  'Whether you are a school teacher creating formative weekly quizzes, a coaching institute running full-length mock tests, or a competitive exam aspirant preparing for CTET, UPTET, NEET, or JEE, Quiz Do provides the intuitive tools and verified study resources you need.'}
+                {t('about.missionText2')}
               </p>
             </section>
 
@@ -90,48 +87,44 @@ export default function AboutPageClient() {
                   <GraduationCap className="w-6 h-6" />
                 </div>
                 <h2 className="text-2xl font-bold text-[var(--color-foreground)]">
-                  {t('about.offeringsTitle') || 'What We Offer'}
+                  {t('about.offeringsTitle')}
                 </h2>
               </div>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--color-background)]/50 space-y-2">
                   <div className="flex items-center gap-2 font-semibold text-[var(--color-foreground)]">
                     <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                    <span>{t('about.quizMakerTitle') || 'Free Quiz & MCQ Maker'}</span>
+                    <span>{t('about.quizMakerTitle')}</span>
                   </div>
                   <p className="text-sm text-[var(--color-muted-foreground)]">
-                    {t('about.quizMakerDesc') ||
-                      'Create custom multiple-choice quizzes in seconds, share instant access codes with students, and auto-grade responses.'}
+                    {t('about.quizMakerDesc')}
                   </p>
                 </div>
                 <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--color-background)]/50 space-y-2">
                   <div className="flex items-center gap-2 font-semibold text-[var(--color-foreground)]">
                     <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                    <span>{t('about.aiGeneratorTitle') || 'AI Question Generator'}</span>
+                    <span>{t('about.aiGeneratorTitle')}</span>
                   </div>
                   <p className="text-sm text-[var(--color-muted-foreground)]">
-                    {t('about.aiGeneratorDesc') ||
-                      'Transform textbook excerpts, PDFs, and syllabi into balanced question papers and mock tests with zero manual data entry.'}
+                    {t('about.aiGeneratorDesc')}
                   </p>
                 </div>
                 <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--color-background)]/50 space-y-2">
                   <div className="flex items-center gap-2 font-semibold text-[var(--color-foreground)]">
                     <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                    <span>{t('about.mockTestsTitle') || 'Mock Test Series'}</span>
+                    <span>{t('about.mockTestsTitle')}</span>
                   </div>
                   <p className="text-sm text-[var(--color-muted-foreground)]">
-                    {t('about.mockTestsDesc') ||
-                      'Practice timed full-length exams with realistic marking schemes, negative grading, and detailed performance breakdown.'}
+                    {t('about.mockTestsDesc')}
                   </p>
                 </div>
                 <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--color-background)]/50 space-y-2">
                   <div className="flex items-center gap-2 font-semibold text-[var(--color-foreground)]">
                     <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                    <span>{t('about.blogsTitle') || 'Verified Educational Blogs'}</span>
+                    <span>{t('about.blogsTitle')}</span>
                   </div>
                   <p className="text-sm text-[var(--color-muted-foreground)]">
-                    {t('about.blogsDesc') ||
-                      'In-depth articles written by experienced educators covering pedagogy, exam preparation strategies, science, mathematics, and child development.'}
+                    {t('about.blogsDesc')}
                   </p>
                 </div>
               </div>
@@ -144,36 +137,31 @@ export default function AboutPageClient() {
                   <ShieldCheck className="w-6 h-6" />
                 </div>
                 <h2 className="text-2xl font-bold text-[var(--color-foreground)]">
-                  {t('about.standardsTitle') || 'Editorial Integrity & Content Standards'}
+                  {t('about.standardsTitle')}
                 </h2>
               </div>
               <p className="text-[var(--color-muted-foreground)] leading-relaxed">
-                {t('about.standardsIntro') ||
-                  'Educational trust is at the core of everything we build. All blog articles, study guides, and question banks published on Quiz Do undergo rigorous review:'}
+                {t('about.standardsIntro')}
               </p>
               <ul className="list-disc list-inside space-y-2 text-[var(--color-muted-foreground)] pl-2">
                 <li>
                   <strong className="text-[var(--color-foreground)]">
-                    {t('about.standardsPoint1') ||
-                      'Subject-Matter Review: Educational content is written and vetted by qualified teachers and competitive exam subject specialists.'}
+                    {t('about.standardsPoint1')}
                   </strong>
                 </li>
                 <li>
                   <strong className="text-[var(--color-foreground)]">
-                    {t('about.standardsPoint2') ||
-                      'Syllabus Alignment: Exam-specific questions (CTET, UPTET, Board exams) adhere strictly to official syllabi and NCERT standards.'}
+                    {t('about.standardsPoint2')}
                   </strong>
                 </li>
                 <li>
                   <strong className="text-[var(--color-foreground)]">
-                    {t('about.standardsPoint3') ||
-                      'Regular Updates: Articles and test patterns are actively updated to reflect the latest examination notifications, counselling schedules, and regulatory changes.'}
+                    {t('about.standardsPoint3')}
                   </strong>
                 </li>
                 <li>
                   <strong className="text-[var(--color-foreground)]">
-                    {t('about.standardsPoint4') ||
-                      'No Thin or Misleading Content: We maintain strict quality filters against automated filler or low-quality content, ensuring every resource delivers measurable educational value.'}
+                    {t('about.standardsPoint4')}
                   </strong>
                 </li>
               </ul>
@@ -186,12 +174,11 @@ export default function AboutPageClient() {
                   <Users className="w-6 h-6" />
                 </div>
                 <h2 className="text-2xl font-bold text-[var(--color-foreground)]">
-                  {t('about.transparencyTitle') || 'Publisher Transparency & Contact'}
+                  {t('about.transparencyTitle')}
                 </h2>
               </div>
               <p className="text-[var(--color-muted-foreground)] leading-relaxed">
-                {t('about.transparencyText') ||
-                  'Quiz Do is operated by an enthusiastic team of Indian educators, software engineers, and digital learning advocates. We welcome community feedback, feature suggestions, educator partnerships, and corrections.'}
+                {t('about.transparencyText')}
               </p>
               <div className="p-6 rounded-2xl border border-[var(--border)] bg-[var(--color-background)]/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
@@ -200,10 +187,10 @@ export default function AboutPageClient() {
                   </div>
                   <div>
                     <p className="font-semibold text-[var(--color-foreground)]">
-                      {t('about.contactQuestion') || 'Have a question or suggestion?'}
+                      {t('about.contactQuestion')}
                     </p>
                     <p className="text-sm text-[var(--color-muted-foreground)]">
-                      {t('about.contactAnswer') || 'Reach our team directly via our support channels.'}
+                      {t('about.contactAnswer')}
                     </p>
                   </div>
                 </div>
@@ -211,7 +198,7 @@ export default function AboutPageClient() {
                   href={ROUTES.contact}
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--primary)] text-white font-medium text-sm hover:opacity-90 transition-opacity"
                 >
-                  <span>{t('about.contactButton') || 'Contact Us'}</span>
+                  <span>{t('about.contactButton')}</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>

@@ -30,13 +30,13 @@ export function ProfileSecurityTab({
             <div>
               <h2 className="text-base sm:text-lg font-semibold text-[var(--color-foreground)]">
                 {hasPassword
-                  ? t('password.changePasswordTitle') || 'Change Password'
-                  : t('password.setPasswordTitle') || 'Create Password'}
+                  ? t('password.changePasswordTitle')
+                  : t('password.setPasswordTitle')}
               </h2>
               <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)]">
                 {hasPassword
-                  ? t('password.changePasswordDesc') || 'Update your account password regularly to protect your account.'
-                  : t('password.setPasswordDesc') || 'Set a password for your account to sign in with email credentials.'}
+                  ? t('password.changePasswordDesc')
+                  : t('password.setPasswordDesc')}
               </p>
             </div>
           </div>

@@ -31,14 +31,14 @@ export function ContestScheduleSection({
     <div className="p-6 rounded-3xl bg-[var(--card-solid)] border border-[var(--border)] shadow-xs space-y-4">
       <div className="flex items-center gap-2 pb-3 border-b border-[var(--border)] text-sm font-bold text-[var(--color-foreground)]">
         <Clock className="w-4 h-4 text-[var(--primary)]" />
-        <span>{t('contest.timingAndSchedule') || '2. Schedule & Solutions Release'}</span>
+        <span>{t('contest.timingAndSchedule')}</span>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Start Time */}
         <div className="group">
           <label className="block text-xs font-semibold text-[var(--color-muted-foreground)] mb-1.5 group-focus-within:text-[var(--primary)] transition-colors">
-            {t('contest.startTime') || 'Start Date & Time *'}
+            {t('contest.startTime')}
           </label>
           <div className="relative">
             <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted-foreground)] group-focus-within:text-[var(--primary)] pointer-events-none transition-colors" />
@@ -55,7 +55,7 @@ export function ContestScheduleSection({
         {/* End Time */}
         <div className="group">
           <label className="block text-xs font-semibold text-[var(--color-muted-foreground)] mb-1.5 group-focus-within:text-[var(--primary)] transition-colors">
-            {t('contest.endTime') || 'End Date & Time *'}
+            {t('contest.endTime')}
           </label>
           <div className="relative">
             <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted-foreground)] group-focus-within:text-[var(--primary)] pointer-events-none transition-colors" />
@@ -72,7 +72,7 @@ export function ContestScheduleSection({
         {/* Duration */}
         <div className="group">
           <label className="block text-xs font-semibold text-[var(--color-muted-foreground)] mb-1.5 group-focus-within:text-[var(--primary)] transition-colors">
-            {t('contest.durationMinutes') || 'Attempt Duration (Minutes) *'}
+            {t('contest.durationMinutes')}
           </label>
           <div className="relative">
             <Timer className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted-foreground)] group-focus-within:text-[var(--primary)] pointer-events-none transition-colors" />
@@ -91,7 +91,7 @@ export function ContestScheduleSection({
         {/* Solutions Release */}
         <div className="group">
           <label className="block text-xs font-semibold text-[var(--color-muted-foreground)] mb-1.5 group-focus-within:text-[var(--primary)] transition-colors">
-            {t('contest.solutionsReleaseTime') || 'Solutions Unlock Time (Optional)'}
+            {t('contest.solutionsReleaseTime')}
           </label>
           <div className="relative">
             <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted-foreground)] group-focus-within:text-[var(--primary)] pointer-events-none transition-colors" />
@@ -103,7 +103,7 @@ export function ContestScheduleSection({
             />
           </div>
           <span className="text-[11px] text-[var(--color-muted)] mt-1 block">
-            {t('contest.solutionsLockedHint') || 'Answers remain locked for students until this time. Defaults to end time.'}
+            {t('contest.solutionsLockedHint')}
           </span>
         </div>
       </div>

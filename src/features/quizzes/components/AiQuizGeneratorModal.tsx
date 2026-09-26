@@ -95,8 +95,8 @@ export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme, entity
     if (!topic.trim()) {
       setErrorMsg(
         isContest
-          ? t('contest.topicRequired') || 'Please enter a contest topic or subject.'
-          : t('aiQuiz.topicRequired') || 'Please enter a quiz topic or subject.'
+          ? t('contest.topicRequired')
+          : t('aiQuiz.topicRequired')
       );
       return;
     }
@@ -120,8 +120,8 @@ export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme, entity
 
       const data = await res.json().catch(() => ({}));
       const fallbackError = isContest
-        ? t('contest.generationFailed') || 'Unable to generate contest questions at this moment. Please try again in a few moments.'
-        : t('aiQuiz.generationFailed') || 'Unable to generate quiz at this moment. Please try again in a few moments.';
+        ? t('contest.generationFailed')
+        : t('aiQuiz.generationFailed');
 
       if (!res.ok) {
         throw new Error(sanitizeAiErrorMessage(data?.message, fallbackError));
@@ -135,13 +135,13 @@ export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme, entity
         onSuccess(data.questions);
         onClose();
       } else {
-        throw new Error(t('aiQuiz.noQuestionsReturned') || 'No questions returned from AI generator.');
+        throw new Error(t('aiQuiz.noQuestionsReturned'));
       }
     } catch (err) {
       const raw = err instanceof Error ? err.message : '';
       const fallbackError = isContest
-        ? t('contest.generationFailed') || 'Unable to generate contest questions at this moment. Please try again in a few moments.'
-        : t('aiQuiz.generationFailed') || 'Unable to generate quiz at this moment. Please try again in a few moments.';
+        ? t('contest.generationFailed')
+        : t('aiQuiz.generationFailed');
       setErrorMsg(sanitizeAiErrorMessage(raw, fallbackError));
     } finally {
       setIsGenerating(false);
@@ -166,13 +166,13 @@ export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme, entity
               <div>
                 <h3 className="text-lg font-bold leading-tight">
                   {isContest
-                    ? t('contest.aiModalTitle') || 'Generate Contest Questions with AI'
-                    : t('aiQuiz.modalTitle') || 'Generate Quiz with AI'}
+                    ? t('contest.aiModalTitle')
+                    : t('aiQuiz.modalTitle')}
                 </h3>
                 <p className="text-xs text-white/80">
                   {isContest
-                    ? t('contest.aiModalSubtitle') || 'Instantly create competitive contest questions using AI'
-                    : t('aiQuiz.modalSubtitle') || 'Instantly create multiple choice questions using AI'}
+                    ? t('contest.aiModalSubtitle')
+                    : t('aiQuiz.modalSubtitle')}
                 </p>
               </div>
             </div>
@@ -197,9 +197,9 @@ export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme, entity
 
             {usageInfo && (
               <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-xs text-[var(--color-muted-foreground)]">
-                <span>{t('aiQuiz.usageInfo') || 'AI Generations Quota:'}</span>
+                <span>{t('aiQuiz.usageInfo')}</span>
                 <span className="font-bold text-[var(--color-foreground)]">
-                  {usageInfo.used} / {usageInfo.limit} ({usageInfo.remaining} {t('aiQuiz.remaining') || 'remaining'})
+                  {usageInfo.used} / {usageInfo.limit} ({usageInfo.remaining} {t('aiQuiz.remaining')})
                 </span>
               </div>
             )}
@@ -210,8 +210,8 @@ export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme, entity
                 <span className="flex items-center gap-1.5">
                   <BookOpen className="w-4 h-4 text-[var(--color-primary)]" />
                   {isContest
-                    ? t('contest.topicLabel') || 'Contest Topic / Subject'
-                    : t('aiQuiz.topicLabel') || 'Quiz Topic / Subject'} <span className="text-[var(--color-error)]">*</span>
+                    ? t('contest.topicLabel')
+                    : t('aiQuiz.topicLabel')} <span className="text-[var(--color-error)]">*</span>
                 </span>
               </label>
               <input
@@ -228,8 +228,8 @@ export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme, entity
                 }}
                 placeholder={
                   isContest
-                    ? t('contest.topicPlaceholder') || 'e.g., Advanced DSA, System Design, or General Science'
-                    : t('aiQuiz.topicPlaceholder') || 'e.g., Photosynthesis and Cellular Respiration'
+                    ? t('contest.topicPlaceholder')
+                    : t('aiQuiz.topicPlaceholder')
                 }
                 required
                 className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-foreground)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] disabled:opacity-60 disabled:cursor-not-allowed"
@@ -242,13 +242,13 @@ export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme, entity
                 <label className="block text-xs sm:text-sm font-bold text-[var(--color-foreground)]">
                   <span className="flex items-center gap-1.5">
                     <SlidersHorizontal className="w-4 h-4 text-[var(--color-primary)]" />
-                    {t('aiQuiz.numQuestionsLabel') || 'Number of Questions'} (Max {maxAllowedQuestions})
+                    {t('aiQuiz.numQuestionsLabel')} (Max {maxAllowedQuestions})
                   </span>
                 </label>
                 {hasCustomLimit && (
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--primary-soft)] text-[var(--color-primary)] text-[10px] font-bold border border-[var(--color-primary)]/20 shadow-2xs">
                     <Sparkles className="w-3 h-3" />
-                    {t('aiQuiz.customLimitActive') || 'Extra Questions Allowed'}
+                    {t('aiQuiz.customLimitActive')}
                   </span>
                 )}
               </div>
@@ -275,7 +275,7 @@ export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme, entity
                 <label className="block text-xs sm:text-sm font-bold text-[var(--color-foreground)] mb-1.5">
                   <span className="flex items-center gap-1.5">
                     <HelpCircle className="w-4 h-4 text-[var(--color-primary)]" />
-                    {t('aiQuiz.difficultyLabel') || 'Difficulty Level'}
+                    {t('aiQuiz.difficultyLabel')}
                   </span>
                 </label>
                 <select
@@ -284,9 +284,9 @@ export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme, entity
                   onChange={(e) => setDifficulty(e.target.value as 'easy' | 'medium' | 'hard')}
                   className="w-full px-3 py-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-foreground)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  <option value="easy">{t('aiQuiz.easy') || 'Easy'}</option>
-                  <option value="medium">{t('aiQuiz.medium') || 'Medium'}</option>
-                  <option value="hard">{t('aiQuiz.hard') || 'Hard'}</option>
+                  <option value="easy">{t('aiQuiz.easy')}</option>
+                  <option value="medium">{t('aiQuiz.medium')}</option>
+                  <option value="hard">{t('aiQuiz.hard')}</option>
                 </select>
               </div>
 
@@ -295,7 +295,7 @@ export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme, entity
                 <label className="block text-xs sm:text-sm font-bold text-[var(--color-foreground)] mb-1.5">
                   <span className="flex items-center gap-1.5">
                     <Globe className="w-4 h-4 text-[var(--color-primary)]" />
-                    {t('aiQuiz.languageLabel') || 'Language'}
+                    {t('aiQuiz.languageLabel')}
                   </span>
                 </label>
                 <select
@@ -317,14 +317,14 @@ export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme, entity
             {/* Additional Instructions */}
             <div>
               <label className="block text-xs sm:text-sm font-bold text-[var(--color-foreground)] mb-1.5">
-                {t('aiQuiz.instructionsLabel') || 'Additional Context / Prompt (Optional)'}
+                {t('aiQuiz.instructionsLabel')}
               </label>
               <textarea
                 value={instructions}
                 disabled={isGenerating}
                 onChange={(e) => setInstructions(e.target.value)}
                 rows={2}
-                placeholder={t('aiQuiz.instructionsPlaceholder') || 'e.g., Focus on light-dependent reactions and ATP synthesis'}
+                placeholder={t('aiQuiz.instructionsPlaceholder')}
                 className="w-full px-3.5 py-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-foreground)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] resize-none disabled:opacity-60 disabled:cursor-not-allowed"
               />
             </div>
@@ -337,7 +337,7 @@ export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme, entity
                 disabled={isGenerating}
                 className="px-4 py-2 text-sm font-medium rounded-xl border border-[var(--color-border)] text-[var(--color-foreground)] hover:bg-[var(--color-accent)] transition-colors disabled:opacity-50"
               >
-                {t('common.cancel') || 'Cancel'}
+                {t('common.cancel')}
               </button>
 
               <button
@@ -351,8 +351,8 @@ export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme, entity
                     <Loader2 className="w-4 h-4 animate-spin" />
                     <span>
                       {isContest
-                        ? t('contest.generating') || 'Generating Contest Questions...'
-                        : t('aiQuiz.generating') || 'Generating Quiz...'}
+                        ? t('contest.generating')
+                        : t('aiQuiz.generating')}
                     </span>
                   </>
                 ) : (
@@ -360,8 +360,8 @@ export function AiQuizGeneratorModal({ isOpen, onClose, onSuccess, theme, entity
                     <Sparkles className="w-4 h-4" />
                     <span>
                       {isContest
-                        ? t('contest.generateBtn') || 'Generate Contest Questions'
-                        : t('aiQuiz.generateBtn') || 'Generate Questions'}
+                        ? t('contest.generateBtn')
+                        : t('aiQuiz.generateBtn')}
                     </span>
                   </>
                 )}

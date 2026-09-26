@@ -163,7 +163,7 @@ export default function EmailRegisterForm({
             required
             value={formData.password}
             onChange={handleChange}
-            placeholder={t('register.min8Chars') || 'Min 8 characters'}
+            placeholder={t('register.min8Chars')}
             startIcon={<Lock className="w-4 h-4 text-[var(--color-muted)]" />}
             fullWidth
           />
@@ -192,7 +192,7 @@ export default function EmailRegisterForm({
           name="inviteCode"
           value={formData.inviteCode}
           onChange={handleChange}
-          placeholder={t('register.enterInviteCode') || 'Enter invite code (optional)'}
+          placeholder={t('register.enterInviteCode')}
           startIcon={<Building2 className="w-4 h-4 text-[var(--color-muted)]" />}
           fullWidth
         />

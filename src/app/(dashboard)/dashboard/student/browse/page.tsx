@@ -9,7 +9,7 @@ import { useSessionStore } from '@/store/useSessionStore';
 import { useAlert } from '@/components/ui/AlertContainer';
 import { LazyCourseCard, LazyCourseFilters, LazyJoinCourseByCode } from '@/lib/lazy';
 import { PageSkeleton } from '@/components/ui/Skeleton';
-import { PageWrapper, ResponsiveGrid } from '@/components/layout';
+import { PageWrapper, ResponsiveGrid, PageHeader } from '@/components/layout';
 import { useAvailableCourses, useEnrollCourse } from '@/lib/react-query/hooks';
 import { BookOpen, Sparkles, Compass } from 'lucide-react';
 import BackButton from '@/components/ui/BackButton';
@@ -95,29 +95,28 @@ export default function BrowseCoursesPage() {
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="hero-banner"
+        className="stack-page--compact"
       >
-        <div className="stack-page--compact">
-          <BackButton
-            href={ROUTES.student.courses}
-            label={t('courses.backToCourses')}
-            className="text-xs font-bold uppercase tracking-wider text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
-          />
+        <BackButton
+          href={ROUTES.student.courses}
+          label={t('courses.backToCourses')}
+          className="text-xs font-bold uppercase tracking-wider text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] mb-2 inline-block"
+        />
 
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-[var(--card-gap)]">
+        <PageHeader
+          title={
             <div className="flex flex-col gap-1.5">
               <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--student-primary)]">
                 <Compass className="w-3.5 h-3.5" />
                 <span>{t('courses.courseCatalog')}</span>
               </div>
-              <h1 className="heading-xl">{t('courses.browseCourses')}</h1>
-              <p className="text-[var(--color-muted-foreground)] text-sm sm:text-base max-w-xl">
-                {t('courses.browseDesc')}
-              </p>
+              <span>{t('courses.browseCourses')}</span>
             </div>
-
-            <div className="flex items-center gap-4 antigravity-glass border border-[var(--border)] rounded-2xl p-4 shadow-sm min-w-[200px]">
-              <div className="text-right flex-1">
+          }
+          description={t('courses.browseDesc')}
+          actions={
+            <div className="flex items-center gap-3 sm:gap-4 antigravity-glass border border-[var(--border)] rounded-2xl p-3 sm:p-4 shadow-sm w-full sm:w-auto">
+              <div className="text-right flex-1 sm:text-right text-left">
                 <p className="text-[10px] font-black uppercase tracking-widest text-[var(--color-muted-foreground)]">
                   {t('courses.availableCourses')}
                 </p>
@@ -129,8 +128,8 @@ export default function BrowseCoursesPage() {
                 <Sparkles className="w-5 h-5" />
               </div>
             </div>
-          </div>
-        </div>
+          }
+        />
       </motion.div>
 
       {/* Join private course */}

@@ -56,9 +56,9 @@ export default function AdminSettingsPage() {
   const showJobs = activeTab === 'all' || activeTab === 'jobs';
 
   return (
-    <PageWrapper className="max-w-6xl space-y-6">
+    <PageWrapper className="max-w-6xl">
       {/* Hero Banner */}
-      <div className="hero-banner flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 sm:p-8 rounded-3xl">
+      <div className="hero-banner flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 sm:p-6 md:p-8 rounded-3xl">
         <div className="space-y-1.5 max-w-xl">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[var(--primary)]/15 text-[var(--primary)] border border-[var(--primary)]/25 shadow-xs">
             <Settings className="w-3.5 h-3.5" />
@@ -71,7 +71,7 @@ export default function AdminSettingsPage() {
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto">
-          <Tooltip label={t('analytics.refresh') || 'Refresh'}>
+          <Tooltip label={t('analytics.refresh')}>
             <Button
               onClick={fetchSettings}
               variant="secondary"
@@ -80,7 +80,7 @@ export default function AdminSettingsPage() {
               aria-label="Refresh"
             >
               <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">{t('analytics.refresh') || 'Refresh'}</span>
+              <span className="hidden sm:inline">{t('analytics.refresh')}</span>
             </Button>
           </Tooltip>
           <Button

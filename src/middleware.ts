@@ -23,8 +23,7 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith('/api/')) {
     const ip =
       request.headers.get('x-forwarded-for') ||
-      request.headers.get('x-real-ip') ||
-      'unknown';
+      request.headers.get('x-real-ip');
 
     const identifier = token?.id || ip;
 
@@ -65,8 +64,7 @@ export async function middleware(request: NextRequest) {
   ) {
     const ip =
       request.headers.get('x-forwarded-for') ||
-      request.headers.get('x-real-ip') ||
-      'unknown';
+      request.headers.get('x-real-ip');
 
     const result = publicBlogRateLimiter.check(ip);
     if (!result.allowed) {

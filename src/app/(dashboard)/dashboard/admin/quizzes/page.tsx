@@ -66,7 +66,7 @@ export default function AdminQuizzesPage() {
   };
 
   return (
-    <PageWrapper className="space-y-6">
+    <PageWrapper>
       {/* Hero Banner Header */}
       <AdminQuizzesHero viewMode={viewMode} onViewModeChange={setViewMode} />
 
@@ -118,11 +118,11 @@ export default function AdminQuizzesPage() {
       {/* Quizzes List (Grid or Table) */}
       {quizzes.length === 0 ? (
         <EmptyState
-          title={t('admin.noQuizzesFound') || 'No quizzes found'}
-          description={t('admin.adjustSearch') || 'Try adjusting your search criteria or course filters.'}
+          title={t('admin.noQuizzesFound')}
+          description={t('admin.adjustSearch')}
           action={
             <Button onClick={clearFilters} variant="secondary">
-              {t('common.reset') || 'Reset Filters'}
+              {t('common.reset')}
             </Button>
           }
         />
@@ -153,7 +153,7 @@ export default function AdminQuizzesPage() {
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex justify-between items-center antigravity-glass border border-[var(--border)] rounded-2xl px-5 py-3 shadow-md"
+          className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-2 antigravity-glass border border-[var(--border)] rounded-2xl px-5 py-3 shadow-md"
         >
           <p className="text-xs sm:text-sm font-medium text-[var(--color-muted-foreground)]">
             {t('admin.showing').replace('{current}', String(quizzes.length)).replace('{total}', String(pagination.total))}
@@ -193,10 +193,10 @@ export default function AdminQuizzesPage() {
       {/* Delete Confirmation Modal */}
       <ConfirmModal
         isOpen={Boolean(deleteId)}
-        title={t('admin.deleteQuiz') || 'Delete Quiz'}
-        message={t('admin.deleteQuizConfirm') || 'Are you sure you want to delete this quiz? This action cannot be undone.'}
-        confirmText={t('common.delete') || 'Delete'}
-        cancelText={t('common.cancel') || 'Cancel'}
+        title={t('admin.deleteQuiz')}
+        message={t('admin.deleteQuizConfirm')}
+        confirmText={t('common.delete')}
+        cancelText={t('common.cancel')}
         onConfirm={() => deleteId && handleDelete(deleteId)}
         onCancel={() => setDeleteId(null)}
         type="danger"

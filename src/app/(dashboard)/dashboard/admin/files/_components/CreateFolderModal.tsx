@@ -36,7 +36,7 @@ export function CreateFolderModal({
     e.preventDefault();
     const trimmed = folderName.trim();
     if (!trimmed) {
-      setError(t('files.enterFolderName') || 'Please enter a folder name');
+      setError(t('files.enterFolderName'));
       return;
     }
     if (trimmed.length > 255) {
@@ -61,10 +61,10 @@ export function CreateFolderModal({
             </div>
             <div>
               <h3 className="text-base font-bold text-[var(--color-foreground)]">
-                {t('files.createFolder') || 'Create New Folder'}
+                {t('files.createFolder')}
               </h3>
               <p className="text-xs text-[var(--color-muted-foreground)]">
-                {t('files.enterFolderName') || 'Organize documents in subdirectories'}
+                {t('files.enterFolderName')}
               </p>
             </div>
           </div>
@@ -80,13 +80,13 @@ export function CreateFolderModal({
         <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-4">
           <div>
             <TextField
-              label={t('files.folderName') || 'Folder Name'}
+              label={t('files.folderName')}
               value={folderName}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setFolderName(e.target.value);
                 if (error) setError('');
               }}
-              placeholder={t('files.enterFolderName') || 'e.g. Science Mock Tests'}
+              placeholder={t('files.enterFolderName')}
               autoFocus
               required
             />
@@ -95,10 +95,10 @@ export function CreateFolderModal({
 
           <div className="flex items-center justify-end gap-2 pt-2">
             <Button type="button" variant="secondary" onClick={onClose} disabled={isSubmitting}>
-              {t('common.cancel') || 'Cancel'}
+              {t('common.cancel')}
             </Button>
             <Button type="submit" variant="primary" isLoading={isSubmitting}>
-              {t('files.createFolder') || 'Create Folder'}
+              {t('files.createFolder')}
             </Button>
           </div>
         </form>

@@ -75,19 +75,19 @@ export default function AdminBlogsPage() {
   const handleTogglePublish = async (blogId: string, currentStatus: boolean) => {
     try {
       await updateBlog.mutateAsync({ blogId, data: { isPublished: !currentStatus } });
-      addAlert({ type: 'success', message: t('admin.blogUpdated') || 'Blog updated successfully' });
+      addAlert({ type: 'success', message: t('admin.blogUpdated') });
     } catch {
-      addAlert({ type: 'error', message: t('admin.failedUpdateBlog') || 'Failed to update blog' });
+      addAlert({ type: 'error', message: t('admin.failedUpdateBlog') });
     }
   };
 
   const handleDelete = async (blogId: string) => {
     try {
       await deleteBlog.mutateAsync(blogId);
-      addAlert({ type: 'success', message: t('admin.blogDeleted') || 'Blog deleted successfully' });
+      addAlert({ type: 'success', message: t('admin.blogDeleted') });
       setDeleteId(null);
     } catch {
-      addAlert({ type: 'error', message: t('admin.failedDeleteBlog') || 'Failed to delete blog' });
+      addAlert({ type: 'error', message: t('admin.failedDeleteBlog') });
     }
   };
 
@@ -96,7 +96,7 @@ export default function AdminBlogsPage() {
   }
 
   return (
-    <PageWrapper className="space-y-6">
+    <PageWrapper>
       {/* Hero Banner */}
       <AdminBlogsHero />
 
@@ -119,11 +119,11 @@ export default function AdminBlogsPage() {
       {/* Blog Cards Grid */}
       {blogs.length === 0 ? (
         <EmptyState
-          title={t('admin.noBlogsFound') || 'No blogs found'}
-          description={t('admin.adjustSearch') || 'Try adjusting your search criteria or language filters.'}
+          title={t('admin.noBlogsFound')}
+          description={t('admin.adjustSearch')}
           action={
             <Button onClick={clearFilters} variant="secondary">
-              {t('common.reset') || 'Reset Filters'}
+              {t('common.reset')}
             </Button>
           }
         />
@@ -153,10 +153,10 @@ export default function AdminBlogsPage() {
       {/* Delete Confirmation Dialog */}
       <ConfirmModal
         isOpen={Boolean(deleteId)}
-        title={t('admin.deleteBlog') || 'Delete Blog'}
-        message={t('admin.deleteBlogConfirm') || 'Are you sure you want to delete this blog? This action cannot be undone.'}
-        confirmText={t('common.delete') || 'Delete'}
-        cancelText={t('common.cancel') || 'Cancel'}
+        title={t('admin.deleteBlog')}
+        message={t('admin.deleteBlogConfirm')}
+        confirmText={t('common.delete')}
+        cancelText={t('common.cancel')}
         onConfirm={() => deleteId && handleDelete(deleteId)}
         onCancel={() => setDeleteId(null)}
         type="danger"

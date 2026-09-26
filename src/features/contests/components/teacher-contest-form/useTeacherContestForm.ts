@@ -122,12 +122,10 @@ export function useTeacherContestForm(contestId?: string) {
     const contestNumber = await fetchDailyQuizCounter();
     setTitle(`Daily Quiz Contest ${contestNumber}`);
     setDescription(
-      t('contest.dailyQuizDesc') ||
-        'A daily 20-question General Knowledge quiz designed to test your awareness. Medium difficulty level.'
+      t('contest.dailyQuizDesc')
     );
     setInstructions(
-      t('contest.dailyQuizInstructions') ||
-        '1. All questions are compulsory.\n2. Each question carries 1 mark.\n3. There is a negative marking of 0.25 for incorrect answers.\n4. Complete the quiz within 24 hours.'
+      t('contest.dailyQuizInstructions')
     );
     setDuration('20');
 
@@ -145,7 +143,7 @@ export function useTeacherContestForm(contestId?: string) {
 
     addAlert({
       type: 'success',
-      message: t('contest.aiAutofillSuccess') || 'Contest details auto-filled! Please generate your questions.',
+      message: t('contest.aiAutofillSuccess'),
     });
   };
 

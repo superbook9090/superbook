@@ -50,19 +50,19 @@ export function FilesTable({
           <thead className="bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)] font-semibold text-xs border-b border-[var(--border)]">
             <tr>
               <th scope="col" className="px-4 py-3.5 min-w-[240px]">
-                {t('files.fileName') || 'Name'}
+                {t('files.fileName')}
               </th>
               <th scope="col" className="px-4 py-3.5 w-28">
-                {t('organizations.status') || 'Type'}
+                {t('organizations.status')}
               </th>
               <th scope="col" className="px-4 py-3.5 w-28">
-                {t('files.fileSize') || 'Size'}
+                {t('files.fileSize')}
               </th>
               <th scope="col" className="px-4 py-3.5 w-36">
-                {t('files.lastModified') || 'Date'}
+                {t('files.lastModified')}
               </th>
               <th scope="col" className="px-4 py-3.5 text-right w-44">
-                {t('files.actions') || 'Actions'}
+                {t('files.actions')}
               </th>
             </tr>
           </thead>
@@ -95,7 +95,7 @@ export function FilesTable({
                   </td>
                   <td className="px-4 py-3">
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--color-warning-light)] text-[var(--color-warning)]">
-                      {t('files.folder') || 'Folder'}
+                      {t('files.folder')}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-[var(--color-muted-foreground)]">-</td>
@@ -104,22 +104,22 @@ export function FilesTable({
                     <div className="flex items-center justify-end gap-1">
                       {canMutate && (
                         <>
-                          <Tooltip label={t('common.edit') || 'Rename'}>
+                          <Tooltip label={t('common.edit')}>
                             <button
                               type="button"
                               onClick={() => onRenameFolder(folder)}
                               className="p-1.5 rounded-lg hover:bg-[var(--primary-soft)] text-[var(--color-muted-foreground)] hover:text-[var(--primary)] transition-colors"
-                              aria-label={t('common.edit') || 'Rename'}
+                              aria-label={t('common.edit')}
                             >
                               <Pencil className="w-4 h-4" />
                             </button>
                           </Tooltip>
-                          <Tooltip label={t('common.delete') || 'Delete'}>
+                          <Tooltip label={t('common.delete')}>
                             <button
                               type="button"
                               onClick={() => onDeleteFolder(folder)}
                               className="p-1.5 rounded-lg hover:bg-[var(--color-error-light)] text-[var(--color-muted-foreground)] hover:text-[var(--color-error)] transition-colors"
-                              aria-label={t('common.delete') || 'Delete'}
+                              aria-label={t('common.delete')}
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -169,54 +169,54 @@ export function FilesTable({
                   <td className="px-4 py-3 text-[var(--color-muted-foreground)]">{formattedDate}</td>
                   <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center justify-end gap-1">
-                      <Tooltip label={t('files.preview') || 'Preview'}>
+                      <Tooltip label={t('files.preview')}>
                         <button
                           type="button"
                           onClick={() => onPreviewFile(file)}
                           className="p-1.5 rounded-lg hover:bg-[var(--primary-soft)] text-[var(--color-muted-foreground)] hover:text-[var(--primary)] transition-colors"
-                          aria-label={t('files.preview') || 'Preview'}
+                          aria-label={t('files.preview')}
                         >
                           <Eye className="w-4 h-4" />
                         </button>
                       </Tooltip>
-                      <Tooltip label={t('files.download') || 'Download'}>
+                      <Tooltip label={t('files.download')}>
                         <button
                           type="button"
                           onClick={() => onDownloadFile(file)}
                           className="p-1.5 rounded-lg hover:bg-[var(--primary-soft)] text-[var(--color-muted-foreground)] hover:text-[var(--primary)] transition-colors"
-                          aria-label={t('files.download') || 'Download'}
+                          aria-label={t('files.download')}
                         >
                           <Download className="w-4 h-4" />
                         </button>
                       </Tooltip>
-                      <Tooltip label={t('files.copyLink') || 'Copy Link'}>
+                      <Tooltip label={t('files.copyLink')}>
                         <button
                           type="button"
                           onClick={() => onCopyLink(file)}
                           className="p-1.5 rounded-lg hover:bg-[var(--primary-soft)] text-[var(--color-muted-foreground)] hover:text-[var(--primary)] transition-colors"
-                          aria-label={t('files.copyLink') || 'Copy Link'}
+                          aria-label={t('files.copyLink')}
                         >
                           <LinkIcon className="w-4 h-4" />
                         </button>
                       </Tooltip>
                       {canMutate && (
                         <>
-                          <Tooltip label={t('common.edit') || 'Rename'}>
+                          <Tooltip label={t('common.edit')}>
                             <button
                               type="button"
                               onClick={() => onRenameFile(file)}
                               className="p-1.5 rounded-lg hover:bg-[var(--primary-soft)] text-[var(--color-muted-foreground)] hover:text-[var(--primary)] transition-colors"
-                              aria-label={t('common.edit') || 'Rename'}
+                              aria-label={t('common.edit')}
                             >
                               <Pencil className="w-4 h-4" />
                             </button>
                           </Tooltip>
-                          <Tooltip label={t('common.delete') || 'Delete'}>
+                          <Tooltip label={t('common.delete')}>
                             <button
                               type="button"
                               onClick={() => onDeleteFile(file)}
                               className="p-1.5 rounded-lg hover:bg-[var(--color-error-light)] text-[var(--color-muted-foreground)] hover:text-[var(--color-error)] transition-colors"
-                              aria-label={t('common.delete') || 'Delete'}
+                              aria-label={t('common.delete')}
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>

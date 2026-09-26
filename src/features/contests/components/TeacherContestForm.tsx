@@ -111,7 +111,7 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
           variant="secondary"
           onClick={() => router.push('/dashboard/teacher/contests')}
         >
-          {t('common.cancel') || 'Cancel'}
+          {t('common.cancel')}
         </Button>
 
         <Button type="submit" disabled={form.isSaving} className="min-w-[160px]">
@@ -120,8 +120,8 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
             {form.isSaving
               ? 'Saving...'
               : form.isEdit
-              ? t('contest.updateContest') || 'Update Contest'
-              : t('contest.publishContest') || 'Publish & Schedule'}
+              ? t('contest.updateContest')
+              : t('contest.publishContest')}
           </span>
         </Button>
       </div>

@@ -25,7 +25,7 @@ export function ChallengeResultView({ challenge, result, guestName }: ChallengeR
   const [isScorecardOpen, setIsScorecardOpen] = useState(false);
   const [showReview, setShowReview] = useState(false);
 
-  const challengerName = challenge.challenger.name || 'Quizdo Scholar';
+  const challengerName = challenge.challenger.name || t('challenge.quizdoScholar');
   const opponentDisplayName = guestName || (session?.user?.name ? session.user.name : t('challenge.youGuest'));
 
   const formatTime = (secs: number) => {
@@ -78,7 +78,7 @@ export function ChallengeResultView({ challenge, result, guestName }: ChallengeR
     <div className="flex flex-col gap-6 w-full max-w-xl mx-auto pb-12 px-2 sm:px-0">
       {/* 1. Hero Outcome Banner */}
       <div
-        className={`relative overflow-hidden rounded-3xl p-6 sm:p-8 text-center border shadow-2xl transition-all ${
+        className={`relative overflow-hidden rounded-3xl p-4 sm:p-6 md:p-8 text-center border shadow-2xl transition-all ${
           result.isWon
             ? 'border-emerald-500/30 bg-gradient-to-b from-emerald-950/50 via-[var(--color-surface)] to-[var(--color-surface)]'
             : result.isDraw

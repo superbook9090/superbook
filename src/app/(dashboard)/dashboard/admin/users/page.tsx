@@ -105,9 +105,9 @@ export default function AdminUsersPage() {
   };
 
   return (
-    <PageWrapper className="space-y-6">
+    <PageWrapper>
       {/* Hero Banner Header */}
-      <div className="hero-banner flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 sm:p-8 rounded-3xl">
+      <div className="hero-banner flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 sm:p-6 md:p-8 rounded-3xl">
         <div className="space-y-1.5 max-w-xl">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[var(--info-light)] text-[var(--info)] border border-[var(--info)]/20 shadow-xs">
             <Users className="w-3.5 h-3.5" />
@@ -124,7 +124,7 @@ export default function AdminUsersPage() {
           className="flex items-center gap-2 self-start sm:self-auto min-h-[44px] px-4 shadow-sm"
         >
           <RefreshCw className="w-4 h-4" />
-          <span>{t('analytics.refresh') || 'Refresh'}</span>
+          <span>{t('analytics.refresh')}</span>
         </Button>
       </div>
 
@@ -142,11 +142,11 @@ export default function AdminUsersPage() {
 
       {users.length === 0 ? (
         <EmptyState
-          title={t('adminUsers.noUsersFound') || 'No users found'}
-          description={t('adminUsers.noUsersFoundDesc') || 'Try adjusting your search criteria or role filters.'}
+          title={t('adminUsers.noUsersFound')}
+          description={t('adminUsers.noUsersFoundDesc')}
           action={
             <Button onClick={handleResetFilters} variant="secondary">
-              {t('common.reset') || 'Reset Filters'}
+              {t('common.reset')}
             </Button>
           }
         />
@@ -171,7 +171,7 @@ export default function AdminUsersPage() {
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex justify-between items-center antigravity-glass border border-[var(--border)] rounded-2xl px-5 py-3 shadow-md"
+          className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-2 antigravity-glass border border-[var(--border)] rounded-2xl px-5 py-3 shadow-md"
         >
           <p className="text-xs sm:text-sm font-medium text-[var(--color-muted-foreground)]">
             {t('admin.showing').replace('{current}', String(users.length)).replace('{total}', String(pagination.total))}
@@ -228,10 +228,10 @@ export default function AdminUsersPage() {
 
       <ConfirmModal
         isOpen={showDeleteDialog}
-        title={t('adminUsers.deleteUser') || 'Delete User'}
+        title={t('adminUsers.deleteUser')}
         message="Are you sure you want to delete this user? This action cannot be undone."
-        confirmText={t('admin.delete') || 'Delete'}
-        cancelText={t('common.cancel') || 'Cancel'}
+        confirmText={t('admin.delete')}
+        cancelText={t('common.cancel')}
         onConfirm={() => deleteId && handleDelete(deleteId)}
         onCancel={() => { setDeleteId(null); setShowDeleteDialog(false); }}
         type="danger"

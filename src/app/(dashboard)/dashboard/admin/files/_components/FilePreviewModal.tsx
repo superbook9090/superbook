@@ -67,7 +67,7 @@ export function FilePreviewModal({
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <Tooltip label={t('files.copyLink') || 'Copy Link'}>
+            <Tooltip label={t('files.copyLink')}>
               <Button
                 variant="secondary"
                 size="sm"
@@ -75,11 +75,11 @@ export function FilePreviewModal({
                 className="hidden sm:inline-flex items-center gap-1.5"
               >
                 <LinkIcon className="w-4 h-4" />
-                <span>{t('files.copyLink') || 'Copy Link'}</span>
+                <span>{t('files.copyLink')}</span>
               </Button>
             </Tooltip>
 
-            <Tooltip label={t('files.download') || 'Download'}>
+            <Tooltip label={t('files.download')}>
               <Button
                 variant="secondary"
                 size="sm"
@@ -87,11 +87,11 @@ export function FilePreviewModal({
                 className="hidden sm:inline-flex items-center gap-1.5"
               >
                 <Download className="w-4 h-4" />
-                <span>{t('files.download') || 'Download'}</span>
+                <span>{t('files.download')}</span>
               </Button>
             </Tooltip>
 
-            <Tooltip label={t('files.openInNewTab') || 'Open in new tab'}>
+            <Tooltip label={t('files.openInNewTab')}>
               <a
                 href={previewUrl}
                 target="_blank"

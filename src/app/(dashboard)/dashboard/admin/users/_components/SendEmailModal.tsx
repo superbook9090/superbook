@@ -46,7 +46,7 @@ export function SendEmailModal({ user, onClose }: SendEmailModalProps) {
       });
       addAlert({
         type: 'success',
-        message: t('adminUsers.emailSentSuccess') || 'Email sent to user successfully',
+        message: t('adminUsers.emailSentSuccess'),
       });
       onClose();
     } catch (err) {
@@ -55,7 +55,7 @@ export function SendEmailModal({ user, onClose }: SendEmailModalProps) {
           ? err.message
           : err instanceof Error
           ? err.message
-          : t('adminUsers.failedSendEmail') || 'Failed to send email';
+          : t('adminUsers.failedSendEmail');
       setError(errorMsg);
     } finally {
       setIsSending(false);
@@ -85,7 +85,7 @@ export function SendEmailModal({ user, onClose }: SendEmailModalProps) {
             </div>
             <div className="min-w-0">
               <h3 className="text-base sm:text-lg font-bold text-[var(--color-foreground)] truncate">
-                {t('adminUsers.sendDirectEmail') || 'Send Direct Email'}
+                {t('adminUsers.sendDirectEmail')}
               </h3>
               <p className="text-xs text-[var(--color-muted-foreground)] truncate">
                 To: <span className="font-semibold text-[var(--color-foreground)]">{user.name}</span> ({user.email})
@@ -114,10 +114,10 @@ export function SendEmailModal({ user, onClose }: SendEmailModalProps) {
           )}
 
           <TextField
-            label={t('adminUsers.emailSubject') || 'Subject'}
+            label={t('adminUsers.emailSubject')}
             type="text"
             required
-            placeholder={t('adminUsers.emailSubjectPlaceholder') || 'e.g. Important notice regarding your account'}
+            placeholder={t('adminUsers.emailSubjectPlaceholder')}
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
             disabled={isSending}
@@ -125,11 +125,11 @@ export function SendEmailModal({ user, onClose }: SendEmailModalProps) {
           />
 
           <TextField
-            label={t('adminUsers.emailMessage') || 'Message'}
+            label={t('adminUsers.emailMessage')}
             multiline
             rows={4}
             required
-            placeholder={t('adminUsers.emailMessagePlaceholder') || 'Type your message to this user here...'}
+            placeholder={t('adminUsers.emailMessagePlaceholder')}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             disabled={isSending}
@@ -137,7 +137,7 @@ export function SendEmailModal({ user, onClose }: SendEmailModalProps) {
           />
 
           <p className="text-[11px] text-[var(--color-muted)]">
-            {t('adminUsers.directEmailDesc') || "This email will be delivered directly to the user's registered address from the official platform inbox."}
+            {t('adminUsers.directEmailDesc')}
           </p>
 
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-[var(--border)] mt-auto">
@@ -148,7 +148,7 @@ export function SendEmailModal({ user, onClose }: SendEmailModalProps) {
               size="md"
               disabled={isSending}
             >
-              {t('common.cancel') || 'Cancel'}
+              {t('common.cancel')}
             </Button>
             <Button
               type="submit"
@@ -158,7 +158,7 @@ export function SendEmailModal({ user, onClose }: SendEmailModalProps) {
               className="flex items-center gap-2"
             >
               <Send className="w-4 h-4" />
-              <span>{isSending ? t('adminUsers.sendingEmail') || 'Sending...' : t('adminUsers.sendEmail') || 'Send Email'}</span>
+              <span>{isSending ? t('adminUsers.sendingEmail') : t('adminUsers.sendEmail')}</span>
             </Button>
           </div>
         </form>

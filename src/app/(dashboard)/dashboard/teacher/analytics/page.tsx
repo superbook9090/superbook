@@ -68,7 +68,7 @@ export default function TeacherAnalyticsPage() {
           )}
           <h3 className="heading-md mb-2">{t('teacherAnalytics.errorLoading')}</h3>
           <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] mb-6">
-            {t('errors.tryAgain') || 'Please try again or check your network connection.'}
+            {t('errors.tryAgain')}
           </p>
           <Button onClick={fetchStats} className="btn-premium min-h-[44px]">
             {t('teacherAnalytics.retry')}
@@ -79,7 +79,7 @@ export default function TeacherAnalyticsPage() {
   }
 
   return (
-    <PageWrapper className="space-y-6">
+    <PageWrapper>
       {/* Header Banner with 3D Glass Score Metric */}
       <TeacherAnalyticsHeader averageScore={stats.overview?.averageScore ?? 0} />
 

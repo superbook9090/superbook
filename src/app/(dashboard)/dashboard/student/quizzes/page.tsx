@@ -156,7 +156,7 @@ export default function StudentQuizzesPage() {
           enableContests ? (
             <Link href={ROUTES.student.contests} className="btn-primary inline-flex items-center gap-2 px-4 py-2 bg-[var(--student-primary)] text-white rounded-lg hover:bg-[var(--student-primary)]/90 transition-colors">
               <Trophy className="w-4 h-4" />
-              <span className="font-semibold text-sm">{t('common.contests') || 'Live Contests'}</span>
+              <span className="font-semibold text-sm">{t('common.contests')}</span>
             </Link>
           ) : null
         }

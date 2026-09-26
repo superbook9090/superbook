@@ -58,7 +58,7 @@ export function SettingsActionBar({
                 className="flex-1 sm:flex-initial min-h-[40px] flex items-center justify-center gap-1.5"
               >
                 <RotateCcw className="w-4 h-4" />
-                <span>{t('adminSettings.discardChanges') || 'Discard'}</span>
+                <span>{t('adminSettings.discardChanges')}</span>
               </Button>
               <Button
                 type="button"

@@ -46,8 +46,8 @@ export async function GET(request: NextRequest) {
     const quiz = searchParams.get('quiz');
     const course = searchParams.get('course');
     const attemptId = searchParams.get('attemptId');
-    const page = parseInt(searchParams.get('page') || '1', 10);
-    const limit = parseInt(searchParams.get('limit') || '20', 10);
+    const page = parseInt(searchParams.get('page'), 10);
+    const limit = parseInt(searchParams.get('limit'), 10);
     const skip = (page - 1) * limit;
 
     const cacheKey = `quiz-attempts:${session.user.id}:${quiz || 'all'}:${course || 'all'}:${attemptId || 'all'}:page${page}:limit${limit}`;

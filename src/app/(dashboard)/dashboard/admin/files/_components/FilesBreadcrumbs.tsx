@@ -26,12 +26,12 @@ export function FilesBreadcrumbs({
     <div className="flex flex-wrap items-center justify-between gap-3 p-3 sm:p-4 rounded-2xl bg-[var(--card-solid)] border border-[var(--border)] shadow-xs">
       <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap min-w-0">
         {canGoUp && (
-          <Tooltip label={t('files.parentFolder') || 'Up One Level'}>
+          <Tooltip label={t('files.parentFolder')}>
             <button
               type="button"
               onClick={onGoToParent}
               className="p-1.5 sm:p-2 rounded-xl bg-[var(--color-surface-muted)] hover:bg-[var(--primary-soft)] text-[var(--color-foreground)] hover:text-[var(--primary)] border border-[var(--border)] transition-colors inline-flex items-center justify-center shrink-0"
-              aria-label={t('files.parentFolder') || 'Up One Level'}
+              aria-label={t('files.parentFolder')}
             >
               <CornerLeftUp className="w-4 h-4" />
             </button>
@@ -75,7 +75,7 @@ export function FilesBreadcrumbs({
 
       <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-[var(--color-surface-muted)] border border-[var(--border)] text-[var(--color-muted-foreground)] shrink-0">
         <span>{totalItems}</span>
-        <span>{totalItems === 1 ? t('files.oneItem') || 'item' : t('files.itemCount', { count: totalItems }) || 'items'}</span>
+        <span>{totalItems === 1 ? t('files.oneItem') : t('files.itemCount', { count: totalItems })}</span>
       </div>
     </div>
   );

@@ -58,6 +58,12 @@ export default function MyFeaturePage() {
 
 ---
 
+**CRITICAL PageWrapper Spacing Rule**:
+- Do **not** add `className="space-y-*"` (e.g., `space-y-6`) to `PageWrapper`.
+- `PageWrapper` natively uses the `.stack-page` CSS class, which already provides `gap: var(--section-gap)`. Adding `space-y-*` will double the margin and cause excessive whitespace between sections on mobile screens.
+
+---
+
 ## Design System Tokens & Global CSS
 
 Rely on tokens defined in `src/app/globals.css`:

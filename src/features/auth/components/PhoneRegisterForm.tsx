@@ -98,7 +98,7 @@ export default function PhoneRegisterForm({ theme, callbackUrl, onBackToEmail, a
         if (formattedPhone.length === 10) {
           formattedPhone = '+91' + formattedPhone;
         } else {
-          addAlert({ type: 'error', message: t('login.invalidPhone') || 'Please enter phone number with country code (e.g. +91...)' });
+          addAlert({ type: 'error', message: t('login.invalidPhone') });
           setIsLoading(false);
           return;
         }
@@ -128,7 +128,7 @@ export default function PhoneRegisterForm({ theme, callbackUrl, onBackToEmail, a
     } catch (err) {
       console.error('Error sending OTP:', err);
       const errMsg = err instanceof Error ? err.message : String(err);
-      addAlert({ type: 'error', message: errMsg || t('login.genericError') || 'Failed to send OTP. Please try again.' });
+      addAlert({ type: 'error', message: errMsg || t('login.genericError') });
       if (window.recaptchaVerifier) {
         try {
           window.recaptchaVerifier.clear();
@@ -166,7 +166,7 @@ export default function PhoneRegisterForm({ theme, callbackUrl, onBackToEmail, a
       });
 
       if (result?.error) {
-        addAlert({ type: 'error', message: t('login.invalidOtp') || 'Invalid code. Please try again.' });
+        addAlert({ type: 'error', message: t('login.invalidOtp') });
         setIsLoading(false);
         return;
       }
@@ -184,7 +184,7 @@ export default function PhoneRegisterForm({ theme, callbackUrl, onBackToEmail, a
       router.push(redirectTo);
     } catch (err) {
       console.error('Error verifying OTP:', err);
-      addAlert({ type: 'error', message: t('login.invalidOtp') || 'Invalid verification code.' });
+      addAlert({ type: 'error', message: t('login.invalidOtp') });
     } finally {
       setIsLoading(false);
     }
@@ -215,7 +215,7 @@ export default function PhoneRegisterForm({ theme, callbackUrl, onBackToEmail, a
           className="flex flex-col gap-2.5 sm:gap-3"
         >
           <TextField
-            label={t('login.enterPhone') || 'Phone Number'}
+            label={t('login.enterPhone')}
             type="tel"
             required
             value={phoneNumber}
@@ -230,7 +230,7 @@ export default function PhoneRegisterForm({ theme, callbackUrl, onBackToEmail, a
             type="text"
             value={inviteCode}
             onChange={(e) => setInviteCode(e.target.value)}
-            placeholder={t('register.enterInviteCode') || "Enter invite code (optional)"}
+            placeholder={t('register.enterInviteCode')}
             startIcon={<Building2 className="w-4.5 h-4.5 text-[var(--color-muted)]" />}
             fullWidth
           />
@@ -248,7 +248,7 @@ export default function PhoneRegisterForm({ theme, callbackUrl, onBackToEmail, a
               <Loader size="sm" />
             ) : (
               <>
-                {t('login.sendOtp') || 'Send Code'}
+                {t('login.sendOtp')}
                 <ArrowRight className="w-4.5 h-4.5 ml-2" />
               </>
             )}
@@ -265,7 +265,7 @@ export default function PhoneRegisterForm({ theme, callbackUrl, onBackToEmail, a
           </p>
 
           <TextField
-            label={t('login.enterOtp') || 'Verification Code'}
+            label={t('login.enterOtp')}
             type="text"
             required
             value={otpCode}
@@ -285,7 +285,7 @@ export default function PhoneRegisterForm({ theme, callbackUrl, onBackToEmail, a
               <Loader size="sm" />
             ) : (
               <>
-                {t('login.verifyOtp') || 'Verify Code'}
+                {t('login.verifyOtp')}
                 <ArrowRight className="w-4.5 h-4.5 ml-2" />
               </>
             )}
@@ -300,7 +300,7 @@ export default function PhoneRegisterForm({ theme, callbackUrl, onBackToEmail, a
         className="w-full flex items-center justify-center py-1.5 text-xs sm:text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors cursor-pointer"
       >
         <ArrowLeft className="w-3.5 h-3.5 mr-1.5" />
-        {isOtpSent ? (t('common.back') || 'Back') : (t('login.backToEmail') || 'Back to Email Signup')}
+        {isOtpSent ? (t('common.back')) : (t('login.backToEmail'))}
       </button>
     </form>
   );

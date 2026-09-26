@@ -43,7 +43,7 @@ export function useContestQuestionsState(enableNegativeMarking: boolean, negativ
 
     addAlert({
       type: 'success',
-      message: (t('contest.importQuestionsSuccess') || 'Successfully loaded {count} questions!').replace(
+      message: (t('contest.importQuestionsSuccess')).replace(
         '{count}',
         String(formatted.length)
       ),

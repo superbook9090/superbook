@@ -40,13 +40,13 @@ export function ContestSettingsSection({
     <div className="p-6 rounded-3xl bg-[var(--card-solid)] border border-[var(--border)] shadow-xs space-y-4">
       <div className="flex items-center gap-2 pb-3 border-b border-[var(--border)] text-sm font-bold text-[var(--color-foreground)]">
         <Shield className="w-4 h-4 text-[var(--primary)]" />
-        <span>{t('contest.settings') || '4. Contest Rules & Visibility'}</span>
+        <span>{t('contest.settings')}</span>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-semibold text-[var(--color-foreground)] mb-1">
-            {t('contest.maxAttempts') || 'Max Attempts Allowed'}
+            {t('contest.maxAttempts')}
           </label>
           <input
             type="number"
@@ -60,12 +60,12 @@ export function ContestSettingsSection({
 
         <div>
           <label className="block text-xs font-semibold text-[var(--color-foreground)] mb-1">
-            {t('contest.maxParticipants') || 'Participant Capacity (Optional)'}
+            {t('contest.maxParticipants')}
           </label>
           <input
             type="number"
             min="1"
-            placeholder={t('contest.unlimitedPlaceholder') || 'Leave blank for unlimited'}
+            placeholder={t('contest.unlimitedPlaceholder')}
             value={maxParticipants}
             onChange={(e) => setMaxParticipants(e.target.value)}
             className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-[var(--color-surface-muted)] border border-[var(--border)] text-[var(--color-foreground)]"
@@ -74,31 +74,31 @@ export function ContestSettingsSection({
 
         <div>
           <label className="block text-xs font-semibold text-[var(--color-foreground)] mb-1">
-            {t('contest.visibility') || 'Contest Visibility'}
+            {t('contest.visibility')}
           </label>
           <select
             value={visibility}
             onChange={(e) => setVisibility(e.target.value as VisibilityType)}
             className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-[var(--color-surface-muted)] border border-[var(--border)] text-[var(--color-foreground)]"
           >
-            <option value="public">{t('contest.visibilityPublic') || 'Public (Open Platform-wide)'}</option>
-            <option value="organization">{t('contest.visibilityOrg') || 'Organization Members Only'}</option>
-            <option value="unlisted">{t('contest.visibilityUnlisted') || 'Unlisted (Direct link only)'}</option>
+            <option value="public">{t('contest.visibilityPublic')}</option>
+            <option value="organization">{t('contest.visibilityOrg')}</option>
+            <option value="unlisted">{t('contest.visibilityUnlisted')}</option>
           </select>
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-[var(--color-foreground)] mb-1">
-            {t('contest.leaderboardVisibility') || 'Leaderboard Display'}
+            {t('contest.leaderboardVisibility')}
           </label>
           <select
             value={leaderboardVisibility}
             onChange={(e) => setLeaderboardVisibility(e.target.value as LeaderboardVisibilityType)}
             className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-[var(--color-surface-muted)] border border-[var(--border)] text-[var(--color-foreground)]"
           >
-            <option value="live">{t('contest.leaderboardLive') || 'Live (Real-time ranks during contest)'}</option>
-            <option value="after_end">{t('contest.leaderboardAfterEnd') || 'After End (Reveal only when contest ends)'}</option>
-            <option value="hidden">{t('contest.leaderboardHidden') || 'Hidden (Teacher only)'}</option>
+            <option value="live">{t('contest.leaderboardLive')}</option>
+            <option value="after_end">{t('contest.leaderboardAfterEnd')}</option>
+            <option value="hidden">{t('contest.leaderboardHidden')}</option>
           </select>
         </div>
 
@@ -115,10 +115,10 @@ export function ContestSettingsSection({
                   onChange={(e) => setEnableNegativeMarking(e.target.checked)}
                   className="h-4 w-4 text-[var(--primary)] focus:ring-[var(--primary)] border-[var(--border)] rounded cursor-pointer"
                 />
-                <span>{t('contest.enableNegativeMarking') || 'Enable Negative Marking'}</span>
+                <span>{t('contest.enableNegativeMarking')}</span>
               </label>
               <p className="text-[11px] sm:text-xs text-[var(--color-muted-foreground)] mt-0.5 ml-6">
-                {t('contest.negativeMarkingDesc') || 'Deduct marks for incorrect answers to simulate competitive exam grading.'}
+                {t('contest.negativeMarkingDesc')}
               </p>
             </div>
           </div>
@@ -127,14 +127,14 @@ export function ContestSettingsSection({
             <div className="pt-2 border-t border-[var(--border)] space-y-3 ml-6">
               <div>
                 <label className="block text-xs font-semibold text-[var(--color-foreground)] mb-1.5">
-                  {t('contest.negativeMarks') || 'Penalty per incorrect answer'}
+                  {t('contest.negativeMarks')}
                 </label>
                 <div className="flex flex-wrap items-center gap-2 mb-2">
                   {[
-                    { label: t('contest.negativeMarksPresetQuarter') || '1/4 (-0.25)', value: '0.25' },
-                    { label: t('contest.negativeMarksPresetThird') || '1/3 (-0.33)', value: '0.33' },
-                    { label: t('contest.negativeMarksPresetHalf') || '1/2 (-0.5)', value: '0.5' },
-                    { label: t('contest.negativeMarksPresetOne') || '1 (-1.0)', value: '1' },
+                    { label: t('contest.negativeMarksPresetQuarter'), value: '0.25' },
+                    { label: t('contest.negativeMarksPresetThird'), value: '0.33' },
+                    { label: t('contest.negativeMarksPresetHalf'), value: '0.5' },
+                    { label: t('contest.negativeMarksPresetOne'), value: '1' },
                   ].map((preset) => (
                     <button
                       key={preset.value}
@@ -161,7 +161,7 @@ export function ContestSettingsSection({
                   className="w-32 px-3 py-1.5 text-xs sm:text-sm rounded-xl border border-[var(--border)] bg-[var(--card-solid)] text-[var(--color-foreground)] focus:ring-1 focus:ring-[var(--primary)]"
                 />
                 <span className="text-[11px] text-[var(--color-muted)] block mt-1">
-                  {t('contest.negativeMarksHint') || 'Unattempted / skipped questions receive 0 deduction.'}
+                  {t('contest.negativeMarksHint')}
                 </span>
               </div>
             </div>

@@ -77,7 +77,7 @@ Feature toggles (`enableContests`, `enableQuizChallenges`, etc.) control visibil
 
 Prefer shared layout primitives over ad-hoc `space-y-*` / `p-4 sm:p-6`:
 
-- Components: `src/components/layout/*`
+- Components: `src/components/layout/*`. **CRITICAL:** Never add `className="space-y-*"` to `<PageWrapper>` as it already implements `gap` via `.stack-page`, causing excessive double-spacing on mobile.
 - CSS tokens & utilities: `src/app/globals.css` (`--gutter-x`, `--section-gap`, `.stack-page`, `.card-body`, `.mobile-header-spacer`, etc.)
 - TS reference: `src/constants/spacing.ts`
 

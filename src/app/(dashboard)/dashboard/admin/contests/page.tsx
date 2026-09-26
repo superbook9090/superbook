@@ -33,17 +33,17 @@ export default function AdminContestsPage() {
   const stats = data?.stats || { liveCount: 0, upcomingCount: 0, completedCount: 0 };
 
   return (
-    <PageWrapper className="space-y-6">
+    <PageWrapper>
       {/* Hero Header Banner */}
-      <div className="hero-banner flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 sm:p-8 rounded-3xl">
+      <div className="hero-banner flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 sm:p-6 md:p-8 rounded-3xl">
         <div className="space-y-1 max-w-xl">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[var(--admin-soft)] text-[var(--admin-primary)] border border-[var(--admin-border)]">
             <Trophy className="w-3.5 h-3.5" />
-            <span>{t('common.contests') || 'All Contests'}</span>
+            <span>{t('common.contests')}</span>
           </div>
-          <h1 className="heading-xl">{t('common.contests') || 'All Contests'}</h1>
+          <h1 className="heading-xl">{t('common.contests')}</h1>
           <p className="text-sm sm:text-base text-[var(--color-muted-foreground)]">
-            {t('contest.adminContestsDesc') || 'View, manage, and moderate all contests across the platform.'}
+            {t('contest.adminContestsDesc')}
           </p>
         </div>
 
@@ -52,7 +52,7 @@ export default function AdminContestsPage() {
           className="btn-premium inline-flex items-center justify-center gap-2 min-h-[44px] px-6 py-2.5 text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition-all self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
-          <span>{t('contest.createNewContest') || 'Create Contest'}</span>
+          <span>{t('contest.createNewContest')}</span>
         </Link>
       </div>
 
@@ -60,10 +60,10 @@ export default function AdminContestsPage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {(
           [
-            { label: t('common.all') || 'Total', value: contests.length, color: 'var(--admin-primary)', icon: <LayoutList className="w-4 h-4" /> },
-            { label: t('contest.live') || 'Live', value: stats.liveCount, color: 'var(--error)', icon: <Flame className="w-4 h-4" /> },
-            { label: t('contest.upcoming') || 'Upcoming', value: stats.upcomingCount, color: 'var(--primary)', icon: <Clock className="w-4 h-4" /> },
-            { label: t('contest.completed') || 'Completed', value: stats.completedCount, color: 'var(--success)', icon: <CheckCircle className="w-4 h-4" /> },
+            { label: t('common.all'), value: contests.length, color: 'var(--admin-primary)', icon: <LayoutList className="w-4 h-4" /> },
+            { label: t('contest.live'), value: stats.liveCount, color: 'var(--error)', icon: <Flame className="w-4 h-4" /> },
+            { label: t('contest.upcoming'), value: stats.upcomingCount, color: 'var(--primary)', icon: <Clock className="w-4 h-4" /> },
+            { label: t('contest.completed'), value: stats.completedCount, color: 'var(--success)', icon: <CheckCircle className="w-4 h-4" /> },
           ] as { label: string; value: number; color: string; icon: React.ReactNode }[]
         ).map((s) => (
           <div
@@ -86,7 +86,7 @@ export default function AdminContestsPage() {
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder={t('contest.searchContests') || 'Search contests by title or description…'}
+          placeholder={t('contest.searchContests')}
           className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-[var(--card-solid)] border border-[var(--border)] text-sm text-[var(--color-foreground)] placeholder:text-[var(--color-muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)]/40 min-h-[44px]"
         />
       </div>
@@ -95,10 +95,10 @@ export default function AdminContestsPage() {
       <div className="flex items-center gap-2 border-b border-[var(--border)] pb-3 overflow-x-auto no-scrollbar">
         {(
           [
-            { id: 'all', label: t('common.all') || 'All', icon: <Trophy className="w-4 h-4" />, activeColor: 'bg-[var(--admin-primary)]', badge: null },
-            { id: 'live', label: t('contest.live') || 'Live', icon: <Flame className="w-4 h-4" />, activeColor: 'bg-[var(--error)]', badge: stats.liveCount },
-            { id: 'upcoming', label: t('contest.upcoming') || 'Upcoming', icon: <Clock className="w-4 h-4" />, activeColor: 'bg-[var(--primary)]', badge: stats.upcomingCount },
-            { id: 'completed', label: t('contest.completed') || 'Completed', icon: <CheckCircle className="w-4 h-4" />, activeColor: 'bg-[var(--student-primary)]', badge: stats.completedCount },
+            { id: 'all', label: t('common.all'), icon: <Trophy className="w-4 h-4" />, activeColor: 'bg-[var(--admin-primary)]', badge: null },
+            { id: 'live', label: t('contest.live'), icon: <Flame className="w-4 h-4" />, activeColor: 'bg-[var(--error)]', badge: stats.liveCount },
+            { id: 'upcoming', label: t('contest.upcoming'), icon: <Clock className="w-4 h-4" />, activeColor: 'bg-[var(--primary)]', badge: stats.upcomingCount },
+            { id: 'completed', label: t('contest.completed'), icon: <CheckCircle className="w-4 h-4" />, activeColor: 'bg-[var(--student-primary)]', badge: stats.completedCount },
           ] as { id: string; label: string; icon: React.ReactNode; activeColor: string; badge: number | null }[]
         ).map((tab) => (
           <button
@@ -128,11 +128,11 @@ export default function AdminContestsPage() {
       ) : contests.length === 0 ? (
         <EmptyState
           icon={Trophy}
-          title={t('contest.noContests') || 'No Contests Found'}
+          title={t('contest.noContests')}
           description={
             activeTab === 'all' && !search
-              ? (t('contest.noContestsAdminDesc') || 'No contests have been created on the platform yet.')
-              : (t('contest.noContestsFilterDesc') || 'Try adjusting your filters or search query.')
+              ? (t('contest.noContestsAdminDesc'))
+              : (t('contest.noContestsFilterDesc'))
           }
           action={
             <Link
@@ -140,7 +140,7 @@ export default function AdminContestsPage() {
               className="btn-premium inline-flex items-center gap-2 min-h-[44px]"
             >
               <Plus className="w-4 h-4" />
-              <span>{t('contest.createNewContest') || 'Create Contest'}</span>
+              <span>{t('contest.createNewContest')}</span>
             </Link>
           }
         />

@@ -147,7 +147,7 @@ export function UserDetailModal({
                     {selectedUser.name}
                   </h3>
                   {selectedUser.isVerified && (
-                    <Tooltip label={t('adminUsers.verified') || 'Verified Account'}>
+                    <Tooltip label={t('adminUsers.verified')}>
                       <CheckCircle2 className="w-4 h-4 text-[var(--success)] shrink-0" />
                     </Tooltip>
                   )}
@@ -156,7 +156,7 @@ export function UserDetailModal({
                   </span>
                   {selectedUser.isSuspended && (
                     <span className="px-2 py-0.5 text-[11px] font-bold rounded-full bg-[var(--error-light)] text-[var(--error)]">
-                      {t('adminUsers.suspended') || 'Suspended'}
+                      {t('adminUsers.suspended')}
                     </span>
                   )}
                 </div>
@@ -165,7 +165,7 @@ export function UserDetailModal({
                   <button
                     onClick={copyUserId}
                     className="flex items-center gap-1.5 bg-[var(--color-surface-muted)] hover:bg-[var(--color-surface-muted-strong)] px-2 py-0.5 rounded-md transition-colors font-mono text-[11px] text-[var(--color-muted-foreground)]"
-                    title={t('adminUsers.copyUserId') || 'Copy User ID'}
+                    title={t('adminUsers.copyUserId')}
                   >
                     <Shield className="w-3 h-3 text-[var(--info)] shrink-0" />
                     <span className="truncate max-w-[120px] sm:max-w-none">ID: {selectedUser._id}</span>

@@ -103,7 +103,7 @@ export default function PhoneLoginForm({ theme, callbackUrl, onBackToEmail }: Ph
         if (formattedPhone.length === 10) {
           formattedPhone = '+91' + formattedPhone;
         } else {
-          addAlert({ type: 'error', message: t('login.invalidPhone') || 'Please enter phone number with country code (e.g. +91...)' });
+          addAlert({ type: 'error', message: t('login.invalidPhone') });
           setIsLoading(false);
           return;
         }
@@ -115,7 +115,7 @@ export default function PhoneLoginForm({ theme, callbackUrl, onBackToEmail }: Ph
     } catch (err) {
       console.error('Error sending OTP:', err);
       const errMsg = err instanceof Error ? err.message : String(err);
-      addAlert({ type: 'error', message: errMsg || t('login.genericError') || 'Failed to send OTP. Please try again.' });
+      addAlert({ type: 'error', message: errMsg || t('login.genericError') });
       if (window.recaptchaVerifier) {
         try {
           window.recaptchaVerifier.clear();
@@ -152,7 +152,7 @@ export default function PhoneLoginForm({ theme, callbackUrl, onBackToEmail }: Ph
       });
 
       if (result?.error) {
-        addAlert({ type: 'error', message: t('login.invalidOtp') || 'Invalid code. Please try again.' });
+        addAlert({ type: 'error', message: t('login.invalidOtp') });
         setIsLoading(false);
         return;
       }
@@ -165,7 +165,7 @@ export default function PhoneLoginForm({ theme, callbackUrl, onBackToEmail }: Ph
       router.push(callbackUrl);
     } catch (err) {
       console.error('Error verifying OTP:', err);
-      addAlert({ type: 'error', message: t('login.invalidOtp') || 'Invalid verification code.' });
+      addAlert({ type: 'error', message: t('login.invalidOtp') });
     } finally {
       setIsLoading(false);
     }
@@ -194,7 +194,7 @@ export default function PhoneLoginForm({ theme, callbackUrl, onBackToEmail }: Ph
           >
             <div className="flex flex-col">
               <label className="text-sm font-semibold text-[var(--color-foreground)] mb-1.5 ml-1">
-                {t('login.enterPhone') || 'Phone Number'}
+                {t('login.enterPhone')}
               </label>
 
               <div className="relative flex items-center min-h-[50px] sm:min-h-[56px] w-full rounded-2xl bg-[var(--color-surface)] border-2 border-[var(--color-border)] focus-within:border-[var(--color-primary)] focus-within:shadow-[0_0_0_3px_var(--color-primary)]/10 transition-all overflow-hidden group">
@@ -227,7 +227,7 @@ export default function PhoneLoginForm({ theme, callbackUrl, onBackToEmail }: Ph
                 <Loader size="sm" className="text-white" />
               ) : (
                 <>
-                  {t('login.sendOtp') || 'Continue'}
+                  {t('login.sendOtp')}
                   <ArrowRight className="w-4 h-4 ml-2 opacity-90" />
                 </>
               )}
@@ -245,7 +245,7 @@ export default function PhoneLoginForm({ theme, callbackUrl, onBackToEmail }: Ph
             <div className="flex flex-col">
               <div className="flex items-center justify-between mb-1.5 ml-1 mr-1">
                 <label className="text-sm font-semibold text-[var(--color-foreground)]">
-                  {t('login.enterOtp') || 'Verification Code'}
+                  {t('login.enterOtp')}
                 </label>
                 <button 
                   type="button" 
@@ -301,7 +301,7 @@ export default function PhoneLoginForm({ theme, callbackUrl, onBackToEmail }: Ph
                 <Loader size="sm" className="text-white" />
               ) : (
                 <>
-                  {t('login.verifyOtp') || 'Verify & Login'}
+                  {t('login.verifyOtp')}
                   <ArrowRight className="w-4 h-4 ml-2 opacity-90" />
                 </>
               )}
@@ -318,7 +318,7 @@ export default function PhoneLoginForm({ theme, callbackUrl, onBackToEmail }: Ph
         className="w-full flex items-center justify-center min-h-[44px] sm:min-h-[48px] bg-transparent border-2 border-[var(--color-border)] rounded-xl text-xs sm:text-sm font-semibold text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:border-[var(--color-muted)] hover:bg-[var(--color-surface-muted)] transition-all mt-1"
       >
         <ArrowLeft className="w-4 h-4 mr-2 opacity-70" />
-        {isOtpSent ? (t('common.back') || 'Back to Phone Number') : (t('login.backToEmail') || 'Back to Email Login')}
+        {isOtpSent ? (t('common.back')) : (t('login.backToEmail'))}
       </motion.button>
     </form>
   );

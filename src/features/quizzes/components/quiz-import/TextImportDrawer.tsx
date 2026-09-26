@@ -63,8 +63,7 @@ export function TextImportDrawer({
         <div className="mb-2 flex items-center gap-2 text-xs text-[var(--color-muted-foreground)]">
           <span className="inline-block w-2 h-2 rounded-full bg-[var(--color-success)]" />
           <span>
-            {t('createQuizForm.supportsRawAndPipeText') ||
-              'Auto-detects pasted questions with options (A, B, C, D) & answer key or pipe-separated format.'}
+            {t('createQuizForm.supportsRawAndPipeText')}
           </span>
         </div>
         <textarea

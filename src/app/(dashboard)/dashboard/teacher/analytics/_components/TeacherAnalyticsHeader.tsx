@@ -18,7 +18,7 @@ export default function TeacherAnalyticsHeader({
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      className="hero-banner flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 sm:p-8 rounded-3xl"
+      className="hero-banner flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-4 sm:p-6 md:p-8 rounded-3xl"
     >
       <div className="space-y-1.5 max-w-xl">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[var(--teacher-soft)] text-[var(--teacher-primary)] border border-[var(--teacher-border)]">

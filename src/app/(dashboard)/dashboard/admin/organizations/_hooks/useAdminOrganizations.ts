@@ -257,7 +257,7 @@ export function useAdminOrganizations() {
     try {
       setIsSubmitting(true);
       await deleteOrganization(deleteTargetOrg._id);
-      addAlert({ type: 'success', message: t('common.deletedSuccessfully') || 'Deleted successfully' });
+      addAlert({ type: 'success', message: t('common.deletedSuccessfully') });
       setShowDeleteDialog(false);
       setShowDetailModal(false);
       setDeleteTargetOrg(null);

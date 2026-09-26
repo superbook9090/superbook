@@ -46,29 +46,29 @@ export function FileGridCard({
 
   const dropdownItems = [
     {
-      label: t('files.preview') || 'Preview',
+      label: t('files.preview'),
       icon: <Eye className="w-4 h-4" />,
       onClick: () => onPreview(file),
     },
     {
-      label: t('files.download') || 'Download',
+      label: t('files.download'),
       icon: <Download className="w-4 h-4" />,
       onClick: () => onDownload(file),
     },
     {
-      label: t('files.copyLink') || 'Copy Link',
+      label: t('files.copyLink'),
       icon: <LinkIcon className="w-4 h-4" />,
       onClick: () => onCopyLink(file),
     },
     ...(canMutate
       ? [
           {
-            label: t('common.edit') || 'Rename',
+            label: t('common.edit'),
             icon: <Pencil className="w-4 h-4" />,
             onClick: () => onRename(file),
           },
           {
-            label: t('common.delete') || 'Delete',
+            label: t('common.delete'),
             icon: <Trash2 className="w-4 h-4 text-[var(--color-error)]" />,
             onClick: () => onDelete(file),
             className: 'text-[var(--color-error)] hover:bg-[var(--color-error-light)]',
@@ -111,7 +111,7 @@ export function FileGridCard({
               <button
                 type="button"
                 className="p-1.5 rounded-lg text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted)] transition-colors"
-                aria-label={t('files.actions') || 'Actions'}
+                aria-label={t('files.actions')}
               >
                 <MoreVertical className="w-4 h-4" />
               </button>
@@ -125,32 +125,32 @@ export function FileGridCard({
         <span className="text-xs text-[var(--color-muted-foreground)]">{formattedDate}</span>
 
         <div className="flex items-center gap-1">
-          <Tooltip label={t('files.preview') || 'Preview'}>
+          <Tooltip label={t('files.preview')}>
             <button
               type="button"
               onClick={() => onPreview(file)}
               className="p-1.5 rounded-lg bg-[var(--color-surface-muted)] hover:bg-[var(--primary-soft)] text-[var(--color-muted-foreground)] hover:text-[var(--primary)] transition-colors"
-              aria-label={t('files.preview') || 'Preview'}
+              aria-label={t('files.preview')}
             >
               <Eye className="w-4 h-4" />
             </button>
           </Tooltip>
-          <Tooltip label={t('files.download') || 'Download'}>
+          <Tooltip label={t('files.download')}>
             <button
               type="button"
               onClick={() => onDownload(file)}
               className="p-1.5 rounded-lg bg-[var(--color-surface-muted)] hover:bg-[var(--primary-soft)] text-[var(--color-muted-foreground)] hover:text-[var(--primary)] transition-colors"
-              aria-label={t('files.download') || 'Download'}
+              aria-label={t('files.download')}
             >
               <Download className="w-4 h-4" />
             </button>
           </Tooltip>
-          <Tooltip label={t('files.copyLink') || 'Copy Link'}>
+          <Tooltip label={t('files.copyLink')}>
             <button
               type="button"
               onClick={() => onCopyLink(file)}
               className="p-1.5 rounded-lg bg-[var(--color-surface-muted)] hover:bg-[var(--primary-soft)] text-[var(--color-muted-foreground)] hover:text-[var(--primary)] transition-colors"
-              aria-label={t('files.copyLink') || 'Copy Link'}
+              aria-label={t('files.copyLink')}
             >
               <LinkIcon className="w-4 h-4" />
             </button>

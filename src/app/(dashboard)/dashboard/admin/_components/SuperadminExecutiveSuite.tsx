@@ -24,32 +24,32 @@ export default function SuperadminExecutiveSuite({ stats }: SuperadminExecutiveS
 
   const cards = [
     {
-      title: t('admin.multiTenantHub') || 'Multi-Tenant Hub',
-      subtitle: t('admin.tenancyHealth') || 'Organizations & Isolation',
-      metric: stats?.users?.total ? `${stats.users.total} ${t('admin.users') || 'Users'}` : 'Multi-Tenant',
-      status: t('admin.activeNow') || 'Live Isolation',
+      title: t('admin.multiTenantHub'),
+      subtitle: t('admin.tenancyHealth'),
+      metric: stats?.users?.total ? `${stats.users.total} ${t('admin.users')}` : 'Multi-Tenant',
+      status: t('admin.activeNow'),
       icon: Building2,
       href: ROUTES.admin.organizations,
       accentBg: 'from-amber-500/15 via-amber-500/5 to-transparent',
       borderColor: 'border-amber-500/30 hover:border-amber-500/60',
       iconColor: 'text-amber-500 bg-amber-500/15 border-amber-500/25',
-      cta: t('admin.manageOrganizations') || 'Manage Orgs',
+      cta: t('admin.manageOrganizations'),
     },
     {
-      title: t('admin.broadcastDispatcher') || 'Broadcast Dispatcher',
-      subtitle: t('admin.readyToBroadcast') || 'Global Push & In-App',
+      title: t('admin.broadcastDispatcher'),
+      subtitle: t('admin.readyToBroadcast'),
       metric: 'Push FCM',
-      status: t('admin.readyToBroadcast') || 'Broadcast Ready',
+      status: t('admin.readyToBroadcast'),
       icon: Bell,
       href: ROUTES.admin.notifications,
       accentBg: 'from-rose-500/15 via-rose-500/5 to-transparent',
       borderColor: 'border-rose-500/30 hover:border-rose-500/60',
       iconColor: 'text-rose-500 bg-rose-500/15 border-rose-500/25',
-      cta: t('admin.emergencyBroadcast') || 'Dispatch Alert',
+      cta: t('admin.emergencyBroadcast'),
     },
     {
-      title: t('admin.liveMaintenanceMode') || 'Platform Maintenance',
-      subtitle: t('admin.maintenanceDisabled') || 'Normal Operation',
+      title: t('admin.liveMaintenanceMode'),
+      subtitle: t('admin.maintenanceDisabled'),
       metric: 'Active',
       status: 'Redis & Mongo Synced',
       icon: Sliders,
@@ -57,11 +57,11 @@ export default function SuperadminExecutiveSuite({ stats }: SuperadminExecutiveS
       accentBg: 'from-purple-500/15 via-purple-500/5 to-transparent',
       borderColor: 'border-purple-500/30 hover:border-purple-500/60',
       iconColor: 'text-purple-500 bg-purple-500/15 border-purple-500/25',
-      cta: t('admin.settings') || 'Configure Settings',
+      cta: t('admin.settings'),
     },
     {
-      title: t('admin.cloudStorage') || 'Cloud File Storage',
-      subtitle: t('admin.storageCapacity') || 'Platform File Assets',
+      title: t('admin.cloudStorage'),
+      subtitle: t('admin.storageCapacity'),
       metric: 'CDN Active',
       status: 'Encrypted Storage',
       icon: FolderOpen,
@@ -69,7 +69,7 @@ export default function SuperadminExecutiveSuite({ stats }: SuperadminExecutiveS
       accentBg: 'from-sky-500/15 via-sky-500/5 to-transparent',
       borderColor: 'border-sky-500/30 hover:border-sky-500/60',
       iconColor: 'text-sky-500 bg-sky-500/15 border-sky-500/25',
-      cta: t('common.files') || 'Browse Files',
+      cta: t('common.files'),
     },
   ];
 
@@ -88,7 +88,7 @@ export default function SuperadminExecutiveSuite({ stats }: SuperadminExecutiveS
           </div>
           <div>
             <h2 id="superadmin-suite-heading" className="text-sm sm:text-base font-black tracking-tight text-[var(--color-foreground)] flex items-center gap-2">
-              <span>{t('admin.superadminTier') || 'Superadmin Executive Control'}</span>
+              <span>{t('admin.superadminTier')}</span>
               <span className="text-[9px] uppercase font-extrabold px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-500 border border-amber-500/30">
                 Exclusive
               </span>

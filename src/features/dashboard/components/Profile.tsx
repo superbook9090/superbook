@@ -36,9 +36,9 @@ export default function Profile({ session, descriptionKey }: ProfileProps) {
 
   const pageDescription = (() => {
     if (descriptionKey) return t(`profile.${descriptionKey}`);
-    if (superAdmin || role === 'admin') return t('profile.adminProfileDesc') || 'Manage administrative credentials and permissions.';
-    if (role === 'teacher') return t('profile.teacherProfileDesc') || 'Manage educator settings and courseware preferences.';
-    return t('profile.studentProfileDesc') || 'Manage your student profile, security settings, and learning preferences.';
+    if (superAdmin || role === 'admin') return t('profile.adminProfileDesc');
+    if (role === 'teacher') return t('profile.teacherProfileDesc');
+    return t('profile.studentProfileDesc');
   })();
 
   const RoleHeaderIcon = (() => {
@@ -57,7 +57,7 @@ export default function Profile({ session, descriptionKey }: ProfileProps) {
             <span className="p-2.5 bg-[var(--primary-soft)] text-[var(--primary)] rounded-xl shrink-0 inline-flex shadow-xs">
               <RoleHeaderIcon className="w-6 h-6" />
             </span>
-            <span>{t('profile.myProfile') || 'My Profile'}</span>
+            <span>{t('profile.myProfile')}</span>
           </span>
         }
         description={pageDescription}

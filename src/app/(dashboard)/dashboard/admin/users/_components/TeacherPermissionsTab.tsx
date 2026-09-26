@@ -27,8 +27,8 @@ export function TeacherPermissionsTab({
       id: 'video',
       icon: <Video className="w-4 h-4" />,
       iconBg: 'bg-violet-500/10 text-violet-600 dark:text-violet-400',
-      title: t('adminUsers.videoUploadPermission') || 'Video Uploads',
-      desc: t('adminUsers.videoUploadPermissionDesc') || 'Allow unlisted YouTube video lectures.',
+      title: t('adminUsers.videoUploadPermission'),
+      desc: t('adminUsers.videoUploadPermissionDesc'),
       checked: Boolean(user.canUploadVideos),
       onToggle: () => onToggleVideo(Boolean(user.canUploadVideos)),
       activeClass: 'peer-checked:bg-[var(--teacher-primary)]',
@@ -37,8 +37,8 @@ export function TeacherPermissionsTab({
       id: 'publicCourse',
       icon: <Globe className="w-4 h-4" />,
       iconBg: 'bg-sky-500/10 text-sky-600 dark:text-sky-400',
-      title: t('adminUsers.canCreatePublicCourses') || 'Public Courses',
-      desc: t('adminUsers.canCreatePublicCoursesDesc') || 'Create open courses without join codes.',
+      title: t('adminUsers.canCreatePublicCourses'),
+      desc: t('adminUsers.canCreatePublicCoursesDesc'),
       checked: Boolean(user.canCreatePublicCourses),
       onToggle: () => onTogglePublicCourse(Boolean(user.canCreatePublicCourses)),
       activeClass: 'peer-checked:bg-[var(--teacher-primary)]',
@@ -47,8 +47,8 @@ export function TeacherPermissionsTab({
       id: 'contests',
       icon: <Trophy className="w-4 h-4" />,
       iconBg: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
-      title: t('adminUsers.canCreateContests') || 'Contest Creator',
-      desc: t('adminUsers.canCreateContestsDesc') || 'Create & schedule live competitive contests.',
+      title: t('adminUsers.canCreateContests'),
+      desc: t('adminUsers.canCreateContestsDesc'),
       checked: Boolean(user.canCreateContests),
       onToggle: () => onToggleContest?.(Boolean(user.canCreateContests)),
       activeClass: 'peer-checked:bg-[var(--warning)]',
@@ -57,8 +57,8 @@ export function TeacherPermissionsTab({
       id: 'aiQuiz',
       icon: <Sparkles className="w-4 h-4" />,
       iconBg: 'bg-[var(--primary-soft)] text-[var(--color-primary)]',
-      title: t('adminUsers.canGenerateAiQuizzes') || 'AI Quiz Generation',
-      desc: t('adminUsers.canGenerateAiQuizzesDesc') || 'Allow teacher to generate quiz questions using AI.',
+      title: t('adminUsers.canGenerateAiQuizzes'),
+      desc: t('adminUsers.canGenerateAiQuizzesDesc'),
       checked: Boolean(user.canGenerateAiQuizzes),
       onToggle: () => onToggleAiQuizGen?.(Boolean(user.canGenerateAiQuizzes)),
       activeClass: 'peer-checked:bg-[var(--color-primary)]',
@@ -73,7 +73,7 @@ export function TeacherPermissionsTab({
       <div className="flex items-center justify-between px-4 py-2.5 bg-[var(--color-surface-muted)]/50 border-b border-[var(--border)] text-xs text-[var(--color-muted-foreground)]">
         <span className="flex items-center gap-1.5 font-medium">
           <ShieldCheck className="w-3.5 h-3.5 text-[var(--teacher-primary)]" />
-          <span>{t('adminUsers.featurePermissions') || 'Feature Permissions'}</span>
+          <span>{t('adminUsers.featurePermissions')}</span>
         </span>
         <span className="font-semibold text-[var(--color-foreground)]">
           {enabledCount} of {permissions.length} active

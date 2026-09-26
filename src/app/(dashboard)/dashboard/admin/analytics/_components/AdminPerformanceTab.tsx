@@ -114,7 +114,7 @@ export function AdminPerformanceTab({ stats }: AdminPerformanceTabProps) {
               <p className="text-xl sm:text-2xl font-black tabular-nums text-[var(--success)] font-[family-name:var(--font-display)] mt-3 sm:mt-4">
                 &ge; 80%
               </p>
-              <p className="text-[10px] sm:text-[11px] text-[var(--color-foreground)]/70 mt-1">{t('adminAnalytics.highMastery') || 'High Mastery & Retention'}</p>
+              <p className="text-[10px] sm:text-[11px] text-[var(--color-foreground)]/70 mt-1">{t('adminAnalytics.highMastery')}</p>
             </div>
 
             <div className="p-3.5 sm:p-4 rounded-xl bg-[var(--warning-light)] border border-[var(--warning)]/20 flex flex-col justify-between">
@@ -127,7 +127,7 @@ export function AdminPerformanceTab({ stats }: AdminPerformanceTabProps) {
               <p className="text-xl sm:text-2xl font-black tabular-nums text-[var(--warning)] font-[family-name:var(--font-display)] mt-3 sm:mt-4">
                 50% - 79%
               </p>
-              <p className="text-[10px] sm:text-[11px] text-[var(--color-foreground)]/70 mt-1">{t('adminAnalytics.steadyProgress') || 'Steady Progress & Passing'}</p>
+              <p className="text-[10px] sm:text-[11px] text-[var(--color-foreground)]/70 mt-1">{t('adminAnalytics.steadyProgress')}</p>
             </div>
 
             <div className="p-3.5 sm:p-4 rounded-xl bg-[var(--error-light)] border border-[var(--error)]/20 flex flex-col justify-between">
@@ -140,7 +140,7 @@ export function AdminPerformanceTab({ stats }: AdminPerformanceTabProps) {
               <p className="text-xl sm:text-2xl font-black tabular-nums text-[var(--error)] font-[family-name:var(--font-display)] mt-3 sm:mt-4">
                 &lt; 50%
               </p>
-              <p className="text-[10px] sm:text-[11px] text-[var(--color-foreground)]/70 mt-1">{t('adminAnalytics.requiresRemediation') || 'Requires Remediation'}</p>
+              <p className="text-[10px] sm:text-[11px] text-[var(--color-foreground)]/70 mt-1">{t('adminAnalytics.requiresRemediation')}</p>
             </div>
           </div>
         </div>

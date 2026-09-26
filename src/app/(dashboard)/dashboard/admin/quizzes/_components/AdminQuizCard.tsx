@@ -60,7 +60,7 @@ export function AdminQuizCard({
               <HelpCircle className="w-4.5 h-4.5" />
             </div>
             <span className="text-xs font-bold text-[var(--color-muted-foreground)]">
-              {questionCount} {t('common.questions') || 'questions'}
+              {questionCount} {t('common.questions')}
             </span>
           </div>
 
@@ -75,7 +75,7 @@ export function AdminQuizCard({
             {quiz.title}
           </h3>
           <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] line-clamp-2 mt-1 leading-relaxed">
-            {quiz.description || t('quizzes.noDescription') || 'No description provided.'}
+            {quiz.description || t('quizzes.noDescription')}
           </p>
         </div>
 
@@ -111,7 +111,7 @@ export function AdminQuizCard({
 
       {/* Action Bar */}
       <div className="px-5 py-3.5 bg-[var(--surface-muted)]/50 border-t border-[var(--border)]/60 flex items-center justify-between gap-2">
-        <Tooltip label={quiz.isPublished ? t('common.unpublish') || 'Unpublish' : t('common.publish') || 'Publish'}>
+        <Tooltip label={quiz.isPublished ? t('common.unpublish') : t('common.publish')}>
           <button
             type="button"
             onClick={() => onTogglePublish(quiz._id, quiz.isPublished)}
@@ -126,7 +126,7 @@ export function AdminQuizCard({
         </Tooltip>
 
         <div className="flex items-center gap-1.5">
-          <Tooltip label={t('quiz.leaderboard.title') || 'Leaderboard'}>
+          <Tooltip label={t('quiz.leaderboard.title')}>
             <button
               type="button"
               onClick={() => router.push(`${ROUTES.admin.quizEdit(quiz._id)}?tab=leaderboard`)}
@@ -146,7 +146,7 @@ export function AdminQuizCard({
             <span>{t('common.edit')}</span>
           </Button>
 
-          <Tooltip label={t('common.delete') || 'Delete'}>
+          <Tooltip label={t('common.delete')}>
             <button
               type="button"
               onClick={() => onDelete(quiz._id)}

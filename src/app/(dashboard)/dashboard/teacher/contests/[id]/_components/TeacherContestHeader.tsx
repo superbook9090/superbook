@@ -39,7 +39,7 @@ export default function TeacherContestHeader({
           className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors min-h-[44px]"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>{t('contest.backToContests') || 'Back to Contests'}</span>
+          <span>{t('contest.backToContests')}</span>
         </Link>
 
         <div className="flex items-center gap-2">
@@ -49,7 +49,7 @@ export default function TeacherContestHeader({
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[var(--color-surface-muted)] hover:bg-[var(--color-surface-muted-strong)] text-[var(--color-foreground)] border border-[var(--border)] shadow-xs transition-colors min-h-[44px]"
             >
               <Edit className="w-3.5 h-3.5" />
-              <span>{t('common.edit') || 'Edit Contest'}</span>
+              <span>{t('common.edit')}</span>
             </Link>
           )}
 
@@ -60,7 +60,7 @@ export default function TeacherContestHeader({
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[var(--warning-light)] text-[var(--warning-foreground)] border border-[var(--warning)]/30 shadow-xs hover:bg-[var(--warning-light)]/80 transition-colors min-h-[44px]"
             >
               <StopCircle className="w-3.5 h-3.5" />
-              <span>{t('contest.endContestEarly') || 'End Contest Early'}</span>
+              <span>{t('contest.endContestEarly')}</span>
             </button>
           )}
 
@@ -70,13 +70,13 @@ export default function TeacherContestHeader({
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[var(--error-light)] text-[var(--error)] border border-[var(--error)]/30 shadow-xs hover:bg-[var(--error-light)]/80 transition-colors min-h-[44px]"
           >
             <Trash2 className="w-3.5 h-3.5" />
-            <span>{t('common.delete') || 'Delete'}</span>
+            <span>{t('common.delete')}</span>
           </button>
         </div>
       </div>
 
       {/* Main Header Banner */}
-      <div className="hero-banner p-6 sm:p-8 rounded-3xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div className="hero-banner p-4 sm:p-6 md:p-8 rounded-3xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             {state === 'live' ? (
@@ -106,11 +106,11 @@ export default function TeacherContestHeader({
           </h1>
 
           <div className="flex flex-wrap items-center gap-3 text-xs font-medium text-[var(--color-muted-foreground)]">
-            <span>{t('contest.start') || 'Start'}: {formatDateTime(contest.startTime)}</span>
+            <span>{t('contest.start')}: {formatDateTime(contest.startTime)}</span>
             <span>•</span>
-            <span>{t('contest.end') || 'End'}: {formatDateTime(contest.endTime)}</span>
+            <span>{t('contest.end')}: {formatDateTime(contest.endTime)}</span>
             <span>•</span>
-            <span>{t('contest.duration') || 'Duration'}: {contest.duration} {t('common.mins') || 'mins'}</span>
+            <span>{t('contest.duration')}: {contest.duration} {t('common.mins')}</span>
           </div>
         </div>
 
@@ -118,7 +118,7 @@ export default function TeacherContestHeader({
           <div className="p-4 rounded-2xl antigravity-glass bg-[var(--color-surface-muted)]/60 border border-[var(--border)] text-center shrink-0">
             <ContestCountdown
               targetDate={contest.endTime}
-              label={t('contest.remainingLiveTime') || 'Remaining Live Time'}
+              label={t('contest.remainingLiveTime')}
               type="ends_in"
             />
           </div>

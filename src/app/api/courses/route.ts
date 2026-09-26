@@ -47,8 +47,8 @@ export async function GET(request: NextRequest) {
     const instructor = searchParams.get('instructor');
     const isPublished = searchParams.get('isPublished');
     const available = searchParams.get('available'); // For students to browse
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '20');
+    const page = parseInt(searchParams.get('page'));
+    const limit = parseInt(searchParams.get('limit'));
     const skip = (page - 1) * limit;
     const fields = searchParams.get('fields'); // Comma-separated fields to select
 

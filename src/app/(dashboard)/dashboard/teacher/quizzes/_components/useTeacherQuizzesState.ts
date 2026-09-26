@@ -73,7 +73,7 @@ export function useTeacherQuizzesState(courses: Course[], orgId: string) {
     const quizId = toIdString(quiz._id);
     try {
       await patchQuiz(quizId, { isPublished: !quiz.isPublished });
-      addAlert({ type: 'success', message: t('teacherQuizzes.quizUpdated') || 'Quiz updated' });
+      addAlert({ type: 'success', message: t('teacherQuizzes.quizUpdated') });
       await invalidateAfterQuizChange(queryClient, getCourseId(quiz.course), orgId);
     } catch (err) {
       addAlert({ type: 'error', message: err instanceof ApiClientError ? err.message : t('teacherQuizzes.errorUpdateQuiz') });
@@ -86,7 +86,7 @@ export function useTeacherQuizzesState(courses: Course[], orgId: string) {
     const quiz = quizzes.find((q) => toIdString(q._id) === deleteTarget.id);
     try {
       await deleteQuiz(deleteTarget.id);
-      addAlert({ type: 'success', message: t('teacherQuizzes.quizDeleted') || 'Quiz deleted' });
+      addAlert({ type: 'success', message: t('teacherQuizzes.quizDeleted') });
       await invalidateAfterQuizChange(queryClient, quiz ? getCourseId(quiz.course) : '', orgId);
       setDeleteTarget(null);
     } catch (err) {

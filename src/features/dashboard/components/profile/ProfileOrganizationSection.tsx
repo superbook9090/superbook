@@ -66,13 +66,13 @@ export default function ProfileOrganizationSection({ session }: ProfileOrganizat
       router.refresh();
 
       setOrganizationName(response.organizationName);
-      addAlert({ type: 'success', message: t('profile.orgJoinedSuccess') || 'Successfully joined organization.' });
+      addAlert({ type: 'success', message: t('profile.orgJoinedSuccess') });
       setIsLinkingOrg(false);
       setInviteCode('');
     } catch (err) {
       console.error('Error joining organization:', err);
       const errMsg = err instanceof Error ? err.message : String(err);
-      addAlert({ type: 'error', message: errMsg || t('profile.orgJoinError') || 'Failed to join organization.' });
+      addAlert({ type: 'error', message: errMsg || t('profile.orgJoinError') });
     } finally {
       setIsLoading(false);
     }
@@ -80,16 +80,16 @@ export default function ProfileOrganizationSection({ session }: ProfileOrganizat
 
   return (
     <div>
-      <label className="block text-sm font-medium text-[var(--color-muted-foreground)]">{t('profile.organization') || 'Organization'}</label>
+      <label className="block text-sm font-medium text-[var(--color-muted-foreground)]">{t('profile.organization')}</label>
       {session.user?.organizationId ? (
         <p className="mt-1 text-sm sm:text-base text-[var(--color-foreground)] break-words">
-          {organizationName || t('profile.orgJoined') || 'Joined an Organization'}
+          {organizationName || t('profile.orgJoined')}
         </p>
       ) : isLinkingOrg ? (
         <form onSubmit={handleJoinOrganization} className="mt-2 space-y-3 max-w-md">
           <div className="space-y-3">
             <TextField
-              aria-label={t('profile.enterInviteCode') || 'Enter Invite Code'}
+              aria-label={t('profile.enterInviteCode')}
               value={inviteCode}
               onChange={(e) => setInviteCode(e.target.value)}
               placeholder="ORG-XXXX"
@@ -104,7 +104,7 @@ export default function ProfileOrganizationSection({ session }: ProfileOrganizat
                 isLoading={isLoading}
                 size="md"
               >
-                {t('profile.joinOrganization') || 'Join'}
+                {t('profile.joinOrganization')}
               </Button>
               <Button
                 type="button"
@@ -116,7 +116,7 @@ export default function ProfileOrganizationSection({ session }: ProfileOrganizat
                 disabled={isLoading}
                 size="md"
               >
-                {t('common.cancel') || 'Cancel'}
+                {t('common.cancel')}
               </Button>
             </div>
           </div>
@@ -124,7 +124,7 @@ export default function ProfileOrganizationSection({ session }: ProfileOrganizat
       ) : (
         <div className="mt-1 flex items-center justify-between gap-4">
           <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] italic">
-            {t('profile.noOrganization') || 'No organization linked'}
+            {t('profile.noOrganization')}
           </p>
           <Button
             variant="ghost"
@@ -133,7 +133,7 @@ export default function ProfileOrganizationSection({ session }: ProfileOrganizat
               setIsLinkingOrg(true);
             }}
           >
-            {t('profile.addOrganization') || 'Join Organization'}
+            {t('profile.addOrganization')}
           </Button>
         </div>
       )}

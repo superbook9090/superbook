@@ -29,19 +29,18 @@ export function ContestSolutionsReview({
         </div>
         <div>
           <h3 className="text-base sm:text-lg font-bold text-[var(--color-foreground)]">
-            {t('contest.solutionsLocked') || 'Answers & Detailed Review Locked'}
+            {t('contest.solutionsLocked')}
           </h3>
           <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] max-w-md mt-1">
             {message ||
-              t('contest.solutionsLockedDesc') ||
-              'To ensure fairness, correct answers and detailed explanations will be unlocked automatically at the scheduled release time.'}
+              t('contest.solutionsLockedDesc')}
           </p>
         </div>
 
         <div className="pt-2">
           <ContestCountdown
             targetDate={solutionsReleaseAt}
-            label={t('contest.solutionsUnlockIn') || 'Solutions Unlock In'}
+            label={t('contest.solutionsUnlockIn')}
             type="solutions_in"
           />
         </div>
@@ -52,7 +51,7 @@ export function ContestSolutionsReview({
   if (questionReviews.length === 0) {
     return (
       <div className="p-6 text-center text-xs text-[var(--color-muted-foreground)]">
-        {t('contest.noReviewAvailable') || 'No solution review data available.'}
+        {t('contest.noReviewAvailable')}
       </div>
     );
   }
@@ -63,11 +62,11 @@ export function ContestSolutionsReview({
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-[var(--success)]" />
           <h3 className="text-sm font-bold text-[var(--color-foreground)]">
-            {t('contest.solutionAndExplanation') || 'Solutions & Explanations'}
+            {t('contest.solutionAndExplanation')}
           </h3>
         </div>
         <span className="text-xs text-[var(--color-muted)] font-medium">
-          {questionReviews.length} {t('common.questions') || 'Questions'}
+          {questionReviews.length} {t('common.questions')}
         </span>
       </div>
 
@@ -110,7 +109,7 @@ export function ContestSolutionsReview({
                     ) : isSkipped ? (
                       <>
                         <Clock className="w-3.5 h-3.5" />
-                        <span>{t('contest.skippedPoints') || 'Skipped (0 pts)'}</span>
+                        <span>{t('contest.skippedPoints')}</span>
                       </>
                     ) : (
                       <>
@@ -118,7 +117,7 @@ export function ContestSolutionsReview({
                         <span>
                           {typeof q.pointsEarned === 'number' && q.pointsEarned < 0
                             ? `Incorrect (${q.pointsEarned} pts)`
-                            : t('contest.incorrectPoints') || 'Incorrect (0 pts)'}
+                            : t('contest.incorrectPoints')}
                         </span>
                       </>
                     )}
@@ -163,13 +162,13 @@ export function ContestSolutionsReview({
                         {isThisCorrect && (
                           <span className="text-[var(--success)] flex items-center gap-1">
                             <CheckCircle2 className="w-4 h-4" />
-                            {t('contest.correctAnswer') || 'Correct Answer'}
+                            {t('contest.correctAnswer')}
                           </span>
                         )}
                         {isThisSelected && !isThisCorrect && (
                           <span className="text-[var(--error)] flex items-center gap-1">
                             <XCircle className="w-4 h-4" />
-                            {t('contest.yourAnswer') || 'Your Answer'}
+                            {t('contest.yourAnswer')}
                           </span>
                         )}
                       </div>

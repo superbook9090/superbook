@@ -39,7 +39,7 @@ export default function HeaderStatic({ forceScrolled = false }: { forceScrolled?
               data-i18n-key="common.contests"
               className={`header-nav-btn ${forceScrolled ? 'header-nav-btn-dark' : 'header-nav-btn-light'}`}
             >
-              {t('common.contests') || 'Contests'}
+              {t('common.contests')}
             </Link>
             {enableBlogs && (
               <Link

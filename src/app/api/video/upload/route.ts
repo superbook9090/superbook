@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const title = request.nextUrl.searchParams.get('title') || 'Lecture Video';
+    const title = request.nextUrl.searchParams.get('title');
     const description = request.nextUrl.searchParams.get('description') || '';
 
     // Validate content type

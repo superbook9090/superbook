@@ -43,13 +43,13 @@ export default function StudentHero({ userName, enrolledCount }: StudentHeroProp
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5 pt-2 md:pt-0">
+        <div className="flex flex-wrap items-center gap-2 pt-2 md:pt-0">
           {enableCourses && (
             <Link
               href={ROUTES.student.browse}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold antigravity-glass text-[var(--color-foreground)] border border-[var(--border)] hover:border-[var(--student-primary)]/50 hover:shadow-md transition-all duration-300"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold antigravity-glass text-[var(--color-foreground)] border border-[var(--border)] hover:border-[var(--student-primary)]/50 hover:shadow-md transition-all duration-300"
             >
-              <Search className="w-4 h-4 text-[var(--student-primary)]" />
+              <Search className="w-3.5 h-3.5 text-[var(--student-primary)]" />
               <span>{t('dashboard.browseCatalog')}</span>
             </Link>
           )}
@@ -57,9 +57,9 @@ export default function StudentHero({ userName, enrolledCount }: StudentHeroProp
           {enableQuizzes && (
             <Link
               href={ROUTES.student.quizzes}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold antigravity-glass text-[var(--color-foreground)] border border-[var(--border)] hover:border-[var(--student-primary)]/50 hover:shadow-md transition-all duration-300"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold antigravity-glass text-[var(--color-foreground)] border border-[var(--border)] hover:border-[var(--student-primary)]/50 hover:shadow-md transition-all duration-300"
             >
-              <HelpCircle className="w-4 h-4 text-[var(--student-primary)]" />
+              <HelpCircle className="w-3.5 h-3.5 text-[var(--student-primary)]" />
               <span>{t('dashboard.takeQuiz')}</span>
             </Link>
           )}
@@ -67,9 +67,9 @@ export default function StudentHero({ userName, enrolledCount }: StudentHeroProp
           {enableCourses && enrolledCount > 0 && (
             <Link
               href={ROUTES.student.courses}
-              className="btn-premium inline-flex items-center gap-2 text-xs sm:text-sm !py-2.5 !px-4 hover:shadow-lg hover:scale-102 transition-all duration-300"
+              className="btn-premium inline-flex items-center gap-1.5 text-xs sm:text-sm !py-2 !px-3 hover:shadow-lg hover:scale-102 transition-all duration-300"
             >
-              <BookOpen className="w-4 h-4" />
+              <BookOpen className="w-3.5 h-3.5" />
               <span>{t('dashboard.resumeLearning')}</span>
             </Link>
           )}

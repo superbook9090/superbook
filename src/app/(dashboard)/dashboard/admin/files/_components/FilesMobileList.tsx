@@ -51,12 +51,12 @@ export function FilesMobileList({
       {folders.map((folder) => {
         const dropdownItems = [
           {
-            label: t('common.edit') || 'Rename',
+            label: t('common.edit'),
             icon: <Pencil className="w-4 h-4" />,
             onClick: () => onRenameFolder(folder),
           },
           {
-            label: t('common.delete') || 'Delete',
+            label: t('common.delete'),
             icon: <Trash2 className="w-4 h-4 text-[var(--color-error)]" />,
             onClick: () => onDeleteFolder(folder),
             className: 'text-[var(--color-error)]',
@@ -78,7 +78,7 @@ export function FilesMobileList({
                   {folder.name}
                 </h4>
                 <p className="text-xs text-[var(--color-muted-foreground)] mt-0.5">
-                  {t('files.folder') || 'Folder'}
+                  {t('files.folder')}
                 </p>
               </div>
             </div>
@@ -91,7 +91,7 @@ export function FilesMobileList({
                     <button
                       type="button"
                       className="p-2 min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-lg text-[var(--color-muted-foreground)] active:bg-[var(--color-surface-muted)]"
-                      aria-label={t('files.actions') || 'Actions'}
+                      aria-label={t('files.actions')}
                     >
                       <MoreVertical className="w-4 h-4" />
                     </button>
@@ -111,29 +111,29 @@ export function FilesMobileList({
       {files.map((file) => {
         const dropdownItems = [
           {
-            label: t('files.preview') || 'Preview',
+            label: t('files.preview'),
             icon: <Eye className="w-4 h-4" />,
             onClick: () => onPreviewFile(file),
           },
           {
-            label: t('files.download') || 'Download',
+            label: t('files.download'),
             icon: <Download className="w-4 h-4" />,
             onClick: () => onDownloadFile(file),
           },
           {
-            label: t('files.copyLink') || 'Copy Link',
+            label: t('files.copyLink'),
             icon: <LinkIcon className="w-4 h-4" />,
             onClick: () => onCopyLink(file),
           },
           ...(canMutate
             ? [
                 {
-                  label: t('common.edit') || 'Rename',
+                  label: t('common.edit'),
                   icon: <Pencil className="w-4 h-4" />,
                   onClick: () => onRenameFile(file),
                 },
                 {
-                  label: t('common.delete') || 'Delete',
+                  label: t('common.delete'),
                   icon: <Trash2 className="w-4 h-4 text-[var(--color-error)]" />,
                   onClick: () => onDeleteFile(file),
                   className: 'text-[var(--color-error)]',
@@ -171,7 +171,7 @@ export function FilesMobileList({
                 type="button"
                 onClick={() => onPreviewFile(file)}
                 className="p-2 min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-lg text-[var(--primary)] active:bg-[var(--primary-soft)]"
-                aria-label={t('files.preview') || 'Preview'}
+                aria-label={t('files.preview')}
               >
                 <Eye className="w-4 h-4" />
               </button>
@@ -182,7 +182,7 @@ export function FilesMobileList({
                   <button
                     type="button"
                     className="p-2 min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-lg text-[var(--color-muted-foreground)] active:bg-[var(--color-surface-muted)]"
-                    aria-label={t('files.actions') || 'Actions'}
+                    aria-label={t('files.actions')}
                   >
                     <MoreVertical className="w-4 h-4" />
                   </button>

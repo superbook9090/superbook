@@ -247,11 +247,11 @@ export function NotificationPreview({
         <div className="flex items-center gap-3">
           <span className="flex items-center gap-1">
             <Smartphone className="w-3.5 h-3.5" />
-            <span>{t('adminNotifications.fcmInApp') || 'FCM + In-App'}</span>
+            <span>{t('adminNotifications.fcmInApp')}</span>
           </span>
           <span className="flex items-center gap-1">
             <Bell className="w-3.5 h-3.5" />
-            <span>{t('adminNotifications.liveRendering') || 'Live Rendering'}</span>
+            <span>{t('adminNotifications.liveRendering')}</span>
           </span>
         </div>
       </div>

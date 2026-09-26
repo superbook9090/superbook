@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
 
   try {
     // 1. IP extraction and Rate Limiting
-    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
+    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip');
     const rateLimitCheck = contactRateLimiter.check(ip);
     
     if (!rateLimitCheck.allowed) {

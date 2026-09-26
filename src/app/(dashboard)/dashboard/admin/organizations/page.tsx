@@ -84,13 +84,13 @@ export default function OrganizationsPage() {
   };
 
   return (
-    <PageWrapper className="space-y-6">
+    <PageWrapper>
       {/* Hero Banner Header */}
-      <div className="hero-banner flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 sm:p-8 rounded-3xl">
+      <div className="hero-banner flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 sm:p-6 md:p-8 rounded-3xl">
         <div className="space-y-1.5 max-w-xl">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[var(--primary)]/15 text-[var(--primary)] border border-[var(--primary)]/25 shadow-xs">
             <Building2 className="w-3.5 h-3.5" />
-            <span>{t('organizations.title') || 'Multi-Tenant Organizations'}</span>
+            <span>{t('organizations.title')}</span>
           </div>
           <h1 className="heading-xl">{t('organizations.title')}</h1>
           <p className="text-sm sm:text-base text-[var(--color-muted-foreground)]">
@@ -99,7 +99,7 @@ export default function OrganizationsPage() {
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto">
-          <Tooltip label={t('analytics.refresh') || 'Refresh'}>
+          <Tooltip label={t('analytics.refresh')}>
             <Button
               onClick={() => fetchOrganizations()}
               variant="secondary"
@@ -108,7 +108,7 @@ export default function OrganizationsPage() {
               aria-label="Refresh"
             >
               <RefreshCw className="w-4 h-4" />
-              <span className="hidden sm:inline">{t('analytics.refresh') || 'Refresh'}</span>
+              <span className="hidden sm:inline">{t('analytics.refresh')}</span>
             </Button>
           </Tooltip>
           <Button
@@ -168,11 +168,11 @@ export default function OrganizationsPage() {
       {/* Organization List / Grid / Empty State */}
       {filteredOrganizations.length === 0 ? (
         <EmptyState
-          title={stats.total === 0 ? t('organizations.noOrganizations') : t('organizations.noFilteredResults') || 'No matching organizations'}
-          description={stats.total === 0 ? t('organizations.noOrganizationsDesc') : t('organizations.noFilteredResultsDesc') || 'Try adjusting your search query or status filter.'}
+          title={stats.total === 0 ? t('organizations.noOrganizations') : t('organizations.noFilteredResults')}
+          description={stats.total === 0 ? t('organizations.noOrganizationsDesc') : t('organizations.noFilteredResultsDesc')}
           action={
             <Button onClick={stats.total === 0 ? openCreateModal : handleResetFilters} variant="secondary">
-              {stats.total === 0 ? t('organizations.createOrganization') : (t('common.reset') || 'Reset Filters')}
+              {stats.total === 0 ? t('organizations.createOrganization') : (t('common.reset'))}
             </Button>
           }
         />
@@ -262,10 +262,10 @@ export default function OrganizationsPage() {
 
       <ConfirmModal
         isOpen={showDeleteDialog}
-        title={t('organizations.deleteOrgTitle') || 'Delete Organization'}
+        title={t('organizations.deleteOrgTitle')}
         message={deleteTargetOrg ? t('organizations.deleteOrgConfirm') : t('organizations.deleteConfirm')}
-        confirmText={t('admin.delete') || 'Delete'}
-        cancelText={t('common.cancel') || 'Cancel'}
+        confirmText={t('admin.delete')}
+        cancelText={t('common.cancel')}
         onConfirm={handleDelete}
         onCancel={() => setShowDeleteDialog(false)}
         type="danger"

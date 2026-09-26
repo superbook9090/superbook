@@ -28,7 +28,7 @@ function MobileBottomNavComponent({ items, isAdminUser, isSuperAdmin }: MobileBo
   }, [filtered, isAdminUser]);
 
   return (
-    <nav className="nav-bottom-bar md:hidden safe-area-pb" aria-label={t('common.dashboard')}>
+    <nav className="nav-bottom-bar md:hidden" aria-label={t('common.dashboard')}>
       <div className="nav-bottom-bar__inner">
         {bottomNavItems.map((item) => {
           const isActive = pathname === item.href;
@@ -37,13 +37,11 @@ function MobileBottomNavComponent({ items, isAdminUser, isSuperAdmin }: MobileBo
             <Link
               key={item.href}
               href={item.href}
-              className={cn('nav-bottom-link focus-ring rounded-lg', isActive && 'nav-bottom-link--active')}
+              className={cn('nav-bottom-link focus-ring', isActive && 'nav-bottom-link--active')}
               aria-current={isActive ? 'page' : undefined}
+              aria-label={t(item.nameKey)}
             >
-              <Icon className="w-5 h-5" aria-hidden />
-              <span className="text-[10px] mt-0.5 truncate max-w-[4rem] leading-tight">
-                {t(item.nameKey)}
-              </span>
+              <Icon className="w-6 h-6 z-10" aria-hidden />
             </Link>
           );
         })}

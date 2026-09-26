@@ -105,17 +105,17 @@ export default function AdminFilesPage() {
             <span className="p-2.5 bg-[var(--primary)]/10 text-[var(--primary)] rounded-xl shrink-0 inline-flex shadow-xs">
               <FolderOpen className="w-6 h-6" />
             </span>
-            <span>{t('files.title') || 'Files & Documents'}</span>
+            <span>{t('files.title')}</span>
           </span>
         }
         description={
           isStudent
-            ? t('files.studentDescription') || 'Browse, preview, and download study documents and learning resources.'
-            : t('files.description') || 'Upload, manage, organize, and preview system documents.'
+            ? t('files.studentDescription')
+            : t('files.description')
         }
         actions={
           <div className="flex items-center gap-2">
-            <Tooltip label={t('analytics.refresh') || 'Refresh'}>
+            <Tooltip label={t('analytics.refresh')}>
               <Button
                 onClick={() => loadContents(parentId)}
                 variant="secondary"
@@ -124,7 +124,7 @@ export default function AdminFilesPage() {
                 aria-label="Refresh"
               >
                 <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-                <span className="hidden sm:inline">{t('analytics.refresh') || 'Refresh'}</span>
+                <span className="hidden sm:inline">{t('analytics.refresh')}</span>
               </Button>
             </Tooltip>
             {canMutate && (
@@ -136,7 +136,7 @@ export default function AdminFilesPage() {
                   className="flex items-center gap-2"
                 >
                   <FolderPlus className="w-4 h-4 text-[var(--color-warning)]" />
-                  <span className="hidden min-[450px]:inline">{t('files.createFolder') || 'New Folder'}</span>
+                  <span className="hidden min-[450px]:inline">{t('files.createFolder')}</span>
                 </Button>
                 <Button
                   onClick={() => setShowUploadModal(true)}
@@ -145,7 +145,7 @@ export default function AdminFilesPage() {
                   className="flex items-center gap-2"
                 >
                   <UploadCloud className="w-4 h-4" />
-                  <span>{t('files.uploadPdf') || 'Upload PDF'}</span>
+                  <span>{t('files.uploadPdf')}</span>
                 </Button>
               </>
             )}

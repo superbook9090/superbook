@@ -83,7 +83,7 @@ export default function TeacherBlogsPage() {
       await deleteBlog.mutateAsync(deleteId);
       setShowDeleteModal(false);
       setDeleteId(null);
-      addAlert({ type: 'success', message: t('blog.blogDeleted') || 'Blog deleted successfully' });
+      addAlert({ type: 'success', message: t('blog.blogDeleted') });
     } catch (error) {
       console.error('Error deleting blog:', error);
       addAlert({ type: 'error', message: t('blog.failedDeleteBlog') });
@@ -93,7 +93,7 @@ export default function TeacherBlogsPage() {
   const togglePublish = async (id: string, currentStatus: boolean) => {
     try {
       await updateBlog.mutateAsync({ blogId: id, data: { isPublished: !currentStatus } });
-      addAlert({ type: 'success', message: t('blog.blogUpdated') || 'Blog updated successfully' });
+      addAlert({ type: 'success', message: t('blog.blogUpdated') });
     } catch (error) {
       console.error('Error updating blog:', error);
       addAlert({ type: 'error', message: t('blog.failedUpdateBlog') });
@@ -103,9 +103,9 @@ export default function TeacherBlogsPage() {
   if (isLoading && !data) return <PageSkeleton />;
 
   return (
-    <PageWrapper className="space-y-6">
+    <PageWrapper>
       {/* Hero Header Banner */}
-      <div className="hero-banner flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 sm:p-8 rounded-3xl">
+      <div className="hero-banner flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 sm:p-6 md:p-8 rounded-3xl">
         <div className="space-y-1 max-w-xl">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[var(--teacher-soft)] text-[var(--teacher-primary)] border border-[var(--teacher-border)]">
             <Newspaper className="w-3.5 h-3.5" />

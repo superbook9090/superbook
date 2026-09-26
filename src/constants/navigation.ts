@@ -23,7 +23,8 @@ export type NavIconName =
   | 'Trophy'
   | 'Video'
   | 'Swords'
-  | 'Settings';
+  | 'Settings'
+  | 'GraduationCap';
 
 export type NavFeatureFlag = 'enableBlogs' | 'enableQuizzes' | 'enableCourses' | 'enableAnalytics' | 'enableNotes' | 'enableContests' | 'enableQuizChallenges';
 
@@ -90,15 +91,16 @@ export const MOBILE_BOTTOM_NAV_KEYS = [
   'common.browse',
   'common.quizzes',
   'common.contests',
+  'common.analytics',
 ] as const;
 
 /** Primary items shown in mobile bottom bar for Admin/SuperAdmin (max 5). */
 export const ADMIN_BOTTOM_NAV_KEYS = [
   'common.users',
-  'common.organizations',
+  'common.contests',
   'common.allCourses',
   'common.settings',
-  'common.profile',
+  'common.analytics',
 ] as const;
 
 export function filterNavByFeatures(

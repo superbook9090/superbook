@@ -62,7 +62,7 @@ export function CourseHeader({
 
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)] text-white shadow-2xs">
               <Sparkles className="w-3 h-3 text-amber-300" />
-              <span>{category || t('common.course') || 'Course'}</span>
+              <span>{category || t('common.course')}</span>
             </span>
 
             {isCompleted && (
@@ -79,18 +79,18 @@ export function CourseHeader({
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--surface-muted)]/60 border border-[var(--border)]/60">
                 <BookOpen className="w-3.5 h-3.5 text-[var(--student-primary)]" />
                 <strong className="text-[var(--color-foreground)]">{chaptersCount}</strong>
-                <span>{chaptersCount === 1 ? t('common.chapter') || 'Chapter' : t('common.chapters') || 'Chapters'}</span>
+                <span>{chaptersCount === 1 ? t('common.chapter') : t('common.chapters')}</span>
               </span>
             ) : null}
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--surface-muted)]/60 border border-[var(--border)]/60">
               <Clock className="w-3.5 h-3.5 text-[var(--student-primary)]" />
               <strong className="text-[var(--color-foreground)]">{lessonsCount}</strong>
-              <span>{lessonsCount === 1 ? t('common.lesson') || 'Lesson' : t('common.lessons') || 'Lessons'}</span>
+              <span>{lessonsCount === 1 ? t('common.lesson') : t('common.lessons')}</span>
             </span>
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--surface-muted)]/60 border border-[var(--border)]/60">
               <Target className="w-3.5 h-3.5 text-[var(--student-primary)]" />
               <strong className="text-[var(--color-foreground)]">{quizzesCount}</strong>
-              <span>{quizzesCount === 1 ? t('common.quiz') || 'Quiz' : t('common.quizzes') || 'Quizzes'}</span>
+              <span>{quizzesCount === 1 ? t('common.quiz') : t('common.quizzes')}</span>
             </span>
           </div>
         </div>

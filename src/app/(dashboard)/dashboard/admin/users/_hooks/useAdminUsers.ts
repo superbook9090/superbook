@@ -126,7 +126,7 @@ export function useAdminUsers() {
       await patchAdminUser({ userId, updates: { canCreateContests: newVal } });
       setUsers((prev) => prev.map((u) => (u._id === userId ? { ...u, canCreateContests: newVal } : u)));
       if (selectedUser?._id === userId) setSelectedUser((prev) => (prev ? { ...prev, canCreateContests: newVal } : null));
-      addAlert({ type: 'success', message: t('adminUsers.contestPermissionUpdated') || 'Contest permission updated' });
+      addAlert({ type: 'success', message: t('adminUsers.contestPermissionUpdated') });
     } catch (err) {
       addAlert({
         type: 'error',
@@ -141,7 +141,7 @@ export function useAdminUsers() {
       await patchAdminUser({ userId, updates: { canGenerateAiQuizzes: newVal } });
       setUsers((prev) => prev.map((u) => (u._id === userId ? { ...u, canGenerateAiQuizzes: newVal } : u)));
       if (selectedUser?._id === userId) setSelectedUser((prev) => (prev ? { ...prev, canGenerateAiQuizzes: newVal } : null));
-      addAlert({ type: 'success', message: t('adminUsers.aiQuizPermissionUpdated') || 'AI quiz generation permission updated successfully' });
+      addAlert({ type: 'success', message: t('adminUsers.aiQuizPermissionUpdated') });
     } catch (err) {
       addAlert({
         type: 'error',

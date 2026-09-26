@@ -28,9 +28,9 @@ export function useOrganizationsFilterChips({
       onChange: (val: string) => setStatusFilter(val as OrgStatusFilter),
       neutralValue: 'all',
       options: [
-        { id: 'all', label: t('organizations.allStatus') || 'All Status' },
-        { id: 'active', label: t('organizations.activeStatus') || 'Active' },
-        { id: 'inactive', label: t('organizations.inactiveStatus') || 'Inactive' },
+        { id: 'all', label: t('organizations.allStatus') },
+        { id: 'active', label: t('organizations.activeStatus') },
+        { id: 'inactive', label: t('organizations.inactiveStatus') },
       ],
     },
     {
@@ -40,10 +40,10 @@ export function useOrganizationsFilterChips({
       onChange: (val: string) => setSortOption(val as OrgSortOption),
       neutralValue: 'newest',
       options: [
-        { id: 'newest', label: t('organizations.sortNewest') || 'Newest' },
-        { id: 'name', label: t('organizations.sortName') || 'Name (A-Z)' },
-        { id: 'users', label: t('organizations.sortUsers') || 'Most Users' },
-        { id: 'courses', label: t('organizations.sortCourses') || 'Most Content' },
+        { id: 'newest', label: t('organizations.sortNewest') },
+        { id: 'name', label: t('organizations.sortName') },
+        { id: 'users', label: t('organizations.sortUsers') },
+        { id: 'courses', label: t('organizations.sortCourses') },
       ],
     },
   ];

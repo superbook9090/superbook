@@ -27,7 +27,7 @@ export default function PhoneAuthButton({ onClick }: PhoneAuthButtonProps) {
       className="w-full flex items-center justify-center gap-2 py-2.5 sm:py-3 px-4 bg-[var(--card-solid)] border border-[var(--color-border)] rounded-xl hover:border-[var(--primary)]/40 hover:bg-[var(--color-surface-muted)] transition-all text-xs sm:text-sm font-semibold text-[var(--color-foreground)] shadow-sm min-h-[44px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
     >
       <Phone className="w-4 h-4 text-[var(--color-muted)] shrink-0" />
-      <span className="truncate">{t('login.continueWithPhone') || 'Continue with Phone'}</span>
+      <span className="truncate">{t('login.continueWithPhone')}</span>
     </motion.button>
   );
 }

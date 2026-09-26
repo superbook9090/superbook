@@ -54,7 +54,7 @@ export default function StudentDashboardPage() {
   }
 
   return (
-    <PageWrapper className="space-y-6">
+    <PageWrapper>
       <StudentHero
         userName={session?.user?.name}
         enrolledCount={stats.enrolledCount}

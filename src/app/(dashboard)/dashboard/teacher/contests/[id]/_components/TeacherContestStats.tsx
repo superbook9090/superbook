@@ -24,28 +24,28 @@ export default function TeacherContestStats({ stats }: TeacherContestStatsProps)
       <StatCard
         icon={Users}
         value={stats.totalParticipants}
-        label={t('contest.participants') || 'Participants'}
+        label={t('contest.participants')}
         color="teacher"
         delay={0.05}
       />
       <StatCard
         icon={CheckCircle}
         value={stats.completedCount}
-        label={t('contest.submissions') || 'Submissions'}
+        label={t('contest.submissions')}
         color="success"
         delay={0.1}
       />
       <StatCard
         icon={Trophy}
         value={`${stats.highestScore} pts`}
-        label={t('contest.highestScore') || 'Highest Score'}
+        label={t('contest.highestScore')}
         color="warning"
         delay={0.15}
       />
       <StatCard
         icon={Clock}
         value={formatDuration(stats.avgTimeTaken)}
-        label={t('contest.avgTime') || 'Avg Time'}
+        label={t('contest.avgTime')}
         color="info"
         delay={0.2}
       />

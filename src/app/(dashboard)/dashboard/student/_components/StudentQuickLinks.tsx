@@ -68,8 +68,8 @@ export default function StudentQuickLinks() {
         {enableContests && (
           <QuickActionCard
             icon={Trophy}
-            title={t('common.contests') || 'Contests'}
-            description={t('contest.contestsHubDesc') || 'Participate in live challenges'}
+            title={t('common.contests')}
+            description={t('contest.contestsHubDesc')}
             href={ROUTES.student.contests}
             color="error"
             delay={0.18}

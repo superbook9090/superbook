@@ -27,15 +27,15 @@ export function FilesEmptyState({
     <EmptyState
       title={
         isFolderEmpty
-          ? t('files.empty') || 'This folder is empty'
-          : t('files.noFilteredResults') || 'No matching items'
+          ? t('files.empty')
+          : t('files.noFilteredResults')
       }
       description={
         isFolderEmpty
           ? canMutate
-            ? t('files.emptyFolderDesc') || 'Upload a PDF or create a subfolder to get started.'
-            : t('files.studentEmptyDesc') || 'No study materials or documents available in this folder yet.'
-          : t('files.noFilteredResultsDesc') || 'Try adjusting your search query or filters.'
+            ? t('files.emptyFolderDesc')
+            : t('files.studentEmptyDesc')
+          : t('files.noFilteredResultsDesc')
       }
       action={
         isFolderEmpty ? (
@@ -47,7 +47,7 @@ export function FilesEmptyState({
                 className="flex items-center gap-2"
               >
                 <FolderPlus className="w-4 h-4 text-[var(--color-warning)]" />
-                <span>{t('files.createFolder') || 'New Folder'}</span>
+                <span>{t('files.createFolder')}</span>
               </Button>
               <Button
                 onClick={onOpenUpload}
@@ -55,13 +55,13 @@ export function FilesEmptyState({
                 className="flex items-center gap-2"
               >
                 <UploadCloud className="w-4 h-4" />
-                <span>{t('files.uploadPdf') || 'Upload PDF'}</span>
+                <span>{t('files.uploadPdf')}</span>
               </Button>
             </div>
           ) : undefined
         ) : (
           <Button onClick={onResetFilters} variant="secondary">
-            {t('common.reset') || 'Reset Filters'}
+            {t('common.reset')}
           </Button>
         )
       }

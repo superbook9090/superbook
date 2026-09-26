@@ -125,12 +125,12 @@ export function UsersTableRow({
           {user.isSuspended ? (
             <span className="text-[11px] text-[var(--error)] font-semibold flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--error)] animate-pulse" />
-              {t('adminUsers.suspended') || 'Suspended'}
+              {t('adminUsers.suspended')}
             </span>
           ) : (
             <span className="text-[11px] text-[var(--success)] font-medium flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--success)]" />
-              {t('adminUsers.active') || 'Active'}
+              {t('adminUsers.active')}
             </span>
           )}
         </div>
@@ -155,7 +155,7 @@ export function UsersTableRow({
           </span>
         ) : (
           <span className="text-xs text-[var(--color-muted)] italic">
-            {t('common.notAvailable') || 'N/A'}
+            {t('common.notAvailable')}
           </span>
         )}
       </td>
@@ -171,7 +171,7 @@ export function UsersTableRow({
           </Tooltip>
         ) : (
           <span className="text-xs text-[var(--color-muted)] italic">
-            {t('common.never') || 'Never'}
+            {t('common.never')}
           </span>
         )}
       </td>
@@ -185,7 +185,7 @@ export function UsersTableRow({
           </div>
         ) : (
           <span className="text-xs text-[var(--color-muted)] italic">
-            {t('common.none') || 'Public'}
+            {t('common.none')}
           </span>
         )}
       </td>
@@ -226,41 +226,41 @@ export function UsersTableRow({
                   <Tooltip label={customLimitsSummary}>
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 cursor-default">
                       <Sliders className="w-3 h-3" />
-                      <span>{t('adminUsers.customLimits') || 'Custom Limits'}</span>
+                      <span>{t('adminUsers.customLimits')}</span>
                     </span>
                   </Tooltip>
                 ) : (
-                  <Tooltip label={t('adminUsers.platformDefaultsTooltip') || 'Platform defaults: 5 Courses, 10 Quizzes, 2 Blogs'}>
+                  <Tooltip label={t('adminUsers.platformDefaultsTooltip')}>
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-[var(--color-surface-muted-strong)] text-[var(--color-muted-foreground)] cursor-default">
-                      <span>{t('adminUsers.standardLimits') || 'Standard Limits'}</span>
+                      <span>{t('adminUsers.standardLimits')}</span>
                     </span>
                   </Tooltip>
                 )}
               </div>
               <div className="flex items-center gap-1.5">
                 {user.canUploadVideos && (
-                  <Tooltip label={t('adminUsers.videoUploadPermission') || 'Video uploads enabled'}>
+                  <Tooltip label={t('adminUsers.videoUploadPermission')}>
                     <span className="p-1 rounded bg-violet-500/10 text-violet-600 dark:text-violet-400">
                       <Video className="w-3 h-3" />
                     </span>
                   </Tooltip>
                 )}
                 {user.canCreatePublicCourses && (
-                  <Tooltip label={t('adminUsers.canCreatePublicCourses') || 'Public course creation enabled'}>
+                  <Tooltip label={t('adminUsers.canCreatePublicCourses')}>
                     <span className="p-1 rounded bg-sky-500/10 text-sky-600 dark:text-sky-400">
                       <Globe className="w-3 h-3" />
                     </span>
                   </Tooltip>
                 )}
                 {user.canCreateContests && (
-                  <Tooltip label={t('adminUsers.canCreateContests') || 'Contests creator enabled'}>
+                  <Tooltip label={t('adminUsers.canCreateContests')}>
                     <span className="p-1 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400">
                       <Trophy className="w-3 h-3" />
                     </span>
                   </Tooltip>
                 )}
                 {user.canGenerateAiQuizzes && (
-                  <Tooltip label={t('adminUsers.canGenerateAiQuizzes') || 'AI quiz generation enabled'}>
+                  <Tooltip label={t('adminUsers.canGenerateAiQuizzes')}>
                     <span className="p-1 rounded bg-[var(--primary-soft)] text-[var(--color-primary)]">
                       <Sparkles className="w-3 h-3" />
                     </span>
@@ -280,7 +280,7 @@ export function UsersTableRow({
       <td className="px-5 py-3.5 text-right" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-end gap-1.5">
           {onDeleteClick && (
-            <Tooltip label={t('admin.delete') || 'Delete'}>
+            <Tooltip label={t('admin.delete')}>
               <button
                 type="button"
                 onClick={() => onDeleteClick(user._id)}

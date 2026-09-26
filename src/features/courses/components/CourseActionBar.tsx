@@ -197,8 +197,8 @@ export default function CourseActionBar({ courseId }: { courseId: string }) {
       {/* Teacher Mark Complete Modal */}
       <LazyConfirmModal
         isOpen={confirmCompleteCourse}
-        title={t('teacherCourses.completeConfirmTitle') || 'Mark Course as Completed?'}
-        message={t('teacherCourses.completeConfirmMessage') || 'Students who have finished all lessons and quizzes will automatically receive a completion certificate. Continue?'}
+        title={t('teacherCourses.completeConfirmTitle')}
+        message={t('teacherCourses.completeConfirmMessage')}
         onConfirm={() => handleMarkCompleted(true)}
         onCancel={() => setConfirmCompleteCourse(false)}
         confirmText={t('teacherCourses.markCompleted')}
@@ -210,8 +210,8 @@ export default function CourseActionBar({ courseId }: { courseId: string }) {
       {!isAdmin && (
         <LazyConfirmModal
           isOpen={confirmDeleteCourse}
-          title={t('teacherCourses.deleteConfirmTitle') || 'Delete Course'}
-          message={t('teacherCourses.deleteConfirmMessage') || 'Are you sure you want to delete this course? This action cannot be undone.'}
+          title={t('teacherCourses.deleteConfirmTitle')}
+          message={t('teacherCourses.deleteConfirmMessage')}
           onConfirm={handleDeleteTeacher}
           onCancel={() => setConfirmDeleteCourse(false)}
           confirmText={t('common.delete')}

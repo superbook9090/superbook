@@ -50,7 +50,7 @@ export function UserProfileInfoSection({
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--color-muted-foreground)]">
           <UserCheck className="w-3.5 h-3.5 text-[var(--info)]" />
-          <span>{t('adminUsers.overview') || 'User Details & Contact Info'}</span>
+          <span>{t('adminUsers.overview')}</span>
         </div>
 
         {onSendEmailClick && (
@@ -61,7 +61,7 @@ export function UserProfileInfoSection({
             className="flex items-center gap-1.5 py-1 px-3 text-xs"
           >
             <Send className="w-3.5 h-3.5" />
-            <span>{t('adminUsers.sendEmail') || 'Send Email'}</span>
+            <span>{t('adminUsers.sendEmail')}</span>
           </Button>
         )}
       </div>
@@ -75,7 +75,7 @@ export function UserProfileInfoSection({
             </div>
             <div className="min-w-0">
               <p className="text-[11px] font-semibold text-[var(--color-muted-foreground)] uppercase">
-                {t('common.email') || 'Email Address'}
+                {t('common.email')}
               </p>
               <a
                 href={`mailto:${user.email}`}
@@ -86,7 +86,7 @@ export function UserProfileInfoSection({
               </a>
             </div>
           </div>
-          <Tooltip label={copiedKey === 'email' ? t('common.copied') || 'Copied!' : t('common.copy') || 'Copy'}>
+          <Tooltip label={copiedKey === 'email' ? t('common.copied') : t('common.copy')}>
             <button
               onClick={() => copyValue('email', user.email)}
               className="p-1.5 rounded-lg text-[var(--color-muted)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted)] transition-colors shrink-0"
@@ -105,7 +105,7 @@ export function UserProfileInfoSection({
             </div>
             <div className="min-w-0">
               <p className="text-[11px] font-semibold text-[var(--color-muted-foreground)] uppercase">
-                {t('common.phone') || 'Phone Number'}
+                {t('common.phone')}
               </p>
               {user.phone ? (
                 <a
@@ -116,13 +116,13 @@ export function UserProfileInfoSection({
                 </a>
               ) : (
                 <span className="text-xs text-[var(--color-muted)] italic">
-                  {t('common.notProvided') || 'Not provided'}
+                  {t('common.notProvided')}
                 </span>
               )}
             </div>
           </div>
           {user.phone && (
-            <Tooltip label={copiedKey === 'phone' ? t('common.copied') || 'Copied!' : t('common.copy') || 'Copy'}>
+            <Tooltip label={copiedKey === 'phone' ? t('common.copied') : t('common.copy')}>
               <button
                 onClick={() => copyValue('phone', user.phone!)}
                 className="p-1.5 rounded-lg text-[var(--color-muted)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted)] transition-colors shrink-0"
@@ -146,10 +146,10 @@ export function UserProfileInfoSection({
             </div>
             <div className="min-w-0">
               <p className="text-[11px] font-semibold text-[var(--color-muted-foreground)] uppercase">
-                {t('adminAnalytics.platform') || 'Platform Used'}
+                {t('adminAnalytics.platform')}
               </p>
               <p className="text-xs sm:text-sm font-bold text-[var(--color-foreground)] truncate capitalize">
-                {user.lastPlatform === 'android' ? 'Android App' : user.lastPlatform === 'ios' ? 'iOS App' : user.lastPlatform === 'web' ? 'Website (Browser)' : t('common.none') || 'None'}
+                {user.lastPlatform === 'android' ? 'Android App' : user.lastPlatform === 'ios' ? 'iOS App' : user.lastPlatform === 'web' ? 'Website (Browser)' : t('common.none')}
               </p>
             </div>
           </div>
@@ -163,12 +163,12 @@ export function UserProfileInfoSection({
             </div>
             <div className="min-w-0">
               <p className="text-[11px] font-semibold text-[var(--color-muted-foreground)] uppercase">
-                {t('adminUsers.lastOpened') || 'Last Opened'}
+                {t('adminUsers.lastOpened')}
               </p>
               <p className="text-xs sm:text-sm font-bold text-[var(--color-foreground)] truncate">
                 {user.lastActiveAt
                   ? `${getRelativeTime(user.lastActiveAt)} (${formatDateTime(user.lastActiveAt)})`
-                  : t('common.never') || 'Never'}
+                  : t('common.never')}
               </p>
             </div>
           </div>
@@ -182,7 +182,7 @@ export function UserProfileInfoSection({
             </div>
             <div className="min-w-0">
               <p className="text-[11px] font-semibold text-[var(--color-muted-foreground)] uppercase">
-                {t('admin.joined') || 'Registration Date & Time'}
+                {t('admin.joined')}
               </p>
               <p className="text-xs sm:text-sm font-bold text-[var(--color-foreground)] truncate">
                 {formatDateTime(user.createdAt)}
@@ -199,7 +199,7 @@ export function UserProfileInfoSection({
             </div>
             <div className="min-w-0">
               <p className="text-[11px] font-semibold text-[var(--color-muted-foreground)] uppercase">
-                {t('adminUsers.authProvider') || 'Auth & Verification'}
+                {t('adminUsers.authProvider')}
               </p>
               <div className="flex items-center gap-2 mt-0.5">
                 <span className="text-xs sm:text-sm font-bold text-[var(--color-foreground)] capitalize">
@@ -230,7 +230,7 @@ export function UserProfileInfoSection({
               </div>
               <div className="min-w-0">
                 <p className="text-[11px] font-semibold text-[var(--color-muted-foreground)] uppercase">
-                  {t('adminUsers.organization') || 'Assigned Organization'}
+                  {t('adminUsers.organization')}
                 </p>
                 <p className="text-xs sm:text-sm font-bold text-[var(--color-foreground)] truncate">
                   {orgName}

@@ -103,7 +103,7 @@ export function FilesModals({
 
       <ConfirmModal
         isOpen={showDeleteDialog}
-        title={t('files.deleteItem') || 'Delete Item'}
+        title={t('files.deleteItem')}
         message={
           deleteTarget?.type === 'folder'
             ? t('files.deleteFolderConfirm', { name: deleteTarget.name }) ||
@@ -111,8 +111,8 @@ export function FilesModals({
             : t('files.deleteFileConfirm', { name: deleteTarget?.name || '' }) ||
               `Delete file "${deleteTarget?.name}"?`
         }
-        confirmText={t('admin.delete') || 'Delete'}
-        cancelText={t('common.cancel') || 'Cancel'}
+        confirmText={t('admin.delete')}
+        cancelText={t('common.cancel')}
         onConfirm={onDelete}
         onCancel={() => {
           setShowDeleteDialog(false);

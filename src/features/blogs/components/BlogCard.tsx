@@ -50,7 +50,7 @@ export default function BlogCard({
             )}
             {blog.isFeatured && (
               <span className="inline-flex items-center rounded-full bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold text-amber-600 dark:text-amber-400">
-                ★ {t('blog.spotlightStory') || 'Spotlight'}
+                ★ {t('blog.spotlightStory')}
               </span>
             )}
           </div>
@@ -58,7 +58,7 @@ export default function BlogCard({
           <div className="flex items-center gap-1">
             {/* Student & Guest Favorite Button */}
             {onToggleFavorite && (
-              <Tooltip label={isFavorited ? (t('favorites.removeFromFavorites') || 'Remove from favorites') : (t('blog.addToFavorites') || 'Add to favorites')}>
+              <Tooltip label={isFavorited ? (t('favorites.removeFromFavorites')) : (t('blog.addToFavorites'))}>
                 <button
                   type="button"
                   onClick={(e) => {
@@ -79,7 +79,7 @@ export default function BlogCard({
 
             {/* Author Quick Edit Action */}
             {isAuthor && (
-              <Tooltip label={t('blog.editArticle') || 'Edit your article'}>
+              <Tooltip label={t('blog.editArticle')}>
                 <Link
                   href={ROUTES.teacher.blogEdit(blog._id)}
                   className="touch-target inline-flex items-center justify-center p-2 rounded-xl text-[var(--color-muted-foreground)] hover:text-[var(--teacher-primary)] hover:bg-[var(--teacher-soft)] transition-colors"
@@ -92,7 +92,7 @@ export default function BlogCard({
 
             {/* Admin Quick Action */}
             {isAdminRole && (
-              <Tooltip label={t('blog.adminModerate') || 'Admin Moderate'}>
+              <Tooltip label={t('blog.adminModerate')}>
                 <Link
                   href={ROUTES.admin.blogs}
                   className="touch-target inline-flex items-center justify-center p-2 rounded-xl text-[var(--color-muted-foreground)] hover:text-[var(--admin-primary)] hover:bg-[var(--admin-soft)] transition-colors"
@@ -128,18 +128,18 @@ export default function BlogCard({
                 {blog.author?.name ? blog.author.name.charAt(0).toUpperCase() : <User className="w-3 h-3" />}
               </div>
               <span className="font-medium text-[var(--color-foreground)] max-w-[120px] truncate">
-                {blog.author?.name || t('blog.teacher') || 'Educator'}
+                {blog.author?.name || t('blog.teacher')}
               </span>
               {isAuthor && (
                 <span className="rounded bg-[var(--teacher-soft)] text-[var(--teacher-primary)] text-[10px] font-semibold px-1.5 py-0.2">
-                  {t('blog.yourArticle') || 'You'}
+                  {t('blog.yourArticle')}
                 </span>
               )}
             </div>
 
             <span className="hidden sm:inline-flex items-center gap-1">
               <Clock className="w-3.5 h-3.5" />
-              {blog.readingTimeMinutes} {t('quiz.min') || 'min'}
+              {blog.readingTimeMinutes} {t('quiz.min')}
             </span>
           </div>
 
@@ -160,7 +160,7 @@ export default function BlogCard({
               className="inline-flex items-center gap-0.5 font-semibold text-[var(--primary)] hover:underline ml-1"
               aria-label={`Read ${blog.title}`}
             >
-              <span className="hidden xs:inline">{t('favorites.readArticle') || 'Read'}</span>
+              <span className="hidden xs:inline">{t('favorites.readArticle')}</span>
               <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </Link>
           </div>

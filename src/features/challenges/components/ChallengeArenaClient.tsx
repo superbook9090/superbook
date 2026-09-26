@@ -85,7 +85,7 @@ export function ChallengeArenaClient({
           );
           return;
         } else {
-          setStartError(data.message || t('challenge.failedToStart') || 'Failed to start challenge');
+          setStartError(data.message || t('challenge.failedToStart'));
           setIsStarting(false);
         }
       } catch {

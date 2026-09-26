@@ -93,7 +93,7 @@ export default function TeacherContestManagePage({
   };
 
   return (
-    <PageWrapper className="space-y-6">
+    <PageWrapper>
       {/* Header Banner & Action Bar */}
       <TeacherContestHeader
         contest={contest}
@@ -117,7 +117,7 @@ export default function TeacherContestManagePage({
           }`}
         >
           <Trophy className="w-4 h-4" />
-          <span>{t('contest.leaderboard') || 'Live Leaderboard'}</span>
+          <span>{t('contest.leaderboard')}</span>
         </button>
 
         <button
@@ -130,7 +130,7 @@ export default function TeacherContestManagePage({
           }`}
         >
           <Users className="w-4 h-4" />
-          <span>{t('contest.studentAttempts') || 'Student Submissions'}</span>
+          <span>{t('contest.studentAttempts')}</span>
         </button>
 
         <button
@@ -143,7 +143,7 @@ export default function TeacherContestManagePage({
           }`}
         >
           <Layers className="w-4 h-4" />
-          <span>{t('contest.overview') || 'Prizes & Guidelines'}</span>
+          <span>{t('contest.overview')}</span>
         </button>
       </div>
 
@@ -174,7 +174,7 @@ export default function TeacherContestManagePage({
           {contest.instructions && (
             <div className="p-6 rounded-3xl bg-[var(--card-solid)] antigravity-glass border border-[var(--border)] shadow-xs space-y-2">
               <h3 className="text-sm sm:text-base font-bold text-[var(--color-foreground)]">
-                {t('contest.instructions') || 'Contest Guidelines & Rules'}
+                {t('contest.instructions')}
               </h3>
               <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] whitespace-pre-line leading-relaxed">
                 {contest.instructions}
@@ -187,10 +187,10 @@ export default function TeacherContestManagePage({
       {/* End Modal */}
       <LazyConfirmModal
         isOpen={showEndModal}
-        title={t('contest.endContestConfirmTitle') || 'End Contest Early?'}
-        message={t('contest.endContestConfirmDesc') || 'Conclude this contest now and release solutions and final results for all participants.'}
-        confirmText={t('contest.endContestNow') || 'End Contest Now'}
-        cancelText={t('common.cancel') || 'Cancel'}
+        title={t('contest.endContestConfirmTitle')}
+        message={t('contest.endContestConfirmDesc')}
+        confirmText={t('contest.endContestNow')}
+        cancelText={t('common.cancel')}
         onConfirm={handleEndContest}
         onCancel={() => setShowEndModal(false)}
         type="warning"
@@ -199,10 +199,10 @@ export default function TeacherContestManagePage({
       {/* Delete Modal */}
       <LazyConfirmModal
         isOpen={showDeleteModal}
-        title={t('contest.deleteContestConfirmTitle') || 'Delete Contest?'}
-        message={t('contest.deleteContestConfirmDesc') || 'Are you sure you want to delete or cancel this contest? If student attempts already exist, the contest will be safely cancelled.'}
-        confirmText={t('contest.confirmDelete') || 'Confirm Delete'}
-        cancelText={t('common.cancel') || 'Cancel'}
+        title={t('contest.deleteContestConfirmTitle')}
+        message={t('contest.deleteContestConfirmDesc')}
+        confirmText={t('contest.confirmDelete')}
+        cancelText={t('common.cancel')}
         onConfirm={handleDeleteContest}
         onCancel={() => setShowDeleteModal(false)}
         type="danger"

@@ -40,7 +40,7 @@ export default function JoinCourseByCode() {
 
   return (
     <div className="card-surface card-body">
-      <div className="mb-4 flex items-start gap-3">
+      <div className="mb-3 sm:mb-4 flex items-start gap-2 sm:gap-3">
         <div
           className={cn(
             'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-white',

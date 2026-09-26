@@ -127,14 +127,14 @@ export default function CurriculumTreeEditor({
   const handleAddTopic = () => {
     addChapter.mutate({
       courseId,
-      data: { title: t('curriculum.newChapterTitle') || 'New Topic' },
+      data: { title: t('curriculum.newChapterTitle') },
     });
   };
 
   const handleAddSubTopic = (parentTopicId: string) => {
     addChapter.mutate({
       courseId,
-      data: { title: t('curriculum.newSubTopicTitle') || 'New Sub-topic', parentChapter: parentTopicId },
+      data: { title: t('curriculum.newSubTopicTitle'), parentChapter: parentTopicId },
     });
     setExpanded((prev) => ({ ...prev, [parentTopicId]: true }));
   };

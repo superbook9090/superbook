@@ -15,7 +15,7 @@ import StatCard from '@/components/ui/StatCard';
 import Button from '@/components/ui/Button';
 import type { CourseStatusFilter } from '@/features/courses/components/CourseFilters';
 import { FilterPanel } from '@/components/filters/DashboardListFilters';
-import { PageWrapper, ResponsiveGrid } from '@/components/layout';
+import { PageWrapper, ResponsiveGrid, PageHeader } from '@/components/layout';
 
 export default function StudentCoursesPage() {
   const { session, status } = useSessionStore();
@@ -116,33 +116,35 @@ export default function StudentCoursesPage() {
 
   return (
     <PageWrapper>
-      {/* Hero Banner */}
+      {/* Header Area */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="hero-banner"
+        className="stack-page--compact"
       >
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-[var(--card-gap)]">
-          <div className="space-y-1">
-            <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--student-primary)]">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>{t('dashboard.learningHub')}</span>
+        <PageHeader
+          title={
+            <div className="flex flex-col gap-1.5">
+              <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--student-primary)]">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>{t('dashboard.learningHub')}</span>
+              </div>
+              <span>{t('courses.myCourses')}</span>
             </div>
-            <h1 className="heading-xl">{t('courses.myCourses')}</h1>
-            <p className="text-[var(--color-muted-foreground)] text-sm sm:text-base">
-              {t('dashboard.continueLearning').replace('{count}', String(enrollments.length))}
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <Button
-              onClick={() => router.push(ROUTES.student.browse)}
-              className="btn-premium"
-            >
-              <Compass className="w-4 h-4" />
-              <span>{t('courses.browseMore')}</span>
-            </Button>
-          </div>
-        </div>
+          }
+          description={t('dashboard.continueLearning').replace('{count}', String(enrollments.length))}
+          actions={
+            <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+              <Button
+                onClick={() => router.push(ROUTES.student.browse)}
+                className="btn-premium w-full sm:w-auto justify-center"
+              >
+                <Compass className="w-4 h-4" />
+                <span>{t('courses.browseMore')}</span>
+              </Button>
+            </div>
+          }
+        />
       </motion.div>
 
       {/* Stats Cards */}

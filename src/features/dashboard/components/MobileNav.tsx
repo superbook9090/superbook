@@ -52,9 +52,9 @@ function MobileNavComponent({
   const allNavItems = useMemo(() => {
     if (isStaff && adminItems.length > 0) {
       return [
-        ...mainItems,
-        { nameKey: 'common.administration', href: '', icon: 'LayoutDashboard' as const },
         ...adminItems,
+        { nameKey: 'admin.teacherWorkspace', href: '', icon: 'GraduationCap' as const },
+        ...mainItems.slice(0, 5),
       ];
     }
     return mainItems;
@@ -66,7 +66,7 @@ function MobileNavComponent({
 
   return (
     <>
-      <div className={cn(headerBg, 'md:hidden fixed top-0 left-0 right-0 z-50 safe-area-pt-compact shadow-[var(--shadow-sm)] border-b border-[var(--border)]')}>
+      <div className={cn(headerBg, 'md:hidden fixed top-[1px] left-2 right-2 z-50 safe-area-pt-compact shadow-[var(--shadow-sm)] border border-[var(--border)] rounded-[2rem]')}>
         <div className="mobile-header-bar flex items-center justify-between px-4 sm:px-5">
           <Link
             href={homePath}
@@ -94,10 +94,10 @@ function MobileNavComponent({
         <div
           className={cn(
             headerBg,
-            'md:hidden fixed left-0 right-0 bottom-0 z-40 border-t border-[var(--border)] top-[calc(var(--mobile-header-height)+min(env(safe-area-inset-top,0px),16px))]'
+            'md:hidden fixed left-2 right-2 bottom-0 z-40 border border-b-0 border-[var(--border)] rounded-t-[2rem] top-[calc(var(--mobile-header-height)+min(env(safe-area-inset-top,0px),16px)+8px)]'
           )}
         >
-          <div className="h-full overflow-y-auto px-3 py-3 pb-24 flex flex-col justify-between">
+          <div className="h-full overflow-y-auto px-3 pt-6 pb-24 flex flex-col justify-between">
             <div>
               {/* Quick Actions / Preferences Bar inside drawer */}
               <div className="flex items-center justify-between p-2 mb-3 rounded-xl bg-[var(--surface-muted)] border border-[var(--border)]">

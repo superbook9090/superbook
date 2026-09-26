@@ -135,7 +135,7 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
             {'chapterCount' in courseData && courseData.chapterCount ? (
               <div className="flex items-center gap-1 text-[11px]">
                 <Layers className="w-3 h-3" />
-                <span>{courseData.chapterCount} {t('common.chaptersShort') || 'Ch.'}</span>
+                <span>{courseData.chapterCount} {t('common.chaptersShort')}</span>
               </div>
             ) : null}
           </div>

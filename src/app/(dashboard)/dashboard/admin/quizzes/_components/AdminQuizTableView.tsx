@@ -46,13 +46,13 @@ export function AdminQuizTableView({
         <table className="w-full text-left text-xs sm:text-sm border-collapse">
           <thead>
             <tr className="border-b border-[var(--border)] bg-[var(--surface-muted)]/70 text-[var(--color-muted-foreground)] font-bold uppercase text-[11px] tracking-wider">
-              <th className="py-4 px-5">{t('teacherQuizzes.tableQuiz') || 'Quiz Title'}</th>
-              <th className="py-4 px-5">{t('teacherQuizzes.tableCourse') || 'Course'}</th>
-              <th className="py-4 px-5 text-center">{t('common.questions') || 'Questions'}</th>
-              <th className="py-4 px-5">{t('admin.status') || 'Status'}</th>
-              <th className="py-4 px-5 text-center">{t('teacherQuizzes.passing') || 'Pass Score'}</th>
-              <th className="py-4 px-5">{t('admin.created') || 'Created'}</th>
-              <th className="py-4 px-5 text-right">{t('admin.actions') || 'Actions'}</th>
+              <th className="py-4 px-5">{t('teacherQuizzes.tableQuiz')}</th>
+              <th className="py-4 px-5">{t('teacherQuizzes.tableCourse')}</th>
+              <th className="py-4 px-5 text-center">{t('common.questions')}</th>
+              <th className="py-4 px-5">{t('admin.status')}</th>
+              <th className="py-4 px-5 text-center">{t('teacherQuizzes.passing')}</th>
+              <th className="py-4 px-5">{t('admin.created')}</th>
+              <th className="py-4 px-5 text-right">{t('admin.actions')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--border)]/60">
@@ -127,7 +127,7 @@ export function AdminQuizTableView({
                       </button>
                     </Tooltip>
 
-                    <Tooltip label={t('quiz.leaderboard.title') || 'Leaderboard'}>
+                    <Tooltip label={t('quiz.leaderboard.title')}>
                       <button
                         type="button"
                         onClick={() => router.push(`${ROUTES.admin.quizEdit(quiz._id)}?tab=leaderboard`)}
@@ -137,7 +137,7 @@ export function AdminQuizTableView({
                       </button>
                     </Tooltip>
 
-                    <Tooltip label={t('common.edit') || 'Edit'}>
+                    <Tooltip label={t('common.edit')}>
                       <button
                         type="button"
                         onClick={() => router.push(ROUTES.admin.quizEdit(quiz._id))}
@@ -147,7 +147,7 @@ export function AdminQuizTableView({
                       </button>
                     </Tooltip>
 
-                    <Tooltip label={t('common.delete') || 'Delete'}>
+                    <Tooltip label={t('common.delete')}>
                       <button
                         type="button"
                         onClick={() => onDelete(quiz._id)}

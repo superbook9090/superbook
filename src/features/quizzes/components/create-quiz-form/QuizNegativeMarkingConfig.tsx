@@ -29,10 +29,10 @@ export function QuizNegativeMarkingConfig({
               onChange={onChange}
               className="h-4 w-4 text-[var(--color-primary)] focus:ring-[var(--color-primary)] border-[var(--color-border)] rounded cursor-pointer"
             />
-            <span>{t('createQuizForm.enableNegativeMarking') || 'Enable Negative Marking'}</span>
+            <span>{t('createQuizForm.enableNegativeMarking')}</span>
           </label>
           <p className="text-xs text-[var(--color-muted-foreground)] mt-0.5 ml-6">
-            {t('createQuizForm.negativeMarkingDesc') || 'Deduct marks for incorrect answers to simulate competitive exam grading.'}
+            {t('createQuizForm.negativeMarkingDesc')}
           </p>
         </div>
       </div>
@@ -41,14 +41,14 @@ export function QuizNegativeMarkingConfig({
         <div className="pt-2 border-t border-[var(--color-border)] space-y-3 ml-6">
           <div>
             <label className="block text-xs font-semibold text-[var(--color-foreground)] mb-1">
-              {t('createQuizForm.negativeMarks') || 'Penalty per incorrect answer'}
+              {t('createQuizForm.negativeMarks')}
             </label>
             <div className="flex flex-wrap items-center gap-2 mb-2">
               {[
-                { label: t('createQuizForm.negativeMarksPresetQuarter') || '1/4 (-0.25)', value: '0.25' },
-                { label: t('createQuizForm.negativeMarksPresetThird') || '1/3 (-0.33)', value: '0.33' },
-                { label: t('createQuizForm.negativeMarksPresetHalf') || '1/2 (-0.5)', value: '0.5' },
-                { label: t('createQuizForm.negativeMarksPresetOne') || '1 (-1.0)', value: '1' },
+                { label: t('createQuizForm.negativeMarksPresetQuarter'), value: '0.25' },
+                { label: t('createQuizForm.negativeMarksPresetThird'), value: '0.33' },
+                { label: t('createQuizForm.negativeMarksPresetHalf'), value: '0.5' },
+                { label: t('createQuizForm.negativeMarksPresetOne'), value: '1' },
               ].map((preset) => (
                 <button
                   key={preset.value}
@@ -80,7 +80,7 @@ export function QuizNegativeMarkingConfig({
               className="w-32 px-3 py-1.5 text-xs sm:text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-foreground)] focus:ring-1 focus:ring-[var(--color-primary)]"
             />
             <span className="text-[11px] text-[var(--color-muted-foreground)] block mt-1">
-              {t('createQuizForm.negativeMarksHint') || 'Unattempted / skipped questions receive 0 deduction.'}
+              {t('createQuizForm.negativeMarksHint')}
             </span>
           </div>
         </div>

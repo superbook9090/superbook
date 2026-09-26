@@ -49,7 +49,7 @@ export function AdminBlogCard({
               </span>
             )}
             <Badge variant={blog.isPublished ? 'success' : 'default'} size="sm" className="font-bold">
-              {blog.isPublished ? t('common.published') || 'Published' : t('common.draft') || 'Draft'}
+              {blog.isPublished ? t('common.published') : t('common.draft')}
             </Badge>
           </div>
         </div>
@@ -88,7 +88,7 @@ export function AdminBlogCard({
       {/* Action Buttons */}
       <div className="flex items-center justify-between pt-4 mt-4 border-t border-[var(--border)]">
         <div className="flex items-center gap-2">
-          <Tooltip label={blog.isPublished ? t('common.unpublish') || 'Unpublish' : t('common.publish') || 'Publish'}>
+          <Tooltip label={blog.isPublished ? t('common.unpublish') : t('common.publish')}>
             <button
               type="button"
               onClick={() => onTogglePublish(blog._id, blog.isPublished)}
@@ -102,7 +102,7 @@ export function AdminBlogCard({
             </button>
           </Tooltip>
 
-          <Tooltip label={t('common.edit') || 'Edit'}>
+          <Tooltip label={t('common.edit')}>
             <Link
               href={ROUTES.teacher.blogEdit(blog._id)}
               className="p-2 min-h-[40px] min-w-[40px] bg-[var(--surface-muted)] text-[var(--color-foreground)] rounded-xl hover:bg-[var(--teacher-soft)] hover:text-[var(--teacher-primary)] flex items-center justify-center transition-colors"
@@ -126,7 +126,7 @@ export function AdminBlogCard({
           )}
         </div>
 
-        <Tooltip label={t('common.delete') || 'Delete'}>
+        <Tooltip label={t('common.delete')}>
           <button
             type="button"
             onClick={() => onDelete(blog._id)}

@@ -35,7 +35,7 @@ export function useAdminFiles() {
 
   const [parentId, setParentId] = useState<string | null>(null);
   const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([
-    { id: null, name: t('files.root') || 'Root' },
+    { id: null, name: t('files.root') },
   ]);
 
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
@@ -90,9 +90,9 @@ export function useAdminFiles() {
 
   useEffect(() => {
     setBreadcrumbs((prev) => {
-      if (!prev.length) return [{ id: null, name: t('files.root') || 'Root' }];
+      if (!prev.length) return [{ id: null, name: t('files.root') }];
       const updated = [...prev];
-      updated[0] = { id: null, name: t('files.root') || 'Root' };
+      updated[0] = { id: null, name: t('files.root') };
       return updated;
     });
   }, [t]);

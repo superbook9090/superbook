@@ -160,7 +160,7 @@ export default function DownloadAppPopup() {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.94, y: 16 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="relative w-full max-w-lg bg-[var(--card-solid)] border border-[var(--border)] rounded-3xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)] overflow-hidden z-10 p-6 sm:p-8"
+          className="relative w-full max-w-lg bg-[var(--card-solid)] border border-[var(--border)] rounded-3xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)] overflow-hidden z-10 p-4 sm:p-6 md:p-8"
         >
           {/* Subtle Ambient Light Gradients */}
           <div

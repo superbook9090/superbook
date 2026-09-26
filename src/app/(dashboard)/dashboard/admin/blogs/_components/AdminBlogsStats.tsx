@@ -22,14 +22,14 @@ export function AdminBlogsStats({ stats }: AdminBlogsStatsProps) {
       <StatCard
         icon={Newspaper}
         value={stats.total}
-        label={t('admin.totalBlogs') || 'Total Articles'}
+        label={t('admin.totalBlogs')}
         color="teacher"
         delay={0.05}
       />
       <StatCard
         icon={CheckCircle}
         value={stats.published}
-        label={t('common.published') || 'Published'}
+        label={t('common.published')}
         color="success"
         delay={0.1}
         description="Publicly readable"
@@ -37,7 +37,7 @@ export function AdminBlogsStats({ stats }: AdminBlogsStatsProps) {
       <StatCard
         icon={Clock}
         value={stats.draft}
-        label={t('common.draft') || 'Drafts'}
+        label={t('common.draft')}
         color="warning"
         delay={0.15}
         description="Unpublished works"

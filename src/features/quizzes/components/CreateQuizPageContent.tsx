@@ -48,7 +48,7 @@ export default function CreateQuizPageContent({ quizId }: { quizId?: string }) {
               )}
             >
               <Edit2 className="w-4 h-4" />
-              <span>{t('createQuizPage.editTitle') || 'Edit Quiz'}</span>
+              <span>{t('createQuizPage.editTitle')}</span>
             </button>
             <button
               type="button"

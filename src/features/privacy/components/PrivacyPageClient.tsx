@@ -25,7 +25,7 @@ export default function PrivacyPageClient() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <BackButton
             href={ROUTES.home}
-            label={t('privacy.backToHome') || 'Back to Home'}
+            label={t('privacy.backToHome')}
             className="hover:text-[var(--primary)] mb-8"
           />
 
@@ -35,10 +35,10 @@ export default function PrivacyPageClient() {
             className="space-y-4 mb-12 text-center sm:text-left"
           >
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-[var(--color-foreground)]">
-              {t('privacy.title') || 'Privacy Policy'}
+              {t('privacy.title')}
             </h1>
             <p className="text-[var(--color-muted-foreground)] font-medium text-lg">
-              {t('privacy.lastUpdated') || 'Last Updated: May 18, 2026'}
+              {t('privacy.lastUpdated')}
             </p>
           </motion.div>
 
@@ -49,7 +49,7 @@ export default function PrivacyPageClient() {
             className="bg-[var(--card-solid)] border border-[var(--border)] rounded-3xl p-8 sm:p-12 shadow-2xl space-y-12"
           >
             <p className="text-lg text-[var(--color-foreground)] leading-relaxed font-medium">
-              {t('privacy.intro') || 'Your privacy is important to us. This Privacy Policy explains how we collect, use, and protect your personal information when you use our services.'}
+              {t('privacy.intro')}
             </p>
 
             <div className="space-y-12">
@@ -59,11 +59,11 @@ export default function PrivacyPageClient() {
                     <Database className="w-6 h-6" />
                   </div>
                   <h2 className="text-2xl font-bold text-[var(--color-foreground)]">
-                    {t('privacy.dataCollection') || 'Information We Collect'}
+                    {t('privacy.dataCollection')}
                   </h2>
                 </div>
                 <p className="text-[var(--color-muted-foreground)] leading-relaxed pl-2 sm:pl-16">
-                  {t('privacy.dataCollectionText') || 'We collect information you provide directly to us when you create an account, update your profile, use the interactive features of our services, participate in quizzes or courses, request customer support, or otherwise communicate with us.'}
+                  {t('privacy.dataCollectionText')}
                 </p>
               </section>
 
@@ -73,11 +73,11 @@ export default function PrivacyPageClient() {
                     <Eye className="w-6 h-6" />
                   </div>
                   <h2 className="text-2xl font-bold text-[var(--color-foreground)]">
-                    {t('privacy.dataUse') || 'How We Use Your Information'}
+                    {t('privacy.dataUse')}
                   </h2>
                 </div>
                 <p className="text-[var(--color-muted-foreground)] leading-relaxed pl-2 sm:pl-16">
-                  {t('privacy.dataUseText') || 'We use the information we collect to provide, maintain, and improve our services, to develop new features, and to protect Quiz Do and our users.'}
+                  {t('privacy.dataUseText')}
                 </p>
               </section>
 
@@ -87,11 +87,11 @@ export default function PrivacyPageClient() {
                     <Shield className="w-6 h-6" />
                   </div>
                   <h2 className="text-2xl font-bold text-[var(--color-foreground)]">
-                    {t('privacy.dataSharing') || 'Information Sharing'}
+                    {t('privacy.dataSharing')}
                   </h2>
                 </div>
                 <p className="text-[var(--color-muted-foreground)] leading-relaxed pl-2 sm:pl-16">
-                  {t('privacy.dataSharingText') || 'We do not share your personal information with third parties except as described in this privacy policy or as required by law.'}
+                  {t('privacy.dataSharingText')}
                 </p>
               </section>
 
@@ -101,11 +101,11 @@ export default function PrivacyPageClient() {
                     <Lock className="w-6 h-6" />
                   </div>
                   <h2 className="text-2xl font-bold text-[var(--color-foreground)]">
-                    {t('privacy.security') || 'Security'}
+                    {t('privacy.security')}
                   </h2>
                 </div>
                 <p className="text-[var(--color-muted-foreground)] leading-relaxed pl-2 sm:pl-16">
-                  {t('privacy.securityText') || 'We take reasonable measures to help protect information about you from loss, theft, misuse, unauthorized access, disclosure, alteration, and destruction.'}
+                  {t('privacy.securityText')}
                 </p>
               </section>
 
@@ -115,13 +115,12 @@ export default function PrivacyPageClient() {
                     <Cookie className="w-6 h-6" />
                   </div>
                   <h2 className="text-2xl font-bold text-[var(--color-foreground)]">
-                    {t('privacy.cookiesAndAds') || 'Third-Party Advertising & Cookies (Google AdSense)'}
+                    {t('privacy.cookiesAndAds')}
                   </h2>
                 </div>
                 <div className="text-[var(--color-muted-foreground)] leading-relaxed pl-2 sm:pl-16 space-y-3">
                   <p>
-                    {t('privacy.cookiesAndAdsText') ||
-                      'We partner with third-party advertising vendors, including Google AdSense, to serve relevant advertisements when you visit our website. Google uses cookies (including the DoubleClick DART cookie) to serve ads to users based on their prior visits to Quiz Do and other websites on the Internet.'}
+                    {t('privacy.cookiesAndAdsText')}
                   </p>
                   <p>
                     Users may opt out of personalized advertising by visiting{' '}
@@ -150,16 +149,16 @@ export default function PrivacyPageClient() {
 
             <div className="mt-12 pt-12 border-t border-[var(--border)] text-center">
               <h3 className="text-xl font-bold text-[var(--color-foreground)] mb-4">
-                {t('privacy.contactUs') || 'Contact Us'}
+                {t('privacy.contactUs')}
               </h3>
               <p className="text-[var(--color-muted-foreground)] mb-6">
-                {t('privacy.contactUsText') || 'If you have any questions about this Privacy Policy, please contact us.'}
+                {t('privacy.contactUsText')}
               </p>
               <Link 
                 href={ROUTES.contact} 
                 className="inline-flex items-center justify-center px-8 py-3.5 bg-[var(--primary)] text-white font-bold rounded-2xl shadow-lg shadow-[var(--primary)]/20 hover:scale-[1.02] active:scale-[0.98] hover:shadow-xl hover:shadow-[var(--primary)]/30 transition-all duration-200"
               >
-                {t('privacy.contactUs') || 'Contact Us'}
+                {t('privacy.contactUs')}
               </Link>
             </div>
           </motion.div>

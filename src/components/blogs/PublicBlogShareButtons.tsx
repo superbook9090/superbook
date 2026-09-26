@@ -66,7 +66,7 @@ export default function PublicBlogShareButtons({ title, url }: Props) {
         className="rounded-lg bg-[var(--color-primary)] px-4 py-2 text-sm font-medium text-white flex items-center gap-1.5 hover:brightness-110 active:scale-[0.98] transition-all"
       >
         <Share2 className="w-4 h-4" />
-        {t('blog.shareLabel') || 'Share'}
+        {t('blog.shareLabel')}
       </button>
       <button
         type="button"
@@ -76,12 +76,12 @@ export default function PublicBlogShareButtons({ title, url }: Props) {
         {copied ? (
           <>
             <Check className="w-4 h-4 text-[var(--color-success)] animate-in fade-in zoom-in-50 duration-200" />
-            <span className="animate-in fade-in duration-200">{t('blog.linkCopiedLabel') || 'Link Copied!'}</span>
+            <span className="animate-in fade-in duration-200">{t('blog.linkCopiedLabel')}</span>
           </>
         ) : (
           <>
             <Copy className="w-4 h-4 text-[var(--color-muted-foreground)]" />
-            <span>{t('blog.copyLinkLabel') || 'Copy Link'}</span>
+            <span>{t('blog.copyLinkLabel')}</span>
           </>
         )}
       </button>

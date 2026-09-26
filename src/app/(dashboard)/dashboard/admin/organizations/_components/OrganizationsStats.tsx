@@ -17,7 +17,7 @@ export function OrganizationsStats({ stats, isLoading }: OrganizationsStatsProps
   const cards = [
     {
       id: 'totalOrgs',
-      label: t('organizations.totalOrgs') || 'Total Organizations',
+      label: t('organizations.totalOrgs'),
       value: stats.total,
       icon: Building2,
       iconBg: 'bg-[var(--info-light)] text-[var(--info)]',
@@ -25,7 +25,7 @@ export function OrganizationsStats({ stats, isLoading }: OrganizationsStatsProps
     },
     {
       id: 'activeOrgs',
-      label: t('organizations.activeOrgs') || 'Active Organizations',
+      label: t('organizations.activeOrgs'),
       value: stats.active,
       icon: CheckCircle2,
       iconBg: 'bg-[var(--success-light)] text-[var(--success)]',
@@ -39,7 +39,7 @@ export function OrganizationsStats({ stats, isLoading }: OrganizationsStatsProps
     },
     {
       id: 'totalUsers',
-      label: t('organizations.totalUsers') || 'Enrolled Users',
+      label: t('organizations.totalUsers'),
       value: stats.totalUsers,
       icon: Users,
       iconBg: 'bg-[var(--student-soft)] text-[var(--student-primary)]',
@@ -47,7 +47,7 @@ export function OrganizationsStats({ stats, isLoading }: OrganizationsStatsProps
     },
     {
       id: 'totalContent',
-      label: t('organizations.totalContent') || 'Total Content',
+      label: t('organizations.totalContent'),
       value: stats.totalContent,
       icon: BookOpen,
       iconBg: 'bg-[var(--teacher-soft)] text-[var(--teacher-primary)]',

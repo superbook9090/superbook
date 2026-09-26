@@ -44,7 +44,7 @@ export default function LogoutButton({ variant = 'profile', className }: LogoutB
       aria-label={t('common.signOut')}
     >
       <LogOut className={variant === 'sidebar' ? 'w-4 h-4' : 'w-5 h-5'} aria-hidden />
-      {showLabel && (t('common.signOut') || 'Sign Out')}
+      {showLabel && (t('common.signOut'))}
     </button>
   );
 }

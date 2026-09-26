@@ -31,12 +31,12 @@ export function FolderGridCard({
 
   const dropdownItems = [
     {
-      label: t('common.edit') || 'Rename',
+      label: t('common.edit'),
       icon: <Pencil className="w-4 h-4" />,
       onClick: () => onRename(folder),
     },
     {
-      label: t('common.delete') || 'Delete',
+      label: t('common.delete'),
       icon: <Trash2 className="w-4 h-4 text-[var(--color-error)]" />,
       onClick: () => onDelete(folder),
       className: 'text-[var(--color-error)] hover:bg-[var(--color-error-light)]',
@@ -69,7 +69,7 @@ export function FolderGridCard({
               {folder.name}
             </h3>
             <p className="text-xs text-[var(--color-muted-foreground)] mt-0.5">
-              {t('files.folder') || 'Folder'}
+              {t('files.folder')}
             </p>
           </div>
         </div>
@@ -82,7 +82,7 @@ export function FolderGridCard({
                 <button
                   type="button"
                   className="p-1.5 rounded-lg text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted)] transition-colors"
-                  aria-label={t('files.actions') || 'Actions'}
+                  aria-label={t('files.actions')}
                 >
                   <MoreVertical className="w-4 h-4" />
                 </button>
@@ -96,7 +96,7 @@ export function FolderGridCard({
       <div className="mt-4 pt-3 border-t border-[var(--border)]/60 flex items-center justify-between text-xs text-[var(--color-muted-foreground)]">
         <span>{formattedDate}</span>
         <div className="flex items-center gap-1 text-[var(--primary)] font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-          <span>{t('files.view') || 'Open'}</span>
+          <span>{t('files.view')}</span>
           <ChevronRight className="w-3.5 h-3.5" />
         </div>
       </div>

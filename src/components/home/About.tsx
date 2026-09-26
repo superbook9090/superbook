@@ -118,7 +118,7 @@ export default function About() {
             />
 
             <div className="relative transform-3d transition-transform duration-700 sm:[transform:rotateX(8deg)_rotateY(-8deg)_rotateZ(1deg)] hover:[transform:none]">
-              <div className="relative antigravity-glass rounded-3xl p-6 sm:p-8 shadow-2xl border border-[var(--border)]">
+              <div className="relative antigravity-glass rounded-3xl p-4 sm:p-6 md:p-8 shadow-2xl border border-[var(--border)]">
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center gap-3 border-b border-[var(--color-border)]/60 pb-4">
                     <div className="w-10 h-10 bg-[var(--student-soft)] rounded-xl flex items-center justify-center border border-[var(--student-border)]/50">

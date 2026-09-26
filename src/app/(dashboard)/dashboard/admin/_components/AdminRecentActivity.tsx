@@ -49,7 +49,7 @@ export default function AdminRecentActivity({ stats }: AdminRecentActivityProps)
                 </div>
                 <div>
                   <h3 id="platform-radar-heading" className="font-extrabold text-sm sm:text-base text-[var(--color-foreground)]">
-                    {t('admin.topCurriculumLeaders') || 'Top Performing Courses'}
+                    {t('admin.topCurriculumLeaders')}
                   </h3>
                 </div>
               </div>
@@ -126,7 +126,7 @@ export default function AdminRecentActivity({ stats }: AdminRecentActivityProps)
                 </div>
                 <div>
                   <h3 className="font-extrabold text-sm sm:text-base text-[var(--color-foreground)]">
-                    {t('admin.recentPlatformAudits') || 'Live Platform Activity Feed'}
+                    {t('admin.recentPlatformAudits')}
                   </h3>
                 </div>
               </div>
@@ -134,7 +134,7 @@ export default function AdminRecentActivity({ stats }: AdminRecentActivityProps)
                 href={ROUTES.admin.analytics}
                 className="text-xs font-bold text-sky-500 hover:underline flex items-center gap-1 min-h-[36px]"
               >
-                <span>{t('admin.viewFullRadar') || 'Analytics'}</span>
+                <span>{t('admin.viewFullRadar')}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>

@@ -55,12 +55,12 @@ export default function AuthBranding({ mode = 'login', className = '' }: AuthBra
           className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-[11px] font-semibold text-purple-100 shadow-sm"
         >
           <Sparkles className="w-3 h-3 text-amber-300 animate-pulse" />
-          <span>{isRegister ? t('auth.joinLearners') || 'Join 50,000+ Learners' : t('auth.interactiveLearning') || 'Interactive Learning & Quizzes'}</span>
+          <span>{isRegister ? t('auth.joinLearners') : t('auth.interactiveLearning')}</span>
         </motion.div>
 
         <div className="flex items-center gap-1.5 text-[11px] text-purple-200/80 font-medium">
           <span className="size-2 rounded-full bg-emerald-400 animate-ping inline-block" />
-          <span>{t('auth.livePlatform') || 'Live Platform'}</span>
+          <span>{t('auth.livePlatform')}</span>
         </div>
       </div>
 
@@ -113,7 +113,7 @@ export default function AuthBranding({ mode = 'login', className = '' }: AuthBra
             </div>
             <div className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-300 bg-amber-400/10 px-2 py-0.5 rounded-full border border-amber-300/20">
               <Trophy className="w-3 h-3" />
-              <span>{isRegister ? t('auth.topRewards') || 'Top Rewards' : t('auth.topRank') || 'Top 1% Rank'}</span>
+              <span>{isRegister ? t('auth.topRewards') : t('auth.topRank')}</span>
             </div>
           </div>
 
@@ -138,7 +138,7 @@ export default function AuthBranding({ mode = 'login', className = '' }: AuthBra
           <div className="mt-3.5 pt-2.5 border-t border-white/10 flex items-center justify-between text-xs text-purple-100/75">
             <div className="flex items-center gap-1.5">
               <Users className="w-3.5 h-3.5 text-purple-300" />
-              <span>{t('auth.activeLearnersCount', { count: '2,480' }) || '2,480 Active Learners'}</span>
+              <span>{t('auth.activeLearnersCount', { count: '2,480' })}</span>
             </div>
             <span className="text-emerald-300 font-medium">Instant AI Feedback</span>
           </div>

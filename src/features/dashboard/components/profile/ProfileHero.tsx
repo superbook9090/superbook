@@ -41,7 +41,7 @@ export function ProfileHero({ session, accountInfo }: ProfileHeroProps) {
   const roleMeta = (() => {
     if (superAdmin) {
       return {
-        label: t('profile.superAdminBadge') || 'Super Admin',
+        label: t('profile.superAdminBadge'),
         icon: ShieldCheck,
         badgeClass: 'bg-[var(--warning-light)] text-[var(--warning)] border-[var(--warning)]/30',
         avatarBg: 'bg-[var(--warning)]',
@@ -49,7 +49,7 @@ export function ProfileHero({ session, accountInfo }: ProfileHeroProps) {
     }
     if (role === 'admin') {
       return {
-        label: t('profile.adminBadge') || 'Admin',
+        label: t('profile.adminBadge'),
         icon: Shield,
         badgeClass: 'bg-[var(--teacher-soft)] text-[var(--teacher-primary)] border-[var(--teacher-border)]',
         avatarBg: 'bg-[var(--teacher-primary)]',
@@ -57,14 +57,14 @@ export function ProfileHero({ session, accountInfo }: ProfileHeroProps) {
     }
     if (role === 'teacher') {
       return {
-        label: t('profile.teacherBadge') || 'Educator',
+        label: t('profile.teacherBadge'),
         icon: BookOpen,
         badgeClass: 'bg-[var(--teacher-soft)] text-[var(--teacher-primary)] border-[var(--teacher-border)]',
         avatarBg: 'bg-[var(--teacher-primary)]',
       };
     }
     return {
-      label: t('profile.studentBadge') || 'Student',
+      label: t('profile.studentBadge'),
       icon: GraduationCap,
       badgeClass: 'bg-[var(--student-soft)] text-[var(--student-primary)] border-[var(--student-border)]',
       avatarBg: 'bg-[var(--student-primary)]',
@@ -114,7 +114,7 @@ export function ProfileHero({ session, accountInfo }: ProfileHeroProps) {
               ) : (
                 <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[var(--color-surface-muted)] text-xs font-medium text-[var(--color-muted-foreground)] border border-[var(--border)]">
                   <UserCheck className="w-3 h-3 text-[var(--success)]" />
-                  <span>{t('profile.unassignedOrg') || 'Independent'}</span>
+                  <span>{t('profile.unassignedOrg')}</span>
                 </span>
               )}
             </div>

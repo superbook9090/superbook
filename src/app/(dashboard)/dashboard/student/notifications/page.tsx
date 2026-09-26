@@ -127,32 +127,30 @@ export default function StudentNotificationsPage() {
                   : 'antigravity-glass border-[var(--student-primary)]/40 bg-[var(--student-soft)]/25 hover:-translate-y-0.5 shadow-sm shadow-[var(--student-primary)]/10'
               }`}
             >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-3">
-                  <div className="relative mt-1 shrink-0">
-                    <div className="p-2 bg-[var(--card-solid)] border border-[var(--border)] rounded-xl shadow-xs">
-                      {getCategoryIcon(item.category)}
-                    </div>
-                    {!item.read && (
-                      <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[var(--student-primary)] shadow-[0_0_8px_var(--student-primary)] animate-pulse border border-[var(--background)]" />
-                    )}
+              <div className="flex items-start gap-3 sm:gap-4 w-full text-left">
+                <div className="relative shrink-0 mt-0.5">
+                  <div className="p-2 sm:p-2.5 bg-[var(--card-solid)] border border-[var(--border)] rounded-xl shadow-xs">
+                    {getCategoryIcon(item.category)}
                   </div>
-                  <div>
-                    <p className={`text-sm sm:text-base font-bold text-[var(--color-foreground)] ${!item.read ? 'text-[var(--student-primary)]' : ''}`}>
-                      {localizedText(item.title, lang)}
-                    </p>
-                    <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] mt-1 leading-relaxed">
-                      {localizedText(item.body, lang)}
-                    </p>
-                  </div>
+                  {!item.read && (
+                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[var(--student-primary)] shadow-[0_0_8px_var(--student-primary)] animate-pulse border border-[var(--background)]" />
+                  )}
                 </div>
-                <div className="text-right shrink-0">
-                  <span className="text-xs font-bold text-[var(--student-primary)] px-2.5 py-0.5 rounded-full bg-[var(--student-soft)] border border-[var(--student-primary)]/20 inline-block mb-1">
-                    {t(`notifications.categories.${item.category}`)}
-                  </span>
-                  <span className="text-[11px] text-[var(--color-muted-foreground)] block">
-                    {formatWhen(item.createdAt, lang)}
-                  </span>
+                <div className="flex-1 min-w-0 flex flex-col">
+                  <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 mb-1.5">
+                    <span className="text-[10px] sm:text-[11px] font-bold text-[var(--student-primary)] px-2 py-0.5 rounded-md bg-[var(--student-soft)] border border-[var(--student-primary)]/20 uppercase tracking-wide">
+                      {t(`notifications.categories.${item.category}`)}
+                    </span>
+                    <span className="text-[10px] sm:text-[11px] text-[var(--color-muted-foreground)] font-medium">
+                      {formatWhen(item.createdAt, lang)}
+                    </span>
+                  </div>
+                  <p className={`text-sm sm:text-base font-bold text-[var(--color-foreground)] leading-snug break-words ${!item.read ? 'text-[var(--student-primary)]' : ''}`}>
+                    {localizedText(item.title, lang)}
+                  </p>
+                  <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] leading-relaxed break-words mt-1">
+                    {localizedText(item.body, lang)}
+                  </p>
                 </div>
               </div>
             </button>

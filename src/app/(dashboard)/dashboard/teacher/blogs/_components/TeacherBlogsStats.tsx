@@ -22,21 +22,21 @@ export default function TeacherBlogsStats({ stats }: TeacherBlogsStatsProps) {
       <StatCard
         icon={BookOpen}
         value={stats.total}
-        label={t('blog.totalBlogs') || 'Total Blogs'}
+        label={t('blog.totalBlogs')}
         color="teacher"
         delay={0.05}
       />
       <StatCard
         icon={CheckCircle}
         value={stats.published}
-        label={t('blog.published') || 'Published'}
+        label={t('blog.published')}
         color="success"
         delay={0.1}
       />
       <StatCard
         icon={Clock}
         value={stats.draft}
-        label={t('blog.draft') || 'Drafts'}
+        label={t('blog.draft')}
         color="warning"
         delay={0.15}
       />

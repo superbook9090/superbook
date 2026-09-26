@@ -53,10 +53,10 @@ export function ContestQuestionsSection({
       <div className="p-6 rounded-3xl bg-[var(--card-solid)] border border-[var(--border)] shadow-xs space-y-2">
         <div className="flex items-center gap-2 text-sm font-bold text-[var(--color-foreground)]">
           <Layers className="w-4 h-4 text-[var(--primary)]" />
-          <span>{t('contest.questionsBuilder') || '5. Contest Questions'}</span>
+          <span>{t('contest.questionsBuilder')}</span>
         </div>
         <p className="text-xs text-[var(--color-muted-foreground)]">
-          {t('contest.questionsLockedDuringContest') || 'Questions cannot be modified once the contest has started or completed.'}
+          {t('contest.questionsLockedDuringContest')}
         </p>
       </div>
     );
@@ -67,10 +67,10 @@ export function ContestQuestionsSection({
       <div className="flex items-center justify-between pb-3 border-b border-[var(--border)]">
         <div className="flex items-center gap-2 text-sm font-bold text-[var(--color-foreground)]">
           <Layers className="w-4 h-4 text-[var(--primary)]" />
-          <span>{t('contest.questionsBuilder') || '5. Contest Questions'}</span>
+          <span>{t('contest.questionsBuilder')}</span>
         </div>
         <span className="text-xs font-bold text-[var(--primary)]">
-          {questions.length} {t('common.questions') || 'Questions'}
+          {questions.length} {t('common.questions')}
         </span>
       </div>
 
@@ -102,13 +102,13 @@ export function ContestQuestionsSection({
                   className="text-xs font-bold text-[var(--error)] hover:opacity-80 flex items-center gap-1"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
-                  <span>{t('common.remove') || 'Remove'}</span>
+                  <span>{t('common.remove')}</span>
                 </button>
               )}
             </div>
 
             <TextField
-              label={t('contest.questionPrompt') || 'Question Text *'}
+              label={t('contest.questionPrompt')}
               value={q.question}
               onChange={(e) => onQuestionChange(qIdx, e.target.value)}
               placeholder="Enter the question prompt..."
@@ -117,7 +117,7 @@ export function ContestQuestionsSection({
 
             <div className="space-y-2">
               <label className="block text-xs font-semibold text-[var(--color-foreground)]">
-                {t('contest.optionsAndCorrect') || 'Options & Correct Answer (Select radio for correct answer)'}
+                {t('contest.optionsAndCorrect')}
               </label>
               {q.options.map((opt, optIdx) => (
                 <div key={optIdx} className="flex items-center gap-2">
@@ -158,7 +158,7 @@ export function ContestQuestionsSection({
                   onClick={() => onAddOption(qIdx)}
                   className="text-xs font-bold text-[var(--primary)] hover:opacity-80 pt-1 block"
                 >
-                  {t('contest.addOption') || '+ Add Option'}
+                  {t('contest.addOption')}
                 </button>
               )}
             </div>
@@ -166,7 +166,7 @@ export function ContestQuestionsSection({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-[var(--border)]">
               <div>
                 <label className="block text-[11px] font-semibold text-[var(--color-foreground)] mb-1">
-                  {t('contest.questionPoints') || 'Positive Points'}
+                  {t('contest.questionPoints')}
                 </label>
                 <input
                   type="number"
@@ -181,7 +181,7 @@ export function ContestQuestionsSection({
               {enableNegativeMarking && (
                 <div>
                   <label className="block text-[11px] font-semibold text-[var(--color-foreground)] mb-1">
-                    {t('contest.negativePoints') || 'Negative Penalty'}
+                    {t('contest.negativePoints')}
                   </label>
                   <input
                     type="number"
@@ -204,7 +204,7 @@ export function ContestQuestionsSection({
           className="w-full py-3 rounded-2xl border-2 border-dashed border-[var(--border)] text-xs font-bold text-[var(--primary)] hover:bg-[var(--primary-light)]/20 transition-all flex items-center justify-center gap-2"
         >
           <Plus className="w-4 h-4" />
-          <span>{t('contest.addAnotherQuestion') || 'Add Another Question'}</span>
+          <span>{t('contest.addAnotherQuestion')}</span>
         </button>
       </div>
     </div>

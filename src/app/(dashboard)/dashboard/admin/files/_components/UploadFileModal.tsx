@@ -62,7 +62,7 @@ export function UploadFileModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedFile) {
-      setError(t('files.chooseFile') || 'Please select a PDF file');
+      setError(t('files.chooseFile'));
       return;
     }
     await onSubmit(selectedFile);
@@ -82,10 +82,10 @@ export function UploadFileModal({
             </div>
             <div>
               <h3 className="text-base font-bold text-[var(--color-foreground)]">
-                {t('files.uploadPdf') || 'Upload PDF Document'}
+                {t('files.uploadPdf')}
               </h3>
               <p className="text-xs text-[var(--color-muted-foreground)]">
-                {t('files.uploadRestrictions') || 'PDF files up to 20MB are supported'}
+                {t('files.uploadRestrictions')}
               </p>
             </div>
           </div>
@@ -148,10 +148,10 @@ export function UploadFileModal({
               <div className="flex flex-col items-center">
                 <UploadCloud className="w-8 h-8 text-[var(--primary)] mb-2" />
                 <p className="text-sm font-semibold text-[var(--color-foreground)]">
-                  {t('files.dropFilesHere') || 'Drop PDF here or click to browse'}
+                  {t('files.dropFilesHere')}
                 </p>
                 <p className="text-xs text-[var(--color-muted-foreground)] mt-1">
-                  {t('files.uploadRestrictions') || 'Max size 20MB'}
+                  {t('files.uploadRestrictions')}
                 </p>
               </div>
             )}
@@ -166,7 +166,7 @@ export function UploadFileModal({
 
           <div className="flex items-center justify-end gap-2 pt-2">
             <Button type="button" variant="secondary" onClick={onClose} disabled={isSubmitting}>
-              {t('common.cancel') || 'Cancel'}
+              {t('common.cancel')}
             </Button>
             <Button
               type="submit"
@@ -174,7 +174,7 @@ export function UploadFileModal({
               isLoading={isSubmitting}
               disabled={!selectedFile}
             >
-              {t('files.upload') || 'Upload File'}
+              {t('files.upload')}
             </Button>
           </div>
         </form>

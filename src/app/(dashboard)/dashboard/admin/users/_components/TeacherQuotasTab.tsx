@@ -36,21 +36,21 @@ export function TeacherQuotasTab({
       field: 'courses',
       icon: <BookOpen className="w-4 h-4" />,
       iconBg: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
-      title: t('adminUsers.courses') || 'Courses',
+      title: t('adminUsers.courses'),
       globalVal: globalCoursesLimit,
     },
     {
       field: 'quizzes',
       icon: <HelpCircle className="w-4 h-4" />,
       iconBg: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
-      title: t('adminUsers.quizzes') || 'Quizzes',
+      title: t('adminUsers.quizzes'),
       globalVal: globalQuizzesLimit,
     },
     {
       field: 'blogs',
       icon: <FileText className="w-4 h-4" />,
       iconBg: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
-      title: t('adminUsers.blogs') || 'Blogs',
+      title: t('adminUsers.blogs'),
       globalVal: globalBlogsLimit,
     },
   ];
@@ -68,9 +68,9 @@ export function TeacherQuotasTab({
       <div className="flex items-center justify-between px-4 py-2.5 bg-[var(--color-surface-muted)]/50 border-b border-[var(--border)] text-xs text-[var(--color-muted-foreground)]">
         <span className="flex items-center gap-1.5 font-medium">
           <Layers className="w-3.5 h-3.5 text-[var(--teacher-primary)]" />
-          <span>{t('adminUsers.contentQuotasTitle') || 'Standard Content Quotas'}</span>
+          <span>{t('adminUsers.contentQuotasTitle')}</span>
         </span>
-        <span>{t('adminUsers.leaveEmptyForGlobal') || 'Leave empty for global limit'}</span>
+        <span>{t('adminUsers.leaveEmptyForGlobal')}</span>
       </div>
 
       {/* Quota Rows */}
@@ -95,11 +95,11 @@ export function TeacherQuotasTab({
                     </p>
                     {isCustom ? (
                       <span className="text-[10px] font-semibold px-2 py-0.2 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                        {t('adminUsers.customOverride') || 'Custom'}
+                        {t('adminUsers.customOverride')}
                       </span>
                     ) : (
                       <span className="text-[10px] font-medium px-2 py-0.2 rounded-full bg-[var(--color-surface-muted-strong)] text-[var(--color-muted-foreground)]">
-                        {t('adminUsers.globalDefaultBadge') || 'Global'}: {item.globalVal}
+                        {t('adminUsers.globalDefaultBadge')}: {item.globalVal}
                       </span>
                     )}
                   </div>
@@ -115,7 +115,7 @@ export function TeacherQuotasTab({
                   <button
                     type="button"
                     onClick={() => handleStep(item.field, -1, item.globalVal)}
-                    aria-label={t('adminUsers.stepperDecrease') || 'Decrease'}
+                    aria-label={t('adminUsers.stepperDecrease')}
                     className="p-2 text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted)] transition-colors active:scale-95"
                   >
                     <Minus className="w-3.5 h-3.5" />
@@ -133,7 +133,7 @@ export function TeacherQuotasTab({
                   <button
                     type="button"
                     onClick={() => handleStep(item.field, 1, item.globalVal)}
-                    aria-label={t('adminUsers.stepperIncrease') || 'Increase'}
+                    aria-label={t('adminUsers.stepperIncrease')}
                     className="p-2 text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted)] transition-colors active:scale-95"
                   >
                     <Plus className="w-3.5 h-3.5" />
@@ -144,7 +144,7 @@ export function TeacherQuotasTab({
                   <button
                     type="button"
                     onClick={() => onLimitsChange(item.field, '')}
-                    title={t('adminUsers.resetToGlobal') || 'Reset to Global'}
+                    title={t('adminUsers.resetToGlobal')}
                     className="p-2 rounded-lg text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted)] border border-transparent hover:border-[var(--border)] transition-colors text-xs"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />

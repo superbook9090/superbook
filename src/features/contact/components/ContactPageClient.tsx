@@ -178,7 +178,7 @@ export default function ContactPageClient() {
               initial={{ opacity: 0, y: 30, rotateX: 2 }}
               animate={{ opacity: 1, y: 0, rotateX: 0 }}
               transition={{ duration: 0.6, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-              className="lg:col-span-7 antigravity-glass border border-[var(--border)] rounded-3xl p-6 sm:p-8 lg:p-10 shadow-2xl relative overflow-hidden transform-3d"
+              className="lg:col-span-7 antigravity-glass border border-[var(--border)] rounded-3xl p-4 sm:p-6 md:p-8 lg:p-10 shadow-2xl relative overflow-hidden transform-3d"
             >
               <div
                 className="absolute top-0 inset-x-0 h-1.5 shadow-[0_0_12px_var(--primary)]"

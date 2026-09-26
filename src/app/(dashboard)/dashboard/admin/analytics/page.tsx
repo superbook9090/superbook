@@ -42,7 +42,7 @@ export default function AdminAnalyticsPage() {
   }
 
   return (
-    <PageWrapper className="overflow-x-hidden space-y-6">
+    <PageWrapper className="overflow-x-hidden">
       <AdminAnalyticsHero
         activeTab={activeTab}
         onTabChange={setActiveTab}

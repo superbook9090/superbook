@@ -48,19 +48,19 @@ export default function ContestResultPage({ params }: { params: Promise<{ id: st
       : null;
 
   return (
-    <PageWrapper className="space-y-6">
+    <PageWrapper>
       <div className="flex items-center justify-between">
         <Link
           href={ROUTES.student.contests}
           className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>{t('contest.backToContests') || 'Back to Contests'}</span>
+          <span>{t('contest.backToContests')}</span>
         </Link>
       </div>
 
       {/* Hero Summary Card */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)] text-white p-6 sm:p-8 shadow-md">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)] text-white p-4 sm:p-6 md:p-8 shadow-md">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
           <div className="space-y-2 max-w-xl">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-xs font-extrabold tracking-wider uppercase">
@@ -69,8 +69,8 @@ export default function ContestResultPage({ params }: { params: Promise<{ id: st
             </div>
             <h1 className="text-xl sm:text-3xl font-extrabold tracking-tight">
               {userAttempt
-                ? t('contest.contestCompleted') || 'Contest Completed!'
-                : t('contest.contestOverview') || 'Contest Results & Standings'}
+                ? t('contest.contestCompleted')
+                : t('contest.contestOverview')}
             </h1>
             <p className="text-xs sm:text-sm text-white/80">
               {contest?.description || 'Review your performance and current standing on the leaderboard.'}
@@ -82,7 +82,7 @@ export default function ContestResultPage({ params }: { params: Promise<{ id: st
             <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20">
               <div className="text-center px-3 border-r border-white/20">
                 <span className="text-[10px] uppercase font-extrabold text-white/70">
-                  {t('contest.score') || 'Score'}
+                  {t('contest.score')}
                 </span>
                 <p className="text-xl sm:text-2xl font-mono font-black text-white">
                   {userAttempt.score}
@@ -93,7 +93,7 @@ export default function ContestResultPage({ params }: { params: Promise<{ id: st
               {userRank && (
                 <div className="text-center px-3">
                   <span className="text-[10px] uppercase font-extrabold text-white/70">
-                    {t('contest.rank') || 'Rank'}
+                    {t('contest.rank')}
                   </span>
                   <p className="text-xl sm:text-2xl font-mono font-black text-[var(--warning)]">
                     #{userRank}
@@ -136,7 +136,7 @@ export default function ContestResultPage({ params }: { params: Promise<{ id: st
           }`}
         >
           <Trophy className="w-4 h-4" />
-          <span>{t('contest.leaderboard') || 'Leaderboard'}</span>
+          <span>{t('contest.leaderboard')}</span>
         </button>
 
         <button
@@ -149,7 +149,7 @@ export default function ContestResultPage({ params }: { params: Promise<{ id: st
           }`}
         >
           <Sparkles className="w-4 h-4" />
-          <span>{t('contest.solutionsAndReview') || 'Solutions & Answers'}</span>
+          <span>{t('contest.solutionsAndReview')}</span>
           {reviewData?.isLocked && <Lock className="w-3 h-3 text-[var(--warning)]" />}
         </button>
       </div>

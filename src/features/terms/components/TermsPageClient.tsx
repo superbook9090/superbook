@@ -25,7 +25,7 @@ export default function TermsPageClient() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <BackButton
             href={ROUTES.home}
-            label={t('terms.backToHome') || 'Back to Home'}
+            label={t('terms.backToHome')}
             className="hover:text-[var(--primary)] mb-8"
           />
 
@@ -35,10 +35,10 @@ export default function TermsPageClient() {
             className="space-y-4 mb-12 text-center sm:text-left"
           >
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-[var(--color-foreground)]">
-              {t('terms.title') || 'Terms of Service'}
+              {t('terms.title')}
             </h1>
             <p className="text-[var(--color-muted-foreground)] font-medium text-lg">
-              {t('terms.lastUpdated') || 'Last Updated: May 18, 2026'}
+              {t('terms.lastUpdated')}
             </p>
           </motion.div>
 
@@ -49,8 +49,7 @@ export default function TermsPageClient() {
             className="bg-[var(--card-solid)] border border-[var(--border)] rounded-3xl p-8 sm:p-12 shadow-2xl space-y-12"
           >
             <p className="text-lg text-[var(--color-foreground)] leading-relaxed font-medium">
-              {t('terms.intro') ||
-                'Please review these Terms of Service before using Quiz Do. By accessing or using our website, interactive quizzes, courses, or services, you agree to comply with and be bound by these terms.'}
+              {t('terms.intro')}
             </p>
 
             <div className="space-y-12">
@@ -61,12 +60,11 @@ export default function TermsPageClient() {
                     <FileText className="w-6 h-6" />
                   </div>
                   <h2 className="text-2xl font-bold text-[var(--color-foreground)]">
-                    {t('terms.acceptance') || '1. Acceptance of Terms'}
+                    {t('terms.acceptance')}
                   </h2>
                 </div>
                 <p className="text-[var(--color-muted-foreground)] leading-relaxed pl-2 sm:pl-16">
-                  {t('terms.acceptanceText') ||
-                    'Quiz Do provides online learning management, interactive quizzes, mock test generation, and educational content. Your access to and use of the platform is conditioned on your acceptance of and compliance with these Terms.'}
+                  {t('terms.acceptanceText')}
                 </p>
               </section>
 
@@ -77,12 +75,11 @@ export default function TermsPageClient() {
                     <UserCheck className="w-6 h-6" />
                   </div>
                   <h2 className="text-2xl font-bold text-[var(--color-foreground)]">
-                    {t('terms.accounts') || '2. User Accounts & Security'}
+                    {t('terms.accounts')}
                   </h2>
                 </div>
                 <p className="text-[var(--color-muted-foreground)] leading-relaxed pl-2 sm:pl-16">
-                  {t('terms.accountsText') ||
-                    'When creating an account, you agree to provide accurate and complete information. You are responsible for safeguarding your login credentials and for all activities that occur under your account.'}
+                  {t('terms.accountsText')}
                 </p>
               </section>
 
@@ -93,12 +90,11 @@ export default function TermsPageClient() {
                     <AlertCircle className="w-6 h-6" />
                   </div>
                   <h2 className="text-2xl font-bold text-[var(--color-foreground)]">
-                    {t('terms.conduct') || '3. Educational Integrity & Prohibited Use'}
+                    {t('terms.conduct')}
                   </h2>
                 </div>
                 <p className="text-[var(--color-muted-foreground)] leading-relaxed pl-2 sm:pl-16">
-                  {t('terms.conductText') ||
-                    'Quiz Do is built for authentic learning and assessment. You agree not to manipulate test results, deploy automated scraping scripts, upload copyrighted materials without authorization, or compromise platform integrity.'}
+                  {t('terms.conductText')}
                 </p>
               </section>
 
@@ -109,12 +105,11 @@ export default function TermsPageClient() {
                     <BookOpen className="w-6 h-6" />
                   </div>
                   <h2 className="text-2xl font-bold text-[var(--color-foreground)]">
-                    {t('terms.content') || '4. Intellectual Property & Course Materials'}
+                    {t('terms.content')}
                   </h2>
                 </div>
                 <p className="text-[var(--color-muted-foreground)] leading-relaxed pl-2 sm:pl-16">
-                  {t('terms.contentText') ||
-                    'Educators and creators retain ownership of their proprietary educational materials. By publishing publicly on Quiz Do, you grant us a license to host, display, and distribute the content to learners.'}
+                  {t('terms.contentText')}
                 </p>
               </section>
 
@@ -125,12 +120,11 @@ export default function TermsPageClient() {
                     <ExternalLink className="w-6 h-6" />
                   </div>
                   <h2 className="text-2xl font-bold text-[var(--color-foreground)]">
-                    {t('terms.advertising') || '5. Third-Party Advertisements & Links'}
+                    {t('terms.advertising')}
                   </h2>
                 </div>
                 <p className="text-[var(--color-muted-foreground)] leading-relaxed pl-2 sm:pl-16">
-                  {t('terms.advertisingText') ||
-                    'Quiz Do may display third-party advertisements served by networks such as Google AdSense. We do not endorse or assume liability for third-party products, services, claims, or websites linked through advertisements.'}
+                  {t('terms.advertisingText')}
                 </p>
               </section>
 
@@ -141,28 +135,27 @@ export default function TermsPageClient() {
                     <Shield className="w-6 h-6" />
                   </div>
                   <h2 className="text-2xl font-bold text-[var(--color-foreground)]">
-                    {t('terms.disclaimer') || '6. Disclaimer of Warranties & Limitation of Liability'}
+                    {t('terms.disclaimer')}
                   </h2>
                 </div>
                 <p className="text-[var(--color-muted-foreground)] leading-relaxed pl-2 sm:pl-16">
-                  {t('terms.disclaimerText') ||
-                    'Quiz Do and all educational resources are provided on an "as is" and "as available" basis without warranties of any kind. To the fullest extent permitted by law, Quiz Do shall not be liable for any indirect, incidental, or consequential damages.'}
+                  {t('terms.disclaimerText')}
                 </p>
               </section>
             </div>
 
             <div className="mt-12 pt-12 border-t border-[var(--border)] text-center">
               <h3 className="text-xl font-bold text-[var(--color-foreground)] mb-4">
-                {t('terms.contactUs') || 'Questions About Terms'}
+                {t('terms.contactUs')}
               </h3>
               <p className="text-[var(--color-muted-foreground)] mb-6">
-                {t('terms.contactUsText') || 'If you have any questions regarding these Terms of Service, please reach out to our team.'}
+                {t('terms.contactUsText')}
               </p>
               <Link
                 href={ROUTES.contact}
                 className="inline-flex items-center justify-center px-8 py-3.5 bg-[var(--primary)] text-white font-bold rounded-2xl shadow-lg shadow-[var(--primary)]/20 hover:scale-[1.02] active:scale-[0.98] hover:shadow-xl hover:shadow-[var(--primary)]/30 transition-all duration-200"
               >
-                {t('privacy.contactUs') || 'Contact Us'}
+                {t('privacy.contactUs')}
               </Link>
             </div>
           </motion.div>

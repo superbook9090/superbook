@@ -56,13 +56,13 @@ export function UserModerationSection({
             <div>
               <p className="text-xs sm:text-sm font-semibold text-[var(--color-foreground)]">
                 {user.isSuspended
-                  ? t('adminUsers.unsuspendUser') || 'Unsuspend Account'
-                  : t('adminUsers.suspendUser') || 'Suspend User Account'}
+                  ? t('adminUsers.unsuspendUser')
+                  : t('adminUsers.suspendUser')}
               </p>
               <p className="text-[11px] sm:text-xs text-[var(--color-muted-foreground)] mt-0.5">
                 {user.isSuspended
                   ? 'Reactivate account to restore user login and access.'
-                  : t('adminUsers.suspendUserDesc') || 'Block user from signing in and accessing resources.'}
+                  : t('adminUsers.suspendUserDesc')}
               </p>
             </div>
           </div>
@@ -91,10 +91,10 @@ export function UserModerationSection({
             <AlertTriangle className="w-4 h-4 text-[var(--error)] shrink-0 mt-0.5" />
             <div>
               <p className="text-xs sm:text-sm font-bold text-[var(--error)]">
-                {t('adminUsers.dangerZone') || 'Danger Zone'}
+                {t('adminUsers.dangerZone')}
               </p>
               <p className="text-[11px] sm:text-xs text-[var(--color-muted-foreground)]">
-                {t('adminUsers.deleteUserDesc') || 'Permanently delete this user account.'}
+                {t('adminUsers.deleteUserDesc')}
               </p>
             </div>
           </div>
@@ -107,13 +107,13 @@ export function UserModerationSection({
             className="w-full sm:w-auto flex items-center justify-center gap-2 shrink-0"
           >
             <Trash2 className="w-4 h-4" />
-            <span>{t('admin.delete') || 'Delete User'}</span>
+            <span>{t('admin.delete')}</span>
           </Button>
         </div>
 
         {isSuperAdminUser && (
           <p className="text-[11px] text-[var(--color-muted-foreground)] mt-2 italic">
-            {t('adminUsers.superAdminCannotDelete') || 'Super admin accounts cannot be deleted.'}
+            {t('adminUsers.superAdminCannotDelete')}
           </p>
         )}
       </div>

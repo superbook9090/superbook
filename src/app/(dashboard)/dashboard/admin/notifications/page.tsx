@@ -80,7 +80,7 @@ export default function AdminNotificationsPage() {
   }
 
   return (
-    <PageWrapper className="overflow-x-hidden space-y-6">
+    <PageWrapper className="overflow-x-hidden">
       <NotificationHero
         activeTab={activeTab}
         onTabChange={setActiveTab}

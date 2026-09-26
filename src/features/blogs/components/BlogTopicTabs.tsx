@@ -65,7 +65,7 @@ export default function BlogTopicTabs({
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder={t('blog.searchBlogs') || 'Search articles, topics, keywords...'}
+            placeholder={t('blog.searchBlogs')}
             className="w-full rounded-xl border border-[var(--border)] bg-[var(--background)] py-2.5 pl-10 pr-20 text-sm text-[var(--color-foreground)] placeholder-[var(--color-muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 transition-all"
             aria-label="Search articles"
           />
@@ -96,7 +96,7 @@ export default function BlogTopicTabs({
               className="w-full appearance-none bg-transparent py-2 pl-9 pr-8 text-xs font-semibold text-[var(--color-foreground)] outline-none cursor-pointer"
               aria-label="Filter by language"
             >
-              <option value="all">{t('common.all') || 'All'}</option>
+              <option value="all">{t('common.all')}</option>
               <option value="en">English (EN)</option>
               <option value="hi">हिंदी (HI)</option>
             </select>
@@ -114,9 +114,9 @@ export default function BlogTopicTabs({
               className="w-full appearance-none bg-transparent py-2 pl-9 pr-8 text-xs font-semibold text-[var(--color-foreground)] outline-none cursor-pointer"
               aria-label="Sort articles"
             >
-              <option value="latest">{t('blog.latestArticles') || 'Latest'}</option>
-              <option value="popular">{t('blog.mostPopular') || 'Popular'}</option>
-              <option value="quick">{t('blog.quickReads') || 'Quick Reads'}</option>
+              <option value="latest">{t('blog.latestArticles')}</option>
+              <option value="popular">{t('blog.mostPopular')}</option>
+              <option value="quick">{t('blog.quickReads')}</option>
             </select>
             <div className="absolute right-2.5 pointer-events-none text-[var(--color-muted-foreground)]">
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -129,7 +129,7 @@ export default function BlogTopicTabs({
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none pt-1">
         <div className="flex items-center gap-1 text-xs font-semibold text-[var(--color-muted-foreground)] mr-1 shrink-0">
           <Tag className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">{t('blog.topic') || 'Topics'}:</span>
+          <span className="hidden sm:inline">{t('blog.topic')}:</span>
         </div>
         {allTopicList.map((topicItem) => {
           const isSelected =
@@ -147,7 +147,7 @@ export default function BlogTopicTabs({
                   : 'bg-[var(--color-surface-muted)] text-[var(--color-foreground)] hover:bg-[var(--primary)]/10 hover:text-[var(--primary)]'
               }`}
             >
-              {topicItem === 'All' ? (t('common.all') || 'All Topics') : topicItem}
+              {topicItem === 'All' ? (t('common.all')) : topicItem}
             </button>
           );
         })}
@@ -157,7 +157,7 @@ export default function BlogTopicTabs({
       {(searchQuery || selectedTopic !== 'All' || languageFilter !== 'all') && (
         <div className="flex items-center justify-between pt-2 border-t border-[var(--border)] text-xs text-[var(--color-muted-foreground)]">
           <span>
-            {totalCount} {t('blog.totalArticles') || 'articles found'}
+            {totalCount} {t('blog.totalArticles')}
             {selectedTopic !== 'All' ? ` in "${selectedTopic}"` : ''}
             {searchQuery ? ` matching "${searchQuery}"` : ''}
           </span>
@@ -170,7 +170,7 @@ export default function BlogTopicTabs({
             }}
             className="text-[var(--primary)] font-semibold hover:underline"
           >
-            {t('common.clearFilters') || 'Reset all filters'}
+            {t('common.clearFilters')}
           </button>
         </div>
       )}

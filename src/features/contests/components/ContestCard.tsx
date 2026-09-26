@@ -39,7 +39,7 @@ export function ContestCard({ contest, isTeacher = false, managePath }: ContestC
       return (
         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-[var(--error)] text-white shadow-xs animate-pulse">
           <Flame className="w-3.5 h-3.5" />
-          <span>{t('contest.liveNow') || 'LIVE NOW'}</span>
+          <span>{t('contest.liveNow')}</span>
         </span>
       );
     }
@@ -47,7 +47,7 @@ export function ContestCard({ contest, isTeacher = false, managePath }: ContestC
       return (
         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-[var(--info-light)] text-[var(--info)] border border-[var(--info)]/20">
           <Clock className="w-3.5 h-3.5" />
-          <span>{t('contest.upcoming') || 'UPCOMING'}</span>
+          <span>{t('contest.upcoming')}</span>
         </span>
       );
     }
@@ -55,7 +55,7 @@ export function ContestCard({ contest, isTeacher = false, managePath }: ContestC
       return (
         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)] border border-[var(--color-border)]">
           <CheckCircle className="w-3.5 h-3.5" />
-          <span>{t('contest.completed') || 'COMPLETED'}</span>
+          <span>{t('contest.completed')}</span>
         </span>
       );
     }
@@ -66,14 +66,14 @@ export function ContestCard({ contest, isTeacher = false, managePath }: ContestC
     if (contest.scheduleType === 'daily') {
       return (
         <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-[var(--warning-light)] text-[var(--warning-foreground)] border border-[var(--warning)]/20">
-          {t('contest.daily') || 'Daily Challenge'}
+          {t('contest.daily')}
         </span>
       );
     }
     if (contest.scheduleType === 'weekly') {
       return (
         <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-[var(--student-soft)] text-[var(--student-primary)] border border-[var(--student-primary)]/20">
-          {t('contest.weekly') || 'Weekly League'}
+          {t('contest.weekly')}
         </span>
       );
     }
@@ -157,12 +157,12 @@ export function ContestCard({ contest, isTeacher = false, managePath }: ContestC
         <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[var(--border)] text-xs text-[var(--color-muted-foreground)]">
           <div className="flex items-center gap-1.5">
             <Clock className="w-3.5 h-3.5 text-[var(--color-muted)] shrink-0" />
-            <span>{contest.duration} {t('common.minutes') || 'mins'}</span>
+            <span>{contest.duration} {t('common.minutes')}</span>
           </div>
 
           <div className="flex items-center gap-1.5">
             <HelpCircle className="w-3.5 h-3.5 text-[var(--color-muted)] shrink-0" />
-            <span>{contest.questionCount} {t('common.questions') || 'questions'}</span>
+            <span>{contest.questionCount} {t('common.questions')}</span>
           </div>
 
           <div className="flex items-center gap-1.5 col-span-2">
@@ -178,7 +178,7 @@ export function ContestCard({ contest, isTeacher = false, managePath }: ContestC
           <div className="p-2.5 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--border)] flex items-center justify-between text-xs">
             <span className="font-semibold text-[var(--color-foreground)] flex items-center gap-1">
               <CheckCircle className="w-3.5 h-3.5 text-[var(--success)]" />
-              {t('contest.yourScore') || 'Your Score'}:
+              {t('contest.yourScore')}:
             </span>
             <span className="font-bold text-[var(--primary)] text-sm">
               {userAttempt.score} pts ({userAttempt.percentage}%)
@@ -209,7 +209,7 @@ export function ContestCard({ contest, isTeacher = false, managePath }: ContestC
         >
           {isTeacher ? (
             <>
-              <span>{t('contest.manageContest') || 'Manage'}</span>
+              <span>{t('contest.manageContest')}</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </>
           ) : state === 'live' ? (
@@ -217,29 +217,29 @@ export function ContestCard({ contest, isTeacher = false, managePath }: ContestC
               {userAttempt?.status === 'in_progress' ? (
                 <>
                   <RotateCcw className="w-3.5 h-3.5" />
-                  <span>{t('contest.resumeAttempt') || 'Resume'}</span>
+                  <span>{t('contest.resumeAttempt')}</span>
                 </>
               ) : hasSubmitted ? (
                 <>
                   <Trophy className="w-3.5 h-3.5 text-[var(--warning)]" />
-                  <span>{t('contest.viewResults') || 'View Results'}</span>
+                  <span>{t('contest.viewResults')}</span>
                 </>
               ) : (
                 <>
                   <Play className="w-3.5 h-3.5" />
-                  <span>{t('contest.joinContest') || 'Join Contest'}</span>
+                  <span>{t('contest.joinContest')}</span>
                 </>
               )}
             </>
           ) : state === 'upcoming' ? (
             <>
-              <span>{t('contest.viewDetails') || 'View Details'}</span>
+              <span>{t('contest.viewDetails')}</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </>
           ) : (
             <>
               <Trophy className="w-3.5 h-3.5 text-[var(--warning)]" />
-              <span>{t('contest.viewResults') || 'View Results'}</span>
+              <span>{t('contest.viewResults')}</span>
             </>
           )}
         </Link>

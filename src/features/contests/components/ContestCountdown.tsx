@@ -91,7 +91,7 @@ export function ContestCountdown({
               {pad(timeLeft.days)}
             </div>
             <span className="text-[10px] text-[var(--color-muted)] mt-1 uppercase font-medium">
-              {t('common.days') || 'Days'}
+              {t('common.days')}
             </span>
           </div>
         )}
@@ -101,7 +101,7 @@ export function ContestCountdown({
             {pad(timeLeft.hours)}
           </div>
           <span className="text-[10px] text-[var(--color-muted)] mt-1 uppercase font-medium">
-            {t('common.hours') || 'Hours'}
+            {t('common.hours')}
           </span>
         </div>
 
@@ -112,7 +112,7 @@ export function ContestCountdown({
             {pad(timeLeft.minutes)}
           </div>
           <span className="text-[10px] text-[var(--color-muted)] mt-1 uppercase font-medium">
-            {t('common.mins') || 'Mins'}
+            {t('common.mins')}
           </span>
         </div>
 
@@ -129,7 +129,7 @@ export function ContestCountdown({
             {pad(timeLeft.seconds)}
           </div>
           <span className="text-[10px] text-[var(--color-muted)] mt-1 uppercase font-medium">
-            {t('common.secs') || 'Secs'}
+            {t('common.secs')}
           </span>
         </div>
       </div>

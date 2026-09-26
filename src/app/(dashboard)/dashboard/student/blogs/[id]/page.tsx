@@ -103,7 +103,7 @@ export default function BlogDetailPage() {
       await navigator.clipboard.writeText(shareUrl);
       addAlert({
         type: 'success',
-        message: t('createBlogPage.urlCopied') || 'Blog URL copied to clipboard!',
+        message: t('createBlogPage.urlCopied'),
       });
     } catch {
       addAlert({ type: 'error', message: 'Failed to copy URL' });

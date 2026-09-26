@@ -42,12 +42,12 @@
   /* Responsive layout spacing (mobile-first defaults) */
   --gutter-x: var(--space-4);
   --gutter-y: var(--space-3);
-  --section-gap: var(--space-4);
-  --card-padding: var(--space-3);
-  --card-gap: var(--space-3);
+  --section-gap: var(--space-3);
+  --card-padding: var(--space-2);
+  --card-gap: var(--space-2);
   --form-gap: var(--space-3);
-  --mobile-nav-offset: 3.5rem;
-  --mobile-header-height: 3rem;
+  --mobile-nav-offset: 7rem;
+  --mobile-header-height: 4.25rem;
   --mobile-header-gap: var(--space-2);
 
   /* Layout */
@@ -147,9 +147,9 @@
   :root {
     --gutter-x: var(--space-5);
     --gutter-y: var(--space-4);
-    --section-gap: var(--space-5);
-    --card-padding: var(--space-4);
-    --card-gap: var(--space-3);
+    --section-gap: var(--space-4);
+    --card-padding: var(--space-3);
+    --card-gap: var(--space-2);
     --form-gap: var(--space-4);
   }
 }
@@ -158,9 +158,9 @@
   :root {
     --gutter-x: var(--space-6);
     --gutter-y: var(--space-4);
-    --section-gap: var(--space-6);
-    --card-padding: var(--space-4);
-    --card-gap: var(--space-4);
+    --section-gap: var(--space-5);
+    --card-padding: var(--space-3);
+    --card-gap: var(--space-3);
   }
 }
 
@@ -1962,32 +1962,24 @@ select:-webkit-autofill:focus {
 
 .nav-bottom-bar {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: calc(0.25rem + env(safe-area-inset-bottom, 0px));
+  left: 0.5rem;
+  right: 0.5rem;
   z-index: 50;
   background: var(--card-solid);
-  border-top: 1px solid var(--border);
-  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255,255,255,0.05) inset;
+  border-radius: 2rem;
 }
 
-@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
-  .nav-bottom-bar {
-    background: color-mix(in srgb, var(--card-solid) 96%, transparent);
-    backdrop-filter: var(--blur-glass) saturate(180%);
-    -webkit-backdrop-filter: var(--blur-glass) saturate(180%);
-  }
-}
 
 .nav-bottom-bar__inner {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: center;
-  height: 3.25rem;
-  max-width: 26rem;
-  margin-left: auto;
-  margin-right: auto;
-  padding-inline: 0.375rem;
+  height: 4.25rem;
+  padding-inline: 0.5rem;
+  position: relative;
 }
 
 .nav-bottom-link {
@@ -1997,20 +1989,39 @@ select:-webkit-autofill:focus {
   align-items: center;
   justify-content: center;
   flex: 1;
-  min-height: 38px;
-  padding: 0.25rem 0.125rem;
-  border-radius: var(--radius-md);
+  height: 3.5rem;
+  border-radius: 1.5rem;
   color: var(--muted);
-  transition: color 0.18s ease, transform 0.18s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
 }
 
 .nav-bottom-link:active {
-  transform: scale(0.94);
+  transform: scale(0.92);
 }
 
 .nav-bottom-link--active {
   color: var(--primary);
   font-weight: 600;
+}
+
+.nav-bottom-link--active::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  border-radius: 1.25rem;
+  z-index: -1;
+  transform: scale(0.9);
+}
+
+.nav-bottom-link svg {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s ease;
+  margin-bottom: 2px;
+}
+
+.nav-bottom-link--active svg {
+  transform: translateY(-2px);
 }
 
 .grid-responsive-cards {
@@ -2079,7 +2090,7 @@ select:-webkit-autofill:focus {
   position: relative;
   overflow: hidden;
   border-radius: var(--radius-2xl);
-  padding: var(--space-4) var(--space-5);
+  padding: var(--space-3) var(--space-4);
   background: color-mix(in srgb, var(--surface) 75%, transparent);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
@@ -2122,7 +2133,7 @@ select:-webkit-autofill:focus {
 
 @media (min-width: 640px) {
   .hero-banner {
-    padding: var(--space-5) var(--space-6);
+    padding: var(--space-4) var(--space-5);
   }
 }
 

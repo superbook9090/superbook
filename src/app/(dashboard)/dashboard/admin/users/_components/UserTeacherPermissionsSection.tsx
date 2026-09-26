@@ -101,21 +101,21 @@ export function UserTeacherPermissionsSection({
   }> = [
     {
       id: 'permissions',
-      label: t('adminUsers.tabFeatureAccess') || 'Feature Access',
+      label: t('adminUsers.tabFeatureAccess'),
       icon: <ShieldCheck className="w-4 h-4" />,
       badge: `${permissionsActiveCount}/4`,
       hasOverride: false,
     },
     {
       id: 'quotas',
-      label: t('adminUsers.tabContentQuotas') || 'Content Quotas',
+      label: t('adminUsers.tabContentQuotas'),
       icon: <Layers className="w-4 h-4" />,
       badge: contentOverridesCount > 0 ? `${contentOverridesCount} custom` : 'default',
       hasOverride: contentOverridesCount > 0,
     },
     {
       id: 'ai',
-      label: t('adminUsers.tabAiIntelligence') || 'AI Intelligence',
+      label: t('adminUsers.tabAiIntelligence'),
       icon: <Sparkles className="w-4 h-4" />,
       badge: aiOverridesCount > 0 ? `${aiOverridesCount} custom` : 'default',
       hasOverride: aiOverridesCount > 0,
@@ -132,10 +132,10 @@ export function UserTeacherPermissionsSection({
           </div>
           <div>
             <h4 className="text-sm sm:text-base font-bold text-[var(--color-foreground)] leading-tight">
-              {t('adminUsers.teacherPrivilegesAndLimits') || 'Teacher Privileges & Quotas'}
+              {t('adminUsers.teacherPrivilegesAndLimits')}
             </h4>
             <p className="text-xs text-[var(--color-muted-foreground)] mt-0.5">
-              {t('adminUsers.teacherPrivilegesDesc') || 'Configure feature access toggles and custom creation limits for this teacher.'}
+              {t('adminUsers.teacherPrivilegesDesc')}
             </p>
           </div>
         </div>
@@ -145,11 +145,11 @@ export function UserTeacherPermissionsSection({
           {activeOverridesCount > 0 ? (
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-xs">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-              <span>{activeOverridesCount} {t('adminUsers.activeOverrides') || 'Custom Overrides'}</span>
+              <span>{activeOverridesCount} {t('adminUsers.activeOverrides')}</span>
             </span>
           ) : (
             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--color-surface-muted-strong)] text-[var(--color-muted-foreground)]">
-              {t('adminUsers.allGlobalDefaults') || 'All Global Defaults'}
+              {t('adminUsers.allGlobalDefaults')}
             </span>
           )}
         </div>
@@ -234,7 +234,7 @@ export function UserTeacherPermissionsSection({
           <div className="flex items-center gap-2 min-w-0">
             <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shrink-0" />
             <p className="text-xs sm:text-sm font-medium text-amber-900 dark:text-amber-200 truncate">
-              {t('adminUsers.unsavedChanges') || 'Unsaved limit changes'}
+              {t('adminUsers.unsavedChanges')}
             </p>
           </div>
 
@@ -247,7 +247,7 @@ export function UserTeacherPermissionsSection({
                 className="px-3 py-1.5 text-xs font-semibold rounded-lg text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-black/5 dark:hover:bg-white/5 transition-colors flex items-center gap-1"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                <span>{t('adminUsers.discard') || 'Discard'}</span>
+                <span>{t('adminUsers.discard')}</span>
               </button>
             )}
             <Button

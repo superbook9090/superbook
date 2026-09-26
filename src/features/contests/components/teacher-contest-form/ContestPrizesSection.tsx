@@ -25,7 +25,7 @@ export function ContestPrizesSection({
       <div className="flex items-center justify-between pb-3 border-b border-[var(--border)]">
         <div className="flex items-center gap-2 text-sm font-bold text-[var(--color-foreground)]">
           <Award className="w-4 h-4 text-[var(--warning)]" />
-          <span>{t('contest.prizesBuilder') || '3. Prizes & Rewards Showcase'}</span>
+          <span>{t('contest.prizesBuilder')}</span>
         </div>
         <button
           type="button"
@@ -33,7 +33,7 @@ export function ContestPrizesSection({
           className="inline-flex items-center gap-1 text-xs font-bold text-[var(--primary)] hover:opacity-80"
         >
           <Plus className="w-3.5 h-3.5" />
-          <span>{t('contest.addPrize') || 'Add Prize Tier'}</span>
+          <span>{t('contest.addPrize')}</span>
         </button>
       </div>
 
@@ -45,7 +45,7 @@ export function ContestPrizesSection({
           >
             <div className="sm:col-span-2">
               <label className="block text-[10px] uppercase font-bold text-[var(--color-muted)] mb-0.5">
-                {t('contest.rank') || 'Rank'}
+                {t('contest.rank')}
               </label>
               <input
                 type="text"
@@ -58,7 +58,7 @@ export function ContestPrizesSection({
 
             <div className="sm:col-span-4">
               <label className="block text-[10px] uppercase font-bold text-[var(--color-muted)] mb-0.5">
-                {t('contest.prizeTitle') || 'Prize Title'}
+                {t('contest.prizeTitle')}
               </label>
               <input
                 type="text"
@@ -71,7 +71,7 @@ export function ContestPrizesSection({
 
             <div className="sm:col-span-3">
               <label className="block text-[10px] uppercase font-bold text-[var(--color-muted)] mb-0.5">
-                {t('contest.rewardType') || 'Reward Type'}
+                {t('contest.rewardType')}
               </label>
               <select
                 value={prize.rewardType || 'trophy'}
@@ -89,7 +89,7 @@ export function ContestPrizesSection({
 
             <div className="sm:col-span-2">
               <label className="block text-[10px] uppercase font-bold text-[var(--color-muted)] mb-0.5">
-                {t('contest.value') || 'Value'}
+                {t('contest.value')}
               </label>
               <input
                 type="text"

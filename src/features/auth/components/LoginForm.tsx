@@ -95,7 +95,7 @@ function LoginFormInner() {
           <AuthBranding mode="login" className="lg:col-span-6" />
 
           {/* Right: Form Area */}
-          <div className="lg:col-span-6 p-6 sm:p-8 xl:p-10 flex flex-col justify-center relative">
+          <div className="lg:col-span-6 p-4 sm:p-6 md:p-8 xl:p-10 flex flex-col justify-center relative">
             {/* Ambient decorative glow */}
             <div
               className={`absolute top-0 right-0 w-36 h-36 bg-gradient-to-br ${theme.gradient} opacity-10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none`}

@@ -21,7 +21,7 @@ export default function TeacherCoursesList({ courses }: TeacherCoursesListProps)
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="card-surface card-body p-6 sm:p-8 text-center rounded-3xl border border-[var(--border)] antigravity-glass shadow-lg"
+        className="card-surface card-body p-4 sm:p-6 md:p-8 text-center rounded-3xl border border-[var(--border)] antigravity-glass shadow-lg"
       >
         <div className="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-[var(--teacher-soft)] to-[var(--teacher-primary)]/15 border border-[var(--teacher-border)] flex items-center justify-center text-[var(--teacher-primary)] shadow-sm">
           <BookPlus className="w-7 h-7 sm:w-8 sm:h-8" />

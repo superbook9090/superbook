@@ -12,8 +12,8 @@ export async function GET(req: NextRequest) {
     if (featureCheck) return featureCheck;
 
     const { searchParams } = new URL(req.url);
-    const page = Number(searchParams.get('page') || '1');
-    const limit = Number(searchParams.get('limit') || '12');
+    const page = Number(searchParams.get('page'));
+    const limit = Number(searchParams.get('limit'));
     const topic = searchParams.get('topic') || undefined;
     const search = searchParams.get('search') || undefined;
     const sort = searchParams.get('sort') === 'popular' ? 'popular' : 'latest';

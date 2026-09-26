@@ -38,7 +38,7 @@ export function ContestShareButton({
     }
   }, [shareUrl]);
 
-  const label = copied ? t('common.linkCopied') || 'Copied!' : t('common.share') || 'Share';
+  const label = copied ? t('common.linkCopied') : t('common.share');
 
   if (variant === 'button') {
     return (

@@ -112,7 +112,7 @@ export default function StudentBlogsPage() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="hero-banner flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 sm:p-8 rounded-3xl"
+        className="hero-banner flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 sm:p-6 md:p-8 rounded-3xl"
       >
         <div className="flex-1 w-full sm:w-auto">
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-[var(--color-foreground)] truncate">

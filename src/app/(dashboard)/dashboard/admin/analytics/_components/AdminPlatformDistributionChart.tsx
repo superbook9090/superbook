@@ -26,14 +26,14 @@ export function AdminPlatformDistributionChart({
   const chartData = useMemo(() => {
     return [
       {
-        name: t('adminAnalytics.platformApp') || 'Mobile App',
+        name: t('adminAnalytics.platformApp'),
         value: appUsers,
         percentage: appPct,
         color: 'var(--primary)',
         icon: Smartphone,
       },
       {
-        name: t('adminAnalytics.platformWeb') || 'Website (Browser)',
+        name: t('adminAnalytics.platformWeb'),
         value: webUsers,
         percentage: webPct,
         color: 'var(--info)',
@@ -82,18 +82,18 @@ export function AdminPlatformDistributionChart({
               <Layers className="w-4 h-4" />
             </span>
             <h3 className="text-sm sm:text-base md:text-lg font-bold text-[var(--color-foreground)] truncate">
-              {t('adminAnalytics.platformDistributionTitle') || 'Platform Usage (App vs Website)'}
+              {t('adminAnalytics.platformDistributionTitle')}
             </h3>
           </div>
           <p className="text-[11px] sm:text-xs text-[var(--color-muted-foreground)] mt-0.5 sm:mt-1 line-clamp-1 sm:line-clamp-none">
-            {t('adminAnalytics.platformDistributionSubtitle') || 'Adoption breakdown across Mobile App and Web Browser'}
+            {t('adminAnalytics.platformDistributionSubtitle')}
           </p>
         </div>
 
         {platformStats?.activeApp !== undefined && (
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)] text-[11px] font-medium shrink-0 self-start sm:self-auto">
             <Radio className="w-3 h-3 text-[var(--success)] animate-pulse" />
-            <span>{platformStats.activeApp} {t('adminAnalytics.activeInApp30d') || 'active in App (30d)'}</span>
+            <span>{platformStats.activeApp} {t('adminAnalytics.activeInApp30d')}</span>
           </div>
         )}
       </div>
@@ -125,7 +125,7 @@ export function AdminPlatformDistributionChart({
               {appPct}%
             </span>
             <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider text-[var(--color-muted)] mt-0.5">
-              {t('adminAnalytics.appShare') || 'App Share'}
+              {t('adminAnalytics.appShare')}
             </span>
           </div>
         </div>
@@ -139,14 +139,14 @@ export function AdminPlatformDistributionChart({
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-semibold text-[var(--color-foreground)] truncate">
-                  {t('adminAnalytics.platformApp') || 'Mobile App'}
+                  {t('adminAnalytics.platformApp')}
                 </span>
                 <span className="font-bold tabular-nums text-[var(--primary)] shrink-0 ml-1">
                   {appPct}%
                 </span>
               </div>
               <p className="text-[11px] text-[var(--color-muted-foreground)] tabular-nums mt-0.5">
-                {appUsers} {t('adminAnalytics.totalUsers') || 'users'}
+                {appUsers} {t('adminAnalytics.totalUsers')}
               </p>
             </div>
           </div>
@@ -158,14 +158,14 @@ export function AdminPlatformDistributionChart({
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-semibold text-[var(--color-foreground)] truncate">
-                  {t('adminAnalytics.platformWeb') || 'Website'}
+                  {t('adminAnalytics.platformWeb')}
                 </span>
                 <span className="font-bold tabular-nums text-[var(--info)] shrink-0 ml-1">
                   {webPct}%
                 </span>
               </div>
               <p className="text-[11px] text-[var(--color-muted-foreground)] tabular-nums mt-0.5">
-                {webUsers} {t('adminAnalytics.totalUsers') || 'users'}
+                {webUsers} {t('adminAnalytics.totalUsers')}
               </p>
             </div>
           </div>

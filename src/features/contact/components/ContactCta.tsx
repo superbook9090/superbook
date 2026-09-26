@@ -51,7 +51,7 @@ export function ContactCta() {
         >
           <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-white/10 text-white border border-white/15 backdrop-blur-md">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>{t('contact.joinToday') || 'Join Quiz Do Today'}</span>
+            <span>{t('contact.joinToday')}</span>
           </span>
 
           <h2 className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white drop-shadow-[0_0_25px_rgba(var(--primary-rgb),0.4)]">

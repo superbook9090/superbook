@@ -33,7 +33,7 @@ export function ContactFaq() {
           >
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[var(--primary)]/10 text-[var(--primary)] border border-[var(--primary)]/20">
               <HelpCircle className="w-3.5 h-3.5" />
-              <span>{t('contact.faq') || 'Frequently Asked Questions'}</span>
+              <span>{t('contact.faqLabel')}</span>
             </span>
 
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black uppercase tracking-tight text-[var(--color-foreground)]">

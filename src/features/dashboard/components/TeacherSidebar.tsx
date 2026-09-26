@@ -51,7 +51,7 @@ export default function TeacherSidebar({ user }: { user: User | null }) {
           {isSuperAdminUser ? (
             <span className="rail-chip inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-500 border border-amber-500/25 shadow-xs">
               <Crown className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
-              <span>{t('admin.superadminTier') || 'Superadmin'}</span>
+              <span>{t('admin.superadminTier')}</span>
             </span>
           ) : isAdminUser ? (
             <span className="rail-chip inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[var(--teacher-soft)] text-[var(--teacher-primary)] border border-[var(--teacher-border)] shadow-xs">
@@ -105,7 +105,7 @@ export default function TeacherSidebar({ user }: { user: User | null }) {
               <div className="pt-4 mt-4 border-t border-[var(--border)]">
                 <div className="flex items-center gap-1.5 px-2 pb-1 text-[11px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
                   <GraduationCap className="w-3.5 h-3.5" />
-                  <span>{t('admin.teacherWorkspace') || 'Teacher Workspace'}</span>
+                  <span>{t('admin.teacherWorkspace')}</span>
                 </div>
                 <div className="space-y-1">
                   {filteredTeacherNavigation.slice(0, 5).map((item, index) => {

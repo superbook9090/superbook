@@ -32,17 +32,17 @@ export default function TeacherContestAttemptsTable({
     <div className="rounded-3xl border border-[var(--border)] bg-[var(--card-solid)] antigravity-glass overflow-hidden shadow-xs">
       <div className="p-4 sm:p-5 border-b border-[var(--border)] flex items-center justify-between">
         <h3 className="text-sm sm:text-base font-bold text-[var(--color-foreground)]">
-          {t('contest.studentSubmissions') || 'All Student Attempts'}
+          {t('contest.studentSubmissions')}
         </h3>
         <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)]">
-          {attempts.length} {t('contest.submissions') || 'submissions'}
+          {attempts.length} {t('contest.submissions')}
         </span>
       </div>
 
       {attempts.length === 0 ? (
         <div className="p-12 text-center text-xs sm:text-sm text-[var(--color-muted-foreground)] flex flex-col items-center gap-2">
           <Users className="w-8 h-8 text-[var(--color-muted-foreground)] opacity-30" />
-          <span>{t('contest.noStudentsAttempted') || 'No students have attempted this contest yet.'}</span>
+          <span>{t('contest.noStudentsAttempted')}</span>
         </div>
       ) : (
         <>
@@ -93,12 +93,12 @@ export default function TeacherContestAttemptsTable({
             <table className="w-full text-left text-xs sm:text-sm">
               <thead className="bg-[var(--color-surface-muted)]/70 text-[var(--color-muted-foreground)] uppercase text-[11px] font-bold">
                 <tr>
-                  <th className="py-3.5 px-5">{t('contest.participant') || 'Student'}</th>
-                  <th className="py-3.5 px-4">{t('contest.status') || 'Status'}</th>
-                  <th className="py-3.5 px-4 text-center">{t('contest.score') || 'Score'}</th>
-                  <th className="py-3.5 px-4 text-center">{t('contest.timeTaken') || 'Time'}</th>
-                  <th className="py-3.5 px-4">{t('contest.submittedAt') || 'Submitted At'}</th>
-                  <th className="py-3.5 px-4 text-center">{t('contest.violations') || 'Violations'}</th>
+                  <th className="py-3.5 px-5">{t('contest.participant')}</th>
+                  <th className="py-3.5 px-4">{t('contest.status')}</th>
+                  <th className="py-3.5 px-4 text-center">{t('contest.score')}</th>
+                  <th className="py-3.5 px-4 text-center">{t('contest.timeTaken')}</th>
+                  <th className="py-3.5 px-4">{t('contest.submittedAt')}</th>
+                  <th className="py-3.5 px-4 text-center">{t('contest.violations')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">

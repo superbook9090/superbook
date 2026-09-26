@@ -116,7 +116,7 @@ export default function ChangePasswordForm() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <TextField
-          label={hasPassword ? t('password.newPassword') : (t('password.newPassword') || 'New Password')}
+          label={hasPassword ? t('password.newPassword') : (t('password.newPassword'))}
           type="password"
           required
           minLength={8}
@@ -138,7 +138,7 @@ export default function ChangePasswordForm() {
       </div>
 
       <Button type="submit" disabled={isSaving} isLoading={isSaving}>
-        {hasPassword ? t('password.updatePassword') : (t('password.createPassword') || 'Create Password')}
+        {hasPassword ? t('password.updatePassword') : (t('password.createPassword'))}
       </Button>
     </form>
   );

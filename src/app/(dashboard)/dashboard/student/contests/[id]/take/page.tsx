@@ -66,19 +66,19 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
     (reason: string) => {
       switch (reason) {
         case 'fullscreen_exit':
-          return t('quiz.violationFullscreenExit') || 'You exited fullscreen mode.';
+          return t('quiz.violationFullscreenExit');
         case 'tab_switch':
-          return t('quiz.violationTabSwitch') || 'Switching tabs or minimizing the browser is not allowed.';
+          return t('quiz.violationTabSwitch');
         case 'window_blur':
-          return t('quiz.violationWindowBlur') || 'Leaving the contest window is not allowed.';
+          return t('quiz.violationWindowBlur');
         case 'page_exit':
-          return t('quiz.violationPageExit') || 'Attempting to leave or refresh the page.';
+          return t('quiz.violationPageExit');
         case 'dev_tools':
-          return t('quiz.violationDevTools') || 'Developer tools are strictly disabled during contests.';
+          return t('quiz.violationDevTools');
         case 'duplicate_tab':
-          return t('quiz.violationDuplicateTab') || 'Contest is open in another tab.';
+          return t('quiz.violationDuplicateTab');
         default:
-          return t('quiz.violationGeneric') || 'Security violation detected.';
+          return t('quiz.violationGeneric');
       }
     },
     [t]
@@ -164,8 +164,7 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
 
     if (isDevToolsOpen) {
       setViolationMessage(
-        t('quiz.violationDevTools') ||
-          'Developer tools detected. Please close developer tools to continue.'
+        t('quiz.violationDevTools')
       );
       return;
     }
@@ -226,7 +225,7 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
         
         if (err instanceof ApiClientError && err.message.includes('maximum allowed attempts')) {
           console.warn('[TakeContestPage] Attempts exhausted:', err.message);
-          addAlert({ type: 'info', message: t('contest.attemptsExhausted') || 'You have already completed this contest.' });
+          addAlert({ type: 'info', message: t('contest.attemptsExhausted') });
           router.replace(`/dashboard/student/contests/${id}/result`);
         } else {
           console.error('[TakeContestPage] Failed to initialize contest:', err);
@@ -288,7 +287,7 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
             </h1>
           </div>
           <span className="text-xs text-[var(--color-muted)] font-medium">
-            {answeredCount} / {totalQ} {t('contest.answered') || 'Answered'}
+            {answeredCount} / {totalQ} {t('contest.answered')}
           </span>
         </div>
 
@@ -323,7 +322,7 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
             }`}
           >
             <Send className="w-3.5 h-3.5" />
-            <span>{isSubmitting ? (t('common.loading') || 'Submitting…') : (t('contest.submitContest') || 'Submit')}</span>
+            <span>{isSubmitting ? (t('common.loading')) : (t('contest.submitContest'))}</span>
           </button>
         </div>
       </header>
@@ -357,7 +356,7 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
 
         {/* Current Question Card */}
         {currentQ && (
-          <div className="p-6 sm:p-8 rounded-3xl bg-[var(--card-solid)] border border-[var(--border)] shadow-sm flex flex-col gap-6">
+          <div className="p-4 sm:p-6 md:p-8 rounded-3xl bg-[var(--card-solid)] border border-[var(--border)] shadow-sm flex flex-col gap-6">
             <div className="flex items-center justify-between pb-4 border-b border-[var(--border)]">
               <span className="text-xs font-extrabold uppercase tracking-wider text-[var(--color-muted-foreground)]">
                 {currentQ.quizTitle ? `${currentQ.quizTitle} • ` : ''}
@@ -367,15 +366,15 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
                 <span className="px-2 py-0.5 rounded text-xs font-bold bg-[var(--primary-light)] text-[var(--primary)]">
                   +{currentQ.points || 1}{' '}
                   {currentQ.points === 1
-                    ? t('contest.point') || 'Point'
-                    : t('contest.points') || 'Points'}
+                    ? t('contest.point')
+                    : t('contest.points')}
                 </span>
                 {(currentQ.negativePoints !== undefined
                   ? currentQ.negativePoints > 0
                   : Boolean(contest?.enableNegativeMarking)) && (
                   <span
                     className="px-2 py-0.5 rounded text-xs font-bold bg-[var(--error-light)] text-[var(--error)]"
-                    title={t('contest.negativeMarksHint') || 'Penalty for wrong answer'}
+                    title={t('contest.negativeMarksHint')}
                   >
                     -{currentQ.negativePoints ?? contest?.negativeMarks ?? 0.25}
                   </span>
@@ -433,7 +432,7 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[var(--color-surface-muted)] text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted-strong)] disabled:opacity-40 transition-colors"
               >
                 <ChevronLeft className="w-4 h-4" />
-                <span>{t('common.previous') || 'Previous'}</span>
+                <span>{t('common.previous')}</span>
               </button>
 
               {currentIndex < totalQ - 1 ? (
@@ -442,7 +441,7 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
                   onClick={() => setCurrentIndex((prev) => Math.min(totalQ - 1, prev + 1))}
                   className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-bold bg-[var(--primary)] text-white hover:opacity-90 transition-opacity shadow-xs"
                 >
-                  <span>{t('common.next') || 'Next'}</span>
+                  <span>{t('common.next')}</span>
                   <ChevronRight className="w-4 h-4" />
                 </button>
               ) : (
@@ -452,7 +451,7 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
                   className="inline-flex items-center gap-1.5 px-6 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-[var(--primary)] to-[var(--student-primary)] text-white shadow-xs hover:shadow-md transition-all"
                 >
                   <Send className="w-4 h-4" />
-                  <span>{t('contest.finishAndSubmit') || 'Finish & Submit'}</span>
+                  <span>{t('contest.finishAndSubmit')}</span>
                 </button>
               )}
             </div>
@@ -463,13 +462,13 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
       {/* Submit Confirmation Modal */}
       <LazyConfirmModal
         isOpen={showSubmitModal}
-        title={t('contest.confirmSubmitTitle') || 'Submit Contest?'}
+        title={t('contest.confirmSubmitTitle')}
         message={
           t('contest.confirmSubmitDesc') ||
           `You have answered ${answeredCount} out of ${totalQ} questions. Are you sure you want to submit?`
         }
-        confirmText={t('contest.submitNow') || 'Submit Contest'}
-        cancelText={t('common.cancel') || 'Cancel'}
+        confirmText={t('contest.submitNow')}
+        cancelText={t('common.cancel')}
         onConfirm={() => {
           setShowSubmitModal(false);
           handleSubmit();
@@ -486,20 +485,20 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
               <ShieldAlert className="w-8 h-8" />
             </div>
             <h3 className="text-base font-bold text-[var(--color-foreground)]">
-              {t('quiz.securityViolationTitle') || 'Security Violation'}
+              {t('quiz.securityViolationTitle')}
             </h3>
             <p className="text-xs text-[var(--color-muted-foreground)]">
               {violationMessage}
             </p>
             <span className="text-[11px] text-[var(--warning-foreground)] font-semibold">
-              {t('contest.violations') || 'Violations'}: {violationCountRef.current} / 3
+              {t('contest.violations')}: {violationCountRef.current} / 3
             </span>
             <button
               type="button"
               onClick={handleViolationContinue}
               className="mt-2 w-full py-2.5 rounded-xl bg-[var(--primary)] text-white font-bold text-xs shadow-xs hover:opacity-90 transition-opacity"
             >
-              {t('quiz.violationContinue') || 'Continue'}
+              {t('quiz.violationContinue')}
             </button>
           </div>
         </div>

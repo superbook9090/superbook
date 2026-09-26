@@ -82,11 +82,11 @@ export function FileDropzone({ onUploadFile, canMutate, isMutating }: FileDropzo
         <div className="text-center sm:text-left">
           <p className="text-sm font-semibold text-[var(--color-foreground)]">
             {isDragOver
-              ? t('files.dropFilesActive') || 'Release to upload PDF now'
-              : t('files.dropFilesHere') || 'Drop your PDF file here or browse'}
+              ? t('files.dropFilesActive')
+              : t('files.dropFilesHere')}
           </p>
           <p className="text-xs text-[var(--color-muted-foreground)] mt-0.5">
-            {t('files.uploadRestrictions') || 'PDF files up to 20MB are supported'}
+            {t('files.uploadRestrictions')}
           </p>
         </div>
       </div>

@@ -59,12 +59,12 @@ export function AdminOverviewTab({ stats }: AdminOverviewTabProps) {
         <StatCard
           icon={TrendingUp}
           value={stats.activeUsers?.dau ?? 0}
-          label={t('adminAnalytics.activeToday') || 'Active Today'}
+          label={t('adminAnalytics.activeToday')}
           color="student"
           delay={0.08}
           description={
             stats.platformStats
-              ? `${stats.platformStats.appPercentage}% ${t('adminAnalytics.platformApp') || 'App'}`
+              ? `${stats.platformStats.appPercentage}% ${t('adminAnalytics.platformApp')}`
               : undefined
           }
         />

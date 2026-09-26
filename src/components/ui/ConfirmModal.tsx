@@ -153,7 +153,7 @@ export default function ConfirmModal({
             aria-labelledby="modal-title"
             aria-describedby="modal-description"
           >
-            <div className="w-full max-w-[340px] sm:max-w-md relative overflow-hidden bg-[var(--color-card)] rounded-2xl border border-[var(--color-border)] shadow-2xl p-6 sm:p-8">
+            <div className="w-full max-w-[340px] sm:max-w-md relative overflow-hidden bg-[var(--color-card)] rounded-2xl border border-[var(--color-border)] shadow-2xl p-4 sm:p-6 md:p-8">
               {/* Type indicator top bar */}
               <div className={cn(
                 "absolute top-0 left-0 right-0 h-1.5",

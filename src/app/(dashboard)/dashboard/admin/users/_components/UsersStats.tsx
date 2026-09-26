@@ -17,31 +17,31 @@ export function UsersStats({ stats, isLoading }: UsersStatsProps) {
   const cards = [
     {
       id: 'total',
-      label: t('adminUsers.totalUsers') || 'Total Users',
+      label: t('adminUsers.totalUsers'),
       value: stats?.total ?? 0,
       icon: Users,
       iconBg: 'bg-[var(--info-light)] text-[var(--info)]',
       border: 'border-[var(--border)]',
       subtitle:
         stats?.appUsers !== undefined && stats?.webUsers !== undefined
-          ? `${stats.appUsers} ${t('adminAnalytics.platformApp') || 'App'} • ${stats.webUsers} ${t('adminAnalytics.platformWeb') || 'Web'}`
+          ? `${stats.appUsers} ${t('adminAnalytics.platformApp')} • ${stats.webUsers} ${t('adminAnalytics.platformWeb')}`
           : undefined,
     },
     {
       id: 'students',
-      label: t('adminUsers.studentsCount') || 'Students',
+      label: t('adminUsers.studentsCount'),
       value: stats?.students ?? 0,
       icon: GraduationCap,
       iconBg: 'bg-[var(--student-soft)] text-[var(--student-primary)]',
       border: 'border-[var(--border)]',
       subtitle:
         stats?.activeToday !== undefined && stats.activeToday > 0
-          ? `${stats.activeToday} ${t('adminAnalytics.activeToday') || 'active today'}`
+          ? `${stats.activeToday} ${t('adminAnalytics.activeToday')}`
           : undefined,
     },
     {
       id: 'teachers',
-      label: t('adminUsers.teachersCount') || 'Teachers',
+      label: t('adminUsers.teachersCount'),
       value: stats?.teachers ?? 0,
       icon: BookOpen,
       iconBg: 'bg-[var(--teacher-soft)] text-[var(--teacher-primary)]',
@@ -49,7 +49,7 @@ export function UsersStats({ stats, isLoading }: UsersStatsProps) {
     },
     {
       id: 'admins',
-      label: t('adminUsers.adminsCount') || 'Admins & Staff',
+      label: t('adminUsers.adminsCount'),
       value: (stats?.admins ?? 0) + (stats?.superadmins ?? 0),
       icon: ShieldCheck,
       iconBg: 'bg-[var(--success-light)] text-[var(--success)]',
@@ -58,7 +58,7 @@ export function UsersStats({ stats, isLoading }: UsersStatsProps) {
         stats && stats.suspended > 0 ? (
           <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-bold rounded-md bg-[var(--error-light)] text-[var(--error)]">
             <UserX className="w-3 h-3" />
-            {stats.suspended} {t('adminUsers.suspended') || 'Suspended'}
+            {stats.suspended} {t('adminUsers.suspended')}
           </span>
         ) : null,
     },

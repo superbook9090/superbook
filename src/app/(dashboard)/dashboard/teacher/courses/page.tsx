@@ -81,9 +81,9 @@ export default function TeacherCoursesPage() {
   }
 
   return (
-    <PageWrapper className="space-y-6">
+    <PageWrapper>
       {/* Hero Banner Header */}
-      <div className="hero-banner flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 sm:p-8 rounded-3xl">
+      <div className="hero-banner flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 sm:p-6 md:p-8 rounded-3xl">
         <div className="space-y-1 max-w-xl">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[var(--teacher-soft)] text-[var(--teacher-primary)] border border-[var(--teacher-border)]">
             <BookOpen className="w-3.5 h-3.5" />

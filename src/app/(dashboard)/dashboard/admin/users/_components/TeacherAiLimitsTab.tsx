@@ -50,10 +50,10 @@ export function TeacherAiLimitsTab({
           </div>
           <div>
             <h5 className="text-xs sm:text-sm font-bold text-[var(--color-foreground)] leading-tight">
-              {t('adminUsers.aiQuotasTitle') || 'AI Intelligence & Quiz Limits'}
+              {t('adminUsers.aiQuotasTitle')}
             </h5>
             <p className="text-[11px] text-[var(--color-muted-foreground)] mt-0.5">
-              {t('adminUsers.aiQuotasDesc') || 'Manage AI question generation quotas and single-generation question limits.'}
+              {t('adminUsers.aiQuotasDesc')}
             </p>
           </div>
         </div>
@@ -61,7 +61,7 @@ export function TeacherAiLimitsTab({
         {usedGenerationsCount !== undefined && (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/20 self-start sm:self-center shrink-0">
             <Sparkles className="w-3 h-3" />
-            <span>{t('adminUsers.usedGenerations') || 'Used'}: {usedGenerationsCount}</span>
+            <span>{t('adminUsers.usedGenerations')}: {usedGenerationsCount}</span>
           </span>
         )}
       </div>
@@ -73,20 +73,20 @@ export function TeacherAiLimitsTab({
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-[var(--color-foreground)] flex items-center gap-1.5">
               <Zap className="w-3.5 h-3.5 text-[var(--color-primary)]" />
-              {t('adminUsers.aiQuizGenerations') || 'AI Quiz Quota'}
+              {t('adminUsers.aiQuizGenerations')}
             </span>
             {isGenCustom ? (
               <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                {limitsForm.aiQuizGenerations} {t('adminUsers.customOverride') || 'Custom'}
+                {limitsForm.aiQuizGenerations} {t('adminUsers.customOverride')}
               </span>
             ) : (
               <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[var(--color-surface-muted-strong)] text-[var(--color-muted-foreground)]">
-                {t('adminUsers.globalDefaultBadge') || 'Global'}: {globalGenerationsLimit}
+                {t('adminUsers.globalDefaultBadge')}: {globalGenerationsLimit}
               </span>
             )}
           </div>
           <p className="text-[11px] text-[var(--color-muted-foreground)]">
-            {t('adminUsers.totalAiRuns') || 'Total Generations Allowed'}
+            {t('adminUsers.totalAiRuns')}
           </p>
 
           {/* Stepper + Input */}
@@ -120,7 +120,7 @@ export function TeacherAiLimitsTab({
               <button
                 type="button"
                 onClick={() => onLimitsChange('aiQuizGenerations', '')}
-                title={t('adminUsers.resetToGlobal') || 'Reset to Global'}
+                title={t('adminUsers.resetToGlobal')}
                 className="p-2 rounded-lg text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted)] border border-transparent hover:border-[var(--border)] transition-colors text-xs"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
@@ -131,7 +131,7 @@ export function TeacherAiLimitsTab({
           {/* Presets */}
           <div className="flex items-center gap-1.5 flex-wrap pt-1">
             <span className="text-[10px] text-[var(--color-muted-foreground)]">
-              {t('adminUsers.preset') || 'Preset'}:
+              {t('adminUsers.preset')}:
             </span>
             <button
               type="button"
@@ -166,20 +166,20 @@ export function TeacherAiLimitsTab({
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-[var(--color-foreground)] flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-[var(--teacher-primary)]" />
-              {t('adminUsers.aiQuizMaxQuestions') || 'Max Questions / Gen'}
+              {t('adminUsers.aiQuizMaxQuestions')}
             </span>
             {isMaxQCustom ? (
               <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                {limitsForm.aiQuizMaxQuestions} {t('adminUsers.customOverride') || 'Custom'}
+                {limitsForm.aiQuizMaxQuestions} {t('adminUsers.customOverride')}
               </span>
             ) : (
               <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[var(--color-surface-muted-strong)] text-[var(--color-muted-foreground)]">
-                {t('adminUsers.globalDefaultBadge') || 'Global'}: {globalMaxQuestions}
+                {t('adminUsers.globalDefaultBadge')}: {globalMaxQuestions}
               </span>
             )}
           </div>
           <p className="text-[11px] text-[var(--color-muted-foreground)]">
-            {t('adminUsers.maxQuestionsPerRun') || 'Max Questions per Generation'}
+            {t('adminUsers.maxQuestionsPerRun')}
           </p>
 
           {/* Stepper + Input */}
@@ -214,7 +214,7 @@ export function TeacherAiLimitsTab({
               <button
                 type="button"
                 onClick={() => onLimitsChange('aiQuizMaxQuestions', '')}
-                title={t('adminUsers.resetToGlobal') || 'Reset to Global'}
+                title={t('adminUsers.resetToGlobal')}
                 className="p-2 rounded-lg text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted)] border border-transparent hover:border-[var(--border)] transition-colors text-xs"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
@@ -225,7 +225,7 @@ export function TeacherAiLimitsTab({
           {/* Presets */}
           <div className="flex items-center gap-1.5 flex-wrap pt-1">
             <span className="text-[10px] text-[var(--color-muted-foreground)]">
-              {t('adminUsers.preset') || 'Preset'}:
+              {t('adminUsers.preset')}:
             </span>
             <button
               type="button"
@@ -256,7 +256,7 @@ export function TeacherAiLimitsTab({
 
           <div className="flex items-start gap-1.5 pt-1 text-[10px] text-[var(--color-muted-foreground)]">
             <Info className="w-3 h-3 text-[var(--color-primary)] shrink-0 mt-0.5" />
-            <span>{t('adminUsers.extraQuestionsHighlighted') || 'Questions above default (10) are highlighted during quiz creation.'}</span>
+            <span>{t('adminUsers.extraQuestionsHighlighted')}</span>
           </div>
         </div>
       </div>

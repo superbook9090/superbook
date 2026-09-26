@@ -17,22 +17,21 @@ export default function AdminEditContestPage({
   const { t } = useTranslation();
 
   return (
-    <PageWrapper className="space-y-6">
+    <PageWrapper>
       <div className="flex items-center justify-between">
         <Link
           href={ROUTES.admin.contestManage(id)}
           className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors min-h-[44px]"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>{t('contest.backToDetails') || 'Back to Contest Details'}</span>
+          <span>{t('contest.backToDetails')}</span>
         </Link>
       </div>
 
       <PageHeader
-        title={t('contest.editContestTitle') || 'Edit Contest Settings'}
+        title={t('contest.editContestTitle')}
         description={
-          t('contest.editContestDesc') ||
-          'Update schedule, instructions, prizes, and visibility settings for this contest.'
+          t('contest.editContestDesc')
         }
       />
 

@@ -29,7 +29,7 @@ export default function ProfileNameSection({ session }: ProfileNameSectionProps)
     e.preventDefault();
 
     if (!tempName.trim()) {
-      addAlert({ type: 'error', message: t('profile.nameRequired') || 'Name is required.' });
+      addAlert({ type: 'error', message: t('profile.nameRequired') });
       return;
     }
 
@@ -54,10 +54,10 @@ export default function ProfileNameSection({ session }: ProfileNameSectionProps)
       await useSessionStore.getState().fetchSession(true);
       router.refresh();
 
-      addAlert({ type: 'success', message: t('profile.nameUpdateSuccess') || 'Name updated successfully.' });
+      addAlert({ type: 'success', message: t('profile.nameUpdateSuccess') });
       setIsEditingName(false);
     } catch (err) {
-      const errMsg = err instanceof ApiClientError ? err.message : (t('profile.nameUpdateError') || 'Failed to update name.');
+      const errMsg = err instanceof ApiClientError ? err.message : (t('profile.nameUpdateError'));
       addAlert({ type: 'error', message: errMsg });
     } finally {
       setIsUpdatingName(false);
@@ -90,7 +90,7 @@ export default function ProfileNameSection({ session }: ProfileNameSectionProps)
               isLoading={isUpdatingName}
               size="md"
             >
-              {t('common.save') || 'Save'}
+              {t('common.save')}
             </Button>
             <Button
               type="button"
@@ -101,7 +101,7 @@ export default function ProfileNameSection({ session }: ProfileNameSectionProps)
               disabled={isUpdatingName}
               size="md"
             >
-              {t('common.cancel') || 'Cancel'}
+              {t('common.cancel')}
             </Button>
           </div>
         </form>
@@ -118,7 +118,7 @@ export default function ProfileNameSection({ session }: ProfileNameSectionProps)
               setIsEditingName(true);
             }}
           >
-            {t('profile.editName') || 'Edit Name'}
+            {t('profile.editName')}
           </Button>
         </div>
       )}

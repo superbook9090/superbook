@@ -80,7 +80,7 @@ function buildTopicFilter(topic: string) {
 
 // GET /api/blogs - List blogs with server-side filters and pagination
 export async function GET(req: NextRequest) {
-  const requestId = req.headers.get('X-Request-ID') || 'unknown';
+  const requestId = req.headers.get('X-Request-ID');
   const logContext: LogContext = {
     requestId,
     method: 'GET',
@@ -94,12 +94,12 @@ export async function GET(req: NextRequest) {
     const topic = searchParams.get('topic');
     const language = searchParams.get('language');
     const search = searchParams.get('search')?.trim() || '';
-    const status = searchParams.get('status') || 'all';
+    const status = searchParams.get('status');
     const includeDrafts = searchParams.get('includeDrafts') === 'true';
     const author = searchParams.get('author');
-    const orgId = searchParams.get('orgId') || 'public';
+    const orgId = searchParams.get('orgId');
     const includeStats = searchParams.get('includeStats') === 'true';
-    const sortParam = searchParams.get('sort') || 'newest';
+    const sortParam = searchParams.get('sort');
 
     const canUseCache =
       !includeDrafts &&
@@ -280,7 +280,7 @@ export async function GET(req: NextRequest) {
 
 // POST /api/blogs - Create a new blog (teacher only)
 export async function POST(req: NextRequest) {
-  const requestId = req.headers.get('X-Request-ID') || 'unknown';
+  const requestId = req.headers.get('X-Request-ID');
   const logContext: LogContext = {
     requestId,
     method: 'POST',

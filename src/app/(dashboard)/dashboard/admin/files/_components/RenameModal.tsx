@@ -43,8 +43,8 @@ export function RenameModal({
     if (!trimmed) {
       setError(
         isFolder
-          ? t('files.enterFolderName') || 'Folder name is required'
-          : t('files.enterFileName') || 'File name is required'
+          ? t('files.enterFolderName')
+          : t('files.enterFileName')
       );
       return;
     }
@@ -73,10 +73,10 @@ export function RenameModal({
             </div>
             <div>
               <h3 className="text-base font-bold text-[var(--color-foreground)]">
-                {t('files.rename') || 'Rename Item'}
+                {t('files.rename')}
               </h3>
               <p className="text-xs text-[var(--color-muted-foreground)]">
-                {isFolder ? t('files.folder') || 'Folder' : t('files.file') || 'Document'}
+                {isFolder ? t('files.folder') : t('files.file')}
               </p>
             </div>
           </div>
@@ -94,8 +94,8 @@ export function RenameModal({
             <TextField
               label={
                 isFolder
-                  ? t('files.folderName') || 'Folder Name'
-                  : t('files.fileName') || 'File Name'
+                  ? t('files.folderName')
+                  : t('files.fileName')
               }
               value={name}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -110,10 +110,10 @@ export function RenameModal({
 
           <div className="flex items-center justify-end gap-2 pt-2">
             <Button type="button" variant="secondary" onClick={onClose} disabled={isSubmitting}>
-              {t('common.cancel') || 'Cancel'}
+              {t('common.cancel')}
             </Button>
             <Button type="submit" variant="primary" isLoading={isSubmitting}>
-              {t('files.rename') || 'Save Changes'}
+              {t('files.rename')}
             </Button>
           </div>
         </form>

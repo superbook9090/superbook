@@ -41,17 +41,16 @@ export default function TeacherContestsPage() {
   // If teacher is not authorized by Superadmin
   if (!isAuthorized) {
     return (
-      <PageWrapper className="space-y-6">
+      <PageWrapper>
         <div className="p-8 sm:p-12 rounded-3xl bg-[var(--card-solid)] antigravity-glass border border-[var(--warning)]/40 shadow-sm text-center max-w-2xl mx-auto flex flex-col items-center gap-4">
           <div className="p-4 rounded-2xl bg-[var(--warning-light)] text-[var(--warning)] shadow-xs">
             <Lock className="w-8 h-8" />
           </div>
           <h2 className="heading-lg text-[var(--color-foreground)]">
-            {t('contest.permissionRequired') || 'Contest Creation Access Required'}
+            {t('contest.permissionRequired')}
           </h2>
           <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] leading-relaxed">
-            {t('contest.permissionRequiredDesc') ||
-              'Contest hosting is restricted to authorized educators. A Superadmin can grant you contest creation permissions from the user administration panel.'}
+            {t('contest.permissionRequiredDesc')}
           </p>
           <div className="pt-2">
             <Link
@@ -59,7 +58,7 @@ export default function TeacherContestsPage() {
               className="btn-premium inline-flex items-center gap-2 px-6 py-2.5 min-h-[44px]"
             >
               <Mail className="w-4 h-4" />
-              <span>{t('contact.title') || 'Contact Administration'}</span>
+              <span>{t('contact.title')}</span>
             </Link>
           </div>
         </div>
@@ -68,17 +67,17 @@ export default function TeacherContestsPage() {
   }
 
   return (
-    <PageWrapper className="space-y-6">
+    <PageWrapper>
       {/* Hero Header Banner */}
-      <div className="hero-banner flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 sm:p-8 rounded-3xl">
+      <div className="hero-banner flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 sm:p-6 md:p-8 rounded-3xl">
         <div className="space-y-1 max-w-xl">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[var(--teacher-soft)] text-[var(--teacher-primary)] border border-[var(--teacher-border)]">
             <Trophy className="w-3.5 h-3.5" />
-            <span>{t('contest.teacherContests') || 'Contests Management'}</span>
+            <span>{t('contest.teacherContests')}</span>
           </div>
-          <h1 className="heading-xl">{t('contest.teacherContests') || 'Contests Management'}</h1>
+          <h1 className="heading-xl">{t('contest.teacherContests')}</h1>
           <p className="text-sm sm:text-base text-[var(--color-muted-foreground)]">
-            {t('contest.teacherContestsDesc') || 'Create, schedule, and monitor your live student competitions.'}
+            {t('contest.teacherContestsDesc')}
           </p>
         </div>
 
@@ -87,7 +86,7 @@ export default function TeacherContestsPage() {
           className="btn-premium inline-flex items-center justify-center gap-2 min-h-[44px] px-6 py-2.5 text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition-all self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
-          <span>{t('contest.createNewContest') || 'Create New Contest'}</span>
+          <span>{t('contest.createNewContest')}</span>
         </Link>
       </div>
 
@@ -106,7 +105,7 @@ export default function TeacherContestsPage() {
           }`}
         >
           <Trophy className="w-4 h-4" />
-          <span>{t('common.all') || 'All Contests'}</span>
+          <span>{t('common.all')}</span>
         </button>
 
         <button
@@ -119,7 +118,7 @@ export default function TeacherContestsPage() {
           }`}
         >
           <Flame className="w-4 h-4" />
-          <span>{t('contest.live') || 'Live'}</span>
+          <span>{t('contest.live')}</span>
           {stats.liveCount > 0 && (
             <span className="px-2 py-0.5 rounded-full text-[10px] bg-white/25 text-white font-black animate-pulse">
               {stats.liveCount}
@@ -137,7 +136,7 @@ export default function TeacherContestsPage() {
           }`}
         >
           <Clock className="w-4 h-4" />
-          <span>{t('contest.upcoming') || 'Upcoming'}</span>
+          <span>{t('contest.upcoming')}</span>
           {stats.upcomingCount > 0 && (
             <span className="px-2 py-0.5 rounded-full text-[10px] bg-white/25 text-white font-black">
               {stats.upcomingCount}
@@ -155,7 +154,7 @@ export default function TeacherContestsPage() {
           }`}
         >
           <CheckCircle className="w-4 h-4" />
-          <span>{t('contest.completed') || 'Completed'}</span>
+          <span>{t('contest.completed')}</span>
           {stats.completedCount > 0 && (
             <span className="px-2 py-0.5 rounded-full text-[10px] bg-white/25 text-white font-black">
               {stats.completedCount}
@@ -170,10 +169,9 @@ export default function TeacherContestsPage() {
       ) : contests.length === 0 ? (
         <EmptyState
           icon={Trophy}
-          title={t('contest.noTeacherContests') || 'No Contests Created Yet'}
+          title={t('contest.noTeacherContests')}
           description={
-            t('contest.noTeacherContestsDesc') ||
-            'Create your first scheduled competition to engage your students and distribute prizes.'
+            t('contest.noTeacherContestsDesc')
           }
           action={
             <Link
@@ -181,7 +179,7 @@ export default function TeacherContestsPage() {
               className="btn-premium inline-flex items-center gap-2 min-h-[44px]"
             >
               <Plus className="w-4 h-4" />
-              <span>{t('contest.createNewContest') || 'Create Contest'}</span>
+              <span>{t('contest.createNewContest')}</span>
             </Link>
           }
         />

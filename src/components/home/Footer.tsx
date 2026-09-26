@@ -135,15 +135,15 @@ export default function Footer() {
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-[var(--color-muted)]">
             <Link href={ROUTES.privacy} className="hover:text-[var(--foreground)] transition-colors">
-              {t('home.footer.privacyPolicy') || 'Privacy Policy'}
+              {t('home.footer.privacyPolicy')}
             </Link>
             <span>•</span>
             <Link href={ROUTES.terms} className="hover:text-[var(--foreground)] transition-colors">
-              {t('home.footer.termsOfService') || 'Terms of Service'}
+              {t('home.footer.termsOfService')}
             </Link>
             <span>•</span>
             <Link href={ROUTES.contact} className="hover:text-[var(--foreground)] transition-colors">
-              {t('contact.title') || 'Contact Us'}
+              {t('contact.title')}
             </Link>
           </div>
           <p className="text-[var(--color-muted)] text-sm flex items-center justify-center gap-1">

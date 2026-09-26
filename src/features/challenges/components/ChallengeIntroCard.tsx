@@ -31,7 +31,7 @@ export function ChallengeIntroCard({
     <motion.div
       initial={{ opacity: 0, scale: 0.96 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="w-full max-w-lg card-surface rounded-3xl border border-[var(--color-border)] shadow-2xl p-6 sm:p-8 flex flex-col items-center text-center"
+      className="w-full max-w-lg card-surface rounded-3xl border border-[var(--color-border)] shadow-2xl p-4 sm:p-6 md:p-8 flex flex-col items-center text-center"
     >
       {/* Arena Badge */}
       <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white shadow-xl shadow-orange-500/25 mb-4">
@@ -44,7 +44,7 @@ export function ChallengeIntroCard({
       </div>
 
       <h1 className="text-xl sm:text-2xl font-black text-[var(--color-foreground)] leading-tight">
-        {t('challenge.canYouBeat', { name: challenge.challenger.name || 'Quizdo Scholar' })}
+        {t('challenge.canYouBeat', { name: challenge.challenger.name || t('challenge.quizdoScholar') })}
       </h1>
 
       <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] mt-2">

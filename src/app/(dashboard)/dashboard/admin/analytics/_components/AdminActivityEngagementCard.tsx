@@ -41,18 +41,18 @@ export function AdminActivityEngagementCard({
               <Activity className="w-4 h-4" />
             </span>
             <h3 className="text-sm sm:text-base md:text-lg font-bold text-[var(--color-foreground)] truncate">
-              {t('adminAnalytics.activityEngagementTitle') || 'User Activity & Last Opened Recency'}
+              {t('adminAnalytics.activityEngagementTitle')}
             </h3>
           </div>
           <p className="text-[11px] sm:text-xs text-[var(--color-muted-foreground)] mt-0.5 sm:mt-1 line-clamp-1 sm:line-clamp-none">
-            {t('adminAnalytics.activityEngagementSubtitle') || 'Daily active learners, engagement retention, and stickiness ratio'}
+            {t('adminAnalytics.activityEngagementSubtitle')}
           </p>
         </div>
 
         {/* Stickiness Badge */}
         <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--success-light)] text-[var(--success)] text-xs font-bold shrink-0 self-start sm:self-auto">
           <Zap className="w-3.5 h-3.5" />
-          <span>{stickiness}% {t('adminAnalytics.stickiness') || 'DAU/MAU Stickiness'}</span>
+          <span>{stickiness}% {t('adminAnalytics.stickiness')}</span>
         </div>
       </div>
 
@@ -62,56 +62,56 @@ export function AdminActivityEngagementCard({
           {/* Active Today */}
           <div className="p-3 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)] flex flex-col justify-between">
             <div className="flex items-center justify-between text-[11px] font-semibold text-[var(--color-muted-foreground)]">
-              <span className="truncate">{t('adminAnalytics.activeToday') || 'Active Today (DAU)'}</span>
+              <span className="truncate">{t('adminAnalytics.activeToday')}</span>
               <span className="w-2 h-2 rounded-full bg-[var(--success)] shrink-0 animate-ping" />
             </div>
             <div className="text-lg sm:text-xl font-bold tabular-nums text-[var(--color-foreground)] mt-1">
               {dau}
             </div>
             <span className="text-[10px] font-medium text-[var(--success)] mt-0.5">
-              {Math.round((dau / total) * 100)}% {t('adminAnalytics.ofTotal') || 'of total'}
+              {Math.round((dau / total) * 100)}% {t('adminAnalytics.ofTotal')}
             </span>
           </div>
 
           {/* Active This Week */}
           <div className="p-3 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)] flex flex-col justify-between">
             <div className="flex items-center justify-between text-[11px] font-semibold text-[var(--color-muted-foreground)]">
-              <span className="truncate">{t('adminAnalytics.activeThisWeek') || 'Active 7 Days (WAU)'}</span>
+              <span className="truncate">{t('adminAnalytics.activeThisWeek')}</span>
               <Clock className="w-3.5 h-3.5 text-[var(--info)] shrink-0" />
             </div>
             <div className="text-lg sm:text-xl font-bold tabular-nums text-[var(--color-foreground)] mt-1">
               {wau}
             </div>
             <span className="text-[10px] font-medium text-[var(--info)] mt-0.5">
-              {Math.round((wau / total) * 100)}% {t('adminAnalytics.ofTotal') || 'of total'}
+              {Math.round((wau / total) * 100)}% {t('adminAnalytics.ofTotal')}
             </span>
           </div>
 
           {/* Active This Month */}
           <div className="p-3 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)] flex flex-col justify-between">
             <div className="flex items-center justify-between text-[11px] font-semibold text-[var(--color-muted-foreground)]">
-              <span className="truncate">{t('adminAnalytics.activeThisMonth') || 'Active 30 Days (MAU)'}</span>
+              <span className="truncate">{t('adminAnalytics.activeThisMonth')}</span>
               <UserCheck className="w-3.5 h-3.5 text-[var(--primary)] shrink-0" />
             </div>
             <div className="text-lg sm:text-xl font-bold tabular-nums text-[var(--color-foreground)] mt-1">
               {mau}
             </div>
             <span className="text-[10px] font-medium text-[var(--primary)] mt-0.5">
-              {Math.round((mau / total) * 100)}% {t('adminAnalytics.ofTotal') || 'of total'}
+              {Math.round((mau / total) * 100)}% {t('adminAnalytics.ofTotal')}
             </span>
           </div>
 
           {/* Inactive */}
           <div className="p-3 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)] flex flex-col justify-between">
             <div className="flex items-center justify-between text-[11px] font-semibold text-[var(--color-muted-foreground)]">
-              <span className="truncate">{t('adminAnalytics.inactiveUsers') || 'Inactive (>30 Days)'}</span>
+              <span className="truncate">{t('adminAnalytics.inactiveUsers')}</span>
               <UserMinus className="w-3.5 h-3.5 text-[var(--color-muted)] shrink-0" />
             </div>
             <div className="text-lg sm:text-xl font-bold tabular-nums text-[var(--color-muted-foreground)] mt-1">
               {inactive}
             </div>
             <span className="text-[10px] font-medium text-[var(--color-muted)] mt-0.5">
-              {Math.round((inactive / total) * 100)}% {t('adminAnalytics.ofTotal') || 'of total'}
+              {Math.round((inactive / total) * 100)}% {t('adminAnalytics.ofTotal')}
             </span>
           </div>
         </div>
@@ -121,10 +121,10 @@ export function AdminActivityEngagementCard({
           <div className="flex justify-between items-center text-xs font-semibold text-[var(--color-foreground)] mb-1.5">
             <span className="flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-[var(--color-muted)]" />
-              <span>{t('adminAnalytics.recencyDistribution') || 'Last Opened Recency Breakdown'}</span>
+              <span>{t('adminAnalytics.recencyDistribution')}</span>
             </span>
             <span className="text-[11px] text-[var(--color-muted-foreground)]">
-              {total} {t('adminAnalytics.totalTracked') || 'total users'}
+              {total} {t('adminAnalytics.totalTracked')}
             </span>
           </div>
 

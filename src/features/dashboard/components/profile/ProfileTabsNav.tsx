@@ -16,12 +16,12 @@ export function ProfileTabsNav({ activeTab, onTabChange }: ProfileTabsNavProps) 
   const tabs: { id: ProfileTabKey; label: string; icon: React.ElementType }[] = [
     {
       id: 'account',
-      label: t('profile.tabAccount') || 'Personal Details',
+      label: t('profile.tabAccount'),
       icon: User,
     },
     {
       id: 'security',
-      label: t('profile.tabSecurity') || 'Security & Password',
+      label: t('profile.tabSecurity'),
       icon: Lock,
     },
   ];

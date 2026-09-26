@@ -120,7 +120,7 @@ export function UsersMobileList({ users, organizations, handleOpenUserDetail }: 
             <div className="flex flex-col gap-2 pt-2.5 border-t border-[var(--border)] text-xs">
               {/* Platform & Last Opened */}
               <div className="flex items-center justify-between">
-                <span className="text-[var(--color-muted-foreground)]">{t('adminAnalytics.platform') || 'Platform'}</span>
+                <span className="text-[var(--color-muted-foreground)]">{t('adminAnalytics.platform')}</span>
                 {user.lastPlatform === 'android' ? (
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--primary-soft)] text-[var(--primary)] text-[11px] font-semibold">
                     <Smartphone className="w-3 h-3" />
@@ -143,27 +143,27 @@ export function UsersMobileList({ users, organizations, handleOpenUserDetail }: 
 
               {/* Last Opened */}
               <div className="flex items-center justify-between">
-                <span className="text-[var(--color-muted-foreground)]">{t('adminUsers.lastOpened') || 'Last Opened'}</span>
+                <span className="text-[var(--color-muted-foreground)]">{t('adminUsers.lastOpened')}</span>
                 {user.lastActiveAt ? (
                   <span className="font-semibold text-[var(--color-foreground)] flex items-center gap-1">
                     <Clock className="w-3 h-3 text-[var(--primary)]" />
                     {getRelativeTime(user.lastActiveAt)}
                   </span>
                 ) : (
-                  <span className="text-[var(--color-muted)] italic">{t('common.never') || 'Never'}</span>
+                  <span className="text-[var(--color-muted)] italic">{t('common.never')}</span>
                 )}
               </div>
 
               {/* Organization */}
               <div className="flex items-center justify-between">
-                <span className="text-[var(--color-muted-foreground)]">{t('adminUsers.organization') || 'Organization'}</span>
+                <span className="text-[var(--color-muted-foreground)]">{t('adminUsers.organization')}</span>
                 {orgName ? (
                   <span className="font-semibold text-[var(--color-foreground)] flex items-center gap-1">
                     <Building2 className="w-3 h-3 text-[var(--info)]" />
                     {orgName}
                   </span>
                 ) : (
-                  <span className="text-[var(--color-muted)] italic">{t('common.none') || 'Public'}</span>
+                  <span className="text-[var(--color-muted)] italic">{t('common.none')}</span>
                 )}
               </div>
 
@@ -181,16 +181,16 @@ export function UsersMobileList({ users, organizations, handleOpenUserDetail }: 
                   <div className="flex flex-col gap-1.5 py-1">
                     <div className="flex items-center justify-between">
                       <span className="text-[var(--color-muted-foreground)]">
-                        {t('adminUsers.capabilitiesAndLimits') || 'Quotas'}
+                        {t('adminUsers.capabilitiesAndLimits')}
                       </span>
                       {hasCustomLimits ? (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
                           <Sliders className="w-3 h-3" />
-                          <span>{t('adminUsers.customLimits') || 'Custom Limits'}</span>
+                          <span>{t('adminUsers.customLimits')}</span>
                         </span>
                       ) : (
                         <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-[var(--color-surface-muted-strong)] text-[var(--color-muted-foreground)]">
-                          {t('adminUsers.standardLimits') || 'Standard Limits'}
+                          {t('adminUsers.standardLimits')}
                         </span>
                       )}
                     </div>
@@ -222,7 +222,7 @@ export function UsersMobileList({ users, organizations, handleOpenUserDetail }: 
 
               {/* Joined */}
               <div className="flex items-center justify-between">
-                <span className="text-[var(--color-muted-foreground)]">{t('admin.joined') || 'Joined'}</span>
+                <span className="text-[var(--color-muted-foreground)]">{t('admin.joined')}</span>
                 <span className="text-[var(--color-muted)] flex items-center gap-1">
                   <Calendar className="w-3 h-3" />
                   {formatDate(user.createdAt)}
@@ -232,7 +232,7 @@ export function UsersMobileList({ users, organizations, handleOpenUserDetail }: 
 
             {/* Tap Action Bar (min 44px touch target) */}
             <div className="pt-2 border-t border-[var(--border)] flex items-center justify-between text-xs font-bold text-[var(--primary)] min-h-[44px]">
-              <span>{t('adminUsers.manageUser') || 'Manage User'}</span>
+              <span>{t('adminUsers.manageUser')}</span>
               <ChevronRight className="w-4 h-4" />
             </div>
           </motion.div>

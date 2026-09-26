@@ -56,7 +56,7 @@ export function ContestPrizesShowcase({ prizes = [], compact = false }: ContestP
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--color-muted-foreground)]">
         <Sparkles className="w-4 h-4 text-[var(--warning)]" />
-        <span>{t('contest.prizesAndRewards') || 'Prizes & Rewards'}</span>
+        <span>{t('contest.prizesAndRewards')}</span>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
@@ -73,7 +73,7 @@ export function ContestPrizesShowcase({ prizes = [], compact = false }: ContestP
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between gap-1">
                 <span className="text-xs font-extrabold uppercase tracking-wider opacity-75">
-                  {t('contest.rank') || 'Rank'} #{prize.rank}
+                  {t('contest.rank')} #{prize.rank}
                 </span>
                 {prize.value && (
                   <span className="text-xs font-bold text-[var(--primary)] bg-[var(--primary-light)] px-1.5 py-0.5 rounded">

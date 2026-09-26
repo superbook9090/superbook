@@ -13,7 +13,7 @@ All UI components and layouts must follow these design system and styling rules:
 
 ## 3. Shared Layout Primitives
 - Prefer shared layout primitives from `src/components/layout/*` over ad-hoc container wrappers:
-  - `PageWrapper`: Main page container with standard max-width and gutter padding.
+  - `PageWrapper`: Main page container with standard max-width and gutter padding. **CRITICAL:** Do NOT add `className="space-y-*"` to `PageWrapper`. It already uses `.stack-page` which provides `gap: var(--section-gap)`. Adding `space-y-*` will cause massive double-spacing on mobile.
   - `PageHeader`: Standardized title, subtitle description, and action button bar.
   - `DashboardContent`: Dashboard section container.
   - `ResponsiveGrid`: Configurable responsive grid layout.

@@ -34,7 +34,7 @@ export function LessonVideoUploader({
 
     // Client-side size validation (2GB)
     if (file.size > 2 * 1024 * 1024 * 1024) {
-      setUploadError(t('curriculum.formatSizeHint') || 'File too large (max 2GB)');
+      setUploadError(t('curriculum.formatSizeHint'));
       return;
     }
 

@@ -88,7 +88,7 @@ export default function ProfilePhoneSection({ session }: ProfilePhoneSectionProp
         if (formattedPhone.length === 10) {
           formattedPhone = '+91' + formattedPhone;
         } else {
-          addAlert({ type: 'error', message: t('login.invalidPhone') || 'Please enter phone number with country code (e.g. +91...)' });
+          addAlert({ type: 'error', message: t('login.invalidPhone') });
           setIsPhoneLoading(false);
           return;
         }
@@ -101,7 +101,7 @@ export default function ProfilePhoneSection({ session }: ProfilePhoneSectionProp
     } catch (err) {
       console.error('Error sending OTP:', err);
       const errMsg = err instanceof Error ? err.message : String(err);
-      addAlert({ type: 'error', message: errMsg || t('login.genericError') || 'Failed to send OTP. Please try again.' });
+      addAlert({ type: 'error', message: errMsg || t('login.genericError') });
       if (window.phoneRecaptchaVerifier) {
         try {
           window.phoneRecaptchaVerifier.clear();
@@ -135,7 +135,7 @@ export default function ProfilePhoneSection({ session }: ProfilePhoneSectionProp
 
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.message || t('profile.phoneAlreadyExists') || 'Failed to link phone number.');
+        throw new Error(data.message || t('profile.phoneAlreadyExists'));
       }
 
       const csrfToken = await getCsrfToken();
@@ -155,7 +155,7 @@ export default function ProfilePhoneSection({ session }: ProfilePhoneSectionProp
       await useSessionStore.getState().fetchSession(true);
       router.refresh();
 
-      addAlert({ type: 'success', message: t('profile.phoneLinkedSuccess') || 'Phone number linked successfully.' });
+      addAlert({ type: 'success', message: t('profile.phoneLinkedSuccess') });
       setIsLinkingPhone(false);
       setIsOtpSent(false);
       setPhoneVal('');
@@ -163,7 +163,7 @@ export default function ProfilePhoneSection({ session }: ProfilePhoneSectionProp
     } catch (err) {
       console.error('Error linking phone:', err);
       const errMsg = err instanceof Error ? err.message : String(err);
-      addAlert({ type: 'error', message: errMsg || t('login.invalidOtp') || 'Invalid verification code.' });
+      addAlert({ type: 'error', message: errMsg || t('login.invalidOtp') });
     } finally {
       setIsPhoneLoading(false);
     }
@@ -188,7 +188,7 @@ export default function ProfilePhoneSection({ session }: ProfilePhoneSectionProp
 
   return (
     <div>
-      <label className="block text-sm font-medium text-[var(--color-muted-foreground)]">{t('profile.phone') || 'Phone Number'}</label>
+      <label className="block text-sm font-medium text-[var(--color-muted-foreground)]">{t('profile.phone')}</label>
       {session.user?.phone ? (
         <p className="mt-1 text-sm sm:text-base text-[var(--color-foreground)] break-words">
           {session.user.phone}
@@ -198,7 +198,7 @@ export default function ProfilePhoneSection({ session }: ProfilePhoneSectionProp
           {!isOtpSent ? (
             <div className="space-y-3">
               <TextField
-                aria-label={t('login.enterPhone') || 'Phone Number'}
+                aria-label={t('login.enterPhone')}
                 value={phoneVal}
                 onChange={(e) => setPhoneVal(e.target.value)}
                 placeholder="+919999999999"
@@ -214,7 +214,7 @@ export default function ProfilePhoneSection({ session }: ProfilePhoneSectionProp
                   isLoading={isPhoneLoading}
                   size="md"
                 >
-                  {t('login.sendOtp') || 'Send Code'}
+                  {t('login.sendOtp')}
                 </Button>
                 <Button
                   type="button"
@@ -223,7 +223,7 @@ export default function ProfilePhoneSection({ session }: ProfilePhoneSectionProp
                   disabled={isPhoneLoading}
                   size="md"
                 >
-                  {t('common.cancel') || 'Cancel'}
+                  {t('common.cancel')}
                 </Button>
               </div>
             </div>
@@ -233,7 +233,7 @@ export default function ProfilePhoneSection({ session }: ProfilePhoneSectionProp
                 {t('login.otpSent', { phone: phoneVal })}
               </p>
               <TextField
-                aria-label={t('login.enterOtp') || 'Verification Code'}
+                aria-label={t('login.enterOtp')}
                 value={otpVal}
                 onChange={(e) => setOtpVal(e.target.value)}
                 placeholder="123456"
@@ -248,7 +248,7 @@ export default function ProfilePhoneSection({ session }: ProfilePhoneSectionProp
                   isLoading={isPhoneLoading}
                   size="md"
                 >
-                  {t('login.verifyOtp') || 'Verify Code'}
+                  {t('login.verifyOtp')}
                 </Button>
                 <Button
                   type="button"
@@ -257,7 +257,7 @@ export default function ProfilePhoneSection({ session }: ProfilePhoneSectionProp
                   disabled={isPhoneLoading}
                   size="md"
                 >
-                  {t('common.back') || 'Back'}
+                  {t('common.back')}
                 </Button>
               </div>
             </div>
@@ -266,7 +266,7 @@ export default function ProfilePhoneSection({ session }: ProfilePhoneSectionProp
       ) : (
         <div className="mt-1 flex items-center justify-between gap-4">
           <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] italic">
-            {t('profile.phoneNotLinked') || 'No phone number linked'}
+            {t('profile.phoneNotLinked')}
           </p>
           <Button
             variant="ghost"
@@ -275,7 +275,7 @@ export default function ProfilePhoneSection({ session }: ProfilePhoneSectionProp
               setIsLinkingPhone(true);
             }}
           >
-            {t('profile.addPhone') || 'Link Phone Number'}
+            {t('profile.addPhone')}
           </Button>
         </div>
       )}

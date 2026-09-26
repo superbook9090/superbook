@@ -31,7 +31,7 @@ export default function BlogListPagination({
 
   return (
     <div className="flex items-center justify-between px-1 py-3 sm:px-2 mt-4">
-      <div className="flex flex-1 justify-between sm:hidden">
+      <div className="flex flex-1 items-center justify-between sm:hidden">
         <button
           type="button"
           onClick={() => onPageChange(Math.max(1, page - 1))}
@@ -40,11 +40,14 @@ export default function BlogListPagination({
         >
           {t('common.previous')}
         </button>
+        <span className="text-sm font-medium text-[var(--color-foreground)] mx-2">
+          {page} / {pagination.totalPages}
+        </span>
         <button
           type="button"
           onClick={() => onPageChange(Math.min(pagination.totalPages, page + 1))}
           disabled={page === pagination.totalPages}
-          className="relative ml-3 inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-[var(--color-foreground)] bg-[var(--card-solid)] border border-[var(--border)] hover:bg-[var(--color-surface-muted)] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-[var(--color-foreground)] bg-[var(--card-solid)] border border-[var(--border)] hover:bg-[var(--color-surface-muted)] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {t('common.next')}
         </button>

@@ -28,28 +28,28 @@ export default function TeacherQuizzesStats({
       <StatCard
         icon={HelpCircle}
         value={total}
-        label={t('teacherQuizzes.totalQuizzes') || 'Total Quizzes'}
+        label={t('teacherQuizzes.totalQuizzes')}
         color="teacher"
         delay={0.05}
       />
       <StatCard
         icon={CheckCircle}
         value={publishedCount}
-        label={t('teacherQuizzes.published') || 'Published'}
+        label={t('teacherQuizzes.published')}
         color="success"
         delay={0.1}
       />
       <StatCard
         icon={Clock}
         value={draftCount}
-        label={t('teacherQuizzes.draft') || 'Drafts'}
+        label={t('teacherQuizzes.draft')}
         color="warning"
         delay={0.15}
       />
       <StatCard
         icon={FileQuestion}
         value={totalQuestions}
-        label={t('teacherQuizzes.questions') || 'Questions'}
+        label={t('teacherQuizzes.questions')}
         color="student"
         delay={0.2}
       />

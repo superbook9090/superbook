@@ -24,7 +24,7 @@ export default function UsernameModal({ currentName, onClose }: UsernameModalPro
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
-      setError(t('profile.nameRequired') || 'Name is required.');
+      setError(t('profile.nameRequired'));
       return;
     }
 
@@ -56,7 +56,7 @@ export default function UsernameModal({ currentName, onClose }: UsernameModalPro
       onClose();
     } catch (err) {
       console.error(err);
-      setError(t('profile.nameUpdateError') || 'Failed to update name.');
+      setError(t('profile.nameUpdateError'));
     } finally {
       setIsUpdating(false);
     }
@@ -78,7 +78,7 @@ export default function UsernameModal({ currentName, onClose }: UsernameModalPro
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-md bg-[var(--card-solid)]/90 border border-[var(--border)] rounded-3xl p-6 sm:p-8 shadow-[var(--shadow-lg)] backdrop-blur-md overflow-hidden"
+        className="relative w-full max-w-md bg-[var(--card-solid)]/90 border border-[var(--border)] rounded-3xl p-4 sm:p-6 md:p-8 shadow-[var(--shadow-lg)] backdrop-blur-md overflow-hidden"
       >
         {/* Glow effect */}
         <div className="absolute -top-10 -right-10 w-32 h-32 bg-[var(--color-primary)]/15 rounded-full blur-2xl pointer-events-none" />
@@ -88,17 +88,17 @@ export default function UsernameModal({ currentName, onClose }: UsernameModalPro
             <Sparkles className="w-5 h-5" />
           </div>
           <h2 className="text-xl sm:text-2xl font-bold text-[var(--color-foreground)]">
-            {t('profile.usernameModalTitle') || 'Set Username'}
+            {t('profile.usernameModalTitle')}
           </h2>
         </div>
 
         <p className="text-sm text-[var(--color-muted-foreground)] mb-6">
-          {t('profile.usernameModalDesc') || 'Please choose a display name for your account.'}
+          {t('profile.usernameModalDesc')}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <TextField
-            label={t('profile.usernameLabel') || 'Display Name'}
+            label={t('profile.usernameLabel')}
             type="text"
             required
             value={name}
@@ -120,14 +120,14 @@ export default function UsernameModal({ currentName, onClose }: UsernameModalPro
               onClick={onClose}
               disabled={isUpdating}
             >
-              {t('common.cancel') || 'Cancel'}
+              {t('common.cancel')}
             </Button>
             <Button
               type="submit"
               isLoading={isUpdating}
               disabled={isUpdating}
             >
-              {t('common.save') || 'Save'}
+              {t('common.save')}
             </Button>
           </div>
         </form>

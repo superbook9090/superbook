@@ -21,12 +21,12 @@ export function SettingsTabsNav({
   const { t } = useTranslation();
 
   const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
-    { id: 'all', label: t('adminSettings.allTab') || 'All Settings', icon: Layers },
+    { id: 'all', label: t('adminSettings.allTab'), icon: Layers },
     { id: 'jobs', label: 'Manual Jobs', icon: Zap },
-    { id: 'features', label: t('adminSettings.featureTogglesTab') || 'Feature Toggles', icon: ToggleLeft },
-    { id: 'teacher_limits', label: t('adminSettings.contentLimitsTab') || 'Teacher Limits', icon: GraduationCap },
-    { id: 'notes_limits', label: t('adminSettings.notesLimitsTab') || 'Notes Limits', icon: Notebook },
-    { id: 'platform', label: t('adminSettings.platformConfigTab') || 'Platform & Access', icon: Globe },
+    { id: 'features', label: t('adminSettings.featureTogglesTab'), icon: ToggleLeft },
+    { id: 'teacher_limits', label: t('adminSettings.contentLimitsTab'), icon: GraduationCap },
+    { id: 'notes_limits', label: t('adminSettings.notesLimitsTab'), icon: Notebook },
+    { id: 'platform', label: t('adminSettings.platformConfigTab'), icon: Globe },
   ];
 
   return (
@@ -60,7 +60,7 @@ export function SettingsTabsNav({
           type="text"
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          placeholder={t('adminSettings.searchPlaceholder') || 'Search settings...'}
+          placeholder={t('adminSettings.searchPlaceholder')}
           className="w-full pl-10 pr-9 py-2 text-xs sm:text-sm rounded-2xl antigravity-glass border border-[var(--border)] text-[var(--color-foreground)] placeholder-[var(--color-muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent transition-all min-h-[44px] shadow-xs"
         />
         {searchQuery && (
@@ -68,7 +68,7 @@ export function SettingsTabsNav({
             type="button"
             onClick={() => onSearchChange('')}
             className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] rounded-md cursor-pointer"
-            aria-label={t('adminSettings.clearSearch') || 'Clear Search'}
+            aria-label={t('adminSettings.clearSearch')}
           >
             <X className="w-4 h-4" />
           </button>

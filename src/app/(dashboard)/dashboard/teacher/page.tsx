@@ -106,7 +106,7 @@ export default function TeacherDashboardPage() {
   }
 
   return (
-    <PageWrapper className="space-y-6">
+    <PageWrapper>
       <TeacherHero
         userName={session?.user?.name}
         isAtCourseLimit={isAtCourseLimit}

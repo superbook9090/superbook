@@ -15,7 +15,7 @@ export function AdminQuizzesHero({ viewMode, onViewModeChange }: AdminQuizzesHer
   const { t } = useTranslation();
 
   return (
-    <div className="hero-banner flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 sm:p-8 rounded-3xl">
+    <div className="hero-banner flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 sm:p-6 md:p-8 rounded-3xl">
       <div className="space-y-1.5 max-w-xl">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[var(--student-soft)] text-[var(--student-primary)] border border-[var(--student-border)] shadow-xs">
           <HelpCircle className="w-3.5 h-3.5" />
@@ -37,10 +37,10 @@ export function AdminQuizzesHero({ viewMode, onViewModeChange }: AdminQuizzesHer
                 ? 'bg-[var(--primary)] text-white shadow-md'
                 : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--surface-muted)]'
             }`}
-            title={t('admin.viewGrid') || 'Grid View'}
+            title={t('admin.viewGrid')}
           >
             <LayoutGrid className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('admin.viewGrid') || 'Grid'}</span>
+            <span className="hidden sm:inline">{t('admin.viewGrid')}</span>
           </button>
           <button
             type="button"
@@ -50,10 +50,10 @@ export function AdminQuizzesHero({ viewMode, onViewModeChange }: AdminQuizzesHer
                 ? 'bg-[var(--primary)] text-white shadow-md'
                 : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--surface-muted)]'
             }`}
-            title={t('admin.viewTable') || 'Table View'}
+            title={t('admin.viewTable')}
           >
             <TableIcon className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('admin.viewTable') || 'Table'}</span>
+            <span className="hidden sm:inline">{t('admin.viewTable')}</span>
           </button>
         </div>
 

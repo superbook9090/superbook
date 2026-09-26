@@ -30,7 +30,7 @@ export default function TeacherStats({
   const blogUsage = Math.min(100, Math.round((stats.totalBlogs / blogLimit) * 100));
 
   return (
-    <ResponsiveGrid variant="stats">
+    <ResponsiveGrid variant="cards">
       {enableCourses && (
         <StatCard
           icon={BookOpen}

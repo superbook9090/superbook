@@ -31,10 +31,10 @@ export function ProfilePersonalInfoTab({ session }: ProfilePersonalInfoTabProps)
             </div>
             <div>
               <h2 className="text-base sm:text-lg font-semibold text-[var(--color-foreground)]">
-                {t('profile.personalInfoTitle') || 'Personal & Contact Details'}
+                {t('profile.personalInfoTitle')}
               </h2>
               <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)]">
-                {t('profile.personalInfoDesc') || 'Your primary profile identification across the learning portal.'}
+                {t('profile.personalInfoDesc')}
               </p>
             </div>
           </div>

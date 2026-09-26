@@ -33,12 +33,11 @@ export function ContestLeaderboard({
           <Lock className="w-6 h-6" />
         </div>
         <h3 className="text-base sm:text-lg font-bold text-[var(--color-foreground)]">
-          {t('contest.leaderboardLocked') || 'Leaderboard is Locked'}
+          {t('contest.leaderboardLocked')}
         </h3>
         <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] max-w-md">
           {message ||
-            t('contest.leaderboardLockedDesc') ||
-            'The leaderboard will be revealed after the contest has ended.'}
+            t('contest.leaderboardLockedDesc')}
         </p>
       </div>
     );
@@ -70,7 +69,7 @@ export function ContestLeaderboard({
                 <Medal className="w-6 h-6 text-[var(--color-muted)]" />
               </div>
               <span className="text-xs font-extrabold uppercase tracking-wider text-[var(--color-muted)]">
-                {t('contest.secondPlace') || '2nd Place'}
+                {t('contest.secondPlace')}
               </span>
               <h4 className="text-sm font-bold text-[var(--color-foreground)] truncate max-w-[140px]">
                 {top3[1].name}
@@ -101,13 +100,13 @@ export function ContestLeaderboard({
             >
               <div className="absolute -top-3.5 px-3 py-0.5 rounded-full bg-[var(--warning)] text-black font-extrabold text-[10px] tracking-wider uppercase shadow-xs flex items-center gap-1">
                 <Sparkles className="w-3 h-3" />
-                {t('contest.winner') || 'Winner'}
+                {t('contest.winner')}
               </div>
               <div className="p-3 rounded-full bg-[var(--warning)]/20 shadow-xs">
                 <Trophy className="w-8 h-8 text-[var(--warning)]" />
               </div>
               <span className="text-xs font-extrabold uppercase tracking-wider text-[var(--warning-foreground)]">
-                {t('contest.firstPlace') || '1st Place'}
+                {t('contest.firstPlace')}
               </span>
               <h4 className="text-base font-extrabold text-[var(--color-foreground)] truncate max-w-[160px]">
                 {top3[0].name}
@@ -139,7 +138,7 @@ export function ContestLeaderboard({
                 <Medal className="w-6 h-6 text-[var(--error)]" />
               </div>
               <span className="text-xs font-extrabold uppercase tracking-wider text-[var(--error)]">
-                {t('contest.thirdPlace') || '3rd Place'}
+                {t('contest.thirdPlace')}
               </span>
               <h4 className="text-sm font-bold text-[var(--color-foreground)] truncate max-w-[140px]">
                 {top3[2].name}
@@ -169,17 +168,17 @@ export function ContestLeaderboard({
           <div className="flex items-center gap-2">
             <Trophy className="w-4 h-4 text-[var(--primary)]" />
             <h3 className="text-sm font-bold text-[var(--color-foreground)]">
-              {t('contest.allContestants') || 'All Contestants'}
+              {t('contest.allContestants')}
             </h3>
           </div>
           <span className="text-xs text-[var(--color-muted)] font-semibold">
-            {totalParticipants || data.length} {t('contest.participants') || 'participants'}
+            {totalParticipants || data.length} {t('contest.participants')}
           </span>
         </div>
 
         {data.length === 0 ? (
           <div className="p-8 text-center text-xs text-[var(--color-muted-foreground)]">
-            {t('contest.noSubmissionsYet') || 'No completed submissions yet. Be the first to join!'}
+            {t('contest.noSubmissionsYet')}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -187,10 +186,10 @@ export function ContestLeaderboard({
               <thead className="bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)] uppercase text-[11px] font-bold">
                 <tr>
                   <th className="py-3 px-4 w-14">#</th>
-                  <th className="py-3 px-4">{t('contest.participant') || 'Contestant'}</th>
-                  <th className="py-3 px-4 text-center">{t('contest.score') || 'Score'}</th>
-                  <th className="py-3 px-4 text-center">{t('contest.timeTaken') || 'Time'}</th>
-                  <th className="py-3 px-4 text-right">{t('contest.prize') || 'Prize'}</th>
+                  <th className="py-3 px-4">{t('contest.participant')}</th>
+                  <th className="py-3 px-4 text-center">{t('contest.score')}</th>
+                  <th className="py-3 px-4 text-center">{t('contest.timeTaken')}</th>
+                  <th className="py-3 px-4 text-right">{t('contest.prize')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">
@@ -219,7 +218,7 @@ export function ContestLeaderboard({
                             {entry.name}
                             {isCurrent && (
                               <span className="ml-1.5 px-1.5 py-0.2 rounded text-[10px] bg-[var(--primary)] text-white font-bold">
-                                {t('common.you') || 'You'}
+                                {t('common.you')}
                               </span>
                             )}
                           </span>

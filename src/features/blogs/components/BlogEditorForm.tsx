@@ -96,7 +96,7 @@ export default function BlogEditorForm({
               <Link2 className="w-3.5 h-3.5 text-[var(--teacher-primary)]" />
               {t('createBlogPage.customUrl')}
               <span className="text-xs font-normal text-[var(--color-muted-foreground)]">
-                ({t('common.optional') || 'Optional'})
+                ({t('common.optional')})
               </span>
             </label>
             {formData.title.trim() && (
@@ -138,8 +138,8 @@ export default function BlogEditorForm({
           <Dropdown
             searchable
             allowCustom
-            searchPlaceholder={t('createBlogPage.searchTopic') || 'Search or enter custom topic...'}
-            customLabelPrefix={t('createBlogPage.useCustomTopic') || 'Use custom'}
+            searchPlaceholder={t('createBlogPage.searchTopic')}
+            customLabelPrefix={t('createBlogPage.useCustomTopic')}
             label={
               <>
                 <Hash className="w-3.5 h-3.5 inline mr-1.5" />

@@ -35,7 +35,7 @@ export default function BlogFeaturedSpotlight({
   });
 
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-[var(--border)] bg-gradient-to-br from-[var(--card-solid)] via-[var(--color-surface-muted)]/50 to-[var(--card-solid)] p-6 sm:p-8 lg:p-10 shadow-[var(--shadow-md)]">
+    <section className="relative overflow-hidden rounded-2xl border border-[var(--border)] bg-gradient-to-br from-[var(--card-solid)] via-[var(--color-surface-muted)]/50 to-[var(--card-solid)] p-4 sm:p-6 md:p-8 lg:p-10 shadow-[var(--shadow-md)]">
       {/* Background ambient glow */}
       <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-[var(--primary)]/10 blur-3xl" />
       <div className="pointer-events-none absolute -left-16 -bottom-16 h-64 w-64 rounded-full bg-[var(--primary)]/5 blur-3xl" />
@@ -46,7 +46,7 @@ export default function BlogFeaturedSpotlight({
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--primary)] px-3 py-1 text-xs font-bold text-white shadow-sm">
               <Sparkles className="w-3.5 h-3.5" />
-              {t('blog.spotlightStory') || 'Spotlight Story'}
+              {t('blog.spotlightStory')}
             </span>
             <span className="inline-flex items-center rounded-full bg-[var(--card-solid)] border border-[var(--border)] px-3 py-1 text-xs font-semibold text-[var(--primary)]">
               {blog.topic}
@@ -77,11 +77,11 @@ export default function BlogFeaturedSpotlight({
                 {blog.author?.name ? blog.author.name.charAt(0).toUpperCase() : <User className="w-3.5 h-3.5" />}
               </div>
               <span className="font-semibold text-[var(--color-foreground)]">
-                {blog.author?.name || t('blog.teacher') || 'Educator'}
+                {blog.author?.name || t('blog.teacher')}
               </span>
               {isAuthor && (
                 <span className="rounded bg-[var(--teacher-soft)] text-[var(--teacher-primary)] text-xs font-semibold px-2 py-0.5">
-                  {t('blog.yourArticle') || 'You'}
+                  {t('blog.yourArticle')}
                 </span>
               )}
             </div>
@@ -93,13 +93,13 @@ export default function BlogFeaturedSpotlight({
 
             <span className="inline-flex items-center gap-1">
               <Clock className="w-4 h-4" />
-              {blog.readingTimeMinutes} {t('blog.minRead') || 'min read'}
+              {blog.readingTimeMinutes} {t('blog.minRead')}
             </span>
 
             {blog.viewCount > 0 && (
               <span className="inline-flex items-center gap-1">
                 <Eye className="w-4 h-4" />
-                {blog.viewCount} {t('blog.views') || 'views'}
+                {blog.viewCount} {t('blog.views')}
               </span>
             )}
           </div>
@@ -109,7 +109,7 @@ export default function BlogFeaturedSpotlight({
         <div className="flex flex-row lg:flex-col items-center lg:items-end justify-between gap-4 pt-2 lg:pt-0 border-t lg:border-t-0 border-[var(--border)]">
           <div className="flex items-center gap-2">
             {onToggleFavorite && (
-              <Tooltip label={isFavorited ? (t('favorites.removeFromFavorites') || 'Remove from favorites') : (t('blog.addToFavorites') || 'Add to favorites')}>
+              <Tooltip label={isFavorited ? (t('favorites.removeFromFavorites')) : (t('blog.addToFavorites'))}>
                 <button
                   type="button"
                   onClick={() => onToggleFavorite(blog._id)}
@@ -126,7 +126,7 @@ export default function BlogFeaturedSpotlight({
             )}
 
             {isAuthor && (
-              <Tooltip label={t('blog.editArticle') || 'Edit your article'}>
+              <Tooltip label={t('blog.editArticle')}>
                 <Link
                   href={ROUTES.teacher.blogEdit(blog._id)}
                   className="touch-target inline-flex items-center justify-center p-3 rounded-2xl bg-[var(--card-solid)] border border-[var(--border)] text-[var(--color-muted-foreground)] hover:text-[var(--teacher-primary)] hover:border-[var(--teacher-primary)] shadow-sm transition-all"
@@ -138,7 +138,7 @@ export default function BlogFeaturedSpotlight({
             )}
 
             {isAdminRole && (
-              <Tooltip label={t('blog.adminModerate') || 'Admin Moderate'}>
+              <Tooltip label={t('blog.adminModerate')}>
                 <Link
                   href={ROUTES.admin.blogs}
                   className="touch-target inline-flex items-center justify-center p-3 rounded-2xl bg-[var(--card-solid)] border border-[var(--border)] text-[var(--color-muted-foreground)] hover:text-[var(--admin-primary)] hover:border-[var(--admin-primary)] shadow-sm transition-all"
@@ -154,7 +154,7 @@ export default function BlogFeaturedSpotlight({
             href={ROUTES.blog(blog.slug)}
             className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[var(--primary)] px-6 py-3.5 text-sm sm:text-base font-semibold text-white shadow-md hover:opacity-95 hover:shadow-lg transition-all active:scale-[0.98] shrink-0"
           >
-            <span>{t('blog.readFullArticle') || 'Read Full Article'}</span>
+            <span>{t('blog.readFullArticle')}</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>

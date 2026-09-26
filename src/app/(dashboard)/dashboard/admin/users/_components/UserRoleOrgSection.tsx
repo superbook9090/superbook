@@ -33,13 +33,13 @@ export function UserRoleOrgSection({
   const isSuperAdminUser = user.role === 'superadmin';
 
   const roleOptions = [
-    { value: 'student', label: t('roles.student') || 'Student' },
-    { value: 'teacher', label: t('roles.teacher') || 'Teacher' },
-    { value: 'admin', label: t('roles.admin') || 'Admin' },
+    { value: 'student', label: t('roles.student') },
+    { value: 'teacher', label: t('roles.teacher') },
+    { value: 'admin', label: t('roles.admin') },
   ];
 
   const orgOptions = [
-    { value: '', label: t('adminUsers.noOrganization') || 'No Organization (Public)' },
+    { value: '', label: t('adminUsers.noOrganization') },
     ...organizations.map((org) => ({ value: org._id, label: org.name })),
   ];
 
@@ -49,14 +49,14 @@ export function UserRoleOrgSection({
     <div className="flex flex-col gap-4 p-4 rounded-xl bg-[var(--color-surface-muted)]/40 border border-[var(--border)]">
       <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--color-muted-foreground)]">
         <Shield className="w-3.5 h-3.5 text-[var(--primary)]" />
-        <span>{t('adminUsers.changeRole') || 'Role & Organization'}</span>
+        <span>{t('adminUsers.changeRole')}</span>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Role Selector */}
         <div>
           <Dropdown
-            label={t('admin.role') || 'Role'}
+            label={t('admin.role')}
             value={user.role}
             onChange={(val) => val && onRoleChange(val)}
             disabled={isSelf || isSuperAdminUser}
@@ -82,7 +82,7 @@ export function UserRoleOrgSection({
                 label={
                   <span className="flex items-center gap-1.5">
                     <Building2 className="w-3 h-3 text-[var(--info)]" />
-                    <span>{t('adminUsers.organization') || 'Organization'}</span>
+                    <span>{t('adminUsers.organization')}</span>
                   </span>
                 }
                 value={selectedOrgId ?? user.organizationId ?? ''}

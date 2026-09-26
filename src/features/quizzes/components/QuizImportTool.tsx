@@ -156,8 +156,8 @@ export function QuizImportTool({ theme, onImport, entityType = 'quiz', triggerAi
             <Sparkles className="w-4 h-4 text-yellow-300 animate-pulse" />
             <span>
               {entityType === 'contest'
-                ? t('contest.generateAiQuestions') || 'Generate Contest Questions with AI'
-                : t('createQuizForm.generateAi') || 'Generate with AI'}
+                ? t('contest.generateAiQuestions')
+                : t('createQuizForm.generateAi')}
             </span>
           </button>
         )}

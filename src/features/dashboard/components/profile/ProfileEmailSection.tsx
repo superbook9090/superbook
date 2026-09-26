@@ -34,7 +34,7 @@ export default function ProfileEmailSection({ session }: ProfileEmailSectionProp
     try {
       const trimmedEmail = tempEmail.trim().toLowerCase();
       if (!trimmedEmail) {
-        throw new Error(t('profile.emailRequired') || 'Email is required.');
+        throw new Error(t('profile.emailRequired'));
       }
 
       const response = await updateProfileEmail({ email: trimmedEmail });
@@ -55,12 +55,12 @@ export default function ProfileEmailSection({ session }: ProfileEmailSectionProp
 
       await useSessionStore.getState().fetchSession(true);
       router.refresh();
-      addAlert({ type: 'success', message: t('profile.emailUpdatedSuccess') || 'Email address added successfully.' });
+      addAlert({ type: 'success', message: t('profile.emailUpdatedSuccess') });
       setIsEditingEmail(false);
     } catch (err) {
       console.error('Error updating email:', err);
       const errMsg = err instanceof ApiClientError ? err.message : (err instanceof Error ? err.message : String(err));
-      addAlert({ type: 'error', message: errMsg || t('common.errorOccurred') || 'An error occurred.' });
+      addAlert({ type: 'error', message: errMsg || t('common.errorOccurred') });
     } finally {
       setIsUpdatingEmail(false);
     }
@@ -74,7 +74,7 @@ export default function ProfileEmailSection({ session }: ProfileEmailSectionProp
           <form onSubmit={handleEmailSubmit} className="mt-2 space-y-3 max-w-md">
             <div className="space-y-3">
               <TextField
-                aria-label={t('profile.enterEmail') || 'Email Address'}
+                aria-label={t('profile.enterEmail')}
                 value={tempEmail}
                 onChange={(e) => setTempEmail(e.target.value)}
                 placeholder="you@example.com"
@@ -90,7 +90,7 @@ export default function ProfileEmailSection({ session }: ProfileEmailSectionProp
                   isLoading={isUpdatingEmail}
                   size="md"
                 >
-                  {t('common.save') || 'Save'}
+                  {t('common.save')}
                 </Button>
                 <Button
                   type="button"
@@ -101,7 +101,7 @@ export default function ProfileEmailSection({ session }: ProfileEmailSectionProp
                   disabled={isUpdatingEmail}
                   size="md"
                 >
-                  {t('common.cancel') || 'Cancel'}
+                  {t('common.cancel')}
                 </Button>
               </div>
             </div>
@@ -109,7 +109,7 @@ export default function ProfileEmailSection({ session }: ProfileEmailSectionProp
         ) : (
           <div className="mt-1 flex items-center justify-between gap-4">
             <p className="text-sm sm:text-base text-[var(--color-muted-foreground)] italic">
-              {t('profile.emailNotLinked') || 'No email address linked'}
+              {t('profile.emailNotLinked')}
             </p>
             <Button
               variant="ghost"
@@ -119,7 +119,7 @@ export default function ProfileEmailSection({ session }: ProfileEmailSectionProp
                 setIsEditingEmail(true);
               }}
             >
-              {t('profile.addEmail') || 'Add Email'}
+              {t('profile.addEmail')}
             </Button>
           </div>
         )

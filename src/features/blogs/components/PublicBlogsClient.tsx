@@ -38,7 +38,7 @@ export default function PublicBlogsClient({
   const role = session?.user?.role ? normalizeRole(session.user.role) : 'guest';
   const currentUserId = session?.user?.id;
 
-  const currentTopic = searchParams.get('topic') || 'All';
+  const currentTopic = searchParams.get('topic');
   const currentSearch = searchParams.get('search') || '';
   const currentLang = (searchParams.get('language') as BlogLanguageType) || 'all';
   const currentSort = (searchParams.get('sort') as BlogSortType) || 'latest';
@@ -113,7 +113,7 @@ export default function PublicBlogsClient({
     if (role === 'guest') {
       addAlert({
         type: 'info',
-        message: t('blog.signInToSave') || 'Please sign in to save articles to your favorites',
+        message: t('blog.signInToSave'),
       });
       return;
     }
@@ -121,13 +121,13 @@ export default function PublicBlogsClient({
     try {
       if (isFavorited) {
         await removeFavoriteMutation.mutateAsync(blogId);
-        addAlert({ type: 'success', message: t('blog.removedSuccess') || 'Removed from favorites' });
+        addAlert({ type: 'success', message: t('blog.removedSuccess') });
       } else {
         await addFavoriteMutation.mutateAsync(blogId);
-        addAlert({ type: 'success', message: t('blog.savedSuccess') || 'Added to favorites' });
+        addAlert({ type: 'success', message: t('blog.savedSuccess') });
       }
     } catch {
-      addAlert({ type: 'error', message: t('blog.failedUpdateFavorite') || 'Could not update favorite' });
+      addAlert({ type: 'error', message: t('blog.failedUpdateFavorite') });
     }
   };
 
@@ -171,10 +171,10 @@ export default function PublicBlogsClient({
             <BookOpen className="w-8 h-8" />
           </div>
           <h3 className="text-xl font-bold text-[var(--color-foreground)]">
-            {t('blog.noBlogsFound') || 'No articles found'}
+            {t('blog.noBlogsFound')}
           </h3>
           <p className="mt-1.5 max-w-md text-sm text-[var(--color-muted-foreground)]">
-            {t('blog.tryAdjusting') || 'Try adjusting your search query, topic filter, or language.'}
+            {t('blog.tryAdjusting')}
           </p>
           <button
             type="button"
@@ -186,7 +186,7 @@ export default function PublicBlogsClient({
             }}
             className="mt-6 rounded-xl bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition-all"
           >
-            {t('common.clearFilters') || 'Clear all filters'}
+            {t('common.clearFilters')}
           </button>
         </div>
       ) : (

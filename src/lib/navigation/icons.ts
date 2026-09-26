@@ -21,6 +21,7 @@ import {
   Video,
   Swords,
   Settings,
+  GraduationCap,
 } from 'lucide-react';
 import type { NavIconName } from '@/constants/navigation';
 
@@ -46,6 +47,7 @@ export const NAV_ICON_MAP: Record<NavIconName, LucideIcon> = {
   Video,
   Swords,
   Settings,
+  GraduationCap,
 };
 
 export function getNavIcon(name: NavIconName): LucideIcon {

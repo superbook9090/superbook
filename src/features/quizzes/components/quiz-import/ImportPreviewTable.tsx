@@ -58,7 +58,7 @@ export function ImportPreviewTable({
               <th className="px-3 py-2 text-left text-xs font-medium text-[var(--color-muted-foreground)] uppercase">{t('createQuizForm.answer')}</th>
               {hasExplanations && (
                 <th className="px-3 py-2 text-left text-xs font-medium text-[var(--color-muted-foreground)] uppercase">
-                  {t('createQuizForm.explanation') || 'Explanation'}
+                  {t('createQuizForm.explanation')}
                 </th>
               )}
             </tr>

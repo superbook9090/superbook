@@ -97,11 +97,11 @@ export default function AdminHero({
 
               {isSuperAdmin ? (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-amber-500/15 text-amber-500 border border-amber-500/30 shrink-0">
-                  {t('admin.superadminTier') || 'Superadmin'}
+                  {t('admin.superadminTier')}
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[var(--teacher-soft)] text-[var(--teacher-primary)] border border-[var(--teacher-border)] shrink-0">
-                  {t('admin.adminSuite') || 'Admin'}
+                  {t('admin.adminSuite')}
                 </span>
               )}
 
@@ -110,7 +110,7 @@ export default function AdminHero({
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--success)] opacity-75" />
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[var(--success)]" />
                 </span>
-                <span>{t('admin.systemsOperational') || 'Operational'}</span>
+                <span>{t('admin.systemsOperational')}</span>
               </div>
             </div>
 
@@ -131,7 +131,7 @@ export default function AdminHero({
                   className="px-1.5 py-0.5 text-[10px] font-bold rounded hover:bg-[var(--surface-muted)] text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors cursor-pointer"
                   title="Last 24 Hours"
                 >
-                  {t('admin.presetToday') || '1D'}
+                  {t('admin.presetToday')}
                 </button>
                 <button
                   type="button"
@@ -139,7 +139,7 @@ export default function AdminHero({
                   className="px-1.5 py-0.5 text-[10px] font-bold rounded hover:bg-[var(--surface-muted)] text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors cursor-pointer"
                   title="Last 7 Days"
                 >
-                  {t('admin.preset7D') || '7D'}
+                  {t('admin.preset7D')}
                 </button>
                 <button
                   type="button"
@@ -147,7 +147,7 @@ export default function AdminHero({
                   className="px-1.5 py-0.5 text-[10px] font-bold rounded hover:bg-[var(--surface-muted)] text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors cursor-pointer"
                   title="Last 30 Days"
                 >
-                  {t('admin.preset30D') || '30D'}
+                  {t('admin.preset30D')}
                 </button>
               </div>
 
@@ -175,10 +175,10 @@ export default function AdminHero({
             <Link
               href={ROUTES.admin.notifications}
               className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 hover:bg-amber-500/25 transition-all shadow-xs min-h-[34px]"
-              title={t('admin.emergencyBroadcast') || 'Broadcast Alert'}
+              title={t('admin.emergencyBroadcast')}
             >
               <Bell className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{t('admin.broadcastDispatcher') || 'Broadcast'}</span>
+              <span className="hidden sm:inline">{t('admin.broadcastDispatcher')}</span>
             </Link>
           )}
 

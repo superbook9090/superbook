@@ -26,28 +26,28 @@ export default function TeacherContestsStats({
       <StatCard
         icon={Trophy}
         value={totalCount}
-        label={t('contest.totalContests') || 'Total Contests'}
+        label={t('contest.totalContests')}
         color="teacher"
         delay={0.05}
       />
       <StatCard
         icon={Flame}
         value={stats.liveCount}
-        label={t('contest.live') || 'Live Now'}
+        label={t('contest.live')}
         color="warning"
         delay={0.1}
       />
       <StatCard
         icon={Clock}
         value={stats.upcomingCount}
-        label={t('contest.upcoming') || 'Upcoming'}
+        label={t('contest.upcoming')}
         color="info"
         delay={0.15}
       />
       <StatCard
         icon={CheckCircle}
         value={stats.completedCount}
-        label={t('contest.completed') || 'Completed'}
+        label={t('contest.completed')}
         color="success"
         delay={0.2}
       />

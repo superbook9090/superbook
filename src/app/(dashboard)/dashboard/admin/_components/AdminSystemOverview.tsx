@@ -30,19 +30,19 @@ export default function AdminSystemOverview() {
 
   const modules = [
     {
-      name: t('admin.courseCatalog') || 'Courses Engine',
+      name: t('admin.courseCatalog'),
       enabled: enableCourses,
       icon: BookOpen,
       color: '#a855f7',
     },
     {
-      name: t('admin.quizBank') || 'Quiz Engine',
+      name: t('admin.quizBank'),
       enabled: enableQuizzes,
       icon: HelpCircle,
       color: '#3b82f6',
     },
     {
-      name: t('admin.knowledgeBase') || 'Blog Engine',
+      name: t('admin.knowledgeBase'),
       enabled: enableBlogs,
       icon: Newspaper,
       color: '#ec4899',
@@ -76,7 +76,7 @@ export default function AdminSystemOverview() {
           </div>
           <div>
             <h2 id="system-modules-heading" className="text-base sm:text-lg font-black tracking-tight text-[var(--color-foreground)]">
-              {t('admin.engineCapabilities') || 'Platform Engines & Features'}
+              {t('admin.engineCapabilities')}
             </h2>
           </div>
         </div>
@@ -85,7 +85,7 @@ export default function AdminSystemOverview() {
           href={ROUTES.admin.settings}
           className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--primary)] hover:underline min-h-[36px]"
         >
-          <span>{t('admin.configureInSettings') || 'Configure in Settings'}</span>
+          <span>{t('admin.configureInSettings')}</span>
           <ArrowRight className="w-3.5 h-3.5" />
         </Link>
       </div>
@@ -117,7 +117,7 @@ export default function AdminSystemOverview() {
                   mod.enabled ? 'text-emerald-500' : 'text-[var(--color-muted-foreground)]'
                 }`}
               >
-                {mod.enabled ? (t('dashboard.active') || 'Active') : (t('dashboard.inactive') || 'Disabled')}
+                {mod.enabled ? (t('dashboard.active')) : (t('dashboard.inactive'))}
               </p>
             </div>
           </div>
