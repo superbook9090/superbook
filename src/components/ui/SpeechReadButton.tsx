@@ -59,3 +59,5 @@ export function SpeechReadButton({
     </button>
   );
 }
+
+export default SpeechReadButton;

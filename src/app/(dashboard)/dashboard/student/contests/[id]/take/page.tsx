@@ -17,26 +17,19 @@ import {
 import { ContestCountdown } from '@/features/contests/components/ContestCountdown';
 import { LazyConfirmModal, LazyQuizQuestionProgress } from '@/lib/lazy';
 import {
-  CheckCircle2,
-  ChevronLeft,
-  ChevronRight,
-  Send,
   Flame,
   ShieldAlert,
-  Maximize2,
 } from 'lucide-react';
 import { ApiClientError } from '@/lib/api/http';
 import { useWakeLock } from '@/hooks/useWakeLock';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { haptics } from '@/lib/native/haptics';
 import { playOptionSelectSound, playSuccessChime, playViolationWarningSound } from '@/lib/native/soundEffects';
-import { SpeechReadButton } from '@/components/ui/SpeechReadButton';
 import {
   saveLocalAttemptAnswers,
   loadLocalAttemptAnswers,
   clearLocalAttemptAnswers,
 } from '@/lib/native/offlineStorage';
-import Button from '@/components/ui/Button';
 import { QuizQuestionCard } from '../../../quizzes/take/_components/QuizQuestionCard';
 import { QuizNavigation } from '../../../quizzes/take/_components/QuizNavigation';
 import type { Question } from '../../../quizzes/take/_components/types';
@@ -150,7 +143,7 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
         message: err instanceof ApiClientError ? err.message : 'Failed to submit contest',
       });
     }
-  }, [id, questions, answers, router, addAlert, setQuizActive]);
+  }, [id, questions, answers, router, addAlert, setQuizActive, violationRetryCount]);
 
   // Handle violation continue / re-enter fullscreen
   const handleViolationContinue = useCallback(async () => {

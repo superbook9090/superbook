@@ -28,8 +28,8 @@ function MobileBottomNavComponent({ items, isAdminUser, isSuperAdmin }: MobileBo
   }, [filtered, isAdminUser]);
 
   return (
-    <nav className="nav-bottom-bar md:hidden" aria-label={t('common.dashboard')}>
-      <div className="nav-bottom-bar__inner">
+    <nav className="md:hidden fixed bottom-4 left-4 right-4 z-40" aria-label={t('common.dashboard')}>
+      <div className="flex items-center justify-around bg-[var(--card-solid)]/90 backdrop-blur-xl border border-[var(--border)] rounded-2xl shadow-xl px-2 py-3 mx-auto max-w-[400px]">
         {bottomNavItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = getNavIcon(item.icon);
@@ -37,11 +37,22 @@ function MobileBottomNavComponent({ items, isAdminUser, isSuperAdmin }: MobileBo
             <Link
               key={item.href}
               href={item.href}
-              className={cn('nav-bottom-link focus-ring', isActive && 'nav-bottom-link--active')}
+              className={cn(
+                'flex flex-col items-center justify-center gap-1 min-w-[64px] h-12 rounded-xl transition-all duration-300 relative group',
+                isActive
+                  ? 'text-[var(--primary)]'
+                  : 'text-[var(--muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--foreground)]'
+              )}
               aria-current={isActive ? 'page' : undefined}
               aria-label={t(item.nameKey)}
             >
-              <Icon className="w-6 h-6 z-10" aria-hidden />
+              {isActive && (
+                <span className="absolute -top-1 w-8 h-1 bg-[var(--primary)] rounded-full shadow-[0_0_8px_var(--primary)]" />
+              )}
+              <Icon className={cn('w-5 h-5 transition-transform duration-300', isActive && 'scale-110')} aria-hidden />
+              <span className={cn('text-[10px] font-medium transition-all duration-300', isActive ? 'opacity-100' : 'opacity-70')}>
+                {t(item.nameKey)}
+              </span>
             </Link>
           );
         })}

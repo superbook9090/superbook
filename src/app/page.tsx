@@ -6,6 +6,7 @@ import HomeBelowFold from '@/components/home/HomeBelowFold';
 import HomeQuizMakerSeo from '@/components/home/HomeQuizMakerSeo';
 import FeaturedBlogs from '@/components/home/FeaturedBlogs';
 import SeoResources from '@/components/home/SeoResources';
+import GamificationFeatures from '@/components/home/GamificationFeatures';
 import MobileWebviewGuard from '@/components/mobile/MobileWebviewGuard';
 import { createPageMetadata } from '@/lib/seo/metadata';
 
@@ -50,8 +51,9 @@ export default function HomePage() {
     <main className="min-h-screen">
       <MobileWebviewGuard />
       <JsonLd includeWebSite />
-      <HeroStatic />
       <MarketingHeader />
+      <HeroStatic />
+      <GamificationFeatures />
       <HomeQuizMakerSeo />
       <SeoResources />
       <FeaturedBlogs />

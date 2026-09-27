@@ -46,86 +46,98 @@ export default function Footer() {
   });
 
   return (
-    <footer className="bg-[var(--card-solid)] text-[var(--foreground)] border-t border-[var(--border)]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
+    <footer className="relative overflow-hidden bg-[var(--background)] text-[var(--foreground)] border-t border-[var(--border)]/30 mt-12 sm:mt-24">
+      {/* Subtle Aurora Glow at the bottom */}
+      <div className="absolute inset-0 pointer-events-none aria-hidden overflow-hidden">
+        <div className="absolute -bottom-40 left-1/2 -translate-x-1/2 w-[40rem] h-[40rem] bg-[var(--student-primary)]/10 rounded-full blur-[120px] -z-10 mix-blend-screen" />
+      </div>
+      
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12 sm:pt-24 sm:pb-16">
+        <div className="flex flex-col lg:grid lg:grid-cols-12 gap-10 lg:gap-8 mb-12 sm:mb-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="sm:col-span-2 lg:col-span-2"
+            className="lg:col-span-4 flex flex-col items-center lg:items-start text-center lg:text-left"
           >
-            <div className="flex items-center gap-2 mb-4">
-              <PremiumLogo variant="default" size="md" theme="dark" />
+            <div className="flex items-center gap-2 mb-6">
+              <div className="p-2 bg-white/5 dark:bg-black/20 border border-white/10 dark:border-white/5 rounded-2xl antigravity-glass shadow-sm">
+                <PremiumLogo variant="default" size="md" theme="dark" />
+              </div>
             </div>
-            <p className="text-[var(--color-muted)] max-w-sm">
+            <p className="text-[var(--muted)] text-sm sm:text-base leading-relaxed max-w-sm mb-6 lg:mb-0">
               {t('home.footer.tagline')}
             </p>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
-            <h3 className="font-semibold mb-4">{t('home.footer.product')}</h3>
-            <ul className="flex flex-col gap-2">
-              {getFooterLinks(t).product.map((link) => (
-                <li key={link.label}>
-                  <Link
-                    href={link.href}
-                    className="text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
+          <div className="lg:col-span-8 grid grid-cols-2 sm:grid-cols-3 gap-x-8 gap-y-10">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="flex flex-col"
+            >
+              <h3 className="text-sm font-bold tracking-wider uppercase text-[var(--foreground)] mb-4">{t('home.footer.product')}</h3>
+              <ul className="flex flex-col gap-3">
+                {getFooterLinks(t).product.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-[var(--muted)] hover:text-[var(--student-primary)] hover:translate-x-1 inline-block transition-all duration-300"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.15 }}
-          >
-            <h3 className="font-semibold mb-4">{t('home.footer.resources')}</h3>
-            <ul className="flex flex-col gap-2">
-              {resourceLinks.map((link) => (
-                <li key={link.label}>
-                  <Link
-                    href={link.href}
-                    className="text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.15 }}
+              className="flex flex-col"
+            >
+              <h3 className="text-sm font-bold tracking-wider uppercase text-[var(--foreground)] mb-4">{t('home.footer.resources')}</h3>
+              <ul className="flex flex-col gap-3">
+                {resourceLinks.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-[var(--muted)] hover:text-[var(--student-primary)] hover:translate-x-1 inline-block transition-all duration-300"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <h3 className="font-semibold mb-4">{t('home.footer.getStarted')}</h3>
-            <ul className="flex flex-col gap-2">
-              {getFooterLinks(t).auth.map((link) => (
-                <li key={link.label}>
-                  <Link
-                    href={link.href}
-                    className="text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="col-span-2 sm:col-span-1 flex flex-col"
+            >
+              <h3 className="text-sm font-bold tracking-wider uppercase text-[var(--foreground)] mb-4">{t('home.footer.getStarted')}</h3>
+              <ul className="flex flex-col gap-3">
+                {getFooterLinks(t).auth.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-[var(--muted)] hover:text-[var(--student-primary)] hover:translate-x-1 inline-block transition-all duration-300"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          </div>
         </div>
 
         <div className="pt-8 border-t border-[var(--border)] flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">

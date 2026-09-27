@@ -558,6 +558,7 @@ export const hi = {
     learningHubDesc: 'आपके अध्ययन रिसोर्सेज़ों तक त्वरित पहुँच',
     exploreCourses: 'कोर्स खोजें',
     takeQuiz: 'क्विज़ दें',
+    contests: 'प्रतियोगिताएं',
     studyNotes: 'अध्ययन नोट्स',
     viewCertificates: 'सर्टिफिकेट',
     certificatesDesc: 'अर्जित सर्टिफिकेट देखें और डाउनलोड करें',

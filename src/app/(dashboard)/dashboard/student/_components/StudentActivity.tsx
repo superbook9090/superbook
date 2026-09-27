@@ -61,32 +61,34 @@ export default function StudentActivity({ enrollments, attempts }: StudentActivi
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.4 }}
       aria-labelledby="recent-activity-heading"
-      className="card-surface rounded-3xl border border-[var(--border)] overflow-hidden shadow-lg"
+      className="relative rounded-[2rem] bg-[var(--card-solid)]/40 backdrop-blur-xl border border-[var(--border)]/50 overflow-hidden shadow-xl"
     >
-      <div className="card-panel-header flex items-center justify-between p-4 sm:p-5 border-b border-[var(--border)]">
+      <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--student-primary)]/5 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="relative z-10 flex items-center justify-between p-5 sm:p-6 border-b border-[var(--border)]/50">
         <div>
-          <h2 id="recent-activity-heading" className="text-base sm:text-lg font-bold text-[var(--color-foreground)]">
+          <h2 id="recent-activity-heading" className="text-lg sm:text-xl font-extrabold tracking-tight text-[var(--color-foreground)]">
             {t('dashboard.recentActivity')}
           </h2>
-          <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] mt-0.5">
+          <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] mt-1 font-medium">
             {t('dashboard.recentActivityDesc')}
           </p>
         </div>
-        <div className="p-2.5 rounded-2xl bg-gradient-to-br from-[var(--student-soft)] to-[var(--student-primary)]/15 text-[var(--student-primary)] border border-[var(--student-border)] shadow-sm">
-          <Activity className="w-5 h-5" />
+        <div className="p-3 rounded-2xl bg-[var(--student-soft)] text-[var(--student-primary)] shadow-sm">
+          <Activity className="w-5 h-5 sm:w-6 sm:h-6" />
         </div>
       </div>
 
-      <div className="divide-y divide-[var(--border)]">
+      <div className="relative z-10 divide-y divide-[var(--border)]/50">
         {recentActivity.length === 0 ? (
-          <div className="card-panel-body text-center py-10 px-4">
-            <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-[var(--student-soft)] to-[var(--student-primary)]/15 border border-[var(--student-border)] flex items-center justify-center text-[var(--student-primary)] shadow-sm">
-              <Clock className="w-6 h-6" />
+          <div className="text-center py-12 px-6">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[var(--student-soft)] flex items-center justify-center text-[var(--student-primary)] shadow-sm">
+              <Clock className="w-6 h-6 sm:w-8 sm:h-8" />
             </div>
-            <h3 className="text-sm sm:text-base font-semibold text-[var(--color-foreground)] mb-1">
+            <h3 className="text-sm sm:text-base font-bold text-[var(--color-foreground)] mb-1">
               {t('dashboard.noRecentActivity')}
             </h3>
-            <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)]">
+            <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] font-medium">
               {t('dashboard.startEnrolling')}
             </p>
           </div>

@@ -21,24 +21,27 @@ export default function ContinueLearning({ enrollments }: ContinueLearningProps)
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.25 }}
-        className="card-surface card-body p-4 sm:p-6 md:p-8 text-center rounded-3xl border border-[var(--border)] antigravity-glass shadow-lg"
+        className="relative overflow-hidden p-6 sm:p-10 text-center rounded-[2rem] bg-[var(--card-solid)]/40 backdrop-blur-xl border border-[var(--border)]/50 shadow-xl group"
       >
-        <div className="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-[var(--student-soft)] to-[var(--student-primary)]/15 border border-[var(--student-border)] flex items-center justify-center text-[var(--student-primary)] shadow-sm">
-          <Compass className="w-7 h-7 sm:w-8 sm:h-8" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[var(--surface-muted)]/20 to-transparent pointer-events-none" />
+        <div className="relative z-10">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-5 rounded-[1.5rem] bg-[var(--student-soft)]/50 border border-[var(--student-border)]/50 flex items-center justify-center text-[var(--student-primary)] shadow-[0_8px_16px_-6px_rgba(0,0,0,0.1)] group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
+            <Compass className="w-8 h-8 sm:w-10 sm:h-10" />
+          </div>
+          <h3 className="text-lg sm:text-xl font-extrabold text-[var(--color-foreground)] mb-2">
+            {t('dashboard.noEnrolledCourses')}
+          </h3>
+          <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] max-w-sm mx-auto mb-6 font-medium">
+            {t('dashboard.noEnrolledDesc')}
+          </p>
+          <Link
+            href={ROUTES.student.browse}
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-[var(--student-primary)] to-blue-600 shadow-[0_0_20px_rgba(59,130,246,0.2)] hover:shadow-[0_0_25px_rgba(59,130,246,0.4)] hover:scale-105 active:scale-95 transition-all duration-300"
+          >
+            <Compass className="w-4 h-4" />
+            <span>{t('dashboard.exploreCourses')}</span>
+          </Link>
         </div>
-        <h3 className="text-base sm:text-lg font-bold text-[var(--color-foreground)] mb-1">
-          {t('dashboard.noEnrolledCourses')}
-        </h3>
-        <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] max-w-md mx-auto mb-5">
-          {t('dashboard.noEnrolledDesc')}
-        </p>
-        <Link
-          href={ROUTES.student.browse}
-          className="btn-premium inline-flex items-center gap-2 text-xs sm:text-sm hover:shadow-lg hover:scale-102 transition-all duration-300"
-        >
-          <Compass className="w-4 h-4" />
-          <span>{t('dashboard.exploreCourses')}</span>
-        </Link>
       </motion.div>
     );
   }
@@ -51,20 +54,20 @@ export default function ContinueLearning({ enrollments }: ContinueLearningProps)
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.25 }}
       aria-labelledby="continue-learning-heading"
-      className="space-y-3 sm:space-y-4"
+      className="space-y-4 sm:space-y-6"
     >
       <div className="flex items-baseline justify-between">
         <div>
-          <h2 id="continue-learning-heading" className="text-lg sm:text-xl font-bold text-[var(--color-foreground)]">
+          <h2 id="continue-learning-heading" className="text-xl sm:text-2xl font-extrabold tracking-tight text-[var(--color-foreground)]">
             {t('dashboard.inProgressCourses')}
           </h2>
         </div>
         <Link
           href={ROUTES.student.courses}
-          className="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-[var(--student-primary)] hover:text-[var(--student-hover)] transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[var(--student-primary)] hover:text-blue-500 transition-colors group/link"
         >
           <span>{t('dashboard.viewAll')}</span>
-          <ArrowRight className="w-4 h-4" />
+          <ArrowRight className="w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
         </Link>
       </div>
 
@@ -81,43 +84,44 @@ export default function ContinueLearning({ enrollments }: ContinueLearningProps)
                 key={item._id || idx}
                 initial={{ opacity: 0, y: 16, rotateX: 6 }}
                 animate={{ opacity: 1, y: 0, rotateX: 0 }}
-                transition={{ delay: 0.3 + idx * 0.06, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                className="card-surface card-body flex flex-col justify-between rounded-3xl border border-[var(--border)] hover:border-[var(--student-primary)]/40 hover:shadow-xl transition-all duration-300 group"
+                transition={{ delay: 0.3 + idx * 0.06, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                className="relative flex flex-col justify-between rounded-[2rem] bg-[var(--card-solid)]/40 backdrop-blur-xl border border-[var(--border)]/50 p-5 hover:border-[var(--student-primary)]/50 hover:shadow-2xl transition-all duration-300 group overflow-hidden"
               >
-                <div>
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[var(--student-soft)] text-[var(--student-primary)] border border-[var(--student-border)]/60 truncate max-w-[150px]">
+                {/* Glow effect on hover */}
+                <div className="absolute -top-24 -right-24 w-48 h-48 bg-[var(--student-primary)]/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between gap-2 mb-4">
+                    <span className="px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-[var(--student-soft)] text-[var(--student-primary)] border border-[var(--student-border)]/60 truncate max-w-[150px]">
                       {courseCategory || t('common.course')}
                     </span>
-                    <span className="text-xs font-bold tabular-nums text-[var(--color-muted-foreground)]">
+                    <span className="text-xs sm:text-sm font-extrabold tabular-nums text-[var(--student-primary)]">
                       {progress}%
                     </span>
                   </div>
 
-                  <h3 className="font-bold text-sm sm:text-base text-[var(--color-foreground)] line-clamp-2 mb-2 group-hover:text-[var(--student-primary)] transition-colors">
+                  <h3 className="font-bold text-sm sm:text-base md:text-lg text-[var(--color-foreground)] line-clamp-2 mb-3 group-hover:text-[var(--student-primary)] transition-colors">
                     {courseTitle}
                   </h3>
 
-                  <div className="w-full bg-[var(--surface-muted-strong)] rounded-full h-2 mb-4 overflow-hidden">
-                    <div
-                      className="h-2 rounded-full transition-all duration-500 shadow-sm"
-                      style={{
-                        width: `${progress}%`,
-                        background: 'var(--student-gradient)',
-                      }}
+                  <div className="w-full bg-[var(--surface-muted-strong)] rounded-full h-1.5 mb-5 overflow-hidden shadow-inner">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${progress}%` }}
+                      transition={{ duration: 1, ease: 'easeOut', delay: 0.5 + idx * 0.1 }}
+                      className="h-full rounded-full"
+                      style={{ background: 'var(--student-gradient)' }}
                     />
                   </div>
                 </div>
 
-                <div className="pt-2.5 border-t border-[var(--border)]/60">
-                  <Link
-                    href={courseId ? `${ROUTES.student.courses}/${courseId}` : ROUTES.student.courses}
-                    className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-semibold bg-[var(--student-soft)] text-[var(--student-primary)] hover:bg-[var(--student-primary)] hover:text-white hover:shadow-md transition-all min-h-[44px]"
-                  >
-                    <PlayCircle className="w-4 h-4" />
-                    <span>{t('dashboard.resumeCourse')}</span>
-                  </Link>
-                </div>
+                <Link
+                  href={courseId ? `${ROUTES.student.courses}/${courseId}` : ROUTES.student.courses}
+                  className="relative z-10 flex items-center justify-center gap-2 w-full py-3 rounded-xl text-xs sm:text-sm font-bold bg-[var(--surface-muted)] text-[var(--foreground)] hover:bg-[var(--student-primary)] hover:text-white hover:shadow-md transition-all duration-300 min-h-[44px]"
+                >
+                  <PlayCircle className="w-4 h-4" />
+                  <span>{t('dashboard.resumeCourse')}</span>
+                </Link>
               </motion.div>
             );
           })}

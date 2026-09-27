@@ -48,7 +48,7 @@ export function AdminBlogCard({
                 {blog.locale}
               </span>
             )}
-            <Badge variant={blog.isPublished ? 'success' : 'default'} size="sm" className="font-bold">
+            <Badge variant={blog.isPublished ? 'default' : 'secondary'} className="font-bold">
               {blog.isPublished ? t('common.published') : t('common.draft')}
             </Badge>
           </div>

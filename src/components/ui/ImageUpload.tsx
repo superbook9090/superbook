@@ -179,3 +179,5 @@ export const ImageUpload = ({
     </div>
   );
 };
+
+export default ImageUpload;

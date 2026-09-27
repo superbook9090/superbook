@@ -16,8 +16,9 @@ export default function HeaderEnhancements({ forceScrolled = false }: { forceScr
 
     const onScroll = () => {
       const scrolled = forceScrolled || window.scrollY > 20;
-      header.classList.toggle('bg-[var(--card-solid)]/80', scrolled);
-      header.classList.toggle('backdrop-blur-md', scrolled);
+      header.classList.toggle('bg-white/80', scrolled);
+      header.classList.toggle('dark:bg-black/80', scrolled);
+      header.classList.toggle('backdrop-blur-xl', scrolled);
       header.classList.toggle('border-b', scrolled);
       header.classList.toggle('border-[var(--border)]', scrolled);
       header.classList.toggle('shadow-sm', scrolled);

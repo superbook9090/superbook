@@ -12,6 +12,7 @@ Use this file as the default orientation for agents working in this repo. For fu
 - React 19
 - TypeScript
 - Tailwind CSS 4
+- Shadcn UI / Radix UI (Use everywhere for components)
 - MongoDB + Mongoose
 - NextAuth
 - Zustand

@@ -1,103 +1,93 @@
-'use client';
+import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
+import { cn } from "@/lib/utils"
+import { Slot } from "radix-ui"
 
-import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
-import { ButtonHTMLAttributes, forwardRef } from 'react';
-import { Loader } from '@/components/ui/Loader';
-import { useRoleTheme } from '@/contexts/RoleThemeContext';
+const buttonVariants = cva(
+  "inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        primary: "bg-primary text-primary-foreground hover:bg-primary/90",
+        destructive:
+          "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40",
+        error:
+          "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40",
+        danger:
+          "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40",
+        success:
+          "bg-[var(--color-success)] text-white hover:bg-[var(--color-success)]/90",
+        warning:
+          "bg-[var(--color-warning)] text-white hover:bg-[var(--color-warning)]/90",
+        info:
+          "bg-[var(--color-info)] text-white hover:bg-[var(--color-info)]/90",
+        outline:
+          "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
+        secondary:
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        ghost:
+          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
+        link: "text-primary underline-offset-4 hover:underline",
+      },
+      size: {
+        default: "h-9 px-4 py-2 has-[>svg]:px-3",
+        xs: "h-6 gap-1 rounded-md px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
+        sm: "h-8 gap-1.5 rounded-md px-3 has-[>svg]:px-2.5",
+        md: "h-9 px-4 py-2 has-[>svg]:px-3",
+        lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
+        icon: "size-9",
+        "icon-xs": "size-6 rounded-md [&_svg:not([class*='size-'])]:size-3",
+        "icon-sm": "size-8",
+        "icon-lg": "size-10",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+)
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
-  size?: 'sm' | 'md' | 'lg';
-  isLoading?: boolean;
-  fullWidth?: boolean;
+function Button({
+  className,
+  variant = "default",
+  size = "default",
+  asChild = false,
+  isLoading = false,
+  children,
+  disabled,
+  ...props
+}: React.ComponentProps<"button"> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean
+    isLoading?: boolean
+  }) {
+  const Comp = asChild ? Slot.Root : "button"
+
+  return (
+    <Comp
+      data-slot="button"
+      data-variant={variant}
+      data-size={size}
+      className={cn(buttonVariants({ variant, size, className }))}
+      disabled={isLoading || disabled}
+      {...props}
+    >
+      {isLoading ? (
+        <>
+          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          {children}
+        </>
+      ) : (
+        children
+      )}
+    </Comp>
+  )
 }
 
-const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  (
-    {
-      className,
-      variant = 'primary',
-      size = 'md',
-      isLoading = false,
-      fullWidth = false,
-      children,
-      disabled,
-      ...props
-    },
-    ref
-  ) => {
-    const { theme } = useRoleTheme();
-
-    const baseStyles = cn(
-      'relative inline-flex items-center justify-center font-semibold transition-all duration-200',
-      'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
-      'disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none',
-      'min-h-[44px]', // Mobile touch target rule
-      fullWidth && 'w-full'
-    );
-
-    const variants = {
-      primary: cn(
-        `bg-gradient-to-r ${theme.gradient} text-white`,
-        'shadow-lg hover:shadow-xl',
-        'hover:brightness-110 active:brightness-95',
-        'focus-visible:ring-offset-2 focus-visible:ring-2'
-      ),
-      secondary: cn(
-        'bg-[var(--color-surface-muted)] text-[var(--color-foreground)]',
-        'hover:bg-[var(--color-surface-muted-strong)]',
-        'active:bg-[var(--color-muted)]',
-        'focus-visible:ring-[var(--color-muted)]'
-      ),
-      outline: cn(
-        `border-2 ${theme.border} ${theme.text}`,
-        'hover:bg-[var(--color-surface-muted)]',
-        'active:bg-[var(--color-surface-muted-strong)]',
-        'focus-visible:ring-offset-2 focus-visible:ring-2'
-      ),
-      ghost: cn(
-        `${theme.text} ${theme.activeBg}`,
-        'hover:opacity-80',
-        'active:opacity-60',
-        'focus-visible:ring-offset-2 focus-visible:ring-2'
-      ),
-      danger: cn(
-        'bg-[var(--color-error)] text-white',
-        'hover:opacity-90',
-        'active:opacity-80',
-        'shadow-md hover:shadow-lg',
-        'focus-visible:ring-[var(--color-error)]'
-      ),
-    };
-
-    const sizes = {
-      sm: 'px-4 py-2 text-xs rounded-lg',
-      md: 'px-5 py-2.5 text-sm rounded-xl',
-      lg: 'px-6 py-3 text-base rounded-xl',
-    };
-
-    return (
-      <motion.button
-        ref={ref}
-        whileHover={{ scale: disabled || isLoading ? 1 : 1.01, y: disabled || isLoading ? 0 : -1 }}
-        whileTap={{ scale: disabled || isLoading ? 1 : 0.99 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-        className={cn(baseStyles, variants[variant], sizes[size], className)}
-        disabled={disabled || isLoading}
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        {...props as any}
-      >
-        {isLoading && (
-          <Loader size="sm" />
-        )}
-        {!isLoading && children}
-      </motion.button>
-    );
-  }
-);
-
-Button.displayName = 'Button';
-
-export default Button;
-export type { ButtonProps };
+export { Button, buttonVariants }
+export default Button

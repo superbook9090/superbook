@@ -70,11 +70,11 @@ export default function AdminCourseCard({ course, isSuperAdmin }: AdminCourseCar
 
         {/* Status badges */}
         <div className="absolute top-3 left-3 flex flex-wrap items-center gap-1.5">
-          <Badge variant={course.isPublished ? 'primary' : 'default'} size="sm">
+          <Badge variant={course.isPublished ? 'default' : 'secondary'}>
             {course.isPublished ? t('common.published') : t('common.draft')}
           </Badge>
           {isSuperAdmin && (
-            <Badge variant={course.isPrivate ? 'warning' : 'info'} size="sm">
+            <Badge variant={course.isPrivate ? 'secondary' : 'outline'}>
               {course.isPrivate ? t('courses.privateCourse') : t('courses.publicCourse')}
             </Badge>
           )}

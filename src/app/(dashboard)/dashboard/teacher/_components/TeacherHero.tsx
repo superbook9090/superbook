@@ -7,8 +7,6 @@ import { ROUTES } from '@/constants/routes';
 import { GraduationCap, Plus, AlertCircle, PenTool } from 'lucide-react';
 import { useFeature } from '@/contexts/AppSettingsContext';
 
-const MotionLink = motion(Link);
-
 interface TeacherHeroProps {
   userName?: string;
   isAtCourseLimit: boolean;
@@ -38,31 +36,58 @@ export default function TeacherHero({
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className="hero-banner relative overflow-hidden"
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+      className="relative overflow-hidden rounded-[2rem] bg-[var(--card-solid)]/30 backdrop-blur-2xl border border-[var(--border)]/50 p-6 sm:p-10 shadow-xl group"
     >
-      <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="space-y-1.5 max-w-2xl">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--teacher-soft)] text-[var(--teacher-primary)] border border-[var(--teacher-border)]">
-            <GraduationCap className="w-3.5 h-3.5" />
+      {/* Decorative ambient gradients */}
+      <div className="absolute -top-32 -right-32 w-96 h-96 bg-[var(--teacher-primary)]/20 rounded-full blur-3xl opacity-50 group-hover:opacity-70 transition-opacity duration-700 pointer-events-none" />
+      <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl opacity-50 group-hover:opacity-70 transition-opacity duration-700 pointer-events-none" />
+
+      <div className="relative z-10 flex flex-col md:flex-row md:items-end md:justify-between gap-8">
+        <div className="space-y-4 max-w-2xl">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold bg-[var(--teacher-soft)] text-[var(--teacher-primary)] border border-[var(--teacher-border)]/50 shadow-sm"
+          >
+            <GraduationCap className="w-4 h-4" />
             <span>{t('dashboard.teacherDashboard')}</span>
+          </motion.div>
+          
+          <div className="space-y-2">
+            <motion.h1 
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+              className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight"
+            >
+              {t('dashboard.welcomeBack')}{displayName ? `, ` : '!'}
+              {displayName && <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--teacher-primary)] to-purple-500">{displayName}!</span>}
+            </motion.h1>
+            <motion.p 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="text-sm sm:text-lg text-[var(--color-muted-foreground)] font-medium max-w-xl"
+            >
+              {t('dashboard.manageContent')}
+            </motion.p>
           </div>
-          <h1 className="heading-xl">
-            {t('dashboard.welcomeBack')}{displayName ? `, ` : '!'}
-            {displayName && <span className="gradient-text">{displayName}!</span>}
-          </h1>
-          <p className="text-sm sm:text-base text-[var(--color-muted-foreground)]">
-            {t('dashboard.manageContent')}
-          </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5 pt-2 md:pt-0">
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="flex flex-wrap items-center gap-3 pt-2 md:pt-0"
+        >
           {enableBlogs && (
             isAtBlogLimit ? (
               <button
                 type="button"
                 onClick={() => onLimitReached('blogs', blogLimit)}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)] border border-[var(--border)] cursor-not-allowed min-h-[44px]"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold bg-[var(--surface-muted)] text-[var(--color-muted-foreground)] border border-[var(--border)] cursor-not-allowed min-h-[44px]"
               >
                 <PenTool className="w-4 h-4" />
                 <span>{t('dashboard.createBlog')}</span>
@@ -70,7 +95,7 @@ export default function TeacherHero({
             ) : (
               <Link
                 href={ROUTES.teacher.blogCreate}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold antigravity-glass text-[var(--color-foreground)] border border-[var(--border)] hover:border-[var(--teacher-primary)]/50 hover:shadow-md transition-all duration-300 min-h-[44px]"
+                className="group/btn relative inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold bg-[var(--card-solid)]/60 backdrop-blur-md text-[var(--color-foreground)] border border-[var(--border)] hover:border-[var(--teacher-primary)]/50 hover:bg-[var(--surface-muted)] hover:shadow-lg transition-all duration-300 min-h-[44px]"
               >
                 <PenTool className="w-4 h-4 text-[var(--teacher-primary)]" />
                 <span>{t('dashboard.createBlog')}</span>
@@ -83,24 +108,22 @@ export default function TeacherHero({
               <button
                 type="button"
                 onClick={() => onLimitReached('courses', courseLimit)}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-[var(--surface-muted)] text-[var(--color-muted-foreground)] border border-[var(--border)] cursor-not-allowed min-h-[44px]"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold bg-[var(--surface-muted)] text-[var(--color-muted-foreground)] border border-[var(--border)] cursor-not-allowed min-h-[44px]"
               >
                 <AlertCircle className="w-4 h-4 text-[var(--warning)]" />
                 <span>{t('dashboard.createCourse')}</span>
               </button>
             ) : (
-              <MotionLink
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+              <Link
                 href={ROUTES.teacher.courseCreate}
-                className="btn-premium inline-flex items-center gap-2 text-xs sm:text-sm min-h-[44px] !py-2.5 !px-5 hover:shadow-lg transition-all duration-300"
+                className="relative inline-flex items-center gap-2 px-6 py-2.5 rounded-2xl text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-[var(--teacher-primary)] to-purple-600 shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:shadow-[0_0_25px_rgba(139,92,246,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 min-h-[44px]"
               >
                 <Plus className="w-4 h-4" />
                 <span>{t('dashboard.createCourse')}</span>
-              </MotionLink>
+              </Link>
             )
           )}
-        </div>
+        </motion.div>
       </div>
     </motion.div>
   );

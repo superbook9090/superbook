@@ -27,16 +27,16 @@ export function QuizCardAttemptDetails({ type, attempt }: Props) {
   const { t } = useTranslation();
 
   const getScoreVariant = (score: number) => {
-    if (score >= 70) return 'success';
-    if (score >= 50) return 'warning';
-    return 'error';
+    if (score >= 70) return 'default';
+    if (score >= 50) return 'secondary';
+    return 'destructive';
   };
 
   if (type === 'attempted') {
     return (
       <div className="rounded-lg bg-[var(--color-surface-muted)]/60 p-2.5 sm:p-3">
         <div className="mb-2 flex items-center justify-between gap-2">
-          <Badge variant={getScoreVariant(attempt.score)} size="sm">
+          <Badge variant={getScoreVariant(attempt.score)}>
             {attempt.score}% {t('quiz.quizScore')}
           </Badge>
           <span className="shrink-0 text-xs text-[var(--color-muted-foreground)]">
@@ -69,7 +69,7 @@ export function QuizCardAttemptDetails({ type, attempt }: Props) {
 
   return (
     <div className="rounded-lg border border-[var(--color-warning)]/30 bg-[var(--color-warning-light)] p-2.5 sm:p-3">
-      <Badge variant="warning" size="sm">
+      <Badge variant="secondary">
         {t('courses.inProgress')}
       </Badge>
       <p className="mt-1.5 truncate text-xs text-[var(--color-muted-foreground)]">

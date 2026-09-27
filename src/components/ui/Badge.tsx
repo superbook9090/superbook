@@ -1,54 +1,67 @@
-'use client';
+import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
+import { cn } from "@/lib/utils"
+import { Slot } from "radix-ui"
 
-import { cn } from '@/lib/utils';
-import { ReactNode } from 'react';
-import { useRoleTheme } from '@/contexts/RoleThemeContext';
+const badgeVariants = cva(
+  "inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border border-transparent px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none [&>svg]:size-3",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground [a&]:hover:bg-primary/90",
+        primary: "bg-primary text-primary-foreground [a&]:hover:bg-primary/90",
+        secondary:
+          "bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90",
+        destructive:
+          "bg-destructive text-white focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40 [a&]:hover:bg-destructive/90",
+        error:
+          "bg-destructive text-white focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40 [a&]:hover:bg-destructive/90",
+        danger:
+          "bg-destructive text-white focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40 [a&]:hover:bg-destructive/90",
+        success:
+          "bg-[var(--color-success)] text-white [a&]:hover:bg-[var(--color-success)]/90",
+        warning:
+          "bg-[var(--color-warning)] text-white [a&]:hover:bg-[var(--color-warning)]/90",
+        info:
+          "bg-[var(--color-info)] text-white [a&]:hover:bg-[var(--color-info)]/90",
+        outline:
+          "border-border text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+        ghost: "[a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+        link: "text-primary underline-offset-4 [a&]:hover:underline",
+      },
+      size: {
+        default: "",
+        sm: "px-1.5 py-0 text-[10px]",
+        md: "px-2 py-0.5 text-xs",
+        lg: "px-3 py-1 text-sm",
+      }
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
 
-type BadgeVariant = 'default' | 'primary' | 'success' | 'warning' | 'error' | 'info';
-type BadgeSize = 'sm' | 'md';
-
-interface BadgeProps {
-  children: ReactNode;
-  variant?: BadgeVariant;
-  size?: BadgeSize;
-  className?: string;
-  icon?: ReactNode;
-}
-
-const sizes = {
-  sm: 'px-2.5 py-1 text-xs rounded-lg',
-  md: 'px-3 py-1.5 text-sm rounded-lg',
-};
-
-export function Badge({
-  children,
-  variant = 'default',
-  size = 'md',
+function Badge({
   className,
-  icon
-}: BadgeProps) {
-  const { theme } = useRoleTheme();
-
-  const variants = {
-    default: 'bg-[var(--color-accent)] text-[var(--color-muted-foreground)] border-[var(--color-border)]',
-    primary: `${theme.activeBg} ${theme.activeText} ${theme.border}`,
-    success: 'bg-[var(--color-success-light)] text-[var(--color-success)] border-[var(--color-success)]/20',
-    warning: 'bg-[var(--color-warning-light)] text-[var(--color-warning)] border-[var(--color-warning)]/20',
-    error: 'bg-[var(--color-error-light)] text-[var(--color-error)] border-[var(--color-error)]/20',
-    info: 'bg-[var(--color-info-light)] text-[var(--color-info)] border-[var(--color-info)]/20',
-  };
+  variant = "default",
+  size = "default",
+  asChild = false,
+  ...props
+}: React.ComponentProps<"span"> &
+  VariantProps<typeof badgeVariants> & { asChild?: boolean }) {
+  const Comp = asChild ? Slot.Root : "span"
 
   return (
-    <span
-      className={cn(
-        'inline-flex items-center gap-1.5 font-semibold border',
-        variants[variant],
-        sizes[size],
-        className
-      )}
-    >
-      {icon && <span className="shrink-0">{icon}</span>}
-      {children}
-    </span>
-  );
+    <Comp
+      data-slot="badge"
+      data-variant={variant}
+      data-size={size}
+      className={cn(badgeVariants({ variant, size }), className)}
+      {...props}
+    />
+  )
 }
+
+export { Badge, badgeVariants }
+export default Badge

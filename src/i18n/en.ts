@@ -558,6 +558,7 @@ export const en = {
     learningHubDesc: 'Quick access to your learning resources',
     exploreCourses: 'Explore Courses',
     takeQuiz: 'Take Quiz',
+    contests: 'Contests',
     studyNotes: 'Study Notes',
     viewCertificates: 'Certificates',
     certificatesDesc: 'View and download earned certificates',

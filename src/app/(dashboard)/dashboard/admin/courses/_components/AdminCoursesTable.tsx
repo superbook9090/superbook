@@ -77,7 +77,7 @@ export default function AdminCoursesTable({ courses, isSuperAdmin }: AdminCourse
 
                 {/* Status */}
                 <td className="py-3 px-4">
-                  <Badge variant={course.isPublished ? 'primary' : 'default'} size="sm">
+                  <Badge variant={course.isPublished ? 'default' : 'secondary'}>
                     {course.isPublished ? t('common.published') : t('common.draft')}
                   </Badge>
                 </td>

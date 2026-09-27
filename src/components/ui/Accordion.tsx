@@ -70,3 +70,5 @@ export function Accordion({ title, children, defaultOpen = false, index = 0, cla
     </motion.div>
   );
 }
+
+export default Accordion;

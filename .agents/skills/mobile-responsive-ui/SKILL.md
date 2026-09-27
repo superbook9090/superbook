@@ -23,6 +23,11 @@ This skill outlines guidelines and architectural rules for developing UI compone
    - Ensure all interactive elements (buttons, toggles, icons, links) meet the minimum 44px touch target requirement on mobile devices.
    - Use the shared `.touch-target` utility class or adequate padding.
 
+4. **Shadcn UI & Radix UI**:
+   - MUST use Shadcn UI and Radix UI components everywhere for UI implementations.
+   - Do not write complex interactive components (Dialogs, Selects, Dropdowns) from scratch.
+   - If a component does not exist in `src/components/ui/`, install it using `npx shadcn@latest add <component>` or use the raw components.
+
 ---
 
 ## Shared Layout Primitives (`src/components/layout/*`)

@@ -91,3 +91,5 @@ export function PageSkeleton({ variant = 'full' }: { variant?: PageSkeletonVaria
     </div>
   );
 }
+
+export default Skeleton;

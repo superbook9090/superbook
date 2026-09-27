@@ -61,26 +61,29 @@ export default function ActivityCard({
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay }}
       onClick={onClick}
-      className={`px-3 py-2 sm:px-6 sm:py-4 flex items-center space-x-3 sm:space-x-4 hover:bg-[var(--background)]/50 transition-colors cursor-pointer ${onClick ? 'cursor-pointer' : ''}`}
+      className={`relative px-4 py-3 sm:px-6 sm:py-4 flex items-center space-x-3 sm:space-x-4 hover:bg-[var(--primary)]/5 transition-colors group overflow-hidden ${onClick ? 'cursor-pointer' : ''}`}
     >
+      {/* Glow on hover */}
+      <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-12 h-12 ${config.bg} rounded-full blur-xl opacity-0 group-hover:opacity-60 transition-opacity duration-500 pointer-events-none`} />
+
       {/* Icon */}
-      <div className={`flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center ${config.bg} ${config.text}`}>
+      <div className={`relative z-10 flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-[1rem] flex items-center justify-center ${config.bg} ${config.text} group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-sm border border-[var(--border)]/30`}>
         <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
       </div>
       
       {/* Content */}
-      <div className="flex-1 min-w-0">
-        <p className="text-xs sm:text-sm font-semibold text-[var(--color-foreground)] truncate">
+      <div className="relative z-10 flex-1 min-w-0">
+        <p className="text-xs sm:text-sm font-bold text-[var(--color-foreground)] truncate group-hover:text-[var(--primary)] transition-colors">
           {title}
         </p>
-        <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] mt-0.5 truncate">
+        <p className="text-[10px] sm:text-xs font-medium text-[var(--color-muted-foreground)] mt-0.5 truncate">
           {description}
         </p>
       </div>
       
       {/* Date */}
       {date && (
-        <div className="flex-shrink-0 text-xs sm:text-sm text-[var(--color-muted-foreground)]">
+        <div className="relative z-10 flex-shrink-0 text-[10px] sm:text-xs font-semibold text-[var(--color-muted-foreground)] group-hover:text-[var(--color-foreground)] transition-colors">
           {date}
         </div>
       )}

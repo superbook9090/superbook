@@ -77,19 +77,19 @@ export default function SuperadminExecutiveSuite({ stats }: SuperadminExecutiveS
     <motion.section
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.1, duration: 0.35 }}
+      transition={{ delay: 0.1, duration: 0.5 }}
       aria-labelledby="superadmin-suite-heading"
-      className="space-y-2.5"
+      className="space-y-4"
     >
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="p-1 rounded-lg bg-amber-500/15 text-amber-500 border border-amber-500/25 shadow-xs">
-            <Zap className="w-3.5 h-3.5" />
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-xl bg-amber-500/20 text-amber-500 border border-amber-500/30 shadow-md">
+            <Zap className="w-5 h-5" />
           </div>
           <div>
-            <h2 id="superadmin-suite-heading" className="text-sm sm:text-base font-black tracking-tight text-[var(--color-foreground)] flex items-center gap-2">
+            <h2 id="superadmin-suite-heading" className="text-lg sm:text-xl font-extrabold tracking-tight text-[var(--color-foreground)] flex items-center gap-2">
               <span>{t('admin.superadminTier')}</span>
-              <span className="text-[9px] uppercase font-extrabold px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-500 border border-amber-500/30">
+              <span className="text-[10px] uppercase font-black px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-500 border border-amber-500/30">
                 Exclusive
               </span>
             </h2>
@@ -97,47 +97,49 @@ export default function SuperadminExecutiveSuite({ stats }: SuperadminExecutiveS
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 perspective-1000">
         {cards.map((card, idx) => (
           <motion.div
             key={card.title}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 + idx * 0.03, duration: 0.25 }}
-            whileHover={{ y: -2, scale: 1.01 }}
-            className={`antigravity-glass relative overflow-hidden rounded-xl p-3 sm:p-3.5 border ${card.borderColor} bg-gradient-to-br ${card.accentBg} transition-all duration-300 shadow-xs flex flex-col justify-between group`}
+            initial={{ opacity: 0, y: 16, rotateX: 6 }}
+            animate={{ opacity: 1, y: 0, rotateX: 0 }}
+            transition={{ delay: 0.15 + idx * 0.05, duration: 0.5, ease: 'easeOut' }}
+            className={`relative overflow-hidden rounded-[2rem] p-5 sm:p-6 border backdrop-blur-2xl ${card.borderColor} bg-[var(--card-solid)]/40 transition-all duration-500 shadow-xl flex flex-col justify-between group`}
           >
-            <div>
-              <div className="flex items-center justify-between gap-2 pb-2 mb-2 border-b border-[var(--border)]/60">
-                <div className={`p-1.5 rounded-lg border ${card.iconColor} shadow-xs group-hover:scale-105 transition-transform duration-300`}>
-                  <card.icon className="w-3.5 h-3.5" />
+            {/* Hover ambient flare */}
+            <div className={`absolute -inset-4 opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-gradient-to-br ${card.accentBg} pointer-events-none blur-xl`} />
+
+            <div className="relative z-10">
+              <div className="flex items-center justify-between gap-2 pb-4 mb-4 border-b border-[var(--border)]/50">
+                <div className={`p-3 rounded-2xl border ${card.iconColor} shadow-md group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500`}>
+                  <card.icon className="w-5 h-5" />
                 </div>
-                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[var(--surface-muted)] text-[var(--color-muted-foreground)]">
-                  <Radio className="w-2.5 h-2.5 text-emerald-500 animate-pulse" />
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-[var(--surface-muted)] text-[var(--color-muted-foreground)] shadow-inner">
+                  <Radio className="w-3 h-3 text-emerald-500 animate-pulse" />
                   <span>{card.status}</span>
                 </div>
               </div>
 
-              <div className="space-y-0.5">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-muted-foreground)]">
+              <div className="space-y-1">
+                <p className="text-[11px] font-black uppercase tracking-widest text-[var(--color-muted-foreground)] group-hover:text-[var(--color-foreground)] transition-colors">
                   {card.subtitle}
                 </p>
-                <h3 className="text-xs sm:text-sm font-extrabold text-[var(--color-foreground)] group-hover:text-[var(--primary)] transition-colors">
+                <h3 className="text-sm sm:text-base md:text-lg font-extrabold text-[var(--color-foreground)] group-hover:text-[var(--primary)] transition-colors">
                   {card.title}
                 </h3>
               </div>
             </div>
 
-            <div className="pt-2 mt-2 flex items-center justify-between border-t border-[var(--border)]/50 text-xs">
-              <span className="font-extrabold text-[var(--color-foreground)]">
+            <div className="relative z-10 pt-4 mt-6 flex items-center justify-between border-t border-[var(--border)]/50">
+              <span className="font-extrabold text-sm text-[var(--color-foreground)]">
                 {card.metric}
               </span>
               <Link
                 href={card.href}
-                className="inline-flex items-center gap-1 font-bold text-[var(--primary)] hover:underline min-h-[28px]"
+                className="inline-flex items-center justify-center p-2 rounded-xl bg-[var(--surface-muted)] hover:bg-[var(--primary)] text-[var(--foreground)] hover:text-white transition-all duration-300 min-h-[36px]"
+                aria-label={card.cta}
               >
-                <span>{card.cta}</span>
-                <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                <ArrowUpRight className="w-4 h-4 group-hover:rotate-12 transition-transform" />
               </Link>
             </div>
           </motion.div>

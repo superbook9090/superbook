@@ -38,7 +38,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={fontVariables} data-theme="dark" suppressHydrationWarning>
-      <body className="antialiased text-sm sm:text-base">
+      <body className="antialiased text-[13px] sm:text-sm md:text-base">
         <a href="#main-content" className="skip-link absolute left-[-9999px] top-0 focus-visible:left-0 focus-visible:top-0 p-2 bg-white text-black z-50">Skip to main content</a>
         <script
           dangerouslySetInnerHTML={{

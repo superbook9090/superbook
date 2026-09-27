@@ -25,3 +25,9 @@ All UI components and layouts must follow these design system and styling rules:
   - Theme colors: `var(--primary)`, `var(--card-solid)`, `var(--color-surface-muted)`, `var(--color-foreground)`, `var(--color-muted-foreground)`
 - Use `useRoleTheme` context for role-specific dynamic accent colors (`theme.text`, `theme.activeBg`, `theme.gradient`).
 - **Do not use inline `style={{ ... }}`** unless calculating dynamic runtime percentages (e.g. progress bars).
+
+## 5. Component Library (Shadcn UI & Radix UI)
+- Use Shadcn UI (built on Radix UI primitives) everywhere in the codebase for UI components (e.g. Buttons, Dialogs, Dropdowns, Selects, Forms).
+- Do not build custom interactive elements from scratch if a Radix UI/Shadcn equivalent exists.
+- Initialize/add new Shadcn components into `src/components/ui` using the Shadcn CLI or by copying the raw component code.
+- Ensure any added Shadcn components use our design tokens for colors and border radiuses.

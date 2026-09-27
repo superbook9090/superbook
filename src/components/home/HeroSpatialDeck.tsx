@@ -32,8 +32,7 @@ export default function HeroSpatialDeck() {
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           className="relative antigravity-glass rounded-3xl p-5 sm:p-7 shadow-2xl border border-[var(--border)] text-left max-w-xl mx-auto overflow-hidden"
         >
-          {/* Top header bar */}
-          <div className="flex items-center justify-between gap-4 mb-5 pb-3 border-b border-[var(--border)]/60">
+          <div className="flex flex-col items-center justify-center gap-3 mb-5 pb-4 border-b border-[var(--border)]/60 text-center">
             <div className="flex items-center gap-2.5">
               <span className="flex h-2.5 w-2.5 relative">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
@@ -43,14 +42,14 @@ export default function HeroSpatialDeck() {
                 Live Quiz Challenge
               </span>
             </div>
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--student-soft)] text-[var(--student-primary)] text-xs font-bold border border-[var(--student-border)]/50">
+            <div className="flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-full bg-[var(--student-soft)] text-[var(--student-primary)] text-xs font-bold border border-[var(--student-border)]/50">
               <Timer className="w-3.5 h-3.5" />
               <span>00:45</span>
             </div>
           </div>
 
           {/* Question Text */}
-          <h3 className="text-base sm:text-lg font-bold text-[var(--foreground)] mb-5 leading-snug">
+          <h3 className="text-base sm:text-lg font-bold text-[var(--foreground)] mb-5 leading-snug text-center">
             Which cellular process converts biochemical energy from nutrients into ATP?
           </h3>
 
