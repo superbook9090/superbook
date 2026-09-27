@@ -412,7 +412,7 @@ export default function TakeQuizPage() {
   const answeredIds = new Set(questionIds.filter((id) => answers[id] !== undefined));
 
   return (
-    <div className="max-w-4xl mx-auto pb-24 sm:pb-8">
+    <div className="max-w-4xl w-full mx-auto h-[100dvh] flex flex-col pt-1 sm:pt-6 px-2 sm:px-4 pb-[3.75rem] sm:pb-6">
       {/* Security Warning */}
       {securityWarning && (
         <div className="bg-[var(--error-light)] border-l-4 border-[var(--error)] p-4 mb-6 rounded-r-lg">
@@ -444,12 +444,14 @@ export default function TakeQuizPage() {
       />
       
       {/* Question */}
+      <main className="w-full flex-1 flex flex-col min-h-0 overflow-y-auto pb-2">
       <QuizQuestionCard
         currentQuestionIndex={currentQuestion}
         currentQ={currentQ as unknown as Question}
         answers={answers}
         handleAnswer={handleAnswer}
       />
+      </main>
       
       {/* Navigation */}
       <QuizNavigation

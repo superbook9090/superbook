@@ -10,6 +10,8 @@ import { fetchOpenRouterChat } from '@/lib/ai/openrouter';
 import { requireFeature } from '@/lib/settingsHelpers';
 import { invalidatePattern } from '@/lib/redis';
 import { sendAdminBroadcast } from '@/lib/server/services/notifications-service';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60; // Max execution time for Vercel (Free tier limit)
@@ -27,12 +29,19 @@ export async function GET(req: NextRequest) {
   const MAX_RUN_TIME_MS = 46000;
 
   try {
-    // 1. Verify Vercel Cron Secret (if configured)
+    // 1. Verify Vercel Cron Secret (if configured) or Superadmin session
     const authHeader = req.headers.get('authorization');
-    if (
-      process.env.CRON_SECRET &&
-      authHeader !== `Bearer ${process.env.CRON_SECRET}`
-    ) {
+    const isCronAuthorized = !process.env.CRON_SECRET || authHeader === `Bearer ${process.env.CRON_SECRET}`;
+    
+    let isSuperAdmin = false;
+    if (!isCronAuthorized) {
+      const session = await getServerSession(authOptions);
+      if (session?.user?.role === 'superadmin') {
+        isSuperAdmin = true;
+      }
+    }
+
+    if (!isCronAuthorized && !isSuperAdmin) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
@@ -52,15 +61,18 @@ export async function GET(req: NextRequest) {
     }
 
     // 4. Implement AI Topic Generation Logic (Focused on India & Competitive Exams)
-    const topicPrompt = `Generate a unique, engaging, and specific quiz topic relevant to India and Indian competitive exams (e.g. UPSC, SSC, Banking, State PSC, Indian GK).
+    const topicPrompt = `Generate a HIGHLY RANDOM, unique, and specific quiz topic relevant to India and Indian competitive exams (e.g. UPSC, SSC, Banking, State PSC, Indian GK).
 Topics can cover: Indian History, Indian Geography, Indian Polity & Constitution, Indian Economy, Science & Technology in India, Indian Art & Culture, Famous Personalities of India, Environment & Wildlife of India, or Current Affairs.
-Additionally, generate SEO metadata for a contest page about this topic.
+Make sure the topic is extremely specific and completely different from typical generic topics. Random seed: ${Math.random().toString(36).substring(2, 10)}
+
+IMPORTANT: The "topic", "metaTitle", and "metaDescription" MUST be written in Hindi language. The "slug" MUST be in English/Latin characters.
+
 Return ONLY a valid JSON object matching exactly this structure, with no markdown, quotes, or extra text:
 {
-  "topic": "The generated topic name",
-  "slug": "seo-friendly-url-slug",
-  "metaTitle": "SEO meta title (max 60 chars)",
-  "metaDescription": "SEO meta description (max 160 chars)"
+  "topic": "The generated topic name (in Hindi)",
+  "slug": "seo-friendly-url-slug-in-english",
+  "metaTitle": "SEO meta title (max 60 chars) (in Hindi)",
+  "metaDescription": "SEO meta description (max 160 chars) (in Hindi)"
 }`;
 
     let topic = 'General Knowledge of India';
@@ -98,7 +110,7 @@ Return ONLY a valid JSON object matching exactly this structure, with no markdow
     const targetQuestions = 10;
     const batchSize = 5;
     let parsedQuestions: GeneratedQuestion[] = [];
-    const language = 'English';
+    const language = 'Hindi';
     
     let batchNumber = 1;
     // We only attempt another batch if we have spent less than 25 seconds so far.
@@ -114,8 +126,8 @@ ${batchNumber > 1 ? 'Make sure these questions are entirely new and distinct fro
 CRITICAL QUALITY & PEDAGOGICAL REQUIREMENTS:
 1. INDIAN CONTEXT: All questions and options must be strictly focused on India and relevant to Indian students/aspirants.
 2. DIFFICULTY: Medium level — thought-provoking, competitive, and realistic.
-3. EXACT QUESTION COUNT: Provide EXACTLY ${toFetch} distinct questions written in ${language}.
-4. 4 OPTIONS: Each question MUST have EXACTLY 4 distinct, plausible multiple-choice options.
+3. EXACT QUESTION COUNT: Provide EXACTLY ${toFetch} distinct questions written strictly in ${language}.
+4. 4 OPTIONS: Each question MUST have EXACTLY 4 distinct, plausible multiple-choice options, also in ${language}.
 5. RANDOM CORRECT ANSWER: Distribute the "correctAnswer" index (0 for A, 1 for B, 2 for C, 3 for D) randomly.
 6. FORMAT: Return ONLY a valid JSON array of question objects matching this exact format without any markdown wrapper:
 [
@@ -257,9 +269,11 @@ CRITICAL QUALITY & PEDAGOGICAL REQUIREMENTS:
     // Invalidate contests cache so the new contest is live immediately
     await invalidatePattern('contests:*');
 
-    // Notify all students to join the daily contest (skip if running out of time)
+    // Notify all students to join the daily contest (skip if running out of time, in dev, or triggered manually)
     let notificationsSent = 0;
-    if (Date.now() - startTime < MAX_RUN_TIME_MS) {
+    const shouldSendNotification = process.env.NODE_ENV === 'production' && !isSuperAdmin;
+
+    if (shouldSendNotification && Date.now() - startTime < MAX_RUN_TIME_MS) {
       try {
         const students = await User.find({ role: 'student' }).select('_id').lean();
         const studentIds = students.map((s) => String(s._id));
@@ -290,7 +304,7 @@ CRITICAL QUALITY & PEDAGOGICAL REQUIREMENTS:
         );
       }
     } else {
-      logInfo('Skipped notifications due to execution time limits', logContext);
+      logInfo('Skipped notifications due to execution time limits, local environment, or manual trigger', logContext);
     }
 
     return NextResponse.json({

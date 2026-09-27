@@ -15,7 +15,7 @@ import {
   type ContestItem,
 } from '@/lib/api/contests';
 import { ContestCountdown } from '@/features/contests/components/ContestCountdown';
-import { LazyConfirmModal } from '@/lib/lazy';
+import { LazyConfirmModal, LazyQuizQuestionProgress } from '@/lib/lazy';
 import {
   CheckCircle2,
   ChevronLeft,
@@ -36,6 +36,10 @@ import {
   loadLocalAttemptAnswers,
   clearLocalAttemptAnswers,
 } from '@/lib/native/offlineStorage';
+import Button from '@/components/ui/Button';
+import { QuizQuestionCard } from '../../../quizzes/take/_components/QuizQuestionCard';
+import { QuizNavigation } from '../../../quizzes/take/_components/QuizNavigation';
+import type { Question } from '../../../quizzes/take/_components/types';
 
 export default function TakeContestPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -54,7 +58,7 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showViolationModal, setShowViolationModal] = useState(false);
   const [violationMessage, setViolationMessage] = useState('');
-  const violationCountRef = useRef(0);
+  const [violationRetryCount, setViolationRetryCount] = useState(0);
   const isSubmittingRef = useRef(false);
   const attemptStartedAtRef = useRef<number>(Date.now());
 
@@ -89,7 +93,6 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
     (reason: string) => {
       haptics.error();
       playViolationWarningSound();
-      violationCountRef.current += 1;
       setViolationMessage(getSecurityReasonMessage(reason));
       setShowViolationModal(true);
     },
@@ -130,7 +133,7 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
       await submitContestAttempt(id, {
         answers: formattedAnswers,
         timeTaken: timeTakenSeconds,
-        violationCount: violationCountRef.current,
+        violationCount: violationRetryCount,
       });
 
       clearLocalAttemptAnswers(`contest_${id}`);
@@ -164,27 +167,28 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
 
     if (isDevToolsOpen) {
       setViolationMessage(
-        t('quiz.violationDevTools')
+        t('errors.closeDevTools')
       );
       return;
     }
 
     setShowViolationModal(false);
+    setViolationMessage('');
     quizSecurity.resetDevToolsDetection();
 
-    // If student accumulated 3 or more violations, force submit the contest attempt
-    if (violationCountRef.current >= 3) {
+    if (violationRetryCount >= 2) {
+      // After 3 retries (0, 1, 2), force submit
       addAlert({
         type: 'error',
         message: 'Maximum anti-cheat violations reached. Submitting contest attempt now.',
       });
       await handleSubmit();
-      return;
+    } else {
+      // Increment retry count and re-enter fullscreen
+      setViolationRetryCount((prev) => prev + 1);
+      await startQuizRef.current();
     }
-
-    // Re-enter fullscreen and activate security
-    await startQuizRef.current();
-  }, [quizSecurity, handleSubmit, addAlert, t]);
+  }, [violationRetryCount, quizSecurity, handleSubmit, addAlert, t]);
 
   // Cleanup on unmount - restore chrome and exit fullscreen
   useEffect(() => {
@@ -273,191 +277,107 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
   const answeredCount = Object.keys(answers).length;
 
   return (
-    <div className="min-h-screen bg-[var(--background)] flex flex-col pb-16">
-      {/* Top Fixed Sticky Header */}
-      <header className="sticky top-0 z-40 bg-[var(--card-solid)]/95 backdrop-blur-md border-b border-[var(--border)] shadow-xs px-4 sm:px-8 py-3.5 flex items-center justify-between gap-4">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-extrabold bg-[var(--error)] text-white animate-pulse">
-              <Flame className="w-3 h-3" />
-              LIVE
-            </span>
-            <h1 className="text-sm sm:text-base font-bold text-[var(--color-foreground)] truncate max-w-[200px] sm:max-w-md">
+    <div className="max-w-4xl w-full mx-auto h-[100dvh] flex flex-col pt-1 sm:pt-6 px-2 sm:px-4 pb-[3.75rem] sm:pb-6">
+      {/* Security Warning */}
+      {violationMessage && !showViolationModal && (
+        <div className="bg-[var(--error-light)] border-l-4 border-[var(--error)] p-4 mb-6 rounded-r-lg">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <ShieldAlert className="h-5 w-5 text-[var(--error)]" />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium text-[var(--error)]">{violationMessage}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Header */}
+      <div className="antigravity-glass rounded-2xl sm:rounded-3xl p-2 sm:p-6 mb-2 sm:mb-6 shadow-md border border-[var(--border)]">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 sm:gap-4 mb-1.5 sm:mb-4">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-extrabold bg-[var(--error)] text-white animate-pulse">
+                <Flame className="w-3 h-3" />
+                LIVE
+              </span>
+              <span className="text-xs text-[var(--color-muted)] font-medium">
+                {answeredCount} / {totalQ} {t('contest.answered')}
+              </span>
+            </div>
+            <h1 className="text-sm sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)] line-clamp-2 leading-tight">
               {contest.title}
             </h1>
           </div>
-          <span className="text-xs text-[var(--color-muted)] font-medium">
-            {answeredCount} / {totalQ} {t('contest.answered')}
-          </span>
+          
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+
+            
+            {endTime && (
+              <ContestCountdown
+                targetDate={endTime}
+                compact
+                urgent
+                onExpire={handleSubmit}
+              />
+            )}
+          </div>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3">
-          {endTime && (
-            <ContestCountdown
-              targetDate={endTime}
-              compact
-              urgent
-              onExpire={handleSubmit}
-            />
-          )}
+        <LazyQuizQuestionProgress
+          total={totalQ}
+          currentIndex={currentIndex}
+          answeredIds={new Set(Object.keys(answers))}
+          questionIds={questions.map((q) => q._id)}
+          onSelect={setCurrentIndex}
+        />
+      </div>
 
-          {!quizSecurity.state.isFullscreen && (
-            <button
-              type="button"
-              onClick={() => quizSecurity.startQuiz()}
-              className="inline-flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-bold bg-[var(--color-surface-muted)] hover:bg-[var(--color-surface-muted-strong)] text-[var(--color-foreground)] border border-[var(--border)] shadow-xs transition-colors shrink-0"
-              title="Enter Fullscreen"
-            >
-              <Maximize2 className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Fullscreen</span>
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={() => setShowSubmitModal(true)}
-            disabled={isSubmitting}
-            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-[var(--primary)] to-[var(--student-primary)] text-white shadow-xs hover:shadow-md transition-all shrink-0 ${
-              isSubmitting ? 'opacity-60 cursor-not-allowed' : ''
-            }`}
-          >
-            <Send className="w-3.5 h-3.5" />
-            <span>{isSubmitting ? (t('common.loading')) : (t('contest.submitContest'))}</span>
-          </button>
-        </div>
-      </header>
-
-      {/* Main Examination View */}
-      <main className="max-w-4xl w-full mx-auto px-4 sm:px-6 pt-6 flex-1 flex flex-col gap-6">
-        {/* Question Stepper / Palette */}
-        <div className="p-3 rounded-2xl bg-[var(--card-solid)] border border-[var(--border)] shadow-xs flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-          {questions.map((q, idx) => {
-            const isAnswered = answers[q._id] !== undefined;
-            const isCurrent = idx === currentIndex;
-
-            return (
-              <button
-                key={q._id}
-                type="button"
-                onClick={() => setCurrentIndex(idx)}
-                className={`w-8 h-8 rounded-xl font-mono text-xs font-bold transition-all shrink-0 flex items-center justify-center ${
-                  isCurrent
-                    ? 'bg-[var(--primary)] text-white ring-2 ring-[var(--primary)]/40 shadow-xs'
-                    : isAnswered
-                    ? 'bg-[var(--success-light)] text-[var(--success)] border border-[var(--success)]/40'
-                    : 'bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)] hover:bg-[var(--color-surface-muted-strong)]'
-                }`}
-              >
-                {idx + 1}
-              </button>
-            );
-          })}
-        </div>
+      <main className="w-full flex-1 flex flex-col min-h-0 overflow-y-auto pb-2">
 
         {/* Current Question Card */}
         {currentQ && (
-          <div className="p-4 sm:p-6 md:p-8 rounded-3xl bg-[var(--card-solid)] border border-[var(--border)] shadow-sm flex flex-col gap-6">
-            <div className="flex items-center justify-between pb-4 border-b border-[var(--border)]">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-[var(--color-muted-foreground)]">
-                {currentQ.quizTitle ? `${currentQ.quizTitle} • ` : ''}
-                {t('quiz.question')} {currentIndex + 1} of {totalQ}
-              </span>
-              <div className="flex items-center gap-1.5">
-                <span className="px-2 py-0.5 rounded text-xs font-bold bg-[var(--primary-light)] text-[var(--primary)]">
-                  +{currentQ.points || 1}{' '}
-                  {currentQ.points === 1
-                    ? t('contest.point')
-                    : t('contest.points')}
+          <QuizQuestionCard
+            currentQuestionIndex={currentIndex}
+            currentQ={currentQ as unknown as Question}
+            answers={answers}
+            handleAnswer={handleSelectOption}
+            headerSlot={
+              <>
+                <span className="text-xs font-extrabold uppercase tracking-wider text-[var(--color-muted-foreground)]">
+                  {t('quiz.question')} {currentIndex + 1} of {totalQ}
                 </span>
-                {(currentQ.negativePoints !== undefined
-                  ? currentQ.negativePoints > 0
-                  : Boolean(contest?.enableNegativeMarking)) && (
-                  <span
-                    className="px-2 py-0.5 rounded text-xs font-bold bg-[var(--error-light)] text-[var(--error)]"
-                    title={t('contest.negativeMarksHint')}
-                  >
-                    -{currentQ.negativePoints ?? contest?.negativeMarks ?? 0.25}
+                <div className="flex items-center gap-1.5">
+                  <span className="px-2 py-0.5 rounded text-xs font-bold bg-[var(--primary-light)] text-[var(--primary)]">
+                    +{currentQ.points || 1}{' '}
+                    {currentQ.points === 1 ? t('contest.point') : t('contest.points')}
                   </span>
-                )}
-              </div>
-            </div>
-
-            <div className="flex items-start justify-between gap-3">
-              <h2 className="text-base sm:text-lg font-bold text-[var(--color-foreground)] leading-relaxed">
-                {currentQ.question}
-              </h2>
-              <SpeechReadButton
-                text={`${currentQ.question}. ${(currentQ.options || []).map((o, idx) => `Option ${String.fromCharCode(65 + idx)}: ${o}`).join('. ')}`}
-              />
-            </div>
-
-            {/* Options List */}
-            <div className="space-y-3">
-              {currentQ.options.map((optionText, optIndex) => {
-                const isSelected = answers[currentQ._id] === optIndex;
-
-                return (
-                  <button
-                    key={optIndex}
-                    type="button"
-                    onClick={() => handleSelectOption(currentQ._id, optIndex)}
-                    className={`w-full p-4 rounded-2xl border text-left flex items-center gap-3 transition-all ${
-                      isSelected
-                        ? 'bg-[var(--primary-light)]/60 border-[var(--primary)] text-[var(--color-foreground)] shadow-xs ring-1 ring-[var(--primary)]/30'
-                        : 'bg-[var(--color-surface-muted)]/40 border-[var(--border)] text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted)]'
-                    }`}
-                  >
+                  {(currentQ.negativePoints !== undefined
+                    ? currentQ.negativePoints > 0
+                    : Boolean(contest?.enableNegativeMarking)) && (
                     <span
-                      className={`w-6 h-6 rounded-lg flex items-center justify-center font-mono text-xs font-bold shrink-0 transition-colors ${
-                        isSelected
-                          ? 'bg-[var(--primary)] text-white'
-                          : 'bg-[var(--card-solid)] border border-[var(--border)] text-[var(--color-muted-foreground)]'
-                      }`}
+                      className="px-2 py-0.5 rounded text-xs font-bold bg-[var(--error-light)] text-[var(--error)]"
+                      title={t('contest.negativeMarksHint')}
                     >
-                      {String.fromCharCode(65 + optIndex)}
+                      -{currentQ.negativePoints ?? contest?.negativeMarks ?? 0.25}
                     </span>
-                    <span className="text-xs sm:text-sm font-medium flex-1">{optionText}</span>
-                    {isSelected && <CheckCircle2 className="w-5 h-5 text-[var(--primary)] shrink-0" />}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Bottom Navigation Buttons */}
-            <div className="flex items-center justify-between pt-4 border-t border-[var(--border)]">
-              <button
-                type="button"
-                onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
-                disabled={currentIndex === 0}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[var(--color-surface-muted)] text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted-strong)] disabled:opacity-40 transition-colors"
-              >
-                <ChevronLeft className="w-4 h-4" />
-                <span>{t('common.previous')}</span>
-              </button>
-
-              {currentIndex < totalQ - 1 ? (
-                <button
-                  type="button"
-                  onClick={() => setCurrentIndex((prev) => Math.min(totalQ - 1, prev + 1))}
-                  className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-bold bg-[var(--primary)] text-white hover:opacity-90 transition-opacity shadow-xs"
-                >
-                  <span>{t('common.next')}</span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setShowSubmitModal(true)}
-                  className="inline-flex items-center gap-1.5 px-6 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-[var(--primary)] to-[var(--student-primary)] text-white shadow-xs hover:shadow-md transition-all"
-                >
-                  <Send className="w-4 h-4" />
-                  <span>{t('contest.finishAndSubmit')}</span>
-                </button>
-              )}
-            </div>
-          </div>
+                  )}
+                </div>
+              </>
+            }
+          />
         )}
       </main>
+
+      {/* Navigation */}
+      <QuizNavigation
+        currentQuestion={currentIndex}
+        totalQuestions={totalQ}
+        setCurrentQuestion={setCurrentIndex}
+        handleSubmit={() => setShowSubmitModal(true)}
+        isSubmitting={isSubmitting}
+        t={t}
+      />
 
       {/* Submit Confirmation Modal */}
       <LazyConfirmModal
@@ -491,7 +411,7 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
               {violationMessage}
             </p>
             <span className="text-[11px] text-[var(--warning-foreground)] font-semibold">
-              {t('contest.violations')}: {violationCountRef.current} / 3
+              {t('contest.violations')}: {violationRetryCount + 1} / 3
             </span>
             <button
               type="button"

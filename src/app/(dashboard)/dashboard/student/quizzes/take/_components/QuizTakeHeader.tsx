@@ -26,10 +26,10 @@ export function QuizTakeHeader({
   t,
 }: Props) {
   return (
-    <div className="antigravity-glass rounded-3xl p-5 sm:p-6 mb-4 sm:mb-6 shadow-md border border-[var(--border)]">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
+    <div className="antigravity-glass rounded-2xl sm:rounded-3xl p-2 sm:p-6 mb-2 sm:mb-6 shadow-md border border-[var(--border)]">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 sm:gap-4 mb-1.5 sm:mb-4">
         <div className="min-w-0">
-          <h1 className="text-base sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)] line-clamp-2">
+          <h1 className="text-sm sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)] line-clamp-2 leading-tight">
             {attempt.quiz.title}
           </h1>
         </div>

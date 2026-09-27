@@ -82,7 +82,7 @@ export function QuizQuestionProgress({
 
   return (
     <div className={cn('space-y-3', className)}>
-      <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
+      <div className="hidden sm:flex flex-wrap items-center gap-2 text-xs sm:text-sm">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--success)]/15 text-[var(--success)] px-2.5 py-1 font-medium">
           <span className="w-2 h-2 rounded-full bg-[var(--success)]" />
           {answeredCount} {t('quiz.answered')}
@@ -96,7 +96,7 @@ export function QuizQuestionProgress({
         </span>
       </div>
 
-      <div className="space-y-1.5">
+      <div className="hidden sm:block space-y-1.5">
         <div className="flex justify-between text-[10px] sm:text-xs text-[var(--color-muted-foreground)] px-0.5">
           <span>{t('quiz.progressAnswered')}</span>
           <span>{Math.round(progressPercent)}%</span>
@@ -109,7 +109,7 @@ export function QuizQuestionProgress({
         </div>
       </div>
 
-      <div className="space-y-1.5">
+      <div className="hidden sm:block space-y-1.5">
         <div className="flex justify-between text-[10px] sm:text-xs text-[var(--color-muted-foreground)] px-0.5">
           <span>{t('quiz.progressPosition')}</span>
           <span>{Math.round(positionPercent)}%</span>
@@ -130,7 +130,7 @@ export function QuizQuestionProgress({
             disabled={!canScrollLeft}
             aria-label={t('quiz.showPreviousQuestions')}
             className={cn(
-              'shrink-0 flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl border-2 transition-all',
+              'shrink-0 flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-[10px] sm:rounded-xl border-2 transition-all',
               canScrollLeft
                 ? 'border-[var(--color-border)] bg-[var(--card-solid)] text-[var(--color-foreground)] hover:border-[var(--color-primary)]/40 hover:text-[var(--color-primary)]'
                 : 'border-transparent bg-[var(--color-surface-muted)]/50 text-[var(--color-muted-foreground)]/40 cursor-not-allowed'
@@ -160,7 +160,7 @@ export function QuizQuestionProgress({
                 aria-label={`${t('quiz.question')} ${index + 1}`}
                 onClick={() => onSelect(index)}
                 className={cn(
-                  'relative flex-1 min-w-0 max-w-[44px] h-10 sm:h-9 rounded-xl text-sm font-semibold transition-all border-2',
+                  'relative flex-1 min-w-0 max-w-[36px] sm:max-w-[44px] h-8 sm:h-9 rounded-[10px] sm:rounded-xl text-xs sm:text-sm font-semibold transition-all border-2',
                   isCurrent &&
                     'border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)] shadow-sm scale-105 z-10',
                   isAnswered &&
@@ -173,7 +173,7 @@ export function QuizQuestionProgress({
               >
                 {isAnswered && !isCurrent ? (
                   <span className="flex items-center justify-center gap-0.5">
-                    <Check className="w-3.5 h-3.5 shrink-0" />
+                    <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
                     <span className="hidden sm:inline truncate">{index + 1}</span>
                   </span>
                 ) : (
@@ -191,7 +191,7 @@ export function QuizQuestionProgress({
             disabled={!canScrollRight}
             aria-label={t('quiz.showNextQuestions')}
             className={cn(
-              'shrink-0 flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl border-2 transition-all',
+              'shrink-0 flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-[10px] sm:rounded-xl border-2 transition-all',
               canScrollRight
                 ? 'border-[var(--color-border)] bg-[var(--card-solid)] text-[var(--color-foreground)] hover:border-[var(--color-primary)]/40 hover:text-[var(--color-primary)]'
                 : 'border-transparent bg-[var(--color-surface-muted)]/50 text-[var(--color-muted-foreground)]/40 cursor-not-allowed'
@@ -202,7 +202,7 @@ export function QuizQuestionProgress({
         </Tooltip>
       </div>
 
-      <div className="flex flex-wrap gap-3 text-[10px] sm:text-xs text-[var(--color-muted-foreground)]">
+      <div className="hidden sm:flex flex-wrap gap-3 text-[10px] sm:text-xs text-[var(--color-muted-foreground)]">
         <span className="inline-flex items-center gap-1.5">
           <span className="w-3 h-3 rounded-md border-2 border-[var(--color-primary)] bg-[var(--color-primary)]/10" />
           {t('quiz.progressCurrent')}

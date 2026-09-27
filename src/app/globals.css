@@ -47,7 +47,7 @@
   --card-gap: var(--space-2);
   --form-gap: var(--space-3);
   --mobile-nav-offset: 7rem;
-  --mobile-header-height: 4.25rem;
+  --mobile-header-height: 3.5rem;
   --mobile-header-gap: var(--space-2);
 
   /* Layout */
@@ -1977,7 +1977,7 @@ select:-webkit-autofill:focus {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 4.25rem;
+  height: 3.5rem;
   padding-inline: 0.5rem;
   position: relative;
 }
@@ -1989,7 +1989,7 @@ select:-webkit-autofill:focus {
   align-items: center;
   justify-content: center;
   flex: 1;
-  height: 3.5rem;
+  height: 3rem;
   border-radius: 1.5rem;
   color: var(--muted);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

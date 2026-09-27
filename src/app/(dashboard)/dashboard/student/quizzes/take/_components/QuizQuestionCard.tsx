@@ -9,6 +9,7 @@ type Props = {
   currentQ: Question | undefined;
   answers: Record<string, number>;
   handleAnswer: (questionId: string, optionIndex: number) => void;
+  headerSlot?: React.ReactNode;
 };
 
 export function QuizQuestionCard({
@@ -16,6 +17,7 @@ export function QuizQuestionCard({
   currentQ,
   answers,
   handleAnswer,
+  headerSlot,
 }: Props) {
   const currentQid = currentQ?._id;
 
@@ -24,20 +26,25 @@ export function QuizQuestionCard({
     : '';
 
   return (
-    <div className="antigravity-glass rounded-3xl p-5 sm:p-7 mb-4 sm:mb-6 shadow-md border border-[var(--border)]">
-      <div className="flex items-start justify-between gap-3 mb-5">
+    <div className="antigravity-glass rounded-2xl sm:rounded-3xl p-2 sm:p-5 mb-2 sm:mb-4 shadow-md border border-[var(--border)] flex flex-col min-h-0">
+      {headerSlot && (
+        <div className="flex items-center justify-between pb-2 border-b border-[var(--border)] mb-2 shrink-0">
+          {headerSlot}
+        </div>
+      )}
+      <div className="flex items-start justify-between gap-2 mb-2 shrink-0">
         <div className="flex items-start gap-3 flex-1">
           <span className="shrink-0 inline-flex items-center justify-center min-w-[2rem] h-8 px-2 rounded-xl bg-gradient-to-br from-[var(--student-primary)] to-[var(--student-accent)] text-white text-xs font-black shadow-xs">
             {currentQuestionIndex + 1}
           </span>
-          <h3 className="text-base sm:text-lg font-bold text-[var(--color-foreground)] leading-snug pt-0.5">
+          <h3 className="text-sm sm:text-lg font-bold text-[var(--color-foreground)] leading-snug pt-0.5">
             {currentQ?.question}
           </h3>
         </div>
         {speechText && <SpeechReadButton text={speechText} />}
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2.5 overflow-y-auto no-scrollbar pb-2">
         {(currentQ?.options || []).map((option, index) => {
           const isSelected = currentQid ? answers[currentQid] === index : false;
           return (
