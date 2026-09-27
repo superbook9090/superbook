@@ -124,9 +124,9 @@ function QuizCard({
             <Badge
               variant="primary"
               size="sm"
-              icon={<BookOpen className="w-3 h-3 shrink-0" />}
               className="max-w-full truncate"
             >
+              <BookOpen className="w-3 h-3 shrink-0" />
               <span className="truncate">{quiz.course?.title || t('quiz.course')}</span>
             </Badge>
           </div>

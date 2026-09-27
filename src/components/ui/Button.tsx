@@ -55,6 +55,7 @@ function Button({
   size = "default",
   asChild = false,
   isLoading = false,
+  fullWidth = false,
   children,
   disabled,
   ...props
@@ -62,6 +63,7 @@ function Button({
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean
     isLoading?: boolean
+    fullWidth?: boolean
   }) {
   const Comp = asChild ? Slot.Root : "button"
 
@@ -70,7 +72,7 @@ function Button({
       data-slot="button"
       data-variant={variant}
       data-size={size}
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(buttonVariants({ variant, size, className }), fullWidth && "w-full")}
       disabled={isLoading || disabled}
       {...props}
     >
