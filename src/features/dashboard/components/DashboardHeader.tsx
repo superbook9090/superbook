@@ -12,16 +12,24 @@ import { Bell } from 'lucide-react';
 interface DashboardHeaderProps {
   isTeacherOrAdmin: boolean;
   showNotifications?: boolean;
+  role?: string;
 }
 
-export default function DashboardHeader({ isTeacherOrAdmin, showNotifications = false }: DashboardHeaderProps) {
+export default function DashboardHeader({ isTeacherOrAdmin, showNotifications = false, role }: DashboardHeaderProps) {
   const { t } = useTranslation();
+
+  const getDashboardTitle = () => {
+    if (role === 'superadmin') return 'Superadmin Dashboard';
+    if (role === 'admin') return t('admin.adminDashboard');
+    if (role === 'teacher' || isTeacherOrAdmin) return t('dashboard.teacherDashboard');
+    return t('dashboard.studentDashboard');
+  };
 
   return (
     <header className="dashboard-topbar hidden md:block flex-shrink-0">
       <div className="max-w-[var(--page-max-width)] mx-auto px-[var(--gutter-x)] h-14 flex justify-between items-center">
         <h1 className="text-sm sm:text-base font-bold font-[family-name:var(--font-display)] tracking-tight text-[var(--foreground)] truncate">
-          {isTeacherOrAdmin ? t('dashboard.teacherDashboard') : t('dashboard.studentDashboard')}
+          {getDashboardTitle()}
         </h1>
         <div className="flex items-center gap-2 flex-shrink-0">
           {showNotifications && (

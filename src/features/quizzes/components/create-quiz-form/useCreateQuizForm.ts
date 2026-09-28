@@ -14,6 +14,7 @@ import { getQuizChapterId } from '@/lib/quiz/quizChapter';
 import { useQuizQuestionsManager } from './useQuizQuestionsManager';
 import { useQuizCurriculumLoader } from './useQuizCurriculumLoader';
 import { submitQuizForm } from './quizSubmitHelper';
+import { ROUTES } from '@/constants/routes';
 
 export interface Course {
   _id: string;
@@ -210,6 +211,7 @@ export function useCreateQuizForm(quizId?: string) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    const isAdminUser = session?.user?.role === 'admin' || session?.user?.role === 'superadmin';
     await submitQuizForm({
       formData,
       questions: questionsManager.questions,
@@ -219,6 +221,7 @@ export function useCreateQuizForm(quizId?: string) {
       router,
       addAlert,
       t,
+      returnUrl: isAdminUser ? ROUTES.admin.quizzes : ROUTES.teacher.quizzes,
     });
     setIsLoading(false);
   };

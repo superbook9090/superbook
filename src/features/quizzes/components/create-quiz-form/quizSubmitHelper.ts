@@ -26,10 +26,11 @@ export interface SubmitQuizParams {
   router: { push: (path: string) => void };
   addAlert: (alert: { type: 'success' | 'error'; message: string; duration?: number }) => void;
   t: (key: string) => string;
+  returnUrl?: string;
 }
 
 export async function submitQuizForm(params: SubmitQuizParams): Promise<boolean> {
-  const { formData, questions, quizId, orgId, queryClient, router, addAlert, t } = params;
+  const { formData, questions, quizId, orgId, queryClient, router, addAlert, t, returnUrl } = params;
 
   for (let i = 0; i < questions.length; i++) {
     const q = questions[i];
@@ -98,7 +99,7 @@ export async function submitQuizForm(params: SubmitQuizParams): Promise<boolean>
     }
 
     await invalidateAfterQuizChange(queryClient, formData.course, orgId);
-    router.push(ROUTES.teacher.quizzes);
+    router.push(returnUrl || ROUTES.teacher.quizzes);
     return true;
   } catch (err) {
     const message =

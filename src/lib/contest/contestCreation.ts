@@ -165,10 +165,15 @@ export async function buildContestQuizRefs(params: BuildQuizRefsParams): Promise
 
 export async function broadcastNewContest(contestId: string | mongoose.Types.ObjectId, title: string) {
   try {
-    const students = await User.find({ role: 'student' }).select('_id').lean();
+    const students = await User.find({
+      $or: [{ role: 'student' }, { role: { $exists: false } }, { role: null }],
+      isSuspended: { $ne: true },
+    }).select('_id').lean();
+
     const studentIds = students.map((s) => String(s._id));
 
     if (studentIds.length > 0) {
+      console.log(`[broadcastNewContest] Broadcasting contest "${title}" (${contestId}) to ${studentIds.length} students`);
       await sendAdminBroadcast(studentIds, {
         title: {
           en: `New Contest: ${title}`,
@@ -181,9 +186,12 @@ export async function broadcastNewContest(contestId: string | mongoose.Types.Obj
         category: 'quizzes',
         data: {
           url: `quizdo://contest/${contestId}`,
+          webUrl: `/dashboard/student/contests/${contestId}/take`,
           contestId: String(contestId),
         },
       });
+    } else {
+      console.warn('[broadcastNewContest] No eligible students found for contest broadcast.');
     }
   } catch (err) {
     console.error('Failed to broadcast contest notification:', err);

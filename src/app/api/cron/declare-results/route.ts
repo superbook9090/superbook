@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { logApiError } from '@/lib/logger';
 import { requireFeature } from '@/lib/settingsHelpers';
 import { checkAndDeclareResults } from '@/lib/contests/declareResults';
@@ -12,10 +14,17 @@ export async function GET(req: NextRequest) {
   try {
     // 1. Verify Vercel Cron Secret (if configured)
     const authHeader = req.headers.get('authorization');
-    if (
-      process.env.CRON_SECRET &&
-      authHeader !== `Bearer ${process.env.CRON_SECRET}`
-    ) {
+    const isCronAuthorized = !process.env.CRON_SECRET || authHeader === `Bearer ${process.env.CRON_SECRET}`;
+
+    let isAdmin = false;
+    if (!isCronAuthorized) {
+      const session = await getServerSession(authOptions);
+      if (session?.user?.role === 'admin' || session?.user?.role === 'superadmin') {
+        isAdmin = true;
+      }
+    }
+
+    if (!isCronAuthorized && !isAdmin) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
     

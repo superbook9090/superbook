@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidateTag } from 'next/cache';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import { logApiError, logError, logInfo } from '@/lib/logger';
 import { requireFeature } from '@/lib/settingsHelpers';
@@ -42,12 +44,23 @@ export async function GET(req: NextRequest) {
     const querySecret = searchParams.get('secret');
 
     const expectedSecret = process.env.CRON_SECRET;
-    if (expectedSecret) {
-      const authorized =
-        authHeader === `Bearer ${expectedSecret}` || querySecret === expectedSecret;
-      if (!authorized && process.env.NODE_ENV === 'production') {
-        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    let authorized = false;
+    
+    if (!expectedSecret) {
+      authorized = true;
+    } else {
+      authorized = authHeader === `Bearer ${expectedSecret}` || querySecret === expectedSecret;
+    }
+
+    if (!authorized) {
+      const session = await getServerSession(authOptions);
+      if (session?.user?.role === 'admin' || session?.user?.role === 'superadmin') {
+        authorized = true;
       }
+    }
+
+    if (!authorized && process.env.NODE_ENV === 'production') {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
     // 2. Feature Toggle Guard

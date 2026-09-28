@@ -269,9 +269,9 @@ CRITICAL QUALITY & PEDAGOGICAL REQUIREMENTS:
     // Invalidate contests cache so the new contest is live immediately
     await invalidatePattern('contests:*');
 
-    // Notify all students to join the daily contest (skip if running out of time, in dev, or triggered manually)
+    // Notify all students to join the daily contest (skip if running out of time or in dev)
     let notificationsSent = 0;
-    const shouldSendNotification = process.env.NODE_ENV === 'production' && !isSuperAdmin;
+    const shouldSendNotification = process.env.NODE_ENV === 'production';
 
     if (shouldSendNotification && Date.now() - startTime < MAX_RUN_TIME_MS) {
       try {

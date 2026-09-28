@@ -12,7 +12,7 @@ export const sendPushNotification = async (
 ) => {
   const adminMessaging = getAdminMessaging();
   if (!adminMessaging) {
-    console.warn('FCM Admin not initialized. Skipping push notification.');
+    console.warn('[sendPushNotification] FCM Admin not initialized. Skipping push notification.');
     return;
   }
 
@@ -21,33 +21,45 @@ export const sendPushNotification = async (
   const objectIds = userIds.map(id => new mongoose.Types.ObjectId(id));
 
   // 1. Get preferences for these users to filter out those who muted this category or disabled push
-  const preferences = await NotificationPreference.find({ userId: { $in: objectIds } });
+  const preferences = await NotificationPreference.find({ userId: { $in: objectIds } }).lean();
   
   const disabledUserIds = new Set<string>();
   
   for (const pref of preferences) {
-    if (pref.muteAll || pref.disablePush || !pref.categories[payload.category]) {
+    const isCategoryDisabled = Boolean(pref.categories && pref.categories[payload.category] === false);
+    if (pref.muteAll || pref.disablePush || isCategoryDisabled) {
       disabledUserIds.add(pref.userId.toString());
     }
     // Check if specific course is muted
-    if (payload.data?.courseId && pref.mutedCourses.some((id: mongoose.Types.ObjectId) => id.toString() === payload.data!.courseId)) {
+    if (payload.data?.courseId && pref.mutedCourses?.some((id: mongoose.Types.ObjectId) => id.toString() === payload.data!.courseId)) {
       disabledUserIds.add(pref.userId.toString());
     }
   }
 
   const eligibleUserIds = userIds.filter(id => !disabledUserIds.has(id));
 
-  if (eligibleUserIds.length === 0) return;
+  if (eligibleUserIds.length === 0) {
+    console.log('[sendPushNotification] All target users disabled push or muted this category.');
+    return;
+  }
 
   // 2. Get active tokens for eligible users
   const activeTokens = await NotificationToken.find({ 
     userId: { $in: eligibleUserIds.map(id => new mongoose.Types.ObjectId(id)) },
     isActive: true 
-  });
+  }).lean();
 
-  if (activeTokens.length === 0) return;
+  const rawTokens = activeTokens.map(t => t.deviceToken).filter(Boolean);
+  const tokens = Array.from(new Set(rawTokens));
 
-  const tokens = activeTokens.map(t => t.deviceToken);
+  console.log(
+    `[sendPushNotification] Targeting ${userIds.length} users: ${eligibleUserIds.length} eligible, ${tokens.length} active tokens.`
+  );
+
+  if (tokens.length === 0) {
+    console.log('[sendPushNotification] No active device tokens found. Skipping FCM send.');
+    return;
+  }
 
   // 3. Prepare the FCM Message
   const title = payload.title[language] || payload.title.en;
@@ -61,7 +73,9 @@ export const sendPushNotification = async (
     }
   }
 
-  const message = {
+  const clickUrl = safeData.webUrl || safeData.url || '/dashboard/student/notifications';
+
+  const messageBase = {
     notification: {
       title,
       body,
@@ -69,33 +83,64 @@ export const sendPushNotification = async (
     webpush: {
       notification: {
         icon: '/notification-icon.svg',
-      }
+        badge: '/notification-icon.svg',
+      },
+      fcmOptions: {
+        link: clickUrl,
+      },
+    },
+    android: {
+      priority: 'high' as const,
+      notification: {
+        icon: 'ic_notification',
+        color: '#2563EB',
+        channelId: 'quizdo_general',
+        defaultSound: true,
+      },
     },
     data: safeData,
-    tokens: tokens, // Multicast message
   };
 
-  try {
-    const response = await adminMessaging.sendEachForMulticast(message);
-    console.log(response.successCount + ' messages were sent successfully');
-    
-    if (response.failureCount > 0) {
-      const failedTokens: string[] = [];
-      response.responses.forEach((resp, idx) => {
-        if (!resp.success) {
-          failedTokens.push(tokens[idx]);
-          // If token is unregistered, we should mark it as inactive
-          if (resp.error?.code === 'messaging/invalid-registration-token' ||
-              resp.error?.code === 'messaging/registration-token-not-registered') {
-             // In a real app, queue a job to update the DB here
-             NotificationToken.updateOne({ deviceToken: tokens[idx] }, { isActive: false }).exec();
-          }
-        }
+  const CHUNK_SIZE = 500; // FCM multicast maximum limit
+  let totalSuccess = 0;
+  let totalFailure = 0;
+
+  for (let i = 0; i < tokens.length; i += CHUNK_SIZE) {
+    const chunkTokens = tokens.slice(i, i + CHUNK_SIZE);
+    try {
+      const response = await adminMessaging.sendEachForMulticast({
+        ...messageBase,
+        tokens: chunkTokens,
       });
-      console.log('List of tokens that caused failures: ' + failedTokens);
+
+      totalSuccess += response.successCount;
+      totalFailure += response.failureCount;
+
+      if (response.failureCount > 0) {
+        const invalidTokens: string[] = [];
+        response.responses.forEach((resp, idx) => {
+          if (!resp.success) {
+            const errCode = resp.error?.code;
+            if (
+              errCode === 'messaging/invalid-registration-token' ||
+              errCode === 'messaging/registration-token-not-registered'
+            ) {
+              invalidTokens.push(chunkTokens[idx]);
+            }
+          }
+        });
+
+        if (invalidTokens.length > 0) {
+          await NotificationToken.updateMany(
+            { deviceToken: { $in: invalidTokens } },
+            { $set: { isActive: false } }
+          ).catch((e) => console.error('[sendPushNotification] Error deactivating invalid tokens:', e));
+        }
+      }
+    } catch (batchError) {
+      console.error('[sendPushNotification] Batch send error:', batchError);
     }
-  } catch (error) {
-    console.error('Error sending multicast message:', error);
-    throw error;
   }
+
+  console.log(`[sendPushNotification] Multicast complete: ${totalSuccess} successful, ${totalFailure} failed.`);
 };

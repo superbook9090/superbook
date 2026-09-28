@@ -118,33 +118,47 @@ export function useTeacherContestForm(contestId?: string) {
     }
   }, [isEdit, existingData, setPrizes, setQuestions]);
 
-  const handleSuperAdminAutofill = async () => {
-    const contestNumber = await fetchDailyQuizCounter();
-    setTitle(`Daily Quiz Contest ${contestNumber}`);
-    setDescription(
-      t('contest.dailyQuizDesc')
-    );
-    setInstructions(
-      t('contest.dailyQuizInstructions')
-    );
-    setDuration('20');
+  const [isAutofilling, setIsAutofilling] = useState(false);
 
-    const now = new Date();
-    now.setMinutes(0, 0, 0);
-    const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+  const handleSuperAdminAutofill = async (onDone?: () => void) => {
+    setIsAutofilling(true);
+    try {
+      const contestNumber = await fetchDailyQuizCounter();
+      setTitle(`Daily Quiz Contest ${contestNumber}`);
+      setDescription(t('contest.dailyQuizDesc'));
+      setInstructions(t('contest.dailyQuizInstructions'));
+      setScheduleType('daily');
+      setDuration('20');
 
-    setStartTime(toLocalDateTimeInput(now));
-    setEndTime(toLocalDateTimeInput(tomorrow));
-    setSolutionsReleaseAt(toLocalDateTimeInput(tomorrow));
-    setLeaderboardVisibility('after_end');
-    setEnableNegativeMarking(true);
-    setNegativeMarks('0.25');
-    setTriggerAiModalOpen((prev) => prev + 1);
+      const now = new Date();
+      now.setMinutes(0, 0, 0);
+      const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
-    addAlert({
-      type: 'success',
-      message: t('contest.aiAutofillSuccess'),
-    });
+      setStartTime(toLocalDateTimeInput(now));
+      setEndTime(toLocalDateTimeInput(tomorrow));
+      setSolutionsReleaseAt(toLocalDateTimeInput(tomorrow));
+      setLeaderboardVisibility('after_end');
+      setEnableNegativeMarking(true);
+      setNegativeMarks('0.25');
+
+      setTriggerAiModalOpen((prev) => prev + 1);
+
+      addAlert({
+        type: 'success',
+        message: t('contest.aiAutofillSuccess'),
+      });
+
+      if (onDone) {
+        onDone();
+      }
+    } catch {
+      addAlert({
+        type: 'error',
+        message: 'Failed to auto-fill contest details. Please try again.',
+      });
+    } finally {
+      setIsAutofilling(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -164,6 +178,7 @@ export function useTeacherContestForm(contestId?: string) {
     isEdit,
     fetchingExisting,
     isSaving,
+    isAutofilling,
     canEditQuestions,
     title,
     setTitle,

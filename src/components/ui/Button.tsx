@@ -19,7 +19,7 @@ const buttonVariants = cva(
         success:
           "bg-[var(--color-success)] text-white hover:bg-[var(--color-success)]/90",
         warning:
-          "bg-[var(--color-warning)] text-white hover:bg-[var(--color-warning)]/90",
+          "bg-[var(--color-warning)] text-slate-900 hover:bg-[var(--color-warning)]/90",
         info:
           "bg-[var(--color-info)] text-white hover:bg-[var(--color-info)]/90",
         outline:

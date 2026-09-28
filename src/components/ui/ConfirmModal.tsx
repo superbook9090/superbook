@@ -136,7 +136,7 @@ export default function ConfirmModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-50 bg-[var(--color-foreground)]/30 backdrop-blur-sm"
+            className="fixed inset-0 z-50 bg-[var(--color-foreground)]/10 backdrop-blur-sm"
             onClick={handleBackdropClick}
             aria-hidden="true"
           />
@@ -153,7 +153,7 @@ export default function ConfirmModal({
             aria-labelledby="modal-title"
             aria-describedby="modal-description"
           >
-            <div className="w-full max-w-[340px] sm:max-w-md relative overflow-hidden bg-[var(--color-card)] rounded-2xl border border-[var(--color-border)] shadow-2xl p-4 sm:p-6 md:p-8">
+            <div className="w-full max-w-[340px] sm:max-w-md relative overflow-hidden bg-white/90 dark:bg-[#101319]/90 backdrop-blur-md rounded-2xl border border-[var(--color-border)] shadow-2xl p-4 sm:p-6 md:p-8">
               {/* Type indicator top bar */}
               <div className={cn(
                 "absolute top-0 left-0 right-0 h-1.5",
@@ -185,7 +185,7 @@ export default function ConfirmModal({
               {/* Message text description */}
               <p
                 id="modal-description"
-                className="text-body text-[var(--color-muted-foreground)] text-center mb-8 leading-relaxed"
+                className="text-body text-[var(--color-foreground)] opacity-90 text-center mb-8 leading-relaxed"
               >
                 {message}
               </p>
@@ -198,7 +198,7 @@ export default function ConfirmModal({
                     variant="secondary"
                     onClick={onCancel}
                     disabled={isLoading}
-                    fullWidth
+                    className="w-full sm:flex-1"
                   >
                     {defaultCancelText}
                   </Button>
@@ -208,9 +208,9 @@ export default function ConfirmModal({
                   variant={type === 'danger' ? 'danger' : 'primary'}
                   onClick={handleConfirm}
                   isLoading={isLoading}
-                  fullWidth
                   className={cn(
-                    type === 'warning' && 'bg-none bg-[var(--color-warning)] hover:bg-[var(--color-warning)]/90 focus-visible:ring-[var(--color-warning)]',
+                    "w-full sm:flex-1",
+                    type === 'warning' && 'bg-none bg-[var(--color-warning)] text-slate-900 hover:bg-[var(--color-warning)]/90 focus-visible:ring-[var(--color-warning)]',
                     type === 'success' && 'bg-none bg-[var(--color-success)] hover:bg-[var(--color-success)]/90 focus-visible:ring-[var(--color-success)]',
                     type === 'info' && 'bg-none bg-[var(--color-info)] hover:bg-[var(--color-info)]/90 focus-visible:ring-[var(--color-info)]',
                   )}

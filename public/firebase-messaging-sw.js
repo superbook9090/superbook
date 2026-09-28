@@ -19,11 +19,12 @@ try {
 
   messaging.onBackgroundMessage((payload) => {
     console.log('[firebase-messaging-sw.js] Received background message ', payload);
-    const notificationTitle = payload.notification.title;
+    const notificationTitle = payload?.notification?.title || payload?.data?.title || 'Quiz-Do';
     const notificationOptions = {
-      body: payload.notification.body,
-      icon: '/notification-icon.svg',
-      data: payload.data
+      body: payload?.notification?.body || payload?.data?.body || '',
+      icon: payload?.notification?.icon || '/notification-icon.svg',
+      badge: '/notification-icon.svg',
+      data: payload?.data || {}
     };
 
     self.registration.showNotification(notificationTitle, notificationOptions);
@@ -34,7 +35,25 @@ try {
 
 self.addEventListener('notificationclick', function (event) {
   event.notification.close();
-  const urlToOpen = new URL(event.notification.data.url || '/', self.location.origin).href;
+  const data = event.notification?.data || {};
+
+  let targetPath = data.webUrl;
+  if (!targetPath && data.url) {
+    if (data.url.startsWith('quizdo://contest/')) {
+      const contestId = data.url.replace('quizdo://contest/', '');
+      targetPath = `/dashboard/student/contests/${contestId}/take`;
+    } else if (data.url.startsWith('http://') || data.url.startsWith('https://') || data.url.startsWith('/')) {
+      targetPath = data.url;
+    }
+  }
+  if (!targetPath && data.contestId) {
+    targetPath = `/dashboard/student/contests/${data.contestId}/take`;
+  }
+  if (!targetPath) {
+    targetPath = '/dashboard/student/notifications';
+  }
+
+  const urlToOpen = new URL(targetPath, self.location.origin).href;
 
   const promiseChain = clients.matchAll({
     type: 'window',

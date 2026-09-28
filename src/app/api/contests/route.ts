@@ -12,7 +12,6 @@ import {
   getContestComputedState,
   canTeacherManageContests,
 } from '@/lib/contest/contestHelpers';
-import { isSuperAdmin } from '@/lib/roles';
 import {
   buildContestListQuery,
   getStudentAttemptMap,
@@ -249,7 +248,7 @@ export async function POST(request: NextRequest) {
     await contest.save();
     await invalidatePattern('contests:*');
 
-    if (notifyAllStudents && isSuperAdmin(session.user.role)) {
+    if (notifyAllStudents) {
       await broadcastNewContest(contest._id, title);
     }
 

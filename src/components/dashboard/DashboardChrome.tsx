@@ -79,6 +79,7 @@ export default function DashboardChrome({
           <LazyDashboardHeader
             isTeacherOrAdmin={isStaff}
             showNotifications={role === 'student'}
+            role={role}
           />
 
           <RoleThemeProvider role={role || 'student'}>

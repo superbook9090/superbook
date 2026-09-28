@@ -10,7 +10,11 @@ import {
   RefreshCw,
   Crown,
   Bell,
+  CalendarIcon,
 } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format, parseISO } from 'date-fns';
 
 interface AdminHeroProps {
   userName?: string;
@@ -39,16 +43,16 @@ export default function AdminHero({
   const setPreset = (days: number) => {
     const end = new Date();
     const start = new Date();
-    if (days > 0) {
-      start.setDate(start.getDate() - days);
-    } else {
-      start.setFullYear(start.getFullYear() - 1);
-    }
+    start.setDate(end.getDate() - days + 1);
+    
     onDateRangeChange({
-      startDate: start.toISOString().split('T')[0],
-      endDate: end.toISOString().split('T')[0],
+      startDate: format(start, "yyyy-MM-dd"),
+      endDate: format(end, "yyyy-MM-dd"),
     });
   };
+
+  const parsedStartDate = useMemo(() => dateRange.startDate ? parseISO(dateRange.startDate) : undefined, [dateRange.startDate]);
+  const parsedEndDate = useMemo(() => dateRange.endDate ? parseISO(dateRange.endDate) : undefined, [dateRange.endDate]);
 
   return (
     <motion.div
@@ -73,8 +77,8 @@ export default function AdminHero({
         }`} 
       />
 
-      <div className="relative z-10 flex flex-col md:flex-row md:items-end md:justify-between gap-8">
-        <div className="space-y-4 max-w-2xl">
+      <div className="relative z-10 flex flex-wrap items-end justify-between gap-8">
+        <div className="space-y-4 max-w-2xl min-w-[320px] flex-1">
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -103,21 +107,21 @@ export default function AdminHero({
                 </span>
               )}
             </motion.h1>
-            <motion.p 
+            <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
-              className="text-sm sm:text-lg text-[var(--color-muted-foreground)] font-medium max-w-xl flex items-center gap-2"
+              className="text-sm sm:text-lg text-[var(--color-muted-foreground)] font-medium max-w-xl flex flex-wrap items-center gap-2"
             >
-              {t('admin.adminDesc')}
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold bg-[var(--success-light)] text-[var(--success)] border border-[var(--success)]/30">
+              <span>{t('admin.adminDesc')}</span>
+              <span className="inline-flex shrink-0 items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold bg-[var(--success-light)] text-[var(--success)] border border-[var(--success)]/30">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--success)] opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--success)]" />
                 </span>
                 {t('admin.systemsOperational')}
               </span>
-            </motion.p>
+            </motion.div>
           </div>
         </div>
 
@@ -125,7 +129,7 @@ export default function AdminHero({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="flex flex-col sm:flex-row items-end sm:items-center gap-4 pt-2 md:pt-0"
+          className="flex flex-col sm:flex-row items-end sm:items-center gap-4 pt-2 md:pt-0 shrink-0 ml-auto"
         >
           {isSuperAdmin && (
             <div className="inline-flex flex-col sm:flex-row items-end sm:items-center gap-2 p-1.5 rounded-2xl bg-[var(--card-solid)]/60 backdrop-blur-md border border-[var(--border)] shadow-sm">
@@ -153,20 +157,50 @@ export default function AdminHero({
                 </button>
               </div>
 
-              <div className="flex items-center gap-2 px-2 text-xs font-bold text-[var(--color-foreground)]">
-                <input
-                  type="date"
-                  value={dateRange.startDate}
-                  onChange={(e) => onDateRangeChange({ ...dateRange, startDate: e.target.value })}
-                  className="bg-transparent border-none outline-none cursor-pointer"
-                />
-                <span className="text-[var(--color-muted-foreground)] text-[10px] uppercase">to</span>
-                <input
-                  type="date"
-                  value={dateRange.endDate}
-                  onChange={(e) => onDateRangeChange({ ...dateRange, endDate: e.target.value })}
-                  className="bg-transparent border-none outline-none cursor-pointer"
-                />
+              <div className="flex items-center px-1">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="flex items-center justify-between gap-3 px-3 py-1.5 text-xs font-bold text-[var(--color-foreground)] rounded-xl hover:bg-[var(--surface-muted)] transition-colors border border-transparent hover:border-[var(--border)] cursor-pointer outline-none">
+                      {parsedStartDate ? (
+                        <>
+                          <div className="flex items-center gap-1.5">
+                            {format(parsedStartDate, "dd/MM/yyyy")}
+                            <CalendarIcon className="w-3.5 h-3.5 text-[var(--color-muted-foreground)]" />
+                          </div>
+                          {parsedEndDate && (
+                            <>
+                              <span className="text-[var(--color-muted-foreground)] text-[9px] uppercase font-extrabold">TO</span>
+                              <div className="flex items-center gap-1.5">
+                                {format(parsedEndDate, "dd/MM/yyyy")}
+                                <CalendarIcon className="w-3.5 h-3.5 text-[var(--color-muted-foreground)]" />
+                              </div>
+                            </>
+                          )}
+                        </>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <span>Pick a date range</span>
+                          <CalendarIcon className="w-3.5 h-3.5 text-[var(--color-muted-foreground)]" />
+                        </div>
+                      )}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="end">
+                    <Calendar
+                      autoFocus
+                      mode="range"
+                      defaultMonth={parsedStartDate}
+                      selected={{ from: parsedStartDate, to: parsedEndDate }}
+                      onSelect={(range) => {
+                        onDateRangeChange({
+                          startDate: range?.from ? format(range.from, "yyyy-MM-dd") : "",
+                          endDate: range?.to ? format(range.to, "yyyy-MM-dd") : "",
+                        });
+                      }}
+                      numberOfMonths={2}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
           )}

@@ -68,16 +68,14 @@ export default function CreateQuizPageContent({ quizId }: { quizId?: string }) {
       </div>
 
       {isEdit && activeTab === 'leaderboard' ? (
-        <LazyQuizLeaderboard quizId={quizId!} />
-      ) : (
-        <div className="bg-[var(--card-solid)] shadow rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
-            <CreateQuizForm
-              quizId={quizId}
-              onViewLeaderboard={isEdit ? () => setActiveTab('leaderboard') : undefined}
-            />
-          </div>
+        <div className="bg-[var(--card-solid)] shadow-xl rounded-[2rem] p-5 sm:p-7 border border-[var(--border)]">
+          <LazyQuizLeaderboard quizId={quizId!} />
         </div>
+      ) : (
+        <CreateQuizForm
+          quizId={quizId}
+          onViewLeaderboard={isEdit ? () => setActiveTab('leaderboard') : undefined}
+        />
       )}
     </div>
   );
