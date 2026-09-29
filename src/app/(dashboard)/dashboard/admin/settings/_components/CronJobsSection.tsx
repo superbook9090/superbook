@@ -14,20 +14,31 @@ export function CronJobsSection() {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          // Need to send admin session cookies automatically by browser, which is handled
         },
       });
-      const data = await res.json();
+      const text = await res.text();
+      let data: Record<string, unknown> = {};
+      try {
+        data = JSON.parse(text);
+      } catch {
+        // Non-JSON response (e.g. Vercel timeout 504 or server HTML error)
+        data = {
+          message:
+            res.status === 504
+              ? 'Server execution timed out (HTTP 504). Checkpoint may have been saved.'
+              : `Server returned HTTP ${res.status}: ${res.statusText || 'Error processing request'}`,
+        };
+      }
       setResult({
         job: jobId,
-        success: res.ok,
-        message: data.message || (res.ok ? 'Job executed successfully' : 'Job failed'),
+        success: res.ok && data.success !== false,
+        message: String(data.message || (res.ok ? 'Job executed successfully' : 'Job failed')),
       });
     } catch (err) {
       setResult({
         job: jobId,
         success: false,
-        message: (err as Error).message || 'An error occurred',
+        message: (err as Error).message || 'An error occurred while running the task',
       });
     } finally {
       setLoadingJob(null);

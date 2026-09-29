@@ -1,4 +1,5 @@
 import { fetchOpenRouterChat } from '@/lib/ai/openrouter';
+import { fetchStockanlyzerChat } from '@/lib/stockanlyzer/chat';
 
 export class QuotaExhaustedError extends Error {
   public provider: string;
@@ -39,15 +40,16 @@ function isQuotaOrLimitError(error: unknown): boolean {
 }
 
 /**
- * Robust AI Completion with failover across OpenRouter free models and Google Gemini.
+ * Robust AI Completion with failover across OpenRouter free models, Google Gemini, and Stockanlyzer.
  * Catches quota/rate-limits and throws QuotaExhaustedError when all daily quotas are consumed.
  */
 async function callAiWithFallback(
   messages: Array<{ role: 'system' | 'user'; content: string }>,
   options?: { maxTokens?: number; temperature?: number; validateOutput?: (text: string) => boolean }
 ): Promise<string> {
-  const maxTokens = options?.maxTokens ?? 3500;
+  const maxTokens = options?.maxTokens ?? 1800;
   const temperature = options?.temperature ?? 0.6;
+  const timeoutMs = 12000;
 
   // 1. Attempt OpenRouter Free Models
   if (process.env.OPENROUTER_API_KEY) {
@@ -56,7 +58,7 @@ async function callAiWithFallback(
         maxTokens,
         temperature,
         autoSwitchOnLimit: true,
-        timeoutMs: 35000,
+        timeoutMs,
         validateOutput: options?.validateOutput,
       });
 
@@ -72,6 +74,8 @@ async function callAiWithFallback(
     }
   }
 
+  const promptCombined = messages.map((m) => `${m.role.toUpperCase()}: ${m.content}`).join('\n\n');
+
   // 2. Attempt Google Gemini API as Fallback
   const geminiKey =
     process.env.GEMINI_API_KEY ||
@@ -79,13 +83,17 @@ async function callAiWithFallback(
     process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 
   if (geminiKey) {
-    const geminiModels = ['gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite'];
-    const promptCombined = messages.map((m) => `${m.role.toUpperCase()}: ${m.content}`).join('\n\n');
+    const configuredGeminiModel = process.env.GEMINI_MODEL;
+    const geminiModels = [
+      ...(configuredGeminiModel ? [configuredGeminiModel] : []),
+      'gemini-2.0-flash',
+      'gemini-1.5-flash',
+    ];
 
     for (const model of geminiModels) {
       try {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 35000);
+        const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
         const res = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
@@ -126,7 +134,17 @@ async function callAiWithFallback(
     }
   }
 
-  // If both OpenRouter and Gemini were attempted and failed due to quota/rate limits:
+  // 3. Attempt Stockanlyzer Fallback
+  try {
+    const reply = await fetchStockanlyzerChat(promptCombined, 1, 2000);
+    if (reply && (!options?.validateOutput || options.validateOutput(reply))) {
+      return reply.trim();
+    }
+  } catch (stockErr) {
+    console.warn('[CourseAiGenerator] Stockanlyzer fallback error:', stockErr);
+  }
+
+  // If all providers failed:
   throw new QuotaExhaustedError(
     'All AI model providers reached rate limit or daily free quota. Generation safely paused until next renewal.',
     'COMBINED'
@@ -213,7 +231,7 @@ export async function generateLessonQuizQuestions(params: {
   quizTitle: string;
   numQuestions?: number;
 }): Promise<GeneratedQuestionItem[]> {
-  const { chapterTitle, lessonTitle, quizTitle, numQuestions = 8 } = params;
+  const { chapterTitle, lessonTitle, quizTitle, numQuestions = 5 } = params;
 
   const prompt = `You are an expert exam question paper setter for UPSSSC PET (Uttar Pradesh Preliminary Eligibility Test).
 Generate EXACTLY ${numQuestions} high-quality, realistic multiple-choice questions for:
@@ -242,7 +260,7 @@ CRITICAL REQUIREMENTS:
       { role: 'user', content: prompt },
     ],
     {
-      maxTokens: 3000,
+      maxTokens: 1200,
       temperature: 0.6,
       validateOutput: (text) => text.includes('[') && text.includes(']'),
     }
@@ -281,14 +299,54 @@ CRITICAL REQUIREMENTS:
     while (opts.length < 4) {
       opts.push(`विकल्प ${String.fromCharCode(65 + opts.length)}`);
     }
-    const correct = typeof obj.correctAnswer === 'number' && obj.correctAnswer >= 0 && obj.correctAnswer <= 3
-      ? obj.correctAnswer
-      : 0;
+
+    let resolvedCorrect = 0;
+    const rawCorrect =
+      obj.correctAnswer !== undefined
+        ? obj.correctAnswer
+        : obj.correctOption !== undefined
+          ? obj.correctOption
+          : obj.correct_answer !== undefined
+            ? obj.correct_answer
+            : obj.answer;
+
+    if (typeof rawCorrect === 'number' && Number.isFinite(rawCorrect) && rawCorrect >= 0 && rawCorrect < opts.length) {
+      resolvedCorrect = Math.floor(rawCorrect);
+    } else if (typeof rawCorrect === 'string') {
+      const trimmed = rawCorrect.trim();
+      const num = parseInt(trimmed, 10);
+      if (!isNaN(num) && num >= 0 && num < opts.length) {
+        resolvedCorrect = num;
+      } else {
+        const letterMatch = trimmed.toUpperCase().match(/\b([A-D])\b/);
+        if (letterMatch && letterMatch[1]) {
+          resolvedCorrect = letterMatch[1].charCodeAt(0) - 65;
+        } else {
+          const matchIdx = opts.findIndex((opt) => opt.toLowerCase() === trimmed.toLowerCase());
+          if (matchIdx !== -1) resolvedCorrect = matchIdx;
+        }
+      }
+    }
+
+    // Randomize option order while preserving correct answer
+    const items = opts.map((text, idx) => ({
+      text,
+      isCorrect: idx === resolvedCorrect,
+    }));
+    for (let i = items.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const temp = items[i];
+      items[i] = items[j];
+      items[j] = temp;
+    }
+
+    const finalOptions = items.map((i) => i.text);
+    const finalCorrect = items.findIndex((i) => i.isCorrect);
 
     return {
       question: String(obj.question || 'महत्वपूर्ण प्रश्न').trim(),
-      options: opts,
-      correctAnswer: correct,
+      options: finalOptions,
+      correctAnswer: finalCorrect !== -1 ? finalCorrect : 0,
     };
   });
 }

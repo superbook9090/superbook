@@ -30,8 +30,8 @@ import {
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60; // Max serverless execution time (Vercel standard)
 
-// Max execution budget per single cron invocation (leave 12s safety cushion for DB & final response)
-const MAX_RUN_TIME_MS = 46000;
+// Max execution budget per single cron invocation (leave safe cushion for DB & final response)
+const MAX_RUN_TIME_MS = 25000;
 
 export async function GET(req: NextRequest) {
   const logContext = { method: 'GET', path: '/api/cron/generate-up-pet-course' };
@@ -204,6 +204,12 @@ export async function GET(req: NextRequest) {
         continue;
       }
 
+      // Check if remaining execution time is sufficient for another lesson
+      if (Date.now() - startTime >= MAX_RUN_TIME_MS) {
+        logInfo('Execution budget reached for this invocation, saving progress', logContext);
+        break;
+      }
+
       // Attempt AI Generation for Lesson & Practice Quiz
       try {
         logInfo(
@@ -224,7 +230,7 @@ export async function GET(req: NextRequest) {
           chapterTitle: chapterBlueprint.title,
           lessonTitle: lessonBlueprint.title,
           quizTitle: lessonBlueprint.quizTitle,
-          numQuestions: lessonBlueprint.questionCount,
+          numQuestions: Math.min(5, lessonBlueprint.questionCount || 5),
         });
 
         // 3. Save Lesson to MongoDB
@@ -252,6 +258,8 @@ export async function GET(req: NextRequest) {
           questionCount: questions.length,
           timeLimit: Math.max(5, questions.length * 2), // 2 minutes per question
           isPublished: true,
+          enableNegativeMarking: true,
+          negativeMarks: 0.25,
         });
 
         // 5. Save Quiz Questions
@@ -262,6 +270,7 @@ export async function GET(req: NextRequest) {
           options: q.options,
           correctOption: q.correctAnswer,
           points: 1,
+          negativePoints: 0.25,
         }));
         await QuizQuestion.insertMany(questionDocs);
 
