@@ -36,6 +36,7 @@ export interface AppSettings {
     enableAutoDailyAiContestCreation?: boolean;
     enableAutoDeclareResults?: boolean;
     enableUpPetCourseCron?: boolean;
+    enableChatWidget?: boolean;
   };
   challengeConfig?: {
     allowGuestChallenges: boolean;

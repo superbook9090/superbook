@@ -36,6 +36,7 @@ export interface IAppSettings extends Document {
     enableAutoDailyAiContestCreation?: boolean;
     enableAutoDeclareResults?: boolean;
     enableUpPetCourseCron?: boolean;
+    enableChatWidget?: boolean;
   };
   challengeConfig?: {
     allowGuestChallenges: boolean;
@@ -181,6 +182,10 @@ const appSettingsSchema = new Schema<IAppSettings>(
         default: true,
       },
       enableUpPetCourseCron: {
+        type: Boolean,
+        default: true,
+      },
+      enableChatWidget: {
         type: Boolean,
         default: true,
       },

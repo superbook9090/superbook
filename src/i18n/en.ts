@@ -2102,6 +2102,8 @@ export const en = {
     enableAutoDeclareResultsDesc: 'Automatically declare contest results when they end (superadmin only)',
     enableUpPetCourseCron: 'UP PET AI Course & Quiz Generator',
     enableUpPetCourseCronDesc: 'Automated nightly generator creating the complete UPSSSC PET syllabus course, topic lessons, and quizzes (superadmin only)',
+    enableChatWidget: 'Live Chat Support Widget',
+    enableChatWidgetDesc: 'Display the live customer support chat widget on the website (superadmin only)',
     challengeConfig: 'Quiz Challenge & Viral Settings',
     challengeConfigDesc: 'Configure guest play permissions, link expiration, and viral loop behaviors for student challenges.',
     challengeViralSettings: 'Quiz Challenge & Viral Settings',

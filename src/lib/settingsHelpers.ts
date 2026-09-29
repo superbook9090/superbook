@@ -28,6 +28,7 @@ interface FeatureToggles {
   enableAutoDeclareResults?: boolean;
   enableUpPetCourseCron?: boolean;
   enableGoogleAdsense?: boolean;
+  enableChatWidget?: boolean;
 }
 
 interface TeacherLimits {
@@ -62,6 +63,7 @@ const DEFAULT_FEATURE_TOGGLES: Partial<Record<keyof FeatureToggles, boolean>> = 
   enableAutoDeclareResults: true,
   enableUpPetCourseCron: true,
   enableGoogleAdsense: true,
+  enableChatWidget: true,
 };
 
 export async function isFeatureEnabled(feature: keyof FeatureToggles): Promise<boolean> {

@@ -238,6 +238,10 @@ export async function PATCH(req: NextRequest) {
           isSuper && featureToggles.enableUpPetCourseCron !== undefined
             ? featureToggles.enableUpPetCourseCron
             : (existingToggles.enableUpPetCourseCron ?? true),
+        enableChatWidget:
+          isSuper && featureToggles.enableChatWidget !== undefined
+            ? featureToggles.enableChatWidget
+            : (existingToggles.enableChatWidget ?? true),
       };
 
       settings.featureToggles = mergedToggles;

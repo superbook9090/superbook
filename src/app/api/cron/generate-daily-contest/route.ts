@@ -17,9 +17,106 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 60; // Max execution time for Vercel (Free tier limit)
 
 interface GeneratedQuestion {
-  question: string;
+  question?: string;
+  prompt?: string;
   options: string[];
-  correctAnswer: number;
+  correctAnswer?: number | string;
+  correct_answer?: number | string;
+  correctOption?: number | string;
+  answer?: number | string;
+}
+
+function processAndRandomizeContestQuestion(
+  q: GeneratedQuestion,
+  order: number,
+  quizId: mongoose.Types.ObjectId
+) {
+  const promptText = (q.question || q.prompt || '').trim() || `Question ${order}`;
+
+  // 1. Sanitize options (strings, non-empty, trimmed)
+  let cleanOptions: string[] = [];
+  if (Array.isArray(q.options)) {
+    cleanOptions = q.options
+      .map((opt) => String(opt ?? '').trim())
+      .filter((opt) => opt.length > 0);
+  }
+
+  // Ensure at least 4 options exist
+  while (cleanOptions.length < 4) {
+    cleanOptions.push(`Option ${String.fromCharCode(65 + cleanOptions.length)}`);
+  }
+  cleanOptions = cleanOptions.slice(0, 4);
+
+  // 2. Identify the correct answer from AI output
+  const rawCorrect =
+    q.correctAnswer !== undefined
+      ? q.correctAnswer
+      : q.correctOption !== undefined
+        ? q.correctOption
+        : q.correct_answer !== undefined
+          ? q.correct_answer
+          : q.answer;
+
+  let resolvedCorrectIndex = -1;
+
+  if (typeof rawCorrect === 'number' && Number.isFinite(rawCorrect)) {
+    const idx = Math.floor(rawCorrect);
+    if (idx >= 0 && idx < cleanOptions.length) {
+      resolvedCorrectIndex = idx;
+    }
+  } else if (typeof rawCorrect === 'string') {
+    const trimmed = rawCorrect.trim();
+    const parsedNum = parseInt(trimmed, 10);
+    if (!isNaN(parsedNum) && parsedNum >= 0 && parsedNum < cleanOptions.length) {
+      resolvedCorrectIndex = parsedNum;
+    } else {
+      // Check for letter A, B, C, D (e.g. "A", "Option A", "(B)")
+      const letterMatch = trimmed.toUpperCase().match(/\b([A-D])\b/);
+      if (letterMatch && letterMatch[1]) {
+        resolvedCorrectIndex = letterMatch[1].charCodeAt(0) - 65;
+      } else {
+        // Check if string matches text of one of the options
+        const matchIdx = cleanOptions.findIndex(
+          (opt) => opt.toLowerCase() === trimmed.toLowerCase()
+        );
+        if (matchIdx !== -1) {
+          resolvedCorrectIndex = matchIdx;
+        }
+      }
+    }
+  }
+
+  // Fallback: if AI provided an unrecognized correct answer, pick a random option
+  if (resolvedCorrectIndex < 0 || resolvedCorrectIndex >= cleanOptions.length) {
+    resolvedCorrectIndex = Math.floor(Math.random() * cleanOptions.length);
+  }
+
+  // 3. Guarantee that the correct answer is present AND randomize its position
+  const items = cleanOptions.map((text, idx) => ({
+    text,
+    isCorrect: idx === resolvedCorrectIndex,
+  }));
+
+  // Fisher-Yates shuffle to randomize options
+  for (let i = items.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const temp = items[i];
+    items[i] = items[j];
+    items[j] = temp;
+  }
+
+  const randomizedOptions = items.map((item) => item.text);
+  const randomizedCorrectOption = items.findIndex((item) => item.isCorrect);
+
+  return {
+    quiz: quizId,
+    order,
+    prompt: promptText,
+    options: randomizedOptions,
+    correctOption: randomizedCorrectOption !== -1 ? randomizedCorrectOption : 0,
+    points: 1, // 1 mark per question
+    negativePoints: 0.25, // -0.25 negative mark
+  };
 }
 
 export async function GET(req: NextRequest) {
@@ -128,8 +225,9 @@ CRITICAL QUALITY & PEDAGOGICAL REQUIREMENTS:
 2. DIFFICULTY: Medium level — thought-provoking, competitive, and realistic.
 3. EXACT QUESTION COUNT: Provide EXACTLY ${toFetch} distinct questions written strictly in ${language}.
 4. 4 OPTIONS: Each question MUST have EXACTLY 4 distinct, plausible multiple-choice options, also in ${language}.
-5. RANDOM CORRECT ANSWER: Distribute the "correctAnswer" index (0 for A, 1 for B, 2 for C, 3 for D) randomly.
-6. FORMAT: Return ONLY a valid JSON array of question objects matching this exact format without any markdown wrapper:
+5. ACCURATE CORRECT ANSWER: Every question MUST have exactly one indisputably correct, factually accurate answer, and that correct answer MUST be included in the "options" list.
+6. RANDOM CORRECT ANSWER: Distribute the "correctAnswer" index (0 for A, 1 for B, 2 for C, 3 for D) randomly across questions so that option A (0) is not always the correct answer.
+7. FORMAT: Return ONLY a valid JSON array of question objects matching this exact format without any markdown wrapper:
 [
   {
     "question": "Question text",
@@ -201,25 +299,13 @@ CRITICAL QUALITY & PEDAGOGICAL REQUIREMENTS:
       timeLimit: timeLimitMinutes, // Give time equal to question count
       isPublished: true,
       enableNegativeMarking: true,
-      negativeMarks: 2,
+      negativeMarks: 0.25,
     });
 
     const quizId = quizDoc._id;
 
     const questionDocs = parsedQuestions.map((q, index) => {
-      const opts = Array.isArray(q.options) ? q.options.slice(0, 4) : ['A', 'B', 'C', 'D'];
-      while (opts.length < 4) opts.push(`Option ${opts.length + 1}`);
-      let correct = q.correctAnswer;
-      if (typeof correct !== 'number' || correct < 0 || correct > 3) correct = 0;
-
-      return {
-        quiz: quizId,
-        order: index + 1,
-        prompt: q.question || 'Unknown Question',
-        options: opts,
-        correctOption: correct,
-        points: 10, // 10 points per question
-      };
+      return processAndRandomizeContestQuestion(q, index + 1, quizId);
     });
 
     await QuizQuestion.insertMany(questionDocs);
@@ -260,9 +346,9 @@ CRITICAL QUALITY & PEDAGOGICAL REQUIREMENTS:
       visibility: 'public',
       leaderboardVisibility: 'live',
       questionCount: parsedQuestions.length,
-      totalPoints: parsedQuestions.length * 10,
+      totalPoints: parsedQuestions.length * 1,
       enableNegativeMarking: true,
-      negativeMarks: 2,
+      negativeMarks: 0.25,
       resultsDeclared: false
     });
 

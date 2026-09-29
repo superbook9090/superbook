@@ -9,6 +9,7 @@ import MaintenanceCheck from '@/components/MaintenanceCheck';
 import DeferredAnalytics from '@/components/providers/DeferredAnalytics';
 import ClarityInit from '@/components/providers/ClarityInit';
 import AdsenseInit from '@/components/providers/AdsenseInit';
+import ChatWidgetInit from '@/components/providers/ChatWidgetInit';
 import { createRootMetadata } from '@/lib/seo/metadata';
 import { fontVariables } from '@/lib/fonts';
 import PullToRefresh from '@/components/PullToRefresh';
@@ -65,6 +66,7 @@ export default function RootLayout({
         </Suspense>
         <ClarityInit />
         <AdsenseInit />
+        <ChatWidgetInit />
       </body>
     </html>
   );

@@ -33,6 +33,7 @@ const defaultSettings: AppSettings = {
     enableAiQuizGen: true,
     enableDownloadAppPopup: true,
     enableQuizChallenges: true,
+    enableChatWidget: true,
   },
   challengeConfig: {
     allowGuestChallenges: true,

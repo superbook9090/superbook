@@ -40,6 +40,7 @@ const DEFAULT_SETTINGS = {
     enableAutoDailyAiContestCreation: true,
     enableAutoDeclareResults: true,
     enableUpPetCourseCron: true,
+    enableChatWidget: true,
   },
   challengeConfig: {
     allowGuestChallenges: true,

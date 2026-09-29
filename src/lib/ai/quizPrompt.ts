@@ -142,13 +142,38 @@ export function sanitizeParsedQuestions(
       while (opts.length < 4) {
         opts.push(`Option ${String.fromCharCode(65 + opts.length)}`);
       }
+      let resolvedCorrect = 0;
+      const rawCorrect =
+        obj.correctAnswer !== undefined
+          ? obj.correctAnswer
+          : obj.correctOption !== undefined
+            ? obj.correctOption
+            : obj.correct_answer !== undefined
+              ? obj.correct_answer
+              : obj.answer;
+
+      if (typeof rawCorrect === 'number' && Number.isFinite(rawCorrect) && rawCorrect >= 0 && rawCorrect < opts.length) {
+        resolvedCorrect = Math.floor(rawCorrect);
+      } else if (typeof rawCorrect === 'string') {
+        const trimmed = rawCorrect.trim();
+        const num = parseInt(trimmed, 10);
+        if (!isNaN(num) && num >= 0 && num < opts.length) {
+          resolvedCorrect = num;
+        } else {
+          const letterMatch = trimmed.toUpperCase().match(/\b([A-D])\b/);
+          if (letterMatch && letterMatch[1]) {
+            resolvedCorrect = letterMatch[1].charCodeAt(0) - 65;
+          } else {
+            const matchIdx = opts.findIndex((opt) => opt.toLowerCase() === trimmed.toLowerCase());
+            if (matchIdx !== -1) resolvedCorrect = matchIdx;
+          }
+        }
+      }
+
       return {
-        question: String(obj.question || '').trim(),
+        question: String(obj.question || obj.prompt || '').trim(),
         options: opts,
-        correctAnswer:
-          typeof obj.correctAnswer === 'number' && obj.correctAnswer >= 0 && obj.correctAnswer <= 3
-            ? obj.correctAnswer
-            : 0,
+        correctAnswer: resolvedCorrect,
       };
     })
     .filter((q) => q.question.length > 0);

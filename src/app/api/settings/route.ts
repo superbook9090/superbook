@@ -66,6 +66,7 @@ export async function GET() {
         enableAutoDailyAiContestCreation: true,
         enableAutoDeclareResults: true,
         enableUpPetCourseCron: true,
+        enableChatWidget: true,
       },
       challengeConfig: {
         allowGuestChallenges: true,
