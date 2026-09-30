@@ -49,4 +49,8 @@ lessonSchema.index({ course: 1, chapter: 1, order: 1 });
 lessonSchema.index({ course: 1, isPublished: 1 });
 lessonSchema.index({ chapter: 1, order: 1 });
 
-export default mongoose.models.Lesson || mongoose.model<ILesson>('Lesson', lessonSchema);
+const Lesson =
+  (mongoose.models.Lesson as mongoose.Model<ILesson>) ||
+  mongoose.model<ILesson>('Lesson', lessonSchema);
+
+export default Lesson;

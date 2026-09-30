@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { PlayCircle, BookOpen, ChevronRight, Play } from 'lucide-react';
+import { PlayCircle, BookOpen, ChevronRight, Play, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { LazyCurriculumQuizRow } from '@/lib/lazy';
 import type { CurriculumLesson } from '@/lib/curriculum/tree';
@@ -16,6 +16,14 @@ interface CurriculumLessonRowProps {
   onQuizAction: (quiz: { _id: string; title: string; timeLimit: number; questionCount?: number }) => void;
   startingQuizId: string | null;
   confirmQuizId: string | undefined;
+  isSuperAdmin?: boolean;
+  onOpenAiModal?: (
+    action: 'add-chapter' | 'add-lesson' | 'add-quiz',
+    chapter?: { _id: string; title: string },
+    lesson?: { _id: string; title: string }
+  ) => void;
+  chapterId?: string;
+  chapterTitle?: string;
 }
 
 export default function CurriculumLessonRow({
@@ -25,6 +33,10 @@ export default function CurriculumLessonRow({
   onQuizAction,
   startingQuizId,
   confirmQuizId,
+  isSuperAdmin,
+  onOpenAiModal,
+  chapterId,
+  chapterTitle,
 }: CurriculumLessonRowProps) {
   const isVideo = !!lesson.videoUrl;
 
@@ -58,6 +70,41 @@ export default function CurriculumLessonRow({
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
+          {isSuperAdmin && onOpenAiModal && (
+            <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+              <button
+                type="button"
+                onClick={() =>
+                  onOpenAiModal(
+                    'add-quiz',
+                    chapterId ? { _id: chapterId, title: chapterTitle || '' } : undefined,
+                    { _id: lesson._id, title: lesson.title }
+                  )
+                }
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold text-indigo-600 dark:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 transition-all cursor-pointer shadow-2xs hover:scale-105 active:scale-95"
+                title="Add practice quiz to this lesson using AI"
+              >
+                <HelpCircle className="w-3.5 h-3.5 text-indigo-600" />
+                <span>add quiz using AI</span>
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  onOpenAiModal(
+                    'add-lesson',
+                    chapterId ? { _id: chapterId, title: chapterTitle || '' } : undefined,
+                    { _id: lesson._id, title: lesson.title }
+                  )
+                }
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold text-purple-600 dark:text-purple-300 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 transition-all cursor-pointer shadow-2xs hover:scale-105 active:scale-95"
+                title="Generate notes & quiz for this lesson using AI"
+              >
+                <BookOpen className="w-3.5 h-3.5 text-purple-600" />
+                <span>add lesson using AI</span>
+              </button>
+            </div>
+          )}
+
           <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold text-white bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)] shadow-xs opacity-0 group-hover/lesson:opacity-100 group-hover/lesson:translate-x-0 translate-x-2 transition-all">
             <Play className="w-3 h-3 fill-current" />
             <span>Open</span>

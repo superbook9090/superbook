@@ -39,6 +39,7 @@ export interface ContestItem {
   prizes?: ContestPrize[];
   status: 'draft' | 'published' | 'cancelled' | 'completed';
   computedState: 'upcoming' | 'live' | 'completed' | 'cancelled' | 'draft';
+  resultsDeclared?: boolean;
   startTime: string;
   endTime: string;
   duration: number;
@@ -251,8 +252,22 @@ export async function deleteContest(id: string): Promise<{ message: string }> {
   });
 }
 
-export async function endContest(id: string): Promise<{ message: string }> {
-  return apiJson<{ message: string }>(`/api/contests/${id}/end`, {
+export async function endContest(id: string): Promise<{ message: string; notificationsSent?: number }> {
+  return apiJson<{ message: string; notificationsSent?: number }>(`/api/contests/${id}/end`, {
+    method: 'POST',
+  });
+}
+
+export async function declareContestResults(id: string): Promise<{
+  success: boolean;
+  message: string;
+  notificationsSent: number;
+}> {
+  return apiJson<{
+    success: boolean;
+    message: string;
+    notificationsSent: number;
+  }>(`/api/contests/${id}/declare-results`, {
     method: 'POST',
   });
 }

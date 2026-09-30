@@ -12,6 +12,7 @@ import {
   useContestTeacherAttempts,
   useEndContest,
   useDeleteContest,
+  useDeclareContestResults,
 } from '@/features/contests/hooks/useContests';
 import { ContestLeaderboard } from '@/features/contests/components/ContestLeaderboard';
 import { ContestPrizesShowcase } from '@/features/contests/components/ContestPrizesShowcase';
@@ -36,6 +37,7 @@ export default function TeacherContestManagePage({
   const [activeTab, setActiveTab] = useState<'leaderboard' | 'attempts' | 'overview'>('leaderboard');
   const [showEndModal, setShowEndModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDeclareModal, setShowDeclareModal] = useState(false);
 
   const { data: contestData, isLoading: contestLoading } = useContest(id);
   const { data: leaderboardData, isLoading: leaderboardLoading } = useContestLeaderboard(id);
@@ -43,6 +45,7 @@ export default function TeacherContestManagePage({
 
   const endMutation = useEndContest();
   const deleteMutation = useDeleteContest();
+  const declareMutation = useDeclareContestResults();
 
   if (contestLoading) return <PageSkeleton />;
 
@@ -69,12 +72,28 @@ export default function TeacherContestManagePage({
   const handleEndContest = async () => {
     try {
       await endMutation.mutateAsync(id);
-      addAlert({ type: 'success', message: 'Contest concluded successfully!' });
+      addAlert({ type: 'success', message: 'Contest concluded successfully and results declared!' });
       setShowEndModal(false);
     } catch (err) {
       addAlert({
         type: 'error',
         message: err instanceof ApiClientError ? err.message : 'Failed to end contest',
+      });
+    }
+  };
+
+  const handleDeclareResults = async () => {
+    try {
+      const res = await declareMutation.mutateAsync(id);
+      addAlert({
+        type: 'success',
+        message: res.message || 'Results declared and notifications sent!',
+      });
+      setShowDeclareModal(false);
+    } catch (err) {
+      addAlert({
+        type: 'error',
+        message: err instanceof ApiClientError ? err.message : 'Failed to declare results',
       });
     }
   };
@@ -100,6 +119,8 @@ export default function TeacherContestManagePage({
         state={state}
         onEndContest={() => setShowEndModal(true)}
         onDeleteContest={() => setShowDeleteModal(true)}
+        onDeclareResults={() => setShowDeclareModal(true)}
+        isDeclaringResults={declareMutation.isPending}
       />
 
       {/* KPI Stats Strip */}
@@ -206,6 +227,18 @@ export default function TeacherContestManagePage({
         onConfirm={handleDeleteContest}
         onCancel={() => setShowDeleteModal(false)}
         type="danger"
+      />
+
+      {/* Declare Results Modal */}
+      <LazyConfirmModal
+        isOpen={showDeclareModal}
+        title="Declare Contest Results"
+        message="Are you sure you want to declare results? This will finalize the leaderboard and send notifications to all students who participated."
+        confirmText="Declare & Send Notifications"
+        cancelText={t('common.cancel')}
+        onConfirm={handleDeclareResults}
+        onCancel={() => setShowDeclareModal(false)}
+        type="warning"
       />
     </PageWrapper>
   );

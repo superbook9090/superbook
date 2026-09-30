@@ -1,7 +1,6 @@
 'use client';
 
-import React from 'react';
-import { Play, ChevronDown, HelpCircle, Layers, ChevronsUpDown, RotateCcw } from 'lucide-react';
+import { Play, ChevronDown, HelpCircle, Layers, ChevronsUpDown, RotateCcw, Sparkles, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Button from '@/components/ui/Button';
 import type { CurriculumChapterNode, CurriculumLesson } from '@/lib/curriculum/tree';
@@ -20,12 +19,18 @@ type Props = {
   toggleChapter: (chapterId: string) => void;
   toggleAllChapters?: () => void;
   allExpanded?: boolean;
-  renderLessonRow: (lesson: CurriculumLesson) => React.ReactNode;
+  renderLessonRow: (lesson: CurriculumLesson, chapterId?: string, chapterTitle?: string) => React.ReactNode;
   renderChapterQuizzes: (quizzes?: Array<{ _id: string; title: string; timeLimit: number; questionCount?: number }>) => React.ReactNode;
   allLessons: Array<{ _id: string; title?: string }>;
   handleStartLesson: (lessonId: string) => void;
   enrollmentProgress: number;
   t: (key: string) => string;
+  isSuperAdmin?: boolean;
+  onOpenAiModal?: (
+    action: 'add-chapter' | 'add-lesson' | 'add-quiz',
+    chapter?: { _id: string; title: string },
+    lesson?: { _id: string; title: string }
+  ) => void;
 };
 
 export function CurriculumTab({
@@ -41,6 +46,8 @@ export function CurriculumTab({
   handleStartLesson,
   enrollmentProgress,
   t,
+  isSuperAdmin,
+  onOpenAiModal,
 }: Props) {
   const isComplete = enrollmentProgress === 100;
   const isStarted = enrollmentProgress > 0;
@@ -48,7 +55,7 @@ export function CurriculumTab({
 
   return (
     <div className="w-full space-y-4">
-      {/* Top Header Controls */}
+      {/* Top Header Controls (Course Level Row) */}
       <div className="flex items-center justify-between gap-3 pb-3 border-b border-[var(--border)]">
         <div className="flex items-center gap-2">
           <Layers className="w-4 h-4 text-[var(--student-primary)]" />
@@ -61,6 +68,18 @@ export function CurriculumTab({
         </div>
 
         <div className="flex items-center gap-2">
+          {isSuperAdmin && onOpenAiModal && (
+            <button
+              type="button"
+              onClick={() => onOpenAiModal('add-chapter')}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-amber-600 dark:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 transition-all cursor-pointer shadow-2xs hover:scale-105 active:scale-95"
+              title="Add a new chapter to this course using AI and course context"
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>add chapter using AI</span>
+            </button>
+          )}
+
           {toggleAllChapters && (
             <button
               onClick={toggleAllChapters}
@@ -114,11 +133,11 @@ export function CurriculumTab({
                   : 'border-[var(--border)] hover:border-[var(--student-primary)]/30 hover:shadow-sm'
               )}
             >
-              <button
-                onClick={() => toggleChapter(chapter._id)}
-                className="w-full flex items-center justify-between p-4 sm:p-5 text-left transition-colors hover:bg-[var(--color-surface-muted)]/50 cursor-pointer"
-              >
-                <div className="flex items-center gap-3.5 min-w-0">
+              <div className="w-full flex flex-wrap items-center justify-between p-4 sm:p-5 text-left transition-colors hover:bg-[var(--color-surface-muted)]/50 gap-2">
+                <div
+                  onClick={() => toggleChapter(chapter._id)}
+                  className="flex items-center gap-3.5 min-w-0 cursor-pointer flex-1"
+                >
                   <div
                     className={cn(
                       'w-9 h-9 rounded-xl flex items-center justify-center text-xs font-black shrink-0 transition-all shadow-xs',
@@ -142,23 +161,58 @@ export function CurriculumTab({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0 ml-2">
-                  <div
+                <div className="flex items-center gap-2 shrink-0 ml-auto">
+                  {isSuperAdmin && onOpenAiModal && (
+                    <div className="flex flex-wrap items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        type="button"
+                        onClick={() => onOpenAiModal('add-lesson', { _id: chapter._id, title: chapter.title })}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold text-purple-600 dark:text-purple-300 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 transition-all cursor-pointer shadow-2xs hover:scale-105 active:scale-95"
+                        title="Add lesson to this chapter using AI"
+                      >
+                        <BookOpen className="w-3.5 h-3.5 text-purple-600" />
+                        <span>add lesson using AI</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onOpenAiModal('add-chapter', { _id: chapter._id, title: chapter.title })}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold text-amber-600 dark:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 transition-all cursor-pointer shadow-2xs hover:scale-105 active:scale-95"
+                        title="Add chapter using AI"
+                      >
+                        <Layers className="w-3.5 h-3.5 text-amber-600" />
+                        <span>add chapter using AI</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onOpenAiModal('add-quiz', { _id: chapter._id, title: chapter.title })}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold text-indigo-600 dark:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 transition-all cursor-pointer shadow-2xs hover:scale-105 active:scale-95"
+                        title="Add quiz to this chapter using AI"
+                      >
+                        <HelpCircle className="w-3.5 h-3.5 text-indigo-600" />
+                        <span>add quiz using AI</span>
+                      </button>
+                    </div>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => toggleChapter(chapter._id)}
+                    aria-label="Toggle chapter accordion"
                     className={cn(
-                      'w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200',
+                      'w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200 cursor-pointer',
                       isExpanded
                         ? 'rotate-180 bg-[var(--student-soft)] text-[var(--student-primary)]'
                         : 'text-[var(--color-muted-foreground)] hover:bg-[var(--surface-muted)]'
                     )}
                   >
                     <ChevronDown className="w-4 h-4" />
-                  </div>
+                  </button>
                 </div>
-              </button>
+              </div>
 
               {isExpanded && (
                 <div className="border-t border-[var(--border)] divide-y divide-[var(--border)] bg-[var(--color-surface-muted)]/25 backdrop-blur-sm">
-                  {chapter.lessons?.map(renderLessonRow)}
+                  {chapter.lessons?.map((l) => renderLessonRow(l, chapter._id, chapter.title))}
                   {renderChapterQuizzes(chapter.quizzes)}
 
                   {chapter.subChapters?.map((sub) => (
@@ -180,12 +234,51 @@ export function CurriculumTab({
                       </button>
                       {expandedChapters[sub._id] && (
                         <div className="divide-y divide-[var(--border)] border-t border-[var(--border)]">
-                          {sub.lessons?.map(renderLessonRow)}
+                          {sub.lessons?.map((l) => renderLessonRow(l, sub._id, sub.title))}
                           {renderChapterQuizzes(sub.quizzes)}
                         </div>
                       )}
                     </div>
                   ))}
+
+                  {/* Superadmin AI actions for this already created chapter */}
+                  {isSuperAdmin && onOpenAiModal && (
+                    <div className="p-3.5 bg-gradient-to-r from-purple-500/10 via-indigo-500/5 to-purple-500/10 border-t border-[var(--border)] flex flex-wrap items-center justify-between gap-3">
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-purple-700 dark:text-purple-300">
+                        <Sparkles className="w-4 h-4 text-purple-600 animate-pulse" />
+                        <span>AI Chapter Tools:</span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => onOpenAiModal('add-lesson', { _id: chapter._id, title: chapter.title })}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-purple-700 dark:text-purple-200 bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/30 transition-all cursor-pointer shadow-2xs hover:scale-105 active:scale-95"
+                          title="Generate a new lesson with notes & quiz for this chapter"
+                        >
+                          <BookOpen className="w-3.5 h-3.5" />
+                          <span>add lesson using AI</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onOpenAiModal('add-chapter', { _id: chapter._id, title: chapter.title })}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-amber-700 dark:text-amber-200 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 transition-all cursor-pointer shadow-2xs hover:scale-105 active:scale-95"
+                          title="Generate a new chapter using course context"
+                        >
+                          <Layers className="w-3.5 h-3.5" />
+                          <span>add chapter using AI</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onOpenAiModal('add-quiz', { _id: chapter._id, title: chapter.title })}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-indigo-700 dark:text-indigo-200 bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 transition-all cursor-pointer shadow-2xs hover:scale-105 active:scale-95"
+                          title="Generate practice quiz questions for this chapter"
+                        >
+                          <HelpCircle className="w-3.5 h-3.5" />
+                          <span>add quiz using AI</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

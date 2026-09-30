@@ -8,6 +8,7 @@ import {
   updateContest,
   deleteContest,
   endContest,
+  declareContestResults,
   startContestAttempt,
   submitContestAttempt,
   getContestLeaderboard,
@@ -139,6 +140,18 @@ export function useEndContest() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => endContest(id),
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['contest', id] });
+      queryClient.invalidateQueries({ queryKey: ['contests'] });
+      queryClient.invalidateQueries({ queryKey: ['contest-leaderboard', id] });
+    },
+  });
+}
+
+export function useDeclareContestResults() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => declareContestResults(id),
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ['contest', id] });
       queryClient.invalidateQueries({ queryKey: ['contests'] });

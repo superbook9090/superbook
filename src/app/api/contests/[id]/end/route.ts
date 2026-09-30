@@ -5,7 +5,7 @@ import dbConnect from '@/lib/db';
 import '@/models';
 import Contest from '@/models/Contest';
 import { logApiError, type LogContext } from '@/lib/logger';
-import { invalidatePattern } from '@/lib/redis';
+import { declareContestResults } from '@/lib/contests/declareResults';
 import mongoose from 'mongoose';
 
 export const dynamic = 'force-dynamic';
@@ -56,10 +56,15 @@ export async function POST(
     }
 
     await contest.save();
-    await invalidatePattern('contests:*');
+
+    // Automatically declare results and notify all participating students
+    const result = await declareContestResults(id, { ignoreAge: true });
 
     return NextResponse.json(
-      { message: 'Contest has been concluded successfully' },
+      {
+        message: 'Contest has been concluded successfully and results declared.',
+        notificationsSent: result.notificationsSent,
+      },
       { status: 200 }
     );
   } catch (error) {

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Edit, StopCircle, Trash2, Flame, Clock, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Edit, StopCircle, Trash2, Flame, Clock, CheckCircle, Trophy } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { ROUTES } from '@/constants/routes';
 import { formatDateTime } from '@/lib/dateUtils';
@@ -14,6 +14,8 @@ interface TeacherContestHeaderProps {
   state: ContestItem['computedState'];
   onEndContest: () => void;
   onDeleteContest: () => void;
+  onDeclareResults?: () => void;
+  isDeclaringResults?: boolean;
   /** Override back link destination (default: teacher contests list) */
   backPath?: string;
   /** Override edit link destination (default: teacher edit route) */
@@ -25,6 +27,8 @@ export default function TeacherContestHeader({
   state,
   onEndContest,
   onDeleteContest,
+  onDeclareResults,
+  isDeclaringResults,
   backPath,
   editPath,
 }: TeacherContestHeaderProps) {
@@ -42,7 +46,26 @@ export default function TeacherContestHeader({
           <span>{t('contest.backToContests')}</span>
         </Link>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          {onDeclareResults && (state === 'completed' || state === 'live') && !contest.resultsDeclared && (
+            <button
+              type="button"
+              onClick={onDeclareResults}
+              disabled={isDeclaringResults}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/40 shadow-xs transition-colors min-h-[44px]"
+            >
+              <Trophy className="w-3.5 h-3.5 text-amber-400" />
+              <span>{isDeclaringResults ? 'Declaring...' : 'Declare Results & Notify'}</span>
+            </button>
+          )}
+
+          {contest.resultsDeclared && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+              <CheckCircle className="w-3.5 h-3.5" />
+              Results Declared
+            </span>
+          )}
+
           {state === 'upcoming' && (
             <Link
               href={editPath || ROUTES.teacher.contestEdit(contest._id)}

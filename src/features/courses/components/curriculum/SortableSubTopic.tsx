@@ -10,6 +10,7 @@ import { CurriculumQuizBlock } from './CurriculumQuizBlock';
 import { cn } from '@/lib/utils';
 import { ChapterRowHeader } from './ChapterRowHeader';
 import { LessonList } from './LessonList';
+import type { AiActionType } from '@/app/(dashboard)/dashboard/student/courses/[id]/_components/AiCourseActionModal';
 
 export function SortableSubTopic({
   sub,
@@ -23,6 +24,7 @@ export function SortableSubTopic({
   onDeleteLesson,
   onAddLesson,
   onDeleteQuiz,
+  onOpenAiModal,
 }: {
   sub: Chapter & Pick<CurriculumChapterNode, 'quizzes' | 'lessons'>;
   courseId: string;
@@ -35,6 +37,11 @@ export function SortableSubTopic({
   onDeleteLesson: (id: string) => void;
   onAddLesson: (chapterId: string) => void;
   onDeleteQuiz: (quiz: CurriculumQuiz) => void;
+  onOpenAiModal?: (
+    action: AiActionType,
+    chapter?: { _id: string; title: string } | null,
+    lesson?: { _id: string; title: string } | null
+  ) => void;
 }) {
   const { t } = useTranslation();
   const id = sortableId('subtopic', sub._id);
@@ -66,6 +73,7 @@ export function SortableSubTopic({
           listeners={listeners}
           variant="subtopic"
           deleteLabel={t('curriculum.deleteSubTopicTitle')}
+          onOpenAiModal={onOpenAiModal}
         />
       </div>
       {expanded && (
@@ -78,6 +86,7 @@ export function SortableSubTopic({
             onDeleteLesson={onDeleteLesson}
             onAddLesson={onAddLesson}
             onDeleteQuiz={onDeleteQuiz}
+            onOpenAiModal={onOpenAiModal}
           />
           <CurriculumQuizBlock
             courseId={courseId}

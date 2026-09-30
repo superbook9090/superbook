@@ -14,7 +14,7 @@ import {
 } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import Link from 'next/link';
-import { Plus, Target } from 'lucide-react';
+import { Plus, Target, Sparkles } from 'lucide-react';
 import { buildTeacherCreateQuizUrl } from '@/lib/quiz/buildCreateQuizUrl';
 import { useTranslation } from '@/hooks/useTranslation';
 import {
@@ -43,6 +43,7 @@ import Button from '@/components/ui/Button';
 import { SortableTopic } from './SortableTopic';
 import { toggleExpanded } from './shared';
 import { useCurriculumDnd } from './useCurriculumDnd';
+import type { AiActionType } from '@/app/(dashboard)/dashboard/student/courses/[id]/_components/AiCourseActionModal';
 
 const EMPTY_CURRICULUM: Chapter[] = [];
 
@@ -50,6 +51,11 @@ interface CurriculumTreeEditorProps {
   courseId: string;
   onEditLesson: (lesson: Lesson) => void;
   onAddLesson: (chapterId: string) => void;
+  onOpenAiModal?: (
+    action: AiActionType,
+    chapter?: { _id: string; title: string } | null,
+    lesson?: { _id: string; title: string } | null
+  ) => void;
 }
 
 type DeleteTarget =
@@ -62,6 +68,7 @@ export default function CurriculumTreeEditor({
   courseId,
   onEditLesson,
   onAddLesson,
+  onOpenAiModal,
 }: CurriculumTreeEditorProps) {
   const { t } = useTranslation();
   const session = useSessionStore((s) => s.session);
@@ -168,6 +175,26 @@ export default function CurriculumTreeEditor({
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
         <h2 className="text-xl font-bold text-[var(--color-foreground)]">{t('curriculum.title')}</h2>
         <div className="flex flex-wrap gap-2">
+          {onOpenAiModal && (
+            <>
+              <button
+                type="button"
+                onClick={() => onOpenAiModal('add-chapter')}
+                className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3.5 py-2 rounded-xl text-sm font-semibold bg-gradient-to-r from-purple-600/20 to-indigo-600/20 hover:from-purple-600/30 hover:to-indigo-600/30 text-purple-300 border border-purple-500/40 shadow-sm transition-all"
+              >
+                <Sparkles className="w-4 h-4 text-purple-400" />
+                add chapter using AI
+              </button>
+              <button
+                type="button"
+                onClick={() => onOpenAiModal('add-quiz')}
+                className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3.5 py-2 rounded-xl text-sm font-semibold bg-gradient-to-r from-purple-600/20 to-indigo-600/20 hover:from-purple-600/30 hover:to-indigo-600/30 text-purple-300 border border-purple-500/40 shadow-sm transition-all"
+              >
+                <Sparkles className="w-4 h-4 text-purple-400" />
+                add quiz using AI
+              </button>
+            </>
+          )}
           <Link
             href={buildTeacherCreateQuizUrl({ courseId, placement: 'course' })}
             className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2 rounded-xl text-sm font-semibold border border-[var(--primary-border)] text-[var(--primary)] hover:bg-[var(--primary-soft)] transition-colors"
@@ -205,19 +232,21 @@ export default function CurriculumTreeEditor({
                   courseId={courseId}
                   expanded={!!expanded[topic._id]}
                   onToggle={() => toggleExpanded(setExpanded, topic._id)}
-                editingId={editingId}
-                setEditingId={setEditingId}
-                isExpanded={(id) => !!expanded[id]}
-                toggleExpanded={(id) => toggleExpanded(setExpanded, id)}
-                onDelete={() => setConfirmDelete({ type: 'topic', id: topic._id })}
-                onDeleteSub={(subId) => setConfirmDelete({ type: 'subtopic', id: subId })}
-                onAddSubTopic={handleAddSubTopic}
-                onEditLesson={onEditLesson}
-                onDeleteLesson={(id) => setConfirmDelete({ type: 'lesson', id })}
-                onAddLesson={onAddLesson}
-                onDeleteQuiz={handleRequestDeleteQuiz}
-              />
-            )))}
+                  editingId={editingId}
+                  setEditingId={setEditingId}
+                  isExpanded={(id) => !!expanded[id]}
+                  toggleExpanded={(id) => toggleExpanded(setExpanded, id)}
+                  onDelete={() => setConfirmDelete({ type: 'topic', id: topic._id })}
+                  onDeleteSub={(subId) => setConfirmDelete({ type: 'subtopic', id: subId })}
+                  onAddSubTopic={handleAddSubTopic}
+                  onEditLesson={onEditLesson}
+                  onDeleteLesson={(id) => setConfirmDelete({ type: 'lesson', id })}
+                  onAddLesson={onAddLesson}
+                  onDeleteQuiz={handleRequestDeleteQuiz}
+                  onOpenAiModal={onOpenAiModal}
+                />
+              ))
+            )}
 
             <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
               <h3 className="text-sm font-semibold text-[var(--color-foreground)] mb-3">

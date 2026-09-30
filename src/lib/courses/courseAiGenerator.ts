@@ -155,24 +155,82 @@ async function callAiWithFallback(
  * Generate in-depth educational study material for a lesson
  * Formatted with clean HTML tags (concept trees, tables, exam tips, key takeaways).
  */
-export async function generateLessonContent(params: {
+export interface GenerateLessonContentParams {
   chapterTitle: string;
   lessonTitle: string;
-  subtopics: string[];
-  examTips: string;
-}): Promise<GeneratedLessonNotes> {
-  const { chapterTitle, lessonTitle, subtopics, examTips } = params;
+  subtopics?: string[];
+  examTips?: string;
+  courseTitle?: string;
+  courseCategory?: string;
+  courseDescription?: string;
+  locale?: string;
+}
 
-  const systemPrompt = `You are a premier educational content creator and senior faculty expert for the UPSSSC PET (Uttar Pradesh Preliminary Eligibility Test) examination.
-Your task is to write comprehensive, authoritative, student-friendly, and high-yield study material in Hindi with English terms in parentheses (bilingual).
+export interface GenerateLessonQuizParams {
+  chapterTitle: string;
+  lessonTitle: string;
+  quizTitle: string;
+  numQuestions?: number;
+  courseTitle?: string;
+  courseCategory?: string;
+  locale?: string;
+}
+
+/**
+ * Generate in-depth educational study material for a lesson
+ * Formatted with clean HTML tags (concept trees, tables, exam tips, key takeaways).
+ */
+export async function generateLessonContent(
+  params: GenerateLessonContentParams
+): Promise<GeneratedLessonNotes> {
+  const {
+    chapterTitle,
+    lessonTitle,
+    subtopics = [],
+    examTips = '',
+    courseTitle = '',
+    courseCategory = '',
+    courseDescription = '',
+    locale = 'hi',
+  } = params;
+
+  const isHindi = (locale || 'hi').toLowerCase().startsWith('hi');
+  const isUpPet =
+    courseTitle.toLowerCase().includes('pet') ||
+    courseTitle.toLowerCase().includes('upsssc') ||
+    examTips.toLowerCase().includes('pet') ||
+    courseCategory.toLowerCase().includes('pet');
+
+  const roleDesc = isUpPet
+    ? 'premier educational content creator and senior faculty expert for the UPSSSC PET examination'
+    : `senior subject matter faculty and curriculum expert for "${courseTitle || courseCategory || 'Online Learning'}"`;
+
+  const languageRequirement = isHindi
+    ? 'Write comprehensive, authoritative, student-friendly, and high-yield study material in Hindi with English terms in parentheses (bilingual).'
+    : 'Write comprehensive, authoritative, student-friendly, and structured study material in clear, polished English.';
+
+  const systemPrompt = `You are a ${roleDesc}.
+Your task is to: ${languageRequirement}
 The output MUST be formatted in valid, clean HTML suitable for rendering in an LMS lesson reader.
 Do NOT wrap the output in markdown \`\`\`html code blocks. Return ONLY the HTML markup.`;
 
+  const focusTipsLabel = isUpPet
+    ? '🎯 विगत वर्षों के महत्वपूर्ण प्रश्न एवं ट्रिक्स (PYQ High-Yield Notes)'
+    : isHindi
+      ? '🎯 मुख्य परीक्षा बिंदु एवं महत्वपूर्ण तथ्य (Key Exam Insights)'
+      : '🎯 Core Concepts & Key Insights';
+
+  const revisionLabel = isHindi
+    ? 'निष्कर्ष एवं त्वरित दोहराव (Quick Revision Summary)'
+    : 'Summary & Key Takeaways';
+
   const userPrompt = `Generate a comprehensive master study lesson for:
+- Course: "${courseTitle || 'Curriculum Course'}"${courseCategory ? ` (${courseCategory})` : ''}
+${courseDescription ? `- Course Overview: ${courseDescription.slice(0, 160)}...` : ''}
 - Subject/Chapter: "${chapterTitle}"
 - Topic/Lesson: "${lessonTitle}"
-- Key Focus Subtopics: ${subtopics.join(', ')}
-- Official Exam Tips / PYQ Focus: ${examTips}
+${subtopics.length > 0 ? `- Key Focus Subtopics: ${subtopics.join(', ')}` : ''}
+${examTips ? `- Official Exam Tips / PYQ Focus: ${examTips}` : ''}
 
 PEDAGOGICAL & FORMAT REQUIREMENTS:
 1. Concept Tree Hierarchy: At the top, include a visual ASCII concept tree enclosed in:
@@ -186,12 +244,12 @@ PEDAGOGICAL & FORMAT REQUIREMENTS:
 2. Structure with semantic HTML tags:
    - <h3> headings for major sections
    - <p> for clear, concise conceptual explanations
-   - <ul> and <li> for high-yield facts, dates, articles, and formulas
-   - <blockquote class="bg-amber-50 dark:bg-amber-950/30 p-4 border-l-4 border-amber-500 rounded my-4"> for "🎯 UPSSSC PET विगत वर्षों के महत्वपूर्ण प्रश्न एवं ट्रिक्स (PYQ High-Yield Notes)"
-   - A comparison table <table> if relevant (e.g. comparing dynasties, laws, formulas, rivers)
-   - <h4>निष्कर्ष एवं त्वरित दोहराव (Quick Revision Summary)</h4> at the end.
-3. Language: Fluent, lucid Hindi with key technical/historical/scientific terms followed by English in parentheses, e.g. "सिंधु घाटी सभ्यता (Indus Valley Civilization)".
-4. Length: Thorough and educational (around 600 - 1000 words). Avoid filler text; every paragraph must contain real exam value.`;
+   - <ul> and <li> for high-yield facts, dates, definitions, and formulas
+   - <blockquote class="bg-amber-50 dark:bg-amber-950/30 p-4 border-l-4 border-amber-500 rounded my-4"> for "${focusTipsLabel}"
+   - A comparison table <table> if relevant (e.g. comparing theories, categories, formulas, structures)
+   - <h4>${revisionLabel}</h4> at the end.
+3. Language: ${isHindi ? 'Fluent, lucid Hindi with key technical/historical/scientific terms followed by English in parentheses, e.g. "सिंधु घाटी सभ्यता (Indus Valley Civilization)".' : 'Natural, engaging educational English.'}
+4. Length: Thorough and educational (around 600 - 1000 words). Avoid filler text; every paragraph must contain real educational value.`;
 
   const rawHtml = await callAiWithFallback(
     [
@@ -213,7 +271,9 @@ PEDAGOGICAL & FORMAT REQUIREMENTS:
     .trim();
 
   // Generate a concise 1-2 sentence description summary
-  const summary = `${chapterTitle} के अंतर्गत "${lessonTitle}" का संपूर्ण अध्ययन नोट्स एवं विगत वर्षों के महत्वपूर्ण परीक्षा उपयोगी तथ्य।`;
+  const summary = isHindi
+    ? `${chapterTitle} के अंतर्गत "${lessonTitle}" का संपूर्ण अध्ययन नोट्स एवं महत्वपूर्ण परीक्षा उपयोगी तथ्य।`
+    : `Comprehensive study notes, concept explanations, and key takeaways for "${lessonTitle}" in ${chapterTitle}.`;
 
   return {
     content: cleaned,
@@ -222,27 +282,40 @@ PEDAGOGICAL & FORMAT REQUIREMENTS:
 }
 
 /**
- * Generate 5-8 multiple choice practice questions for a lesson
+ * Generate 5 multiple choice practice questions for a lesson
  * 4 options, randomized correct answer, points: 1.
  */
-export async function generateLessonQuizQuestions(params: {
-  chapterTitle: string;
-  lessonTitle: string;
-  quizTitle: string;
-  numQuestions?: number;
-}): Promise<GeneratedQuestionItem[]> {
-  const { chapterTitle, lessonTitle, quizTitle, numQuestions = 5 } = params;
+export async function generateLessonQuizQuestions(
+  params: GenerateLessonQuizParams
+): Promise<GeneratedQuestionItem[]> {
+  const {
+    chapterTitle,
+    lessonTitle,
+    quizTitle,
+    numQuestions = 5,
+    courseTitle = '',
+    courseCategory = '',
+    locale = 'hi',
+  } = params;
 
-  const prompt = `You are an expert exam question paper setter for UPSSSC PET (Uttar Pradesh Preliminary Eligibility Test).
+  const isHindi = (locale || 'hi').toLowerCase().startsWith('hi');
+  const isUpPet =
+    courseTitle.toLowerCase().includes('pet') ||
+    courseTitle.toLowerCase().includes('upsssc') ||
+    courseCategory.toLowerCase().includes('pet');
+
+  const contextStr = courseTitle ? `Course: "${courseTitle}", ` : '';
+  const prompt = isHindi
+    ? `You are an expert exam question paper setter${isUpPet ? ' for UPSSSC PET' : ''}.
 Generate EXACTLY ${numQuestions} high-quality, realistic multiple-choice questions for:
-- Subject: "${chapterTitle}"
+- ${contextStr}Subject/Chapter: "${chapterTitle}"
 - Topic: "${lessonTitle}"
 - Quiz Title: "${quizTitle}"
 
 CRITICAL REQUIREMENTS:
-1. STRICTLY RELEVANT TO UP PET: Difficulty should match UPSSSC PET standard (medium to competitive, with real previous-year pattern questions).
+1. RELEVANT: Difficulty should match competitive examination standard with clear, unambiguous questions.
 2. BILINGUAL PROMPT: The question text MUST include both Hindi and English translation, e.g.:
-   "लोथल किस नदी के किनारे स्थित प्राचीन हड़प्पा स्थल है? (Lothal is an ancient Harappan site situated on the banks of which river?)"
+   "लोथल किस नदी के किनारे स्थित प्राचीन स्थल है? (Lothal is an ancient site situated on the banks of which river?)"
 3. 4 PLAUSIBLE OPTIONS: Each question must have EXACTLY 4 distinct multiple-choice options in Hindi with English in brackets where applicable.
 4. BALANCED CORRECT ANSWER: Distribute the correctAnswer index (0 for A, 1 for B, 2 for C, 3 for D) randomly and evenly across all questions.
 5. FORMAT: Return ONLY a valid JSON array of objects without markdown backticks or commentary:
@@ -250,6 +323,24 @@ CRITICAL REQUIREMENTS:
   {
     "question": "प्रश्न विवरण (Question text in Hindi & English)",
     "options": ["विकल्प A (Option A)", "विकल्प B (Option B)", "विकल्प C (Option C)", "विकल्प D (Option D)"],
+    "correctAnswer": 0
+  }
+]`
+    : `You are an expert curriculum test creator.
+Generate EXACTLY ${numQuestions} high-quality multiple-choice questions for:
+- ${contextStr}Chapter: "${chapterTitle}"
+- Topic: "${lessonTitle}"
+- Quiz Title: "${quizTitle}"
+
+CRITICAL REQUIREMENTS:
+1. RELEVANT: Direct conceptual clarity and practical understanding.
+2. 4 PLAUSIBLE OPTIONS: Each question must have EXACTLY 4 distinct choices.
+3. BALANCED CORRECT ANSWER: Distribute the correctAnswer index (0 for A, 1 for B, 2 for C, 3 for D) evenly.
+4. FORMAT: Return ONLY a valid JSON array without markdown code blocks:
+[
+  {
+    "question": "Question text here",
+    "options": ["Option A", "Option B", "Option C", "Option D"],
     "correctAnswer": 0
   }
 ]`;
@@ -350,3 +441,232 @@ CRITICAL REQUIREMENTS:
     };
   });
 }
+
+/**
+ * Generate 3-5 structured lesson titles for a chapter when none exist.
+ */
+export async function generateChapterLessonOutlines(params: {
+  courseTitle: string;
+  courseCategory?: string;
+  chapterTitle: string;
+  chapterSummary?: string;
+  locale?: string;
+  count?: number;
+}): Promise<Array<{ title: string; durationMinutes: number }>> {
+  const {
+    courseTitle,
+    courseCategory = '',
+    chapterTitle,
+    chapterSummary = '',
+    locale = 'hi',
+    count = 4,
+  } = params;
+
+  const isHindi = (locale || 'hi').toLowerCase().startsWith('hi');
+
+  const prompt = isHindi
+    ? `You are a curriculum designer for "${courseTitle}" (${courseCategory}).
+Generate EXACTLY ${count} high-yield, logical lessons for the chapter: "${chapterTitle}".
+${chapterSummary ? `Chapter Summary: ${chapterSummary}` : ''}
+
+CRITICAL: Return ONLY a valid JSON array of objects without markdown:
+[
+  { "title": "पाठ 1 का शीर्षक (Lesson Title in Hindi with English in brackets)", "durationMinutes": 20 }
+]`
+    : `You are a curriculum designer for "${courseTitle}" (${courseCategory}).
+Generate EXACTLY ${count} structured, logical lessons for the chapter: "${chapterTitle}".
+${chapterSummary ? `Chapter Summary: ${chapterSummary}` : ''}
+
+CRITICAL: Return ONLY a valid JSON array of objects without markdown:
+[
+  { "title": "Lesson 1 Title", "durationMinutes": 20 }
+]`;
+
+  const rawJson = await callAiWithFallback(
+    [
+      { role: 'system', content: 'You output strictly valid JSON arrays of lesson outlines.' },
+      { role: 'user', content: prompt },
+    ],
+    {
+      maxTokens: 600,
+      temperature: 0.5,
+      validateOutput: (text) => text.includes('[') && text.includes(']'),
+    }
+  );
+
+  let cleaned = rawJson
+    .replace(/<think>[\s\S]*?<\/think>/gi, '')
+    .replace(/```json/gi, '')
+    .replace(/```/g, '')
+    .trim();
+
+  const startIdx = cleaned.indexOf('[');
+  const endIdx = cleaned.lastIndexOf(']');
+  if (startIdx !== -1 && endIdx !== -1) {
+    cleaned = cleaned.substring(startIdx, endIdx + 1);
+  }
+
+  let parsed: unknown[] = [];
+  try {
+    parsed = JSON.parse(cleaned);
+  } catch {
+    return [
+      { title: `${chapterTitle} - भाग 1 (Part 1)`, durationMinutes: 20 },
+      { title: `${chapterTitle} - भाग 2 (Part 2)`, durationMinutes: 20 },
+      { title: `${chapterTitle} - महत्वपूर्ण परीक्षा प्रश्न (Key Exam Review)`, durationMinutes: 25 },
+    ];
+  }
+
+  if (!Array.isArray(parsed) || parsed.length === 0) {
+    return [
+      { title: `${chapterTitle} - भाग 1`, durationMinutes: 20 },
+      { title: `${chapterTitle} - भाग 2`, durationMinutes: 20 },
+    ];
+  }
+
+  return parsed.map((item, idx) => {
+    const obj = (typeof item === 'object' && item !== null ? item : {}) as Record<string, unknown>;
+    return {
+      title: String(obj.title || `${chapterTitle} - पाठ ${idx + 1}`).trim(),
+      durationMinutes: typeof obj.durationMinutes === 'number' ? obj.durationMinutes : 20,
+    };
+  });
+}
+
+/**
+ * Suggest next logical chapter title and summary for a course.
+ */
+export async function suggestNextChapter(params: {
+  courseTitle: string;
+  courseCategory?: string;
+  courseDescription?: string;
+  existingChapterTitles: string[];
+  locale?: string;
+}): Promise<{ title: string; summary: string }> {
+  const {
+    courseTitle,
+    courseCategory = '',
+    existingChapterTitles = [],
+    locale = 'hi',
+  } = params;
+
+  const isHindi = (locale || 'hi').toLowerCase().startsWith('hi');
+
+  const prompt = isHindi
+    ? `You are an educational syllabus architect for "${courseTitle}" (${courseCategory}).
+Existing chapters already present in the course:
+${existingChapterTitles.map((t, i) => `${i + 1}. ${t}`).join('\n')}
+
+Suggest the SINGLE NEXT logical chapter that should follow in this syllabus.
+Return ONLY a valid JSON object without markdown:
+{ "title": "अध्याय का शीर्षक (Hindi with English)", "summary": "1-2 sentence description in Hindi" }`
+    : `You are an educational syllabus architect for "${courseTitle}" (${courseCategory}).
+Existing chapters already present in the course:
+${existingChapterTitles.map((t, i) => `${i + 1}. ${t}`).join('\n')}
+
+Suggest the SINGLE NEXT logical chapter that should follow in this syllabus.
+Return ONLY a valid JSON object without markdown:
+{ "title": "Chapter Title", "summary": "1-2 sentence summary" }`;
+
+  try {
+    const raw = await callAiWithFallback(
+      [
+        { role: 'system', content: 'You output strictly valid JSON objects.' },
+        { role: 'user', content: prompt },
+      ],
+      { maxTokens: 400, temperature: 0.6 }
+    );
+
+    const cleaned = raw.replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/```json/gi, '').replace(/```/g, '').trim();
+    const start = cleaned.indexOf('{');
+    const end = cleaned.lastIndexOf('}');
+    if (start !== -1 && end !== -1) {
+      const parsed = JSON.parse(cleaned.substring(start, end + 1));
+      if (parsed.title) {
+        return {
+          title: String(parsed.title).trim(),
+          summary: String(parsed.summary || `${courseTitle} के अंतर्गत महत्वपूर्ण अध्याय।`).trim(),
+        };
+      }
+    }
+  } catch {
+    // fallback
+  }
+
+  const nextNum = existingChapterTitles.length + 1;
+  return isHindi
+    ? { title: `अध्याय ${nextNum}: महत्वपूर्ण विषय`, summary: `${courseTitle} के अंतर्गत महत्वपूर्ण अध्ययन विषय।` }
+    : { title: `Chapter ${nextNum}: Core Topics`, summary: `Key subject matter and concepts for ${courseTitle}.` };
+}
+
+/**
+ * Suggest next logical lesson title for an already created chapter.
+ */
+export async function suggestNextLesson(params: {
+  courseTitle: string;
+  chapterTitle: string;
+  chapterSummary?: string;
+  existingLessonTitles: string[];
+  locale?: string;
+}): Promise<{ title: string; durationMinutes: number }> {
+  const {
+    courseTitle,
+    chapterTitle,
+    chapterSummary = '',
+    existingLessonTitles = [],
+    locale = 'hi',
+  } = params;
+
+  const isHindi = (locale || 'hi').toLowerCase().startsWith('hi');
+
+  const prompt = isHindi
+    ? `You are an educational curriculum author for "${courseTitle}".
+Chapter: "${chapterTitle}"
+${chapterSummary ? `Summary: ${chapterSummary}` : ''}
+Lessons already present in this chapter:
+${existingLessonTitles.map((t, i) => `${i + 1}. ${t}`).join('\n')}
+
+Suggest the SINGLE NEXT high-yield lesson for this chapter.
+Return ONLY a valid JSON object without markdown:
+{ "title": "पाठ का शीर्षक (Hindi with English in brackets)", "durationMinutes": 20 }`
+    : `You are an educational curriculum author for "${courseTitle}".
+Chapter: "${chapterTitle}"
+${chapterSummary ? `Summary: ${chapterSummary}` : ''}
+Lessons already present in this chapter:
+${existingLessonTitles.map((t, i) => `${i + 1}. ${t}`).join('\n')}
+
+Suggest the SINGLE NEXT logical lesson for this chapter.
+Return ONLY a valid JSON object without markdown:
+{ "title": "Lesson Title", "durationMinutes": 20 }`;
+
+  try {
+    const raw = await callAiWithFallback(
+      [
+        { role: 'system', content: 'You output strictly valid JSON objects.' },
+        { role: 'user', content: prompt },
+      ],
+      { maxTokens: 400, temperature: 0.6 }
+    );
+
+    const cleaned = raw.replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/```json/gi, '').replace(/```/g, '').trim();
+    const start = cleaned.indexOf('{');
+    const end = cleaned.lastIndexOf('}');
+    if (start !== -1 && end !== -1) {
+      const parsed = JSON.parse(cleaned.substring(start, end + 1));
+      if (parsed.title) {
+        return {
+          title: String(parsed.title).trim(),
+          durationMinutes: typeof parsed.durationMinutes === 'number' ? parsed.durationMinutes : 20,
+        };
+      }
+    }
+  } catch {
+    // fallback
+  }
+
+  const nextNum = existingLessonTitles.length + 1;
+  return isHindi
+    ? { title: `${chapterTitle} - पाठ ${nextNum}`, durationMinutes: 20 }
+    : { title: `${chapterTitle} - Lesson ${nextNum}`, durationMinutes: 20 };
+}
+

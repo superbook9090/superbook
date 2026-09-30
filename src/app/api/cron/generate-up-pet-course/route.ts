@@ -3,10 +3,9 @@ import { revalidateTag } from 'next/cache';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
-import { logApiError, logError, logInfo } from '@/lib/logger';
+import { logApiError, logInfo } from '@/lib/logger';
 import { requireFeature } from '@/lib/settingsHelpers';
 import { invalidatePattern } from '@/lib/redis';
-import { sendAdminBroadcast } from '@/lib/server/services/notifications-service';
 import User from '@/models/User';
 import Course, { ensureCourseIndexes } from '@/models/Course';
 import Chapter, { ensureChapterIndexes } from '@/models/Chapter';
@@ -20,18 +19,123 @@ import {
   UP_PET_COURSE_SLUG,
   UP_PET_COURSE_CATEGORY,
   UP_PET_SYLLABUS_ROADMAP,
+  UpPetChapterBlueprint,
+  UpPetLessonBlueprint,
 } from '@/lib/courses/upPetSyllabus';
 import {
   generateLessonContent,
   generateLessonQuizQuestions,
   QuotaExhaustedError,
 } from '@/lib/courses/courseAiGenerator';
+import mongoose from 'mongoose';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60; // Max serverless execution time (Vercel standard)
 
-// Max execution budget per single cron invocation (leave safe cushion for DB & final response)
-const MAX_RUN_TIME_MS = 25000;
+interface SingleLessonGenerationParams {
+  courseId: mongoose.Types.ObjectId;
+  chapterDoc: { _id: mongoose.Types.ObjectId };
+  chapterBlueprint: UpPetChapterBlueprint;
+  lessonBlueprint: UpPetLessonBlueprint;
+  instructorId: mongoose.Types.ObjectId;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  logContext: any;
+}
+
+/**
+ * Generates notes and quiz concurrently using Promise.all,
+ * persisting Lesson, Quiz, and QuizQuestion records cleanly and rapidly.
+ */
+async function generateSingleLessonDoc({
+  courseId,
+  chapterDoc,
+  chapterBlueprint,
+  lessonBlueprint,
+  instructorId,
+  logContext,
+}: SingleLessonGenerationParams) {
+  logInfo(
+    `Generating Lesson Concurrently: [Ch ${chapterBlueprint.order + 1}] "${lessonBlueprint.title}"`,
+    logContext
+  );
+
+  // Run Notes Generation and Quiz Generation in parallel to avoid timeout
+  const [notesResult, quizQuestions] = await Promise.all([
+    generateLessonContent({
+      chapterTitle: chapterBlueprint.title,
+      lessonTitle: lessonBlueprint.title,
+      subtopics: lessonBlueprint.focusSubtopics,
+      examTips: lessonBlueprint.examTips,
+    }),
+    generateLessonQuizQuestions({
+      chapterTitle: chapterBlueprint.title,
+      lessonTitle: lessonBlueprint.title,
+      quizTitle: lessonBlueprint.quizTitle,
+      numQuestions: Math.min(5, lessonBlueprint.questionCount || 5),
+    }),
+  ]);
+
+  // Save Lesson to MongoDB
+  const createdLesson = await Lesson.create({
+    title: lessonBlueprint.title,
+    description: notesResult.summary,
+    course: courseId,
+    chapter: chapterDoc._id,
+    content: notesResult.content,
+    order: lessonBlueprint.order,
+    duration: lessonBlueprint.durationMinutes,
+    isPublished: true,
+    uploadedBy: instructorId,
+    uploadedAt: new Date(),
+  });
+
+  // Save Linked Practice Quiz
+  const createdQuiz = await Quiz.create({
+    title: lessonBlueprint.quizTitle,
+    description: `${lessonBlueprint.title} पर आधारित UPSSSC PET परीक्षा उपयोगी अभ्यास प्रश्न।`,
+    course: courseId,
+    chapter: chapterDoc._id,
+    lesson: createdLesson._id,
+    instructor: instructorId,
+    questionCount: quizQuestions.length,
+    timeLimit: Math.max(5, quizQuestions.length * 2),
+    isPublished: true,
+    enableNegativeMarking: true,
+    negativeMarks: 0.25,
+  });
+
+  // Save Quiz Questions
+  if (quizQuestions.length > 0) {
+    const questionDocs = quizQuestions.map((q, idx) => ({
+      quiz: createdQuiz._id,
+      order: idx + 1,
+      prompt: q.question,
+      options: q.options,
+      correctOption: q.correctAnswer,
+      points: 1,
+      negativePoints: 0.25,
+    }));
+    await QuizQuestion.insertMany(questionDocs);
+  }
+
+  // Update Chapter and Course Counters
+  await Chapter.findByIdAndUpdate(chapterDoc._id, { $inc: { lessonCount: 1 } });
+  await Course.findByIdAndUpdate(courseId, {
+    $inc: { lessonCount: 1 },
+    $set: { lastPublishedLesson: createdLesson._id },
+  });
+
+  // Cache Invalidation
+  try {
+    await invalidatePattern('courses:*');
+    await invalidatePattern('quizzes:*');
+    revalidateTag('courses:public');
+  } catch {
+    // Redis is optional
+  }
+
+  return { createdLesson, createdQuiz };
+}
 
 export async function GET(req: NextRequest) {
   const logContext = { method: 'GET', path: '/api/cron/generate-up-pet-course' };
@@ -45,7 +149,7 @@ export async function GET(req: NextRequest) {
 
     const expectedSecret = process.env.CRON_SECRET;
     let authorized = false;
-    
+
     if (!expectedSecret) {
       authorized = true;
     } else {
@@ -86,7 +190,6 @@ export async function GET(req: NextRequest) {
     // 4. Ensure Course Record exists
     let course = await Course.findOne({ slug: UP_PET_COURSE_SLUG });
     if (!course) {
-      // Check if maybe titled without slug
       course = await Course.findOne({ title: UP_PET_COURSE_TITLE });
     }
 
@@ -112,7 +215,8 @@ export async function GET(req: NextRequest) {
 
     // 5. Ensure all 15 Chapters exist and are ordered
     const existingChapters = await Chapter.find({ course: courseId }).sort({ order: 1 });
-    const chapterMap = new Map<number, (typeof existingChapters)[0]>();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const chapterMap = new Map<number, any>();
     for (const ch of existingChapters) {
       chapterMap.set(ch.order, ch);
     }
@@ -130,7 +234,6 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // Calculate total lessons in the entire syllabus blueprint
     const totalLessonsInRoadmap = UP_PET_SYLLABUS_ROADMAP.reduce(
       (acc, ch) => acc + ch.lessons.length,
       0
@@ -139,7 +242,6 @@ export async function GET(req: NextRequest) {
     // 6. Load or Initialize CourseGenerationProgress
     let progress = await CourseGenerationProgress.findOne({ examKey: UP_PET_EXAM_KEY });
     if (!progress) {
-      // Count any already created lessons in case DB had partial lessons
       const currentLessonCount = await Lesson.countDocuments({ course: courseId });
       progress = await CourseGenerationProgress.create({
         course: courseId,
@@ -153,45 +255,121 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // Check if course is already completed
-    if (progress.status === 'completed') {
+    // ---------------------------------------------------------
+    // ACTION 1: Return Plan / Chapter Breakdown for Client
+    // ---------------------------------------------------------
+    const action = searchParams.get('action');
+    if (action === 'plan' || action === 'status') {
+      const createdLessons = await Lesson.find({ course: courseId }).select('chapter order').lean();
+      const createdSet = new Set(
+        createdLessons.map((l) => `${String(l.chapter)}:${l.order}`)
+      );
+
+      const limit = Math.min(
+        20,
+        Math.max(1, parseInt(searchParams.get('limit') || '12', 10))
+      );
+
+      const pendingLessons: Array<{
+        chapterIndex: number;
+        lessonIndex: number;
+        order: number;
+        title: string;
+        chapterTitle: string;
+      }> = [];
+
+      const chaptersCovered = new Set<string>();
+
+      for (const ch of UP_PET_SYLLABUS_ROADMAP) {
+        const chDoc = chapterMap.get(ch.order);
+        if (!chDoc) continue;
+        const missing = ch.lessons.filter(
+          (l) => !createdSet.has(`${String(chDoc._id)}:${l.order}`)
+        );
+
+        for (const lesson of missing) {
+          pendingLessons.push({
+            chapterIndex: ch.order,
+            lessonIndex: lesson.order,
+            order: lesson.order,
+            title: lesson.title,
+            chapterTitle: ch.title,
+          });
+          chaptersCovered.add(ch.title);
+
+          if (pendingLessons.length >= limit) {
+            break;
+          }
+        }
+
+        if (pendingLessons.length >= limit) {
+          break;
+        }
+      }
+
+      if (pendingLessons.length === 0) {
+        return NextResponse.json({
+          success: true,
+          action: 'plan',
+          isCourseCompleted: true,
+          message: 'All chapters and lessons of UPSSSC PET course are fully generated and published!',
+          totalLessonsCount: totalLessonsInRoadmap,
+          completedLessonsCount: createdLessons.length,
+          percentComplete: 100,
+        });
+      }
+
       return NextResponse.json({
-        message: 'UPSSSC PET course is already 100% completed and published.',
-        progress,
+        success: true,
+        action: 'plan',
+        totalToGenerate: pendingLessons.length,
+        chaptersCount: chaptersCovered.size,
+        chaptersCovered: Array.from(chaptersCovered),
+        pendingLessons,
+        isCourseCompleted: false,
+        totalLessonsInRoadmap,
+        completedLessonsCount: createdLessons.length,
+        percentComplete: Math.round(
+          (createdLessons.length / totalLessonsInRoadmap) * 100
+        ),
       });
     }
 
-    // 7. Generation Loop (Processes lessons within safe execution window)
-    const todayDateString = new Date().toISOString().split('T')[0];
-    let lessonsCreatedThisRun = 0;
-    let quotaLimitHit = false;
-    let quotaMessage = '';
+    // ---------------------------------------------------------
+    // ACTION 2: Generate an Isolated Single Lesson Independently
+    // ---------------------------------------------------------
+    const targetChapterParam = searchParams.get('chapterIndex');
+    const targetLessonParam = searchParams.get('lessonIndex');
 
-    while (Date.now() - startTime < MAX_RUN_TIME_MS) {
-      const chapterIdx = progress.currentChapterIndex;
-      if (chapterIdx >= UP_PET_SYLLABUS_ROADMAP.length) {
-        // All chapters reached!
-        progress.status = 'completed';
-        break;
+    if (targetChapterParam !== null && targetLessonParam !== null) {
+      const chIdx = parseInt(targetChapterParam, 10);
+      const lesIdx = parseInt(targetLessonParam, 10);
+
+      if (isNaN(chIdx) || isNaN(lesIdx) || !UP_PET_SYLLABUS_ROADMAP[chIdx]) {
+        return NextResponse.json(
+          { message: 'Invalid chapterIndex or lessonIndex' },
+          { status: 400 }
+        );
       }
 
-      const chapterBlueprint = UP_PET_SYLLABUS_ROADMAP[chapterIdx];
-      const lessonIdx = progress.currentLessonIndex;
-
-      if (lessonIdx >= chapterBlueprint.lessons.length) {
-        // Current chapter finished, advance to next chapter
-        progress.currentChapterIndex += 1;
-        progress.currentLessonIndex = 0;
-        continue;
+      const chapterBlueprint = UP_PET_SYLLABUS_ROADMAP[chIdx];
+      const lessonBlueprint = chapterBlueprint.lessons[lesIdx];
+      if (!lessonBlueprint) {
+        return NextResponse.json(
+          { message: 'Invalid lessonIndex for specified chapter' },
+          { status: 400 }
+        );
       }
 
-      const lessonBlueprint = chapterBlueprint.lessons[lessonIdx];
-      const chapterDoc = chapterMap.get(chapterIdx);
+      const chapterDoc = chapterMap.get(chIdx);
       if (!chapterDoc) {
-        throw new Error(`Chapter doc for order ${chapterIdx} not found`);
+        return NextResponse.json(
+          { message: 'Chapter document not found' },
+          { status: 404 }
+        );
       }
 
-      // Check if this lesson already exists in database
+      // Check if already created (idempotent)
       const existingLesson = await Lesson.findOne({
         course: courseId,
         chapter: chapterDoc._id,
@@ -199,218 +377,149 @@ export async function GET(req: NextRequest) {
       }).lean();
 
       if (existingLesson) {
-        // Already created, advance pointer
-        progress.currentLessonIndex += 1;
-        continue;
+        return NextResponse.json({
+          success: true,
+          message: `Lesson "${lessonBlueprint.title}" already exists.`,
+          alreadyExists: true,
+          lesson: {
+            title: existingLesson.title,
+            order: existingLesson.order,
+          },
+        });
       }
 
-      // Check if remaining execution time is sufficient for another lesson
-      if (Date.now() - startTime >= MAX_RUN_TIME_MS) {
-        logInfo('Execution budget reached for this invocation, saving progress', logContext);
-        break;
-      }
+      // Generate the lesson content and practice quiz concurrently
+      const { createdLesson } = await generateSingleLessonDoc({
+        courseId,
+        chapterDoc,
+        chapterBlueprint,
+        lessonBlueprint,
+        instructorId: instructor._id,
+        logContext,
+      });
 
-      // Attempt AI Generation for Lesson & Practice Quiz
-      try {
-        logInfo(
-          `Generating Lesson: [Ch ${chapterIdx + 1}/${UP_PET_SYLLABUS_ROADMAP.length}] "${lessonBlueprint.title}"`,
-          logContext
-        );
+      // Update progress snapshot
+      const currentLessonCount = await Lesson.countDocuments({ course: courseId });
+      progress.completedLessonsCount = currentLessonCount;
+      progress.lastRunAt = new Date();
+      progress.lastError = null;
 
-        // 1. Generate Lesson Notes
-        const { content, summary } = await generateLessonContent({
-          chapterTitle: chapterBlueprint.title,
-          lessonTitle: lessonBlueprint.title,
-          subtopics: lessonBlueprint.focusSubtopics,
-          examTips: lessonBlueprint.examTips,
-        });
-
-        // 2. Generate Practice Quiz Questions
-        const questions = await generateLessonQuizQuestions({
-          chapterTitle: chapterBlueprint.title,
-          lessonTitle: lessonBlueprint.title,
-          quizTitle: lessonBlueprint.quizTitle,
-          numQuestions: Math.min(5, lessonBlueprint.questionCount || 5),
-        });
-
-        // 3. Save Lesson to MongoDB
-        const createdLesson = await Lesson.create({
-          title: lessonBlueprint.title,
-          description: summary,
-          course: courseId,
-          chapter: chapterDoc._id,
-          content,
-          order: lessonBlueprint.order,
-          duration: lessonBlueprint.durationMinutes,
-          isPublished: true,
-          uploadedBy: instructor._id,
-          uploadedAt: new Date(),
-        });
-
-        // 4. Save Linked Practice Quiz
-        const createdQuiz = await Quiz.create({
-          title: lessonBlueprint.quizTitle,
-          description: `${lessonBlueprint.title} पर आधारित UPSSSC PET परीक्षा उपयोगी अभ्यास प्रश्न।`,
-          course: courseId,
-          chapter: chapterDoc._id,
-          lesson: createdLesson._id,
-          instructor: instructor._id,
-          questionCount: questions.length,
-          timeLimit: Math.max(5, questions.length * 2), // 2 minutes per question
-          isPublished: true,
-          enableNegativeMarking: true,
-          negativeMarks: 0.25,
-        });
-
-        // 5. Save Quiz Questions
-        const questionDocs = questions.map((q, idx) => ({
-          quiz: createdQuiz._id,
-          order: idx + 1,
-          prompt: q.question,
-          options: q.options,
-          correctOption: q.correctAnswer,
-          points: 1,
-          negativePoints: 0.25,
-        }));
-        await QuizQuestion.insertMany(questionDocs);
-
-        // 6. Update Chapter and Course Counters
-        await Chapter.findByIdAndUpdate(chapterDoc._id, { $inc: { lessonCount: 1 } });
+      if (currentLessonCount >= totalLessonsInRoadmap) {
+        progress.status = 'completed';
         await Course.findByIdAndUpdate(courseId, {
-          $inc: { lessonCount: 1 },
-          $set: { lastPublishedLesson: createdLesson._id },
+          isCompleted: true,
+          completedAt: new Date(),
         });
+      }
+      await progress.save();
 
-        // 7. Update Progress State
-        lessonsCreatedThisRun += 1;
-        progress.completedLessonsCount += 1;
-        progress.lastRunAt = new Date();
-        progress.lastError = null;
-        progress.status = 'in_progress';
+      return NextResponse.json({
+        success: true,
+        message: `Successfully generated lesson "${lessonBlueprint.title}"`,
+        lesson: {
+          id: createdLesson._id,
+          title: createdLesson.title,
+          order: createdLesson.order,
+        },
+        durationMs: Date.now() - startTime,
+      });
+    }
 
-        // Advance to next lesson
-        if (lessonIdx + 1 < chapterBlueprint.lessons.length) {
-          progress.currentLessonIndex = lessonIdx + 1;
-        } else {
-          progress.currentChapterIndex = chapterIdx + 1;
-          progress.currentLessonIndex = 0;
-        }
+    // ---------------------------------------------------------
+    // ACTION 3: Fallback / Automated Cron Single-Step Run
+    // ---------------------------------------------------------
+    if (progress.status === 'completed') {
+      return NextResponse.json({
+        message: 'UPSSSC PET course is already 100% completed and published.',
+        progress,
+      });
+    }
 
-        // Limit per run: To avoid server timeouts and maximize reliability,
-        // create up to 1-2 full lessons per daily cron run.
-        if (lessonsCreatedThisRun >= 1) {
-          break;
-        }
-      } catch (genErr) {
-        if (genErr instanceof QuotaExhaustedError) {
-          quotaLimitHit = true;
-          quotaMessage = genErr.message;
-          progress.status = 'quota_exhausted';
-          progress.lastError = quotaMessage;
-          logError(`AI Quota reached: ${quotaMessage}. Saved checkpoint for next renewal.`, logContext);
-          break;
-        }
+    const createdLessons = await Lesson.find({ course: courseId }).select('chapter order').lean();
+    const createdSet = new Set(
+      createdLessons.map((l) => `${String(l.chapter)}:${l.order}`)
+    );
 
-        // Check if message indicates rate limit/quota
-        const errMsg = genErr instanceof Error ? genErr.message : String(genErr);
-        if (
-          errMsg.toLowerCase().includes('quota') ||
-          errMsg.toLowerCase().includes('rate limit') ||
-          errMsg.toLowerCase().includes('429') ||
-          errMsg.toLowerCase().includes('402')
-        ) {
-          quotaLimitHit = true;
-          quotaMessage = errMsg;
-          progress.status = 'quota_exhausted';
-          progress.lastError = quotaMessage;
-          logError(`Rate limit detected: ${errMsg}. Saved checkpoint for next renewal.`, logContext);
-          break;
-        }
+    let nextToProcess: {
+      chapterBlueprint: UpPetChapterBlueprint;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      chapterDoc: any;
+      lessonBlueprint: UpPetLessonBlueprint;
+    } | null = null;
 
-        // Other unexpected error: record and break
-        progress.lastError = errMsg;
-        logError(`Unexpected generation error: ${errMsg}`, logContext, { error: genErr });
+    for (const ch of UP_PET_SYLLABUS_ROADMAP) {
+      const chDoc = chapterMap.get(ch.order);
+      if (!chDoc) continue;
+      const missing = ch.lessons.filter(
+        (l) => !createdSet.has(`${String(chDoc._id)}:${l.order}`)
+      );
+      if (missing.length > 0) {
+        nextToProcess = {
+          chapterBlueprint: ch,
+          chapterDoc: chDoc,
+          lessonBlueprint: missing[0],
+        };
         break;
       }
     }
 
-    // Check if course has reached 100% completion
-    if (progress.currentChapterIndex >= UP_PET_SYLLABUS_ROADMAP.length) {
+    if (!nextToProcess) {
       progress.status = 'completed';
       await Course.findByIdAndUpdate(courseId, {
         isCompleted: true,
         completedAt: new Date(),
       });
+      await progress.save();
 
-      // Broadcast completion announcement to students
-      try {
-        const students = await User.find({ role: 'student' }).select('_id').lean();
-        const studentIds = students.map((s) => String(s._id));
-        if (studentIds.length > 0) {
-          await sendAdminBroadcast(studentIds, {
-            title: {
-              en: '🎉 UPSSSC PET Complete Course is Now Live!',
-              hi: '🎉 यूपी पीईटी संपूर्ण तैयारी कोर्स अब उपलब्ध है!',
-            },
-            body: {
-              en: 'Full 15-subject syllabus notes and practice quizzes are ready. Start learning today!',
-              hi: 'सभी 15 विषयों के नोट्स और अभ्यास क्विज तैयार हैं। आज ही अपनी तैयारी शुरू करें!',
-            },
-            category: 'announcements',
-            data: {
-              url: `/courses/${UP_PET_COURSE_SLUG}`,
-              courseId: String(courseId),
-            },
-          });
-        }
-      } catch (notifyErr) {
-        logError('Failed to broadcast course completion notification', logContext, { error: notifyErr });
-      }
+      return NextResponse.json({
+        success: true,
+        message: 'Course complete! All lessons are present.',
+        progress,
+      });
     }
 
-    // 8. Record Daily Run Log
-    const runDurationMs = Date.now() - startTime;
-    progress.lastRunAt = new Date();
-    progress.dailyRunLogs.push({
-      date: todayDateString,
-      lessonsCreated: lessonsCreatedThisRun,
-      status: quotaLimitHit ? 'quota_exhausted' : progress.status,
-      error: quotaLimitHit ? quotaMessage : progress.lastError || undefined,
-      runDurationMs,
-      timestamp: new Date(),
+    const { createdLesson } = await generateSingleLessonDoc({
+      courseId,
+      chapterDoc: nextToProcess.chapterDoc,
+      chapterBlueprint: nextToProcess.chapterBlueprint,
+      lessonBlueprint: nextToProcess.lessonBlueprint,
+      instructorId: instructor._id,
+      logContext,
     });
 
+    const newCompletedCount = createdLessons.length + 1;
+    progress.completedLessonsCount = newCompletedCount;
+    progress.lastRunAt = new Date();
+    progress.lastError = null;
     await progress.save();
-
-    // 9. Cache Invalidation
-    try {
-      await invalidatePattern('courses:*');
-      await invalidatePattern('quizzes:*');
-      revalidateTag('courses:public');
-    } catch {
-      // Redis is optional, ignore cache failures
-    }
 
     return NextResponse.json({
       success: true,
-      message: quotaLimitHit
-        ? 'AI quota limit hit for today. Saved checkpoint and will automatically resume at next scheduled renewal.'
-        : `Successfully processed UP PET course generator. ${lessonsCreatedThisRun} lesson(s) created.`,
-      status: progress.status,
-      quotaLimitHit,
-      quotaMessage: quotaLimitHit ? quotaMessage : undefined,
-      progress: {
-        currentChapterIndex: progress.currentChapterIndex,
-        currentLessonIndex: progress.currentLessonIndex,
-        completedLessonsCount: progress.completedLessonsCount,
-        totalLessonsCount: progress.totalLessonsCount,
-        percentComplete: Math.round(
-          (progress.completedLessonsCount / progress.totalLessonsCount) * 100
-        ),
+      message: `Generated next scheduled lesson: "${createdLesson.title}"`,
+      lesson: {
+        id: createdLesson._id,
+        title: createdLesson.title,
+        order: createdLesson.order,
       },
-      durationMs: runDurationMs,
+      progress: {
+        completedLessonsCount: newCompletedCount,
+        totalLessonsCount: totalLessonsInRoadmap,
+        percentComplete: Math.round((newCompletedCount / totalLessonsInRoadmap) * 100),
+      },
+      durationMs: Date.now() - startTime,
     });
   } catch (error) {
+    if (error instanceof QuotaExhaustedError) {
+      return NextResponse.json(
+        {
+          success: false,
+          quotaLimitHit: true,
+          message: error.message,
+        },
+        { status: 429 }
+      );
+    }
+
     logApiError(error as Error, 'GET', '/api/cron/generate-up-pet-course', logContext);
     return NextResponse.json(
       { message: 'Internal Server Error', error: (error as Error).message },

@@ -35,15 +35,25 @@ import { CourseLeaderboardTab } from './_components/CourseLeaderboardTab';
 import { EmptyEnrollmentState } from './_components/EmptyEnrollmentState';
 import { useCourseQuizActions } from './_components/useCourseQuizActions';
 import { useCurriculumAccordion } from './_components/useCurriculumAccordion';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useAlert } from '@/components/ui/AlertContainer';
+import { isSuperAdmin } from '@/lib/roles';
 import { useSettingsStore } from '@/store/useSettingsStore';
+import { AiCourseActionModal, type AiActionType } from './_components/AiCourseActionModal';
 
 export default function CourseDetailPage() {
-  const { status, session } = useSessionStore();
+  const { status, session, fetchSession } = useSessionStore();
   const router = useRouter();
   const params = useParams();
   const { t } = useTranslation();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+
+  useEffect(() => {
+    if (!session) {
+      void fetchSession();
+    }
+  }, [session, fetchSession]);
 
   const { isFeatureEnabled } = useSettingsStore();
   const doubtsEnabled = isFeatureEnabled('enableCourseDoubts');
@@ -72,7 +82,49 @@ export default function CourseDetailPage() {
     handleConfirmQuizAction,
   } = useCourseQuizActions(attempts);
 
+  const queryClient = useQueryClient();
+  const { addAlert } = useAlert();
+  const isSuperAdminUser =
+    isSuperAdmin(session?.user?.role) ||
+    (session?.user as { role?: string } | undefined)?.role === 'superadmin';
+
+  const [aiModal, setAiModal] = useState<{
+    isOpen: boolean;
+    action: AiActionType | null;
+    chapter?: { _id: string; title: string } | null;
+    lesson?: { _id: string; title: string } | null;
+  }>({ isOpen: false, action: null, chapter: null, lesson: null });
+
+  const handleOpenAiModal = (
+    action: AiActionType,
+    chapter?: { _id: string; title: string },
+    lesson?: { _id: string; title: string }
+  ) => {
+    setAiModal({ isOpen: true, action, chapter: chapter || null, lesson: lesson || null });
+  };
+
+  const handleAiModalSuccess = (message: string) => {
+    addAlert({ type: 'success', message });
+    queryClient.invalidateQueries({ queryKey: ['courses', courseId, 'curriculum'] });
+    queryClient.invalidateQueries({ queryKey: ['courses', courseId, 'quizzes'] });
+  };
+
   const enrollment = useMemo(() => enrollments.find((e) => e.course._id === courseId), [enrollments, courseId]);
+
+  // If superadmin is not enrolled, load course data directly
+  const { data: directCourse, isLoading: directCourseLoading } = useQuery({
+    queryKey: ['courses', courseId, 'direct'],
+    queryFn: async () => {
+      const res = await fetch(`/api/courses/${courseId}`);
+      if (!res.ok) return null;
+      const json = await res.json();
+      return json.course || null;
+    },
+    enabled: !!courseId && isSuperAdminUser && !enrollment,
+  });
+
+  const course = enrollment?.course || directCourse;
+  const courseProgress = enrollment?.progress ?? 0;
 
   const { courseLevel: courseLevelQuizzes, chapterScoped: chapterScopedQuizzes, lessonScoped: lessonScopedQuizzes } =
     useMemo(() => splitQuizzesByScope(courseQuizzes), [courseQuizzes]);
@@ -102,15 +154,20 @@ export default function CourseDetailPage() {
     router.push(ROUTES.student.lesson(courseId, lessonId));
   };
 
-  if (status === 'loading' || enrollmentsLoading || quizzesLoading || curriculumLoading || attemptsLoading) {
+  if (
+    status === 'loading' ||
+    enrollmentsLoading ||
+    quizzesLoading ||
+    curriculumLoading ||
+    attemptsLoading ||
+    (isSuperAdminUser && !enrollment && directCourseLoading)
+  ) {
     return <PageSkeleton />;
   }
 
-  if (!enrollment) {
+  if (!course) {
     return <EmptyEnrollmentState t={t} />;
   }
-
-  const { course } = enrollment;
 
   return (
     <div className="flex flex-col gap-3 sm:gap-3.5">
@@ -121,7 +178,7 @@ export default function CourseDetailPage() {
         chaptersCount={curriculum.length}
         lessonsCount={allLessons.length}
         quizzesCount={courseQuizzes.length}
-        progress={enrollment.progress}
+        progress={courseProgress}
         t={t}
       />
 
@@ -143,7 +200,9 @@ export default function CourseDetailPage() {
               toggleChapter={toggleChapter}
               toggleAllChapters={toggleAllChapters}
               allExpanded={allExpanded}
-              renderLessonRow={(lesson) => (
+              isSuperAdmin={isSuperAdminUser}
+              onOpenAiModal={handleOpenAiModal}
+              renderLessonRow={(lesson, chapterId, chapterTitle) => (
                 <CurriculumLessonRow
                   key={lesson._id}
                   lesson={lesson}
@@ -152,6 +211,10 @@ export default function CourseDetailPage() {
                   onQuizAction={handleCurriculumQuizAction}
                   startingQuizId={startingQuizId}
                   confirmQuizId={confirmQuiz?.quizId}
+                  isSuperAdmin={isSuperAdminUser}
+                  onOpenAiModal={handleOpenAiModal}
+                  chapterId={chapterId}
+                  chapterTitle={chapterTitle}
                 />
               )}
               renderChapterQuizzes={(quizzes) =>
@@ -173,13 +236,13 @@ export default function CourseDetailPage() {
               }
               allLessons={allLessons}
               handleStartLesson={handleStartLesson}
-              enrollmentProgress={enrollment.progress}
+              enrollmentProgress={courseProgress}
               t={t}
             />
           )}
 
           {activeTab === 'overview' && (
-            <OverviewTab description={course.description || ''} category={course.category || ''} progress={enrollment.progress} t={t} />
+            <OverviewTab description={course.description || ''} category={course.category || ''} progress={courseProgress} t={t} />
           )}
 
           {activeTab === 'quizzes' && (
@@ -210,7 +273,7 @@ export default function CourseDetailPage() {
           {activeTab === 'leaderboard' && (
             <CourseLeaderboardTab
               courseId={courseId}
-              courseTitle={enrollment.course.title}
+              courseTitle={course.title}
               currentUserId={session?.user?.id}
               t={t}
             />
@@ -228,6 +291,18 @@ export default function CourseDetailPage() {
         isLoading={!!confirmQuiz && startingQuizId === confirmQuiz.quizId}
         onConfirm={handleConfirmQuizAction}
         onCancel={() => setConfirmQuiz(null)}
+      />
+
+      <AiCourseActionModal
+        isOpen={aiModal.isOpen}
+        onClose={() => setAiModal({ isOpen: false, action: null, chapter: null, lesson: null })}
+        actionType={aiModal.action}
+        courseId={courseId}
+        courseTitle={course?.title || ''}
+        chapter={aiModal.chapter}
+        lesson={aiModal.lesson}
+        onSuccess={handleAiModalSuccess}
+        onError={(msg) => addAlert({ type: 'error', message: msg })}
       />
     </div>
   );
