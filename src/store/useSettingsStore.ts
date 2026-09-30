@@ -83,7 +83,7 @@ export const defaultPublicAppSettings: PublicAppSettings = {
     enableAutoDailyAiContestCreation: true,
     enableAutoDeclareResults: true,
     enableUpPetCourseCron: true,
-    enableChatWidget: true,
+    enableChatWidget: false,
   },
   challengeConfig: {
     allowGuestChallenges: true,

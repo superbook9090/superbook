@@ -41,7 +41,7 @@ export function AdminQuizCard({
   const { t } = useTranslation();
   const router = useRouter();
 
-  const questionCount = quiz.questions?.length ?? 0;
+  const questionCount = quiz.questionCount ?? quiz.questions?.length ?? 0;
   const timeLimit = quiz.timeLimit ? `${quiz.timeLimit}m` : null;
 
   return (

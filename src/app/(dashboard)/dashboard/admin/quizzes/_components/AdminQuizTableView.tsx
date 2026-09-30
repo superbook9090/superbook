@@ -90,7 +90,7 @@ export function AdminQuizTableView({
 
                 {/* Question count */}
                 <td className="py-3.5 px-5 text-center font-bold tabular-nums text-[var(--color-foreground)]">
-                  {quiz.questions?.length ?? 0}
+                  {quiz.questionCount ?? quiz.questions?.length ?? 0}
                 </td>
 
                 {/* Status */}

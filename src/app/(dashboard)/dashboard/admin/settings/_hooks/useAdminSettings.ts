@@ -161,7 +161,12 @@ export function useAdminSettings() {
       await fetchPublicSettings(true);
       setInitialSettings(settings);
       addAlert({ type: 'success', message: t('adminSettings.settingsSaved') });
-      window.dispatchEvent(new Event('settingsUpdated'));
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('previewChatWidgetToggle', { detail: { enabled: null } })
+        );
+        window.dispatchEvent(new Event('settingsUpdated'));
+      }
     } catch (err) {
       addAlert({
         type: 'error',
@@ -175,6 +180,13 @@ export function useAdminSettings() {
   const handleDiscard = () => {
     setSettings(initialSettings);
     setShowDiscardModal(false);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('previewChatWidgetToggle', {
+          detail: { enabled: null },
+        })
+      );
+    }
   };
 
   const handleToggleMaintenance = (targetValue: boolean) => {

@@ -60,6 +60,7 @@ export interface Quiz {
   courseId?: string;
   course?: Pick<Course, '_id' | 'title'> & Partial<Course>;
   timeLimit: number;
+  questionCount?: number;
   questions?: QuizQuestion[];
   isPublished: boolean;
   passingScore?: number;

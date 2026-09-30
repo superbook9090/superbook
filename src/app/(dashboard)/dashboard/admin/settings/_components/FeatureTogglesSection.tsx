@@ -123,6 +123,11 @@ export function FeatureTogglesSection({
       ...prev,
       featureToggles: { ...prev.featureToggles, [key]: val },
     }));
+    if (key === 'enableChatWidget' && typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('previewChatWidgetToggle', { detail: { enabled: val } })
+      );
+    }
   };
 
   const filteredCategories = categories
