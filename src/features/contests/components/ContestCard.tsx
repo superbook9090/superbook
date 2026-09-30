@@ -85,15 +85,22 @@ export function ContestCard({ contest, isTeacher = false, managePath }: ContestC
   const hasSubmitted =
     userAttempt?.status === 'completed' || userAttempt?.status === 'timed_out';
 
-  const defaultStudentLink = state === 'live' && !hasSubmitted
-    ? `/dashboard/student/contests/${contest._id}/take`
-    : `/dashboard/student/contests/${contest._id}/result`;
+  // For students:
+  // If the contest has ended or the student has already submitted, route directly to the result/leaderboard page.
+  // If the contest is currently live and unsubmitted, route to take.
+  // If upcoming, use slug details if available.
+  const studentLink =
+    state === 'completed' || hasSubmitted
+      ? `/dashboard/student/contests/${contest._id}/result`
+      : state === 'live'
+      ? `/dashboard/student/contests/${contest._id}/take`
+      : contest.slug
+      ? `/contests/${contest.slug}`
+      : `/dashboard/student/contests/${contest._id}/take`;
 
   const targetLink = isTeacher
     ? (managePath || `/dashboard/teacher/contests/${contest._id}`)
-    : contest.slug
-    ? `/contests/${contest.slug}`
-    : defaultStudentLink;
+    : studentLink;
 
   return (
     <motion.div

@@ -45,6 +45,15 @@ export default async function ContestPublicPage({ params }: ContestPageProps) {
     notFound();
   }
 
-  // Redirect to the dashboard where the actual contest UI lives
+  const now = new Date();
+  const isEnded =
+    contest.status === 'completed' ||
+    Boolean(contest.endTime && new Date(contest.endTime) < now);
+
+  if (isEnded) {
+    redirect(`/dashboard/student/contests/${contest._id.toString()}/result`);
+  }
+
+  // Redirect to the dashboard where the active contest UI lives
   redirect(`/dashboard/student/contests/${contest._id.toString()}/take`);
 }

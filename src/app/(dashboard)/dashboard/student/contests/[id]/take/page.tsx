@@ -202,6 +202,20 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
         if (cancelled) return;
         setContest(contestData.contest);
 
+        const currentContest = contestData.contest;
+        const hasSubmitted =
+          currentContest?.userAttempt?.status === 'completed' ||
+          currentContest?.userAttempt?.status === 'timed_out';
+        const isEnded =
+          currentContest?.computedState === 'completed' ||
+          currentContest?.status === 'completed' ||
+          Boolean(currentContest?.endTime && new Date(currentContest.endTime) < new Date());
+
+        if (isEnded || hasSubmitted) {
+          router.replace(`/dashboard/student/contests/${id}/result`);
+          return;
+        }
+
         const res = await startContestAttempt(id);
         if (cancelled) return;
 
@@ -220,9 +234,14 @@ export default function TakeContestPage({ params }: { params: Promise<{ id: stri
       } catch (err) {
         if (cancelled) return;
         
-        if (err instanceof ApiClientError && err.message.includes('maximum allowed attempts')) {
-          console.warn('[TakeContestPage] Attempts exhausted:', err.message);
-          addAlert({ type: 'info', message: t('contest.attemptsExhausted') });
+        const isAttemptExhausted = err instanceof ApiClientError && err.message.includes('maximum allowed attempts');
+        const isAlreadyEnded = err instanceof ApiClientError && (err.message.toLowerCase().includes('ended') || err.message.toLowerCase().includes('already ended'));
+
+        if (isAttemptExhausted || isAlreadyEnded) {
+          console.warn('[TakeContestPage] Contest ended or attempts exhausted, redirecting to result:', err instanceof Error ? err.message : err);
+          if (isAttemptExhausted) {
+            addAlert({ type: 'info', message: t('contest.attemptsExhausted') });
+          }
           router.replace(`/dashboard/student/contests/${id}/result`);
         } else {
           console.error('[TakeContestPage] Failed to initialize contest:', err);
