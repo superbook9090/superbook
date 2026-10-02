@@ -72,6 +72,14 @@ export async function GET() {
         allowGuestChallenges: true,
         challengeExpiryDays: 7,
       },
+      appVersionConfig: {
+        latestVersion: '1.0.0',
+        minRequiredVersion: '1.0.0',
+        forceUpdate: false,
+        updateUrl: 'https://play.google.com/store/apps/details?id=com.quizdo',
+        releaseNotes: 'Bug fixes and performance improvements.',
+        enabled: true,
+      },
       platformConfig: {
         siteName: 'Quiz Do',
         siteDescription: 'Learning Management System',
@@ -108,6 +116,14 @@ export async function GET() {
       featureToggles: {
         ...defaultSettings.featureToggles,
         ...(settings.featureToggles || {}),
+      },
+      challengeConfig: {
+        ...defaultSettings.challengeConfig,
+        ...(settings.challengeConfig || {}),
+      },
+      appVersionConfig: {
+        ...defaultSettings.appVersionConfig,
+        ...(settings.appVersionConfig || {}),
       },
       platformConfig: {
         ...defaultSettings.platformConfig,

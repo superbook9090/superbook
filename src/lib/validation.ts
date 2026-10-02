@@ -218,6 +218,14 @@ export const updateSettingsSchema = z.object({
     guestQuestionLimit: z.number().int().min(1).max(20).optional(),
     challengeExpiryDays: z.number().int().min(1).max(60).optional(),
   }).optional(),
+  appVersionConfig: z.object({
+    latestVersion: z.string().trim().min(1, 'Latest version is required').max(30),
+    minRequiredVersion: z.string().trim().min(1, 'Minimum required version is required').max(30),
+    forceUpdate: z.boolean().optional(),
+    updateUrl: z.string().trim().url('Invalid update URL').optional().or(z.literal('')),
+    releaseNotes: z.string().max(1000).optional(),
+    enabled: z.boolean().optional(),
+  }).optional(),
   platformConfig: z.object({
     siteName: z.string().max(100).optional(),
     siteDescription: z.string().max(500).optional(),

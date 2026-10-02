@@ -4,12 +4,17 @@ declare global {
   interface Window {
     AndroidBridge?: {
       postMessage?: (message: string) => void;
+      getAppVersion?: () => string;
+      appVersion?: string;
     };
     ReactNativeWebView?: {
       postMessage: (message: string) => void;
     };
     QuizdoNativeApp?: {
       isNativeApp: boolean;
+      version?: string;
+      appVersion?: string;
+      getAppVersion?: () => string;
       share: (payload: NativeSharePayload) => boolean;
       openLink: (url: string, target?: NativeOpenLinkTarget) => boolean;
       openExternal: (url: string) => boolean;

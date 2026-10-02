@@ -46,6 +46,14 @@ const DEFAULT_SETTINGS = {
     allowGuestChallenges: true,
     challengeExpiryDays: 7,
   },
+  appVersionConfig: {
+    latestVersion: '1.0.0',
+    minRequiredVersion: '1.0.0',
+    forceUpdate: false,
+    updateUrl: 'https://play.google.com/store/apps/details?id=com.quizdo',
+    releaseNotes: 'Performance improvements and bug fixes.',
+    enabled: true,
+  },
   platformConfig: {
     siteName: 'Quiz Do',
     siteDescription: 'A comprehensive learning platform',
@@ -75,6 +83,14 @@ export const getSettingsWithDefaults = cache(async (): Promise<IAppSettings> => 
       featureToggles: {
         ...DEFAULT_SETTINGS.featureToggles,
         ...(settings.featureToggles || {}),
+      },
+      challengeConfig: {
+        ...DEFAULT_SETTINGS.challengeConfig,
+        ...(settings.challengeConfig || {}),
+      },
+      appVersionConfig: {
+        ...DEFAULT_SETTINGS.appVersionConfig,
+        ...(settings.appVersionConfig || {}),
       },
       platformConfig: {
         ...DEFAULT_SETTINGS.platformConfig,

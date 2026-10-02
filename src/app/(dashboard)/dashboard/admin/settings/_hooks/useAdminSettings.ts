@@ -39,6 +39,14 @@ const defaultSettings: AppSettings = {
     allowGuestChallenges: true,
     challengeExpiryDays: 7,
   },
+  appVersionConfig: {
+    latestVersion: '1.0.0',
+    minRequiredVersion: '1.0.0',
+    forceUpdate: false,
+    updateUrl: 'https://play.google.com/store/apps/details?id=com.quizdo',
+    releaseNotes: 'Performance improvements and bug fixes.',
+    enabled: true,
+  },
   platformConfig: {
     siteName: 'Quiz Do',
     siteDescription: 'Learning Management System',
@@ -82,6 +90,14 @@ export function useAdminSettings() {
           maxWordsPerPage: data.notesLimits?.maxWordsPerPage ?? defaultSettings.notesLimits?.maxWordsPerPage ?? 1000,
         },
         featureToggles: { ...defaultSettings.featureToggles, ...data.featureToggles },
+        appVersionConfig: {
+          latestVersion: data.appVersionConfig?.latestVersion ?? defaultSettings.appVersionConfig?.latestVersion ?? '1.0.0',
+          minRequiredVersion: data.appVersionConfig?.minRequiredVersion ?? defaultSettings.appVersionConfig?.minRequiredVersion ?? '1.0.0',
+          forceUpdate: data.appVersionConfig?.forceUpdate ?? defaultSettings.appVersionConfig?.forceUpdate ?? false,
+          updateUrl: data.appVersionConfig?.updateUrl ?? defaultSettings.appVersionConfig?.updateUrl ?? 'https://play.google.com/store/apps/details?id=com.quizdo',
+          releaseNotes: data.appVersionConfig?.releaseNotes ?? defaultSettings.appVersionConfig?.releaseNotes ?? '',
+          enabled: data.appVersionConfig?.enabled ?? defaultSettings.appVersionConfig?.enabled ?? true,
+        },
         platformConfig: { ...defaultSettings.platformConfig, ...data.platformConfig },
       };
       setInitialSettings(merged);
@@ -125,6 +141,14 @@ export function useAdminSettings() {
     if (settings.platformConfig.allowRegistration !== initialSettings.platformConfig.allowRegistration) count++;
     if (settings.platformConfig.allowTeacherRegistration !== initialSettings.platformConfig.allowTeacherRegistration) count++;
     if (settings.platformConfig.defaultLanguage !== initialSettings.platformConfig.defaultLanguage) count++;
+
+    // Check app version config
+    if (settings.appVersionConfig?.latestVersion !== initialSettings.appVersionConfig?.latestVersion) count++;
+    if (settings.appVersionConfig?.minRequiredVersion !== initialSettings.appVersionConfig?.minRequiredVersion) count++;
+    if (settings.appVersionConfig?.forceUpdate !== initialSettings.appVersionConfig?.forceUpdate) count++;
+    if (settings.appVersionConfig?.updateUrl !== initialSettings.appVersionConfig?.updateUrl) count++;
+    if (settings.appVersionConfig?.releaseNotes !== initialSettings.appVersionConfig?.releaseNotes) count++;
+    if (settings.appVersionConfig?.enabled !== initialSettings.appVersionConfig?.enabled) count++;
 
     // Check feature toggles
     const keys = Object.keys(settings.featureToggles) as (keyof typeof settings.featureToggles)[];

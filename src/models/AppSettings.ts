@@ -43,6 +43,14 @@ export interface IAppSettings extends Document {
     guestQuestionLimit?: number;
     challengeExpiryDays: number;
   };
+  appVersionConfig?: {
+    latestVersion: string;
+    minRequiredVersion: string;
+    forceUpdate: boolean;
+    updateUrl?: string;
+    releaseNotes?: string;
+    enabled: boolean;
+  };
   platformConfig: {
     maintenanceMode: boolean;
     allowRegistration: boolean;
@@ -204,6 +212,32 @@ const appSettingsSchema = new Schema<IAppSettings>(
         default: 7,
         min: 1,
         max: 60,
+      },
+    },
+    appVersionConfig: {
+      latestVersion: {
+        type: String,
+        default: '1.0.0',
+      },
+      minRequiredVersion: {
+        type: String,
+        default: '1.0.0',
+      },
+      forceUpdate: {
+        type: Boolean,
+        default: false,
+      },
+      updateUrl: {
+        type: String,
+        default: 'https://play.google.com/store/apps/details?id=com.quizdo',
+      },
+      releaseNotes: {
+        type: String,
+        default: 'Bug fixes and performance improvements.',
+      },
+      enabled: {
+        type: Boolean,
+        default: true,
       },
     },
     platformConfig: {

@@ -15,6 +15,7 @@ import { FeatureTogglesSection } from './_components/FeatureTogglesSection';
 import { TeacherLimitsSection } from './_components/TeacherLimitsSection';
 import { NotesLimitsSection } from './_components/NotesLimitsSection';
 import { PlatformConfigSection } from './_components/PlatformConfigSection';
+import { AppVersionSection } from './_components/AppVersionSection';
 import { SettingsActionBar } from './_components/SettingsActionBar';
 import { CronJobsSection } from './_components/CronJobsSection';
 
@@ -50,6 +51,7 @@ export default function AdminSettingsPage() {
   }
 
   const showFeatures = activeTab === 'all' || activeTab === 'features';
+  const showAppVersion = activeTab === 'all' || activeTab === 'app_version';
   const showTeacherLimits = activeTab === 'all' || activeTab === 'teacher_limits';
   const showNotesLimits = activeTab === 'all' || activeTab === 'notes_limits';
   const showPlatform = activeTab === 'all' || activeTab === 'platform';
@@ -115,6 +117,14 @@ export default function AdminSettingsPage() {
             settings={settings}
             setSettings={setSettings}
             canManageSolutionAnalysis={canManageSolutionAnalysis}
+            searchQuery={searchQuery}
+          />
+        )}
+
+        {showAppVersion && (
+          <AppVersionSection
+            settings={settings}
+            setSettings={setSettings}
             searchQuery={searchQuery}
           />
         )}

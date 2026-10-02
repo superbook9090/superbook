@@ -1,4 +1,4 @@
-export type SettingsTab = 'all' | 'features' | 'teacher_limits' | 'notes_limits' | 'platform' | 'jobs';
+export type SettingsTab = 'all' | 'features' | 'app_version' | 'teacher_limits' | 'notes_limits' | 'platform' | 'jobs';
 
 export interface AppSettings {
   teacherLimits: {
@@ -42,6 +42,14 @@ export interface AppSettings {
     allowGuestChallenges: boolean;
     guestQuestionLimit?: number;
     challengeExpiryDays: number;
+  };
+  appVersionConfig?: {
+    latestVersion: string;
+    minRequiredVersion: string;
+    forceUpdate: boolean;
+    updateUrl?: string;
+    releaseNotes?: string;
+    enabled: boolean;
   };
   platformConfig: {
     siteName?: string;

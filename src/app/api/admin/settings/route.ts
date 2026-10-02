@@ -91,7 +91,7 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    const { teacherLimits, notesLimits, featureToggles, platformConfig } = validationResult.data;
+    const { teacherLimits, notesLimits, featureToggles, platformConfig, appVersionConfig } = validationResult.data;
     const isSuper = isSuperAdmin(session.user.role);
 
     await dbConnect();
@@ -256,6 +256,27 @@ export async function PATCH(req: NextRequest) {
       settings.challengeConfig = {
         allowGuestChallenges: body.challengeConfig.allowGuestChallenges ?? existingConfig.allowGuestChallenges ?? true,
         challengeExpiryDays: body.challengeConfig.challengeExpiryDays ?? existingConfig.challengeExpiryDays ?? 7,
+      };
+    }
+
+    // Update app version config if provided (superadmin only)
+    if (appVersionConfig && isSuper) {
+      const existingAppVersion = settings.appVersionConfig || {
+        latestVersion: '1.0.0',
+        minRequiredVersion: '1.0.0',
+        forceUpdate: false,
+        updateUrl: 'https://play.google.com/store/apps/details?id=com.quizdo',
+        releaseNotes: 'Bug fixes and performance improvements.',
+        enabled: true,
+      };
+
+      settings.appVersionConfig = {
+        latestVersion: appVersionConfig.latestVersion ?? existingAppVersion.latestVersion,
+        minRequiredVersion: appVersionConfig.minRequiredVersion ?? existingAppVersion.minRequiredVersion,
+        forceUpdate: appVersionConfig.forceUpdate ?? existingAppVersion.forceUpdate ?? false,
+        updateUrl: appVersionConfig.updateUrl !== undefined ? appVersionConfig.updateUrl : existingAppVersion.updateUrl,
+        releaseNotes: appVersionConfig.releaseNotes !== undefined ? appVersionConfig.releaseNotes : existingAppVersion.releaseNotes,
+        enabled: appVersionConfig.enabled !== undefined ? appVersionConfig.enabled : existingAppVersion.enabled,
       };
     }
 

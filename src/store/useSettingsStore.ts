@@ -43,6 +43,14 @@ export interface PublicAppSettings {
     guestQuestionLimit?: number;
     challengeExpiryDays: number;
   };
+  appVersionConfig?: {
+    latestVersion: string;
+    minRequiredVersion: string;
+    forceUpdate: boolean;
+    updateUrl?: string;
+    releaseNotes?: string;
+    enabled: boolean;
+  };
   platformConfig: {
     maintenanceMode: boolean;
     allowRegistration: boolean;
@@ -88,6 +96,14 @@ export const defaultPublicAppSettings: PublicAppSettings = {
   challengeConfig: {
     allowGuestChallenges: true,
     challengeExpiryDays: 7,
+  },
+  appVersionConfig: {
+    latestVersion: '1.0.0',
+    minRequiredVersion: '1.0.0',
+    forceUpdate: false,
+    updateUrl: 'https://play.google.com/store/apps/details?id=com.quizdo',
+    releaseNotes: 'Performance improvements and bug fixes.',
+    enabled: true,
   },
   platformConfig: {
     maintenanceMode: false,
@@ -148,6 +164,14 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
             featureToggles: {
               ...defaultPublicAppSettings.featureToggles,
               ...data.featureToggles,
+            },
+            appVersionConfig: {
+              latestVersion: data.appVersionConfig?.latestVersion ?? defaultPublicAppSettings.appVersionConfig?.latestVersion ?? '1.0.0',
+              minRequiredVersion: data.appVersionConfig?.minRequiredVersion ?? defaultPublicAppSettings.appVersionConfig?.minRequiredVersion ?? '1.0.0',
+              forceUpdate: data.appVersionConfig?.forceUpdate ?? defaultPublicAppSettings.appVersionConfig?.forceUpdate ?? false,
+              updateUrl: data.appVersionConfig?.updateUrl ?? defaultPublicAppSettings.appVersionConfig?.updateUrl ?? 'https://play.google.com/store/apps/details?id=com.quizdo',
+              releaseNotes: data.appVersionConfig?.releaseNotes ?? defaultPublicAppSettings.appVersionConfig?.releaseNotes ?? '',
+              enabled: data.appVersionConfig?.enabled ?? defaultPublicAppSettings.appVersionConfig?.enabled ?? true,
             },
             platformConfig: {
               ...defaultPublicAppSettings.platformConfig,

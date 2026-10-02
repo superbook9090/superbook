@@ -14,6 +14,7 @@ import { createRootMetadata } from '@/lib/seo/metadata';
 import { fontVariables } from '@/lib/fonts';
 import PullToRefresh from '@/components/PullToRefresh';
 import { AnimatedCursor } from '@/components/layout';
+import AppUpdateModal from '@/components/mobile/AppUpdateModal';
 
 export const metadata: Metadata = {
   ...createRootMetadata(),
@@ -56,6 +57,7 @@ export default function RootLayout({
                     {children}
                   </PullToRefresh>
                 </MaintenanceCheck>
+                <AppUpdateModal />
               </SessionProvider>
             </AppSettingsProvider>
           </LanguageProvider>
