@@ -38,7 +38,9 @@ import { persistIsMobileApp } from './mobileDetection';
 
 export const sendToWebView = (message: WebToNativeMessage) => {
   if (typeof window !== 'undefined') {
-    persistIsMobileApp();
+    if (isNativeWebViewBridgeAvailable()) {
+      persistIsMobileApp();
+    }
     // Check for Android JavascriptInterface
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ((window as any).AndroidBridge && (window as any).AndroidBridge.postMessage) {
@@ -77,8 +79,12 @@ export const shareViaNativeApp = (payload: NativeSharePayload) => {
     return window.QuizdoNativeApp.share(payload);
   }
 
-  sendToWebView({ action: 'REQUEST_SHARE', payload });
-  return true;
+  if (isNativeWebViewBridgeAvailable()) {
+    sendToWebView({ action: 'REQUEST_SHARE', payload });
+    return true;
+  }
+
+  return false;
 };
 
 export const openLinkViaNativeApp = (url: string, target: NativeOpenLinkTarget = 'external') => {
@@ -90,8 +96,16 @@ export const openLinkViaNativeApp = (url: string, target: NativeOpenLinkTarget =
     return window.QuizdoNativeApp.openLink(url, target);
   }
 
-  sendToWebView({ action: 'REQUEST_OPEN_LINK', payload: { url, target } });
-  return true;
+  if (window.QuizdoNativeApp?.openExternal && target === 'external') {
+    return window.QuizdoNativeApp.openExternal(url);
+  }
+
+  if (isNativeWebViewBridgeAvailable()) {
+    sendToWebView({ action: 'REQUEST_OPEN_LINK', payload: { url, target } });
+    return true;
+  }
+
+  return false;
 };
 
 export const openExternalLinkViaNativeApp = (url: string) => openLinkViaNativeApp(url, 'external');

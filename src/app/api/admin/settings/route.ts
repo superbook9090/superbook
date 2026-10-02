@@ -262,7 +262,7 @@ export async function PATCH(req: NextRequest) {
     // Update app version config if provided (superadmin only)
     if (appVersionConfig && isSuper) {
       const existingAppVersion = settings.appVersionConfig || {
-        latestVersion: '1.0.0',
+        latestVersion: '1.10.10',
         minRequiredVersion: '1.0.0',
         forceUpdate: false,
         updateUrl: 'https://play.google.com/store/apps/details?id=com.quizdo',

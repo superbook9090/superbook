@@ -47,7 +47,7 @@ export function isUpdateAvailable(
   currentVersion: string | null | undefined,
   latestVersion: string | null | undefined
 ): boolean {
-  if (!latestVersion) return false;
+  if (!currentVersion || !latestVersion) return false;
   return compareVersions(currentVersion, latestVersion) < 0;
 }
 
@@ -60,6 +60,7 @@ export function isForceUpdateRequired(
   minRequiredVersion: string | null | undefined,
   forceUpdateFlag = false
 ): boolean {
+  if (!currentVersion) return false;
   if (forceUpdateFlag) return true;
   if (!minRequiredVersion) return false;
   return compareVersions(currentVersion, minRequiredVersion) < 0;

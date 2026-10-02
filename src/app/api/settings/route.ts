@@ -73,7 +73,7 @@ export async function GET() {
         challengeExpiryDays: 7,
       },
       appVersionConfig: {
-        latestVersion: '1.0.0',
+        latestVersion: '1.10.10',
         minRequiredVersion: '1.0.0',
         forceUpdate: false,
         updateUrl: 'https://play.google.com/store/apps/details?id=com.quizdo',

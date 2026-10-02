@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Rocket, ShieldAlert, ArrowRight, X, Sparkles } from 'lucide-react';
+import { Rocket, ShieldAlert, ArrowRight, X, Sparkles, RefreshCw } from 'lucide-react';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { useTranslation } from '@/hooks/useTranslation';
 import { ROUTES } from '@/constants/routes';
 import { isMobileApp } from '@/lib/mobile/mobileDetection';
-import { getCurrentAppVersion, isUpdateDismissed, dismissUpdate } from '@/lib/mobile/appVersion';
+import { getCurrentAppVersion, isUpdateDismissed, dismissUpdate, clearAppVersionPersistence } from '@/lib/mobile/appVersion';
 import { isUpdateAvailable, isForceUpdateRequired } from '@/lib/mobile/versionCompare';
 import { openExternalLinkViaNativeApp } from '@/lib/mobile/webviewBridge';
 
@@ -16,6 +16,7 @@ export default function AppUpdateModal() {
   const appVersionConfig = useSettingsStore((s) => s.settings.appVersionConfig);
   const [isOpen, setIsOpen] = useState(false);
   const [currentVersion, setCurrentVersion] = useState<string | null>(null);
+  const [isChecking, setIsChecking] = useState(false);
 
   const latestVersion = appVersionConfig?.latestVersion;
   const minRequiredVersion = appVersionConfig?.minRequiredVersion;
@@ -24,11 +25,27 @@ export default function AppUpdateModal() {
   const updateUrl = appVersionConfig?.updateUrl || ROUTES.downloadApp;
   const releaseNotes = appVersionConfig?.releaseNotes;
 
-  const isForced = isForceUpdateRequired(currentVersion, minRequiredVersion, forceUpdateFlag);
+  const hasNativeBridge = typeof window !== 'undefined' && Boolean(
+    window.QuizdoNativeApp?.isNativeApp ||
+    window.AndroidBridge ||
+    window.Android ||
+    window.QuizdoApp ||
+    window.ReactNativeWebView
+  );
 
-  useEffect(() => {
-    if (!isEnabled || !latestVersion) return;
-    if (!isMobileApp()) return;
+  const isForced = isForceUpdateRequired(currentVersion, minRequiredVersion, forceUpdateFlag);
+  // Allow dismissal if update is not forced OR if running in standard web browser without a native bridge
+  const canDismiss = !isForced || !hasNativeBridge;
+
+  const checkUpdateStatus = useCallback(() => {
+    if (!isEnabled || !latestVersion) {
+      setIsOpen(false);
+      return;
+    }
+    if (!isMobileApp()) {
+      setIsOpen(false);
+      return;
+    }
 
     const detected = getCurrentAppVersion();
     setCurrentVersion(detected);
@@ -37,39 +54,87 @@ export default function AppUpdateModal() {
       const forced = isForceUpdateRequired(detected, minRequiredVersion, forceUpdateFlag);
       if (forced || !isUpdateDismissed(latestVersion)) {
         setIsOpen(true);
+        return;
       }
     }
+
+    setIsOpen(false);
   }, [isEnabled, latestVersion, minRequiredVersion, forceUpdateFlag]);
 
+  useEffect(() => {
+    checkUpdateStatus();
+
+    // Re-check after 300ms in case the native bridge is attached asynchronously on initial load
+    const timer = setTimeout(() => {
+      checkUpdateStatus();
+    }, 300);
+
+    // Re-check automatically when user switches back from Google Play Store or switches tabs
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        checkUpdateStatus();
+      }
+    };
+
+    window.addEventListener('visibilitychange', onVisibilityChange);
+    window.addEventListener('focus', checkUpdateStatus);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('visibilitychange', onVisibilityChange);
+      window.removeEventListener('focus', checkUpdateStatus);
+    };
+  }, [checkUpdateStatus]);
+
   const handleDismiss = useCallback(() => {
-    if (isForced) return;
+    if (!canDismiss) return;
     if (latestVersion) {
       dismissUpdate(latestVersion);
     }
     setIsOpen(false);
-  }, [isForced, latestVersion]);
+  }, [canDismiss, latestVersion]);
 
   const handleUpdate = () => {
     const targetUrl = updateUrl || ROUTES.downloadApp;
-    if (!openExternalLinkViaNativeApp(targetUrl)) {
+    const handled = openExternalLinkViaNativeApp(targetUrl);
+    if (!handled) {
       window.open(targetUrl, '_blank', 'noopener,noreferrer');
     }
-    if (!isForced) {
+    if (canDismiss) {
       handleDismiss();
     }
   };
 
-  // Prevent ESC key dismissal when forced
+  const handleCheckAgain = () => {
+    setIsChecking(true);
+    clearAppVersionPersistence();
+
+    setTimeout(() => {
+      const detected = getCurrentAppVersion();
+      setCurrentVersion(detected);
+
+      if (!detected || !latestVersion || !isUpdateAvailable(detected, latestVersion)) {
+        setIsOpen(false);
+        setIsChecking(false);
+      } else {
+        setIsChecking(false);
+        // Reload page to let WebView refresh with updated assets and bridge
+        window.location.reload();
+      }
+    }, 400);
+  };
+
+  // Prevent ESC key dismissal only when strictly forced in a native app
   useEffect(() => {
     if (!isOpen) return;
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && !isForced) {
+      if (e.key === 'Escape' && canDismiss) {
         handleDismiss();
       }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [isOpen, isForced, handleDismiss]);
+  }, [isOpen, canDismiss, handleDismiss]);
 
   if (!isOpen || !latestVersion) return null;
 
@@ -89,7 +154,7 @@ export default function AppUpdateModal() {
           transition={{ duration: 0.2 }}
           className="absolute inset-0 bg-black/75 backdrop-blur-md"
           onClick={() => {
-            if (!isForced) handleDismiss();
+            if (canDismiss) handleDismiss();
           }}
         />
 
@@ -109,8 +174,8 @@ export default function AppUpdateModal() {
             aria-hidden="true"
           />
 
-          {/* Close button for non-forced updates */}
-          {!isForced && (
+          {/* Close button for non-forced updates or browser environments */}
+          {canDismiss && (
             <button
               onClick={handleDismiss}
               className="absolute top-4 right-4 p-2 text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--surface-muted)] rounded-full transition-colors z-20 cursor-pointer"
@@ -164,7 +229,7 @@ export default function AppUpdateModal() {
                   {t('appUpdateModal.currentVersion')}
                 </p>
                 <p className="text-xs sm:text-sm font-extrabold text-[var(--color-foreground)] mt-0.5">
-                  v{currentVersion || '1.0.0'}
+                  v{currentVersion || '—'}
                 </p>
               </div>
               <ArrowRight className="w-4 h-4 text-[var(--color-muted-foreground)] shrink-0" />
@@ -191,25 +256,39 @@ export default function AppUpdateModal() {
             )}
 
             {/* Actions */}
-            <div className="flex flex-col sm:flex-row items-center gap-2.5 pt-1">
+            <div className="flex flex-col gap-2.5 pt-1">
               <button
                 type="button"
                 onClick={handleUpdate}
-                className="w-full flex-1 flex items-center justify-center gap-2 py-3 px-5 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-2xl shadow-[0_4px_16px_0_rgba(16,185,129,0.35)] hover:shadow-[0_6px_22px_rgba(16,185,129,0.45)] hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer text-xs sm:text-sm group"
+                className="w-full flex items-center justify-center gap-2 py-3 px-5 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-2xl shadow-[0_4px_16px_0_rgba(16,185,129,0.35)] hover:shadow-[0_6px_22px_rgba(16,185,129,0.45)] hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer text-xs sm:text-sm group"
               >
                 <span>{t('appUpdateModal.updateNow')}</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform shrink-0" />
               </button>
 
-              {!isForced && (
+              <div className="flex flex-col sm:flex-row items-center gap-2">
+                {/* Check Again / Refresh button */}
                 <button
                   type="button"
-                  onClick={handleDismiss}
-                  className="w-full sm:w-auto px-4 py-3 rounded-2xl border border-[var(--border)] text-xs sm:text-sm font-semibold text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--surface-muted)] transition-colors cursor-pointer"
+                  onClick={handleCheckAgain}
+                  disabled={isChecking}
+                  className="w-full flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-2xl border border-[var(--border)] text-xs font-semibold text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--surface-muted)] transition-colors cursor-pointer disabled:opacity-50"
                 >
-                  {t('appUpdateModal.maybeLater')}
+                  <RefreshCw className={`w-3.5 h-3.5 ${isChecking ? 'animate-spin' : ''}`} />
+                  <span>{t('appUpdateModal.checkAgain')}</span>
                 </button>
-              )}
+
+                {/* Dismiss button when permitted */}
+                {canDismiss && (
+                  <button
+                    type="button"
+                    onClick={handleDismiss}
+                    className="w-full sm:w-auto px-4 py-2.5 rounded-2xl border border-[var(--border)] text-xs font-semibold text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--surface-muted)] transition-colors cursor-pointer"
+                  >
+                    {!hasNativeBridge ? t('appUpdateModal.continueToWeb') : t('appUpdateModal.maybeLater')}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </motion.div>

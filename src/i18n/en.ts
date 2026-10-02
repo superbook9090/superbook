@@ -2913,6 +2913,8 @@ export const en = {
     whatsNew: "What's New in This Update",
     updateNow: 'Update Now',
     maybeLater: 'Maybe Later',
+    checkAgain: 'Already Updated? Check Again',
+    continueToWeb: 'Continue to Website',
   },
 
   // Challenge Arena & Viral Sharing

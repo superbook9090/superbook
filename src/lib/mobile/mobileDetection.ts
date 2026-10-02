@@ -29,9 +29,9 @@ export const persistIsMobileApp = (): void => {
 export const isMobileAppUserAgent = (userAgent: string | null | undefined): boolean => {
   if (!userAgent) return false;
 
-  // Exact native app markers (Quizdo native app, React Native WebView)
-  // Must NOT match generic words like "Quizdo" or "MobileApp" to prevent false positives on desktop
-  return /QuizdoNativeApp|ReactNativeWebView|QuizdoApp\//i.test(userAgent);
+  // Exact native app markers (Quizdo native app, React Native WebView, Android WebView custom UA)
+  // Must NOT match generic words like "Mobile" or "Android" to prevent false positives on desktop/mobile browsers
+  return /QuizdoNativeApp|ReactNativeWebView|QuizdoApp[\/\s_-]|Quizdo[\/\s_-]v?\d|com\.quizdo/i.test(userAgent);
 };
 
 export const isAndroidWebView = (): boolean => {
@@ -43,6 +43,7 @@ export const isAndroidWebView = (): boolean => {
     isMobileAppUserAgent(userAgent) ||
     Boolean((window as unknown as { AndroidBridge?: unknown }).AndroidBridge) ||
     Boolean((window as unknown as { Android?: unknown }).Android) ||
+    Boolean((window as unknown as { QuizdoApp?: unknown }).QuizdoApp) ||
     Boolean((window as unknown as { ReactNativeWebView?: unknown }).ReactNativeWebView) ||
     Boolean(window.QuizdoNativeApp?.isNativeApp)
   );
@@ -74,6 +75,7 @@ export const isMobileApp = (): boolean => {
   const win = window as unknown as {
     Android?: unknown;
     AndroidBridge?: unknown;
+    QuizdoApp?: unknown;
     webkit?: { messageHandlers?: { ReactNativeWebView?: unknown } };
     __REACT_WEB_VIEW__?: unknown;
     ReactNativeWebView?: unknown;
@@ -87,6 +89,7 @@ export const isMobileApp = (): boolean => {
     Boolean(win.QuizdoNativeApp?.isNativeApp) ||
     Boolean(win.AndroidBridge) ||
     Boolean(win.Android) ||
+    Boolean(win.QuizdoApp) ||
     Boolean(win.ReactNativeWebView) ||
     Boolean(win.webkit?.messageHandlers?.ReactNativeWebView) ||
     Boolean(win.__REACT_WEB_VIEW__) ||
@@ -128,42 +131,17 @@ export const isMobileApp = (): boolean => {
     return true;
   }
 
-  // 4. Standalone installed PWA on actual mobile devices only (exclude desktop fullscreen)
+  // 4. Check active tab session storage
   try {
-    const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(userAgent);
-    const isStandalone =
-      isMobileDevice &&
-      (Boolean(window.matchMedia?.('(display-mode: standalone)').matches) ||
-        Boolean((navigator as unknown as { standalone?: boolean }).standalone) ||
-        Boolean(typeof document !== 'undefined' && document.referrer && document.referrer.startsWith('android-app://')));
-
-    if (isStandalone) {
-      persistIsMobileApp();
+    if (sessionStorage.getItem(APP_STORAGE_KEY) === 'true') {
       return true;
     }
   } catch {
-    // MatchMedia error fallback
+    // Storage access fallback
   }
 
-  // 5. Check cached detection in storage / cookies ONLY if on a mobile device
-  try {
-    const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(userAgent);
-    if (!isMobileDevice) {
-      // If we are on a desktop browser, clear any accidental app storage!
-      clearMobileAppPersistence();
-      return false;
-    }
-
-    if (
-      sessionStorage.getItem(APP_STORAGE_KEY) === 'true' ||
-      localStorage.getItem(APP_STORAGE_KEY) === 'true' ||
-      (typeof document !== 'undefined' && document.cookie.includes(`${APP_STORAGE_KEY}=true`))
-    ) {
-      return true;
-    }
-  } catch {
-    // Storage access might fail in restricted sandboxes
-  }
-
+  // If none of the native app indicators match, ensure stale localStorage/cookies
+  // are cleaned up so normal website visitors in mobile browsers are never trapped!
+  clearMobileAppPersistence();
   return false;
 };

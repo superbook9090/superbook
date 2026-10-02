@@ -23,6 +23,9 @@ describe('versionCompare', () => {
     expect(compareVersions('1.0', '1.0.0')).toBe(0);
     expect(compareVersions('2.0.0', '1.9.9')).toBe(1);
     expect(compareVersions('0.9.5', '1.0.0')).toBe(-1);
+    expect(compareVersions('1.10.10', '1.10.10')).toBe(0);
+    expect(compareVersions('1.2.0', '1.10.10')).toBe(-1);
+    expect(compareVersions('1.10.10', '1.2.0')).toBe(1);
   });
 
   it('determines if update is available', () => {
@@ -30,21 +33,32 @@ describe('versionCompare', () => {
     expect(isUpdateAvailable('1.1.0', '1.0.1')).toBe(false);
     expect(isUpdateAvailable('1.0.0', '1.0.0')).toBe(false);
     expect(isUpdateAvailable('1.0.0', null)).toBe(false);
+    expect(isUpdateAvailable(null, '1.0.1')).toBe(false);
+    expect(isUpdateAvailable('1.10.10', '1.10.10')).toBe(false);
+    expect(isUpdateAvailable('1.9.9', '1.10.10')).toBe(true);
   });
 
   it('determines if force update is required', () => {
-    // Force flag enabled
+    // Force flag enabled with known version
     expect(isForceUpdateRequired('2.0.0', '1.0.0', true)).toBe(true);
+
+    // Unknown version should never force update
+    expect(isForceUpdateRequired(null, '1.0.0', true)).toBe(false);
+    expect(isForceUpdateRequired(null, '1.0.0', false)).toBe(false);
 
     // Current version below min required version
     expect(isForceUpdateRequired('1.0.0', '1.1.0', false)).toBe(true);
     expect(isForceUpdateRequired('1.1.0', '1.1.0', false)).toBe(false);
     expect(isForceUpdateRequired('1.2.0', '1.1.0', false)).toBe(false);
+    expect(isForceUpdateRequired('1.10.10', '1.10.10', false)).toBe(false);
   });
 
   it('extracts version from user agent', () => {
     expect(extractVersionFromUserAgent('Mozilla/5.0 QuizdoApp/1.4.2 Android')).toBe('1.4.2');
     expect(extractVersionFromUserAgent('QuizdoNativeApp/2.0.0-beta')).toBe('2.0.0');
+    expect(extractVersionFromUserAgent('Quizdo/1.0.1 (Linux; Android 14)')).toBe('1.0.1');
+    expect(extractVersionFromUserAgent('QuizdoApp/1.10.10')).toBe('1.10.10');
+    expect(extractVersionFromUserAgent('com.quizdo/1.2.0')).toBe('1.2.0');
     expect(extractVersionFromUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 16_5)')).toBeNull();
   });
 });

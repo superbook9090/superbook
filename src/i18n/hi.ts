@@ -2913,6 +2913,8 @@ export const hi = {
     whatsNew: 'इस अपडेट में नया क्या है',
     updateNow: 'अभी अपडेट करें',
     maybeLater: 'बाद में',
+    checkAgain: 'अपडेट कर चुके हैं? दोबारा जाँचें',
+    continueToWeb: 'वेबसाइट पर जारी रखें',
   },
 
   // Challenge Arena & Viral Sharing

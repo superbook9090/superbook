@@ -217,7 +217,7 @@ const appSettingsSchema = new Schema<IAppSettings>(
     appVersionConfig: {
       latestVersion: {
         type: String,
-        default: '1.0.0',
+        default: '1.10.10',
       },
       minRequiredVersion: {
         type: String,
