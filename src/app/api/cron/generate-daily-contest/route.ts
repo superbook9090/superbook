@@ -12,6 +12,8 @@ import { invalidatePattern } from '@/lib/redis';
 import { sendAdminBroadcast } from '@/lib/server/services/notifications-service';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { getFallbackContestData } from '@/lib/ai/fallbackQuestions';
+import { parseQuestionsFromAiOutput } from '@/lib/ai/quizPrompt';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60; // Max execution time for Vercel (Free tier limit)
@@ -157,7 +159,14 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ message: 'No superadmin or admin found to own the contest' }, { status: 400 });
     }
 
-    // 4. Implement AI Topic Generation Logic (Focused on India & Competitive Exams)
+    // 4. Implement Topic & SEO Generation (AI with curated competitive exam fallback)
+    const targetQuestions = 10;
+    const fallbackTheme = getFallbackContestData(targetQuestions);
+    let topic = fallbackTheme.topic;
+    let slug = fallbackTheme.slug;
+    let metaTitle = fallbackTheme.metaTitle;
+    let metaDescription = fallbackTheme.metaDescription;
+
     const topicPrompt = `Generate a HIGHLY RANDOM, unique, and specific quiz topic relevant to India and Indian competitive exams (e.g. UPSC, SSC, Banking, State PSC, Indian GK).
 Topics can cover: Indian History, Indian Geography, Indian Polity & Constitution, Indian Economy, Science & Technology in India, Indian Art & Culture, Famous Personalities of India, Environment & Wildlife of India, or Current Affairs.
 Make sure the topic is extremely specific and completely different from typical generic topics. Random seed: ${Math.random().toString(36).substring(2, 10)}
@@ -172,10 +181,6 @@ Return ONLY a valid JSON object matching exactly this structure, with no markdow
   "metaDescription": "SEO meta description (max 160 chars) (in Hindi)"
 }`;
 
-    let topic = 'General Knowledge of India';
-    let slug = 'general-knowledge-of-india';
-    let metaTitle = 'General Knowledge of India Quiz Contest | Quiz-Do';
-    let metaDescription = 'Participate in the General Knowledge of India quiz contest and test your skills against top competitors.';
     try {
       const topicResult = await fetchOpenRouterChat([
         { role: 'user', content: topicPrompt }
@@ -196,34 +201,28 @@ Return ONLY a valid JSON object matching exactly this structure, with no markdow
 
       const parsed = JSON.parse(cleaned);
       if (parsed.topic) topic = parsed.topic;
-      if (parsed.slug) slug = parsed.slug;
+      if (parsed.slug) {
+        const dateStr = new Date().toISOString().slice(0, 10);
+        const randomSuffix = Math.random().toString(36).substring(2, 6);
+        slug = `${parsed.slug.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}-${dateStr}-${randomSuffix}`;
+      }
       if (parsed.metaTitle) metaTitle = parsed.metaTitle;
       if (parsed.metaDescription) metaDescription = parsed.metaDescription;
     } catch (err) {
-      logError('Failed to generate topic and SEO, falling back to defaults', logContext, { error: err });
+      logError('Failed to generate topic via AI, using curated fallback theme', logContext, { error: err });
     }
 
-    // 5. Implement AI Question Generation Logic with Time-Bounded Loop
-    const targetQuestions = 10;
-    const batchSize = 5;
+    // 5. Implement AI Question Generation Logic with Multi-Tier Fallback
     let parsedQuestions: GeneratedQuestion[] = [];
     const language = 'Hindi';
-    
-    let batchNumber = 1;
-    // We only attempt another batch if we have spent less than 25 seconds so far.
-    // This guarantees we have at least ~35 seconds left for the next batch + DB + Notifications.
-    while (parsedQuestions.length < targetQuestions && (Date.now() - startTime < 25000)) {
-      const remaining = targetQuestions - parsedQuestions.length;
-      const toFetch = Math.min(batchSize, remaining);
 
-      const prompt = `You are a master educator and expert in Indian competitive examinations (such as UPSC, SSC, State PSC, and Banking exams).
-Generate a high-quality, realistic, medium-difficulty competitive contest multiple-choice quiz with EXACTLY ${toFetch} questions on the topic: "${topic}" focused on India.
-${batchNumber > 1 ? 'Make sure these questions are entirely new and distinct from the previous ones.' : ''}
+    const prompt = `You are a master educator and expert in Indian competitive examinations (such as UPSC, SSC, State PSC, and Banking exams).
+Generate a high-quality, realistic, medium-difficulty competitive contest multiple-choice quiz with EXACTLY ${targetQuestions} questions on the topic: "${topic}" focused on India.
 
 CRITICAL QUALITY & PEDAGOGICAL REQUIREMENTS:
 1. INDIAN CONTEXT: All questions and options must be strictly focused on India and relevant to Indian students/aspirants.
 2. DIFFICULTY: Medium level — thought-provoking, competitive, and realistic.
-3. EXACT QUESTION COUNT: Provide EXACTLY ${toFetch} distinct questions written strictly in ${language}.
+3. EXACT QUESTION COUNT: Provide EXACTLY ${targetQuestions} distinct questions written strictly in ${language}.
 4. 4 OPTIONS: Each question MUST have EXACTLY 4 distinct, plausible multiple-choice options, also in ${language}.
 5. ACCURATE CORRECT ANSWER: Every question MUST have exactly one indisputably correct, factually accurate answer, and that correct answer MUST be included in the "options" list.
 6. RANDOM CORRECT ANSWER: Distribute the "correctAnswer" index (0 for A, 1 for B, 2 for C, 3 for D) randomly across questions so that option A (0) is not always the correct answer.
@@ -236,54 +235,33 @@ CRITICAL QUALITY & PEDAGOGICAL REQUIREMENTS:
   }
 ]`;
 
-      try {
-        const qsResult = await fetchOpenRouterChat([
-          { role: 'system', content: 'You output strictly valid JSON arrays.' },
-          { role: 'user', content: prompt }
-        ], {
-          maxTokens: 3000,
-          timeoutMs: 12000,
-          validateOutput: (text) => text.includes('[') && text.includes(']')
-        });
+    try {
+      const qsResult = await fetchOpenRouterChat([
+        { role: 'system', content: 'You output strictly valid JSON arrays.' },
+        { role: 'user', content: prompt }
+      ], {
+        maxTokens: 3000,
+        timeoutMs: 16000,
+        validateOutput: (text) => text.includes('[') && text.includes(']')
+      });
 
-        const rawText = qsResult.content;
-        let cleaned = rawText
-          .replace(/<think>[\s\S]*?<\/think>/gi, '')
-          .replace(/```json/gi, '')
-          .replace(/```/g, '')
-          .trim();
-
-        const jsonStart = cleaned.indexOf('[');
-        const jsonEnd = cleaned.lastIndexOf(']');
-        if (jsonStart !== -1 && jsonEnd !== -1) {
-          cleaned = cleaned.substring(jsonStart, jsonEnd + 1);
-        }
-        cleaned = cleaned.replace(/,\s*([\]}])/g, '$1');
-
-        let batchQuestions: GeneratedQuestion[] = [];
-        try {
-          batchQuestions = JSON.parse(cleaned);
-        } catch {
-          const relaxed = cleaned.replace(/(?<=:\s*"[^"]*)\n(?=[^"]*")/g, '\\n');
-          batchQuestions = JSON.parse(relaxed);
-        }
-
-        if (Array.isArray(batchQuestions)) {
-          parsedQuestions.push(...batchQuestions);
-        }
-      } catch (err) {
-        logError(`Failed to generate AI questions batch ${batchNumber}`, logContext, { error: err });
-        break; // Stop fetching if an error occurs, proceed with what we have
+      const parsed = parseQuestionsFromAiOutput(qsResult.content, targetQuestions);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        parsedQuestions = parsed;
       }
-      
-      batchNumber++;
+    } catch (err) {
+      logError('AI question generation call failed, switching to curated fallback questions', logContext, { error: err });
     }
 
-    if (parsedQuestions.length === 0) {
-      return NextResponse.json({ message: 'AI failed to generate any valid questions' }, { status: 500 });
+    // If AI failed or produced fewer than target questions, seamlessly top up or supply with fallback questions
+    if (parsedQuestions.length < targetQuestions) {
+      logInfo(`Supplementing ${targetQuestions - parsedQuestions.length} questions from curated competitive exam bank`, logContext);
+      const remainingNeeded = targetQuestions - parsedQuestions.length;
+      const additionalFallback = fallbackTheme.questions.slice(0, remainingNeeded);
+      parsedQuestions.push(...additionalFallback);
     }
 
-    // Cap at exactly what we need, in case the AI generated a few extra
+    // Guarantee exact target count
     parsedQuestions = parsedQuestions.slice(0, targetQuestions);
 
     // 6. Database Logic: Create Quiz & QuizQuestions

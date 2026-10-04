@@ -41,11 +41,13 @@ interface OpenRouterResponse {
  * Verified active free generative models on OpenRouter
  */
 export const ACTIVE_FREE_MODELS: string[] = [
-  'nex-agi/nex-n2.5-pro:free',
+  'qwen/qwen3.8-27b:free',
   'dots-studio/dots-3-note-preview:free',
-  'nvidia/nemotron-3.5-lightning:free',
   'nvidia/nemotron-3-super-120b-a12b:free',
+  'inclusionai/ling-3.0-flash-sante:free',
   'cohere/north-mini-code:free',
+  'nvidia/nemotron-3-ultra-550b-a55b:free',
+  'poolside/laguna-s-2.1:free',
 ];
 
 /**
@@ -96,7 +98,6 @@ export async function fetchOpenRouterChat(
           messages,
           temperature: options?.temperature ?? 0.5,
           max_tokens: options?.maxTokens ?? 3000,
-          reasoning: { effort: 'none' },
         }),
         signal: controller.signal,
       });
@@ -124,7 +125,16 @@ export async function fetchOpenRouterChat(
         continue;
       }
 
-      const content = data?.choices?.[0]?.message?.content;
+      const msg = data?.choices?.[0]?.message;
+      const rawContent = msg?.content;
+      const reasoning = (msg as { reasoning?: string } | undefined)?.reasoning;
+      const content =
+        typeof rawContent === 'string' && rawContent.trim().length > 0
+          ? rawContent
+          : typeof reasoning === 'string' && reasoning.trim().length > 0
+            ? reasoning
+            : undefined;
+
       if (
         typeof content === 'string' &&
         content.trim().length > 0 &&
