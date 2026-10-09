@@ -195,15 +195,7 @@ export async function generateLessonContent(
   } = params;
 
   const isHindi = (locale || 'hi').toLowerCase().startsWith('hi');
-  const isUpPet =
-    courseTitle.toLowerCase().includes('pet') ||
-    courseTitle.toLowerCase().includes('upsssc') ||
-    examTips.toLowerCase().includes('pet') ||
-    courseCategory.toLowerCase().includes('pet');
-
-  const roleDesc = isUpPet
-    ? 'premier educational content creator and senior faculty expert for the UPSSSC PET examination'
-    : `senior subject matter faculty and curriculum expert for "${courseTitle || courseCategory || 'Online Learning'}"`;
+  const roleDesc = `senior subject matter faculty and curriculum expert for "${courseTitle || courseCategory || 'Online Learning'}"`;
 
   const languageRequirement = isHindi
     ? 'Write comprehensive, authoritative, student-friendly, and high-yield study material in Hindi with English terms in parentheses (bilingual).'
@@ -214,11 +206,9 @@ Your task is to: ${languageRequirement}
 The output MUST be formatted in valid, clean HTML suitable for rendering in an LMS lesson reader.
 Do NOT wrap the output in markdown \`\`\`html code blocks. Return ONLY the HTML markup.`;
 
-  const focusTipsLabel = isUpPet
-    ? '🎯 विगत वर्षों के महत्वपूर्ण प्रश्न एवं ट्रिक्स (PYQ High-Yield Notes)'
-    : isHindi
-      ? '🎯 मुख्य परीक्षा बिंदु एवं महत्वपूर्ण तथ्य (Key Exam Insights)'
-      : '🎯 Core Concepts & Key Insights';
+  const focusTipsLabel = isHindi
+    ? '🎯 मुख्य परीक्षा बिंदु एवं महत्वपूर्ण तथ्य (Key Exam Insights)'
+    : '🎯 Core Concepts & Key Insights';
 
   const revisionLabel = isHindi
     ? 'निष्कर्ष एवं त्वरित दोहराव (Quick Revision Summary)'
@@ -299,14 +289,11 @@ export async function generateLessonQuizQuestions(
   } = params;
 
   const isHindi = (locale || 'hi').toLowerCase().startsWith('hi');
-  const isUpPet =
-    courseTitle.toLowerCase().includes('pet') ||
-    courseTitle.toLowerCase().includes('upsssc') ||
-    courseCategory.toLowerCase().includes('pet');
-
-  const contextStr = courseTitle ? `Course: "${courseTitle}", ` : '';
+  const contextStr = courseTitle || courseCategory
+    ? `Course: "${[courseTitle, courseCategory].filter(Boolean).join(' - ')}", `
+    : '';
   const prompt = isHindi
-    ? `You are an expert exam question paper setter${isUpPet ? ' for UPSSSC PET' : ''}.
+    ? `You are an expert exam question paper setter.
 Generate EXACTLY ${numQuestions} high-quality, realistic multiple-choice questions for:
 - ${contextStr}Subject/Chapter: "${chapterTitle}"
 - Topic: "${lessonTitle}"
@@ -315,7 +302,7 @@ Generate EXACTLY ${numQuestions} high-quality, realistic multiple-choice questio
 CRITICAL REQUIREMENTS:
 1. RELEVANT: Difficulty should match competitive examination standard with clear, unambiguous questions.
 2. BILINGUAL PROMPT: The question text MUST include both Hindi and English translation, e.g.:
-   "लोथल किस नदी के किनारे स्थित प्राचीन स्थल है? (Lothal is an ancient site situated on the banks of which river?)"
+   "भारतीय रिज़र्व बैंक की स्थापना किस वर्ष हुई थी? (In which year was the Reserve Bank of India established?)"
 3. 4 PLAUSIBLE OPTIONS: Each question must have EXACTLY 4 distinct multiple-choice options in Hindi with English in brackets where applicable.
 4. BALANCED CORRECT ANSWER: Distribute the correctAnswer index (0 for A, 1 for B, 2 for C, 3 for D) randomly and evenly across all questions.
 5. FORMAT: Return ONLY a valid JSON array of objects without markdown backticks or commentary:

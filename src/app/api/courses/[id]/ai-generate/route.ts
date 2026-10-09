@@ -18,7 +18,7 @@ import {
   suggestNextLesson,
   QuotaExhaustedError,
 } from '@/lib/courses/courseAiGenerator';
-import { UP_PET_SYLLABUS_ROADMAP } from '@/lib/courses/upPetSyllabus';
+import { BANK_PO_SYLLABUS_ROADMAP } from '@/lib/courses/bankPoSyllabus';
 import mongoose from 'mongoose';
 
 export const dynamic = 'force-dynamic';
@@ -77,9 +77,10 @@ export async function POST(
     }
 
     const instructorId = course.instructor || session.user.id;
-    const isPetCourse =
-      course.title.toLowerCase().includes('pet') ||
-      course.title.toLowerCase().includes('upsssc');
+    const isBankPoCourse =
+      course.title.toLowerCase().includes('bank') ||
+      course.title.toLowerCase().includes('po') ||
+      Boolean(course.category && course.category.toLowerCase().includes('bank'));
 
     // =============================================================
     // ACTION 1: ADD CHAPTER USING AI
@@ -94,9 +95,9 @@ export async function POST(
       let chapterSummary = '';
 
       if (!chapterTitle) {
-        if (isPetCourse) {
+        if (isBankPoCourse) {
           const createdTitles = new Set(existingChapters.map((c) => c.title));
-          const nextBlueprint = UP_PET_SYLLABUS_ROADMAP.find(
+          const nextBlueprint = BANK_PO_SYLLABUS_ROADMAP.find(
             (bp) => !createdTitles.has(bp.title) && !existingChapters.some((c) => c.order === bp.order)
           );
           if (nextBlueprint) {
@@ -166,8 +167,8 @@ export async function POST(
       return NextResponse.json({ message: 'Chapter not found' }, { status: 404 });
     }
 
-    const blueprintChapter = isPetCourse
-      ? UP_PET_SYLLABUS_ROADMAP.find(
+    const blueprintChapter = isBankPoCourse
+      ? BANK_PO_SYLLABUS_ROADMAP.find(
           (c) => c.order === chapter.order || c.title.includes(chapter.title) || chapter.title.includes(c.title)
         )
       : null;

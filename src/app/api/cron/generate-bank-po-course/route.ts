@@ -14,14 +14,15 @@ import Quiz from '@/models/Quiz';
 import QuizQuestion from '@/models/QuizQuestion';
 import CourseGenerationProgress from '@/models/CourseGenerationProgress';
 import {
-  UP_PET_EXAM_KEY,
-  UP_PET_COURSE_TITLE,
-  UP_PET_COURSE_SLUG,
-  UP_PET_COURSE_CATEGORY,
-  UP_PET_SYLLABUS_ROADMAP,
-  UpPetChapterBlueprint,
-  UpPetLessonBlueprint,
-} from '@/lib/courses/upPetSyllabus';
+  BANK_PO_EXAM_KEY,
+  BANK_PO_COURSE_TITLE,
+  BANK_PO_COURSE_SLUG,
+  BANK_PO_COURSE_CATEGORY,
+  BANK_PO_SEO_DATA,
+  BANK_PO_SYLLABUS_ROADMAP,
+  BankPoChapterBlueprint,
+  BankPoLessonBlueprint,
+} from '@/lib/courses/bankPoSyllabus';
 import {
   generateLessonContent,
   generateLessonQuizQuestions,
@@ -35,15 +36,15 @@ export const maxDuration = 60; // Max serverless execution time (Vercel standard
 interface SingleLessonGenerationParams {
   courseId: mongoose.Types.ObjectId;
   chapterDoc: { _id: mongoose.Types.ObjectId };
-  chapterBlueprint: UpPetChapterBlueprint;
-  lessonBlueprint: UpPetLessonBlueprint;
+  chapterBlueprint: BankPoChapterBlueprint;
+  lessonBlueprint: BankPoLessonBlueprint;
   instructorId: mongoose.Types.ObjectId;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   logContext: any;
 }
 
 /**
- * Generates notes and quiz concurrently using Promise.all,
+ * Generates study notes and practice quiz concurrently using Promise.all,
  * persisting Lesson, Quiz, and QuizQuestion records cleanly and rapidly.
  */
 async function generateSingleLessonDoc({
@@ -55,7 +56,7 @@ async function generateSingleLessonDoc({
   logContext,
 }: SingleLessonGenerationParams) {
   logInfo(
-    `Generating Lesson Concurrently: [Ch ${chapterBlueprint.order + 1}] "${lessonBlueprint.title}"`,
+    `Generating Bank PO Lesson Concurrently: [Ch ${chapterBlueprint.order + 1}] "${lessonBlueprint.title}"`,
     logContext
   );
 
@@ -66,12 +67,18 @@ async function generateSingleLessonDoc({
       lessonTitle: lessonBlueprint.title,
       subtopics: lessonBlueprint.focusSubtopics,
       examTips: lessonBlueprint.examTips,
+      courseTitle: BANK_PO_COURSE_TITLE,
+      courseCategory: BANK_PO_COURSE_CATEGORY,
+      locale: 'hi',
     }),
     generateLessonQuizQuestions({
       chapterTitle: chapterBlueprint.title,
       lessonTitle: lessonBlueprint.title,
       quizTitle: lessonBlueprint.quizTitle,
       numQuestions: Math.min(5, lessonBlueprint.questionCount || 5),
+      courseTitle: BANK_PO_COURSE_TITLE,
+      courseCategory: BANK_PO_COURSE_CATEGORY,
+      locale: 'hi',
     }),
   ]);
 
@@ -92,7 +99,7 @@ async function generateSingleLessonDoc({
   // Save Linked Practice Quiz
   const createdQuiz = await Quiz.create({
     title: lessonBlueprint.quizTitle,
-    description: `${lessonBlueprint.title} पर आधारित UPSSSC PET परीक्षा उपयोगी अभ्यास प्रश्न।`,
+    description: `${lessonBlueprint.title} पर आधारित Bank PO (IBPS/SBI) परीक्षा उपयोगी अभ्यास प्रश्न।`,
     course: courseId,
     chapter: chapterDoc._id,
     lesson: createdLesson._id,
@@ -138,7 +145,7 @@ async function generateSingleLessonDoc({
 }
 
 export async function GET(req: NextRequest) {
-  const logContext = { method: 'GET', path: '/api/cron/generate-up-pet-course' };
+  const logContext = { method: 'GET', path: '/api/cron/generate-bank-po-course' };
   const startTime = Date.now();
 
   try {
@@ -168,7 +175,7 @@ export async function GET(req: NextRequest) {
     }
 
     // 2. Feature Toggle Guard
-    const featureCheck = await requireFeature('enableUpPetCourseCron');
+    const featureCheck = await requireFeature('enableBankPoCourseCron');
     if (featureCheck) return featureCheck;
 
     await dbConnect();
@@ -188,32 +195,46 @@ export async function GET(req: NextRequest) {
     }
 
     // 4. Ensure Course Record exists
-    let course = await Course.findOne({ slug: UP_PET_COURSE_SLUG });
+    let course = await Course.findOne({ slug: BANK_PO_COURSE_SLUG });
     if (!course) {
-      course = await Course.findOne({ title: UP_PET_COURSE_TITLE });
+      course = await Course.findOne({ title: BANK_PO_COURSE_TITLE });
     }
 
     if (!course) {
       course = await Course.create({
-        title: UP_PET_COURSE_TITLE,
+        title: BANK_PO_COURSE_TITLE,
         description:
-          'उत्तर प्रदेश प्रारंभिक अहर्ता परीक्षा (UPSSSC PET 2026) का संपूर्ण एवं नवीनतम पाठ्यक्रम आधारित कोर्स। इसमें सभी 15 विषयों के अध्याय, परीक्षा-उपयोगी अध्ययन नोट्स, विगत वर्षों के महत्वपूर्ण तथ्य एवं प्रत्येक पाठ के साथ अभ्यास क्विज शामिल हैं।',
+          'बैंक पीओ 2026 (IBPS PO, SBI PO, RRB Scale-I) की संपूर्ण तैयारी हेतु विस्तृत कोर्स। इसमें Quantitative Aptitude, Reasoning Ability, English Language, Banking & Financial Awareness तथा Computer Aptitude के सभी अध्याय, परीक्षा-उपयोगी अध्ययन नोट्स, शॉर्ट ट्रिक्स एवं प्रत्येक पाठ के साथ अभ्यास क्विज शामिल हैं।',
         instructor: instructor._id,
-        category: UP_PET_COURSE_CATEGORY,
-        slug: UP_PET_COURSE_SLUG,
+        category: BANK_PO_COURSE_CATEGORY,
+        slug: BANK_PO_COURSE_SLUG,
+        metaTitle: BANK_PO_SEO_DATA.metaTitle,
+        metaDescription: BANK_PO_SEO_DATA.metaDescription,
+        keywords: BANK_PO_SEO_DATA.keywords,
         locale: 'hi',
         price: 0,
         isPublished: true,
-        chapterCount: UP_PET_SYLLABUS_ROADMAP.length,
+        chapterCount: BANK_PO_SYLLABUS_ROADMAP.length,
         lessonCount: 0,
         enrolledCount: 0,
       });
-      logInfo(`Created UPSSSC PET Course: ${course._id}`, logContext);
+      logInfo(`Created Bank PO Course: ${course._id}`, logContext);
+    } else if (!course.metaTitle || !course.keywords?.length) {
+      await Course.updateOne(
+        { _id: course._id },
+        {
+          $set: {
+            metaTitle: BANK_PO_SEO_DATA.metaTitle,
+            metaDescription: BANK_PO_SEO_DATA.metaDescription,
+            keywords: BANK_PO_SEO_DATA.keywords,
+          },
+        }
+      );
     }
 
     const courseId = course._id;
 
-    // 5. Ensure all 15 Chapters exist and are ordered
+    // 5. Ensure all Chapters exist and are ordered
     const existingChapters = await Chapter.find({ course: courseId }).sort({ order: 1 });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const chapterMap = new Map<number, any>();
@@ -221,7 +242,7 @@ export async function GET(req: NextRequest) {
       chapterMap.set(ch.order, ch);
     }
 
-    for (const blueprint of UP_PET_SYLLABUS_ROADMAP) {
+    for (const blueprint of BANK_PO_SYLLABUS_ROADMAP) {
       if (!chapterMap.has(blueprint.order)) {
         const createdChapter = await Chapter.create({
           course: courseId,
@@ -234,18 +255,18 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    const totalLessonsInRoadmap = UP_PET_SYLLABUS_ROADMAP.reduce(
+    const totalLessonsInRoadmap = BANK_PO_SYLLABUS_ROADMAP.reduce(
       (acc, ch) => acc + ch.lessons.length,
       0
     );
 
     // 6. Load or Initialize CourseGenerationProgress
-    let progress = await CourseGenerationProgress.findOne({ examKey: UP_PET_EXAM_KEY });
+    let progress = await CourseGenerationProgress.findOne({ examKey: BANK_PO_EXAM_KEY });
     if (!progress) {
       const currentLessonCount = await Lesson.countDocuments({ course: courseId });
       progress = await CourseGenerationProgress.create({
         course: courseId,
-        examKey: UP_PET_EXAM_KEY,
+        examKey: BANK_PO_EXAM_KEY,
         status: 'in_progress',
         currentChapterIndex: 0,
         currentLessonIndex: 0,
@@ -280,7 +301,7 @@ export async function GET(req: NextRequest) {
 
       const chaptersCovered = new Set<string>();
 
-      for (const ch of UP_PET_SYLLABUS_ROADMAP) {
+      for (const ch of BANK_PO_SYLLABUS_ROADMAP) {
         const chDoc = chapterMap.get(ch.order);
         if (!chDoc) continue;
         const missing = ch.lessons.filter(
@@ -312,7 +333,7 @@ export async function GET(req: NextRequest) {
           success: true,
           action: 'plan',
           isCourseCompleted: true,
-          message: 'All chapters and lessons of UPSSSC PET course are fully generated and published!',
+          message: 'All chapters and lessons of Bank PO course are fully generated and published!',
           totalLessonsCount: totalLessonsInRoadmap,
           completedLessonsCount: createdLessons.length,
           percentComplete: 100,
@@ -345,14 +366,14 @@ export async function GET(req: NextRequest) {
       const chIdx = parseInt(targetChapterParam, 10);
       const lesIdx = parseInt(targetLessonParam, 10);
 
-      if (isNaN(chIdx) || isNaN(lesIdx) || !UP_PET_SYLLABUS_ROADMAP[chIdx]) {
+      if (isNaN(chIdx) || isNaN(lesIdx) || !BANK_PO_SYLLABUS_ROADMAP[chIdx]) {
         return NextResponse.json(
           { message: 'Invalid chapterIndex or lessonIndex' },
           { status: 400 }
         );
       }
 
-      const chapterBlueprint = UP_PET_SYLLABUS_ROADMAP[chIdx];
+      const chapterBlueprint = BANK_PO_SYLLABUS_ROADMAP[chIdx];
       const lessonBlueprint = chapterBlueprint.lessons[lesIdx];
       if (!lessonBlueprint) {
         return NextResponse.json(
@@ -430,7 +451,7 @@ export async function GET(req: NextRequest) {
     // ---------------------------------------------------------
     if (progress.status === 'completed') {
       return NextResponse.json({
-        message: 'UPSSSC PET course is already 100% completed and published.',
+        message: 'Bank PO course is already 100% completed and published.',
         progress,
       });
     }
@@ -441,13 +462,13 @@ export async function GET(req: NextRequest) {
     );
 
     let nextToProcess: {
-      chapterBlueprint: UpPetChapterBlueprint;
+      chapterBlueprint: BankPoChapterBlueprint;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       chapterDoc: any;
-      lessonBlueprint: UpPetLessonBlueprint;
+      lessonBlueprint: BankPoLessonBlueprint;
     } | null = null;
 
-    for (const ch of UP_PET_SYLLABUS_ROADMAP) {
+    for (const ch of BANK_PO_SYLLABUS_ROADMAP) {
       const chDoc = chapterMap.get(ch.order);
       if (!chDoc) continue;
       const missing = ch.lessons.filter(
@@ -520,7 +541,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    logApiError(error as Error, 'GET', '/api/cron/generate-up-pet-course', logContext);
+    logApiError(error as Error, 'GET', '/api/cron/generate-bank-po-course', logContext);
     return NextResponse.json(
       { message: 'Internal Server Error', error: (error as Error).message },
       { status: 500 }

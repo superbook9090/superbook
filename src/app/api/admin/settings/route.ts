@@ -234,10 +234,10 @@ export async function PATCH(req: NextRequest) {
           isSuper && featureToggles.enableAutoDeclareResults !== undefined
             ? featureToggles.enableAutoDeclareResults
             : (existingToggles.enableAutoDeclareResults ?? true),
-        enableUpPetCourseCron:
-          isSuper && featureToggles.enableUpPetCourseCron !== undefined
-            ? featureToggles.enableUpPetCourseCron
-            : (existingToggles.enableUpPetCourseCron ?? true),
+        enableBankPoCourseCron:
+          isSuper && featureToggles.enableBankPoCourseCron !== undefined
+            ? featureToggles.enableBankPoCourseCron
+            : (existingToggles.enableBankPoCourseCron ?? true),
         enableChatWidget:
           isSuper && featureToggles.enableChatWidget !== undefined
             ? featureToggles.enableChatWidget

@@ -23,6 +23,9 @@ export interface ICourse extends Document {
   courseCode?: string | null;
   /** SEO-friendly URL slug for public course pages */
   slug?: string | null;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  keywords?: string[];
   /** For continue-learning tiles without loading lessons. */
   lastPublishedLesson?: mongoose.Types.ObjectId | null;
   createdAt: Date;
@@ -48,6 +51,9 @@ const courseSchema = new Schema<ICourse>(
     courseCode: { type: String, default: undefined, trim: true, uppercase: true },
     // Omit when unset — do not default to null (breaks unique index on slug).
     slug: { type: String, trim: true, lowercase: true, maxlength: 240, default: undefined },
+    metaTitle: { type: String, trim: true, maxlength: 200, default: undefined },
+    metaDescription: { type: String, trim: true, maxlength: 500, default: undefined },
+    keywords: { type: [String], default: undefined },
     lastPublishedLesson: { type: Schema.Types.ObjectId, ref: 'Lesson', default: null },
   },
   { timestamps: true }

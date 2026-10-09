@@ -39,7 +39,7 @@ const DEFAULT_SETTINGS = {
     enableQuizChallenges: true,
     enableAutoDailyAiContestCreation: true,
     enableAutoDeclareResults: true,
-    enableUpPetCourseCron: true,
+    enableBankPoCourseCron: true,
     enableChatWidget: true,
   },
   challengeConfig: {

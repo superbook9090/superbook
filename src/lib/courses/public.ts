@@ -3,6 +3,8 @@ import mongoose from 'mongoose';
 import dbConnect from '@/lib/db';
 import '@/models';
 import Course from '@/models/Course';
+import Chapter from '@/models/Chapter';
+import Lesson from '@/models/Lesson';
 import { publicCourseFilter } from '@/lib/courseAccess';
 import { getSiteUrl } from '@/lib/seo/config';
 
@@ -18,6 +20,9 @@ export type PublicCourseSummary = {
   chapterCount: number;
   lessonCount: number;
   enrolledCount: number;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  keywords?: string[];
   instructor?: { _id: string; name: string | null };
   createdAt: string;
   updatedAt: string;
@@ -63,6 +68,9 @@ async function ensurePublicSlug(course: {
   chapterCount?: number;
   lessonCount?: number;
   enrolledCount?: number;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  keywords?: string[];
   instructor?: unknown;
   createdAt: Date;
   updatedAt: Date;
@@ -90,6 +98,9 @@ async function ensurePublicSlug(course: {
     chapterCount: course.chapterCount ?? 0,
     lessonCount: course.lessonCount ?? 0,
     enrolledCount: course.enrolledCount ?? 0,
+    metaTitle: course.metaTitle ?? null,
+    metaDescription: course.metaDescription ?? null,
+    keywords: Array.isArray(course.keywords) ? course.keywords : [],
     instructor: normalizeInstructor(course.instructor),
     createdAt: course.createdAt.toISOString(),
     updatedAt: course.updatedAt.toISOString(),
@@ -129,7 +140,7 @@ export async function listPublicCourses(params: {
 
   const [rows, total] = await Promise.all([
     Course.find(query)
-      .select('title slug description category locale thumbnail price chapterCount lessonCount enrolledCount instructor createdAt updatedAt')
+      .select('title slug description category locale thumbnail price chapterCount lessonCount enrolledCount metaTitle metaDescription keywords instructor createdAt updatedAt')
       .populate('instructor', 'name')
       .sort({ enrolledCount: -1, createdAt: -1 })
       .skip(skip)
@@ -166,12 +177,66 @@ export async function getPublicCourseBySlug(slug: string): Promise<PublicCourseS
     ...publicVisibilityFilter(),
     slug: slug.toLowerCase(),
   })
-    .select('title slug description category locale thumbnail price chapterCount lessonCount enrolledCount instructor createdAt updatedAt')
+    .select('title slug description category locale thumbnail price chapterCount lessonCount enrolledCount metaTitle metaDescription keywords instructor createdAt updatedAt')
     .populate('instructor', 'name')
     .lean();
 
   if (!row) return null;
   return ensurePublicSlug(row as unknown as Parameters<typeof ensurePublicSlug>[0]);
+}
+
+export type PublicLessonCurriculumItem = {
+  _id: string;
+  title: string;
+  order: number;
+  duration: number;
+  isPreview?: boolean;
+};
+
+export type PublicChapterCurriculumItem = {
+  _id: string;
+  title: string;
+  summary?: string;
+  order: number;
+  lessonCount: number;
+  lessons: PublicLessonCurriculumItem[];
+};
+
+export async function getPublicCourseCurriculum(courseId: string): Promise<PublicChapterCurriculumItem[]> {
+  await dbConnect();
+
+  const [chapters, lessons] = await Promise.all([
+    Chapter.find({ course: courseId }).sort({ order: 1 }).lean(),
+    Lesson.find({ course: courseId, isPublished: true })
+      .select('_id title order duration isPreview chapter')
+      .sort({ order: 1 })
+      .lean(),
+  ]);
+
+  const lessonsByChapter = new Map<string, PublicLessonCurriculumItem[]>();
+  for (const lesson of lessons) {
+    const chId = lesson.chapter?.toString();
+    if (!chId) continue;
+    if (!lessonsByChapter.has(chId)) {
+      lessonsByChapter.set(chId, []);
+    }
+    lessonsByChapter.get(chId)!.push({
+      _id: lesson._id.toString(),
+      title: lesson.title,
+      order: lesson.order,
+      duration: lesson.duration || 0,
+      isPreview: lesson.isPreview ?? false,
+    });
+  }
+
+  return chapters.map((ch) => ({
+    _id: ch._id.toString(),
+    title: ch.title,
+    summary: ch.summary,
+    order: ch.order,
+    lessonCount: ch.lessonCount || 0,
+    lessons: lessonsByChapter.get(ch._id.toString()) || [],
+  }));
 }
 
 export async function listPublicCourseSlugs(limit = 200) {

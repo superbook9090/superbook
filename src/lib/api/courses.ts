@@ -21,21 +21,21 @@ export type CourseDetail = {
 export type CoursesListPayload = { courses: unknown[]; organizationId?: string };
 
 export function listCoursesAdmin(): Promise<CoursesListPayload> {
-  return apiJson(BASE, { method: 'GET' });
+  return apiJson(`${BASE}?limit=1000`, { method: 'GET' });
 }
 
 export function listTeacherCoursesSelf(): Promise<CoursesListPayload> {
-  return apiJson(`${BASE}?instructor=self`, { method: 'GET' });
+  return apiJson(`${BASE}?instructor=self&limit=1000`, { method: 'GET' });
 }
 
 export function listTeacherCoursesByOrg(orgId: string): Promise<CoursesListPayload> {
   const o = orgId || 'public';
-  return apiJson(`${BASE}?orgId=${encodeURIComponent(o)}&instructor=self`, { method: 'GET' });
+  return apiJson(`${BASE}?orgId=${encodeURIComponent(o)}&instructor=self&limit=1000`, { method: 'GET' });
 }
 
 export function listAvailableCoursesByOrg(orgId: string): Promise<CoursesListPayload> {
   const o = orgId || 'public';
-  return apiJson(`${BASE}?orgId=${encodeURIComponent(o)}&available=true`, { method: 'GET' });
+  return apiJson(`${BASE}?orgId=${encodeURIComponent(o)}&available=true&limit=100`, { method: 'GET' });
 }
 
 export function getCourseById(courseId: string): Promise<CourseDetail> {

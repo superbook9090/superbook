@@ -4,7 +4,7 @@ import Button from '@/components/ui/Button';
 
 export function CronJobsSection() {
   const [loadingJob, setLoadingJob] = useState<string | null>(null);
-  const [upPetProgress, setUpPetProgress] = useState<string | null>(null);
+  const [bankPoProgress, setBankPoProgress] = useState<string | null>(null);
   const [result, setResult] = useState<{ job: string; success: boolean; message: string } | null>(null);
 
   const runJob = async (jobId: string, endpoint: string) => {
@@ -46,23 +46,23 @@ export function CronJobsSection() {
   };
 
   /**
-   * Generates a batch of 10-12 lessons across syllabus chapters in one click,
+   * Generates a batch of 10-12 lessons across Bank PO syllabus chapters in one click,
    * dispatching independent parallel API requests with a worker pool of 3
    * to guarantee zero serverless timeouts and avoid AI burst rate limits.
    */
-  const runUpPetChapter = async () => {
-    setLoadingJob('up_pet_course');
+  const runBankPoChapter = async () => {
+    setLoadingJob('bank_po_course');
     setResult(null);
-    setUpPetProgress('Analyzing course roadmap for next 10-12 lessons batch...');
+    setBankPoProgress('Analyzing Bank PO course roadmap for next 10-12 lessons batch...');
 
     try {
       // 1. Fetch next batch plan (up to 12 lessons)
-      const planRes = await fetch('/api/cron/generate-up-pet-course?action=plan&limit=12');
+      const planRes = await fetch('/api/cron/generate-bank-po-course?action=plan&limit=12');
       const plan = await planRes.json().catch(() => ({}));
 
       if (!planRes.ok || !plan.success) {
         setResult({
-          job: 'up_pet_course',
+          job: 'bank_po_course',
           success: false,
           message: plan.message || 'Failed to determine syllabus roadmap plan.',
         });
@@ -71,9 +71,9 @@ export function CronJobsSection() {
 
       if (plan.isCourseCompleted) {
         setResult({
-          job: 'up_pet_course',
+          job: 'bank_po_course',
           success: true,
-          message: 'All chapters of the UPSSSC PET course are already 100% generated!',
+          message: 'All chapters of the Bank PO 2026 course are already 100% generated!',
         });
         return;
       }
@@ -87,9 +87,9 @@ export function CronJobsSection() {
 
       if (pending.length === 0) {
         setResult({
-          job: 'up_pet_course',
+          job: 'bank_po_course',
           success: true,
-          message: 'No pending lessons found. The course is up to date!',
+          message: 'No pending lessons found. The Bank PO course is up to date!',
         });
         return;
       }
@@ -98,7 +98,7 @@ export function CronJobsSection() {
       let completed = 0;
       let failed = 0;
 
-      setUpPetProgress(
+      setBankPoProgress(
         `Starting generation batch of ${total} lessons across ${plan.chaptersCount || 1} chapter(s)... (0/${total} completed)`
       );
 
@@ -113,7 +113,7 @@ export function CronJobsSection() {
 
           try {
             const res = await fetch(
-              `/api/cron/generate-up-pet-course?chapterIndex=${item.chapterIndex}&lessonIndex=${item.lessonIndex}`
+              `/api/cron/generate-bank-po-course?chapterIndex=${item.chapterIndex}&lessonIndex=${item.lessonIndex}`
             );
             const data = await res.json().catch(() => ({}));
             if (res.ok && data.success) {
@@ -125,8 +125,8 @@ export function CronJobsSection() {
             failed++;
           }
 
-          setUpPetProgress(
-            `Generating UP PET Course: (${completed}/${total} completed${failed > 0 ? `, ${failed} failed` : ''}) — current: "${item.title.slice(0, 28)}..."`
+          setBankPoProgress(
+            `Generating Bank PO Course: (${completed}/${total} completed${failed > 0 ? `, ${failed} failed` : ''}) — current: "${item.title.slice(0, 28)}..."`
           );
         }
       };
@@ -142,7 +142,7 @@ export function CronJobsSection() {
         : '';
 
       setResult({
-        job: 'up_pet_course',
+        job: 'bank_po_course',
         success: completed > 0,
         message:
           completed === total
@@ -151,12 +151,12 @@ export function CronJobsSection() {
       });
     } catch (err) {
       setResult({
-        job: 'up_pet_course',
+        job: 'bank_po_course',
         success: false,
-        message: (err as Error).message || 'An error occurred during course generation',
+        message: (err as Error).message || 'An error occurred during Bank PO course generation',
       });
     } finally {
-      setUpPetProgress(null);
+      setBankPoProgress(null);
       setLoadingJob(null);
     }
   };
@@ -201,34 +201,35 @@ export function CronJobsSection() {
           )}
         </div>
 
-        {/* UP PET Course Job */}
+
+        {/* Bank PO 2026 Course Job */}
         <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface-muted)]/30 space-y-4">
           <div className="space-y-1">
-            <h3 className="font-semibold text-sm text-[var(--color-foreground)]">Generate UP PET Course (10-12 Lessons Batch)</h3>
+            <h3 className="font-semibold text-sm text-[var(--color-foreground)]">Generate Bank PO 2026 Course (10-12 Lessons Batch)</h3>
             <p className="text-xs text-[var(--color-muted-foreground)] leading-relaxed">
-              Generates a batch of 10–12 syllabus lessons with comprehensive notes & practice quizzes across chapters via independent parallel tasks to avoid server timeouts.
+              Generates a batch of 10–12 Bank PO syllabus lessons with in-depth study notes & practice quizzes across Aptitude, Reasoning, English, and Banking Awareness.
             </p>
           </div>
           
           <Button
-            onClick={runUpPetChapter}
+            onClick={runBankPoChapter}
             disabled={loadingJob !== null}
             variant="secondary"
             size="sm"
             className="w-full flex items-center justify-center gap-2"
           >
-            {loadingJob === 'up_pet_course' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
+            {loadingJob === 'bank_po_course' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
             Run Task Now
           </Button>
 
-          {loadingJob === 'up_pet_course' && upPetProgress && (
+          {loadingJob === 'bank_po_course' && bankPoProgress && (
             <div className="flex items-center gap-2 p-3 rounded-lg text-xs bg-blue-500/10 text-blue-400 border border-blue-500/20">
               <Loader2 className="w-4 h-4 animate-spin shrink-0" />
-              <span>{upPetProgress}</span>
+              <span>{bankPoProgress}</span>
             </div>
           )}
 
-          {result?.job === 'up_pet_course' && (
+          {result?.job === 'bank_po_course' && (
             <div className={`flex items-start gap-2 p-3 rounded-lg text-xs ${result.success ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
               {result.success ? <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" /> : <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />}
               <span>{result.message}</span>

@@ -23,7 +23,12 @@ export const metadata: Metadata = createPageMetadata({
     'online learning platform',
     'quiz based courses',
     'exam preparation courses',
-    'certificate courses',
+    'bank po preparation',
+    'banking exam course',
+    'upsssc pet course',
+    'competitive exams study material',
+    'free certificate courses',
+    'online study notes hindi',
   ],
 });
 
@@ -42,6 +47,22 @@ export default async function PublicCoursesPage() {
       { '@type': 'ListItem', position: 1, name: 'Home', item: getSiteUrl() },
       { '@type': 'ListItem', position: 2, name: 'Courses', item: `${getSiteUrl()}/courses` },
     ],
+  };
+
+  const catalogItemListJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Quiz Do Free Online Courses Catalog',
+    description:
+      'Explore free online courses, exam preparation blueprints, chapter-wise notes, and interactive milestone quizzes.',
+    numberOfItems: data.courses.length,
+    itemListElement: data.courses.slice(0, 30).map((c, idx) => ({
+      '@type': 'ListItem',
+      position: idx + 1,
+      name: c.title,
+      url: `${getSiteUrl()}/courses/${c.slug}`,
+      description: c.description ? c.description.slice(0, 160) : undefined,
+    })),
   };
 
   const featureCards = [
@@ -78,6 +99,12 @@ export default async function PublicCoursesPage() {
         type="application/ld+json"
         suppressHydrationWarning
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <script
+        id="jsonld-courses-catalog"
+        type="application/ld+json"
+        suppressHydrationWarning
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(catalogItemListJsonLd) }}
       />
       <MarketingHeader />
 

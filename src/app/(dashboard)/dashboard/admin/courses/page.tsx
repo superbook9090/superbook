@@ -15,6 +15,7 @@ import DashboardListFilters, { FilterPanel } from '@/components/filters/Dashboar
 import { buildPublishStatusOptions, type PublishStatusFilter } from '@/components/filters/publishStatusOptions';
 import { isSuperAdmin } from '@/lib/roles';
 import { PageWrapper, ResponsiveGrid, EmptyState } from '@/components/layout';
+import { Pagination } from '@/components/ui/Pagination';
 import AdminCoursesStats from './_components/AdminCoursesStats';
 import AdminCourseCard from './_components/AdminCourseCard';
 import AdminCoursesTable from './_components/AdminCoursesTable';
@@ -30,6 +31,8 @@ export default function AdminCoursesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<PublishStatusFilter>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 12;
   const { addAlert } = useAlert();
 
   const fetchCourses = useCallback(async () => {
@@ -72,6 +75,18 @@ export default function AdminCoursesPage() {
       return matchesSearch && matchesFilter;
     });
   }, [courses, searchQuery, filter]);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filter]);
+
+  const paginatedCourses = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredCourses.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredCourses, currentPage]);
+
+  const totalPages = Math.ceil(filteredCourses.length / ITEMS_PER_PAGE);
 
   const clearFilters = () => {
     setSearchQuery('');
@@ -171,20 +186,34 @@ export default function AdminCoursesPage() {
             </button>
           </div>
         ) : viewMode === 'grid' ? (
-          <ResponsiveGrid variant="cards">
-            {filteredCourses.map((course) => (
-              <AdminCourseCard
-                key={course._id}
-                course={course}
-                isSuperAdmin={isSuperAdminUser}
-              />
-            ))}
-          </ResponsiveGrid>
+          <>
+            <ResponsiveGrid variant="cards">
+              {paginatedCourses.map((course) => (
+                <AdminCourseCard
+                  key={course._id}
+                  course={course}
+                  isSuperAdmin={isSuperAdminUser}
+                />
+              ))}
+            </ResponsiveGrid>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </>
         ) : (
-          <AdminCoursesTable
-            courses={filteredCourses}
-            isSuperAdmin={isSuperAdminUser}
-          />
+          <>
+            <AdminCoursesTable
+              courses={paginatedCourses}
+              isSuperAdmin={isSuperAdminUser}
+            />
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </>
         )}
       </div>
     </PageWrapper>

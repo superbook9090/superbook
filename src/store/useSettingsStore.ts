@@ -24,7 +24,7 @@ export type FeatureToggleKey =
   | 'enableQuizChallenges'
   | 'enableAutoDailyAiContestCreation'
   | 'enableAutoDeclareResults'
-  | 'enableUpPetCourseCron'
+  | 'enableBankPoCourseCron'
   | 'enableChatWidget';
 
 export type TeacherLimitKey = 'courses' | 'quizzes' | 'blogs' | 'aiQuizGenerations' | 'aiQuizMaxQuestions';
@@ -90,7 +90,7 @@ export const defaultPublicAppSettings: PublicAppSettings = {
     enableQuizChallenges: true,
     enableAutoDailyAiContestCreation: true,
     enableAutoDeclareResults: true,
-    enableUpPetCourseCron: true,
+    enableBankPoCourseCron: true,
     enableChatWidget: false,
   },
   challengeConfig: {
