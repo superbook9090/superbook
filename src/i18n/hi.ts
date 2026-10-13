@@ -2715,6 +2715,8 @@ export const hi = {
     score: 'स्कोर',
     rank: 'रैंक',
     participants: 'प्रतिभागी',
+    studentAttempted: 'छात्र ने भाग लिया',
+    studentsAttempted: 'छात्रों ने भाग लिया',
     contestCompleted: 'कॉन्टेस्ट समाप्त!',
     contestOverview: 'कॉन्टेस्ट रिज़ल्ट और स्थिति',
     leaderboard: 'लीडरबोर्ड',

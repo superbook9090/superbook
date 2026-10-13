@@ -16,7 +16,7 @@ import { getFallbackContestData } from '@/lib/ai/fallbackQuestions';
 import { parseQuestionsFromAiOutput } from '@/lib/ai/quizPrompt';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 60; // Max execution time for Vercel (Free tier limit)
+export const maxDuration = 60; // Max execution time for Vercel
 
 interface GeneratedQuestion {
   question?: string;
@@ -26,6 +26,9 @@ interface GeneratedQuestion {
   correct_answer?: number | string;
   correctOption?: number | string;
   answer?: number | string;
+  correctOptionText?: string;
+  correctAnswerText?: string;
+  explanation?: string;
 }
 
 function processAndRandomizeContestQuestion(
@@ -45,11 +48,13 @@ function processAndRandomizeContestQuestion(
 
   // Ensure at least 4 options exist
   while (cleanOptions.length < 4) {
-    cleanOptions.push(`Option ${String.fromCharCode(65 + cleanOptions.length)}`);
+    cleanOptions.push(`विकल्प ${String.fromCharCode(65 + cleanOptions.length)}`);
   }
   cleanOptions = cleanOptions.slice(0, 4);
 
-  // 2. Identify the correct answer from AI output
+  // 2. Identify the correct answer from AI output or text matching
+  const rawCorrectText = (q.correctOptionText || q.correctAnswerText || '').trim();
+
   const rawCorrect =
     q.correctAnswer !== undefined
       ? q.correctAnswer
@@ -61,45 +66,65 @@ function processAndRandomizeContestQuestion(
 
   let resolvedCorrectIndex = -1;
 
-  if (typeof rawCorrect === 'number' && Number.isFinite(rawCorrect)) {
-    const idx = Math.floor(rawCorrect);
-    if (idx >= 0 && idx < cleanOptions.length) {
-      resolvedCorrectIndex = idx;
-    }
-  } else if (typeof rawCorrect === 'string') {
-    const trimmed = rawCorrect.trim();
-    const parsedNum = parseInt(trimmed, 10);
-    if (!isNaN(parsedNum) && parsedNum >= 0 && parsedNum < cleanOptions.length) {
-      resolvedCorrectIndex = parsedNum;
+  // First priority: if correctOptionText was provided, find matching option!
+  if (rawCorrectText) {
+    const textIdx = cleanOptions.findIndex(
+      (opt) => opt.toLowerCase() === rawCorrectText.toLowerCase()
+    );
+    if (textIdx !== -1) {
+      resolvedCorrectIndex = textIdx;
     } else {
-      // Check for letter A, B, C, D (e.g. "A", "Option A", "(B)")
-      const letterMatch = trimmed.toUpperCase().match(/\b([A-D])\b/);
-      if (letterMatch && letterMatch[1]) {
-        resolvedCorrectIndex = letterMatch[1].charCodeAt(0) - 65;
+      const partialIdx = cleanOptions.findIndex(
+        (opt) =>
+          opt.toLowerCase().includes(rawCorrectText.toLowerCase()) ||
+          rawCorrectText.toLowerCase().includes(opt.toLowerCase())
+      );
+      if (partialIdx !== -1) {
+        resolvedCorrectIndex = partialIdx;
+      }
+    }
+  }
+
+  // Second priority: numeric index or letter index
+  if (resolvedCorrectIndex === -1) {
+    if (typeof rawCorrect === 'number' && Number.isFinite(rawCorrect)) {
+      const idx = Math.floor(rawCorrect);
+      if (idx >= 0 && idx < cleanOptions.length) {
+        resolvedCorrectIndex = idx;
+      }
+    } else if (typeof rawCorrect === 'string') {
+      const trimmed = rawCorrect.trim();
+      const parsedNum = parseInt(trimmed, 10);
+      if (!isNaN(parsedNum) && parsedNum >= 0 && parsedNum < cleanOptions.length) {
+        resolvedCorrectIndex = parsedNum;
       } else {
-        // Check if string matches text of one of the options
-        const matchIdx = cleanOptions.findIndex(
-          (opt) => opt.toLowerCase() === trimmed.toLowerCase()
-        );
-        if (matchIdx !== -1) {
-          resolvedCorrectIndex = matchIdx;
+        const letterMatch = trimmed.toUpperCase().match(/\b([A-D])\b/);
+        if (letterMatch && letterMatch[1]) {
+          resolvedCorrectIndex = letterMatch[1].charCodeAt(0) - 65;
+        } else {
+          const matchIdx = cleanOptions.findIndex(
+            (opt) => opt.toLowerCase() === trimmed.toLowerCase()
+          );
+          if (matchIdx !== -1) {
+            resolvedCorrectIndex = matchIdx;
+          }
         }
       }
     }
   }
 
-  // Fallback: if AI provided an unrecognized correct answer, pick a random option
+  // Fallback: default to option 0 if still unresolved
   if (resolvedCorrectIndex < 0 || resolvedCorrectIndex >= cleanOptions.length) {
-    resolvedCorrectIndex = Math.floor(Math.random() * cleanOptions.length);
+    resolvedCorrectIndex = 0;
   }
 
-  // 3. Guarantee that the correct answer is present AND randomize its position
+  // 3. Mark correct item before Fisher-Yates shuffle
   const items = cleanOptions.map((text, idx) => ({
     text,
     isCorrect: idx === resolvedCorrectIndex,
   }));
 
-  // Fisher-Yates shuffle to randomize options
+  // Fisher-Yates shuffle to randomize options position fairly
   for (let i = items.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     const temp = items[i];
@@ -118,20 +143,18 @@ function processAndRandomizeContestQuestion(
     correctOption: randomizedCorrectOption !== -1 ? randomizedCorrectOption : 0,
     points: 1, // 1 mark per question
     negativePoints: 0.25, // -0.25 negative mark
+    explanation: q.explanation || undefined,
   };
 }
 
 export async function GET(req: NextRequest) {
   const logContext = { method: 'GET', path: '/api/cron/generate-daily-contest' };
-  const startTime = Date.now();
-  // Safe execution window to prevent Vercel 504 timeouts (Free plan limit is 60s)
-  const MAX_RUN_TIME_MS = 46000;
 
   try {
     // 1. Verify Vercel Cron Secret (if configured) or Superadmin session
     const authHeader = req.headers.get('authorization');
     const isCronAuthorized = !process.env.CRON_SECRET || authHeader === `Bearer ${process.env.CRON_SECRET}`;
-    
+
     let isSuperAdmin = false;
     if (!isCronAuthorized) {
       const session = await getServerSession(authOptions);
@@ -159,103 +182,77 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ message: 'No superadmin or admin found to own the contest' }, { status: 400 });
     }
 
-    // 4. Implement Topic & SEO Generation (AI with curated competitive exam fallback)
+    // 3. Configure Mixed GK & GS Contest Metadata
     const targetQuestions = 10;
     const fallbackTheme = getFallbackContestData(targetQuestions);
-    let topic = fallbackTheme.topic;
-    let slug = fallbackTheme.slug;
-    let metaTitle = fallbackTheme.metaTitle;
-    let metaDescription = fallbackTheme.metaDescription;
 
-    const topicPrompt = `Generate a HIGHLY RANDOM, unique, and specific quiz topic relevant to India and Indian competitive exams (e.g. UPSC, SSC, Banking, State PSC, Indian GK).
-Topics can cover: Indian History, Indian Geography, Indian Polity & Constitution, Indian Economy, Science & Technology in India, Indian Art & Culture, Famous Personalities of India, Environment & Wildlife of India, or Current Affairs.
-Make sure the topic is extremely specific and completely different from typical generic topics. Random seed: ${Math.random().toString(36).substring(2, 10)}
+    const dateStr = new Date().toISOString().slice(0, 10);
+    const randomSuffix = Math.random().toString(36).substring(2, 6);
 
-IMPORTANT: The "topic", "metaTitle", and "metaDescription" MUST be written in Hindi language. The "slug" MUST be in English/Latin characters.
+    const topic = 'दैनिक मिश्रित GK & GS महा-प्रतियोगिता (Daily Mixed GK & GS Contest)';
+    const contestTitle = 'दैनिक मिश्रित GK & GS महा-प्रतियोगिता';
+    const slug = `daily-mixed-gk-gs-contest-${dateStr}-${randomSuffix}`;
+    const metaTitle = 'दैनिक मिश्रित GK & GS महा-प्रतियोगिता | Quiz-Do Live Contest';
+    const metaDescription = 'UPSC, SSC, Railway, State PSC एवं अन्य प्रतियोगी परीक्षाओं हेतु इतिहास, राजव्यवस्था, भूगोल, अर्थव्यवस्था एवं विज्ञान के 10 मिश्रित प्रश्नों की दैनिक लाइव प्रतियोगिता। भाग लें और लाइव रैंक देखें।';
 
-Return ONLY a valid JSON object matching exactly this structure, with no markdown, quotes, or extra text:
-{
-  "topic": "The generated topic name (in Hindi)",
-  "slug": "seo-friendly-url-slug-in-english",
-  "metaTitle": "SEO meta title (max 60 chars) (in Hindi)",
-  "metaDescription": "SEO meta description (max 160 chars) (in Hindi)"
-}`;
-
-    try {
-      const topicResult = await fetchOpenRouterChat([
-        { role: 'user', content: topicPrompt }
-      ], { maxTokens: 300, temperature: 0.8, validateOutput: (text) => text.includes('{'), timeoutMs: 10000 });
-
-      const rawText = topicResult.content;
-      let cleaned = rawText
-        .replace(/<think>[\s\S]*?<\/think>/gi, '')
-        .replace(/```json/gi, '')
-        .replace(/```/g, '')
-        .trim();
-
-      const jsonStart = cleaned.indexOf('{');
-      const jsonEnd = cleaned.lastIndexOf('}');
-      if (jsonStart !== -1 && jsonEnd !== -1) {
-        cleaned = cleaned.substring(jsonStart, jsonEnd + 1);
-      }
-
-      const parsed = JSON.parse(cleaned);
-      if (parsed.topic) topic = parsed.topic;
-      if (parsed.slug) {
-        const dateStr = new Date().toISOString().slice(0, 10);
-        const randomSuffix = Math.random().toString(36).substring(2, 6);
-        slug = `${parsed.slug.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}-${dateStr}-${randomSuffix}`;
-      }
-      if (parsed.metaTitle) metaTitle = parsed.metaTitle;
-      if (parsed.metaDescription) metaDescription = parsed.metaDescription;
-    } catch (err) {
-      logError('Failed to generate topic via AI, using curated fallback theme', logContext, { error: err });
-    }
-
-    // 5. Implement AI Question Generation Logic with Multi-Tier Fallback
+    // 4. Implement AI Question Generation with Strict Single Call and Fast Timeout
     let parsedQuestions: GeneratedQuestion[] = [];
-    const language = 'Hindi';
 
-    const prompt = `You are a master educator and expert in Indian competitive examinations (such as UPSC, SSC, State PSC, and Banking exams).
-Generate a high-quality, realistic, medium-difficulty competitive contest multiple-choice quiz with EXACTLY ${targetQuestions} questions on the topic: "${topic}" focused on India.
+    const prompt = `You are a master question setter for Indian competitive examinations (UPSC CSE Prelims, SSC CGL/CHSL, State PSCs, RRB NTPC).
+Generate a balanced, high-quality MIXED General Knowledge & General Studies (GK & GS / सामान्य ज्ञान एवं सामान्य अध्ययन) contest with EXACTLY ${targetQuestions} questions written in Hindi (Devanagari script).
 
-CRITICAL QUALITY & PEDAGOGICAL REQUIREMENTS:
-1. INDIAN CONTEXT: All questions and options must be strictly focused on India and relevant to Indian students/aspirants.
-2. DIFFICULTY: Medium level — thought-provoking, competitive, and realistic.
-3. EXACT QUESTION COUNT: Provide EXACTLY ${targetQuestions} distinct questions written strictly in ${language}.
-4. 4 OPTIONS: Each question MUST have EXACTLY 4 distinct, plausible multiple-choice options, also in ${language}.
-5. ACCURATE CORRECT ANSWER: Every question MUST have exactly one indisputably correct, factually accurate answer, and that correct answer MUST be included in the "options" list.
-6. RANDOM CORRECT ANSWER: Distribute the "correctAnswer" index (0 for A, 1 for B, 2 for C, 3 for D) randomly across questions so that option A (0) is not always the correct answer.
-7. FORMAT: Return ONLY a valid JSON array of question objects matching this exact format without any markdown wrapper:
+DIFFICULTY LEVEL: MEDIUM (मध्यम स्तर - thoughtful, conceptual, fact-based questions typical of SSC CGL / UPSC Prelims / State PSCs). Neither kindergarten-level easy nor obscure/confusing.
+
+SYLLABUS DISTRIBUTION (MANDATORY MIX OF TOPICS):
+- 2 Questions: भारतीय इतिहास एवं राष्ट्रीय आंदोलन (Indian History & Freedom Struggle)
+- 2 Questions: भारतीय राजव्यवस्था एवं संविधान (Indian Polity & Constitution)
+- 2 Questions: भारत एवं विश्व का भूगोल (Geography & Environment)
+- 1 Question: भारतीय अर्थव्यवस्था (Indian Economy)
+- 2 Questions: सामान्य विज्ञान (General Science: Physics, Chemistry, Biology)
+- 1 Question: स्टेटिक जीके / संस्थान / समसामयिकी (Static GK / Important Institutions)
+
+CRITICAL FACTUAL ACCURACY & FORMAT REQUIREMENTS:
+1. FACTUAL ACCURACY: Every question must have ONE indisputably correct, scientifically/historically verified answer.
+2. 4 OPTIONS: Every question must have exactly 4 plausible, distinct options in Hindi.
+3. CORRECT ANSWER MATCH: Provide "correctOption" (0 for option 1, 1 for option 2, 2 for option 3, 3 for option 4) AND "correctOptionText" (exact text of the correct option) to guarantee 100% answer accuracy.
+4. EXPLANATION: Provide a concise 1-sentence factual explanation in Hindi for why that option is correct.
+5. STRICT JSON OUTPUT: Return ONLY a valid JSON array of question objects without markdown wrappers:
 [
   {
-    "question": "Question text",
-    "options": ["Option A", "Option B", "Option C", "Option D"],
-    "correctAnswer": 0
+    "question": "प्रश्न हिंदी में",
+    "options": ["विकल्प 1", "विकल्प 2", "विकल्प 3", "विकल्प 4"],
+    "correctOption": 0,
+    "correctOptionText": "विकल्प 1",
+    "explanation": "संक्षिप्त स्पष्टीकरण"
   }
 ]`;
 
     try {
-      const qsResult = await fetchOpenRouterChat([
-        { role: 'system', content: 'You output strictly valid JSON arrays.' },
-        { role: 'user', content: prompt }
-      ], {
-        maxTokens: 3000,
-        timeoutMs: 16000,
-        validateOutput: (text) => text.includes('[') && text.includes(']')
-      });
+      // 14 second timeout on AI to guarantee response well within serverless limits
+      const qsResult = await fetchOpenRouterChat(
+        [
+          { role: 'system', content: 'You are an expert exam question setter. You output strictly valid JSON arrays of questions.' },
+          { role: 'user', content: prompt },
+        ],
+        {
+          maxTokens: 2500,
+          timeoutMs: 14000,
+          autoSwitchOnLimit: false, // Prevent cascading retry delays that cause 504 Gateway Timeouts
+          validateOutput: (text) => text.includes('[') && text.includes(']'),
+        }
+      );
 
       const parsed = parseQuestionsFromAiOutput(qsResult.content, targetQuestions);
       if (Array.isArray(parsed) && parsed.length > 0) {
         parsedQuestions = parsed;
       }
     } catch (err) {
-      logError('AI question generation call failed, switching to curated fallback questions', logContext, { error: err });
+      logError('AI question generation call timed out or failed, switching to curated Mixed GK/GS question bank', logContext, { error: err });
     }
 
-    // If AI failed or produced fewer than target questions, seamlessly top up or supply with fallback questions
+    // If AI failed or produced fewer than target questions, supplement from curated Mixed GK & GS bank
     if (parsedQuestions.length < targetQuestions) {
-      logInfo(`Supplementing ${targetQuestions - parsedQuestions.length} questions from curated competitive exam bank`, logContext);
+      logInfo(`Supplementing ${targetQuestions - parsedQuestions.length} questions from curated Mixed GK/GS question bank`, logContext);
       const remainingNeeded = targetQuestions - parsedQuestions.length;
       const additionalFallback = fallbackTheme.questions.slice(0, remainingNeeded);
       parsedQuestions.push(...additionalFallback);
@@ -264,17 +261,16 @@ CRITICAL QUALITY & PEDAGOGICAL REQUIREMENTS:
     // Guarantee exact target count
     parsedQuestions = parsedQuestions.slice(0, targetQuestions);
 
-    // 6. Database Logic: Create Quiz & QuizQuestions
-    // Give time is exactly equal to the question count (1 min per question)
-    const timeLimitMinutes = parsedQuestions.length;
+    // 5. Database Logic: Create Quiz & QuizQuestions
+    const timeLimitMinutes = 10; // 10 minutes for 10 medium difficulty questions
 
     const quizDoc = await Quiz.create({
-      title: `Daily Contest: ${topic}`,
-      description: `An AI-generated daily contest covering: ${topic}.`,
-      course: new mongoose.Types.ObjectId(), // Standalone dummy ObjectId (matches contest pattern)
+      title: contestTitle,
+      description: `दैनिक मिश्रित GK & GS क्विज: इतिहास, राजव्यवस्था, भूगोल, अर्थव्यवस्था एवं सामान्य विज्ञान।`,
+      course: new mongoose.Types.ObjectId(), // Standalone dummy ObjectId
       instructor: instructor._id,
       questionCount: parsedQuestions.length,
-      timeLimit: timeLimitMinutes, // Give time equal to question count
+      timeLimit: timeLimitMinutes,
       isPublished: true,
       enableNegativeMarking: true,
       negativeMarks: 0.25,
@@ -288,32 +284,38 @@ CRITICAL QUALITY & PEDAGOGICAL REQUIREMENTS:
 
     await QuizQuestion.insertMany(questionDocs);
 
-    // 7. Database Logic: Create Contest
+    // 6. Database Logic: Create Contest
     const now = new Date();
     const { searchParams } = new URL(req.url);
     const endInMinutesParam = searchParams.get('endInMinutes');
     const endMinutes = endInMinutesParam && !isNaN(Number(endInMinutesParam))
       ? Math.max(1, Number(endInMinutesParam))
-      : 24 * 60;
+      : 24 * 60; // 24 hours live window
 
     const contestStartTime = new Date(now);
     const endTime = new Date(now.getTime() + endMinutes * 60 * 1000);
-    // Contest duration for a student to attempt is equal to question count
     const duration = timeLimitMinutes;
 
     const contestDoc = await Contest.create({
-      title: `Daily Contest: ${topic}`,
+      title: contestTitle,
       slug,
       metaTitle,
       metaDescription,
-      description: `Participate in today's AI-generated contest on ${topic}. Test your knowledge and climb the leaderboard!`,
+      description: `आज की दैनिक मिश्रित GK & GS महा-प्रतियोगिता में भाग लें। इसमें भारतीय इतिहास, राजव्यवस्था, भूगोल, अर्थव्यवस्था, सामान्य विज्ञान और स्टेटिक जीके के 10 महत्वपूर्ण प्रश्न शामिल हैं। अपनी तैयारी परखें और लाइव लीडरबोर्ड पर रैंक हासिल करें!`,
+      instructions: `1. कुल 10 बहुविकल्पीय प्रश्न हैं।
+2. प्रत्येक सही उत्तर के लिए +1 अंक मिलेगा।
+3. प्रत्येक गलत उत्तर के लिए 0.25 अंक का नकारात्मक अंकन (Negative Marking) है।
+4. कुल समय सीमा 10 मिनट है।
+5. प्रतियोगिता समाप्त होने के पश्चात विस्तृत हल व व्याख्या उपलब्ध होगी।`,
       instructor: instructor._id,
-      quizzes: [{
-        quiz: quizId,
-        title: topic,
-        order: 1,
-        weight: 1
-      }],
+      quizzes: [
+        {
+          quiz: quizId,
+          title: 'मिश्रित GK & GS',
+          order: 1,
+          weight: 1,
+        },
+      ],
       scheduleType: 'one_time',
       status: 'published',
       startTime: contestStartTime,
@@ -327,58 +329,53 @@ CRITICAL QUALITY & PEDAGOGICAL REQUIREMENTS:
       totalPoints: parsedQuestions.length * 1,
       enableNegativeMarking: true,
       negativeMarks: 0.25,
-      resultsDeclared: false
+      resultsDeclared: false,
     });
 
     // Invalidate contests cache so the new contest is live immediately
     await invalidatePattern('contests:*');
 
-    // Notify all students to join the daily contest (skip if running out of time or in dev)
-    let notificationsSent = 0;
-    const shouldSendNotification = process.env.NODE_ENV === 'production';
+    // 7. Non-blocking Background Notification Broadcast
+    if (process.env.NODE_ENV === 'production') {
+      void (async () => {
+        try {
+          const students = await User.find({ role: 'student' }).select('_id').lean();
+          const studentIds = students.map((s) => String(s._id));
 
-    if (shouldSendNotification && Date.now() - startTime < MAX_RUN_TIME_MS) {
-      try {
-        const students = await User.find({ role: 'student' }).select('_id').lean();
-        const studentIds = students.map((s) => String(s._id));
-
-        if (studentIds.length > 0) {
-          await sendAdminBroadcast(studentIds, {
-            title: {
-              en: `🏆 Daily Contest: ${topic}`,
-              hi: `🏆 दैनिक प्रतियोगिता: ${topic}`,
-            },
-            body: {
-              en: `Compete now in today's contest on ${topic} and climb the leaderboard!`,
-              hi: `${topic} पर आज की प्रतियोगिता में भाग लें और लीडरबोर्ड पर आगे बढ़ें!`,
-            },
-            category: 'quizzes',
-            data: {
-              url: `quizdo://contest/${contestDoc._id}`,
-              contestId: String(contestDoc._id),
-            },
+          if (studentIds.length > 0) {
+            await sendAdminBroadcast(studentIds, {
+              title: {
+                en: `🏆 Daily Mixed GK & GS Contest is Live!`,
+                hi: `🏆 दैनिक मिश्रित GK & GS महा-प्रतियोगिता लाइव है!`,
+              },
+              body: {
+                en: `Compete now in today's mixed General Studies contest and climb the live leaderboard!`,
+                hi: `आज की मिश्रित सामान्य ज्ञान व सामान्य अध्ययन प्रतियोगिता में भाग लें और लाइव रैंक हासिल करें!`,
+              },
+              category: 'quizzes',
+              data: {
+                url: `quizdo://contest/${contestDoc._id}`,
+                contestId: String(contestDoc._id),
+              },
+            });
+          }
+        } catch (notifyErr) {
+          logError('Failed to broadcast daily contest notifications in background', logContext, {
+            error: notifyErr,
+            contestId: contestDoc._id,
           });
-          notificationsSent = studentIds.length;
         }
-      } catch (notifyErr) {
-        logError(
-          (notifyErr as Error).message || 'Failed to broadcast daily contest notifications',
-          logContext,
-          { action: 'sendAdminBroadcast', contestId: contestDoc._id, error: notifyErr }
-        );
-      }
-    } else {
-      logInfo('Skipped notifications due to execution time limits, local environment, or manual trigger', logContext);
+      })();
     }
 
     return NextResponse.json({
-      message: 'Successfully generated daily contest',
+      success: true,
+      message: 'Successfully generated daily Mixed GK & GS contest',
       contestId: contestDoc._id,
+      slug: contestDoc.slug,
       topic,
       questionCount: parsedQuestions.length,
-      notificationsSent,
     });
-
   } catch (error) {
     logApiError(error as Error, 'GET', '/api/cron/generate-daily-contest', logContext);
     return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });

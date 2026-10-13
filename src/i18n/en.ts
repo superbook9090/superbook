@@ -2715,6 +2715,8 @@ export const en = {
     score: 'Score',
     rank: 'Rank',
     participants: 'Participants',
+    studentAttempted: 'Student Attempted',
+    studentsAttempted: 'Students Attempted',
     contestCompleted: 'Contest Completed!',
     contestOverview: 'Contest Results & Standings',
     leaderboard: 'Leaderboard',

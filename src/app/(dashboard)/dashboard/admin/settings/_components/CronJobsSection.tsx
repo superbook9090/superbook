@@ -176,9 +176,9 @@ export function CronJobsSection() {
         {/* Daily Contest Job */}
         <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface-muted)]/30 space-y-4">
           <div className="space-y-1">
-            <h3 className="font-semibold text-sm text-[var(--color-foreground)]">Generate Daily AI Contest</h3>
+            <h3 className="font-semibold text-sm text-[var(--color-foreground)]">Generate Daily Mixed GK & GS AI Contest</h3>
             <p className="text-xs text-[var(--color-muted-foreground)] leading-relaxed">
-              Creates a daily contest using AI focused on Indian competitive exams. Automatically broadcasts push notifications to all students.
+              Creates a daily Mixed GK & GS (History, Polity, Geography, Economy, Science) competition with medium-level hardness. Automatically sets up live leaderboard & push notifications.
             </p>
           </div>
           
@@ -190,8 +190,15 @@ export function CronJobsSection() {
             className="w-full flex items-center justify-center gap-2"
           >
             {loadingJob === 'daily_contest' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
-            Run Task Now
+            {loadingJob === 'daily_contest' ? 'Generating Mixed Contest...' : 'Run Task Now'}
           </Button>
+
+          {loadingJob === 'daily_contest' && (
+            <div className="flex items-center gap-2 p-3 rounded-lg text-xs bg-blue-500/10 text-blue-400 border border-blue-500/20">
+              <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+              <span>Generating balanced Mixed GK & GS questions & configuring arena...</span>
+            </div>
+          )}
           
           {result?.job === 'daily_contest' && (
             <div className={`flex items-start gap-2 p-3 rounded-lg text-xs ${result.success ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>

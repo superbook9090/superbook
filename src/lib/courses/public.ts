@@ -29,7 +29,7 @@ export type PublicCourseSummary = {
 };
 
 function slugifyTitle(title: string): string {
-  return title
+  const base = title
     .toLowerCase()
     .normalize('NFKD')
     .replace(/[\u0300-\u036f]/g, '')
@@ -37,7 +37,20 @@ function slugifyTitle(title: string): string {
     .trim()
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
-    .slice(0, 180) || 'course';
+    .slice(0, 180);
+
+  if (base.length >= 3) return base;
+
+  // Meaningful fallback for non-Latin / Hindi course titles
+  if (/बैंक|bank/i.test(title)) return 'bank-po-exam-course';
+  if (/यूपीएससी|upsc/i.test(title)) return 'upsc-preparation-course';
+  if (/एसएससी|ssc/i.test(title)) return 'ssc-cgl-course';
+  if (/गणित|math|aptitude/i.test(title)) return 'quantitative-aptitude-course';
+  if (/रीजनिंग|तर्कशक्ति|reasoning/i.test(title)) return 'reasoning-ability-course';
+  if (/अंग्रेजी|english/i.test(title)) return 'english-language-course';
+  if (/सामान्य अध्ययन|सामान्य ज्ञान|gk|gs/i.test(title)) return 'general-studies-course';
+  if (/विज्ञान|science/i.test(title)) return 'general-science-course';
+  return 'online-learning-course';
 }
 
 function normalizeInstructor(instructor: unknown): { _id: string; name: string | null } | undefined {
@@ -76,13 +89,45 @@ async function ensurePublicSlug(course: {
   updatedAt: Date;
 }): Promise<PublicCourseSummary> {
   let slug = course.slug?.trim().toLowerCase() || '';
+  const updates: Record<string, unknown> = {};
+
   if (!slug) {
     const base = slugifyTitle(course.title);
     const suffix = course._id.toString().slice(-6);
     slug = `${base}-${suffix}`;
+    updates.slug = slug;
+  }
+
+  // Ensure high quality SEO metadata fallbacks for all courses
+  const metaTitle =
+    course.metaTitle?.trim() ||
+    `${course.title} - Free Online Course, Syllabus & Quizzes`;
+
+  const metaDescription =
+    course.metaDescription?.trim() ||
+    (course.description
+      ? `${course.description.slice(0, 140)}... Access ${course.chapterCount || 0} chapters, ${course.lessonCount || 0} interactive lessons, and practice quizzes free on Quiz Do.`
+      : `Complete ${course.title} preparation course on Quiz Do with structured syllabus chapters, interactive quizzes, and verifiable certificate.`);
+
+  const keywords = Array.isArray(course.keywords) && course.keywords.length > 0
+    ? course.keywords
+    : [
+        course.title,
+        `${course.category || 'exam'} preparation`,
+        `${course.category || 'competitive'} online course`,
+        'free online course',
+        'study notes',
+        'interactive practice quizzes',
+      ];
+
+  if (!course.metaTitle) updates.metaTitle = metaTitle;
+  if (!course.metaDescription) updates.metaDescription = metaDescription;
+  if (!course.keywords || course.keywords.length === 0) updates.keywords = keywords;
+
+  if (Object.keys(updates).length > 0) {
     await Course.updateOne(
-      { _id: course._id, $or: [{ slug: null }, { slug: { $exists: false } }, { slug: '' }] },
-      { $set: { slug } }
+      { _id: course._id },
+      { $set: updates }
     );
   }
 
@@ -98,9 +143,9 @@ async function ensurePublicSlug(course: {
     chapterCount: course.chapterCount ?? 0,
     lessonCount: course.lessonCount ?? 0,
     enrolledCount: course.enrolledCount ?? 0,
-    metaTitle: course.metaTitle ?? null,
-    metaDescription: course.metaDescription ?? null,
-    keywords: Array.isArray(course.keywords) ? course.keywords : [],
+    metaTitle,
+    metaDescription,
+    keywords,
     instructor: normalizeInstructor(course.instructor),
     createdAt: course.createdAt.toISOString(),
     updatedAt: course.updatedAt.toISOString(),

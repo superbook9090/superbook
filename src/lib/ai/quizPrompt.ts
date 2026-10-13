@@ -2,6 +2,8 @@ export interface GeneratedQuestion {
   question: string;
   options: string[];
   correctAnswer: number;
+  correctOptionText?: string;
+  explanation?: string;
 }
 
 export interface PromptBuildParams {
@@ -143,6 +145,13 @@ export function sanitizeParsedQuestions(
         opts.push(`Option ${String.fromCharCode(65 + opts.length)}`);
       }
       let resolvedCorrect = 0;
+      const rawCorrectText =
+        typeof obj.correctOptionText === 'string'
+          ? obj.correctOptionText.trim()
+          : typeof obj.correctAnswerText === 'string'
+            ? obj.correctAnswerText.trim()
+            : '';
+
       const rawCorrect =
         obj.correctAnswer !== undefined
           ? obj.correctAnswer
@@ -152,7 +161,25 @@ export function sanitizeParsedQuestions(
               ? obj.correct_answer
               : obj.answer;
 
-      if (typeof rawCorrect === 'number' && Number.isFinite(rawCorrect) && rawCorrect >= 0 && rawCorrect < opts.length) {
+      if (rawCorrectText) {
+        // Direct exact or case-insensitive match on option text
+        const matchIdx = opts.findIndex(
+          (opt) => opt.toLowerCase() === rawCorrectText.toLowerCase()
+        );
+        if (matchIdx !== -1) {
+          resolvedCorrect = matchIdx;
+        } else {
+          // Substring match if model included prefixes like "(A) "
+          const partialIdx = opts.findIndex(
+            (opt) =>
+              opt.toLowerCase().includes(rawCorrectText.toLowerCase()) ||
+              rawCorrectText.toLowerCase().includes(opt.toLowerCase())
+          );
+          if (partialIdx !== -1) {
+            resolvedCorrect = partialIdx;
+          }
+        }
+      } else if (typeof rawCorrect === 'number' && Number.isFinite(rawCorrect) && rawCorrect >= 0 && rawCorrect < opts.length) {
         resolvedCorrect = Math.floor(rawCorrect);
       } else if (typeof rawCorrect === 'string') {
         const trimmed = rawCorrect.trim();
@@ -174,6 +201,8 @@ export function sanitizeParsedQuestions(
         question: String(obj.question || obj.prompt || '').trim(),
         options: opts,
         correctAnswer: resolvedCorrect,
+        correctOptionText: rawCorrectText || opts[resolvedCorrect],
+        explanation: typeof obj.explanation === 'string' ? obj.explanation.trim() : undefined,
       };
     })
     .filter((q) => q.question.length > 0);

@@ -73,9 +73,30 @@ export async function GET(request: NextRequest) {
       Contest.countDocuments(query),
     ]);
 
+    const contestIds = contestsRaw.map((c) => c._id);
+    const attemptCountMap: Record<string, number> = {};
+
+    if (contestIds.length > 0) {
+      const ContestAttempt = (await import('@/models/ContestAttempt')).default;
+      const attemptCountsAggregate = await ContestAttempt.aggregate([
+        { $match: { contest: { $in: contestIds } } },
+        {
+          $group: {
+            _id: '$contest',
+            students: { $addToSet: '$student' },
+            total: { $sum: 1 },
+          },
+        },
+      ]);
+
+      attemptCountsAggregate.forEach((item) => {
+        attemptCountMap[item._id.toString()] = item.students ? item.students.length : item.total;
+      });
+    }
+
     const studentAttemptMap =
       session?.user?.id && session.user.role === 'student' && contestsRaw.length > 0
-        ? await getStudentAttemptMap(session.user.id, contestsRaw.map((c) => c._id))
+        ? await getStudentAttemptMap(session.user.id, contestIds)
         : {};
 
     const contests = contestsRaw.map((c) => {
@@ -89,6 +110,7 @@ export async function GET(request: NextRequest) {
         ...c,
         computedState: getContestComputedState(c, now),
         userAttempt: studentAttemptMap[c._id.toString()] || null,
+        attemptCount: attemptCountMap[c._id.toString()] || 0,
         latestQuizTimestamp,
       };
     });

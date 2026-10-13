@@ -13,6 +13,7 @@ import {
   CheckCircle,
   Play,
   RotateCcw,
+  Users,
 } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { ContestCountdown } from './ContestCountdown';
@@ -172,10 +173,17 @@ export function ContestCard({ contest, isTeacher = false, managePath }: ContestC
             <span>{contest.questionCount} {t('common.questions')}</span>
           </div>
 
-          <div className="flex items-center gap-1.5 col-span-2">
+          <div className="flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5 text-[var(--color-muted)] shrink-0" />
             <span className="truncate">
               {formatDateTime(contest.startTime)}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1.5 font-medium text-[var(--color-foreground)]">
+            <Users className="w-3.5 h-3.5 text-[var(--student-primary)] shrink-0" />
+            <span className="truncate">
+              {contest.attemptCount ?? 0} {((contest.attemptCount ?? 0) === 1 ? t('contest.studentAttempted') : t('contest.studentsAttempted'))}
             </span>
           </div>
         </div>

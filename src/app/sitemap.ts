@@ -10,6 +10,7 @@ import {
   blogTopicSlug,
 } from '@/lib/blogs/public';
 import { buildPublicCoursePath, listPublicCourseSitemapEntries } from '@/lib/courses/public';
+import { buildPublicContestPath, listPublicContestSitemapEntries } from '@/lib/contests/public';
 import { getCanonicalSeoPath } from '@/lib/seo/landing-routes';
 
 /** Public marketing pages included in search indexing. */
@@ -24,6 +25,7 @@ const PUBLIC_PATHS: { path: string; changeFrequency: MetadataRoute.Sitemap[numbe
   { path: ROUTES.blogs, changeFrequency: 'daily', priority: 0.9 },
   { path: '/tools', changeFrequency: 'weekly', priority: 0.9 },
   { path: '/courses', changeFrequency: 'daily', priority: 0.9 },
+  { path: '/contests', changeFrequency: 'daily', priority: 0.9 },
 ];
 
 // Stable reference timestamp for marketing pages (updated periodically rather than per request)
@@ -58,6 +60,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let blogPages: MetadataRoute.Sitemap = [];
   let categoryPages: MetadataRoute.Sitemap = [];
   let coursePages: MetadataRoute.Sitemap = [];
+  let contestPages: MetadataRoute.Sitemap = [];
 
   try {
     const blogEntries = await listPublicBlogSitemapEntries(500);
@@ -83,9 +86,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly' as const,
       priority: 0.85,
     }));
+
+    const contestEntries = await listPublicContestSitemapEntries(200);
+    contestPages = contestEntries.map(({ slug, lastModified }) => ({
+      url: `${baseUrl}${buildPublicContestPath(slug)}`,
+      lastModified: new Date(lastModified),
+      changeFrequency: 'daily' as const,
+      priority: 0.85,
+    }));
   } catch (error) {
     console.warn('[sitemap] Could not fetch dynamic routes for sitemap at build time:', (error as Error).message);
   }
 
-  return [...pages, ...seoLandingPages, ...toolPages, ...blogPages, ...categoryPages, ...coursePages];
+  return [...pages, ...seoLandingPages, ...toolPages, ...blogPages, ...categoryPages, ...coursePages, ...contestPages];
 }
