@@ -78,8 +78,8 @@ const contestSchema = new Schema<IContest>(
     instructions: { type: String, trim: true, maxlength: 10000 },
     // Omit when unset — do not default to null (breaks unique index on slug).
     slug: { type: String, trim: true, lowercase: true, maxlength: 240, default: undefined },
-    metaTitle: { type: String, trim: true, maxlength: 70, default: null },
-    metaDescription: { type: String, trim: true, maxlength: 180, default: null },
+    metaTitle: { type: String, trim: true, maxlength: 200, default: null },
+    metaDescription: { type: String, trim: true, maxlength: 500, default: null },
     instructor: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     organizationId: { type: Schema.Types.ObjectId, ref: 'Organization', default: null },
     quizzes: [contestQuizRefSchema],

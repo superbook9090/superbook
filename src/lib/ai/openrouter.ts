@@ -41,13 +41,12 @@ interface OpenRouterResponse {
  * Verified active free generative models on OpenRouter
  */
 export const ACTIVE_FREE_MODELS: string[] = [
-  'qwen/qwen3.8-27b:free',
-  'dots-studio/dots-3-note-preview:free',
+  'openrouter/free',
+  'meta-llama/llama-3.3-70b-instruct:free',
+  'meta-llama/llama-3.2-3b-instruct:free',
+  'google/gemma-2-9b-it:free',
   'nvidia/nemotron-3-super-120b-a12b:free',
-  'inclusionai/ling-3.0-flash-sante:free',
-  'cohere/north-mini-code:free',
-  'nvidia/nemotron-3-ultra-550b-a55b:free',
-  'poolside/laguna-s-2.1:free',
+  'mistralai/mistral-7b-instruct:free',
 ];
 
 /**
@@ -71,7 +70,9 @@ export async function fetchOpenRouterChat(
     ? autoSwitch
       ? [configuredModel, ...ACTIVE_FREE_MODELS]
       : [configuredModel]
-    : ACTIVE_FREE_MODELS;
+    : autoSwitch
+      ? ACTIVE_FREE_MODELS
+      : [ACTIVE_FREE_MODELS[0]];
 
   // Deduplicate while preserving priority order
   const uniqueModels = Array.from(new Set(candidateModels));

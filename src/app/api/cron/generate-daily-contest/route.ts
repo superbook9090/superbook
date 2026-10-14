@@ -193,7 +193,7 @@ export async function GET(req: NextRequest) {
     const contestTitle = 'दैनिक मिश्रित GK & GS महा-प्रतियोगिता';
     const slug = `daily-mixed-gk-gs-contest-${dateStr}-${randomSuffix}`;
     const metaTitle = 'दैनिक मिश्रित GK & GS महा-प्रतियोगिता | Quiz-Do Live Contest';
-    const metaDescription = 'UPSC, SSC, Railway, State PSC एवं अन्य प्रतियोगी परीक्षाओं हेतु इतिहास, राजव्यवस्था, भूगोल, अर्थव्यवस्था एवं विज्ञान के 10 मिश्रित प्रश्नों की दैनिक लाइव प्रतियोगिता। भाग लें और लाइव रैंक देखें।';
+    const metaDescription = 'UPSC, SSC, Railway, State PSC हेतु इतिहास, राजव्यवस्था, भूगोल, अर्थव्यवस्था व विज्ञान के 10 मिश्रित प्रश्नों की दैनिक प्रतियोगिता। भाग लें और लाइव रैंक देखें।';
 
     // 4. Implement AI Question Generation with Strict Single Call and Fast Timeout
     let parsedQuestions: GeneratedQuestion[] = [];
@@ -235,6 +235,7 @@ CRITICAL FACTUAL ACCURACY & FORMAT REQUIREMENTS:
           { role: 'user', content: prompt },
         ],
         {
+          model: 'openrouter/free',
           maxTokens: 2500,
           timeoutMs: 14000,
           autoSwitchOnLimit: false, // Prevent cascading retry delays that cause 504 Gateway Timeouts
@@ -299,8 +300,8 @@ CRITICAL FACTUAL ACCURACY & FORMAT REQUIREMENTS:
     const contestDoc = await Contest.create({
       title: contestTitle,
       slug,
-      metaTitle,
-      metaDescription,
+      metaTitle: metaTitle.slice(0, 200),
+      metaDescription: metaDescription.slice(0, 500),
       description: `आज की दैनिक मिश्रित GK & GS महा-प्रतियोगिता में भाग लें। इसमें भारतीय इतिहास, राजव्यवस्था, भूगोल, अर्थव्यवस्था, सामान्य विज्ञान और स्टेटिक जीके के 10 महत्वपूर्ण प्रश्न शामिल हैं। अपनी तैयारी परखें और लाइव लीडरबोर्ड पर रैंक हासिल करें!`,
       instructions: `1. कुल 10 बहुविकल्पीय प्रश्न हैं।
 2. प्रत्येक सही उत्तर के लिए +1 अंक मिलेगा।
@@ -378,6 +379,12 @@ CRITICAL FACTUAL ACCURACY & FORMAT REQUIREMENTS:
     });
   } catch (error) {
     logApiError(error as Error, 'GET', '/api/cron/generate-daily-contest', logContext);
-    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json(
+      {
+        message: 'Internal Server Error',
+        error: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 }
+    );
   }
 }
