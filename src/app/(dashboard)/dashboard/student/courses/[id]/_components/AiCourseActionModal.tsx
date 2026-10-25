@@ -97,7 +97,9 @@ export function AiCourseActionModal({
           icon: <HelpCircle className="w-5 h-5 text-purple-500" />,
           subtitle: lesson?.title
             ? `Generate practice quiz for lesson: "${lesson.title}"`
-            : `Generate practice quiz for chapter: "${chapter?.title || ''}"`,
+            : chapter?.title
+            ? `Generate practice quiz for chapter: "${chapter.title}"`
+            : `Generate comprehensive practice quiz for course: "${courseTitle}"`,
           placeholder: 'e.g. अभ्यास टेस्ट (Leave blank for default title)',
           buttonText: 'Add Quiz using AI',
         };

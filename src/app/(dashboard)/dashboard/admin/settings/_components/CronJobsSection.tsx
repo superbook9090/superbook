@@ -7,15 +7,17 @@ export function CronJobsSection() {
   const [bankPoProgress, setBankPoProgress] = useState<string | null>(null);
   const [result, setResult] = useState<{ job: string; success: boolean; message: string } | null>(null);
 
-  const runJob = async (jobId: string, endpoint: string) => {
+  const runJob = async (jobId: string, endpoint: string, options?: RequestInit) => {
     setLoadingJob(jobId);
     setResult(null);
     try {
       const res = await fetch(endpoint, {
-        method: 'GET',
+        method: options?.method || 'GET',
         headers: {
           'Content-Type': 'application/json',
+          ...(options?.headers || {}),
         },
+        body: options?.body,
       });
       const text = await res.text();
       let data: Record<string, unknown> = {};
@@ -268,6 +270,63 @@ export function CronJobsSection() {
             <div className={`flex items-start gap-2 p-3 rounded-lg text-xs ${result.success ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
               {result.success ? <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" /> : <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />}
               <span>{result.message}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Generate AI Trending Blog Job (2000+ Words for SEO & AdSense) */}
+        <div className="p-5 rounded-2xl border border-[var(--primary)]/30 bg-[var(--primary)]/5 space-y-4 md:col-span-2">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[var(--primary)]/15 text-[var(--primary)] border border-[var(--primary)]/20">
+                SEO & Google AdSense Publisher
+              </div>
+              <h3 className="font-bold text-sm sm:text-base text-[var(--color-foreground)]">
+                Generate 2,000+ Word Trending AI Blog (Superadmin Only)
+              </h3>
+              <p className="text-xs text-[var(--color-muted-foreground)] leading-relaxed max-w-2xl">
+                Uses AI to write an exhaustive, deep-dive academic article (minimum 2,000–2,500 words) on trending topics with semantic HTML tables, FAQs, and E-E-A-T structure to maximize site SEO and Google AdSense revenue.
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <Button
+              onClick={() => runJob('ai_trending_blog_en', '/api/admin/blogs/generate-ai-trending', { method: 'POST', body: JSON.stringify({ language: 'en' }) })}
+              disabled={loadingJob !== null}
+              variant="primary"
+              size="sm"
+              className="flex-1 flex items-center justify-center gap-2 font-bold min-h-[42px]"
+            >
+              {loadingJob === 'ai_trending_blog_en' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
+              {loadingJob === 'ai_trending_blog_en' ? 'Writing 2000+ Word English Blog (approx. 40s)...' : 'Generate English AI Blog (2000+ Words)'}
+            </Button>
+
+            <Button
+              onClick={() => runJob('ai_trending_blog_hi', '/api/admin/blogs/generate-ai-trending', { method: 'POST', body: JSON.stringify({ language: 'hi' }) })}
+              disabled={loadingJob !== null}
+              variant="secondary"
+              size="sm"
+              className="flex-1 flex items-center justify-center gap-2 font-bold min-h-[42px]"
+            >
+              {loadingJob === 'ai_trending_blog_hi' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
+              {loadingJob === 'ai_trending_blog_hi' ? 'Writing 2000+ Word Hindi Blog (approx. 40s)...' : 'Generate Hindi AI Blog (2000+ Words)'}
+            </Button>
+          </div>
+
+          {(loadingJob === 'ai_trending_blog_en' || loadingJob === 'ai_trending_blog_hi') && (
+            <div className="flex items-center gap-2 p-3 rounded-lg text-xs bg-blue-500/10 text-blue-400 border border-blue-500/20">
+              <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+              <span>
+                Consulting AI models, structuring 2,000+ words with tables and FAQs, and publishing as Superadmin author...
+              </span>
+            </div>
+          )}
+
+          {(result?.job === 'ai_trending_blog_en' || result?.job === 'ai_trending_blog_hi') && (
+            <div className={`flex items-start gap-2 p-3 rounded-lg text-xs ${result.success ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
+              {result.success ? <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" /> : <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />}
+              <span className="font-medium">{result.message}</span>
             </div>
           )}
         </div>

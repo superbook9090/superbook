@@ -167,8 +167,8 @@ export interface GenerateLessonContentParams {
 }
 
 export interface GenerateLessonQuizParams {
-  chapterTitle: string;
-  lessonTitle: string;
+  chapterTitle?: string;
+  lessonTitle?: string;
   quizTitle: string;
   numQuestions?: number;
   courseTitle?: string;
@@ -290,17 +290,24 @@ export async function generateLessonQuizQuestions(
 
   const isHindi = (locale || 'hi').toLowerCase().startsWith('hi');
   const contextStr = courseTitle || courseCategory
-    ? `Course: "${[courseTitle, courseCategory].filter(Boolean).join(' - ')}", `
+    ? `Course: "${[courseTitle, courseCategory].filter(Boolean).join(' - ')}"`
     : '';
+
+  const scopeDetails = [
+    contextStr,
+    chapterTitle ? `Subject/Chapter: "${chapterTitle}"` : '',
+    lessonTitle ? `Topic: "${lessonTitle}"` : '',
+    !chapterTitle && !lessonTitle ? 'Scope: Entire Course Comprehensive Practice' : '',
+  ].filter(Boolean).join('\n- ');
+
   const prompt = isHindi
     ? `You are an expert exam question paper setter.
 Generate EXACTLY ${numQuestions} high-quality, realistic multiple-choice questions for:
-- ${contextStr}Subject/Chapter: "${chapterTitle}"
-- Topic: "${lessonTitle}"
+- ${scopeDetails}
 - Quiz Title: "${quizTitle}"
 
 CRITICAL REQUIREMENTS:
-1. RELEVANT: Difficulty should match competitive examination standard with clear, unambiguous questions.
+1. RELEVANT: Difficulty should match competitive examination standard with clear, unambiguous questions covering the specified scope.
 2. BILINGUAL PROMPT: The question text MUST include both Hindi and English translation, e.g.:
    "भारतीय रिज़र्व बैंक की स्थापना किस वर्ष हुई थी? (In which year was the Reserve Bank of India established?)"
 3. 4 PLAUSIBLE OPTIONS: Each question must have EXACTLY 4 distinct multiple-choice options in Hindi with English in brackets where applicable.
@@ -315,12 +322,11 @@ CRITICAL REQUIREMENTS:
 ]`
     : `You are an expert curriculum test creator.
 Generate EXACTLY ${numQuestions} high-quality multiple-choice questions for:
-- ${contextStr}Chapter: "${chapterTitle}"
-- Topic: "${lessonTitle}"
+- ${scopeDetails}
 - Quiz Title: "${quizTitle}"
 
 CRITICAL REQUIREMENTS:
-1. RELEVANT: Direct conceptual clarity and practical understanding.
+1. RELEVANT: Direct conceptual clarity and practical understanding covering the specified scope.
 2. 4 PLAUSIBLE OPTIONS: Each question must have EXACTLY 4 distinct choices.
 3. BALANCED CORRECT ANSWER: Distribute the correctAnswer index (0 for A, 1 for B, 2 for C, 3 for D) evenly.
 4. FORMAT: Return ONLY a valid JSON array without markdown code blocks:

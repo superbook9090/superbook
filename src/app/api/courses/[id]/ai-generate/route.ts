@@ -156,27 +156,24 @@ export async function POST(
     }
 
     // =============================================================
-    // ACTIONS 2 & 3: Require Chapter Context
+    // ACTION: ADD LESSON (Requires Chapter Context)
     // =============================================================
-    if (!chapterId || !mongoose.Types.ObjectId.isValid(chapterId)) {
-      return NextResponse.json({ message: 'chapterId is required for this action.' }, { status: 400 });
+    let chapter: InstanceType<typeof Chapter> | null = null;
+    let blueprintChapter = null;
+
+    if (chapterId && mongoose.Types.ObjectId.isValid(chapterId)) {
+      chapter = await Chapter.findById(chapterId);
+      if (chapter && isBankPoCourse) {
+        blueprintChapter = BANK_PO_SYLLABUS_ROADMAP.find(
+          (c) => c.order === chapter!.order || c.title.includes(chapter!.title) || chapter!.title.includes(c.title)
+        ) || null;
+      }
     }
 
-    const chapter = await Chapter.findById(chapterId);
-    if (!chapter) {
-      return NextResponse.json({ message: 'Chapter not found' }, { status: 404 });
-    }
-
-    const blueprintChapter = isBankPoCourse
-      ? BANK_PO_SYLLABUS_ROADMAP.find(
-          (c) => c.order === chapter.order || c.title.includes(chapter.title) || chapter.title.includes(c.title)
-        )
-      : null;
-
-    // =============================================================
-    // ACTION 2: ADD LESSON USING AI
-    // =============================================================
     if (action === 'add-lesson') {
+      if (!chapter) {
+        return NextResponse.json({ message: 'chapterId is required for adding a lesson.' }, { status: 400 });
+      }
       let targetLessonDoc = lessonId && mongoose.Types.ObjectId.isValid(lessonId)
         ? await Lesson.findById(lessonId)
         : null;
@@ -346,24 +343,32 @@ export async function POST(
 
       const quizTitle = title?.trim() || (linkedLesson
         ? `${linkedLesson.title} - अभ्यास प्रश्न`
-        : `${chapter.title} - अध्याय अभ्यास क्विज`);
+        : chapter
+        ? `${chapter.title} - अध्याय अभ्यास क्विज`
+        : `${course.title} - संपूर्ण पाठ्यक्रम अभ्यास टेस्ट`);
+
+      const quizDescription = linkedLesson
+        ? `${course.title}: ${linkedLesson.title} पर आधारित AI-जनरेटेड अभ्यास प्रश्न।`
+        : chapter
+        ? `${course.title}: ${chapter.title} पर आधारित AI-जनरेटेड अभ्यास प्रश्न।`
+        : `${course.title} संपूर्ण पाठ्यक्रम पर आधारित AI-जनरेटेड 종합 अभ्यास टेस्ट।`;
 
       const quizQuestions = await generateLessonQuizQuestions({
         courseTitle: course.title,
         courseCategory: course.category,
         locale: course.locale || 'hi',
-        chapterTitle: chapter.title,
-        lessonTitle: linkedLesson ? linkedLesson.title : chapter.title,
+        chapterTitle: chapter?.title,
+        lessonTitle: linkedLesson ? linkedLesson.title : chapter?.title,
         quizTitle,
         numQuestions: Math.max(3, Math.min(15, numQuestions)),
       });
 
       const createdQuiz = await Quiz.create({
         title: quizTitle,
-        description: `${course.title}: ${chapter.title} पर आधारित AI-जनरेटेड अभ्यास प्रश्न।`,
+        description: quizDescription,
         course: courseId,
-        chapter: chapter._id,
-        lesson: linkedLesson?._id,
+        chapter: chapter?._id || null,
+        lesson: linkedLesson?._id || null,
         instructor: instructorId,
         questionCount: quizQuestions.length,
         timeLimit: Math.max(5, quizQuestions.length * 2),
