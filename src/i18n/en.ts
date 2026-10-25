@@ -1044,6 +1044,10 @@ export const en = {
       empty: 'No notifications yet.',
       loadFailed: 'Failed to load notifications.',
       markReadFailed: 'Could not mark notification as read.',
+      enablePush: 'Enable Push Notifications',
+      pushEnabled: 'Push notifications active',
+      pushBlocked: 'Notifications blocked in browser. Please enable permissions in your site settings.',
+      enabling: 'Enabling...',
     },
   },
 

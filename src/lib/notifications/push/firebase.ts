@@ -47,7 +47,7 @@ export async function initFirebaseMessaging(): Promise<Messaging | null> {
 }
 
 export async function requestNotificationPermission(): Promise<string | null> {
-  if (typeof window === 'undefined' || !('Notification' in window)) {
+  if (typeof window === 'undefined' || !('Notification' in window) || !('serviceWorker' in navigator)) {
     return null;
   }
 
@@ -60,8 +60,12 @@ export async function requestNotificationPermission(): Promise<string | null> {
   if (!msg) return null;
 
   try {
+    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+    await navigator.serviceWorker.ready;
+
     return await getToken(msg, {
       vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+      serviceWorkerRegistration: registration,
     });
   } catch (error) {
     console.error('An error occurred while retrieving token.', error);

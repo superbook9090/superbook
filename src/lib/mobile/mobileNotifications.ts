@@ -11,7 +11,12 @@ async function registerForPlatform(userId: string): Promise<boolean> {
   else if (isIOSWebView()) platform = 'ios';
 
   if (platform === 'web') {
-    return registerDeviceToken(userId, platform);
+    // In web browsers, only auto-fetch token if permission is already granted
+    // Browsers reject unprompted Notification.requestPermission() outside a user gesture
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+      return registerDeviceToken(userId, platform);
+    }
+    return false;
   }
 
   return new Promise<boolean>((resolve) => {

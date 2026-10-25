@@ -96,6 +96,38 @@ export default function StudentNotificationsPage() {
     }
   };
 
+  const [permissionState, setPermissionState] = useState<NotificationPermission | 'unsupported'>('default');
+  const [requestingPush, setRequestingPush] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      setPermissionState(Notification.permission);
+    } else {
+      setPermissionState('unsupported');
+    }
+  }, []);
+
+  const handleEnablePush = async () => {
+    if (!session?.user?.id) return;
+    setRequestingPush(true);
+    try {
+      const { registerDeviceToken } = await import('@/lib/notifications/push/registerDevice');
+      const success = await registerDeviceToken(session.user.id, 'web');
+      if (typeof window !== 'undefined' && 'Notification' in window) {
+        setPermissionState(Notification.permission);
+      }
+      if (success) {
+        addAlert({ type: 'success', message: t('notifications.inbox.pushEnabled'), duration: 4000 });
+      } else if (Notification.permission === 'denied') {
+        addAlert({ type: 'error', message: t('notifications.inbox.pushBlocked'), duration: 6000 });
+      }
+    } catch {
+      addAlert({ type: 'error', message: t('notifications.inbox.loadFailed'), duration: 4000 });
+    } finally {
+      setRequestingPush(false);
+    }
+  };
+
   if (status === 'loading' || loading) {
     return <PageSkeleton />;
   }
@@ -110,6 +142,28 @@ export default function StudentNotificationsPage() {
           </span>
         }
         description={t('notifications.inbox.description')}
+        actions={
+          permissionState !== 'unsupported' && (
+            <div className="flex items-center gap-2">
+              {permissionState === 'granted' ? (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                  {t('notifications.inbox.pushEnabled')}
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleEnablePush}
+                  disabled={requestingPush}
+                  className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[var(--student-primary)] text-white hover:opacity-90 active:scale-95 transition-all shadow-xs disabled:opacity-50"
+                >
+                  <Bell className="w-3.5 h-3.5" />
+                  {requestingPush ? t('notifications.inbox.enabling') : t('notifications.inbox.enablePush')}
+                </button>
+              )}
+            </div>
+          )
+        }
       />
 
       {notifications.length === 0 ? (
