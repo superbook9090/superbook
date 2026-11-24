@@ -112,6 +112,11 @@ export default function CreateCourseForm({ courseId }: Props) {
         value={formData.thumbnail}
         onChange={(url) => setFormData((prev) => ({ ...prev, thumbnail: url }))}
         aspectRatio="video"
+        allowDownload
+        downloadFilename={formData.title || 'course-image'}
+        downloadFallbackUrl={
+          courseId ? `/api/courses/${encodeURIComponent(courseId)}/thumbnail` : undefined
+        }
       />
 
       <CoursePrivateAccessSection

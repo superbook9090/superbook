@@ -1,13 +1,17 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useUrlTab } from '@/hooks/useUrlTab';
 import { PageWrapper, PageHeader } from '@/components/layout';
 import { MistakeCard, type MistakeItem } from './_components/MistakeCard';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { BookMarked, CheckCircle2, RotateCcw, Sparkles } from 'lucide-react';
 
 export default function StudentMistakesPage() {
-  const [activeTab, setActiveTab] = useState<'pending' | 'mastered'>('pending');
+  const [activeTab, setActiveTab] = useUrlTab<'pending' | 'mastered'>(
+    ['pending', 'mastered'],
+    'pending'
+  );
   const [mistakes, setMistakes] = useState<MistakeItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [unmasteredCount, setUnmasteredCount] = useState(0);

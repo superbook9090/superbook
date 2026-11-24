@@ -3,6 +3,7 @@
 import { ROUTES } from '@/constants/routes';
 import { useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { useSmartBack } from '@/hooks/useSmartBack';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSessionStore } from '@/store/useSessionStore';
 import { PageSkeleton } from '@/components/ui/Skeleton';
@@ -27,9 +28,7 @@ export default function LessonViewerPage() {
   const lessonId = params.lessonId as string;
   const coursePath = ROUTES.student.course(courseId);
 
-  const goToCourse = useCallback(() => {
-    router.replace(coursePath);
-  }, [router, coursePath]);
+  const goToCourse = useSmartBack(coursePath);
 
   const goToLesson = useCallback(
     (targetLessonId: string) => {

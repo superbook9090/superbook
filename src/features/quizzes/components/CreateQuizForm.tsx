@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useSmartBack } from '@/hooks/useSmartBack';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useAlert } from '@/components/ui/AlertContainer';
 import Button from '@/components/ui/Button';
@@ -33,8 +33,9 @@ type Props = {
 
 export default function CreateQuizForm({ quizId, onViewLeaderboard }: Props) {
   const { t } = useTranslation();
-  const router = useRouter();
   const session = useSessionStore((s) => s.session);
+  const isAdminUser = session?.user?.role === 'admin' || session?.user?.role === 'superadmin';
+  const handleCancelBack = useSmartBack(isAdminUser ? ROUTES.admin.quizzes : ROUTES.teacher.quizzes);
   const { theme } = useRoleTheme();
   const { addAlert } = useAlert();
 
@@ -62,8 +63,6 @@ export default function CreateQuizForm({ quizId, onViewLeaderboard }: Props) {
   if (isFetching) {
     return <PageSkeleton />;
   }
-
-  const isAdminUser = session?.user?.role === 'admin' || session?.user?.role === 'superadmin';
 
   // Validation before proceeding from Step 1 to Step 2
   const validateStep1 = (): boolean => {
@@ -304,7 +303,7 @@ export default function CreateQuizForm({ quizId, onViewLeaderboard }: Props) {
               <Button
                 type="button"
                 variant="ghost"
-                onClick={() => router.push(isAdminUser ? ROUTES.admin.quizzes : ROUTES.teacher.quizzes)}
+                onClick={handleCancelBack}
                 className="rounded-2xl px-4 py-2.5 font-bold cursor-pointer text-[var(--color-muted-foreground)]"
               >
                 {t('createQuizForm.cancel')}

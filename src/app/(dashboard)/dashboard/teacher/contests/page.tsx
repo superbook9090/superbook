@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useUrlTab } from '@/hooks/useUrlTab';
 import { PageWrapper, ResponsiveGrid, EmptyState } from '@/components/layout';
 import { useContests } from '@/features/contests/hooks/useContests';
 import { useSessionStore } from '@/store/useSessionStore';
@@ -28,7 +29,10 @@ export default function TeacherContestsPage() {
   const isAuthorized =
     user?.role === 'superadmin' || Boolean(user?.canCreateContests);
 
-  const [activeTab, setActiveTab] = useState<'all' | 'live' | 'upcoming' | 'completed'>('live');
+  const [activeTab, setActiveTab] = useUrlTab<'all' | 'live' | 'upcoming' | 'completed'>(
+    ['all', 'live', 'upcoming', 'completed'],
+    'live'
+  );
 
   const { data, isLoading } = useContests({
     instructor: 'self',

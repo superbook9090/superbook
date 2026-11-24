@@ -7,6 +7,7 @@ import { SessionProvider } from '@/components/providers/SessionProvider';
 import { AlertProvider } from '@/components/ui/AlertContainer';
 import MaintenanceCheck from '@/components/MaintenanceCheck';
 import DeferredAnalytics from '@/components/providers/DeferredAnalytics';
+import NavigationTracker from '@/components/providers/NavigationTracker';
 import ClarityInit from '@/components/providers/ClarityInit';
 import AdsenseInit from '@/components/providers/AdsenseInit';
 import ChatWidgetInit from '@/components/providers/ChatWidgetInit';
@@ -64,6 +65,7 @@ export default function RootLayout({
         </AlertProvider>
         <AnimatedCursor />
         <Suspense fallback={null}>
+          <NavigationTracker />
           <DeferredAnalytics />
         </Suspense>
         <ClarityInit />

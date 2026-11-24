@@ -2434,6 +2434,7 @@ export const hi = {
     uploading: 'अपलोड हो रहा है...',
     changeImage: 'छवि बदलें',
     removeImage: 'छवि डिलीट करें',
+    downloadImage: 'छवि डाउनलोड करें',
     invalidFileType: 'कृपया एक छवि फ़ाइल अपलोड करें',
     fileTooLarge: 'फ़ाइल बहुत बड़ी है (अधिकतम 1MB)',
     formatHint: 'PNG, JPG, WebP 1MB तक',

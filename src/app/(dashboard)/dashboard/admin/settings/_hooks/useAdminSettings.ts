@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/constants/routes';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useUrlTab } from '@/hooks/useUrlTab';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useAlert } from '@/components/ui/AlertContainer';
@@ -67,7 +68,10 @@ export function useAdminSettings() {
 
   const [initialSettings, setInitialSettings] = useState<AppSettings>(defaultSettings);
   const [settings, setSettings] = useState<AppSettings>(defaultSettings);
-  const [activeTab, setActiveTab] = useState<SettingsTab>('all');
+  const [activeTab, setActiveTab] = useUrlTab<SettingsTab>(
+    ['all', 'features', 'app_version', 'teacher_limits', 'notes_limits', 'platform', 'jobs'],
+    'all'
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);

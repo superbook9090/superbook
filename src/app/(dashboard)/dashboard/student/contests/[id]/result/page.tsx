@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, use } from 'react';
-import Link from 'next/link';
+import React, { use } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useUrlTab } from '@/hooks/useUrlTab';
+import BackButton from '@/components/ui/BackButton';
 import { ROUTES } from '@/constants/routes';
 import { PageWrapper } from '@/components/layout';
 import { PageSkeleton } from '@/components/ui/Skeleton';
@@ -19,7 +20,6 @@ import { ContestScorecardShareButton } from '@/features/contests/components/Cont
 import { useSessionStore } from '@/store/useSessionStore';
 import {
   Trophy,
-  ArrowLeft,
   Lock,
   Sparkles,
 } from 'lucide-react';
@@ -29,7 +29,10 @@ export default function ContestResultPage({ params }: { params: Promise<{ id: st
   const { t } = useTranslation();
   const session = useSessionStore((s) => s.session);
 
-  const [activeTab, setActiveTab] = useState<'leaderboard' | 'solutions'>('leaderboard');
+  const [activeTab, setActiveTab] = useUrlTab<'leaderboard' | 'solutions'>(
+    ['leaderboard', 'solutions'],
+    'leaderboard'
+  );
 
   const { data: contestData, isLoading: contestLoading } = useContest(id);
   const { data: leaderboardData, isLoading: leaderboardLoading } = useContestLeaderboard(id);
@@ -52,13 +55,11 @@ export default function ContestResultPage({ params }: { params: Promise<{ id: st
   return (
     <PageWrapper>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <Link
+        <BackButton
           href={ROUTES.student.contests}
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>{t('contest.backToContests')}</span>
-        </Link>
+          label={t('contest.backToContests')}
+          className="text-xs font-bold"
+        />
 
         <div className="flex flex-wrap items-center gap-2">
           {reviewData && !reviewData.isLocked && (

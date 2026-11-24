@@ -2,11 +2,12 @@
 
 import React, { useState, useRef } from 'react';
 import Image from 'next/image';
-import { Upload, X, ImageIcon, Loader2 } from 'lucide-react';
+import { Upload, X, ImageIcon, Loader2, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Tooltip from '@/components/ui/Tooltip';
 import { useTranslation } from '@/hooks/useTranslation';
 import { MAX_IMAGE_SIZE_BYTES } from '@/lib/constants';
+import { downloadImage } from '@/lib/downloadImage';
 
 interface ImageUploadProps {
   value?: string;
@@ -14,6 +15,9 @@ interface ImageUploadProps {
   className?: string;
   label?: string;
   aspectRatio?: 'video' | 'square' | 'any';
+  allowDownload?: boolean;
+  downloadFilename?: string;
+  downloadFallbackUrl?: string;
 }
 
 export const ImageUpload = ({
@@ -22,9 +26,13 @@ export const ImageUpload = ({
   className,
   label,
   aspectRatio = 'video',
+  allowDownload = false,
+  downloadFilename,
+  downloadFallbackUrl,
 }: ImageUploadProps) => {
   const { t } = useTranslation();
   const [isUploading, setIsUploading] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -74,6 +82,16 @@ export const ImageUpload = ({
     setError(null);
   };
 
+  const handleDownload = async () => {
+    if (!value || isDownloading) return;
+    setIsDownloading(true);
+    try {
+      await downloadImage(value, downloadFilename || 'course-image', downloadFallbackUrl);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   const ratioClass = {
     video: 'aspect-video',
     square: 'aspect-square',
@@ -114,12 +132,29 @@ export const ImageUpload = ({
               className="object-contain p-1 rounded-xl"
               unoptimized
             />
-            <div className="absolute inset-0 bg-[var(--color-foreground)]/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
+            <div className="absolute inset-0 bg-[var(--color-foreground)]/40 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
+              {allowDownload && (
+                <Tooltip label={t('imageUpload.downloadImage')}>
+                  <button
+                    type="button"
+                    onClick={handleDownload}
+                    disabled={isDownloading}
+                    className="p-2 bg-black/50 backdrop-blur-md rounded-lg text-white hover:bg-black/70 transition-colors cursor-pointer disabled:opacity-60"
+                    aria-label={t('imageUpload.downloadImage')}
+                  >
+                    {isDownloading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Download className="w-4 h-4" />
+                    )}
+                  </button>
+                </Tooltip>
+              )}
               <Tooltip label={t('imageUpload.changeImage')}>
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="p-1.5 bg-white/10 backdrop-blur-md rounded-lg text-white hover:bg-white/20 transition-colors"
+                  className="p-2 bg-black/50 backdrop-blur-md rounded-lg text-white hover:bg-black/70 transition-colors cursor-pointer"
                   aria-label={t('imageUpload.changeImage')}
                 >
                   <Upload className="w-4 h-4" />
@@ -129,7 +164,7 @@ export const ImageUpload = ({
                 <button
                   type="button"
                   onClick={removeImage}
-                  className="p-1.5 bg-[var(--color-error)]/60 backdrop-blur-md rounded-lg text-white hover:bg-[var(--color-error)] transition-colors"
+                  className="p-2 bg-[var(--color-error)]/75 backdrop-blur-md rounded-lg text-white hover:bg-[var(--color-error)] transition-colors cursor-pointer"
                   aria-label={t('imageUpload.removeImage')}
                 >
                   <X className="w-4 h-4" />

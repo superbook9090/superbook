@@ -4,6 +4,7 @@
 import { ROUTES } from '@/constants/routes';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useSmartBack } from '@/hooks/useSmartBack';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useQuiz } from '@/contexts/QuizContext';
 import { useAlert } from '@/components/ui/AlertContainer';
@@ -39,6 +40,7 @@ export default function TakeQuizPage() {
   const session = useSessionStore((s) => s.session);
   const status = useSessionStore((s) => s.status);
   const router = useRouter();
+  const handleBack = useSmartBack(ROUTES.student.quizzes);
   const searchParams = useSearchParams();
   const attemptId = searchParams.get('attemptId');
   const { t } = useTranslation();
@@ -327,7 +329,7 @@ export default function TakeQuizPage() {
 
     try {
       const data = await startQuizMutation.mutateAsync(attempt.quiz._id);
-      router.push(ROUTES.student.quizTake(data.attempt._id));
+      router.replace(ROUTES.student.quizTake(data.attempt._id));
     } catch {
       setError(t('errors.errorStartingNewAttempt'));
       setIsLoading(false);
@@ -383,7 +385,7 @@ export default function TakeQuizPage() {
                 {t('quiz.takeRetryQuiz')}
               </Button>
               <Button
-                onClick={() => router.push(ROUTES.student.quizzes)}
+                onClick={handleBack}
                 variant="secondary"
               >
                 {t('quiz.takeBackToQuizzes')}
@@ -394,7 +396,7 @@ export default function TakeQuizPage() {
           <>
             <p className="text-[var(--error)] mb-4">{error || t('quiz.takeQuizNotFound')}</p>
             <Button
-              onClick={() => router.push(ROUTES.student.quizzes)}
+              onClick={handleBack}
               variant="primary"
             >
               {t('quiz.takeBackToQuizzes')}

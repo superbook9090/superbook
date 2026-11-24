@@ -3,8 +3,8 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { ArrowLeft, BookOpen, Clock, Target, CheckCircle2, Sparkles, Award } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/constants/routes';
+import { useSmartBack } from '@/hooks/useSmartBack';
 
 type Props = {
   courseTitle: string;
@@ -27,7 +27,7 @@ export function CourseHeader({
   progress,
   t,
 }: Props) {
-  const router = useRouter();
+  const handleBack = useSmartBack(ROUTES.student.courses);
   const isCompleted = progress === 100;
   const hasThumbnail = Boolean(thumbnail && thumbnail.trim().length > 0);
 
@@ -53,7 +53,8 @@ export function CourseHeader({
         <div className="flex items-center justify-between gap-2.5 flex-wrap">
           <div className="flex items-center gap-2 flex-wrap">
             <button
-              onClick={() => router.push(ROUTES.student.courses)}
+              type="button"
+              onClick={handleBack}
               className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold text-[var(--color-muted-foreground)] hover:text-[var(--student-primary)] bg-[var(--surface-muted)]/70 hover:bg-[var(--surface-muted)] border border-[var(--border)] transition-all cursor-pointer shadow-2xs"
             >
               <ArrowLeft className="w-3.5 h-3.5" />

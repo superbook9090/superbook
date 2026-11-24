@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useUrlTab } from '@/hooks/useUrlTab';
 import type { Session } from '@/types';
 import { fetchAccountInfo, type AccountInfo } from '@/lib/api/auth';
 import type { ProfileTabKey, ProfileHookState } from './types';
@@ -8,7 +9,10 @@ import type { ProfileTabKey, ProfileHookState } from './types';
 export function useProfile(session: Session | null): ProfileHookState {
   const [accountInfo, setAccountInfo] = useState<AccountInfo | null>(null);
   const [isLoadingAccount, setIsLoadingAccount] = useState(true);
-  const [activeTab, setActiveTab] = useState<ProfileTabKey>('account');
+  const [activeTab, setActiveTab] = useUrlTab<ProfileTabKey>(
+    ['account', 'security'],
+    'account'
+  );
 
   const refreshAccountInfo = useCallback(async () => {
     try {

@@ -4,7 +4,8 @@
 import { ROUTES } from '@/constants/routes';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useUrlTab, useUrlParam } from '@/hooks/useUrlTab';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useAlert } from '@/components/ui/AlertContainer';
 import { LazyQuizCard } from '@/lib/lazy';
@@ -25,19 +26,13 @@ export default function StudentQuizzesPage() {
   const { addAlert } = useAlert();
   const enableContests = useFeature('enableContests');
   const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const tabParam = searchParams.get('tab');
-  const initialTab = tabParam === 'completed' ? 'completed' : 'available';
-  const [activeTab, setActiveTab] = useState<'available' | 'completed'>(initialTab);
-
-  const handleTabChange = (tab: 'available' | 'completed') => {
-    setActiveTab(tab);
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('tab', tab);
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-  };
-  const [selectedCourse, setSelectedCourse] = useState<string>('all');
-  const [courseFilterInitialized, setCourseFilterInitialized] = useState(false);
+  const [activeTab, handleTabChange] = useUrlTab<'available' | 'completed'>(
+    ['available', 'completed'],
+    'available'
+  );
+  const [selectedCourseParam, setSelectedCourse] = useUrlParam('course', '');
+  const selectedCourse = selectedCourseParam || 'all';
+  const [courseFilterInitialized, setCourseFilterInitialized] = useState(() => Boolean(searchParams.get('course')));
 
   const orgId = (session?.user as { organizationId?: string })?.organizationId || 'public';
   const { data: enrollments = [] } = useEnrollments();
@@ -58,7 +53,7 @@ export default function StudentQuizzesPage() {
       setSelectedCourse(latestCourseId);
       setCourseFilterInitialized(true);
     }
-  }, [courseFilterInitialized, enrollments]);
+  }, [courseFilterInitialized, enrollments, setSelectedCourse]);
 
   useEffect(() => {
     if (status === 'loading') return;

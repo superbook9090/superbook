@@ -2434,6 +2434,7 @@ export const en = {
     uploading: 'Uploading...',
     changeImage: 'Change Image',
     removeImage: 'Remove Image',
+    downloadImage: 'Download Image',
     invalidFileType: 'Please upload an image file',
     fileTooLarge: 'File too large (max 1MB)',
     formatHint: 'PNG, JPG, WebP up to 1MB',

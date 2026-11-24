@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useSmartBack } from '@/hooks/useSmartBack';
+import { ROUTES } from '@/constants/routes';
 import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { useAlert } from '@/components/ui/AlertContainer';
 import Button from '@/components/ui/Button';
@@ -32,10 +33,12 @@ import { isAdmin } from '@/lib/roles';
 
 export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
   const { t } = useTranslation();
-  const router = useRouter();
   const { theme, role } = useRoleTheme();
   const { addAlert } = useAlert();
   const userIsAdmin = isAdmin(role);
+  const handleCancelBack = useSmartBack(
+    userIsAdmin ? ROUTES.admin.contests : ROUTES.teacher.contests
+  );
 
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
 
@@ -392,7 +395,7 @@ export function TeacherContestForm({ contestId }: TeacherContestFormProps) {
               <Button
                 type="button"
                 variant="ghost"
-                onClick={() => router.push('/dashboard/teacher/contests')}
+                onClick={handleCancelBack}
                 className="rounded-2xl px-4 py-2.5 font-bold cursor-pointer text-[var(--color-muted-foreground)]"
               >
                 {t('common.cancel')}

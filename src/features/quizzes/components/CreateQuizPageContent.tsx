@@ -1,19 +1,19 @@
 'use client';
 
-import { useState } from 'react';
-import { useSearchParams } from 'next/navigation';
 import CreateQuizForm from '@/features/quizzes/components/CreateQuizForm';
 import { LazyQuizLeaderboard } from '@/lib/lazy';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useUrlTab } from '@/hooks/useUrlTab';
 import { Edit2, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function CreateQuizPageContent({ quizId }: { quizId?: string }) {
   const { t } = useTranslation();
-  const searchParams = useSearchParams();
   const isEdit = Boolean(quizId);
-  const initialTab = searchParams.get('tab') === 'leaderboard' ? 'leaderboard' : 'edit';
-  const [activeTab, setActiveTab] = useState<'edit' | 'leaderboard'>(initialTab);
+  const [activeTab, setActiveTab] = useUrlTab<'edit' | 'leaderboard'>(
+    ['edit', 'leaderboard'],
+    'edit'
+  );
 
   return (
     <div>

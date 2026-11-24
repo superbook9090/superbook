@@ -3,6 +3,7 @@
 import React, { useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useUrlTab } from '@/hooks/useUrlTab';
 import { useAlert } from '@/components/ui/AlertContainer';
 import { PageWrapper } from '@/components/layout';
 import { PageSkeleton } from '@/components/ui/Skeleton';
@@ -35,7 +36,10 @@ export default function AdminContestManagePage({
   const router = useRouter();
   const { addAlert } = useAlert();
 
-  const [activeTab, setActiveTab] = useState<'leaderboard' | 'attempts' | 'overview'>('leaderboard');
+  const [activeTab, setActiveTab] = useUrlTab<'leaderboard' | 'attempts' | 'overview'>(
+    ['leaderboard', 'attempts', 'overview'],
+    'leaderboard'
+  );
   const [showEndModal, setShowEndModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDeclareModal, setShowDeclareModal] = useState(false);

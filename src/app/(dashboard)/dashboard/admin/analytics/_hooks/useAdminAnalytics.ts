@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useUrlTab } from '@/hooks/useUrlTab';
 import { useAlert } from '@/components/ui/AlertContainer';
 import { fetchAnalytics } from '@/lib/api/analytics';
 import { getApiErrorMessage } from '@/lib/api/http';
@@ -16,7 +17,10 @@ export function useAdminAnalytics() {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [activeTab, setActiveTab] = useState<AnalyticsTabKey>('overview');
+  const [activeTab, setActiveTab] = useUrlTab<AnalyticsTabKey>(
+    ['overview', 'users', 'courses', 'quizzes', 'activity'],
+    'overview'
+  );
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   
   // Date range state

@@ -2,7 +2,8 @@
 
 import { ROUTES } from '@/constants/routes';
 import { useEffect, useState, useMemo } from 'react';
-import { useRouter, useParams, useSearchParams, usePathname } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
+import { useUrlTab } from '@/hooks/useUrlTab';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSessionStore } from '@/store/useSessionStore';
 import { PageSkeleton } from '@/components/ui/Skeleton';
@@ -46,8 +47,6 @@ export default function CourseDetailPage() {
   const router = useRouter();
   const params = useParams();
   const { t } = useTranslation();
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
 
   useEffect(() => {
     if (!session) {
@@ -58,10 +57,11 @@ export default function CourseDetailPage() {
   const { isFeatureEnabled } = useSettingsStore();
   const doubtsEnabled = isFeatureEnabled('enableCourseDoubts');
 
-  const tabParam = searchParams.get('tab') as TabType;
-  const validTabs: TabType[] = ['curriculum', 'overview', 'quizzes', 'leaderboard', ...(doubtsEnabled ? ['doubts' as TabType] : [])];
-  const initialTab = validTabs.includes(tabParam) ? tabParam : 'curriculum';
-  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
+  const validTabs: TabType[] = useMemo(
+    () => ['curriculum', 'overview', 'quizzes', 'leaderboard', ...(doubtsEnabled ? ['doubts' as TabType] : [])],
+    [doubtsEnabled]
+  );
+  const [activeTab, handleTabChange] = useUrlTab<TabType>(validTabs, 'curriculum');
 
   const courseId = params.id as string;
 
@@ -141,13 +141,6 @@ export default function CourseDetailPage() {
   useEffect(() => {
     sessionStorage.removeItem(`lesson-active:${courseId}`);
   }, [courseId]);
-
-  const handleTabChange = (tab: TabType) => {
-    setActiveTab(tab);
-    const newParams = new URLSearchParams(searchParams.toString());
-    newParams.set('tab', tab);
-    router.replace(`${pathname}?${newParams.toString()}`, { scroll: false });
-  };
 
   const handleStartLesson = (lessonId: string) => {
     sessionStorage.setItem(`lesson-active:${courseId}`, '1');

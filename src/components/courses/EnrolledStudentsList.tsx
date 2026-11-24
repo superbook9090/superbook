@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSmartBack } from '@/hooks/useSmartBack';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Users, Mail, Calendar, Trash2 } from 'lucide-react';
 import { PageSkeleton } from '@/components/ui/Skeleton';
@@ -25,6 +26,7 @@ export default function EnrolledStudentsList({
   backHref: string;
 }) {
   const router = useRouter();
+  const handleBack = useSmartBack(backHref);
   const { t } = useTranslation();
   const isEnabled = useFeature('enableEnrollmentManagement');
   const [students, setStudents] = useState<CourseStudentRow[]>([]);
@@ -85,7 +87,7 @@ export default function EnrolledStudentsList({
         className="flex items-center gap-3"
       >
         <Button
-          onClick={() => router.push(backHref)}
+          onClick={handleBack}
           aria-label={t('common.back')}
           variant="secondary"
           className="p-2 rounded-lg"

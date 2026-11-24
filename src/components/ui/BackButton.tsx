@@ -6,9 +6,13 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useSmartBack } from '@/hooks/useSmartBack';
 
 export interface BackButtonProps {
+  /** Fallback destination if there is no in-app previous page in history (or exact target when `exactHref` is true). */
   href?: string;
+  /** When true, always navigates directly to `href` instead of popping in-app history. */
+  exactHref?: boolean;
   onClick?: () => void;
   label?: string | React.ReactNode;
   className?: string;
@@ -18,6 +22,7 @@ export interface BackButtonProps {
 
 export default function BackButton({
   href,
+  exactHref = false,
   onClick,
   label,
   className,
@@ -25,6 +30,7 @@ export default function BackButton({
   variant = 'default',
 }: BackButtonProps) {
   const router = useRouter();
+  const smartBack = useSmartBack(href || '/');
 
   // Safe useTranslation wrapper
   let t: (key: string) => string = () => 'Back';
@@ -42,7 +48,9 @@ export default function BackButton({
   const handleClick = () => {
     if (onClick) {
       onClick();
-    } else if (!href) {
+    } else if (href) {
+      smartBack();
+    } else {
       router.back();
     }
   };
@@ -55,7 +63,7 @@ export default function BackButton({
   );
 
   const baseStyles = cn(
-    'inline-flex items-center gap-1.5 font-medium transition-all group duration-200 touch-manipulation',
+    'inline-flex items-center gap-1.5 font-medium transition-all group duration-200 touch-manipulation cursor-pointer',
     variant === 'default' && 'text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]',
     variant === 'ghost' && 'p-2 rounded-lg text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted)]',
     variant === 'outline' && 'px-4 py-2 border-2 border-[var(--border)] rounded-lg text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted)] text-sm',
@@ -65,7 +73,21 @@ export default function BackButton({
 
   if (href) {
     return (
-      <Link href={href} className={baseStyles}>
+      <Link
+        href={href}
+        onClick={(e) => {
+          if (onClick) {
+            e.preventDefault();
+            onClick();
+            return;
+          }
+          if (!exactHref && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) {
+            e.preventDefault();
+            smartBack();
+          }
+        }}
+        className={baseStyles}
+      >
         {content}
       </Link>
     );

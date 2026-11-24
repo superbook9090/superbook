@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useUrlTab } from '@/hooks/useUrlTab';
 import { useAlert } from '@/components/ui/AlertContainer';
 import { ApiClientError } from '@/lib/api/http';
 import {
@@ -26,7 +27,10 @@ export function useAdminNotifications() {
   const { addAlert } = useAlert();
 
   // Navigation & View State
-  const [activeTab, setActiveTab] = useState<NotificationTabKey>('compose');
+  const [activeTab, setActiveTab] = useUrlTab<NotificationTabKey>(
+    ['compose', 'templates', 'history'],
+    'compose'
+  );
   const [previewDevice, setPreviewDevice] = useState<DevicePreviewMode>('ios');
   const [previewLang, setPreviewLang] = useState<PreviewLang>('en');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -91,7 +95,7 @@ export function useAdminNotifications() {
       setActiveTab('compose');
       addAlert({ type: 'success', message: t('admin.notifications.appliedTemplate') });
     },
-    [addAlert, t]
+    [addAlert, setActiveTab, t]
   );
 
   const duplicateBroadcast = useCallback(
@@ -107,7 +111,7 @@ export function useAdminNotifications() {
       setActiveTab('compose');
       addAlert({ type: 'success', message: t('admin.notifications.duplicateSuccess') });
     },
-    [addAlert, t]
+    [addAlert, setActiveTab, t]
   );
 
   const handleSend = async (e: React.FormEvent) => {

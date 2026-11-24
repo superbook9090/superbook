@@ -2,7 +2,8 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Edit, StopCircle, Trash2, Flame, Clock, CheckCircle, Trophy } from 'lucide-react';
+import { Edit, StopCircle, Trash2, Flame, Clock, CheckCircle, Trophy } from 'lucide-react';
+import BackButton from '@/components/ui/BackButton';
 import { useTranslation } from '@/hooks/useTranslation';
 import { ROUTES } from '@/constants/routes';
 import { formatDateTime } from '@/lib/dateUtils';
@@ -38,13 +39,11 @@ export default function TeacherContestHeader({
     <div className="space-y-4">
       {/* Top Breadcrumb & Action Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <Link
+        <BackButton
           href={backPath || ROUTES.teacher.contests}
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors min-h-[44px]"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>{t('contest.backToContests')}</span>
-        </Link>
+          label={t('contest.backToContests')}
+          className="text-xs font-bold min-h-[44px]"
+        />
 
         <div className="flex items-center gap-2 flex-wrap">
           {onDeclareResults && (state === 'completed' || state === 'live') && !contest.resultsDeclared && (

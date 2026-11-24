@@ -3,14 +3,14 @@
 
 import { ROUTES } from '@/constants/routes';
 import { use, useEffect } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSessionStore } from '@/store/useSessionStore';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { getCertificate } from '@/lib/api/certificates';
-import { Award, ArrowLeft, Printer } from 'lucide-react';
+import { Award, Printer } from 'lucide-react';
+import BackButton from '@/components/ui/BackButton';
 
 export default function CertificateDetailPage({
   params,
@@ -47,13 +47,11 @@ export default function CertificateDetailPage({
     return (
       <div className="text-center py-12">
         <p className="text-[var(--color-muted-foreground)]">{t('certificates.notFound')}</p>
-        <Link
+        <BackButton
           href={ROUTES.student.certificates}
-          className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-[var(--student-primary)]"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          {t('certificates.backToCertificates')}
-        </Link>
+          label={t('certificates.backToCertificates')}
+          className="mt-4 text-sm font-medium text-[var(--student-primary)] hover:text-[var(--student-primary)]/80"
+        />
       </div>
     );
   }
@@ -81,13 +79,11 @@ export default function CertificateDetailPage({
       `}</style>
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 print:hidden">
-        <Link
+        <BackButton
           href={ROUTES.student.certificates}
-          className="inline-flex items-center gap-2 text-sm font-medium text-[var(--student-primary)]"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          {t('certificates.backToCertificates')}
-        </Link>
+          label={t('certificates.backToCertificates')}
+          className="text-sm font-medium text-[var(--student-primary)] hover:text-[var(--student-primary)]/80"
+        />
         <button
           onClick={() => window.print()}
           className="btn-premium inline-flex items-center gap-2 min-h-[44px] px-6 py-2.5 text-sm font-bold shadow-lg shadow-[var(--student-primary)]/25"

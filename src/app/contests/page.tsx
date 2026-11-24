@@ -2,17 +2,21 @@
 
 export const dynamic = 'force-dynamic';
 
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import { ContestCard } from '@/features/contests/components/ContestCard';
 import { useContests } from '@/features/contests/hooks/useContests';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { Trophy, Flame, Clock, CheckCircle, Search, Sparkles, Filter } from 'lucide-react';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useUrlTab } from '@/hooks/useUrlTab';
 
-export default function PublicContestsPage() {
+function PublicContestsContent() {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<'live' | 'upcoming' | 'completed'>('live');
+  const [activeTab, setActiveTab] = useUrlTab<'live' | 'upcoming' | 'completed'>(
+    ['live', 'upcoming', 'completed'],
+    'live'
+  );
   const [scheduleFilter, setScheduleFilter] = useState<string>('all');
   const [search, setSearch] = useState('');
   const [showFilters, setShowFilters] = useState(false);
@@ -183,5 +187,13 @@ export default function PublicContestsPage() {
         </div>
       )}
     </main>
+  );
+}
+
+export default function PublicContestsPage() {
+  return (
+    <Suspense fallback={<PageSkeleton />}>
+      <PublicContestsContent />
+    </Suspense>
   );
 }

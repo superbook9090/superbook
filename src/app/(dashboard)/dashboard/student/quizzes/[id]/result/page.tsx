@@ -3,6 +3,7 @@ import { ROUTES } from '@/constants/routes';
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { useSmartBack } from '@/hooks/useSmartBack';
 import { ArrowLeft, Check, X, Minus } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { formatDateTime } from '@/lib/dateUtils';
@@ -69,6 +70,7 @@ export default function QuizResultPage() {
   const status = useSessionStore((s) => s.status);
   const { t } = useTranslation();
   const router = useRouter();
+  const handleBack = useSmartBack(ROUTES.student.quizzes);
   const params = useParams();
   const attemptId = params.id as string;
 
@@ -163,7 +165,7 @@ export default function QuizResultPage() {
       <div className="text-center py-8 px-4">
         <p className="text-[var(--error)] mb-4">{t('quizResult.resultNotFound')}</p>
         <Button
-          onClick={() => router.push(ROUTES.student.quizzes)}
+          onClick={handleBack}
           variant="primary"
           className="sm:w-auto w-full"
         >
@@ -184,7 +186,7 @@ export default function QuizResultPage() {
             <Button
               type="button"
               variant="secondary"
-              onClick={() => router.push(ROUTES.student.quizzes)}
+              onClick={handleBack}
               className="min-w-[44px] min-h-[44px] p-0 flex items-center justify-center rounded-xl shrink-0"
               aria-label={t('quizResult.backToQuizzes')}
             >

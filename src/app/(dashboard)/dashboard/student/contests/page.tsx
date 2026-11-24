@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useUrlTab } from '@/hooks/useUrlTab';
 import { PageWrapper, PageHeader, ResponsiveGrid, EmptyState } from '@/components/layout';
 import { ContestCard } from '@/features/contests/components/ContestCard';
 import { useContests } from '@/features/contests/hooks/useContests';
@@ -11,7 +12,10 @@ import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 
 export default function StudentContestsPage() {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<'live' | 'upcoming' | 'completed'>('live');
+  const [activeTab, setActiveTab] = useUrlTab<'live' | 'upcoming' | 'completed'>(
+    ['live', 'upcoming', 'completed'],
+    'live'
+  );
   const [scheduleFilter, setScheduleFilter] = useState<string>('all');
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search, 300);

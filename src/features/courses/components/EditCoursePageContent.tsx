@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useUrlTab } from '@/hooks/useUrlTab';
 import { LazyCreateCourseForm, LazyCurriculumEditor } from '@/lib/lazy';
 import { Settings, Layout, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -13,8 +14,18 @@ export default function EditCoursePageContent({ courseId }: { courseId: string }
   const { t } = useTranslation();
   const { isFeatureEnabled } = useSettingsStore();
   const doubtsEnabled = isFeatureEnabled('enableCourseDoubts');
-  
-  const [activeTab, setActiveTab] = useState<'basic' | 'curriculum' | 'doubts'>('curriculum');
+
+  const validTabs = useMemo(
+    () =>
+      (doubtsEnabled
+        ? ['basic', 'curriculum', 'doubts']
+        : ['basic', 'curriculum']) as ('basic' | 'curriculum' | 'doubts')[],
+    [doubtsEnabled]
+  );
+  const [activeTab, setActiveTab] = useUrlTab<'basic' | 'curriculum' | 'doubts'>(
+    validTabs,
+    'curriculum'
+  );
 
   return (
     <div>
