@@ -9,7 +9,7 @@ import { invalidatePattern } from '@/lib/redis';
 import { logApiError, logInfo } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 60; // Up to 60s for comprehensive 2000+ words generation
+export const maxDuration = 60; // Max execution time for Vercel functions (60s limit on Hobby plans)
 
 export async function POST(req: NextRequest) {
   const logContext = { method: 'POST', path: '/api/admin/blogs/generate-ai-trending' };

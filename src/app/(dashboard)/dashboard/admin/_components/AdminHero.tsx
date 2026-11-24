@@ -15,6 +15,8 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format, parseISO } from 'date-fns';
+import { OrganizationBadge } from '@/components/organization/OrganizationBadge';
+import { useSessionStore } from '@/store/useSessionStore';
 
 interface AdminHeroProps {
   userName?: string;
@@ -34,6 +36,7 @@ export default function AdminHero({
   onDateRangeChange,
 }: AdminHeroProps) {
   const { t } = useTranslation();
+  const sessionUser = useSessionStore((s) => s.session?.user);
 
   const displayName = useMemo(() => {
     if (!userName) return '';
@@ -79,19 +82,29 @@ export default function AdminHero({
 
       <div className="relative z-10 flex flex-wrap items-end justify-between gap-8">
         <div className="space-y-4 max-w-2xl min-w-[320px] flex-1">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 }}
-            className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold shadow-sm ${
-              isSuperAdmin 
-                ? 'bg-amber-500/20 text-amber-500 border border-amber-500/50' 
-                : 'bg-[var(--teacher-soft)] text-[var(--teacher-primary)] border border-[var(--teacher-border)]/50'
-            }`}
-          >
-            {isSuperAdmin ? <Crown className="w-4 h-4" /> : <ShieldCheck className="w-4 h-4" />}
-            <span>{isSuperAdmin ? t('admin.superadminTier') : t('admin.adminSuite')}</span>
-          </motion.div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 }}
+              className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold shadow-sm ${
+                isSuperAdmin 
+                  ? 'bg-amber-500/20 text-amber-500 border border-amber-500/50' 
+                  : 'bg-[var(--teacher-soft)] text-[var(--teacher-primary)] border border-[var(--teacher-border)]/50'
+              }`}
+            >
+              {isSuperAdmin ? <Crown className="w-4 h-4" /> : <ShieldCheck className="w-4 h-4" />}
+              <span>{isSuperAdmin ? t('admin.superadminTier') : t('admin.adminSuite')}</span>
+            </motion.div>
+            {sessionUser?.organizationName && (
+              <OrganizationBadge
+                name={sessionUser.organizationName}
+                logo={sessionUser.organizationLogo}
+                color={sessionUser.organizationColor}
+                variant="pill"
+              />
+            )}
+          </div>
           
           <div className="space-y-2">
             <motion.h1 

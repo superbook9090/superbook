@@ -44,6 +44,15 @@ export type AccountInfo = {
   /** False when the teacher may only create private (course-code) courses. */
   canCreatePublicCourses: boolean;
   organizationName: string | null;
+  organization?: {
+    name: string;
+    logo?: string | null;
+    primaryColor?: string | null;
+    website?: string | null;
+    tagline?: string | null;
+    inviteCode: string;
+    code: string;
+  } | null;
 };
 
 export function fetchAccountInfo(): Promise<AccountInfo> {

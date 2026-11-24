@@ -23,7 +23,13 @@ export async function POST(request: Request) {
     await dbConnect();
 
     // Check if the organization exists
-    const organization = await Organization.findOne({ inviteCode, isActive: true });
+    const cleanCode = inviteCode.trim();
+    const escaped = cleanCode.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`^${escaped}$`, 'i');
+    const organization = await Organization.findOne({
+      $or: [{ inviteCode: regex }, { code: regex }],
+      isActive: true,
+    });
     if (!organization) {
       return NextResponse.json(
         { message: 'Invalid or inactive invite code' },

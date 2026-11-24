@@ -6,6 +6,10 @@ export interface OrganizationItem {
   code: string;
   inviteCode: string;
   description?: string;
+  logo?: string;
+  primaryColor?: string;
+  website?: string;
+  tagline?: string;
   isActive: boolean;
   userCount: number;
   courseCount: number;
@@ -13,6 +17,20 @@ export interface OrganizationItem {
   quizCount: number;
   createdAt: string;
   updatedAt?: string;
+}
+
+export interface OrganizationLookupResult {
+  found: boolean;
+  organization?: {
+    id: string;
+    name: string;
+    logo?: string;
+    primaryColor?: string;
+    website?: string;
+    tagline?: string;
+    inviteCode: string;
+    description?: string;
+  };
 }
 
 export type OrganizationsListPayload = { organizations: OrganizationItem[] };
@@ -23,9 +41,17 @@ export function listOrganizations(options?: { includeInactive?: boolean }): Prom
   return apiJson(`/api/organizations${query}`, { method: 'GET' });
 }
 
+export function lookupOrganization(code: string): Promise<OrganizationLookupResult> {
+  return apiJson(`/api/organizations/lookup?code=${encodeURIComponent(code)}`, { method: 'GET' });
+}
+
 export function createOrganization(body: {
   name: string;
   description?: string;
+  logo?: string;
+  primaryColor?: string;
+  website?: string;
+  tagline?: string;
   isActive?: boolean;
 }): Promise<OrganizationItem> {
   return apiJson('/api/organizations', { method: 'POST', body });
@@ -33,7 +59,15 @@ export function createOrganization(body: {
 
 export function updateOrganization(
   id: string,
-  body: { name?: string; description?: string; isActive?: boolean }
+  body: {
+    name?: string;
+    description?: string;
+    logo?: string;
+    primaryColor?: string;
+    website?: string;
+    tagline?: string;
+    isActive?: boolean;
+  }
 ): Promise<OrganizationItem> {
   return apiJson(`/api/organizations/${encodeURIComponent(id)}`, { method: 'PATCH', body });
 }

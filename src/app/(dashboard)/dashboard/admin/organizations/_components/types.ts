@@ -17,5 +17,9 @@ export type ViewMode = 'grid' | 'table';
 export interface OrganizationFormData {
   name: string;
   description: string;
+  logo?: string;
+  primaryColor?: string;
+  website?: string;
+  tagline?: string;
   isActive: boolean;
 }

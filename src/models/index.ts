@@ -29,6 +29,7 @@ import './ContestAttempt';
 import './Challenge';
 import './ChallengeAttempt';
 import './CourseGenerationProgress';
+import './MistakeBookmark';
 
 export { default as User } from './User';
 export { default as Organization } from './Organization';
@@ -58,4 +59,5 @@ export { default as ContestAttempt } from './ContestAttempt';
 export { default as Challenge } from './Challenge';
 export { default as ChallengeAttempt } from './ChallengeAttempt';
 export { default as CourseGenerationProgress } from './CourseGenerationProgress';
+export { default as MistakeBookmark } from './MistakeBookmark';
 

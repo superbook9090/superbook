@@ -12,9 +12,10 @@ export async function GET(req: NextRequest) {
   const logContext = { method: 'GET', path: '/api/cron/declare-results' };
 
   try {
-    // 1. Verify Vercel Cron Secret (if configured)
+    // 1. Verify Vercel Cron Secret (if configured) or Admin session
     const authHeader = req.headers.get('authorization');
-    const isCronAuthorized = !process.env.CRON_SECRET || authHeader === `Bearer ${process.env.CRON_SECRET}`;
+    const isCronAuthorized =
+      Boolean(process.env.CRON_SECRET) && authHeader === `Bearer ${process.env.CRON_SECRET}`;
 
     let isAdmin = false;
     if (!isCronAuthorized) {
@@ -25,7 +26,7 @@ export async function GET(req: NextRequest) {
     }
 
     if (!isCronAuthorized && !isAdmin) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ message: 'Unauthorized. Admin session or valid CRON_SECRET is required.' }, { status: 401 });
     }
     
     // 1b. Verify feature toggle

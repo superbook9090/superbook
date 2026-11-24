@@ -11,9 +11,26 @@ export async function middleware(request: NextRequest) {
   const token = await getToken({ req: request });
 
   // =========================
-  // ✅ 0. SKIP AUTH ROUTES (CRITICAL)
+  // ✅ 0. AUTH ROUTES HANDLING
+  // Rate limit credential sign-in attempts while allowing lightweight session polling
   // =========================
   if (pathname.startsWith('/api/auth')) {
+    const isSignInAttempt =
+      request.method === 'POST' &&
+      (pathname.includes('/callback/credentials') || pathname.includes('/signin'));
+
+    if (isSignInAttempt) {
+      const ip =
+        request.headers.get('x-forwarded-for') ||
+        request.headers.get('x-real-ip') || 'unknown';
+      const result = authRateLimiter.check(ip);
+      if (!result.allowed) {
+        return NextResponse.json(
+          { message: 'Too many login attempts. Please try again later.' },
+          { status: 429 }
+        );
+      }
+    }
     return NextResponse.next();
   }
 
@@ -31,8 +48,6 @@ export async function middleware(request: NextRequest) {
 
     if (pathname.startsWith('/api/blogs/public')) {
       limiter = publicBlogRateLimiter;
-    } else if (pathname.startsWith('/api/auth/')) {
-      limiter = authRateLimiter;
     } else if (pathname.startsWith('/api/admin/')) {
       limiter = adminRateLimiter;
     } else {
@@ -116,7 +131,12 @@ export async function middleware(request: NextRequest) {
   // =========================
   // ✅ 3. BLOCK AUTHENTICATED USERS FROM LOGIN/REGISTER
   // =========================
-  if (pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/forgot-password')) {
+  if (
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/register') ||
+    pathname.startsWith('/forgot-password') ||
+    pathname.startsWith('/reset-password')
+  ) {
     if (token?.id) {
       return NextResponse.redirect(new URL(ROUTES.dashboard, request.url));
     }

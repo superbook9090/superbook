@@ -13,6 +13,7 @@ import {
   patchAdminUserOrganization,
 } from '@/lib/api/adminUsers';
 import { listOrganizations } from '@/lib/api/organizations';
+import { fetchAccountInfo } from '@/lib/api/auth';
 import { ApiClientError } from '@/lib/api/http';
 import type { User, UserStats } from '../_components/types';
 
@@ -36,7 +37,32 @@ export function useAdminUsers() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showUserDetail, setShowUserDetail] = useState(false);
   const [organizations, setOrganizations] = useState<Array<{ _id: string; name: string }>>([]);
+  const [adminOrg, setAdminOrg] = useState<{
+    name: string;
+    inviteCode: string;
+    logo?: string | null;
+  } | null>(null);
   const [pagination, setPagination] = useState({ total: 0, totalPages: 1 });
+
+  useEffect(() => {
+    let cancelled = false;
+    if (session?.user?.organizationId) {
+      fetchAccountInfo()
+        .then((info) => {
+          if (!cancelled && info.organization) {
+            setAdminOrg({
+              name: info.organization.name,
+              inviteCode: info.organization.inviteCode,
+              logo: info.organization.logo,
+            });
+          }
+        })
+        .catch(() => {});
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [session?.user?.organizationId]);
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -243,6 +269,7 @@ export function useAdminUsers() {
     showUserDetail,
     setShowUserDetail,
     organizations,
+    adminOrg,
     pagination,
     fetchUsers,
     handleRoleChange,

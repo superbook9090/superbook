@@ -36,6 +36,7 @@ export const hi = {
     no: 'नहीं',
     notAvailable: 'उपलब्ध नहीं',
     quizzes: 'क्विज़',
+    mistakes: 'गलतियों की डायरी',
     contests: 'कॉन्टेस्ट्स',
     aCourse: 'एक कोर्स',
     chaptersShort: 'चैप्टर',
@@ -2332,6 +2333,15 @@ export const hi = {
     deleteConfirm: 'क्या आप सुनिश्चित हैं कि आप इस ऑर्गेनाइजेशन को हटाना चाहते हैं? यह कार्य पूर्ववत नहीं किया जा सकता।',
     failedFetchOrganizations: 'ऑर्गेनाइजेशन प्राप्त करने में विफल',
     namePlaceholder: 'जैसे, स्प्रिंगडेल हाई स्कूल',
+    inviteMembers: 'सदस्यों को आमंत्रित करें',
+    inviteToOrganization: 'संस्था में शामिल हो रहे हैं',
+    chooseInviteRole: 'आमंत्रित करने के लिए भूमिका चुनें',
+    inviteStudents: 'विद्यार्थियों को आमंत्रित करें',
+    inviteTeachers: 'शिक्षकों को आमंत्रित करें',
+    studentDirectLink: 'सीधा विद्यार्थी पंजीकरण लिंक',
+    teacherDirectLink: 'सीधा शिक्षक पंजीकरण लिंक',
+    shareOnWhatsApp: 'व्हाट्सएप पर साझा करें',
+    verifiedInvite: 'शामिल हो रहे हैं',
   },
 
   // Not Found

@@ -122,9 +122,75 @@ export function OrganizationFormModal({
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder={t('organizations.briefDescription')}
-                rows={3}
+                rows={2}
                 className="w-full px-4 py-2.5 bg-[var(--color-surface)] border border-[var(--border)] text-[var(--color-foreground)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-sm font-medium shadow-xs resize-none"
               />
+            </div>
+
+            {/* Branding Details: Logo & Tagline */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-foreground)] mb-1.5">
+                  Logo URL
+                </label>
+                <input
+                  type="url"
+                  value={formData.logo || ''}
+                  onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
+                  placeholder="https://example.com/logo.png"
+                  className="w-full px-4 py-2 min-h-[40px] bg-[var(--color-surface)] border border-[var(--border)] text-[var(--color-foreground)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-xs font-medium shadow-xs"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-foreground)] mb-1.5">
+                  Tagline / Motto
+                </label>
+                <input
+                  type="text"
+                  value={formData.tagline || ''}
+                  onChange={(e) => setFormData({ ...formData, tagline: e.target.value })}
+                  placeholder="Excellence in Learning"
+                  className="w-full px-4 py-2 min-h-[40px] bg-[var(--color-surface)] border border-[var(--border)] text-[var(--color-foreground)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-xs font-medium shadow-xs"
+                />
+              </div>
+            </div>
+
+            {/* Branding Details: Website & Brand Color */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-foreground)] mb-1.5">
+                  Website
+                </label>
+                <input
+                  type="url"
+                  value={formData.website || ''}
+                  onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                  placeholder="https://acme.org"
+                  className="w-full px-4 py-2 min-h-[40px] bg-[var(--color-surface)] border border-[var(--border)] text-[var(--color-foreground)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-xs font-medium shadow-xs"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-foreground)] mb-1.5">
+                  Brand Color (Hex)
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={formData.primaryColor || '#4f46e5'}
+                    onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
+                    className="w-9 h-9 p-0.5 rounded-lg border border-[var(--border)] cursor-pointer shrink-0 bg-transparent"
+                  />
+                  <input
+                    type="text"
+                    value={formData.primaryColor || ''}
+                    onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
+                    placeholder="#4F46E5"
+                    className="flex-1 px-3 py-2 min-h-[40px] bg-[var(--color-surface)] border border-[var(--border)] text-[var(--color-foreground)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-xs font-mono font-medium shadow-xs"
+                  />
+                </div>
+              </div>
             </div>
 
             {/* In Edit mode: Display immutable Code and Invite Code */}

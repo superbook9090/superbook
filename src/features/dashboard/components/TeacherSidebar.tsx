@@ -14,6 +14,8 @@ import { ADMIN_NAV, TEACHER_NAV } from '@/constants/navigation';
 import { getNavIcon } from '@/lib/navigation/icons';
 import { useDashboardNav } from '@/hooks/useDashboardNav';
 import DownloadAppSidebarCard from '@/components/ui/DownloadAppSidebarCard';
+import { OrganizationBadge } from '@/components/organization/OrganizationBadge';
+import { useSessionStore } from '@/store/useSessionStore';
 
 interface User {
   id?: string;
@@ -32,6 +34,10 @@ export default function TeacherSidebar({ user }: { user: User | null }) {
 
   const filteredTeacherNavigation = useDashboardNav(TEACHER_NAV);
   const filteredAdminNavigation = useDashboardNav(ADMIN_NAV, { isSuperAdmin: isSuperAdminUser });
+  const sessionUser = useSessionStore((s) => s.session?.user);
+  const orgName = sessionUser?.organizationName;
+  const orgLogo = sessionUser?.organizationLogo;
+  const orgColor = sessionUser?.organizationColor;
 
   if (isQuizActive) return null;
 
@@ -65,6 +71,18 @@ export default function TeacherSidebar({ user }: { user: User | null }) {
             </span>
           )}
         </div>
+
+        {/* Organization Branding */}
+        {orgName && (
+          <div className="mt-3 px-3 sm:px-4">
+            <OrganizationBadge
+              name={orgName}
+              logo={orgLogo}
+              color={orgColor}
+              variant="card"
+            />
+          </div>
+        )}
 
         {/* Navigation - Scrollable */}
         <nav className="mt-6 sm:mt-8 flex-1 px-3 sm:px-4 space-y-1 min-h-0 overflow-y-auto">

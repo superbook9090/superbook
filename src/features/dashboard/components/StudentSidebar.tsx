@@ -13,6 +13,9 @@ import { STUDENT_NAV } from '@/constants/navigation';
 import { getNavIcon } from '@/lib/navigation/icons';
 import { useDashboardNav } from '@/hooks/useDashboardNav';
 import DownloadAppSidebarCard from '@/components/ui/DownloadAppSidebarCard';
+import StreakBadge from '@/components/gamification/StreakBadge';
+import { OrganizationBadge } from '@/components/organization/OrganizationBadge';
+import { useSessionStore } from '@/store/useSessionStore';
 
 interface User {
   id?: string;
@@ -27,6 +30,10 @@ export default function StudentSidebar({ user }: { user: User | null }) {
   const { isQuizActive } = useQuiz();
 
   const filteredNavigation = useDashboardNav(STUDENT_NAV);
+  const sessionUser = useSessionStore((s) => s.session?.user);
+  const orgName = sessionUser?.organizationName;
+  const orgLogo = sessionUser?.organizationLogo;
+  const orgColor = sessionUser?.organizationColor;
 
   if (isQuizActive) return null;
 
@@ -47,6 +54,23 @@ export default function StudentSidebar({ user }: { user: User | null }) {
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--student-primary)] mr-2 shadow-[0_0_8px_var(--student-primary)] animate-pulse" />
             {t('common.student')}
           </span>
+        </div>
+
+        {/* Organization Branding */}
+        {orgName && (
+          <div className="mt-3 px-3 sm:px-4">
+            <OrganizationBadge
+              name={orgName}
+              logo={orgLogo}
+              color={orgColor}
+              variant="card"
+            />
+          </div>
+        )}
+
+        {/* Streak & XP Widget */}
+        <div className="mt-3 px-3 sm:px-4">
+          <StreakBadge />
         </div>
 
         {/* Navigation - Scrollable */}

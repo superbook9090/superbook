@@ -9,6 +9,8 @@ import {
   areContestSolutionsReleased,
 } from './contestHelpers';
 import { invalidatePattern } from '@/lib/redis';
+import { recordUserActivity } from '@/lib/gamification/streakService';
+import { recordMistakes, type RecordMistakeItem } from '@/lib/learning/mistakesService';
 
 export async function getContestAttemptsWithStats(contestId: string, page: number = 1, limit: number = 50) {
   const skip = (page - 1) * limit;
@@ -344,6 +346,38 @@ export async function handleSubmitAttempt(
   await attempt.save();
   await invalidatePattern('contests:*');
 
+  // Gamification: Update user streak & award contest XP
+  const streakResult = await recordUserActivity(userId, 'contest').catch((e) => {
+    console.error('[ContestAttempt] Streak update error:', e);
+    return null;
+  });
+
+  // Mistakes Notebook: Log incorrectly answered questions
+  const mistakeItems: RecordMistakeItem[] = [];
+  submittedAnswers.forEach((ans) => {
+    const qDoc = questionMap.get(ans.questionId);
+    if (qDoc && ans.selectedOption !== -1 && ans.selectedOption !== qDoc.correctOption) {
+      mistakeItems.push({
+        questionId: qDoc._id.toString(),
+        prompt: qDoc.prompt,
+        options: qDoc.options,
+        correctOption: qDoc.correctOption,
+        selectedOption: ans.selectedOption,
+        explanation: (qDoc as { explanation?: string }).explanation,
+      });
+    }
+  });
+
+  if (mistakeItems.length > 0) {
+    await recordMistakes({
+      userId,
+      items: mistakeItems,
+      sourceType: 'contest',
+      sourceId: contest._id.toString(),
+      sourceTitle: contest.title,
+    }).catch((e) => console.error('[ContestAttempt] Mistake record error:', e));
+  }
+
   const solutionsReleased = areContestSolutionsReleased(contest, now);
 
   return {
@@ -359,6 +393,7 @@ export async function handleSubmitAttempt(
       submittedAt: attempt.submittedAt,
       solutionsReleaseAt: contest.solutionsReleaseAt || contest.endTime,
       areSolutionsReleased: solutionsReleased,
+      streak: streakResult ? { currentStreak: streakResult.currentStreak, xpEarned: streakResult.xpEarned, isNewDay: streakResult.isNewDay } : undefined,
     },
   };
 }

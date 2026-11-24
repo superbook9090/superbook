@@ -14,6 +14,9 @@ declare module 'next-auth' {
       email: string;
       phone?: string;
       organizationId?: string | null;
+      organizationName?: string | null;
+      organizationLogo?: string | null;
+      organizationColor?: string | null;
       canUploadVideos?: boolean;
       canCreateContests?: boolean;
       canGenerateAiQuizzes?: boolean;
@@ -32,6 +35,9 @@ declare module 'next-auth' {
     role: string;
     phone?: string;
     organizationId?: string | null;
+    organizationName?: string | null;
+    organizationLogo?: string | null;
+    organizationColor?: string | null;
     canUploadVideos?: boolean;
     canCreateContests?: boolean;
     canGenerateAiQuizzes?: boolean;
@@ -52,6 +58,9 @@ declare module 'next-auth/jwt' {
     email: string;
     phone?: string;
     organizationId?: string | null;
+    organizationName?: string | null;
+    organizationLogo?: string | null;
+    organizationColor?: string | null;
     canUploadVideos?: boolean;
     canCreateContests?: boolean;
     canGenerateAiQuizzes?: boolean;
@@ -207,24 +216,17 @@ export const authOptions: AuthOptions = {
           }
         }
 
-        console.log("[Authorize debug] Credentials:", { email: credentials?.email, password: credentials?.password ? '***' : null });
-
         if (!credentials?.email || !credentials?.password) {
           throw new Error('Missing email or password');
         }
 
-        console.log("[Authorize debug] User schema paths:", Object.keys(User.schema.paths));
-
         const user = await findUserByEmail(credentials.email).select('+password');
-
-        console.log("[Authorize debug] DB search result fields:", user ? { id: user._id, email: user.email, name: user.name, hasPassword: Boolean(user.password) } : null);
 
         if (!user) {
           throw new Error('User not found');
         }
 
         const isValid = await user.comparePassword(credentials.password);
-        console.log("[Authorize debug] password validation result:", isValid);
 
         if (!isValid) {
           throw new Error('Invalid password');
@@ -311,6 +313,9 @@ export const authOptions: AuthOptions = {
         token.email = user.email || '';
         token.name = user.name || '';
         token.organizationId = user.organizationId || null;
+        token.organizationName = user.organizationName || null;
+        token.organizationLogo = user.organizationLogo || null;
+        token.organizationColor = user.organizationColor || null;
         token.canUploadVideos = user.canUploadVideos || false;
         token.canCreateContests = user.canCreateContests || false;
         token.canGenerateAiQuizzes = user.canGenerateAiQuizzes || false;
@@ -327,7 +332,35 @@ export const authOptions: AuthOptions = {
             token.canGenerateAiQuizzes = true;
           }
         }
+        if (session.organizationName !== undefined) {
+          token.organizationName = session.organizationName;
+        }
+        if (session.organizationLogo !== undefined) {
+          token.organizationLogo = session.organizationLogo;
+        }
+        if (session.organizationColor !== undefined) {
+          token.organizationColor = session.organizationColor;
+        }
       }
+
+      // Lazy hydrate organization branding if organizationId exists but name is not yet in token
+      if (token.organizationId && !token.organizationName) {
+        try {
+          await dbConnect();
+          const Organization = (await import('@/models/Organization')).default;
+          const org = await Organization.findById(token.organizationId)
+            .select('name logo primaryColor')
+            .lean<{ name?: string; logo?: string; primaryColor?: string }>();
+          if (org) {
+            token.organizationName = org.name || null;
+            token.organizationLogo = org.logo || null;
+            token.organizationColor = org.primaryColor || null;
+          }
+        } catch {
+          // Ignore hydration errors
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {
@@ -342,6 +375,9 @@ export const authOptions: AuthOptions = {
         }
         session.user.phone = token.phone || '';
         session.user.organizationId = token.organizationId || null;
+        session.user.organizationName = token.organizationName || null;
+        session.user.organizationLogo = token.organizationLogo || null;
+        session.user.organizationColor = token.organizationColor || null;
         session.user.canUploadVideos = token.canUploadVideos || false;
         session.user.canCreateContests = token.canCreateContests || false;
         session.user.canGenerateAiQuizzes = token.canGenerateAiQuizzes || false;

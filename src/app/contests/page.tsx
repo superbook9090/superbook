@@ -170,7 +170,9 @@ export default function PublicContestsPage() {
           <p className="text-sm text-[var(--color-muted-foreground)] max-w-md">
             {activeTab === 'live'
               ? t('contest.noLiveContestsDesc')
-              : t('contest.noUpcomingContestsDesc')}
+              : activeTab === 'upcoming'
+                ? t('contest.noUpcomingContestsDesc')
+                : t('contest.noCompletedContestsDesc')}
           </p>
         </div>
       ) : (

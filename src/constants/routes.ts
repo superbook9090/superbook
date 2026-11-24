@@ -56,6 +56,7 @@ export const ROUTES = {
     profile: '/dashboard/student/profile',
     notifications: '/dashboard/student/notifications',
     notes: '/dashboard/student/notes',
+    mistakes: '/dashboard/student/mistakes',
   },
   teacher: {
     root: '/dashboard/teacher',

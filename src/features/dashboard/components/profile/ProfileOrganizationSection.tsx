@@ -9,7 +9,10 @@ import { useSessionStore } from '@/store/useSessionStore';
 import { TextField } from '@/components/ui/TextField';
 import Button from '@/components/ui/Button';
 import { Session } from 'next-auth';
-import { addOrganization, fetchAccountInfo } from '@/lib/api/auth';
+import { addOrganization, fetchAccountInfo, type AccountInfo } from '@/lib/api/auth';
+import { OrganizationBadge } from '@/components/organization/OrganizationBadge';
+import { OrganizationInviteShareModal } from '@/components/organization/OrganizationInviteShareModal';
+import { Share2 } from 'lucide-react';
 
 interface ProfileOrganizationSectionProps {
   session: Session;
@@ -24,14 +27,17 @@ export default function ProfileOrganizationSection({ session }: ProfileOrganizat
   const [isLinkingOrg, setIsLinkingOrg] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [organizationName, setOrganizationName] = useState<string | null>(null);
+  const [orgData, setOrgData] = useState<AccountInfo['organization'] | null>(null);
+  const [showInviteModal, setShowInviteModal] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     if (session.user?.organizationId) {
       fetchAccountInfo()
         .then((info) => {
-          if (!cancelled && info.organizationName) {
-            setOrganizationName(info.organizationName);
+          if (!cancelled) {
+            if (info.organizationName) setOrganizationName(info.organizationName);
+            if (info.organization) setOrgData(info.organization);
           }
         })
         .catch(() => {});
@@ -80,11 +86,37 @@ export default function ProfileOrganizationSection({ session }: ProfileOrganizat
 
   return (
     <div>
-      <label className="block text-sm font-medium text-[var(--color-muted-foreground)]">{t('profile.organization')}</label>
+      <label className="block text-sm font-medium text-[var(--color-muted-foreground)] mb-2">
+        {t('profile.organization')}
+      </label>
       {session.user?.organizationId ? (
-        <p className="mt-1 text-sm sm:text-base text-[var(--color-foreground)] break-words">
-          {organizationName || t('profile.orgJoined')}
-        </p>
+        <div className="space-y-2 max-w-md">
+          <OrganizationBadge
+            name={organizationName || orgData?.name || t('profile.orgJoined')}
+            logo={orgData?.logo}
+            color={orgData?.primaryColor}
+            variant="card"
+          />
+          {orgData?.tagline && (
+            <p className="text-xs text-[var(--color-muted-foreground)] italic px-1">
+              &quot;{orgData.tagline}&quot;
+            </p>
+          )}
+          {orgData?.inviteCode && session.user?.role === 'admin' && (
+            <div className="pt-2">
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => setShowInviteModal(true)}
+                className="flex items-center gap-1.5 text-xs"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+                <span>{t('organizations.inviteMembers')}</span>
+              </Button>
+            </div>
+          )}
+        </div>
       ) : isLinkingOrg ? (
         <form onSubmit={handleJoinOrganization} className="mt-2 space-y-3 max-w-md">
           <div className="space-y-3">
@@ -136,6 +168,15 @@ export default function ProfileOrganizationSection({ session }: ProfileOrganizat
             {t('profile.addOrganization')}
           </Button>
         </div>
+      )}
+      {orgData && (
+        <OrganizationInviteShareModal
+          isOpen={showInviteModal}
+          onClose={() => setShowInviteModal(false)}
+          organizationName={organizationName || orgData.name}
+          inviteCode={orgData.inviteCode}
+          logo={orgData.logo}
+        />
       )}
     </div>
   );

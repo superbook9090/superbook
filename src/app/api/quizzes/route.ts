@@ -186,10 +186,14 @@ export async function GET(request: NextRequest) {
       await setCachedData(cacheKey, responseData, 300); // 5 minutes
     }
 
+    const cacheControl = isPublished
+      ? 'public, s-maxage=300, stale-while-revalidate=600'
+      : 'private, no-cache, no-store, must-revalidate';
+
     return NextResponse.json(responseData, {
       status: 200,
       headers: {
-        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+        'Cache-Control': cacheControl,
       },
     });
   } catch (error) {

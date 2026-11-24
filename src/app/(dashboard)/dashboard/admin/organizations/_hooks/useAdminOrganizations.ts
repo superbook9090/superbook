@@ -51,6 +51,10 @@ export function useAdminOrganizations() {
   const [formData, setFormData] = useState<OrganizationFormData>({
     name: '',
     description: '',
+    logo: '',
+    primaryColor: '',
+    website: '',
+    tagline: '',
     isActive: true,
   });
 
@@ -148,7 +152,15 @@ export function useAdminOrganizations() {
 
   // Modal Openers
   const openCreateModal = () => {
-    setFormData({ name: '', description: '', isActive: true });
+    setFormData({
+      name: '',
+      description: '',
+      logo: '',
+      primaryColor: '',
+      website: '',
+      tagline: '',
+      isActive: true,
+    });
     setShowCreateModal(true);
   };
 
@@ -157,6 +169,10 @@ export function useAdminOrganizations() {
     setFormData({
       name: org.name,
       description: org.description || '',
+      logo: org.logo || '',
+      primaryColor: org.primaryColor || '',
+      website: org.website || '',
+      tagline: org.tagline || '',
       isActive: org.isActive,
     });
     setShowEditModal(true);

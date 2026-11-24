@@ -2,10 +2,10 @@
 'use client';
 
 import { ROUTES } from '@/constants/routes';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { motion } from 'framer-motion';
-import { Users, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
+import { Users, ChevronLeft, ChevronRight, RefreshCw, Share2 } from 'lucide-react';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import Tooltip from '@/components/ui/Tooltip';
 import Button from '@/components/ui/Button';
@@ -20,6 +20,7 @@ import { UserDetailModal } from './_components/UserDetailModal';
 import { useAdminUsers } from './_hooks/useAdminUsers';
 import { useUsersFilterChips } from './_hooks/useUsersFilterChips';
 import { PageWrapper, EmptyState } from '@/components/layout';
+import { OrganizationInviteShareModal } from '@/components/organization/OrganizationInviteShareModal';
 
 export default function AdminUsersPage() {
   const router = useRouter();
@@ -52,6 +53,7 @@ export default function AdminUsersPage() {
     showUserDetail,
     setShowUserDetail,
     organizations,
+    adminOrg,
     pagination,
     fetchUsers,
     handleRoleChange,
@@ -64,6 +66,8 @@ export default function AdminUsersPage() {
     handleToggleSuspend,
     handleDelete,
   } = useAdminUsers();
+
+  const [showInviteModal, setShowInviteModal] = useState(false);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -117,15 +121,29 @@ export default function AdminUsersPage() {
           <p className="text-sm sm:text-base text-[var(--color-muted-foreground)]">{t('admin.userDesc')}</p>
         </div>
 
-        <Button
-          onClick={() => fetchUsers()}
-          variant="secondary"
-          size="sm"
-          className="flex items-center gap-2 self-start sm:self-auto min-h-[44px] px-4 shadow-sm"
-        >
-          <RefreshCw className="w-4 h-4" />
-          <span>{t('analytics.refresh')}</span>
-        </Button>
+        <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+          {adminOrg && (
+            <Button
+              onClick={() => setShowInviteModal(true)}
+              variant="primary"
+              size="sm"
+              className="flex items-center gap-2 min-h-[44px] px-4 shadow-sm"
+            >
+              <Share2 className="w-4 h-4" />
+              <span>{t('organizations.inviteMembers')}</span>
+            </Button>
+          )}
+
+          <Button
+            onClick={() => fetchUsers()}
+            variant="secondary"
+            size="sm"
+            className="flex items-center gap-2 min-h-[44px] px-4 shadow-sm"
+          >
+            <RefreshCw className="w-4 h-4" />
+            <span>{t('analytics.refresh')}</span>
+          </Button>
+        </div>
       </div>
 
       <UsersStats stats={stats} isLoading={isLoading} />
@@ -236,6 +254,16 @@ export default function AdminUsersPage() {
         onCancel={() => { setDeleteId(null); setShowDeleteDialog(false); }}
         type="danger"
       />
+
+      {adminOrg && (
+        <OrganizationInviteShareModal
+          isOpen={showInviteModal}
+          onClose={() => setShowInviteModal(false)}
+          organizationName={adminOrg.name}
+          inviteCode={adminOrg.inviteCode}
+          logo={adminOrg.logo}
+        />
+      )}
     </PageWrapper>
   );
 }

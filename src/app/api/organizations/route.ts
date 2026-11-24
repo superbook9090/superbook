@@ -108,7 +108,7 @@ export async function POST(req: NextRequest) {
     await dbConnect();
 
     const body = await req.json();
-    const { name, description } = body;
+    const { name, description, logo, primaryColor, website, tagline } = body;
 
     if (!name) {
       return NextResponse.json(
@@ -147,6 +147,10 @@ export async function POST(req: NextRequest) {
       code,
       inviteCode,
       description,
+      logo: logo || null,
+      primaryColor: primaryColor || null,
+      website: website || null,
+      tagline: tagline || null,
       isActive: true,
     });
 

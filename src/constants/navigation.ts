@@ -24,7 +24,8 @@ export type NavIconName =
   | 'Video'
   | 'Swords'
   | 'Settings'
-  | 'GraduationCap';
+  | 'GraduationCap'
+  | 'BookMarked';
 
 export type NavFeatureFlag = 'enableBlogs' | 'enableQuizzes' | 'enableCourses' | 'enableAnalytics' | 'enableNotes' | 'enableContests' | 'enableQuizChallenges';
 
@@ -47,6 +48,7 @@ export const STUDENT_NAV: DashboardNavItem[] = [
   { nameKey: 'common.blogs', href: ROUTES.student.blogs, icon: 'Newspaper', feature: 'enableBlogs' },
   { nameKey: 'common.favorites', href: ROUTES.student.favorites, icon: 'Heart', feature: 'enableBlogs' },
   { nameKey: 'common.quizzes', href: ROUTES.student.quizzes, icon: 'HelpCircle', feature: 'enableQuizzes' },
+  { nameKey: 'common.mistakes', href: ROUTES.student.mistakes, icon: 'BookMarked' },
   { nameKey: 'common.progress', href: ROUTES.student.progress, icon: 'TrendingUp' },
   { nameKey: 'common.certificates', href: ROUTES.student.certificates, icon: 'Award', feature: 'enableCourses' },
   { nameKey: 'common.profile', href: ROUTES.student.profile, icon: 'User' },

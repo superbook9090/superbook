@@ -351,7 +351,10 @@ export interface SessionUser {
   image?: string;
   role?: string;
   phone?: string;
-  organizationId?: string;
+  organizationId?: string | null;
+  organizationName?: string | null;
+  organizationLogo?: string | null;
+  organizationColor?: string | null;
   canUploadVideos?: boolean;
   canCreateContests?: boolean;
   canGenerateAiQuizzes?: boolean;

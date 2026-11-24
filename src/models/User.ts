@@ -29,6 +29,12 @@ export interface IUser extends Document {
   lastUserAgent?: string;
   canCreateContests?: boolean;
   canGenerateAiQuizzes?: boolean;
+  streak?: {
+    current: number;
+    longest: number;
+    lastActiveDate: string;
+  };
+  xp?: number;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -64,6 +70,12 @@ const userSchema = new Schema<IUser>(
     lastUserAgent: String,
     canCreateContests: { type: Boolean, default: false },
     canGenerateAiQuizzes: { type: Boolean, default: true },
+    streak: {
+      current: { type: Number, default: 0 },
+      longest: { type: Number, default: 0 },
+      lastActiveDate: { type: String, default: '' },
+    },
+    xp: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

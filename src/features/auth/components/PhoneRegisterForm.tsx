@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
@@ -26,21 +26,38 @@ interface PhoneRegisterFormProps {
   callbackUrl: string;
   onBackToEmail: () => void;
   allowTeacherRegistration: boolean;
+  initialInviteCode?: string;
+  initialRole?: 'student' | 'teacher';
 }
 
-export default function PhoneRegisterForm({ theme, callbackUrl, onBackToEmail, allowTeacherRegistration }: PhoneRegisterFormProps) {
+export default function PhoneRegisterForm({
+  theme,
+  callbackUrl,
+  onBackToEmail,
+  allowTeacherRegistration,
+  initialInviteCode,
+  initialRole,
+}: PhoneRegisterFormProps) {
   const { t } = useTranslation();
   const router = useRouter();
   const { fetchSession } = useSessionStore();
 
-  const [role, setRole] = useState<'student' | 'teacher'>('student');
-  const [inviteCode, setInviteCode] = useState('');
+  const [role, setRole] = useState<'student' | 'teacher'>(initialRole || 'student');
+  const [inviteCode, setInviteCode] = useState(initialInviteCode || '');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [otpCode, setOtpCode] = useState('');
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
   const { addAlert } = useAlert();
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (initialInviteCode) setInviteCode(initialInviteCode);
+  }, [initialInviteCode]);
+
+  useEffect(() => {
+    if (initialRole) setRole(initialRole);
+  }, [initialRole]);
 
   const setupRecaptcha = () => {
     try {

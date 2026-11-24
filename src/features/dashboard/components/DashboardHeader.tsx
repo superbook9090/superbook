@@ -8,6 +8,8 @@ import LanguageSwitcher from '@/components/ui/LanguageSwitcher';
 import Tooltip from '@/components/ui/Tooltip';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 import { Bell } from 'lucide-react';
+import { useSessionStore } from '@/store/useSessionStore';
+import { OrganizationBadge } from '@/components/organization/OrganizationBadge';
 
 interface DashboardHeaderProps {
   isTeacherOrAdmin: boolean;
@@ -17,6 +19,7 @@ interface DashboardHeaderProps {
 
 export default function DashboardHeader({ isTeacherOrAdmin, showNotifications = false, role }: DashboardHeaderProps) {
   const { t } = useTranslation();
+  const session = useSessionStore((s) => s.session);
 
   const getDashboardTitle = () => {
     if (role === 'superadmin') return 'Superadmin Dashboard';
@@ -28,9 +31,19 @@ export default function DashboardHeader({ isTeacherOrAdmin, showNotifications = 
   return (
     <header className="dashboard-topbar hidden md:block flex-shrink-0">
       <div className="max-w-[var(--page-max-width)] mx-auto px-[var(--gutter-x)] h-14 flex justify-between items-center">
-        <h1 className="text-sm sm:text-base font-bold font-[family-name:var(--font-display)] tracking-tight text-[var(--foreground)] truncate">
-          {getDashboardTitle()}
-        </h1>
+        <div className="flex items-center gap-3 min-w-0">
+          <h1 className="text-sm sm:text-base font-bold font-[family-name:var(--font-display)] tracking-tight text-[var(--foreground)] truncate">
+            {getDashboardTitle()}
+          </h1>
+          {session?.user?.organizationName && (
+            <OrganizationBadge
+              name={session.user.organizationName}
+              logo={session.user.organizationLogo}
+              color={session.user.organizationColor}
+              variant="pill"
+            />
+          )}
+        </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           {showNotifications && (
             <Tooltip label={t('common.notifications')} position="bottom">

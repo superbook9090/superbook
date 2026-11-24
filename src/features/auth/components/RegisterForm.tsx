@@ -18,6 +18,7 @@ import { Loader } from '@/components/ui/Loader';
 import AuthBranding from './AuthBranding';
 import EmailRegisterForm from './EmailRegisterForm';
 import PhoneRegisterForm from './PhoneRegisterForm';
+import { lookupOrganization, type OrganizationLookupResult } from '@/lib/api/organizations';
 
 function RegisterFormInner() {
   const { status, fetchSession } = useSessionStore();
@@ -33,6 +34,38 @@ function RegisterFormInner() {
   const { addAlert } = useAlert();
   const [isPhoneFlow, setIsPhoneFlow] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Extract invite code and role from URL search parameters
+  const queryInviteCode =
+    searchParams.get('inviteCode') ||
+    searchParams.get('code') ||
+    searchParams.get('orgCode') ||
+    searchParams.get('org') ||
+    '';
+  const rawRole = searchParams.get('role')?.toLowerCase();
+  const queryRole: 'student' | 'teacher' | undefined =
+    rawRole === 'teacher' ? 'teacher' : rawRole === 'student' ? 'student' : undefined;
+
+  const [orgBranding, setOrgBranding] = useState<OrganizationLookupResult['organization'] | null>(null);
+
+  useEffect(() => {
+    if (!queryInviteCode) {
+      setOrgBranding(null);
+      return;
+    }
+    let cancelled = false;
+    lookupOrganization(queryInviteCode)
+      .then((res) => {
+        if (!cancelled && res.found && res.organization) {
+          setOrgBranding(res.organization);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, [queryInviteCode]);
 
   // Client-side guard for UX improvement
   useEffect(() => {
@@ -114,6 +147,43 @@ function RegisterFormInner() {
               </p>
             </div>
 
+            {/* Organization Branding Showcase (when joining via invite link) */}
+            {orgBranding && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="mb-3 p-3 rounded-2xl border border-[var(--primary)]/30 bg-gradient-to-r from-[var(--primary)]/10 via-[var(--primary)]/5 to-transparent flex items-center gap-3 shadow-xs"
+              >
+                {orgBranding.logo ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={orgBranding.logo}
+                    alt={orgBranding.name}
+                    className="w-10 h-10 rounded-xl object-contain bg-[var(--card-solid)] p-1 border border-[var(--border)] shrink-0 shadow-xs"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--primary)] to-[var(--accent)] text-white font-extrabold text-xs flex items-center justify-center shrink-0 shadow-xs">
+                    {orgBranding.name.slice(0, 2).toUpperCase()}
+                  </div>
+                )}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--primary)] px-2 py-0.5 rounded-full bg-[var(--primary)]/15">
+                      {t('organizations.inviteToOrganization')}
+                    </span>
+                  </div>
+                  <h3 className="text-sm font-bold text-[var(--color-foreground)] truncate mt-0.5">
+                    {orgBranding.name}
+                  </h3>
+                  {orgBranding.tagline && (
+                    <p className="text-[11px] text-[var(--color-muted-foreground)] truncate">
+                      {orgBranding.tagline}
+                    </p>
+                  )}
+                </div>
+              </motion.div>
+            )}
+
             {/* Conditionally Render Phone or Email Signup Flow */}
             {isPhoneFlow ? (
               <PhoneRegisterForm
@@ -121,6 +191,8 @@ function RegisterFormInner() {
                 callbackUrl={callbackUrl}
                 onBackToEmail={() => setIsPhoneFlow(false)}
                 allowTeacherRegistration={allowTeacherRegistration}
+                initialInviteCode={queryInviteCode}
+                initialRole={queryRole}
               />
             ) : (
               <EmailRegisterForm
@@ -128,6 +200,9 @@ function RegisterFormInner() {
                 callbackUrl={callbackUrl}
                 onSelectPhoneFlow={() => setIsPhoneFlow(true)}
                 allowTeacherRegistration={allowTeacherRegistration}
+                initialInviteCode={queryInviteCode}
+                initialRole={queryRole}
+                orgBranding={orgBranding}
               />
             )}
 

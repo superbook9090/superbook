@@ -6,6 +6,9 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { ROUTES } from '@/constants/routes';
 import { Sparkles, Search, HelpCircle, BookOpen, ArrowRight, Trophy } from 'lucide-react';
 import { useFeature } from '@/contexts/AppSettingsContext';
+import StreakBadge from '@/components/gamification/StreakBadge';
+import { OrganizationBadge } from '@/components/organization/OrganizationBadge';
+import { useSessionStore } from '@/store/useSessionStore';
 
 interface StudentHeroProps {
   userName?: string;
@@ -14,6 +17,7 @@ interface StudentHeroProps {
 
 export default function StudentHero({ userName, enrolledCount }: StudentHeroProps) {
   const { t } = useTranslation();
+  const sessionUser = useSessionStore((s) => s.session?.user);
   const enableCourses = useFeature('enableCourses');
   const enableQuizzes = useFeature('enableQuizzes');
   const enableContests = useFeature('enableContests');
@@ -35,15 +39,26 @@ export default function StudentHero({ userName, enrolledCount }: StudentHeroProp
 
       <div className="relative z-10 flex flex-col md:flex-row md:items-end md:justify-between gap-8">
         <div className="space-y-4 max-w-2xl">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold bg-[var(--student-soft)] text-[var(--student-primary)] border border-[var(--student-border)]/50 shadow-sm"
-          >
-            <Sparkles className="w-4 h-4" />
-            <span>{t('dashboard.studentDashboard')}</span>
-          </motion.div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 }}
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold bg-[var(--student-soft)] text-[var(--student-primary)] border border-[var(--student-border)]/50 shadow-sm"
+            >
+              <Sparkles className="w-4 h-4" />
+              <span>{t('dashboard.studentDashboard')}</span>
+            </motion.div>
+            {sessionUser?.organizationName && (
+              <OrganizationBadge
+                name={sessionUser.organizationName}
+                logo={sessionUser.organizationLogo}
+                color={sessionUser.organizationColor}
+                variant="pill"
+              />
+            )}
+            <StreakBadge compact />
+          </div>
           
           <div className="space-y-2">
             <motion.h2 

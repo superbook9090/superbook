@@ -11,6 +11,7 @@ import {
   Award,
   Newspaper,
   Trophy,
+  BookMarked,
 } from 'lucide-react';
 import { useFeature } from '@/contexts/AppSettingsContext';
 import { ResponsiveGrid } from '@/components/layout';
@@ -75,6 +76,15 @@ export default function StudentQuickLinks() {
             delay={0.18}
           />
         )}
+
+        <QuickActionCard
+          icon={BookMarked}
+          title={t('common.mistakes') || 'Mistakes Notebook'}
+          description="Revise questions you got wrong"
+          href={ROUTES.student.mistakes}
+          color="warning"
+          delay={0.2}
+        />
 
         {enableNotes && (
           <QuickActionCard

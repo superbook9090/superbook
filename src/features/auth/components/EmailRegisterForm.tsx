@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { useSessionStore } from '@/store/useSessionStore';
 import { registerAccount } from '@/lib/api/auth';
 import { motion } from 'framer-motion';
-import { Mail, Lock, User, Building2, ArrowRight } from 'lucide-react';
+import { Mail, Lock, User, Building2, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { TextField } from '@/components/ui/TextField';
 import { Loader } from '@/components/ui/Loader';
 import { getDashboardHomePath } from '@/lib/roles';
@@ -29,6 +29,13 @@ interface EmailRegisterFormProps {
   callbackUrl: string;
   onSelectPhoneFlow: () => void;
   allowTeacherRegistration: boolean;
+  initialInviteCode?: string;
+  initialRole?: UserRole;
+  orgBranding?: {
+    name: string;
+    logo?: string | null;
+    tagline?: string | null;
+  } | null;
 }
 
 export default function EmailRegisterForm({
@@ -36,6 +43,9 @@ export default function EmailRegisterForm({
   callbackUrl,
   onSelectPhoneFlow,
   allowTeacherRegistration,
+  initialInviteCode,
+  initialRole,
+  orgBranding,
 }: EmailRegisterFormProps) {
   const { t } = useTranslation();
   const { addAlert } = useAlert();
@@ -46,10 +56,22 @@ export default function EmailRegisterForm({
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'student' as UserRole,
-    inviteCode: '',
+    role: (initialRole || 'student') as UserRole,
+    inviteCode: initialInviteCode || '',
   });
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (initialInviteCode) {
+      setFormData((prev) => ({ ...prev, inviteCode: initialInviteCode }));
+    }
+  }, [initialInviteCode]);
+
+  useEffect(() => {
+    if (initialRole) {
+      setFormData((prev) => ({ ...prev, role: initialRole }));
+    }
+  }, [initialRole]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -196,6 +218,12 @@ export default function EmailRegisterForm({
           startIcon={<Building2 className="w-4 h-4 text-[var(--color-muted)]" />}
           fullWidth
         />
+        {orgBranding && (
+          <p className="mt-1 flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            <span>{t('organizations.verifiedInvite')}: {orgBranding.name}</span>
+          </p>
+        )}
       </motion.div>
 
       {/* Submit Button */}

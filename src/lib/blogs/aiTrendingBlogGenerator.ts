@@ -125,30 +125,25 @@ async function callGeminiFallback(prompt: string): Promise<string> {
 }
 
 async function discoverDynamicTrendingTopic(language: 'en' | 'hi'): Promise<{ topic: string; title: string }> {
+  // If the user didn't specify topic/title, pick one immediately with variation or quickly probe AI with tight 6s timeout
   try {
-    const researchPrompt = `You are an SEO & educational trends analyst for Quiz-Do (an online learning platform).
-Identify ONE highly searched, current trending educational, competitive examination, or technology topic for 2026.
-It should be suitable for a 2000+ word authoritative academic guide that ranks high on Google and attracts high organic search traffic.
-
-Return strictly a valid JSON object without markdown fences or extra text:
-{
-  "topic": "Concise Category or Topic Name (e.g. Exam Strategy, Machine Learning, UPSC Current Affairs, Quantum Computing, Neuroscience)",
-  "title": "A compelling, high-CTR, SEO-optimized working title in ${language === 'hi' ? 'Hindi (हिंदी)' : 'English'}"
-}`;
+    const researchPrompt = `You are an SEO & educational trends analyst for Quiz-Do.
+Identify ONE high-volume trending educational or technology topic for 2026.
+Return strictly valid JSON: {"topic":"Topic Name","title":"Catchy SEO Title in ${language === 'hi' ? 'Hindi' : 'English'}"}`;
 
     let raw = '';
     try {
       const result = await fetchOpenRouterChat([
-        { role: 'system', content: 'You are an SEO trend research engine. Respond strictly with raw JSON.' },
+        { role: 'system', content: 'Respond strictly with raw JSON.' },
         { role: 'user', content: researchPrompt },
       ], {
-        maxTokens: 500,
+        maxTokens: 200,
         temperature: 0.8,
+        timeoutMs: 6000,
       });
       raw = result.content;
     } catch {
-      // Fallback to Gemini if OpenRouter fails
-      raw = await callGeminiFallback(researchPrompt).catch(() => '');
+      // Fast fallback without wasting more time
     }
 
     if (raw) {
@@ -208,7 +203,7 @@ Your writing must strictly adhere to Google Search Quality Rater Guidelines (E-E
 5. FORMAT: You must return STRICTLY valid JSON with no extraneous commentary:
 {
   "title": "Compelling, keyword-rich title (max 90 chars)",
-  "slug": "url-friendly-lowercase-slug-without-special-characters",
+  "slug": "url-friendly-lowercase-slug-without-special-characters (always in English Latin alphabet, even for Hindi articles)",
   "topic": "${topic}",
   "language": "${language}",
   "excerpt": "Clear 2-sentence summary of the article (140-160 chars)",
@@ -242,28 +237,45 @@ Return ONLY the raw JSON object.`;
 
   let rawOutput = '';
 
-  // 1. Try OpenRouter if configured
-  if (process.env.OPENROUTER_API_KEY) {
+  // 1. Prioritize Gemini if available (consistently generates 2000+ words in 10-18s with no rate-limiting timeouts)
+  const geminiKey =
+    process.env.GEMINI_API_KEY ||
+    process.env.GOOGLE_AI_API_KEY ||
+    process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+
+  if (geminiKey) {
+    try {
+      const combinedPrompt = `${systemPrompt}\n\nUSER REQUEST:\n${userPrompt}`;
+      rawOutput = await callGeminiFallback(combinedPrompt);
+    } catch (err) {
+      console.warn('[TrendingBlogAi] Gemini attempt failed, falling back to OpenRouter...', err);
+    }
+  }
+
+  // 2. Fallback to OpenRouter if Gemini was not configured or threw an error
+  if (!rawOutput && process.env.OPENROUTER_API_KEY) {
     try {
       const result = await fetchOpenRouterChat(messages, {
         temperature: 0.7,
         maxTokens: 8000,
-        timeoutMs: 55000,
+        timeoutMs: 40000,
         autoSwitchOnLimit: true,
       });
       rawOutput = result.content;
     } catch (err) {
-      console.warn('[TrendingBlogAi] OpenRouter call failed, attempting Gemini API...', err);
+      console.warn('[TrendingBlogAi] OpenRouter call failed:', err);
     }
   }
 
-  // 2. Fallback to Gemini if OpenRouter was missing or failed
+  // 3. Verify output from providers
   if (!rawOutput) {
-    const combinedPrompt = `${systemPrompt}\n\nUSER REQUEST:\n${userPrompt}`;
-    rawOutput = await callGeminiFallback(combinedPrompt);
+    if (!geminiKey && !process.env.OPENROUTER_API_KEY) {
+      throw new Error('Neither GEMINI_API_KEY nor OPENROUTER_API_KEY is configured in environment.');
+    }
+    throw new Error('Failed to generate blog content from AI providers (Gemini & OpenRouter). Please check API quotas and connection.');
   }
 
-  // 3. Clean up JSON response
+  // 4. Clean up JSON response
   let cleaned = rawOutput.trim();
   if (cleaned.startsWith('```json')) {
     cleaned = cleaned.replace(/^```json\s*/i, '').replace(/\s*```$/i, '');
@@ -290,7 +302,7 @@ Return ONLY the raw JSON object.`;
   const plainText = content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
   const wordCount = plainText.split(/\s+/).filter(Boolean).length;
 
-  // Build clean slug
+  // Build clean slug (with Latin fallback for Hindi or non-ASCII titles)
   const title = (parsed.title || chosenTitle).trim();
   const rawSlug = (parsed.slug || title)
     .toLowerCase()
@@ -300,7 +312,16 @@ Return ONLY the raw JSON object.`;
     .replace(/-+/g, '-')
     .slice(0, 160);
 
-  const slug = `${rawSlug || 'trending-guide'}-${Date.now().toString(36)}`;
+  const topicSlug = (parsed.topic || topic || 'trending-guide')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .slice(0, 60);
+
+  const slugBase = rawSlug || topicSlug || 'trending-guide';
+  const slug = `${slugBase}-${Date.now().toString(36)}`;
 
   return {
     title,

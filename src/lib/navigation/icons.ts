@@ -22,6 +22,7 @@ import {
   Swords,
   Settings,
   GraduationCap,
+  BookMarked,
 } from 'lucide-react';
 import type { NavIconName } from '@/constants/navigation';
 
@@ -48,6 +49,7 @@ export const NAV_ICON_MAP: Record<NavIconName, LucideIcon> = {
   Swords,
   Settings,
   GraduationCap,
+  BookMarked,
 };
 
 export function getNavIcon(name: NavIconName): LucideIcon {

@@ -24,6 +24,8 @@ import {
   recordChallengeAttemptIfLinked,
   QuestionGradingDoc,
 } from '@/lib/quizzes/quizAttemptEvaluation';
+import { recordUserActivity } from '@/lib/gamification/streakService';
+import { recordMistakes } from '@/lib/learning/mistakesService';
 import type { Types } from 'mongoose';
 
 // GET /api/quiz-attempts
@@ -56,7 +58,7 @@ export async function GET(request: NextRequest) {
     if (cached) {
       return NextResponse.json(cached, {
         status: 200,
-        headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120' },
+        headers: { 'Cache-Control': 'private, s-maxage=60, stale-while-revalidate=120' },
       });
     }
 
@@ -127,7 +129,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(responseData, {
       status: 200,
-      headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120' },
+      headers: { 'Cache-Control': 'private, s-maxage=60, stale-while-revalidate=120' },
     });
   } catch (error) {
     logApiError(error as Error, 'GET', '/api/quiz-attempts', logContext);
@@ -176,6 +178,7 @@ export async function POST(request: NextRequest) {
 
     const quiz = (await Quiz.findById(quizId).populate('course', '_id').lean()) as {
       _id: Types.ObjectId;
+      title?: string;
       isPublished: boolean;
       course: { _id: Types.ObjectId };
       version: number;
@@ -261,6 +264,56 @@ export async function POST(request: NextRequest) {
       await attempt.save();
 
       await updateCourseEnrollmentProgress(session.user.id, courseId);
+
+      // Gamification: Update user learning streak
+      await recordUserActivity(session.user.id, 'quiz').catch((e) =>
+        console.error('[QuizAttempt] Streak update error:', e)
+      );
+
+      // Mistakes Notebook: Log incorrectly answered questions
+      const incorrectAnswers = answers.filter((a) => {
+        const q = byId.get(a.questionId);
+        return q && a.selectedOption !== -1 && a.selectedOption !== q.correctOption;
+      });
+      if (incorrectAnswers.length > 0) {
+        const qMap = new Map(
+          (qRows as unknown as Array<{ _id: Types.ObjectId; prompt: string; options: string[]; correctOption: number; explanation?: string }>).map((q) => [
+            q._id.toString(),
+            q,
+          ])
+        );
+        const mistakeItems = incorrectAnswers
+          .map((a) => {
+            const q = qMap.get(a.questionId);
+            if (!q) return null;
+            return {
+              questionId: a.questionId,
+              prompt: q.prompt,
+              options: q.options,
+              correctOption: q.correctOption,
+              selectedOption: a.selectedOption,
+              explanation: q.explanation,
+            };
+          })
+          .filter(Boolean) as Array<{
+            questionId: string;
+            prompt: string;
+            options: string[];
+            correctOption: number;
+            selectedOption: number;
+            explanation?: string;
+          }>;
+
+        if (mistakeItems.length > 0) {
+          await recordMistakes({
+            userId: session.user.id,
+            items: mistakeItems,
+            sourceType: 'quiz',
+            sourceId: quiz._id.toString(),
+            sourceTitle: quiz.title,
+          }).catch((e) => console.error('[QuizAttempt] Mistake record error:', e));
+        }
+      }
 
       const challengeSlug = await recordChallengeAttemptIfLinked(
         attempt,

@@ -63,13 +63,17 @@ export function OrganizationDetailModal({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  // Construct Direct Registration Link
-  const registerUrl = useMemo(() => {
+  // Construct Direct Registration Links for Students & Teachers
+  const studentRegisterUrl = useMemo(() => {
     if (!org) return '';
-    if (typeof window !== 'undefined') {
-      return `${window.location.origin}/register?inviteCode=${encodeURIComponent(org.inviteCode)}`;
-    }
-    return `/register?inviteCode=${org.inviteCode}`;
+    const base = typeof window !== 'undefined' ? window.location.origin : 'https://quiz-do.com';
+    return `${base}/register?inviteCode=${encodeURIComponent(org.inviteCode)}&role=student`;
+  }, [org]);
+
+  const teacherRegisterUrl = useMemo(() => {
+    if (!org) return '';
+    const base = typeof window !== 'undefined' ? window.location.origin : 'https://quiz-do.com';
+    return `${base}/register?inviteCode=${encodeURIComponent(org.inviteCode)}&role=teacher`;
   }, [org]);
 
   if (!isOpen || !org) return null;
@@ -198,38 +202,77 @@ export function OrganizationDetailModal({
           </div>
 
           {/* Direct Registration Link Share Box */}
-          <div className="bg-[var(--card-solid)] border border-[var(--primary)]/30 rounded-xl p-3.5 shadow-xs">
-            <div className="flex items-center gap-2 mb-1.5">
-              <LinkIcon className="w-4 h-4 text-[var(--primary)]" />
-              <span className="text-xs font-bold text-[var(--color-foreground)]">
-                {t('organizations.registrationLink')}
-              </span>
+          <div className="bg-[var(--card-solid)] border border-[var(--primary)]/30 rounded-xl p-3.5 shadow-xs space-y-3">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <LinkIcon className="w-4 h-4 text-[var(--primary)]" />
+                <span className="text-xs font-bold text-[var(--color-foreground)]">
+                  {t('organizations.registrationLink')}
+                </span>
+              </div>
+              <p className="text-[11px] text-[var(--color-muted-foreground)]">
+                {t('organizations.registrationLinkDesc')}
+              </p>
             </div>
-            <p className="text-[11px] text-[var(--color-muted-foreground)] mb-2.5">
-              {t('organizations.registrationLinkDesc')}
-            </p>
-            <div className="flex items-center gap-2 bg-[var(--color-surface-muted)] px-3 py-2 rounded-lg border border-[var(--border)]">
-              <span className="text-xs font-mono text-[var(--color-foreground)] truncate flex-1 select-all">
-                {registerUrl}
+
+            {/* Student Link */}
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--student-primary)] block mb-1">
+                {t('organizations.inviteStudents')}
               </span>
-              <Button
-                onClick={() => onCopy(registerUrl, 'inviteLink')}
-                variant="primary"
-                size="sm"
-                className="shrink-0 flex items-center gap-1.5 text-xs py-1 px-2.5"
-              >
-                {copiedCode === `inviteLink-${registerUrl}` ? (
-                  <>
-                    <Check className="w-3.5 h-3.5 text-white" />
-                    <span>{t('organizations.codeCopied')}</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-3.5 h-3.5" />
-                    <span>{t('organizations.copyInviteLink')}</span>
-                  </>
-                )}
-              </Button>
+              <div className="flex items-center gap-2 bg-[var(--color-surface-muted)] px-3 py-1.5 rounded-lg border border-[var(--border)]">
+                <span className="text-xs font-mono text-[var(--color-foreground)] truncate flex-1 select-all">
+                  {studentRegisterUrl}
+                </span>
+                <Button
+                  onClick={() => onCopy(studentRegisterUrl, 'studentLink')}
+                  variant="primary"
+                  size="sm"
+                  className="shrink-0 flex items-center gap-1.5 text-xs py-1 px-2.5"
+                >
+                  {copiedCode === `studentLink-${studentRegisterUrl}` ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-white" />
+                      <span>{t('organizations.codeCopied')}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>{t('organizations.copyInviteLink')}</span>
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            {/* Teacher Link */}
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--teacher-primary)] block mb-1">
+                {t('organizations.inviteTeachers')}
+              </span>
+              <div className="flex items-center gap-2 bg-[var(--color-surface-muted)] px-3 py-1.5 rounded-lg border border-[var(--border)]">
+                <span className="text-xs font-mono text-[var(--color-foreground)] truncate flex-1 select-all">
+                  {teacherRegisterUrl}
+                </span>
+                <Button
+                  onClick={() => onCopy(teacherRegisterUrl, 'teacherLink')}
+                  variant="secondary"
+                  size="sm"
+                  className="shrink-0 flex items-center gap-1.5 text-xs py-1 px-2.5"
+                >
+                  {copiedCode === `teacherLink-${teacherRegisterUrl}` ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-500" />
+                      <span>{t('organizations.codeCopied')}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>{t('organizations.copyInviteLink')}</span>
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
 

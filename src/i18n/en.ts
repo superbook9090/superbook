@@ -36,6 +36,7 @@ export const en = {
     no: 'No',
     notAvailable: 'N/A',
     quizzes: 'Quizzes',
+    mistakes: 'Mistakes Notebook',
     contests: 'Contests',
     aCourse: 'a course',
     chaptersShort: 'Ch.',
@@ -2332,6 +2333,15 @@ export const en = {
     deleteConfirm: 'Are you sure you want to delete this organization? This action cannot be undone.',
     failedFetchOrganizations: 'Failed to fetch organizations',
     namePlaceholder: 'e.g., Springdale High School',
+    inviteMembers: 'Invite Members',
+    inviteToOrganization: 'Joining Organization',
+    chooseInviteRole: 'Choose Role to Invite',
+    inviteStudents: 'Invite Students',
+    inviteTeachers: 'Invite Teachers',
+    studentDirectLink: 'Direct Student Registration Link',
+    teacherDirectLink: 'Direct Teacher Registration Link',
+    shareOnWhatsApp: 'Share via WhatsApp',
+    verifiedInvite: 'Joining',
   },
 
   // Not Found

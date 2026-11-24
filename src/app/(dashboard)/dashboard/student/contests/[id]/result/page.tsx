@@ -14,6 +14,8 @@ import {
 import { ContestLeaderboard } from '@/features/contests/components/ContestLeaderboard';
 import { ContestSolutionsReview } from '@/features/contests/components/ContestSolutionsReview';
 import { ContestPrizesShowcase } from '@/features/contests/components/ContestPrizesShowcase';
+import { ContestPrintButton } from '@/features/contests/components/ContestPrintButton';
+import { ContestScorecardShareButton } from '@/features/contests/components/ContestScorecardShareButton';
 import { useSessionStore } from '@/store/useSessionStore';
 import {
   Trophy,
@@ -49,7 +51,7 @@ export default function ContestResultPage({ params }: { params: Promise<{ id: st
 
   return (
     <PageWrapper>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <Link
           href={ROUTES.student.contests}
           className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors"
@@ -57,6 +59,25 @@ export default function ContestResultPage({ params }: { params: Promise<{ id: st
           <ArrowLeft className="w-4 h-4" />
           <span>{t('contest.backToContests')}</span>
         </Link>
+
+        <div className="flex flex-wrap items-center gap-2">
+          {reviewData && !reviewData.isLocked && (
+            <ContestPrintButton
+              contestTitle={contest?.title}
+              questionReviews={reviewData.questionReviews || []}
+              userScore={userAttempt?.score}
+              userRank={userRank}
+            />
+          )}
+          <ContestScorecardShareButton
+            contestTitle={contest?.title || 'Daily Contest'}
+            contestSlug={contest?.slug}
+            contestId={id}
+            score={userAttempt?.score}
+            rank={userRank}
+            percentage={userAttempt?.percentage}
+          />
+        </div>
       </div>
 
       {/* Hero Summary Card */}

@@ -153,7 +153,8 @@ export async function GET(req: NextRequest) {
   try {
     // 1. Verify Vercel Cron Secret (if configured) or Superadmin session
     const authHeader = req.headers.get('authorization');
-    const isCronAuthorized = !process.env.CRON_SECRET || authHeader === `Bearer ${process.env.CRON_SECRET}`;
+    const isCronAuthorized =
+      Boolean(process.env.CRON_SECRET) && authHeader === `Bearer ${process.env.CRON_SECRET}`;
 
     let isSuperAdmin = false;
     if (!isCronAuthorized) {
@@ -164,7 +165,7 @@ export async function GET(req: NextRequest) {
     }
 
     if (!isCronAuthorized && !isSuperAdmin) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ message: 'Unauthorized. Superadmin session or valid CRON_SECRET is required.' }, { status: 401 });
     }
 
     // 1b. Verify feature toggle

@@ -5,6 +5,7 @@ import { ChevronRight, ShieldCheck, UserCheck, Sparkles, BookOpen } from 'lucide
 import BackButton from '@/components/ui/BackButton';
 import PublicBlogShareButtons from '@/components/blogs/PublicBlogShareButtons';
 import PublicBlogViewTracker from '@/components/blogs/PublicBlogViewTracker';
+import ArticleAudioPlayer from '@/components/blogs/ArticleAudioPlayer';
 import {
   buildPublicBlogCanonical,
   buildPublicBlogPath,
@@ -198,6 +199,14 @@ export default async function PublicBlogDetailPage({
               <span>•</span>
               <span className="font-medium text-[var(--color-foreground)]">{authorName}</span>
             </div>
+
+            <ArticleAudioPlayer
+              title={blog.title}
+              htmlContent={blog.content}
+              readingTimeMinutes={blog.readingTimeMinutes}
+              language={blog.language}
+              className="mt-4"
+            />
           </header>
 
           <div

@@ -174,6 +174,7 @@ export interface ContestQuestionReview {
   selectedOption: number;
   isCorrect: boolean;
   pointsEarned: number;
+  explanation?: string;
 }
 
 export interface ContestReviewResponse {

@@ -49,8 +49,14 @@ export async function POST(request: Request) {
 
     // Handle organization joining via invite code
     let organizationId = null;
-    if (inviteCode) {
-      const organization = await Organization.findOne({ inviteCode, isActive: true });
+    if (inviteCode && typeof inviteCode === 'string') {
+      const trimmedCode = inviteCode.trim();
+      const escaped = trimmedCode.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`^${escaped}$`, 'i');
+      const organization = await Organization.findOne({
+        $or: [{ inviteCode: regex }, { code: regex }],
+        isActive: true,
+      });
       if (!organization) {
         return NextResponse.json(
           { message: 'Invalid invite code' },

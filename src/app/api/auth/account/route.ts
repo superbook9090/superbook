@@ -30,11 +30,31 @@ export async function GET() {
     }
 
     let organizationName = null;
+    let organization = null;
     if (user.organizationId) {
       const Organization = (await import('@/models/Organization')).default;
-      const org = await Organization.findById(user.organizationId).select('name').lean<{ name?: string }>();
+      const org = await Organization.findById(user.organizationId)
+        .select('name logo primaryColor website tagline inviteCode code')
+        .lean<{
+          name?: string;
+          logo?: string;
+          primaryColor?: string;
+          website?: string;
+          tagline?: string;
+          inviteCode?: string;
+          code?: string;
+        }>();
       if (org) {
         organizationName = org.name;
+        organization = {
+          name: org.name,
+          logo: org.logo || null,
+          primaryColor: org.primaryColor || null,
+          website: org.website || null,
+          tagline: org.tagline || null,
+          inviteCode: org.inviteCode || '',
+          code: org.code || '',
+        };
       }
     }
 
@@ -48,6 +68,7 @@ export async function GET() {
       ),
       canCreateContests: Boolean(user.canCreateContests || user.organizationId || session.user.role === 'superadmin'),
       organizationName,
+      organization,
     });
   } catch (error) {
     logApiError(error as Error, 'GET', '/api/auth/account', logContext);
