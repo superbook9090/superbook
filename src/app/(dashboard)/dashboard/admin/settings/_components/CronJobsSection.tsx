@@ -342,10 +342,10 @@ export function CronJobsSection() {
               Superadmin Maintenance Script
             </div>
             <h3 className="font-bold text-sm sm:text-base text-[var(--color-foreground)]">
-              Delete Inactive Courses (&gt; 10 Days Old &amp; 0 Enrollments)
+              Delete Inactive Courses (0 Enrollments · Select Days)
             </h3>
             <p className="text-xs text-[var(--color-muted-foreground)] leading-relaxed max-w-2xl">
-              Scans for courses created more than 10 days ago with 0 verified student enrollments, lets you preview and confirm the exact list, deletes all selected courses &amp; related data, and sends the standard removal notice email to each instructor.
+              Scans for courses created older than your selected number of days (default 10 days) with 0 verified student enrollments, lets you preview and confirm the exact list (including linked quizzes), deletes all selected courses &amp; related data, and sends the standard removal notice email to each instructor.
             </p>
           </div>
 
@@ -375,10 +375,10 @@ export function CronJobsSection() {
               Superadmin Maintenance Script
             </div>
             <h3 className="font-bold text-sm sm:text-base text-[var(--color-foreground)]">
-              Delete Inactive Quizzes (&gt; 10 Days Old &amp; 0 Attempts)
+              Delete Inactive Quizzes (0 Attempts · Select Days)
             </h3>
             <p className="text-xs text-[var(--color-muted-foreground)] leading-relaxed max-w-2xl">
-              Scans for quizzes created more than 10 days ago with 0 verified student attempts (automatically excluding any quizzes linked to contests or viral challenges), lets you preview and confirm the list, and deletes all selected quizzes &amp; questions silently without sending emails.
+              Scans for quizzes created older than your selected number of days (default 10 days) with 0 verified student attempts (automatically excluding any quizzes linked to contests or viral challenges), lets you preview and confirm the list, and deletes all selected quizzes &amp; questions silently without sending emails.
             </p>
           </div>
 

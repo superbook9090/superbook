@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Shield, Smartphone, Activity, Building2 } from 'lucide-react';
+import { Shield, Smartphone, Activity, Building2, UserCheck } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 
 interface UseUsersFilterChipsProps {
@@ -11,6 +11,8 @@ interface UseUsersFilterChipsProps {
   setPlatformFilter: (p: string) => void;
   activityFilter: string;
   setActivityFilter: (a: string) => void;
+  statusFilter: string;
+  setStatusFilter: (s: string) => void;
   orgFilter: string;
   setOrgFilter: (org: string) => void;
   setPage: (p: number) => void;
@@ -25,6 +27,8 @@ export function useUsersFilterChips({
   setPlatformFilter,
   activityFilter,
   setActivityFilter,
+  statusFilter,
+  setStatusFilter,
   orgFilter,
   setOrgFilter,
   setPage,
@@ -45,6 +49,19 @@ export function useUsersFilterChips({
         { id: 'student', label: t('roles.student') },
         { id: 'teacher', label: t('roles.teacher') },
         { id: 'admin', label: t('roles.admin') },
+        ...(isSuper ? [{ id: 'superadmin', label: t('roles.superadmin') }] : []),
+      ],
+    },
+    {
+      label: t('adminUsers.statusFilter'),
+      icon: <UserCheck className="w-3.5 h-3.5" aria-hidden />,
+      value: statusFilter,
+      onChange: (val: string) => { setStatusFilter(val); setPage(1); },
+      neutralValue: 'all',
+      options: [
+        { id: 'all', label: t('adminUsers.allStatuses') },
+        { id: 'active', label: t('adminUsers.active') },
+        { id: 'suspended', label: t('adminUsers.suspended') },
       ],
     },
     {

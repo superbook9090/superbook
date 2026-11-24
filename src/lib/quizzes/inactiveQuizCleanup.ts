@@ -11,6 +11,17 @@ import { deleteQuizzesAndQuestions } from '@/lib/cascade/deleteRelated';
 import { invalidatePattern } from '@/lib/redis';
 
 export const INACTIVE_QUIZ_MIN_AGE_DAYS = 10;
+export const INACTIVE_QUIZ_MIN_DAYS = 1;
+export const INACTIVE_QUIZ_MAX_DAYS = 3650;
+
+export function parseQuizCleanupDays(raw: unknown, fallback = INACTIVE_QUIZ_MIN_AGE_DAYS): number | null {
+  if (raw === undefined || raw === null || raw === '') return fallback;
+  const num = typeof raw === 'number' ? raw : Number(String(raw).trim());
+  if (!Number.isInteger(num) || num < INACTIVE_QUIZ_MIN_DAYS || num > INACTIVE_QUIZ_MAX_DAYS) {
+    return null;
+  }
+  return num;
+}
 
 export interface InactiveQuizCandidate {
   _id: string;
@@ -58,12 +69,14 @@ interface RawQuizDoc {
 }
 
 export async function findInactiveZeroAttemptQuizzes(
-  onlyQuizIds?: string[]
-): Promise<{ quizzes: InactiveQuizCandidate[]; cutoffDate: Date }> {
+  onlyQuizIds?: string[],
+  minAgeDays = INACTIVE_QUIZ_MIN_AGE_DAYS
+): Promise<{ quizzes: InactiveQuizCandidate[]; cutoffDate: Date; minAgeDays: number }> {
   await dbConnect();
 
+  const resolvedDays = parseQuizCleanupDays(minAgeDays) ?? INACTIVE_QUIZ_MIN_AGE_DAYS;
   const nowMs = Date.now();
-  const cutoffDate = new Date(nowMs - INACTIVE_QUIZ_MIN_AGE_DAYS * 24 * 60 * 60 * 1000);
+  const cutoffDate = new Date(nowMs - resolvedDays * 24 * 60 * 60 * 1000);
 
   const filter: Record<string, unknown> = {
     createdAt: { $lt: cutoffDate },
@@ -74,7 +87,7 @@ export async function findInactiveZeroAttemptQuizzes(
       .filter((id) => typeof id === 'string' && mongoose.Types.ObjectId.isValid(id))
       .map((id) => new mongoose.Types.ObjectId(id));
     if (validIds.length === 0) {
-      return { quizzes: [], cutoffDate };
+      return { quizzes: [], cutoffDate, minAgeDays: resolvedDays };
     }
     filter._id = { $in: validIds };
   }
@@ -87,7 +100,7 @@ export async function findInactiveZeroAttemptQuizzes(
     .lean()) as unknown as RawQuizDoc[];
 
   if (oldQuizzes.length === 0) {
-    return { quizzes: [], cutoffDate };
+    return { quizzes: [], cutoffDate, minAgeDays: resolvedDays };
   }
 
   const candidateIds = oldQuizzes.map((q) => q._id);
@@ -155,23 +168,28 @@ export async function findInactiveZeroAttemptQuizzes(
     });
   }
 
-  return { quizzes: eligibleQuizzes, cutoffDate };
+  return { quizzes: eligibleQuizzes, cutoffDate, minAgeDays: resolvedDays };
 }
 
 export interface QuizCleanupExecutionResult {
   deletedCount: number;
   skippedCount: number;
+  minAgeDays: number;
   deletedQuizzes: Array<{ _id: string; title: string }>;
 }
 
 /**
- * Deletes all eligible inactive quizzes (created > 10 days ago, 0 attempts, not used by contests/challenges)
+ * Deletes all eligible inactive quizzes (created > N days ago, 0 attempts, not used by contests/challenges)
  * along with their questions. Intentionally sends NO emails.
  */
 export async function cleanupInactiveZeroAttemptQuizzes(params?: {
   quizIds?: string[];
+  minAgeDays?: number;
 }): Promise<QuizCleanupExecutionResult> {
-  const { quizzes, cutoffDate } = await findInactiveZeroAttemptQuizzes(params?.quizIds);
+  const { quizzes, cutoffDate, minAgeDays } = await findInactiveZeroAttemptQuizzes(
+    params?.quizIds,
+    params?.minAgeDays
+  );
 
   const deletedQuizzes: Array<{ _id: string; title: string }> = [];
   const verifiedDeleteIds: string[] = [];
@@ -220,6 +238,7 @@ export async function cleanupInactiveZeroAttemptQuizzes(params?: {
   return {
     deletedCount: deletedQuizzes.length,
     skippedCount,
+    minAgeDays,
     deletedQuizzes,
   };
 }

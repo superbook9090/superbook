@@ -825,7 +825,7 @@ export const en = {
     systemStats: 'System Stats',
     settings: 'Settings',
     manageSettings: 'Manage Settings',
-    searchUsers: 'Search users...',
+    searchUsers: 'Search by name, email, or phone...',
     allRoles: 'All Roles',
     user: 'User',
     users: 'Users',
@@ -1057,6 +1057,7 @@ export const en = {
     student: 'Student',
     teacher: 'Teacher',
     admin: 'Admin',
+    superadmin: 'Superadmin',
   },
 
   // Navigation
@@ -2214,6 +2215,8 @@ export const en = {
     lastOpened: 'Last Opened',
     active: 'Active',
     suspended: 'Suspended',
+    statusFilter: 'Status',
+    allStatuses: 'All Statuses',
     suspendUser: 'Suspend User Account',
     unsuspendUser: 'Unsuspend Account',
     suspendUserDesc: 'Suspended users are blocked from logging in and accessing platform resources.',

@@ -6,6 +6,9 @@ import { isSuperAdmin } from '@/lib/roles';
 import { logApiError, type LogContext } from '@/lib/logger';
 import {
   INACTIVE_QUIZ_MIN_AGE_DAYS,
+  INACTIVE_QUIZ_MIN_DAYS,
+  INACTIVE_QUIZ_MAX_DAYS,
+  parseQuizCleanupDays,
   findInactiveZeroAttemptQuizzes,
   cleanupInactiveZeroAttemptQuizzes,
 } from '@/lib/quizzes/inactiveQuizCleanup';
@@ -13,7 +16,7 @@ import {
 export const maxDuration = 60;
 
 // GET /api/admin/quizzes/cleanup-inactive — Dry-run preview (Superadmin only)
-export async function GET() {
+export async function GET(req: NextRequest) {
   const logContext: LogContext = {
     method: 'GET',
     path: '/api/admin/quizzes/cleanup-inactive',
@@ -33,11 +36,23 @@ export async function GET() {
 
     logContext.userId = session.user.id;
 
-    const { quizzes, cutoffDate } = await findInactiveZeroAttemptQuizzes();
+    const rawDays = req.nextUrl.searchParams.get('days');
+    const minAgeDays = parseQuizCleanupDays(rawDays, INACTIVE_QUIZ_MIN_AGE_DAYS);
+    if (minAgeDays === null) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: `days must be a whole number between ${INACTIVE_QUIZ_MIN_DAYS} and ${INACTIVE_QUIZ_MAX_DAYS}.`,
+        },
+        { status: 400 }
+      );
+    }
+
+    const { quizzes, cutoffDate } = await findInactiveZeroAttemptQuizzes(undefined, minAgeDays);
 
     return NextResponse.json({
       success: true,
-      minAgeDays: INACTIVE_QUIZ_MIN_AGE_DAYS,
+      minAgeDays,
       cutoffDate: cutoffDate.toISOString(),
       count: quizzes.length,
       quizzes,
@@ -72,7 +87,7 @@ export async function POST(req: NextRequest) {
 
     logContext.userId = session.user.id;
 
-    let body: { confirm?: boolean; quizIds?: unknown } = {};
+    let body: { confirm?: boolean; quizIds?: unknown; days?: unknown } = {};
     try {
       body = await req.json();
     } catch {
@@ -85,6 +100,17 @@ export async function POST(req: NextRequest) {
     if (body.confirm !== true) {
       return NextResponse.json(
         { success: false, message: 'Explicit confirmation (confirm: true) is required before deleting quizzes.' },
+        { status: 400 }
+      );
+    }
+
+    const minAgeDays = parseQuizCleanupDays(body.days, INACTIVE_QUIZ_MIN_AGE_DAYS);
+    if (minAgeDays === null) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: `days must be a whole number between ${INACTIVE_QUIZ_MIN_DAYS} and ${INACTIVE_QUIZ_MAX_DAYS}.`,
+        },
         { status: 400 }
       );
     }
@@ -109,7 +135,7 @@ export async function POST(req: NextRequest) {
       quizIds = body.quizIds as string[];
     }
 
-    const result = await cleanupInactiveZeroAttemptQuizzes({ quizIds });
+    const result = await cleanupInactiveZeroAttemptQuizzes({ quizIds, minAgeDays });
 
     const summaryMessage =
       result.deletedCount === 0

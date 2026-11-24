@@ -19,22 +19,29 @@ export type AdminUsersListResult = {
   stats?: AdminUsersStats;
 };
 
-export function listAdminUsers(params: {
-  search?: string;
-  role?: string;
-  platform?: string;
-  activity?: string;
-  organizationId?: string;
-  page: number;
-}): Promise<AdminUsersListResult> {
+export function listAdminUsers(
+  params: {
+    search?: string;
+    role?: string;
+    platform?: string;
+    activity?: string;
+    status?: string;
+    organizationId?: string;
+    page: number;
+    limit?: number;
+  },
+  options?: { signal?: AbortSignal }
+): Promise<AdminUsersListResult> {
   const sp = new URLSearchParams();
   if (params.search) sp.set('search', params.search);
   if (params.role) sp.set('role', params.role);
   if (params.platform) sp.set('platform', params.platform);
   if (params.activity) sp.set('activity', params.activity);
+  if (params.status) sp.set('status', params.status);
   if (params.organizationId) sp.set('organizationId', params.organizationId);
   sp.set('page', String(params.page));
-  return apiJson(`/api/admin/users?${sp}`, { method: 'GET' });
+  if (params.limit) sp.set('limit', String(params.limit));
+  return apiJson(`/api/admin/users?${sp}`, { method: 'GET', signal: options?.signal });
 }
 
 export function patchAdminUser(body: { userId: string | null; updates: unknown }): Promise<unknown> {

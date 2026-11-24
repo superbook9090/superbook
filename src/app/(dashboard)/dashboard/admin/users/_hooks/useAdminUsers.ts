@@ -1,9 +1,8 @@
 // src/app/(dashboard)/dashboard/admin/users/_hooks/useAdminUsers.ts
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
-import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useAlert } from '@/components/ui/AlertContainer';
 import { useSessionStore } from '@/store/useSessionStore';
 import {
@@ -25,13 +24,16 @@ export function useAdminUsers() {
   const [users, setUsers] = useState<User[]>([]);
   const [stats, setStats] = useState<UserStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isFetching, setIsFetching] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const debouncedSearch = useDebouncedValue(searchQuery, 300);
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [platformFilter, setPlatformFilter] = useState('all');
   const [activityFilter, setActivityFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [orgFilter, setOrgFilter] = useState('all');
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -43,6 +45,26 @@ export function useAdminUsers() {
     logo?: string | null;
   } | null>(null);
   const [pagination, setPagination] = useState({ total: 0, totalPages: 1 });
+
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const requestIdRef = useRef(0);
+  const isFirstSearchMountRef = useRef(true);
+  const errorMessageRef = useRef(t('adminSettings.errorLoadingUsers'));
+  errorMessageRef.current = t('adminSettings.errorLoadingUsers');
+
+  // Batch debounced search + page reset in a single tick to prevent double fetches when searching from page > 1
+  useEffect(() => {
+    if (isFirstSearchMountRef.current) {
+      isFirstSearchMountRef.current = false;
+      return;
+    }
+    const trimmed = searchQuery.trim();
+    const timer = setTimeout(() => {
+      setDebouncedSearch(trimmed);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   useEffect(() => {
     let cancelled = false;
@@ -65,42 +87,71 @@ export function useAdminUsers() {
   }, [session?.user?.organizationId]);
 
   const fetchUsers = useCallback(async () => {
+    abortControllerRef.current?.abort();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+    const currentRequestId = ++requestIdRef.current;
+
+    setIsFetching(true);
     try {
-      const data = await listAdminUsers({
-        search: debouncedSearch || undefined,
-        role: roleFilter === 'all' ? undefined : roleFilter,
-        platform: platformFilter === 'all' ? undefined : platformFilter,
-        activity: activityFilter === 'all' ? undefined : activityFilter,
-        organizationId: orgFilter === 'all' ? undefined : orgFilter,
-        page,
-      });
+      const data = await listAdminUsers(
+        {
+          search: debouncedSearch || undefined,
+          role: roleFilter === 'all' ? undefined : roleFilter,
+          platform: platformFilter === 'all' ? undefined : platformFilter,
+          activity: activityFilter === 'all' ? undefined : activityFilter,
+          status: statusFilter === 'all' ? undefined : statusFilter,
+          organizationId: orgFilter === 'all' ? undefined : orgFilter,
+          page,
+          limit: pageSize,
+        },
+        { signal: controller.signal }
+      );
+      if (currentRequestId !== requestIdRef.current) return;
       setUsers((data.users || []) as User[]);
       setPagination(data.pagination || { total: 0, totalPages: 1 });
       if (data.stats) setStats(data.stats);
     } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return;
+      if (currentRequestId !== requestIdRef.current) return;
       addAlert({
         type: 'error',
-        message: err instanceof ApiClientError ? err.message : t('adminSettings.errorLoadingUsers'),
+        message: err instanceof ApiClientError ? err.message : errorMessageRef.current,
       });
     } finally {
-      setIsLoading(false);
+      if (currentRequestId === requestIdRef.current) {
+        setIsLoading(false);
+        setIsFetching(false);
+      }
     }
-  }, [debouncedSearch, roleFilter, platformFilter, activityFilter, orgFilter, page, t, addAlert]);
+  }, [debouncedSearch, roleFilter, platformFilter, activityFilter, statusFilter, orgFilter, page, pageSize, addAlert]);
 
-  const fetchOrganizations = useCallback(async () => {
-    try {
-      const data = await listOrganizations();
-      setOrganizations((data.organizations || []) as Array<{ _id: string; name: string }>);
-    } catch {
-      // Handled silently
-    }
-  }, []);
+  const sessionUserId = session?.user?.id;
 
+  // Fetch organizations only once per authenticated session
   useEffect(() => {
-    if (status === 'loading' || !session) return;
-    fetchUsers();
-    fetchOrganizations();
-  }, [session, status, fetchUsers, fetchOrganizations]);
+    if (status === 'loading' || !sessionUserId) return;
+    let cancelled = false;
+    listOrganizations()
+      .then((data) => {
+        if (!cancelled) {
+          setOrganizations((data.organizations || []) as Array<{ _id: string; name: string }>);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [sessionUserId, status]);
+
+  // Fetch users whenever query/filter/pagination changes, aborting stale requests
+  useEffect(() => {
+    if (status === 'loading' || !sessionUserId) return;
+    void fetchUsers();
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, [sessionUserId, status, fetchUsers]);
 
   const handleRoleChange = async (userId: string, newRole: string) => {
     try {
@@ -230,10 +281,10 @@ export function useAdminUsers() {
     if (!targetId) return;
     try {
       await deleteAdminUser(targetId);
-      setUsers((prev) => prev.filter((u) => u._id !== targetId));
       setShowDeleteDialog(false);
       setDeleteId(null);
       addAlert({ type: 'success', message: t('adminUsers.userDeletedSuccess') });
+      void fetchUsers();
     } catch (err) {
       addAlert({
         type: 'error',
@@ -242,12 +293,24 @@ export function useAdminUsers() {
     }
   };
 
+  const resetFilters = useCallback(() => {
+    setSearchQuery('');
+    setDebouncedSearch('');
+    setRoleFilter('all');
+    setPlatformFilter('all');
+    setActivityFilter('all');
+    setStatusFilter('all');
+    setOrgFilter('all');
+    setPage(1);
+  }, []);
+
   return {
     session,
     status,
     users,
     stats,
     isLoading,
+    isFetching,
     searchQuery,
     setSearchQuery,
     roleFilter,
@@ -256,10 +319,15 @@ export function useAdminUsers() {
     setPlatformFilter,
     activityFilter,
     setActivityFilter,
+    statusFilter,
+    setStatusFilter,
     orgFilter,
     setOrgFilter,
     page,
     setPage,
+    pageSize,
+    setPageSize,
+    resetFilters,
     deleteId,
     setDeleteId,
     showDeleteDialog,

@@ -5,7 +5,7 @@ import { ROUTES } from '@/constants/routes';
 import { useEffect, useState } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { motion } from 'framer-motion';
-import { Users, ChevronLeft, ChevronRight, RefreshCw, Share2 } from 'lucide-react';
+import { Users, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, RefreshCw, Share2, Loader2 } from 'lucide-react';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import Tooltip from '@/components/ui/Tooltip';
 import Button from '@/components/ui/Button';
@@ -32,6 +32,7 @@ export default function AdminUsersPage() {
     users,
     stats,
     isLoading,
+    isFetching,
     searchQuery,
     setSearchQuery,
     roleFilter,
@@ -40,10 +41,15 @@ export default function AdminUsersPage() {
     setPlatformFilter,
     activityFilter,
     setActivityFilter,
+    statusFilter,
+    setStatusFilter,
     orgFilter,
     setOrgFilter,
     page,
     setPage,
+    pageSize,
+    setPageSize,
+    resetFilters,
     deleteId,
     setDeleteId,
     showDeleteDialog,
@@ -88,6 +94,8 @@ export default function AdminUsersPage() {
     setPlatformFilter,
     activityFilter,
     setActivityFilter,
+    statusFilter,
+    setStatusFilter,
     orgFilter,
     setOrgFilter,
     setPage,
@@ -99,14 +107,8 @@ export default function AdminUsersPage() {
     return <PageSkeleton />;
   }
 
-  const handleResetFilters = () => {
-    setSearchQuery('');
-    setRoleFilter('all');
-    setPlatformFilter('all');
-    setActivityFilter('all');
-    setOrgFilter('all');
-    setPage(1);
-  };
+  const rangeStart = pagination.total === 0 ? 0 : (page - 1) * pageSize + 1;
+  const rangeEnd = Math.min(page * pageSize, pagination.total);
 
   return (
     <PageWrapper>
@@ -151,25 +153,37 @@ export default function AdminUsersPage() {
       <FilterPanel>
         <DashboardListFilters
           searchQuery={searchQuery}
-          onSearchChange={(val) => { setSearchQuery(val); setPage(1); }}
-          onClear={handleResetFilters}
+          onSearchChange={(val) => setSearchQuery(val)}
+          onClear={resetFilters}
           searchPlaceholder={t('admin.searchUsers')}
           chipGroups={filterChips}
+          headerAside={
+            isFetching ? (
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--primary)] shrink-0">
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <span>{t('common.loading')}</span>
+              </span>
+            ) : (
+              <span className="text-xs font-semibold text-[var(--color-muted-foreground)] shrink-0 tabular-nums">
+                {pagination.total.toLocaleString()} {t('adminUsers.totalUsers').toLowerCase()}
+              </span>
+            )
+          }
         />
       </FilterPanel>
 
-      {users.length === 0 ? (
+      {users.length === 0 && !isFetching ? (
         <EmptyState
           title={t('adminUsers.noUsersFound')}
           description={t('adminUsers.noUsersFoundDesc')}
           action={
-            <Button onClick={handleResetFilters} variant="secondary">
+            <Button onClick={resetFilters} variant="secondary">
               {t('common.reset')}
             </Button>
           }
         />
       ) : (
-        <>
+        <div className={`transition-opacity duration-150 ${isFetching ? 'opacity-60 pointer-events-none' : 'opacity-100'}`}>
           <UsersTable
             users={users}
             organizations={organizations}
@@ -182,47 +196,90 @@ export default function AdminUsersPage() {
             organizations={organizations}
             handleOpenUserDetail={(u) => { setSelectedUser(u); setShowUserDetail(true); }}
           />
-        </>
+        </div>
       )}
 
-      {pagination.totalPages > 1 && (
+      {pagination.total > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-2 antigravity-glass border border-[var(--border)] rounded-2xl px-5 py-3 shadow-md"
+          className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-2 antigravity-glass border border-[var(--border)] rounded-2xl px-5 py-3 shadow-md"
         >
-          <p className="text-xs sm:text-sm font-medium text-[var(--color-muted-foreground)]">
-            {t('admin.showing').replace('{current}', String(users.length)).replace('{total}', String(pagination.total))}
-          </p>
-          <div className="flex items-center gap-2">
-            <Tooltip label={t('common.previous')}>
-              <Button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-                aria-label={t('common.previous')}
-                variant="secondary"
-                size="sm"
-                className="p-2 rounded-xl"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-            </Tooltip>
-            <span className="px-3 text-xs sm:text-sm font-bold text-[var(--color-foreground)]">
-              {t('admin.page').replace('{current}', String(page)).replace('{total}', String(pagination.totalPages))}
-            </span>
-            <Tooltip label={t('common.next')}>
-              <Button
-                onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
-                disabled={page === pagination.totalPages}
-                aria-label={t('common.next')}
-                variant="secondary"
-                size="sm"
-                className="p-2 rounded-xl"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </Tooltip>
+          <div className="flex items-center gap-3 flex-wrap justify-center sm:justify-start">
+            <p className="text-xs sm:text-sm font-medium text-[var(--color-muted-foreground)] tabular-nums">
+              {t('admin.showing')
+                .replace('{current}', `${rangeStart}–${rangeEnd}`)
+                .replace('{total}', pagination.total.toLocaleString())}
+            </p>
+            <div className="flex items-center gap-1 text-xs">
+              {[20, 50, 100].map((size) => (
+                <button
+                  key={size}
+                  type="button"
+                  onClick={() => { setPageSize(size); setPage(1); }}
+                  className={`px-2 py-1 rounded-lg font-bold border transition-colors cursor-pointer ${
+                    pageSize === size
+                      ? 'bg-[var(--primary)] text-white border-[var(--primary)]'
+                      : 'bg-[var(--card-solid)] text-[var(--color-muted-foreground)] border-[var(--border)] hover:text-[var(--color-foreground)]'
+                  }`}
+                >
+                  {size}
+                </button>
+              ))}
+            </div>
           </div>
+
+          {pagination.totalPages > 1 && (
+            <div className="flex items-center gap-1.5">
+              <Button
+                onClick={() => setPage(1)}
+                disabled={page === 1 || isFetching}
+                aria-label="First page"
+                variant="secondary"
+                size="sm"
+                className="p-2 rounded-xl"
+              >
+                <ChevronsLeft className="w-4 h-4" />
+              </Button>
+              <Tooltip label={t('common.previous')}>
+                <Button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1 || isFetching}
+                  aria-label={t('common.previous')}
+                  variant="secondary"
+                  size="sm"
+                  className="p-2 rounded-xl"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+              </Tooltip>
+              <span className="px-3 text-xs sm:text-sm font-bold text-[var(--color-foreground)] tabular-nums">
+                {t('admin.page').replace('{current}', String(page)).replace('{total}', String(pagination.totalPages))}
+              </span>
+              <Tooltip label={t('common.next')}>
+                <Button
+                  onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
+                  disabled={page === pagination.totalPages || isFetching}
+                  aria-label={t('common.next')}
+                  variant="secondary"
+                  size="sm"
+                  className="p-2 rounded-xl"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </Tooltip>
+              <Button
+                onClick={() => setPage(pagination.totalPages)}
+                disabled={page === pagination.totalPages || isFetching}
+                aria-label="Last page"
+                variant="secondary"
+                size="sm"
+                className="p-2 rounded-xl"
+              >
+                <ChevronsRight className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
         </motion.div>
       )}
 

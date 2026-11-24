@@ -6,7 +6,10 @@ import { isSuperAdmin } from '@/lib/roles';
 import { logApiError, type LogContext } from '@/lib/logger';
 import {
   INACTIVE_COURSE_MIN_AGE_DAYS,
+  INACTIVE_CLEANUP_MIN_DAYS,
+  INACTIVE_CLEANUP_MAX_DAYS,
   INACTIVE_COURSE_REMOVAL_EMAIL_MESSAGE,
+  parseCleanupDays,
   findInactiveZeroEnrollmentCourses,
   cleanupInactiveZeroEnrollmentCourses,
 } from '@/lib/courses/inactiveCourseCleanup';
@@ -14,7 +17,7 @@ import {
 export const maxDuration = 60;
 
 // GET /api/admin/courses/cleanup-inactive — Dry-run preview (Superadmin only)
-export async function GET() {
+export async function GET(req: NextRequest) {
   const logContext: LogContext = {
     method: 'GET',
     path: '/api/admin/courses/cleanup-inactive',
@@ -34,7 +37,19 @@ export async function GET() {
 
     logContext.userId = session.user.id;
 
-    const { courses, cutoffDate } = await findInactiveZeroEnrollmentCourses();
+    const rawDays = req.nextUrl.searchParams.get('days');
+    const minAgeDays = parseCleanupDays(rawDays, INACTIVE_COURSE_MIN_AGE_DAYS);
+    if (minAgeDays === null) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: `days must be a whole number between ${INACTIVE_CLEANUP_MIN_DAYS} and ${INACTIVE_CLEANUP_MAX_DAYS}.`,
+        },
+        { status: 400 }
+      );
+    }
+
+    const { courses, cutoffDate } = await findInactiveZeroEnrollmentCourses(undefined, minAgeDays);
 
     const uniqueEmails = new Set(
       courses
@@ -44,7 +59,7 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
-      minAgeDays: INACTIVE_COURSE_MIN_AGE_DAYS,
+      minAgeDays,
       cutoffDate: cutoffDate.toISOString(),
       emailMessage: INACTIVE_COURSE_REMOVAL_EMAIL_MESSAGE,
       count: courses.length,
@@ -81,7 +96,7 @@ export async function POST(req: NextRequest) {
 
     logContext.userId = session.user.id;
 
-    let body: { confirm?: boolean; courseIds?: unknown } = {};
+    let body: { confirm?: boolean; courseIds?: unknown; days?: unknown } = {};
     try {
       body = await req.json();
     } catch {
@@ -94,6 +109,17 @@ export async function POST(req: NextRequest) {
     if (body.confirm !== true) {
       return NextResponse.json(
         { success: false, message: 'Explicit confirmation (confirm: true) is required before deleting courses.' },
+        { status: 400 }
+      );
+    }
+
+    const minAgeDays = parseCleanupDays(body.days, INACTIVE_COURSE_MIN_AGE_DAYS);
+    if (minAgeDays === null) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: `days must be a whole number between ${INACTIVE_CLEANUP_MIN_DAYS} and ${INACTIVE_CLEANUP_MAX_DAYS}.`,
+        },
         { status: 400 }
       );
     }
@@ -121,6 +147,7 @@ export async function POST(req: NextRequest) {
     const result = await cleanupInactiveZeroEnrollmentCourses({
       deletedBy: session.user.name || session.user.email || 'Superadmin',
       courseIds,
+      minAgeDays,
     });
 
     const summaryMessage =

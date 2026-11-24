@@ -33,17 +33,19 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search');
     const platform = searchParams.get('platform');
     const activity = searchParams.get('activity');
+    const status = searchParams.get('status');
     const organizationIdParam = searchParams.get('organizationId');
     const pageParam = searchParams.get('page');
     const limitParam = searchParams.get('limit');
     const page = pageParam ? Math.max(1, parseInt(pageParam, 10) || 1) : 1;
-    const limit = limitParam ? Math.max(1, parseInt(limitParam, 10) || 20) : 20;
+    const limit = limitParam ? Math.min(100, Math.max(1, parseInt(limitParam, 10) || 20)) : 20;
 
     const { query, orgFilter } = buildAdminUsersQuery(authResult, {
       role,
       search,
       platform,
       activity,
+      status,
       organizationIdParam,
     });
 

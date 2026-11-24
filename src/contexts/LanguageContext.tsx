@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, ReactNode, useEffect, useCallback, useMemo } from 'react';
 import { translate, type Language, type TranslationKeyInput } from '@/i18n';
 import { supportedLanguages } from '@/i18n/config';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
@@ -25,8 +25,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     }
   });
 
-  const t = (key: TranslationKeyInput, params?: Record<string, string | number>): string =>
-    translate(lang, key, params);
+  const t = useCallback(
+    (key: TranslationKeyInput, params?: Record<string, string | number>): string =>
+      translate(lang, key, params),
+    [lang]
+  );
 
   useEffect(() => {
     document.documentElement.lang = lang;
@@ -51,13 +54,21 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     });
   }, [lang]);
 
-  const setLang = (language: Language) => {
-    setLangState(language);
-    setLanguageCookie(language);
-  };
+  const setLang = useCallback(
+    (language: Language) => {
+      setLangState(language);
+      setLanguageCookie(language);
+    },
+    [setLangState]
+  );
+
+  const contextValue = useMemo(
+    () => ({ lang, setLang, t }),
+    [lang, setLang, t]
+  );
 
   return (
-    <LanguageContext.Provider value={{ lang, setLang, t }}>
+    <LanguageContext.Provider value={contextValue}>
       {children}
     </LanguageContext.Provider>
   );

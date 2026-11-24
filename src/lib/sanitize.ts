@@ -103,6 +103,11 @@ export function validateObjectId(id: string): boolean {
   return /^[0-9a-fA-F]{24}$/.test(id);
 }
 
+// Escape regex special characters for safe MongoDB $regex matching
+export function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 // Sanitize search query
 export function sanitizeSearchQuery(query: string): string {
   return query

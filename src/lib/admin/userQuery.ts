@@ -1,5 +1,6 @@
+import mongoose from 'mongoose';
 import User from '@/models/User';
-import { sanitizeSearchQuery, validateObjectId } from '@/lib/sanitize';
+import { escapeRegex, sanitizeSearchQuery, validateObjectId } from '@/lib/sanitize';
 import { AdminAuthResult } from './adminAuth';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -10,6 +11,7 @@ export interface AdminUserQueryParams {
   search?: string | null;
   platform?: string | null;
   activity?: string | null;
+  status?: string | null;
   organizationIdParam?: string | null;
 }
 
@@ -17,20 +19,20 @@ export function buildAdminUsersQuery(
   authResult: AdminAuthResult,
   params: AdminUserQueryParams
 ): { query: QueryFilter; orgFilter: QueryFilter } {
-  const { role, search, platform, activity, organizationIdParam } = params;
+  const { role, search, platform, activity, status, organizationIdParam } = params;
 
   let orgFilter: QueryFilter = {};
   if (!authResult.isSuperAdmin) {
-    if (!authResult.organizationId) {
+    if (!authResult.organizationId || !validateObjectId(authResult.organizationId)) {
       orgFilter = { organizationId: null };
     } else {
-      orgFilter = { organizationId: authResult.organizationId };
+      orgFilter = { organizationId: new mongoose.Types.ObjectId(authResult.organizationId) };
     }
-  } else if (organizationIdParam) {
+  } else if (organizationIdParam && organizationIdParam !== 'all') {
     if (organizationIdParam === 'null' || organizationIdParam === 'none') {
       orgFilter = { organizationId: null };
     } else if (validateObjectId(organizationIdParam)) {
-      orgFilter = { organizationId: organizationIdParam };
+      orgFilter = { organizationId: new mongoose.Types.ObjectId(organizationIdParam) };
     }
   }
 
@@ -42,6 +44,14 @@ export function buildAdminUsersQuery(
 
   if (role && role !== 'all') {
     andClauses.push({ role });
+  }
+
+  if (status && status !== 'all') {
+    if (status === 'suspended') {
+      andClauses.push({ isSuspended: true });
+    } else if (status === 'active') {
+      andClauses.push({ isSuspended: { $ne: true } });
+    }
   }
 
   if (platform && platform !== 'all') {
@@ -82,12 +92,19 @@ export function buildAdminUsersQuery(
 
   if (search) {
     const sanitizedSearch = sanitizeSearchQuery(search);
-    andClauses.push({
-      $or: [
-        { name: { $regex: sanitizedSearch, $options: 'i' } },
-        { email: { $regex: sanitizedSearch, $options: 'i' } },
-      ],
-    });
+    const tokens = sanitizedSearch.split(/\s+/).filter(Boolean).slice(0, 6);
+    if (tokens.length > 0) {
+      for (const token of tokens) {
+        const escaped = escapeRegex(token);
+        andClauses.push({
+          $or: [
+            { name: { $regex: escaped, $options: 'i' } },
+            { email: { $regex: escaped, $options: 'i' } },
+            { phone: { $regex: escaped, $options: 'i' } },
+          ],
+        });
+      }
+    }
   }
 
   const query =
@@ -104,17 +121,10 @@ export async function fetchAdminUsersWithStats(
 ) {
   const skip = (page - 1) * limit;
   const now = Date.now();
+  const oneDayAgo = new Date(now - 24 * 60 * 60 * 1000);
+  const thirtyDaysAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
 
-  const [
-    users,
-    total,
-    statsAgg,
-    suspendedCount,
-    appUsersCount,
-    webUsersCount,
-    dauCount,
-    mauCount,
-  ] = await Promise.all([
+  const [users, total, statsRows] = await Promise.all([
     User.find(query)
       .select('-password')
       .sort({ createdAt: -1 })
@@ -126,41 +136,63 @@ export async function fetchAdminUsersWithStats(
       { $match: orgFilter },
       {
         $group: {
-          _id: '$role',
-          count: { $sum: 1 },
+          _id: null,
+          total: { $sum: 1 },
+          students: { $sum: { $cond: [{ $eq: ['$role', 'student'] }, 1, 0] } },
+          teachers: { $sum: { $cond: [{ $eq: ['$role', 'teacher'] }, 1, 0] } },
+          admins: { $sum: { $cond: [{ $eq: ['$role', 'admin'] }, 1, 0] } },
+          superadmins: { $sum: { $cond: [{ $eq: ['$role', 'superadmin'] }, 1, 0] } },
+          suspended: { $sum: { $cond: [{ $eq: ['$isSuspended', true] }, 1, 0] } },
+          appUsers: {
+            $sum: { $cond: [{ $in: ['$lastPlatform', ['android', 'ios']] }, 1, 0] },
+          },
+          webUsers: {
+            $sum: {
+              $cond: [
+                { $in: ['$lastPlatform', ['android', 'ios']] },
+                0,
+                1,
+              ],
+            },
+          },
+          activeToday: {
+            $sum: { $cond: [{ $gte: ['$lastActiveAt', oneDayAgo] }, 1, 0] },
+          },
+          activeMonthly: {
+            $sum: { $cond: [{ $gte: ['$lastActiveAt', thirtyDaysAgo] }, 1, 0] },
+          },
         },
       },
     ]),
-    User.countDocuments({ ...orgFilter, isSuspended: true }),
-    User.countDocuments({ ...orgFilter, lastPlatform: { $in: ['android', 'ios'] } }),
-    User.countDocuments({
-      ...orgFilter,
-      $or: [{ lastPlatform: 'web' }, { lastPlatform: { $exists: false } }, { lastPlatform: null }],
-    }),
-    User.countDocuments({ ...orgFilter, lastActiveAt: { $gte: new Date(now - 24 * 60 * 60 * 1000) } }),
-    User.countDocuments({ ...orgFilter, lastActiveAt: { $gte: new Date(now - 30 * 24 * 60 * 60 * 1000) } }),
   ]);
 
-  const stats = {
-    total: 0,
-    students: 0,
-    teachers: 0,
-    admins: 0,
-    superadmins: 0,
-    suspended: suspendedCount,
-    appUsers: appUsersCount,
-    webUsers: webUsersCount,
-    activeToday: dauCount,
-    activeMonthly: mauCount,
-  };
+  const agg = statsRows[0] as
+    | {
+        total: number;
+        students: number;
+        teachers: number;
+        admins: number;
+        superadmins: number;
+        suspended: number;
+        appUsers: number;
+        webUsers: number;
+        activeToday: number;
+        activeMonthly: number;
+      }
+    | undefined;
 
-  statsAgg.forEach((item: { _id: string; count: number }) => {
-    stats.total += item.count;
-    if (item._id === 'student') stats.students = item.count;
-    else if (item._id === 'teacher') stats.teachers = item.count;
-    else if (item._id === 'admin') stats.admins = item.count;
-    else if (item._id === 'superadmin') stats.superadmins = item.count;
-  });
+  const stats = {
+    total: agg?.total ?? 0,
+    students: agg?.students ?? 0,
+    teachers: agg?.teachers ?? 0,
+    admins: agg?.admins ?? 0,
+    superadmins: agg?.superadmins ?? 0,
+    suspended: agg?.suspended ?? 0,
+    appUsers: agg?.appUsers ?? 0,
+    webUsers: agg?.webUsers ?? 0,
+    activeToday: agg?.activeToday ?? 0,
+    activeMonthly: agg?.activeMonthly ?? 0,
+  };
 
   return {
     users,

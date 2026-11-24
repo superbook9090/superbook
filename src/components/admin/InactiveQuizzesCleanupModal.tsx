@@ -14,6 +14,7 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import CleanupDaysSelector from '@/components/admin/CleanupDaysSelector';
 
 export interface InactiveQuizPreviewItem {
   _id: string;
@@ -49,24 +50,27 @@ export function InactiveQuizzesCleanupModal({
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   const [isExecuting, setIsExecuting] = useState(false);
   const [step, setStep] = useState<'select' | 'confirm'>('select');
+  const [days, setDays] = useState(10);
+  const [cutoffDate, setCutoffDate] = useState<string | null>(null);
   const [quizzes, setQuizzes] = useState<InactiveQuizPreviewItem[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [resultMessage, setResultMessage] = useState<string | null>(null);
 
-  const loadPreview = useCallback(async () => {
+  const loadPreview = useCallback(async (targetDays: number) => {
     setIsLoadingPreview(true);
     setError(null);
     setResultMessage(null);
     setStep('select');
     try {
-      const res = await fetch('/api/admin/quizzes/cleanup-inactive');
+      const res = await fetch(`/api/admin/quizzes/cleanup-inactive?days=${targetDays}`);
       const data = await res.json();
       if (!res.ok || !data.success) {
         throw new Error(data.message || 'Failed to load inactive quizzes preview');
       }
       const list: InactiveQuizPreviewItem[] = data.quizzes || [];
       setQuizzes(list);
+      setCutoffDate(data.cutoffDate || null);
       setSelectedIds(new Set(list.map((q) => q._id)));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load preview');
@@ -77,9 +81,17 @@ export function InactiveQuizzesCleanupModal({
 
   useEffect(() => {
     if (isOpen) {
-      void loadPreview();
+      void loadPreview(days);
     }
-  }, [isOpen, loadPreview]);
+  }, [isOpen, days, loadPreview]);
+
+  const handleApplyDays = (nextDays: number) => {
+    if (nextDays === days) {
+      void loadPreview(nextDays);
+    } else {
+      setDays(nextDays);
+    }
+  };
 
   const selectedQuizzes = useMemo(
     () => quizzes.filter((q) => selectedIds.has(q._id)),
@@ -113,6 +125,7 @@ export function InactiveQuizzesCleanupModal({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           confirm: true,
+          days,
           quizIds: Array.from(selectedIds),
         }),
       });
@@ -146,7 +159,7 @@ export function InactiveQuizzesCleanupModal({
               <h2 className="text-base sm:text-lg font-bold text-[var(--color-foreground)]">
                 {step === 'confirm'
                   ? 'Confirm Permanent Quiz Deletion'
-                  : 'Clean Up Inactive Quizzes (10+ Days, 0 Attempts)'}
+                  : `Clean Up Inactive Quizzes (${days}+ Days, 0 Attempts)`}
               </h2>
               <p className="text-xs text-[var(--color-muted-foreground)]">
                 {step === 'confirm'
@@ -182,11 +195,20 @@ export function InactiveQuizzesCleanupModal({
             </div>
           )}
 
+          {step === 'select' && (
+            <CleanupDaysSelector
+              days={days}
+              cutoffDate={cutoffDate}
+              disabled={isLoadingPreview || isExecuting}
+              onApplyDays={handleApplyDays}
+            />
+          )}
+
           {isLoadingPreview ? (
             <div className="py-12 flex flex-col items-center justify-center gap-2.5">
               <Loader2 className="w-7 h-7 animate-spin text-[var(--primary)]" />
               <span className="text-xs text-[var(--color-muted-foreground)]">
-                Scanning quizzes older than 10 days with 0 attempts...
+                Scanning quizzes older than {days} day(s) with 0 attempts...
               </span>
             </div>
           ) : quizzes.length === 0 ? (
@@ -196,7 +218,7 @@ export function InactiveQuizzesCleanupModal({
                 No eligible inactive quizzes found
               </p>
               <p className="text-xs text-[var(--color-muted-foreground)] max-w-sm mx-auto">
-                Every quiz created more than 10 days ago has student attempts or is actively linked to a contest or challenge.
+                Every quiz created more than {days} day(s) ago has student attempts or is actively linked to a contest or challenge.
               </p>
             </div>
           ) : step === 'confirm' ? (

@@ -12,6 +12,17 @@ import { sendCourseDeletionEmail } from '@/lib/email';
 import { invalidatePattern } from '@/lib/redis';
 
 export const INACTIVE_COURSE_MIN_AGE_DAYS = 10;
+export const INACTIVE_CLEANUP_MIN_DAYS = 1;
+export const INACTIVE_CLEANUP_MAX_DAYS = 3650;
+
+export function parseCleanupDays(raw: unknown, fallback = INACTIVE_COURSE_MIN_AGE_DAYS): number | null {
+  if (raw === undefined || raw === null || raw === '') return fallback;
+  const num = typeof raw === 'number' ? raw : Number(String(raw).trim());
+  if (!Number.isInteger(num) || num < INACTIVE_CLEANUP_MIN_DAYS || num > INACTIVE_CLEANUP_MAX_DAYS) {
+    return null;
+  }
+  return num;
+}
 
 export const INACTIVE_COURSE_REMOVAL_EMAIL_MESSAGE =
   'We have reviewed your course and have decided to remove it from our platform due to insufficient content and a lack of activity, such as student enrollments or regular updates.\n\nYou are welcome to resubmit the course once it has been updated with more comprehensive content and is actively maintained.';
@@ -55,12 +66,14 @@ interface RawCourseDoc {
 }
 
 export async function findInactiveZeroEnrollmentCourses(
-  onlyCourseIds?: string[]
-): Promise<{ courses: InactiveCourseCandidate[]; cutoffDate: Date }> {
+  onlyCourseIds?: string[],
+  minAgeDays = INACTIVE_COURSE_MIN_AGE_DAYS
+): Promise<{ courses: InactiveCourseCandidate[]; cutoffDate: Date; minAgeDays: number }> {
   await dbConnect();
 
+  const resolvedDays = parseCleanupDays(minAgeDays) ?? INACTIVE_COURSE_MIN_AGE_DAYS;
   const nowMs = Date.now();
-  const cutoffDate = new Date(nowMs - INACTIVE_COURSE_MIN_AGE_DAYS * 24 * 60 * 60 * 1000);
+  const cutoffDate = new Date(nowMs - resolvedDays * 24 * 60 * 60 * 1000);
 
   const filter: Record<string, unknown> = {
     createdAt: { $lt: cutoffDate },
@@ -71,7 +84,7 @@ export async function findInactiveZeroEnrollmentCourses(
       .filter((id) => typeof id === 'string' && mongoose.Types.ObjectId.isValid(id))
       .map((id) => new mongoose.Types.ObjectId(id));
     if (validIds.length === 0) {
-      return { courses: [], cutoffDate };
+      return { courses: [], cutoffDate, minAgeDays: resolvedDays };
     }
     filter._id = { $in: validIds };
   }
@@ -83,7 +96,7 @@ export async function findInactiveZeroEnrollmentCourses(
     .lean()) as unknown as RawCourseDoc[];
 
   if (oldCourses.length === 0) {
-    return { courses: [], cutoffDate };
+    return { courses: [], cutoffDate, minAgeDays: resolvedDays };
   }
 
   // Authoritative check directly against the Enrollment collection (never trust denormalized enrolledCount alone)
@@ -157,7 +170,7 @@ export async function findInactiveZeroEnrollmentCourses(
     });
   }
 
-  return { courses: zeroEnrollmentCourses, cutoffDate };
+  return { courses: zeroEnrollmentCourses, cutoffDate, minAgeDays: resolvedDays };
 }
 
 export interface CleanupExecutionResult {
@@ -166,14 +179,19 @@ export interface CleanupExecutionResult {
   emailsSent: number;
   emailsFailed: number;
   emailsSkipped: number;
+  minAgeDays: number;
   deletedCourses: Array<{ _id: string; title: string; instructorEmail: string | null }>;
 }
 
 export async function cleanupInactiveZeroEnrollmentCourses(params: {
   deletedBy: string;
   courseIds?: string[];
+  minAgeDays?: number;
 }): Promise<CleanupExecutionResult> {
-  const { courses, cutoffDate } = await findInactiveZeroEnrollmentCourses(params.courseIds);
+  const { courses, cutoffDate, minAgeDays } = await findInactiveZeroEnrollmentCourses(
+    params.courseIds,
+    params.minAgeDays
+  );
 
   const deletedCourses: Array<{ _id: string; title: string; instructorEmail: string | null }> = [];
   const affectedOrgIds = new Set<string>();
@@ -277,6 +295,7 @@ export async function cleanupInactiveZeroEnrollmentCourses(params: {
     emailsSent,
     emailsFailed,
     emailsSkipped,
+    minAgeDays,
     deletedCourses,
   };
 }

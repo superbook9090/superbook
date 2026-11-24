@@ -15,6 +15,7 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import CleanupDaysSelector from '@/components/admin/CleanupDaysSelector';
 
 export interface InactiveCoursePreviewItem {
   _id: string;
@@ -48,25 +49,28 @@ export function InactiveCoursesCleanupModal({
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   const [isExecuting, setIsExecuting] = useState(false);
   const [step, setStep] = useState<'select' | 'confirm'>('select');
+  const [days, setDays] = useState(10);
+  const [cutoffDate, setCutoffDate] = useState<string | null>(null);
   const [courses, setCourses] = useState<InactiveCoursePreviewItem[]>([]);
   const [emailMessage, setEmailMessage] = useState('');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [resultMessage, setResultMessage] = useState<string | null>(null);
 
-  const loadPreview = useCallback(async () => {
+  const loadPreview = useCallback(async (targetDays: number) => {
     setIsLoadingPreview(true);
     setError(null);
     setResultMessage(null);
     setStep('select');
     try {
-      const res = await fetch('/api/admin/courses/cleanup-inactive');
+      const res = await fetch(`/api/admin/courses/cleanup-inactive?days=${targetDays}`);
       const data = await res.json();
       if (!res.ok || !data.success) {
         throw new Error(data.message || 'Failed to load inactive courses preview');
       }
       const list: InactiveCoursePreviewItem[] = data.courses || [];
       setCourses(list);
+      setCutoffDate(data.cutoffDate || null);
       setEmailMessage(data.emailMessage || '');
       setSelectedIds(new Set(list.map((c) => c._id)));
     } catch (err) {
@@ -78,9 +82,17 @@ export function InactiveCoursesCleanupModal({
 
   useEffect(() => {
     if (isOpen) {
-      void loadPreview();
+      void loadPreview(days);
     }
-  }, [isOpen, loadPreview]);
+  }, [isOpen, days, loadPreview]);
+
+  const handleApplyDays = (nextDays: number) => {
+    if (nextDays === days) {
+      void loadPreview(nextDays);
+    } else {
+      setDays(nextDays);
+    }
+  };
 
   const selectedCourses = useMemo(
     () => courses.filter((c) => selectedIds.has(c._id)),
@@ -129,6 +141,7 @@ export function InactiveCoursesCleanupModal({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           confirm: true,
+          days,
           courseIds: Array.from(selectedIds),
         }),
       });
@@ -162,7 +175,7 @@ export function InactiveCoursesCleanupModal({
               <h2 className="text-base sm:text-lg font-bold text-[var(--color-foreground)]">
                 {step === 'confirm'
                   ? 'Confirm Permanent Deletion'
-                  : 'Clean Up Inactive Courses (10+ Days, 0 Enrollments)'}
+                  : `Clean Up Inactive Courses (${days}+ Days, 0 Enrollments)`}
               </h2>
               <p className="text-xs text-[var(--color-muted-foreground)]">
                 {step === 'confirm'
@@ -198,11 +211,20 @@ export function InactiveCoursesCleanupModal({
             </div>
           )}
 
+          {step === 'select' && (
+            <CleanupDaysSelector
+              days={days}
+              cutoffDate={cutoffDate}
+              disabled={isLoadingPreview || isExecuting}
+              onApplyDays={handleApplyDays}
+            />
+          )}
+
           {isLoadingPreview ? (
             <div className="py-12 flex flex-col items-center justify-center gap-2.5">
               <Loader2 className="w-7 h-7 animate-spin text-[var(--primary)]" />
               <span className="text-xs text-[var(--color-muted-foreground)]">
-                Scanning courses older than 10 days with 0 verified student enrollments...
+                Scanning courses older than {days} day(s) with 0 verified student enrollments...
               </span>
             </div>
           ) : courses.length === 0 ? (
@@ -212,7 +234,7 @@ export function InactiveCoursesCleanupModal({
                 No eligible inactive courses found
               </p>
               <p className="text-xs text-[var(--color-muted-foreground)] max-w-sm mx-auto">
-                Every course created more than 10 days ago currently has at least 1 enrolled student.
+                Every course created more than {days} day(s) ago currently has at least 1 enrolled student.
               </p>
             </div>
           ) : step === 'confirm' ? (

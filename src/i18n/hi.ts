@@ -825,7 +825,7 @@ export const hi = {
     systemStats: 'सिस्टम आँकड़े',
     settings: 'सेटिंग्स',
     manageSettings: 'सेटिंग्स प्रबंधित करें',
-    searchUsers: 'यूज़र खोजें...',
+    searchUsers: 'नाम, ईमेल या फोन से खोजें...',
     allRoles: 'सभी भूमिकाएं',
     user: 'यूज़र',
     users: 'यूज़र',
@@ -1057,6 +1057,7 @@ export const hi = {
     student: 'छात्र',
     teacher: 'शिक्षक',
     admin: 'एडमिन',
+    superadmin: 'सुपरएडमिन',
   },
 
   // Navigation
@@ -2214,6 +2215,8 @@ export const hi = {
     lastOpened: 'अंतिम बार खोला गया',
     active: 'सक्रिय',
     suspended: 'निलंबित',
+    statusFilter: 'स्थिति',
+    allStatuses: 'सभी स्थितियां',
     suspendUser: 'यूज़र खाता निलंबित करें',
     unsuspendUser: 'खाता पुनः सक्रिय करें',
     suspendUserDesc: 'निलंबित यूज़रओं को लॉगिन करने और प्लेटफ़ॉर्म रिसोर्सेज़ों तक पहुंचने से रोक दिया जाता है।',
