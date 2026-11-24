@@ -8,10 +8,19 @@ export type NoteSortOption =
   | 'wordCount-desc';
 
 export type NoteViewMode = 'grid' | 'list';
+export type NoteScope = 'mine' | 'all';
+
+export interface NoteOwner {
+  _id: string;
+  name: string;
+  email: string;
+  role?: string;
+}
 
 export interface NoteItem {
   _id: string;
   userId: string;
+  owner?: NoteOwner | null;
   title: string;
   content: string;
   wordCount: number;

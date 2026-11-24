@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Pin, Edit2, Trash2, Eye, Copy, Check, Tag } from 'lucide-react';
+import { Pin, Edit2, Trash2, Eye, Copy, Check, Tag, User } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { NOTE_CATEGORIES, type NoteItem } from '@/features/notes/types';
 
@@ -81,9 +81,24 @@ export function NoteCard({
         </div>
 
         {/* Note Title */}
-        <h3 className="font-bold text-base text-[var(--color-foreground)] line-clamp-1 mb-2 group-hover:text-[var(--color-primary)] transition-colors">
+        <h3 className="font-bold text-base text-[var(--color-foreground)] line-clamp-1 mb-1.5 group-hover:text-[var(--color-primary)] transition-colors">
           {note.title}
         </h3>
+
+        {/* Owner Badge (Superadmin All Notes view) */}
+        {note.owner && (
+          <div className="flex items-center gap-1.5 text-[11px] text-[var(--color-muted-foreground)] mb-2">
+            <User className="w-3 h-3 shrink-0 text-[var(--primary)]" />
+            <span className="font-semibold text-[var(--color-foreground)] truncate">
+              {note.owner.name}
+            </span>
+            {note.owner.role && (
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold uppercase bg-[var(--color-surface-muted)] border border-[var(--border)] shrink-0">
+                {note.owner.role}
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Snippet Content */}
         <p className="text-sm text-[var(--color-muted)] line-clamp-3 leading-relaxed mb-4 whitespace-pre-wrap">

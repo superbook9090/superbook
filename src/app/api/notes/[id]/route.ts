@@ -8,6 +8,7 @@ import { updateNoteSchema } from '@/lib/validation';
 import { countWords } from '@/lib/wordCount';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { requireFeature } from '@/lib/settingsHelpers';
+import { isSuperAdmin } from '@/lib/roles';
 
 export async function GET(
   _req: NextRequest,
@@ -28,7 +29,10 @@ export async function GET(
 
     await dbConnect();
 
-    const note = await Note.findOne({ _id: id, userId: session.user.id }).lean();
+    const query = isSuperAdmin(session.user.role)
+      ? { _id: id }
+      : { _id: id, userId: session.user.id };
+    const note = await Note.findOne(query).lean();
     if (!note) {
       return NextResponse.json({ message: 'Note not found' }, { status: 404 });
     }
@@ -71,7 +75,10 @@ export async function PATCH(
 
     await dbConnect();
 
-    const note = await Note.findOne({ _id: id, userId: session.user.id });
+    const query = isSuperAdmin(session.user.role)
+      ? { _id: id }
+      : { _id: id, userId: session.user.id };
+    const note = await Note.findOne(query);
     if (!note) {
       return NextResponse.json({ message: 'Note not found' }, { status: 404 });
     }
@@ -134,7 +141,10 @@ export async function DELETE(
 
     await dbConnect();
 
-    const note = await Note.findOneAndDelete({ _id: id, userId: session.user.id });
+    const query = isSuperAdmin(session.user.role)
+      ? { _id: id }
+      : { _id: id, userId: session.user.id };
+    const note = await Note.findOneAndDelete(query);
     if (!note) {
       return NextResponse.json({ message: 'Note not found' }, { status: 404 });
     }

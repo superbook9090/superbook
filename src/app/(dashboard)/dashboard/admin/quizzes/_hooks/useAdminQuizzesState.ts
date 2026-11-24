@@ -114,5 +114,6 @@ export function useAdminQuizzesState() {
     clearFilters,
     handleTogglePublish,
     handleDelete,
+    refetch,
   };
 }

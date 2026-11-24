@@ -1,13 +1,14 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import type { NoteItem, NoteColor, NoteSortOption, NoteViewMode } from '@/features/notes/types';
+import type { NoteItem, NoteColor, NoteSortOption, NoteViewMode, NoteScope } from '@/features/notes/types';
 import { computeNotesStats, filterAndSortNotes } from '@/features/notes/utils';
 
-export type { NoteItem, NoteColor, NoteSortOption, NoteViewMode };
+export type { NoteItem, NoteColor, NoteSortOption, NoteViewMode, NoteScope };
 
 const VIEW_MODE_STORAGE_KEY = 'quizdo_notes_view_mode';
 
-export function useNotes() {
+export function useNotes(scope: NoteScope = 'mine') {
   const [rawNotes, setRawNotes] = useState<NoteItem[]>([]);
+  const [ownNotesCount, setOwnNotesCount] = useState<number>(0);
   const [limit, setLimit] = useState<number>(5);
   const [maxWordsPerPage, setMaxWordsPerPage] = useState<number>(1000);
   const [loading, setLoading] = useState<boolean>(true);
@@ -46,10 +47,13 @@ export function useNotes() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/notes');
+      const endpoint = scope === 'all' ? '/api/notes?scope=all' : '/api/notes';
+      const res = await fetch(endpoint);
       if (!res.ok) throw new Error('Failed to fetch notes');
       const data = await res.json();
-      setRawNotes(data.notes || []);
+      const loadedNotes: NoteItem[] = data.notes || [];
+      setRawNotes(loadedNotes);
+      setOwnNotesCount(typeof data.ownNotesCount === 'number' ? data.ownNotesCount : loadedNotes.length);
       setLimit(data.limit ?? 5);
       setMaxWordsPerPage(data.maxWordsPerPage ?? 1000);
     } catch (err: unknown) {
@@ -58,7 +62,7 @@ export function useNotes() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [scope]);
 
   useEffect(() => {
     fetchNotes();
@@ -178,9 +182,10 @@ export function useNotes() {
     notes: filteredNotes,
     rawNotes,
     allNotesCount: rawNotes.length,
+    ownNotesCount,
     limit,
     maxWordsPerPage,
-    isLimitReached: rawNotes.length >= limit,
+    isLimitReached: ownNotesCount >= limit,
     isFiltered: Boolean(searchQuery.trim() || selectedCategory !== 'all' || selectedTag || showPinnedOnly),
     loading,
     saving,

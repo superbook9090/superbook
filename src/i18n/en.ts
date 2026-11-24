@@ -2574,6 +2574,10 @@ export const en = {
   notes: {
     loadingNotes: 'Loading your notes...',
     title: 'My Notes',
+    myNotesTab: 'My Notes',
+    allUsersNotes: 'All Notes',
+    allUsersNotesHint: 'Viewing notes across all users (Superadmin only)',
+    uniqueAuthorsCount: '{count} unique authors',
     subtitle: 'Create, organize, and store your personal study, lesson plans, and reference notes.',
     addNote: 'Add Note',
     editNote: 'Edit Note',

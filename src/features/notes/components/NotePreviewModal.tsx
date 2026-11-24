@@ -11,6 +11,7 @@ import {
   Calendar,
   FileText,
   Tag,
+  User,
 } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import Button from '@/components/ui/Button';
@@ -143,6 +144,20 @@ export function NotePreviewModal({
         <div className="flex-1 overflow-y-auto p-6 space-y-5">
           {/* Metadata bar */}
           <div className="flex items-center gap-4 text-xs text-[var(--color-muted)] pb-3 border-b border-[var(--color-border)] flex-wrap">
+            {note.owner && (
+              <span className="inline-flex items-center gap-1.5 text-[var(--color-foreground)] font-semibold">
+                <User className="w-3.5 h-3.5 text-[var(--primary)]" />
+                <span>{note.owner.name}</span>
+                {note.owner.email && (
+                  <span className="text-[var(--color-muted)] font-normal">({note.owner.email})</span>
+                )}
+                {note.owner.role && (
+                  <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-[var(--color-surface-muted)] border border-[var(--border)]">
+                    {note.owner.role}
+                  </span>
+                )}
+              </span>
+            )}
             <span className="flex items-center gap-1">
               <Calendar className="w-3.5 h-3.5" />
               {t('notes.lastUpdated').replace('{time}', updatedDate)}

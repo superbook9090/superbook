@@ -3,9 +3,11 @@
 import { ROUTES } from '@/constants/routes';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { BookOpen, LayoutGrid, Table as TableIcon } from 'lucide-react';
+import { BookOpen, LayoutGrid, Table as TableIcon, Trash2 } from 'lucide-react';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { useAlert } from '@/components/ui/AlertContainer';
+import Button from '@/components/ui/Button';
+import InactiveCoursesCleanupModal from '@/components/admin/InactiveCoursesCleanupModal';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { Course } from '@/types';
@@ -32,6 +34,7 @@ export default function AdminCoursesPage() {
   const [filter, setFilter] = useState<PublishStatusFilter>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
+  const [showCleanupModal, setShowCleanupModal] = useState(false);
   const ITEMS_PER_PAGE = 12;
   const { addAlert } = useAlert();
 
@@ -110,31 +113,46 @@ export default function AdminCoursesPage() {
           <p className="text-sm sm:text-base text-[var(--color-muted-foreground)]">{t('admin.manageCoursesDesc')}</p>
         </div>
 
-        <div className="flex items-center gap-1.5 p-1.5 rounded-2xl antigravity-glass border border-[var(--border)] self-start sm:self-auto shadow-sm">
-          <button
-            onClick={() => setViewMode('grid')}
-            className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all min-h-[40px] cursor-pointer ${
-              viewMode === 'grid'
-                ? 'bg-[var(--primary)] text-white shadow-md'
-                : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--surface-muted)]'
-            }`}
-            title={t('admin.viewGrid')}
-          >
-            <LayoutGrid className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('admin.viewGrid')}</span>
-          </button>
-          <button
-            onClick={() => setViewMode('table')}
-            className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all min-h-[40px] cursor-pointer ${
-              viewMode === 'table'
-                ? 'bg-[var(--primary)] text-white shadow-md'
-                : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--surface-muted)]'
-            }`}
-            title={t('admin.viewTable')}
-          >
-            <TableIcon className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('admin.viewTable')}</span>
-          </button>
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          {isSuperAdminUser && (
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => setShowCleanupModal(true)}
+              className="flex items-center gap-1.5 min-h-[42px] px-3.5 border-red-500/40 text-red-500 hover:bg-red-500/10 font-bold text-xs shadow-sm"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span>Clean Up Inactive Courses</span>
+            </Button>
+          )}
+
+          <div className="flex items-center gap-1.5 p-1.5 rounded-2xl antigravity-glass border border-[var(--border)] shadow-sm">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all min-h-[40px] cursor-pointer ${
+                viewMode === 'grid'
+                  ? 'bg-[var(--primary)] text-white shadow-md'
+                  : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--surface-muted)]'
+              }`}
+              title={t('admin.viewGrid')}
+            >
+              <LayoutGrid className="w-4 h-4" />
+              <span className="hidden sm:inline">{t('admin.viewGrid')}</span>
+            </button>
+            <button
+              onClick={() => setViewMode('table')}
+              className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all min-h-[40px] cursor-pointer ${
+                viewMode === 'table'
+                  ? 'bg-[var(--primary)] text-white shadow-md'
+                  : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--surface-muted)]'
+              }`}
+              title={t('admin.viewTable')}
+            >
+              <TableIcon className="w-4 h-4" />
+              <span className="hidden sm:inline">{t('admin.viewTable')}</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -216,6 +234,16 @@ export default function AdminCoursesPage() {
           </>
         )}
       </div>
+      {isSuperAdminUser && (
+        <InactiveCoursesCleanupModal
+          isOpen={showCleanupModal}
+          onClose={() => setShowCleanupModal(false)}
+          onCompleted={(message) => {
+            addAlert({ type: 'success', message });
+            void fetchCourses();
+          }}
+        />
+      )}
     </PageWrapper>
   );
 }

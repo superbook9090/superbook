@@ -1,7 +1,7 @@
 // src/app/(dashboard)/dashboard/admin/quizzes/page.tsx
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ROUTES } from '@/constants/routes';
@@ -10,7 +10,10 @@ import { PageSkeleton } from '@/components/ui/Skeleton';
 import Tooltip from '@/components/ui/Tooltip';
 import Button from '@/components/ui/Button';
 import ConfirmModal from '@/components/ui/ConfirmModal';
+import { useAlert } from '@/components/ui/AlertContainer';
 import { useSessionStore } from '@/store/useSessionStore';
+import { isSuperAdmin } from '@/lib/roles';
+import InactiveQuizzesCleanupModal from '@/components/admin/InactiveQuizzesCleanupModal';
 import { useTranslation } from '@/hooks/useTranslation';
 import DashboardListFilters, { FilterPanel } from '@/components/filters/DashboardListFilters';
 import { buildPublishStatusOptions, type PublishStatusFilter } from '@/components/filters/publishStatusOptions';
@@ -26,6 +29,9 @@ export default function AdminQuizzesPage() {
   const { session, status } = useSessionStore();
   const router = useRouter();
   const { t } = useTranslation();
+  const { addAlert } = useAlert();
+  const isSuperAdminUser = isSuperAdmin(session?.user?.role);
+  const [showCleanupModal, setShowCleanupModal] = useState(false);
 
   const {
     page,
@@ -48,6 +54,7 @@ export default function AdminQuizzesPage() {
     clearFilters,
     handleTogglePublish,
     handleDelete,
+    refetch,
   } = useAdminQuizzesState();
 
   useEffect(() => {
@@ -68,7 +75,12 @@ export default function AdminQuizzesPage() {
   return (
     <PageWrapper>
       {/* Hero Banner Header */}
-      <AdminQuizzesHero viewMode={viewMode} onViewModeChange={setViewMode} />
+      <AdminQuizzesHero
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        isSuperAdmin={isSuperAdminUser}
+        onOpenCleanupModal={() => setShowCleanupModal(true)}
+      />
 
       {/* KPI Stats Overview */}
       <AdminQuizzesStats
@@ -201,6 +213,17 @@ export default function AdminQuizzesPage() {
         onCancel={() => setDeleteId(null)}
         type="danger"
       />
+
+      {isSuperAdminUser && (
+        <InactiveQuizzesCleanupModal
+          isOpen={showCleanupModal}
+          onClose={() => setShowCleanupModal(false)}
+          onCompleted={(message) => {
+            addAlert({ type: 'success', message });
+            void refetch();
+          }}
+        />
+      )}
     </PageWrapper>
   );
 }

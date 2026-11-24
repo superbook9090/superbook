@@ -2574,6 +2574,10 @@ export const hi = {
   notes: {
     loadingNotes: 'आपके नोट्स लोड हो रहे हैं...',
     title: 'मेरे नोट्स',
+    myNotesTab: 'मेरे नोट्स',
+    allUsersNotes: 'सभी नोट्स',
+    allUsersNotesHint: 'सभी यूज़र्स के नोट्स देख रहे हैं (केवल सुपरएडमिन)',
+    uniqueAuthorsCount: '{count} लेखक',
     subtitle: 'अपने व्यक्तिगत अध्ययन, लेसन योजना और संदर्भ नोट्स बनाएं, व्यवस्थित करें और सेव करें।',
     addNote: 'नोट ऐड करें',
     editNote: 'नोट एडिट करें',

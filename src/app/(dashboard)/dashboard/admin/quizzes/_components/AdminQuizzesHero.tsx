@@ -2,16 +2,24 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { HelpCircle, Plus, LayoutGrid, Table as TableIcon } from 'lucide-react';
+import { HelpCircle, Plus, LayoutGrid, Table as TableIcon, Trash2 } from 'lucide-react';
 import { ROUTES } from '@/constants/routes';
 import { useTranslation } from '@/hooks/useTranslation';
+import Button from '@/components/ui/Button';
 
 interface AdminQuizzesHeroProps {
   viewMode: 'grid' | 'table';
   onViewModeChange: (mode: 'grid' | 'table') => void;
+  isSuperAdmin?: boolean;
+  onOpenCleanupModal?: () => void;
 }
 
-export function AdminQuizzesHero({ viewMode, onViewModeChange }: AdminQuizzesHeroProps) {
+export function AdminQuizzesHero({
+  viewMode,
+  onViewModeChange,
+  isSuperAdmin = false,
+  onOpenCleanupModal,
+}: AdminQuizzesHeroProps) {
   const { t } = useTranslation();
 
   return (
@@ -27,7 +35,20 @@ export function AdminQuizzesHero({ viewMode, onViewModeChange }: AdminQuizzesHer
         </p>
       </div>
 
-      <div className="flex items-center gap-2.5 self-start sm:self-auto">
+      <div className="flex flex-wrap items-center gap-2.5 self-start sm:self-auto">
+        {isSuperAdmin && onOpenCleanupModal && (
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={onOpenCleanupModal}
+            className="flex items-center gap-1.5 min-h-[42px] px-3.5 border-red-500/40 text-red-500 hover:bg-red-500/10 font-bold text-xs shadow-sm"
+          >
+            <Trash2 className="w-4 h-4" />
+            <span>Clean Up Inactive Quizzes</span>
+          </Button>
+        )}
+
         <div className="flex items-center gap-1 p-1 rounded-2xl antigravity-glass border border-[var(--border)] shadow-sm">
           <button
             type="button"

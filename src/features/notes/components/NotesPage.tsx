@@ -1,9 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Notebook, Plus, RotateCcw } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Notebook, Plus, RotateCcw, Users, Crown } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
-import { useNotes, type NoteItem } from '@/hooks/useNotes';
+import { useNotes, type NoteItem, type NoteScope } from '@/hooks/useNotes';
+import { useSessionStore } from '@/store/useSessionStore';
+import { isSuperAdmin } from '@/lib/roles';
+import { useUrlTab } from '@/hooks/useUrlTab';
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { ResponsiveGrid } from '@/components/layout/ResponsiveGrid';
 import { EmptyState } from '@/components/layout/EmptyState';
@@ -20,10 +23,17 @@ import { NoteDeleteDialog } from './NoteDeleteDialog';
 
 export function NotesPage() {
   const { t } = useTranslation();
+  const session = useSessionStore((s) => s.session);
+  const isSuper = isSuperAdmin(session?.user?.role);
+  const [rawScope, setScope] = useUrlTab<NoteScope>(['mine', 'all'], 'mine', 'scope');
+  const scope: NoteScope = isSuper ? rawScope : 'mine';
+  const isAllScope = scope === 'all';
+
   const {
     notes,
     rawNotes,
     allNotesCount,
+    ownNotesCount,
     limit,
     maxWordsPerPage,
     isLimitReached,
@@ -47,7 +57,13 @@ export function NotesPage() {
     updateNote,
     deleteNote,
     togglePin,
-  } = useNotes();
+  } = useNotes(scope);
+
+  const uniqueAuthorsCount = useMemo(() => {
+    if (!isAllScope) return 0;
+    const ids = new Set(rawNotes.map((n) => n.owner?._id || n.userId).filter(Boolean));
+    return ids.size;
+  }, [isAllScope, rawNotes]);
 
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingNote, setEditingNote] = useState<NoteItem | null>(null);
@@ -90,9 +106,50 @@ export function NotesPage() {
         onOpenAddModal={handleOpenAdd}
       />
 
-      {/* Quota Limit Warning Banner if full */}
-      {isLimitReached ? (
-        <NotesLimitBanner usedPages={allNotesCount} limitPages={limit} />
+      {/* Superadmin-only Scope Toggle: My Notes vs All Users' Notes */}
+      {isSuper && (
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="inline-flex items-center gap-1 p-1 rounded-2xl bg-[var(--color-surface-muted)] border border-[var(--color-border)]">
+            <button
+              type="button"
+              onClick={() => setScope('mine')}
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer min-h-[38px] ${
+                scope === 'mine'
+                  ? 'bg-[var(--card-solid)] text-[var(--color-foreground)] shadow-xs border border-[var(--color-border)]'
+                  : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]'
+              }`}
+            >
+              <Notebook className="w-4 h-4" />
+              <span>{t('notes.myNotesTab')}</span>
+              <span className="px-1.5 py-0.2 rounded-full text-[11px] font-bold bg-[var(--color-primary)]/15 text-[var(--color-primary)]">
+                {ownNotesCount}
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setScope('all')}
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer min-h-[38px] ${
+                scope === 'all'
+                  ? 'bg-[var(--card-solid)] text-amber-500 shadow-xs border border-amber-500/30'
+                  : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]'
+              }`}
+            >
+              <Users className="w-4 h-4" />
+              <span>{t('notes.allUsersNotes')}</span>
+              <Crown className="w-3.5 h-3.5 text-amber-500" />
+            </button>
+          </div>
+          {isAllScope && (
+            <span className="text-xs font-medium text-[var(--color-muted-foreground)]">
+              {t('notes.allUsersNotesHint')}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Quota Limit Warning Banner if full (personal scope only) */}
+      {!isAllScope && isLimitReached ? (
+        <NotesLimitBanner usedPages={ownNotesCount} limitPages={limit} />
       ) : null}
 
       {/* Metric Stats Strip */}
@@ -105,6 +162,8 @@ export function NotesPage() {
         totalTags={stats.allTags.length}
         showPinnedOnly={showPinnedOnly}
         onTogglePinnedFilter={() => setShowPinnedOnly(!showPinnedOnly)}
+        isAllScope={isAllScope}
+        uniqueAuthorsCount={uniqueAuthorsCount}
       />
 
       {/* Filter, Search & View Controls */}

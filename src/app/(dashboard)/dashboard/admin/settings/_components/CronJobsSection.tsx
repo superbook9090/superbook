@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
-import { Play, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Play, Loader2, AlertCircle, CheckCircle2, Trash2 } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import InactiveCoursesCleanupModal from '@/components/admin/InactiveCoursesCleanupModal';
+import InactiveQuizzesCleanupModal from '@/components/admin/InactiveQuizzesCleanupModal';
 
 export function CronJobsSection() {
   const [loadingJob, setLoadingJob] = useState<string | null>(null);
   const [bankPoProgress, setBankPoProgress] = useState<string | null>(null);
   const [result, setResult] = useState<{ job: string; success: boolean; message: string } | null>(null);
+  const [showInactiveCleanupModal, setShowInactiveCleanupModal] = useState(false);
+  const [showInactiveQuizzesModal, setShowInactiveQuizzesModal] = useState(false);
 
   const runJob = async (jobId: string, endpoint: string, options?: RequestInit) => {
     setLoadingJob(jobId);
@@ -330,7 +334,89 @@ export function CronJobsSection() {
             </div>
           )}
         </div>
+
+        {/* Clean Up Inactive Courses Job (10+ Days Old, 0 Student Enrollments) */}
+        <div className="p-5 rounded-2xl border border-red-500/30 bg-red-500/5 space-y-4 md:col-span-2">
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-red-500/15 text-red-500 border border-red-500/20">
+              Superadmin Maintenance Script
+            </div>
+            <h3 className="font-bold text-sm sm:text-base text-[var(--color-foreground)]">
+              Delete Inactive Courses (&gt; 10 Days Old &amp; 0 Enrollments)
+            </h3>
+            <p className="text-xs text-[var(--color-muted-foreground)] leading-relaxed max-w-2xl">
+              Scans for courses created more than 10 days ago with 0 verified student enrollments, lets you preview and confirm the exact list, deletes all selected courses &amp; related data, and sends the standard removal notice email to each instructor.
+            </p>
+          </div>
+
+          <Button
+            onClick={() => setShowInactiveCleanupModal(true)}
+            disabled={loadingJob !== null}
+            variant="secondary"
+            size="sm"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 border-red-500/40 text-red-500 hover:bg-red-500/10 font-bold min-h-[42px] px-5"
+          >
+            <Trash2 className="w-4 h-4" />
+            <span>Preview &amp; Clean Up Inactive Courses</span>
+          </Button>
+
+          {result?.job === 'inactive_courses_cleanup' && (
+            <div className={`flex items-start gap-2 p-3 rounded-lg text-xs ${result.success ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
+              {result.success ? <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" /> : <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />}
+              <span className="font-medium">{result.message}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Clean Up Inactive Quizzes Job (10+ Days Old, 0 Attempts, No Email) */}
+        <div className="p-5 rounded-2xl border border-red-500/30 bg-red-500/5 space-y-4 md:col-span-2">
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-red-500/15 text-red-500 border border-red-500/20">
+              Superadmin Maintenance Script
+            </div>
+            <h3 className="font-bold text-sm sm:text-base text-[var(--color-foreground)]">
+              Delete Inactive Quizzes (&gt; 10 Days Old &amp; 0 Attempts)
+            </h3>
+            <p className="text-xs text-[var(--color-muted-foreground)] leading-relaxed max-w-2xl">
+              Scans for quizzes created more than 10 days ago with 0 verified student attempts (automatically excluding any quizzes linked to contests or viral challenges), lets you preview and confirm the list, and deletes all selected quizzes &amp; questions silently without sending emails.
+            </p>
+          </div>
+
+          <Button
+            onClick={() => setShowInactiveQuizzesModal(true)}
+            disabled={loadingJob !== null}
+            variant="secondary"
+            size="sm"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 border-red-500/40 text-red-500 hover:bg-red-500/10 font-bold min-h-[42px] px-5"
+          >
+            <Trash2 className="w-4 h-4" />
+            <span>Preview &amp; Clean Up Inactive Quizzes</span>
+          </Button>
+
+          {result?.job === 'inactive_quizzes_cleanup' && (
+            <div className={`flex items-start gap-2 p-3 rounded-lg text-xs ${result.success ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
+              {result.success ? <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" /> : <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />}
+              <span className="font-medium">{result.message}</span>
+            </div>
+          )}
+        </div>
       </div>
+
+      <InactiveCoursesCleanupModal
+        isOpen={showInactiveCleanupModal}
+        onClose={() => setShowInactiveCleanupModal(false)}
+        onCompleted={(message) =>
+          setResult({ job: 'inactive_courses_cleanup', success: true, message })
+        }
+      />
+
+      <InactiveQuizzesCleanupModal
+        isOpen={showInactiveQuizzesModal}
+        onClose={() => setShowInactiveQuizzesModal(false)}
+        onCompleted={(message) =>
+          setResult({ job: 'inactive_quizzes_cleanup', success: true, message })
+        }
+      />
     </div>
   );
 }

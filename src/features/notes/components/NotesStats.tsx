@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, FileText, Pin, Tag, Sparkles } from 'lucide-react';
+import { BookOpen, FileText, Pin, Tag, Sparkles, Users } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 
 interface NotesStatsProps {
@@ -11,6 +11,8 @@ interface NotesStatsProps {
   totalTags: number;
   showPinnedOnly: boolean;
   onTogglePinnedFilter: () => void;
+  isAllScope?: boolean;
+  uniqueAuthorsCount?: number;
 }
 
 export function NotesStats({
@@ -22,6 +24,8 @@ export function NotesStats({
   totalTags,
   showPinnedOnly,
   onTogglePinnedFilter,
+  isAllScope = false,
+  uniqueAuthorsCount = 0,
 }: NotesStatsProps) {
   const { t } = useTranslation();
   const quotaPercent = Math.min(100, Math.round((usedPages / Math.max(1, limitPages)) * 100));
@@ -29,40 +33,51 @@ export function NotesStats({
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-      {/* 1. Quota Progress Card */}
+      {/* 1. Quota Progress / Total Platform Notes Card */}
       <div className="p-4 rounded-2xl bg-[var(--card-solid)] border border-[var(--color-border)] shadow-xs flex flex-col justify-between transition-all hover:border-[var(--color-primary)]/40">
         <div className="flex items-center justify-between gap-2 mb-2">
           <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-muted)]">
-            {t('notes.quotaUsage')}
+            {isAllScope ? t('notes.allUsersNotes') : t('notes.quotaUsage')}
           </span>
           <div className="p-1.5 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)]">
-            <BookOpen className="w-4 h-4" />
+            {isAllScope ? <Users className="w-4 h-4" /> : <BookOpen className="w-4 h-4" />}
           </div>
         </div>
-        <div className="space-y-2">
-          <div className="flex items-baseline justify-between">
-            <span className="text-xl sm:text-2xl font-bold text-[var(--color-foreground)]">
-              {usedPages}
-              <span className="text-sm font-normal text-[var(--color-muted)] ml-1">/ {limitPages}</span>
-            </span>
-            <span className="text-xs font-medium text-[var(--color-muted)]">
-              {t('notes.pagesRemaining').replace('{count}', String(remaining))}
-            </span>
+        {isAllScope ? (
+          <div>
+            <div className="text-xl sm:text-2xl font-bold text-[var(--color-foreground)]">
+              {usedPages.toLocaleString()}
+            </div>
+            <p className="text-xs text-[var(--color-muted)] mt-1">
+              {t('notes.uniqueAuthorsCount').replace('{count}', String(uniqueAuthorsCount))}
+            </p>
           </div>
-          {/* Progress bar */}
-          <div className="w-full h-2 bg-[var(--color-surface-muted)] rounded-full overflow-hidden">
-            <div
-              className={`h-full transition-all duration-500 rounded-full ${
-                quotaPercent >= 100
-                  ? 'bg-[var(--color-error)]'
-                  : quotaPercent >= 80
-                  ? 'bg-[var(--color-warning)]'
-                  : 'bg-[var(--color-primary)]'
-              }`}
-              style={{ width: `${quotaPercent}%` }}
-            />
+        ) : (
+          <div className="space-y-2">
+            <div className="flex items-baseline justify-between">
+              <span className="text-xl sm:text-2xl font-bold text-[var(--color-foreground)]">
+                {usedPages}
+                <span className="text-sm font-normal text-[var(--color-muted)] ml-1">/ {limitPages}</span>
+              </span>
+              <span className="text-xs font-medium text-[var(--color-muted)]">
+                {t('notes.pagesRemaining').replace('{count}', String(remaining))}
+              </span>
+            </div>
+            {/* Progress bar */}
+            <div className="w-full h-2 bg-[var(--color-surface-muted)] rounded-full overflow-hidden">
+              <div
+                className={`h-full transition-all duration-500 rounded-full ${
+                  quotaPercent >= 100
+                    ? 'bg-[var(--color-error)]'
+                    : quotaPercent >= 80
+                    ? 'bg-[var(--color-warning)]'
+                    : 'bg-[var(--color-primary)]'
+                }`}
+                style={{ width: `${quotaPercent}%` }}
+              />
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* 2. Total Words Card */}

@@ -54,7 +54,10 @@ export function filterAndSortNotes(
       (n) =>
         n.title.toLowerCase().includes(q) ||
         n.content.toLowerCase().includes(q) ||
-        n.tags?.some((t) => t.toLowerCase().includes(q))
+        n.tags?.some((t) => t.toLowerCase().includes(q)) ||
+        n.owner?.name?.toLowerCase().includes(q) ||
+        n.owner?.email?.toLowerCase().includes(q) ||
+        n.owner?.role?.toLowerCase().includes(q)
     );
   }
 

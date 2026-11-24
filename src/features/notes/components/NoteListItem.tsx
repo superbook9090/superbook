@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Pin, Edit2, Trash2, Eye, Copy, Check, Tag } from 'lucide-react';
+import { Pin, Edit2, Trash2, Eye, Copy, Check, Tag, User } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { NOTE_CATEGORIES, type NoteItem } from '@/features/notes/types';
 
@@ -76,6 +76,13 @@ export function NoteListItem({
             <h4 className="font-bold text-sm text-[var(--color-foreground)] truncate group-hover:text-[var(--color-primary)] transition-colors">
               {note.title}
             </h4>
+            {note.owner && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-[var(--color-surface-muted)] border border-[var(--border)] text-[var(--color-muted-foreground)] shrink-0">
+                <User className="w-3 h-3 text-[var(--primary)]" />
+                <span className="text-[var(--color-foreground)] font-semibold">{note.owner.name}</span>
+                {note.owner.role && <span className="uppercase text-[9px] opacity-80">({note.owner.role})</span>}
+              </span>
+            )}
           </div>
           <p className="text-xs text-[var(--color-muted)] truncate max-w-xl">
             {previewSnippet || t('notes.noContent')}
