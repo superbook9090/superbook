@@ -60,18 +60,20 @@ async function generateSingleLessonDoc({
     logContext
   );
 
-  // Run Notes Generation and Quiz Generation in parallel to avoid timeout
-  const [notesResult, quizQuestions] = await Promise.all([
-    generateLessonContent({
-      chapterTitle: chapterBlueprint.title,
-      lessonTitle: lessonBlueprint.title,
-      subtopics: lessonBlueprint.focusSubtopics,
-      examTips: lessonBlueprint.examTips,
-      courseTitle: BANK_PO_COURSE_TITLE,
-      courseCategory: BANK_PO_COURSE_CATEGORY,
-      locale: 'hi',
-    }),
-    generateLessonQuizQuestions({
+  // Generate Notes first, then Quiz (sequentially to avoid concurrent free-tier AI 429 bursts)
+  const notesResult = await generateLessonContent({
+    chapterTitle: chapterBlueprint.title,
+    lessonTitle: lessonBlueprint.title,
+    subtopics: lessonBlueprint.focusSubtopics,
+    examTips: lessonBlueprint.examTips,
+    courseTitle: BANK_PO_COURSE_TITLE,
+    courseCategory: BANK_PO_COURSE_CATEGORY,
+    locale: 'hi',
+  });
+
+  let quizQuestions: Awaited<ReturnType<typeof generateLessonQuizQuestions>> = [];
+  try {
+    quizQuestions = await generateLessonQuizQuestions({
       chapterTitle: chapterBlueprint.title,
       lessonTitle: lessonBlueprint.title,
       quizTitle: lessonBlueprint.quizTitle,
@@ -79,8 +81,28 @@ async function generateSingleLessonDoc({
       courseTitle: BANK_PO_COURSE_TITLE,
       courseCategory: BANK_PO_COURSE_CATEGORY,
       locale: 'hi',
-    }),
-  ]);
+    });
+  } catch (quizErr) {
+    console.warn(
+      `[BankPO] Quiz generation failed for "${lessonBlueprint.title}", retrying once:`,
+      quizErr
+    );
+    await new Promise((r) => setTimeout(r, 1200));
+    try {
+      quizQuestions = await generateLessonQuizQuestions({
+        chapterTitle: chapterBlueprint.title,
+        lessonTitle: lessonBlueprint.title,
+        quizTitle: lessonBlueprint.quizTitle,
+        numQuestions: Math.min(5, lessonBlueprint.questionCount || 5),
+        courseTitle: BANK_PO_COURSE_TITLE,
+        courseCategory: BANK_PO_COURSE_CATEGORY,
+        locale: 'hi',
+      });
+    } catch {
+      // Save lesson even if quiz generation temporarily hits rate limits
+      quizQuestions = [];
+    }
+  }
 
   // Save Lesson to MongoDB
   const createdLesson = await Lesson.create({

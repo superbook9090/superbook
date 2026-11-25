@@ -270,8 +270,9 @@ export async function POST(request: NextRequest) {
     await contest.save();
     await invalidatePattern('contests:*');
 
+    let notificationSummary = null;
     if (notifyAllStudents) {
-      await broadcastNewContest(contest._id, title);
+      notificationSummary = await broadcastNewContest(contest._id, title);
     }
 
     const created = await Contest.findById(contest._id)
@@ -280,7 +281,11 @@ export async function POST(request: NextRequest) {
       .lean();
 
     return NextResponse.json(
-      { message: 'Contest created successfully', contest: serialize(created) },
+      {
+        message: 'Contest created successfully',
+        contest: serialize(created),
+        ...(notificationSummary ? { notificationSummary } : {}),
+      },
       { status: 201 }
     );
   } catch (error) {

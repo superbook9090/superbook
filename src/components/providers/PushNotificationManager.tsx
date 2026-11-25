@@ -51,21 +51,24 @@ export default function PushNotificationManager() {
         data,
       });
 
-      // If tab is hidden/minimized while still alive, show an OS notification so the user sees it
+      // Always show a real browser/OS notification when permission is granted, because
+      // Firebase SW suppresses OS notifications whenever any window client is visible (even unfocused).
       if (
-        typeof document !== 'undefined' &&
-        document.visibilityState !== 'visible' &&
         typeof window !== 'undefined' &&
         'Notification' in window &&
         Notification.permission === 'granted' &&
         'serviceWorker' in navigator
       ) {
+        const tag = data.contestId
+          ? `contest-${data.contestId}`
+          : `${resolvedTitle}:${resolvedBody}`.slice(0, 80);
         void navigator.serviceWorker.ready
           .then((reg) =>
             reg.showNotification(resolvedTitle, {
               body: resolvedBody,
               icon: '/favicon.png',
               badge: '/favicon.png',
+              tag,
               data,
             })
           )

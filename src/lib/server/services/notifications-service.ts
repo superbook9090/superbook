@@ -219,9 +219,9 @@ export async function resolveBroadcastRecipientIds(
 export async function sendAdminBroadcast(
   userIds: string[],
   payload: SendBroadcastInput
-): Promise<{ delivered: number }> {
+): Promise<{ delivered: number; pushSent: number; pushFailed: number; activeTokens: number }> {
   if (userIds.length === 0) {
-    return { delivered: 0 };
+    return { delivered: 0, pushSent: 0, pushFailed: 0, activeTokens: 0 };
   }
 
   const pushPayload: PushNotificationPayload = {
@@ -231,7 +231,27 @@ export async function sendAdminBroadcast(
     category: payload.category,
   };
 
-  await createUserNotifications(userIds, payload);
-  await sendPushNotification(userIds, pushPayload);
-  return { delivered: userIds.length };
+  const [inboxResult, pushResult] = await Promise.allSettled([
+    createUserNotifications(userIds, payload),
+    sendPushNotification(userIds, pushPayload),
+  ]);
+
+  if (inboxResult.status === 'rejected') {
+    console.error('[sendAdminBroadcast] Failed to insert in-app notifications:', inboxResult.reason);
+  }
+  if (pushResult.status === 'rejected') {
+    console.error('[sendAdminBroadcast] Failed to send push notifications:', pushResult.reason);
+  }
+
+  const summary =
+    pushResult.status === 'fulfilled'
+      ? pushResult.value
+      : { sent: 0, failed: 0, tokenCount: 0 };
+
+  return {
+    delivered: userIds.length,
+    pushSent: summary.sent,
+    pushFailed: summary.failed,
+    activeTokens: summary.tokenCount,
+  };
 }

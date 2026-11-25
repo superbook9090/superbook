@@ -174,7 +174,7 @@ export async function broadcastNewContest(contestId: string | mongoose.Types.Obj
 
     if (studentIds.length > 0) {
       console.log(`[broadcastNewContest] Broadcasting contest "${title}" (${contestId}) to ${studentIds.length} students`);
-      await sendAdminBroadcast(studentIds, {
+      const summary = await sendAdminBroadcast(studentIds, {
         title: {
           en: `New Contest: ${title}`,
           hi: `नया कॉन्टेस्ट: ${title}`,
@@ -190,10 +190,16 @@ export async function broadcastNewContest(contestId: string | mongoose.Types.Obj
           contestId: String(contestId),
         },
       });
+      console.log(
+        `[broadcastNewContest] Broadcast complete for "${title}": delivered=${summary.delivered}, activeTokens=${summary.activeTokens}, pushSent=${summary.pushSent}, pushFailed=${summary.pushFailed}`
+      );
+      return summary;
     } else {
       console.warn('[broadcastNewContest] No eligible students found for contest broadcast.');
+      return { delivered: 0, pushSent: 0, pushFailed: 0, activeTokens: 0 };
     }
   } catch (err) {
     console.error('Failed to broadcast contest notification:', err);
+    return { delivered: 0, pushSent: 0, pushFailed: 0, activeTokens: 0 };
   }
 }

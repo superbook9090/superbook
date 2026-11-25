@@ -49,7 +49,7 @@ async function callAiWithFallback(
 ): Promise<string> {
   const maxTokens = options?.maxTokens ?? 1800;
   const temperature = options?.temperature ?? 0.6;
-  const timeoutMs = 12000;
+  const timeoutMs = 24000;
 
   // 1. Attempt OpenRouter Free Models
   if (process.env.OPENROUTER_API_KEY) {
@@ -86,8 +86,9 @@ async function callAiWithFallback(
     const configuredGeminiModel = process.env.GEMINI_MODEL;
     const geminiModels = [
       ...(configuredGeminiModel ? [configuredGeminiModel] : []),
+      'gemini-2.5-flash',
       'gemini-2.0-flash',
-      'gemini-1.5-flash',
+      'gemini-2.5-flash-lite',
     ];
 
     for (const model of geminiModels) {
@@ -247,9 +248,11 @@ PEDAGOGICAL & FORMAT REQUIREMENTS:
       { role: 'user', content: userPrompt },
     ],
     {
-      maxTokens: 3500,
+      maxTokens: 2400,
       temperature: 0.5,
-      validateOutput: (text) => text.length > 250 && (text.includes('<h3') || text.includes('<p>')),
+      validateOutput: (text) =>
+        text.length > 200 &&
+        (text.includes('<h2') || text.includes('<h3') || text.includes('<p') || text.includes('<ul') || text.includes('<div')),
     }
   );
 

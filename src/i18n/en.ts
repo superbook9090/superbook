@@ -110,6 +110,29 @@ export const en = {
     clearFilters: 'Clear Filters',
   },
 
+  sidebar: {
+    overview: 'Overview',
+    learning: 'Learning',
+    library: 'Library',
+    teaching: 'Teaching',
+    management: 'Management',
+    content: 'Content & Arena',
+    account: 'Account',
+    collapse: 'Collapse sidebar',
+    expand: 'Expand sidebar',
+    viewProfile: 'View profile',
+  },
+
+  topnav: {
+    courses: 'Courses',
+    tools: 'Tools',
+    about: 'About',
+    explore: 'Explore',
+    resources: 'Resources',
+    superadminDashboard: 'Superadmin Dashboard',
+    openDashboard: 'Dashboard',
+  },
+
   privacy: {
     title: 'Privacy Policy',
     lastUpdated: 'Last Updated: May 18, 2026',

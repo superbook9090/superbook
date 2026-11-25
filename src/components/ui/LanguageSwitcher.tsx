@@ -39,8 +39,8 @@ export default function LanguageSwitcher({
         aria-expanded={isOpen}
         aria-label={t('language.selectLanguage')}
         className={cn(
-          'inline-flex items-center gap-1.5 bg-[var(--card-solid)] border border-[var(--border)] rounded-lg font-medium text-[var(--foreground)] hover:bg-[var(--surface-muted)] transition-all focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 shadow-sm shrink-0',
-          compact ? 'h-8.5 px-2.5 text-xs' : 'h-8.5 sm:h-9 px-2.5 sm:px-3 text-xs sm:text-sm',
+          'inline-flex items-center gap-1.5 bg-[var(--card-solid)] border border-[var(--border)]/85 rounded-xl font-medium text-[var(--color-foreground)] hover:bg-[var(--surface-muted)] transition-all focus-ring shadow-xs shrink-0',
+          compact ? 'h-9 px-2.5 text-xs' : 'h-9 px-3 text-xs sm:text-sm',
           className
         )}
       >

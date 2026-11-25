@@ -337,37 +337,41 @@ CRITICAL FACTUAL ACCURACY & FORMAT REQUIREMENTS:
     // Invalidate contests cache so the new contest is live immediately
     await invalidatePattern('contests:*');
 
-    // 7. Non-blocking Background Notification Broadcast
+    // 7. Broadcast Notification (awaited so Vercel serverless does not terminate before FCM completes)
     if (process.env.NODE_ENV === 'production') {
-      void (async () => {
-        try {
-          const students = await User.find({ role: 'student' }).select('_id').lean();
-          const studentIds = students.map((s) => String(s._id));
+      try {
+        const students = await User.find({
+          $or: [{ role: 'student' }, { role: { $exists: false } }, { role: null }],
+          isSuspended: { $ne: true },
+        })
+          .select('_id')
+          .lean();
+        const studentIds = students.map((s) => String(s._id));
 
-          if (studentIds.length > 0) {
-            await sendAdminBroadcast(studentIds, {
-              title: {
-                en: `🏆 Daily Mixed GK & GS Contest is Live!`,
-                hi: `🏆 दैनिक मिश्रित GK & GS महा-प्रतियोगिता लाइव है!`,
-              },
-              body: {
-                en: `Compete now in today's mixed General Studies contest and climb the live leaderboard!`,
-                hi: `आज की मिश्रित सामान्य ज्ञान व सामान्य अध्ययन प्रतियोगिता में भाग लें और लाइव रैंक हासिल करें!`,
-              },
-              category: 'quizzes',
-              data: {
-                url: `quizdo://contest/${contestDoc._id}`,
-                contestId: String(contestDoc._id),
-              },
-            });
-          }
-        } catch (notifyErr) {
-          logError('Failed to broadcast daily contest notifications in background', logContext, {
-            error: notifyErr,
-            contestId: contestDoc._id,
+        if (studentIds.length > 0) {
+          await sendAdminBroadcast(studentIds, {
+            title: {
+              en: `🏆 Daily Mixed GK & GS Contest is Live!`,
+              hi: `🏆 दैनिक मिश्रित GK & GS महा-प्रतियोगिता लाइव है!`,
+            },
+            body: {
+              en: `Compete now in today's mixed General Studies contest and climb the live leaderboard!`,
+              hi: `आज की मिश्रित सामान्य ज्ञान व सामान्य अध्ययन प्रतियोगिता में भाग लें और लाइव रैंक हासिल करें!`,
+            },
+            category: 'quizzes',
+            data: {
+              url: `quizdo://contest/${contestDoc._id}`,
+              webUrl: `/dashboard/student/contests/${contestDoc._id}/take`,
+              contestId: String(contestDoc._id),
+            },
           });
         }
-      })();
+      } catch (notifyErr) {
+        logError('Failed to broadcast daily contest notifications', logContext, {
+          error: notifyErr,
+          contestId: contestDoc._id,
+        });
+      }
     }
 
     return NextResponse.json({

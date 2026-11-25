@@ -103,49 +103,53 @@ export function CronJobsSection() {
       const total = pending.length;
       let completed = 0;
       let failed = 0;
+      let lastErrorMessage = '';
+      let consecutiveQuotaErrors = 0;
 
       setBankPoProgress(
         `Starting generation batch of ${total} lessons across ${plan.chaptersCount || 1} chapter(s)... (0/${total} completed)`
       );
 
-      // 2. Concurrency worker pool (3 workers running independently)
-      const concurrency = 3;
-      let nextIndex = 0;
+      // Process sequentially (1 lesson at a time) to respect free-tier AI concurrency limits
+      for (let idx = 0; idx < pending.length; idx++) {
+        const item = pending[idx];
+        setBankPoProgress(
+          `Generating Bank PO Course: (${completed}/${total} completed${failed > 0 ? `, ${failed} failed` : ''}) — working on "${item.title.slice(0, 32)}..."`
+        );
 
-      const worker = async () => {
-        while (nextIndex < pending.length) {
-          const idx = nextIndex++;
-          const item = pending[idx];
-
-          try {
-            const res = await fetch(
-              `/api/cron/generate-bank-po-course?chapterIndex=${item.chapterIndex}&lessonIndex=${item.lessonIndex}`
-            );
-            const data = await res.json().catch(() => ({}));
-            if (res.ok && data.success) {
-              completed++;
-            } else {
-              failed++;
-            }
-          } catch {
-            failed++;
-          }
-
-          setBankPoProgress(
-            `Generating Bank PO Course: (${completed}/${total} completed${failed > 0 ? `, ${failed} failed` : ''}) — current: "${item.title.slice(0, 28)}..."`
+        try {
+          const res = await fetch(
+            `/api/cron/generate-bank-po-course?chapterIndex=${item.chapterIndex}&lessonIndex=${item.lessonIndex}`
           );
+          const data = await res.json().catch(() => ({}));
+          if (res.ok && data.success) {
+            completed++;
+            consecutiveQuotaErrors = 0;
+          } else {
+            failed++;
+            lastErrorMessage = String(data.message || data.error || `HTTP ${res.status}`);
+            if (res.status === 429 || data.quotaLimitHit) {
+              consecutiveQuotaErrors++;
+              if (consecutiveQuotaErrors >= 2) {
+                break;
+              }
+            }
+          }
+        } catch (err) {
+          failed++;
+          lastErrorMessage = err instanceof Error ? err.message : 'Network error';
         }
-      };
 
-      const workers = Array.from(
-        { length: Math.min(concurrency, total) },
-        () => worker()
-      );
-      await Promise.all(workers);
+        if (idx < pending.length - 1) {
+          await new Promise((r) => setTimeout(r, 800));
+        }
+      }
 
       const chaptersSummary = Array.isArray(plan.chaptersCovered) && plan.chaptersCovered.length > 0
         ? ` (${plan.chaptersCovered.slice(0, 2).join(', ')}${plan.chaptersCovered.length > 2 ? ` +${plan.chaptersCovered.length - 2} more` : ''})`
         : '';
+
+      const errorDetail = lastErrorMessage ? ` Last error: ${lastErrorMessage}` : '';
 
       setResult({
         job: 'bank_po_course',
@@ -153,7 +157,7 @@ export function CronJobsSection() {
         message:
           completed === total
             ? `Successfully generated all ${completed} lessons and quizzes${chaptersSummary} in this batch!`
-            : `Generated ${completed}/${total} lessons${chaptersSummary}.${failed > 0 ? ` (${failed} failed)` : ''}`,
+            : `Generated ${completed}/${total} lessons${chaptersSummary}.${failed > 0 ? ` (${failed} failed)${errorDetail}` : ''}`,
       });
     } catch (err) {
       setResult({

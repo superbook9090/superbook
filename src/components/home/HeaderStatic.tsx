@@ -1,178 +1,195 @@
 'use client';
 
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import {
+  BookOpen,
+  Trophy,
+  Wrench,
+  Newspaper,
+  Info,
+  Mail,
+  HelpCircle,
+  LayoutDashboard,
+  ArrowRight,
+} from 'lucide-react';
 import BrandLogo from '@/components/ui/BrandLogo';
 import { ROUTES } from '@/constants/routes';
-import { translate } from '@/i18n';
-import { roleThemes } from '@/lib/roleTheme';
+import { useTranslation } from '@/hooks/useTranslation';
 import { useFeature } from '@/contexts/AppSettingsContext';
+import { useSessionStore } from '@/store/useSessionStore';
+import { cn } from '@/lib/utils';
 import ThemeToggle from '@/components/ui/ThemeToggle';
+import LanguageSwitcher from '@/components/ui/LanguageSwitcher';
 import DownloadAppSidebarCard from '@/components/ui/DownloadAppSidebarCard';
 import { Button } from '@/components/ui/Button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import MarketingMobileDrawer, {
+  isPublicLinkActive,
+  type PublicNavLink,
+} from './MarketingMobileDrawer';
 
 export default function HeaderStatic({ forceScrolled = false }: { forceScrolled?: boolean }) {
-  const t = (key: Parameters<typeof translate>[1]) => translate('en', key);
-  const theme = roleThemes.student;
+  const { t } = useTranslation();
+  const pathname = usePathname();
+  const session = useSessionStore((s) => s.session);
   const enableBlogs = useFeature('enableBlogs');
+  const enableCourses = useFeature('enableCourses');
+  const enableContests = useFeature('enableContests');
+
+  const [isScrolled, setIsScrolled] = useState(forceScrolled);
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (forceScrolled) {
+      setIsScrolled(true);
+      return;
+    }
+    const onScroll = () => setIsScrolled(window.scrollY > 16);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [forceScrolled]);
+
+  const primaryLinks = useMemo<PublicNavLink[]>(() => {
+    const links: PublicNavLink[] = [];
+    if (enableCourses) {
+      links.push({ href: ROUTES.courses, labelKey: 'topnav.courses', icon: BookOpen });
+    }
+    if (enableContests) {
+      links.push({ href: ROUTES.contests, labelKey: 'common.contests', icon: Trophy });
+    }
+    links.push({ href: ROUTES.toolsIndex, labelKey: 'topnav.tools', icon: Wrench });
+    if (enableBlogs) {
+      links.push({
+        href: ROUTES.blogs,
+        labelKey: 'common.blogs',
+        icon: Newspaper,
+        matchPrefixes: ['/blog/'],
+      });
+    }
+    return links;
+  }, [enableCourses, enableContests, enableBlogs]);
+
+  const secondaryLinks = useMemo<PublicNavLink[]>(
+    () => [
+      { href: ROUTES.howItWorks, labelKey: 'home.footer.howItWorks', icon: HelpCircle },
+      { href: ROUTES.about, labelKey: 'topnav.about', icon: Info },
+      { href: ROUTES.contact, labelKey: 'contact.title', icon: Mail },
+    ],
+    []
+  );
 
   return (
     <header
       id="site-header"
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${forceScrolled
-        ? 'bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-[var(--border)] shadow-sm'
-        : 'bg-transparent'
-        }`}
+      className={cn(
+        'fixed top-0 left-0 right-0 z-50 safe-area-pt-compact marketing-topbar',
+        isScrolled && 'marketing-topbar--scrolled'
+      )}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-20">
-          <Link href={ROUTES.home} className="flex items-center gap-2">
-            <div className="flex items-center">
-              <BrandLogo size="md" className="text-[var(--color-foreground)]" />
-            </div>
+      <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between gap-3 h-16">
+          {/* Left: Brand Logo */}
+          <Link
+            href={ROUTES.home}
+            className="flex items-center shrink-0 focus-ring rounded-lg"
+            aria-label="Quiz Do"
+          >
+            <BrandLogo size="md" className="text-[var(--color-foreground)]" />
           </Link>
 
-          <div className="hidden md:flex items-center gap-4">
-            <DownloadAppSidebarCard compact />
-            <ThemeToggle />
-            <Link
-              id="header-contests-link"
-              href={ROUTES.contests}
-              data-i18n-key="common.contests"
-              className={`header-nav-btn ${forceScrolled ? 'header-nav-btn-dark' : 'header-nav-btn-light'}`}
-            >
-              {t('common.contests')}
-            </Link>
-            {enableBlogs && (
-              <Link
-                id="header-blogs-link"
-                href={ROUTES.blogs}
-                data-i18n-key="common.blogs"
-                className={`header-nav-btn ${forceScrolled ? 'header-nav-btn-dark' : 'header-nav-btn-light'}`}
-              >
-                {t('common.blogs')}
-              </Link>
-            )}
-            <button
-              id="lang-toggle"
-              type="button"
-              className={`header-nav-btn ${forceScrolled ? 'header-nav-btn-dark' : 'header-nav-btn-light'}`}
-            >
-              EN
-            </button>
-
-            <div id="header-auth-guest" className="flex items-center gap-4">
-              <Button asChild variant="ghost" className="text-[var(--muted)] hover:text-[var(--foreground)]">
-                <Link href={ROUTES.login} data-i18n-key="home.login">
-                  {t('home.login')}
-                </Link>
-              </Button>
-              <Button asChild className={`bg-gradient-to-r ${theme.gradient} text-white shadow-md hover:shadow-lg transition-shadow`}>
-                <Link href={ROUTES.register} data-i18n-key="home.register">
-                  {t('home.register')}
-                </Link>
-              </Button>
+          {/* Center: Desktop Pill Navigation */}
+          <nav aria-label="Main navigation" className="hidden md:flex items-center">
+            <div className="topnav-pill-group">
+              {primaryLinks.map((link) => {
+                const active = isPublicLinkActive(pathname, link);
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    aria-current={active ? 'page' : undefined}
+                    className={cn('topnav-link', active && 'topnav-link--active')}
+                  >
+                    {t(link.labelKey)}
+                  </Link>
+                );
+              })}
             </div>
+          </nav>
 
-            <Button
-              asChild
-              id="header-auth-session"
-              className={`hidden bg-gradient-to-r ${theme.gradient} text-white shadow-md hover:shadow-lg transition-shadow`}
-            >
-              <Link href={ROUTES.dashboard} data-i18n-key="common.dashboard">
-                {t('common.dashboard')}
-              </Link>
-            </Button>
+          {/* Right: Desktop Utility & Auth Actions */}
+          <div className="hidden md:flex items-center gap-2 shrink-0">
+            <div className="hidden xl:block">
+              <DownloadAppSidebarCard compact />
+            </div>
+            <ThemeToggle />
+            <LanguageSwitcher compact />
+
+            {session ? (
+              <Button
+                asChild
+                size="sm"
+                className="h-9 px-4 rounded-xl gradient-bg text-white shadow-sm hover:opacity-95 transition-opacity"
+              >
+                <Link href={ROUTES.dashboard} className="inline-flex items-center gap-1.5">
+                  <LayoutDashboard className="w-4 h-4" />
+                  <span>{t('topnav.openDashboard')}</span>
+                </Link>
+              </Button>
+            ) : (
+              <div className="flex items-center gap-1.5 pl-1">
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="sm"
+                  className="h-9 px-3.5 rounded-xl text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
+                >
+                  <Link href={ROUTES.login}>{t('home.login')}</Link>
+                </Button>
+                <Button
+                  asChild
+                  size="sm"
+                  className="h-9 px-4 rounded-xl gradient-bg text-white shadow-sm hover:opacity-95 transition-opacity"
+                >
+                  <Link href={ROUTES.register} className="inline-flex items-center gap-1">
+                    <span>{t('home.register')}</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </Button>
+              </div>
+            )}
           </div>
 
-          <div className="md:hidden flex items-center">
-            <Sheet>
-              <SheetTrigger asChild>
-                <button
-                  id="mobile-menu-toggle"
-                  aria-label={t('home.header.openMenu')}
-                  className="inline-flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--card-solid)] text-[var(--foreground)] hover:bg-[var(--surface-muted)] transition-colors cursor-pointer shadow-sm"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden
-                  >
-                    <line x1="4" x2="20" y1="12" y2="12" />
-                    <line x1="4" x2="20" y1="6" y2="6" />
-                    <line x1="4" x2="20" y1="18" y2="18" />
-                  </svg>
-                </button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-[85vw] sm:w-[350px] p-0 flex flex-col bg-[var(--background)] border-r border-[var(--border)]">
-                <div className="p-4 sm:p-5 border-b border-[var(--border)] text-left">
-                  <div className="flex items-center gap-2">
-                    <BrandLogo size="sm" />
-                  </div>
-                </div>
-                
-                <div className="flex-1 overflow-y-auto px-4 py-6 flex flex-col justify-between">
-                  <div>
-                    {/* Settings Bar */}
-                    <div className="flex items-center justify-between p-2 mb-4 rounded-xl bg-[var(--surface-muted)] border border-[var(--border)]">
-                      <span className="text-xs font-semibold text-[var(--muted)] px-1">Settings</span>
-                      <div className="flex items-center gap-2">
-                        <ThemeToggle />
-                        {/* Language Switcher missing component import, so using the button style for now, but formatted nicely */}
-                        <button
-                          id="lang-toggle-mobile"
-                          type="button"
-                          className="inline-flex h-8 px-2 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--card-solid)] text-xs font-medium text-[var(--muted)] hover:text-[var(--foreground)] transition-colors shadow-sm"
-                        >
-                          EN / HI
-                        </button>
-                      </div>
-                    </div>
+          {/* Mobile Right Cluster + Drawer */}
+          <div className="md:hidden flex items-center gap-1.5 shrink-0">
+            <ThemeToggle />
 
-                    <div className="flex flex-col gap-2 mt-4">
-                      <Link
-                        href={ROUTES.contests}
-                        className="flex items-center min-h-[42px] px-4 py-2.5 text-sm font-medium rounded-xl text-[var(--foreground)] hover:bg-[var(--surface-muted)] transition-colors border border-transparent hover:border-[var(--border)]"
-                      >
-                        {t('common.contests')}
-                      </Link>
-                      
-                      {enableBlogs && (
-                        <Link
-                          href={ROUTES.blogs}
-                          className="flex items-center min-h-[42px] px-4 py-2.5 text-sm font-medium rounded-xl text-[var(--foreground)] hover:bg-[var(--surface-muted)] transition-colors border border-transparent hover:border-[var(--border)]"
-                        >
-                          {t('common.blogs')}
-                        </Link>
-                      )}
-                    </div>
-                  </div>
+            {session ? (
+              <Link
+                href={ROUTES.dashboard}
+                className="inline-flex h-9 items-center gap-1.5 px-3 rounded-xl gradient-bg text-white text-xs font-semibold shadow-xs active:scale-95 transition-transform"
+              >
+                <LayoutDashboard className="w-3.5 h-3.5" />
+                <span>{t('topnav.openDashboard')}</span>
+              </Link>
+            ) : (
+              <Link
+                href={ROUTES.login}
+                className="inline-flex h-9 items-center px-3 rounded-xl border border-[var(--border)]/85 bg-[var(--card-solid)] text-xs font-semibold text-[var(--color-foreground)] hover:bg-[var(--surface-muted)] shadow-xs active:scale-95 transition-all"
+              >
+                {t('home.login')}
+              </Link>
+            )}
 
-                  <div className="mt-8 pt-4 border-t border-[var(--border)] flex flex-col gap-3">
-                    <DownloadAppSidebarCard compact />
-                    <div className="flex flex-col gap-3 bg-[var(--surface-muted)]/30 p-3 rounded-xl border border-[var(--border)]/50 mt-2">
-                      <Button asChild variant="outline" className="w-full justify-center h-11 bg-[var(--card-solid)]">
-                        <Link href={ROUTES.login}>
-                          {t('home.login')}
-                        </Link>
-                      </Button>
-                      <Button asChild className={`w-full justify-center h-11 bg-gradient-to-r ${theme.gradient} text-white`}>
-                        <Link href={ROUTES.register}>
-                          {t('home.register')}
-                        </Link>
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
+            <MarketingMobileDrawer
+              open={isOpen}
+              onOpenChange={setIsOpen}
+              pathname={pathname}
+              primaryLinks={primaryLinks}
+              secondaryLinks={secondaryLinks}
+              user={session?.user}
+            />
           </div>
         </div>
       </div>

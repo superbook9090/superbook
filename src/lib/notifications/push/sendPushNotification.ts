@@ -138,6 +138,10 @@ export const sendPushNotification = async (
       body,
     },
     webpush: {
+      headers: {
+        Urgency: 'high',
+        TTL: '86400',
+      },
       notification: {
         title,
         body,

@@ -6,7 +6,13 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { ROUTES } from '@/constants/routes';
 import { isMobileApp } from '@/lib/mobile/mobileDetection';
 
-export default function DownloadAppSidebarCard({ compact = false }: { compact?: boolean }) {
+export default function DownloadAppSidebarCard({
+  compact = false,
+  iconOnly = false,
+}: {
+  compact?: boolean;
+  iconOnly?: boolean;
+}) {
   const { t } = useTranslation();
   const [inMobileApp, setInMobileApp] = useState(false);
 
@@ -15,6 +21,20 @@ export default function DownloadAppSidebarCard({ compact = false }: { compact?: 
   }, []);
 
   if (inMobileApp) return null;
+
+  if (iconOnly) {
+    return (
+      <a
+        href={ROUTES.downloadApp}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={t('common.downloadApp')}
+        className="flex h-10 w-10 mx-auto items-center justify-center rounded-xl bg-emerald-500/12 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500/50 transition-all group shadow-xs"
+      >
+        <Smartphone className="w-4.5 h-4.5 group-hover:scale-110 transition-transform" />
+      </a>
+    );
+  }
 
   if (compact) {
     return (

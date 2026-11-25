@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useSessionStore } from '@/store/useSessionStore';
 import UsernameModal from '@/components/auth/UsernameModal';
 import { useUserActivityTracker } from '@/hooks/useUserActivityTracker';
+import { LazyPushNotificationManager } from '@/lib/lazy';
 
 export function SessionProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -80,6 +81,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   return (
     <>
       {children}
+      {status === 'authenticated' && session?.user?.id && <LazyPushNotificationManager />}
       {showUsernameModal && session?.user && (
         <UsernameModal
           currentName={session.user.name || ''}

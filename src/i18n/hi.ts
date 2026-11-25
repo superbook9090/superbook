@@ -110,6 +110,29 @@ export const hi = {
     clearFilters: 'फ़िल्टर साफ़ करें',
   },
 
+  sidebar: {
+    overview: 'ओवरव्यू',
+    learning: 'लर्निंग',
+    library: 'लाइब्रेरी',
+    teaching: 'शिक्षण',
+    management: 'प्रबंधन',
+    content: 'कंटेंट और एरीना',
+    account: 'अकाउंट',
+    collapse: 'साइडबार छोटा करें',
+    expand: 'साइडबार बड़ा करें',
+    viewProfile: 'प्रोफ़ाइल देखें',
+  },
+
+  topnav: {
+    courses: 'कोर्स',
+    tools: 'टूल्स',
+    about: 'हमारे बारे में',
+    explore: 'एक्सप्लोर करें',
+    resources: 'रिसोर्सेज़',
+    superadminDashboard: 'सुपरएडमिन डैशबोर्ड',
+    openDashboard: 'डैशबोर्ड',
+  },
+
   privacy: {
     title: 'प्राइवेसी पॉलिसी',
     lastUpdated: 'अंतिम अपडेट: 18 मई, 2026',

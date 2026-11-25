@@ -7,11 +7,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface TooltipProps {
   label: string;
   children: ReactNode;
-  position?: 'top' | 'bottom';
+  position?: 'top' | 'bottom' | 'right';
   /** Extra classes for the wrapper span (e.g. positioning when wrapping an absolutely-positioned button). */
   className?: string;
   /** Long press duration in ms for mobile/touch screens. Defaults to 450ms. */
   longPressDelay?: number;
+  /** Disable tooltip rendering (useful when showing tooltips only in collapsed mode). */
+  disabled?: boolean;
 }
 
 /** 
@@ -25,6 +27,7 @@ export default function Tooltip({
   position = 'top',
   className = '',
   longPressDelay = 450,
+  disabled = false,
 }: TooltipProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [coords, setCoords] = useState({ top: 0, left: 0 });
@@ -36,10 +39,17 @@ export default function Tooltip({
   const updatePosition = useCallback(() => {
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
-      setCoords({
-        top: position === 'top' ? rect.top : rect.bottom,
-        left: rect.left + rect.width / 2,
-      });
+      if (position === 'right') {
+        setCoords({
+          top: rect.top + rect.height / 2,
+          left: rect.right,
+        });
+      } else {
+        setCoords({
+          top: position === 'top' ? rect.top : rect.bottom,
+          left: rect.left + rect.width / 2,
+        });
+      }
     }
   }, [position]);
 
@@ -157,14 +167,25 @@ export default function Tooltip({
     };
   }, [clearTimers]);
 
-  const bubblePlacement = position === 'top' ? '-translate-y-full -mt-2' : 'mt-2';
-  
+  const bubblePlacement =
+    position === 'right'
+      ? '-translate-y-1/2 ml-2.5'
+      : position === 'top'
+        ? '-translate-x-1/2 -translate-y-full -mt-2'
+        : '-translate-x-1/2 mt-2';
+
   const arrowPlacement =
-    position === 'top'
-      ? 'top-full border-t-[var(--color-foreground)]'
-      : 'bottom-full border-b-[var(--color-foreground)]';
+    position === 'right'
+      ? 'right-full top-1/2 -translate-y-1/2 border-r-[var(--color-foreground)]'
+      : position === 'top'
+        ? 'left-1/2 -translate-x-1/2 top-full border-t-[var(--color-foreground)]'
+        : 'left-1/2 -translate-x-1/2 bottom-full border-b-[var(--color-foreground)]';
 
   const positionClass = /\b(absolute|fixed|sticky)\b/.test(className) ? '' : 'relative';
+
+  if (disabled) {
+    return <>{children}</>;
+  }
 
   return (
     <>
@@ -191,11 +212,11 @@ export default function Tooltip({
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.15 }}
                   style={{ top: coords.top, left: coords.left }}
-                  className={`pointer-events-none fixed -translate-x-1/2 ${bubblePlacement} z-[99999] whitespace-nowrap rounded-md bg-[var(--color-foreground)] text-[var(--color-background)] text-xs font-medium px-2.5 py-1.5 shadow-lg select-none`}
+                  className={`pointer-events-none fixed ${bubblePlacement} z-[99999] whitespace-nowrap rounded-md bg-[var(--color-foreground)] text-[var(--color-background)] text-xs font-medium px-2.5 py-1.5 shadow-lg select-none`}
                 >
                   {label}
                   <span
-                    className={`absolute left-1/2 -translate-x-1/2 ${arrowPlacement} border-4 border-transparent`}
+                    className={`absolute ${arrowPlacement} border-4 border-transparent`}
                   />
                 </motion.span>
               )}

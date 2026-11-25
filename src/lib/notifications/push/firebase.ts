@@ -101,8 +101,8 @@ export async function requestNotificationPermission(): Promise<string | null> {
     const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
       scope: '/',
     });
-    // Prompt browser to fetch latest SW immediately if a stale copy is cached
-    void registration.update().catch(() => {});
+    // Ensure any stale cached SW is updated before activating and requesting the FCM token
+    await registration.update().catch(() => {});
     const activeRegistration = await waitForActiveServiceWorker(registration);
 
     return await getToken(msg, {

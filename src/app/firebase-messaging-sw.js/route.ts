@@ -17,9 +17,9 @@ export async function GET() {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || '',
   };
 
-  const swScript = `/* Auto-generated Firebase Messaging Service Worker */
-importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js');
+  const swScript = `/* Auto-generated Firebase Messaging Service Worker (v12.19.0) */
+importScripts('https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/12.19.0/firebase-messaging-compat.js');
 
 const firebaseConfig = ${JSON.stringify(firebaseConfig)};
 

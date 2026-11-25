@@ -5,9 +5,14 @@ import { usePathname } from 'next/navigation';
 import { memo, useMemo } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useDashboardNav } from '@/hooks/useDashboardNav';
-import { MOBILE_BOTTOM_NAV_KEYS, ADMIN_BOTTOM_NAV_KEYS, type DashboardNavItem } from '@/constants/navigation';
+import {
+  MOBILE_BOTTOM_NAV_KEYS,
+  ADMIN_BOTTOM_NAV_KEYS,
+  type DashboardNavItem,
+} from '@/constants/navigation';
 import { getNavIcon } from '@/lib/navigation/icons';
 import { cn } from '@/lib/utils';
+import { isNavItemActive } from './sidebar/sidebarGroups';
 
 interface MobileBottomNavProps {
   items: DashboardNavItem[];
@@ -15,7 +20,11 @@ interface MobileBottomNavProps {
   isSuperAdmin?: boolean;
 }
 
-function MobileBottomNavComponent({ items, isAdminUser, isSuperAdmin }: MobileBottomNavProps) {
+function MobileBottomNavComponent({
+  items,
+  isAdminUser,
+  isSuperAdmin,
+}: MobileBottomNavProps) {
   const pathname = usePathname();
   const { t } = useTranslation();
   const filtered = useDashboardNav(items, { isSuperAdmin });
@@ -28,29 +37,43 @@ function MobileBottomNavComponent({ items, isAdminUser, isSuperAdmin }: MobileBo
   }, [filtered, isAdminUser]);
 
   return (
-    <nav className="md:hidden fixed bottom-4 left-4 right-4 z-40" aria-label={t('common.dashboard')}>
-      <div className="flex items-center justify-around bg-[var(--card-solid)]/90 backdrop-blur-xl border border-[var(--border)] rounded-2xl shadow-xl px-2 py-3 mx-auto max-w-[400px]">
+    <nav
+      className="md:hidden fixed bottom-3 left-3 right-3 z-40 safe-area-pb"
+      aria-label={t('common.dashboard')}
+    >
+      <div className="flex items-center justify-between gap-1 bg-[var(--card-solid)]/92 backdrop-blur-xl border border-[var(--border)]/85 rounded-2xl shadow-xl px-1.5 py-1.5 mx-auto max-w-[440px]">
         {bottomNavItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive = isNavItemActive(pathname, item.href);
           const Icon = getNavIcon(item.icon);
           return (
             <Link
               key={item.href}
               href={item.href}
               className={cn(
-                'flex flex-col items-center justify-center gap-1 min-w-[64px] h-12 rounded-xl transition-all duration-300 relative group',
+                'flex-1 min-w-0 flex flex-col items-center justify-center gap-0.5 h-12 px-1 rounded-xl transition-all duration-200 relative group focus-ring',
                 isActive
-                  ? 'text-[var(--primary)]'
-                  : 'text-[var(--muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--foreground)]'
+                  ? 'bg-[var(--primary-soft)] text-[var(--primary)]'
+                  : 'text-[var(--color-muted-foreground)] hover:bg-[var(--surface-muted)] hover:text-[var(--color-foreground)]'
               )}
               aria-current={isActive ? 'page' : undefined}
               aria-label={t(item.nameKey)}
             >
               {isActive && (
-                <span className="absolute -top-1 w-8 h-1 bg-[var(--primary)] rounded-full shadow-[0_0_8px_var(--primary)]" />
+                <span className="absolute top-0.5 w-6 h-0.5 bg-[var(--primary)] rounded-full" />
               )}
-              <Icon className={cn('w-5 h-5 transition-transform duration-300', isActive && 'scale-110')} aria-hidden />
-              <span className={cn('text-[10px] font-medium transition-all duration-300', isActive ? 'opacity-100' : 'opacity-70')}>
+              <Icon
+                className={cn(
+                  'w-[18px] h-[18px] shrink-0 transition-transform duration-200',
+                  isActive && 'scale-105'
+                )}
+                aria-hidden
+              />
+              <span
+                className={cn(
+                  'text-[10px] leading-tight truncate max-w-full px-0.5',
+                  isActive ? 'font-bold opacity-100' : 'font-medium opacity-80'
+                )}
+              >
                 {t(item.nameKey)}
               </span>
             </Link>

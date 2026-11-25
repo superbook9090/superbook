@@ -10,7 +10,6 @@ import {
   LazyDashboardHeader,
   LazyMobileBottomNav,
   LazyMobileNav,
-  LazyPushNotificationManager,
   LazyStudentSidebar,
   LazyTeacherSidebar,
 } from '@/lib/lazy';
@@ -84,7 +83,6 @@ export default function DashboardChrome({
 
           <RoleThemeProvider role={role || 'student'}>
             <DashboardContent>
-              <LazyPushNotificationManager />
               <LazyContestMarketingPopup />
               <LazyDownloadAppPopup />
               {children}
