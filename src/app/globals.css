@@ -1736,14 +1736,28 @@ select:-webkit-autofill:focus {
 }
 
 .dashboard-topbar {
-  background: color-mix(in srgb, var(--card-solid) 86%, transparent);
+  background: color-mix(in srgb, var(--card-solid) 68%, transparent);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 68%, transparent);
 }
 
 :where([data-theme="dark"], .dark) .dashboard-topbar {
-  background: color-mix(in srgb, var(--card-solid) 82%, transparent);
+  background: color-mix(in srgb, var(--card-solid) 66%, transparent);
+}
+
+.topbar-dock {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--surface-muted) 88%, var(--card-solid));
+  border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+}
+
+:where([data-theme="dark"], .dark) .topbar-dock {
+  background: color-mix(in srgb, var(--surface-muted) 80%, transparent);
 }
 
 .marketing-topbar {
@@ -1798,6 +1812,198 @@ select:-webkit-autofill:focus {
   color: var(--primary);
   background: var(--card-solid);
   box-shadow: var(--shadow-sm);
+}
+
+/* =========================
+   STUDENT SURFACE SYSTEM
+========================= */
+
+.student-panel {
+  position: relative;
+  border-radius: 1.25rem;
+  background: color-mix(in srgb, var(--card-solid) 92%, transparent);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+  box-shadow: 0 8px 28px -14px rgba(15, 23, 42, 0.12);
+}
+
+:where([data-theme="dark"], .dark) .student-panel {
+  background: color-mix(in srgb, var(--card-solid) 80%, transparent);
+  box-shadow: 0 12px 32px -14px rgba(0, 0, 0, 0.48);
+}
+
+.student-card {
+  position: relative;
+  border-radius: 1.25rem;
+  background: color-mix(in srgb, var(--card-solid) 94%, transparent);
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+  box-shadow: 0 6px 20px -12px rgba(15, 23, 42, 0.1);
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.2s ease,
+    box-shadow 0.22s ease;
+}
+
+:where([data-theme="dark"], .dark) .student-card {
+  background: color-mix(in srgb, var(--card-solid) 78%, transparent);
+  box-shadow: 0 10px 28px -14px rgba(0, 0, 0, 0.45);
+}
+
+.student-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--student-primary) 42%, var(--border));
+  box-shadow: 0 14px 32px -14px color-mix(in srgb, var(--student-primary) 22%, rgba(0, 0, 0, 0.15));
+}
+
+.student-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 1.25rem;
+  border-radius: 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: var(--student-gradient);
+  box-shadow: 0 8px 20px -8px color-mix(in srgb, var(--student-primary) 65%, transparent);
+  transition: transform 0.18s ease, opacity 0.18s ease, box-shadow 0.2s ease;
+}
+
+.student-cta-btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.96;
+  box-shadow: 0 12px 26px -8px color-mix(in srgb, var(--student-primary) 75%, transparent);
+}
+
+.student-cta-btn:active {
+  transform: scale(0.98);
+}
+
+.student-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-foreground);
+  background: var(--card-solid);
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  box-shadow: var(--shadow-sm);
+  transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, transform 0.16s ease;
+}
+
+.student-pill-btn:hover {
+  background: var(--surface-muted);
+  border-color: color-mix(in srgb, var(--student-primary) 40%, var(--border));
+  color: var(--student-primary);
+}
+
+.student-pill-btn:active {
+  transform: scale(0.98);
+}
+
+/* =========================
+   TEACHER SURFACE SYSTEM
+========================= */
+
+.teacher-panel {
+  position: relative;
+  border-radius: 1.25rem;
+  background: color-mix(in srgb, var(--card-solid) 92%, transparent);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+  box-shadow: 0 8px 28px -14px rgba(15, 23, 42, 0.12);
+}
+
+:where([data-theme="dark"], .dark) .teacher-panel {
+  background: color-mix(in srgb, var(--card-solid) 80%, transparent);
+  box-shadow: 0 12px 32px -14px rgba(0, 0, 0, 0.48);
+}
+
+.teacher-card {
+  position: relative;
+  border-radius: 1.25rem;
+  background: color-mix(in srgb, var(--card-solid) 94%, transparent);
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+  box-shadow: 0 6px 20px -12px rgba(15, 23, 42, 0.1);
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.2s ease,
+    box-shadow 0.22s ease;
+}
+
+:where([data-theme="dark"], .dark) .teacher-card {
+  background: color-mix(in srgb, var(--card-solid) 78%, transparent);
+  box-shadow: 0 10px 28px -14px rgba(0, 0, 0, 0.45);
+}
+
+.teacher-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--teacher-primary) 42%, var(--border));
+  box-shadow: 0 14px 32px -14px color-mix(in srgb, var(--teacher-primary) 22%, rgba(0, 0, 0, 0.15));
+}
+
+.teacher-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 1.25rem;
+  border-radius: 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: var(--teacher-gradient);
+  box-shadow: 0 8px 20px -8px color-mix(in srgb, var(--teacher-primary) 65%, transparent);
+  transition: transform 0.18s ease, opacity 0.18s ease, box-shadow 0.2s ease;
+}
+
+.teacher-cta-btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.96;
+  box-shadow: 0 12px 26px -8px color-mix(in srgb, var(--teacher-primary) 75%, transparent);
+}
+
+.teacher-cta-btn:active {
+  transform: scale(0.98);
+}
+
+.teacher-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-foreground);
+  background: var(--card-solid);
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  box-shadow: var(--shadow-sm);
+  transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, transform 0.16s ease;
+}
+
+.teacher-pill-btn:hover {
+  background: var(--surface-muted);
+  border-color: color-mix(in srgb, var(--teacher-primary) 40%, var(--border));
+  color: var(--teacher-primary);
+}
+
+.teacher-pill-btn:active {
+  transform: scale(0.98);
 }
 
 /* =========================

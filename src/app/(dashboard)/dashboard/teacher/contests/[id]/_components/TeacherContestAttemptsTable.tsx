@@ -29,8 +29,8 @@ export default function TeacherContestAttemptsTable({
   const { t } = useTranslation();
 
   return (
-    <div className="rounded-3xl border border-[var(--border)] bg-[var(--card-solid)] antigravity-glass overflow-hidden shadow-xs">
-      <div className="p-4 sm:p-5 border-b border-[var(--border)] flex items-center justify-between">
+    <div className="teacher-panel overflow-hidden">
+      <div className="p-4 sm:p-5 border-b border-[var(--border)]/80 flex items-center justify-between">
         <h3 className="text-sm sm:text-base font-bold text-[var(--color-foreground)]">
           {t('contest.studentSubmissions')}
         </h3>
@@ -63,7 +63,7 @@ export default function TeacherContestAttemptsTable({
                     className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold capitalize ${
                       att.status === 'completed'
                         ? 'bg-[var(--success-light)] text-[var(--success)]'
-                        : 'bg-[var(--warning-light)] text-[var(--warning-foreground)]'
+                        : 'bg-[var(--warning-light)] text-amber-800 dark:text-amber-300'
                     }`}
                   >
                     {att.status.replace('_', ' ')}
@@ -115,7 +115,7 @@ export default function TeacherContestAttemptsTable({
                         className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold capitalize ${
                           att.status === 'completed'
                             ? 'bg-[var(--success-light)] text-[var(--success)]'
-                            : 'bg-[var(--warning-light)] text-[var(--warning-foreground)]'
+                            : 'bg-[var(--warning-light)] text-amber-800 dark:text-amber-300'
                         }`}
                       >
                         {att.status.replace('_', ' ')}

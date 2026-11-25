@@ -20,11 +20,11 @@ export default function AdminCoursesTable({ courses, isSuperAdmin }: AdminCourse
   const router = useRouter();
 
   return (
-    <div className="antigravity-glass border border-[var(--border)] rounded-3xl shadow-lg overflow-hidden">
+    <div className="teacher-panel overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs sm:text-sm border-collapse">
           <thead>
-            <tr className="border-b border-[var(--border)] bg-[var(--surface-muted)]/70 text-[var(--color-muted-foreground)] font-bold uppercase text-[11px] tracking-wider">
+            <tr className="border-b border-[var(--border)] bg-[var(--surface-muted)]/75 text-[var(--color-muted-foreground)] font-bold uppercase text-[11px] tracking-wider">
               <th className="py-3.5 px-4">{t('admin.courseTitle')}</th>
               <th className="py-3.5 px-4">{t('admin.instructor')}</th>
               <th className="py-3.5 px-4">{t('admin.status')}</th>
@@ -34,16 +34,15 @@ export default function AdminCoursesTable({ courses, isSuperAdmin }: AdminCourse
               <th className="py-3.5 px-4 text-right">{t('admin.actions')}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[var(--border)]">
+          <tbody className="divide-y divide-[var(--border)]/70">
             {courses.map((course) => (
               <tr
                 key={course._id}
-                className="hover:bg-[var(--color-surface-muted)]/50 transition-colors"
+                className="hover:bg-[var(--surface-muted)]/45 transition-colors"
               >
-                {/* Course Title + Thumbnail */}
                 <td className="py-3 px-4">
                   <div className="flex items-center gap-3">
-                    <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-[var(--color-surface-muted)] shrink-0 border border-[var(--border)]">
+                    <div className="relative w-10 h-10 rounded-[10px] overflow-hidden bg-[var(--surface-muted)] shrink-0 border border-[var(--border)]">
                       {course.thumbnail ? (
                         <Image
                           src={course.thumbnail}
@@ -52,12 +51,12 @@ export default function AdminCoursesTable({ courses, isSuperAdmin }: AdminCourse
                           className="object-contain p-0.5"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-[var(--info)]/10 text-[var(--info)]">
+                        <div className="w-full h-full flex items-center justify-center bg-[var(--teacher-soft)] text-[var(--teacher-primary)]">
                           <BookOpen className="w-4 h-4" />
                         </div>
                       )}
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <p className="font-bold text-[var(--color-foreground)] line-clamp-1 max-w-xs">
                         {course.title}
                       </p>
@@ -70,19 +69,16 @@ export default function AdminCoursesTable({ courses, isSuperAdmin }: AdminCourse
                   </div>
                 </td>
 
-                {/* Instructor */}
                 <td className="py-3 px-4 text-[var(--color-foreground)] font-medium">
                   {course.instructor?.name || t('admin.unknownInstructor')}
                 </td>
 
-                {/* Status */}
                 <td className="py-3 px-4">
                   <Badge variant={course.isPublished ? 'default' : 'secondary'}>
                     {course.isPublished ? t('common.published') : t('common.draft')}
                   </Badge>
                 </td>
 
-                {/* Organization / Visibility */}
                 {isSuperAdmin && (
                   <td className="py-3 px-4">
                     <span className="text-xs font-semibold text-[var(--color-muted-foreground)]">
@@ -95,22 +91,20 @@ export default function AdminCoursesTable({ courses, isSuperAdmin }: AdminCourse
                   </td>
                 )}
 
-                {/* Enrollments */}
                 <td className="py-3 px-4 text-center font-bold tabular-nums text-[var(--color-foreground)]">
                   {course.enrolledCount || 0}
                 </td>
 
-                {/* Created */}
                 <td className="py-3 px-4 text-[var(--color-muted-foreground)] text-xs">
                   {course.createdAt ? formatDate(course.createdAt) : '—'}
                 </td>
 
-                {/* Actions */}
                 <td className="py-3 px-4 text-right">
                   <div className="inline-flex items-center gap-1.5">
                     <button
+                      type="button"
                       onClick={() => router.push(ROUTES.teacher.courseEdit(course._id))}
-                      className="p-1.5 rounded-lg border border-[var(--border)] bg-[var(--card-solid)] text-[var(--color-foreground)] hover:bg-[var(--student-soft)] hover:text-[var(--student-primary)] transition-colors"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--border)] bg-[var(--card-solid)] text-[var(--color-foreground)] hover:bg-[var(--teacher-soft)] hover:text-[var(--teacher-primary)] transition-colors cursor-pointer"
                       title={t('common.edit')}
                     >
                       <Edit className="w-3.5 h-3.5" />
@@ -118,7 +112,7 @@ export default function AdminCoursesTable({ courses, isSuperAdmin }: AdminCourse
 
                     <Link
                       href={ROUTES.admin.courseStudents(course._id)}
-                      className="p-1.5 rounded-lg border border-[var(--border)] bg-[var(--card-solid)] text-[var(--color-foreground)] hover:bg-[var(--student-soft)] hover:text-[var(--student-primary)] transition-colors"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--border)] bg-[var(--card-solid)] text-[var(--color-foreground)] hover:bg-[var(--teacher-soft)] hover:text-[var(--teacher-primary)] transition-colors"
                       title="Enrolled Students"
                     >
                       <UserCheck className="w-3.5 h-3.5" />
@@ -128,7 +122,7 @@ export default function AdminCoursesTable({ courses, isSuperAdmin }: AdminCourse
                       <Link
                         href={`/courses/${course.slug}`}
                         target="_blank"
-                        className="p-1.5 rounded-lg border border-[var(--border)] bg-[var(--card-solid)] text-[var(--color-foreground)] hover:bg-[var(--student-soft)] hover:text-[var(--student-primary)] transition-colors"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--border)] bg-[var(--card-solid)] text-[var(--color-foreground)] hover:bg-[var(--teacher-soft)] hover:text-[var(--teacher-primary)] transition-colors"
                         title={t('admin.preview')}
                       >
                         <ExternalLink className="w-3.5 h-3.5" />

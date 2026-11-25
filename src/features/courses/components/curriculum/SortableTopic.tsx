@@ -95,35 +95,35 @@ export function SortableTopic({
         <div className="border-t border-[var(--color-border)] bg-[var(--color-background)]/30">
           <div className="p-3 sm:p-4 space-y-4">
             {onOpenAiModal && (
-              <div className="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/25 flex-wrap">
-                <span className="text-xs font-semibold text-purple-300 flex items-center gap-1.5">
-                  <Sparkles className="w-4 h-4 text-purple-400" />
+              <div className="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-[var(--teacher-soft)]/70 border border-[var(--teacher-border)] flex-wrap">
+                <span className="text-xs font-bold text-[var(--teacher-primary)] flex items-center gap-1.5">
+                  <Sparkles className="w-4 h-4 shrink-0" />
                   AI Chapter Tools:
                 </span>
                 <div className="flex items-center gap-2 flex-wrap">
                   <button
                     type="button"
                     onClick={() => onOpenAiModal('add-lesson', topic)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-purple-600/20 hover:bg-purple-600/30 text-purple-200 border border-purple-500/40 transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--card-solid)] hover:bg-[var(--teacher-soft)] text-[var(--teacher-primary)] border border-[var(--teacher-border)] transition-colors cursor-pointer"
                   >
-                    <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-                    add lesson using AI
+                    <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                    <span>AI Lesson</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => onOpenAiModal('add-chapter', topic)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-purple-600/20 hover:bg-purple-600/30 text-purple-200 border border-purple-500/40 transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--card-solid)] hover:bg-[var(--teacher-soft)] text-[var(--teacher-primary)] border border-[var(--teacher-border)] transition-colors cursor-pointer"
                   >
-                    <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-                    add chapter using AI
+                    <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                    <span>AI Chapter</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => onOpenAiModal('add-quiz', topic)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-purple-600/20 hover:bg-purple-600/30 text-purple-200 border border-purple-500/40 transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--card-solid)] hover:bg-[var(--teacher-soft)] text-[var(--teacher-primary)] border border-[var(--teacher-border)] transition-colors cursor-pointer"
                   >
-                    <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-                    add quiz using AI
+                    <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                    <span>AI Quiz</span>
                   </button>
                 </div>
               </div>

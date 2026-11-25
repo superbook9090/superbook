@@ -19,11 +19,25 @@ interface AdminActivityChartProps {
 }
 
 type MetricFilter = 'all' | 'signups' | 'enrollments' | 'attempts';
+type SeriesKey = 'signups' | 'enrollments' | 'attempts';
 
 interface TooltipPayload {
   payload: DailyTrendPoint;
   value: number;
 }
+
+const SERIES_META: {
+  key: SeriesKey;
+  labelKey: string;
+  colorVar: string;
+  dotClass: string;
+  textClass: string;
+  gradId: string;
+}[] = [
+  { key: 'signups', labelKey: 'adminAnalytics.signups', colorVar: 'var(--info)', dotClass: 'bg-[var(--info)]', textClass: 'text-[var(--info)]', gradId: 'signupGrad' },
+  { key: 'enrollments', labelKey: 'adminAnalytics.enrollments', colorVar: 'var(--success)', dotClass: 'bg-[var(--success)]', textClass: 'text-[var(--success)]', gradId: 'enrollGrad' },
+  { key: 'attempts', labelKey: 'adminAnalytics.attempts', colorVar: 'var(--warning)', dotClass: 'bg-[var(--warning)]', textClass: 'text-[var(--warning)]', gradId: 'attemptGrad' },
+];
 
 export function AdminActivityChart({ data }: AdminActivityChartProps) {
   const { t } = useTranslation();
@@ -31,22 +45,29 @@ export function AdminActivityChart({ data }: AdminActivityChartProps) {
 
   const processedData = useMemo(() => {
     if (!data || data.length === 0) return [];
-    return data.map((item) => {
-      const d = new Date(item.date);
-      const label = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-      return {
-        ...item,
-        displayDate: label,
-      };
-    });
+    return data.map((item) => ({
+      ...item,
+      displayDate: new Date(item.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+    }));
   }, [data]);
 
-  const filterOptions: { id: MetricFilter; label: string; color: string }[] = [
-    { id: 'all', label: t('adminAnalytics.allSeries'), color: 'bg-[var(--primary)] text-white' },
-    { id: 'signups', label: t('adminAnalytics.signups'), color: 'bg-[var(--info)] text-white' },
-    { id: 'enrollments', label: t('adminAnalytics.enrollments'), color: 'bg-[var(--success)] text-white' },
-    { id: 'attempts', label: t('adminAnalytics.attempts'), color: 'bg-[var(--warning)] text-white' },
-  ];
+  const seriesTotals = useMemo(
+    () =>
+      processedData.reduce(
+        (acc, pt) => ({
+          signups: acc.signups + (pt.signups || 0),
+          enrollments: acc.enrollments + (pt.enrollments || 0),
+          attempts: acc.attempts + (pt.attempts || 0),
+        }),
+        { signups: 0, enrollments: 0, attempts: 0 }
+      ),
+    [processedData]
+  );
+
+  const visibleSeries = useMemo(
+    () => (filter === 'all' ? SERIES_META : SERIES_META.filter((s) => s.key === filter)),
+    [filter]
+  );
 
   const CustomTooltip = ({
     active,
@@ -57,174 +78,143 @@ export function AdminActivityChart({ data }: AdminActivityChartProps) {
     payload?: TooltipPayload[];
     label?: string;
   }) => {
-    if (active && payload && payload.length) {
-      const point = payload[0].payload;
-      return (
-        <div className="bg-[var(--card-solid)] p-2.5 sm:p-3 rounded-xl shadow-xl border border-[var(--color-border)] min-w-[140px] text-xs">
-          <p className="font-semibold text-[var(--color-foreground)] border-b border-[var(--color-border)] pb-1 mb-1.5">
-            {label}
-          </p>
-          <div className="space-y-1">
-            {(filter === 'all' || filter === 'signups') && (
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-[var(--info)] flex items-center gap-1 font-medium">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--info)]" />
-                  {t('adminAnalytics.signups')}
-                </span>
-                <span className="font-bold tabular-nums text-[var(--color-foreground)]">{point.signups}</span>
-              </div>
-            )}
-            {(filter === 'all' || filter === 'enrollments') && (
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-[var(--success)] flex items-center gap-1 font-medium">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--success)]" />
-                  {t('adminAnalytics.enrollments')}
-                </span>
-                <span className="font-bold tabular-nums text-[var(--color-foreground)]">{point.enrollments}</span>
-              </div>
-            )}
-            {(filter === 'all' || filter === 'attempts') && (
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-[var(--warning)] flex items-center gap-1 font-medium">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--warning)]" />
-                  {t('adminAnalytics.attempts')}
-                </span>
-                <span className="font-bold tabular-nums text-[var(--color-foreground)]">{point.attempts}</span>
-              </div>
-            )}
-          </div>
+    if (!active || !payload?.length) return null;
+    const point = payload[0].payload;
+    return (
+      <div className="bg-[var(--card-solid)] p-3 rounded-xl shadow-xl border border-[var(--border)] min-w-[155px] text-xs">
+        <p className="font-bold text-[var(--color-foreground)] border-b border-[var(--border)] pb-1.5 mb-2">
+          {label}
+        </p>
+        <div className="space-y-1.5">
+          {visibleSeries.map((s) => (
+            <div key={s.key} className="flex items-center justify-between gap-3">
+              <span className={`${s.textClass} inline-flex items-center gap-1.5 font-semibold`}>
+                <span className={`w-2 h-2 rounded-full ${s.dotClass}`} />
+                {t(s.labelKey)}
+              </span>
+              <span className="font-bold tabular-nums text-[var(--color-foreground)]">
+                {point[s.key]}
+              </span>
+            </div>
+          ))}
         </div>
-      );
-    }
-    return null;
+      </div>
+    );
   };
 
-  if (!processedData || processedData.length === 0) {
+  if (processedData.length === 0) {
     return (
-      <div className="card-panel p-6 text-center flex flex-col items-center justify-center min-h-[260px]">
-        <Activity className="w-8 h-8 text-[var(--color-muted)] mb-2 animate-pulse" />
+      <div className="teacher-panel p-6 text-center flex flex-col items-center justify-center min-h-[320px]">
+        <Activity className="w-8 h-8 text-[var(--color-muted-foreground)] mb-2 opacity-60" />
         <p className="text-[var(--color-muted-foreground)] text-xs sm:text-sm">{t('progress.noDataAvailable')}</p>
       </div>
     );
   }
 
   return (
-    <div className="card-panel w-full min-w-0 overflow-hidden">
-      <div className="card-panel-header flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="p-1.5 rounded-lg bg-[var(--primary-soft)] text-[var(--primary)] shrink-0">
-              <TrendingUp className="w-4 h-4" />
-            </span>
-            <h3 className="text-sm sm:text-base md:text-lg font-bold text-[var(--color-foreground)] truncate">
+    <div className="teacher-panel p-4 sm:p-5 h-full flex flex-col justify-between gap-4 overflow-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-[var(--border)]/70">
+        <div className="flex items-start gap-2.5 min-w-0">
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] bg-[var(--teacher-soft)] text-[var(--teacher-primary)] border border-[var(--teacher-border)] shrink-0">
+            <TrendingUp className="w-4 h-4" />
+          </span>
+          <div className="min-w-0">
+            <h3 className="text-sm sm:text-base font-extrabold font-[family-name:var(--font-display)] text-[var(--color-foreground)] truncate">
               {t('adminAnalytics.growthTrendTitle')}
             </h3>
+            <p className="text-xs text-[var(--color-muted-foreground)] line-clamp-1">
+              {t('adminAnalytics.growthTrendSubtitle')}
+            </p>
           </div>
-          <p className="text-[11px] sm:text-xs text-[var(--color-muted-foreground)] mt-0.5 sm:mt-1 line-clamp-1 sm:line-clamp-none">
-            {t('adminAnalytics.growthTrendSubtitle')}
-          </p>
         </div>
 
-        {/* Filter Pills */}
-        <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none w-full sm:w-auto max-w-full shrink-0">
-          {filterOptions.map((opt) => {
-            const isActive = filter === opt.id;
-            return (
-              <button
-                key={opt.id}
-                type="button"
-                onClick={() => setFilter(opt.id)}
-                className={`px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs font-semibold rounded-lg transition-all whitespace-nowrap cursor-pointer shrink-0 touch-target ${
-                  isActive
-                    ? opt.color
-                    : 'bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]'
-                }`}
-              >
-                {opt.label}
-              </button>
-            );
-          })}
+        <div className="inline-flex items-center gap-1 p-1 rounded-xl bg-[var(--surface-muted)] border border-[var(--border)] overflow-x-auto max-w-full scrollbar-none shrink-0">
+          {([
+            { id: 'all' as MetricFilter, label: t('adminAnalytics.allSeries'), dot: undefined },
+            ...SERIES_META.map((s) => ({ id: s.key as MetricFilter, label: t(s.labelKey), dot: s.dotClass })),
+          ]).map((opt) => (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => setFilter(opt.id)}
+              className={`inline-flex items-center gap-1.5 px-2.5 min-h-[32px] text-xs font-bold rounded-[8px] transition-colors whitespace-nowrap cursor-pointer shrink-0 ${
+                filter === opt.id
+                  ? 'bg-[var(--card-solid)] text-[var(--teacher-primary)] shadow-xs'
+                  : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]'
+              }`}
+            >
+              {opt.dot && <span className={`w-1.5 h-1.5 rounded-full ${opt.dot}`} />}
+              <span>{opt.label}</span>
+            </button>
+          ))}
         </div>
       </div>
 
-      <div className="p-3 sm:p-5 pt-1 sm:pt-2 w-full min-w-0">
-        <div className="w-full min-w-0 h-[220px] sm:h-[260px] md:h-[290px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={processedData} margin={{ top: 10, right: 8, left: -22, bottom: 0 }}>
-              <defs>
-                <linearGradient id="signupGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--info)" stopOpacity={0.35} />
-                  <stop offset="95%" stopColor="var(--info)" stopOpacity={0.02} />
+      {/* Period Totals Strip */}
+      <div className="grid grid-cols-3 gap-2.5">
+        {SERIES_META.map((s) => (
+          <div
+            key={s.key}
+            className="px-3 py-2 rounded-xl bg-[var(--surface-muted)]/60 border border-[var(--border)]/60 flex items-center justify-between gap-2"
+          >
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[var(--color-muted-foreground)] truncate">
+              <span className={`w-2 h-2 rounded-full shrink-0 ${s.dotClass}`} />
+              <span className="truncate">{t(s.labelKey)}</span>
+            </span>
+            <span className="text-xs sm:text-sm font-extrabold tabular-nums text-[var(--color-foreground)] shrink-0">
+              {seriesTotals[s.key].toLocaleString()}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Area Chart */}
+      <div className="w-full min-w-0 h-[230px] sm:h-[270px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={processedData} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
+            <defs>
+              {SERIES_META.map((s) => (
+                <linearGradient key={s.gradId} id={s.gradId} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={s.colorVar} stopOpacity={0.3} />
+                  <stop offset="95%" stopColor={s.colorVar} stopOpacity={0.01} />
                 </linearGradient>
-                <linearGradient id="enrollGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--success)" stopOpacity={0.35} />
-                  <stop offset="95%" stopColor="var(--success)" stopOpacity={0.02} />
-                </linearGradient>
-                <linearGradient id="attemptGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--warning)" stopOpacity={0.35} />
-                  <stop offset="95%" stopColor="var(--warning)" stopOpacity={0.02} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
-              <XAxis
-                dataKey="displayDate"
-                stroke="var(--color-muted-foreground)"
-                fontSize={10}
-                tickLine={false}
-                axisLine={false}
-                dy={6}
-                interval="preserveStartEnd"
-                minTickGap={16}
+              ))}
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+            <XAxis
+              dataKey="displayDate"
+              stroke="var(--color-muted-foreground)"
+              fontSize={11}
+              tickLine={false}
+              axisLine={false}
+              dy={6}
+              interval="preserveStartEnd"
+              minTickGap={18}
+            />
+            <YAxis
+              stroke="var(--color-muted-foreground)"
+              fontSize={11}
+              tickLine={false}
+              axisLine={false}
+              allowDecimals={false}
+              width={34}
+            />
+            <Tooltip content={<CustomTooltip />} />
+
+            {visibleSeries.map((s) => (
+              <Area
+                key={s.key}
+                type="monotone"
+                dataKey={s.key}
+                stroke={s.colorVar}
+                strokeWidth={2.2}
+                fill={`url(#${s.gradId})`}
+                dot={false}
+                activeDot={{ r: 4 }}
               />
-              <YAxis
-                stroke="var(--color-muted-foreground)"
-                fontSize={10}
-                tickLine={false}
-                axisLine={false}
-                allowDecimals={false}
-                dx={-4}
-                width={30}
-              />
-              <Tooltip content={<CustomTooltip />} />
-
-              {(filter === 'all' || filter === 'signups') && (
-                <Area
-                  type="monotone"
-                  dataKey="signups"
-                  stroke="var(--info)"
-                  strokeWidth={2}
-                  fill="url(#signupGrad)"
-                  dot={false}
-                  activeDot={{ r: 4 }}
-                />
-              )}
-
-              {(filter === 'all' || filter === 'enrollments') && (
-                <Area
-                  type="monotone"
-                  dataKey="enrollments"
-                  stroke="var(--success)"
-                  strokeWidth={2}
-                  fill="url(#enrollGrad)"
-                  dot={false}
-                  activeDot={{ r: 4 }}
-                />
-              )}
-
-              {(filter === 'all' || filter === 'attempts') && (
-                <Area
-                  type="monotone"
-                  dataKey="attempts"
-                  stroke="var(--warning)"
-                  strokeWidth={2}
-                  fill="url(#attemptGrad)"
-                  dot={false}
-                  activeDot={{ r: 4 }}
-                />
-              )}
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
+            ))}
+          </AreaChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );

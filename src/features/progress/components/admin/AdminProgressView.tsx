@@ -1,11 +1,12 @@
 'use client';
 
 import React from 'react';
+import { RotateCw, TrendingUp } from 'lucide-react';
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { useTranslation } from '@/hooks/useTranslation';
+import { AdminPageBanner } from '@/features/admin/components/AdminPageBanner';
 import { useAdminProgress } from '../../hooks/useAdminProgress';
-import { ProgressHeader } from '../ProgressHeader';
 import { AdminPlatformProgressStats } from './AdminPlatformProgressStats';
 import { AdminCourseHealthList } from './AdminCourseHealthList';
 import { AdminStudentSearchInspector } from './AdminStudentSearchInspector';
@@ -34,24 +35,32 @@ export function AdminProgressView() {
   }
 
   return (
-    <PageWrapper className="space-y-6">
-      <ProgressHeader
+    <PageWrapper>
+      <AdminPageBanner
+        icon={TrendingUp}
+        eyebrow={t('progress.adminProgress')}
         title={t('progress.adminProgress')}
         description={t('progress.adminProgressDesc')}
-        onRefresh={refetch}
-        isRefreshing={isLoading}
+        actions={
+          <button
+            type="button"
+            onClick={refetch}
+            disabled={isLoading}
+            className="teacher-pill-btn min-h-[44px] px-4 text-xs sm:text-sm font-semibold cursor-pointer"
+          >
+            <RotateCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            <span>{t('progress.refresh')}</span>
+          </button>
+        }
       />
 
-      {/* Platform Progress Stats */}
       <AdminPlatformProgressStats stats={overallStats} />
 
-      {/* Course Completion Health */}
       <AdminCourseHealthList courseHealth={courseHealth} />
 
-      {/* Student Search & Roster */}
-      <section className="space-y-4">
+      <section className="space-y-3.5">
         <div className="flex items-center justify-between">
-          <h2 className="text-base sm:text-lg font-bold text-[var(--color-foreground)]">
+          <h2 className="text-base sm:text-lg font-extrabold font-[family-name:var(--font-display)] text-[var(--color-foreground)]">
             {t('progress.studentRoster')} ({students.length})
           </h2>
         </div>
@@ -64,7 +73,6 @@ export function AdminProgressView() {
         />
       </section>
 
-      {/* Student Detail Modal */}
       <TeacherStudentDetailModal
         isOpen={Boolean(drilldownStudent)}
         studentName={drilldownStudent?.name || ''}

@@ -1,8 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { useTranslation } from '@/hooks/useTranslation';
-import { ROUTES } from '@/constants/routes';
 import {
   Compass,
   HelpCircle,
@@ -13,6 +10,8 @@ import {
   Trophy,
   BookMarked,
 } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
+import { ROUTES } from '@/constants/routes';
 import { useFeature } from '@/contexts/AppSettingsContext';
 import { ResponsiveGrid } from '@/components/layout';
 import QuickActionCard from '@/components/ui/QuickActionCard';
@@ -26,24 +25,20 @@ export default function StudentQuickLinks() {
   const enableContests = useFeature('enableContests');
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.35 }}
-      aria-labelledby="learning-hub-heading"
-      className="space-y-3 sm:space-y-4"
-    >
+    <section aria-labelledby="learning-hub-heading" className="space-y-3 sm:space-y-4">
       <div>
-        <h2 id="learning-hub-heading" className="text-lg sm:text-xl font-bold text-[var(--color-foreground)]">
+        <h2
+          id="learning-hub-heading"
+          className="text-base sm:text-lg font-bold font-[family-name:var(--font-display)] tracking-tight text-[var(--color-foreground)]"
+        >
           {t('dashboard.learningHub')}
         </h2>
-        <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)]">
+        <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] mt-0.5">
           {t('dashboard.learningHubDesc')}
         </p>
       </div>
 
-      <div className="perspective-1000">
-        <ResponsiveGrid variant="cards">
+      <ResponsiveGrid variant="cards">
         {enableCourses && (
           <QuickActionCard
             icon={Compass}
@@ -51,7 +46,7 @@ export default function StudentQuickLinks() {
             description={t('common.browse')}
             href={ROUTES.student.browse}
             color="student"
-            delay={0.1}
+            delay={0.04}
           />
         )}
 
@@ -62,7 +57,7 @@ export default function StudentQuickLinks() {
             description={t('quiz.quizzesDesc')}
             href={ROUTES.student.quizzes}
             color="success"
-            delay={0.15}
+            delay={0.08}
           />
         )}
 
@@ -73,17 +68,17 @@ export default function StudentQuickLinks() {
             description={t('contest.contestsHubDesc')}
             href={ROUTES.student.contests}
             color="error"
-            delay={0.18}
+            delay={0.12}
           />
         )}
 
         <QuickActionCard
           icon={BookMarked}
-          title={t('common.mistakes') || 'Mistakes Notebook'}
-          description="Revise questions you got wrong"
+          title={t('common.mistakes')}
+          description={t('studentUi.mistakesHubDesc')}
           href={ROUTES.student.mistakes}
           color="warning"
-          delay={0.2}
+          delay={0.16}
         />
 
         {enableNotes && (
@@ -103,7 +98,7 @@ export default function StudentQuickLinks() {
           description={t('dashboard.averageProgress')}
           href={ROUTES.student.progress}
           color="info"
-          delay={0.25}
+          delay={0.24}
         />
 
         {enableCourses && (
@@ -113,7 +108,7 @@ export default function StudentQuickLinks() {
             description={t('dashboard.certificatesDesc')}
             href={ROUTES.student.certificates}
             color="student"
-            delay={0.3}
+            delay={0.28}
           />
         )}
 
@@ -124,11 +119,10 @@ export default function StudentQuickLinks() {
             description={t('dashboard.readBlogsDesc')}
             href={ROUTES.student.blogs}
             color="admin"
-            delay={0.35}
+            delay={0.32}
           />
         )}
       </ResponsiveGrid>
-    </div>
-    </motion.section>
+    </section>
   );
 }

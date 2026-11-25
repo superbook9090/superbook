@@ -1,19 +1,19 @@
 'use client';
 
-import { ROUTES } from '@/constants/routes';
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { BookOpen, Sparkles, Compass } from 'lucide-react';
+import { ROUTES } from '@/constants/routes';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useAlert } from '@/components/ui/AlertContainer';
 import { LazyCourseCard, LazyCourseFilters, LazyJoinCourseByCode } from '@/lib/lazy';
 import { PageSkeleton } from '@/components/ui/Skeleton';
-import { PageWrapper, ResponsiveGrid, PageHeader } from '@/components/layout';
+import { PageWrapper, ResponsiveGrid, EmptyState } from '@/components/layout';
 import { useAvailableCourses, useEnrollCourse } from '@/lib/react-query/hooks';
-import { BookOpen, Sparkles, Compass } from 'lucide-react';
-import BackButton from '@/components/ui/BackButton';
 import { FilterPanel } from '@/components/filters/DashboardListFilters';
+import Button from '@/components/ui/Button';
+import { StudentPageBanner } from '@/features/student/components/StudentPageBanner';
 
 export default function BrowseCoursesPage() {
   const { session, status } = useSessionStore();
@@ -31,40 +31,32 @@ export default function BrowseCoursesPage() {
 
   useEffect(() => {
     if (status === 'loading') return;
-    if (!session) {
-      router.push(ROUTES.login);
-    }
+    if (!session) router.push(ROUTES.login);
   }, [status, session, router]);
 
   const categories = useMemo(() => {
     const cats = new Set<string>(['All']);
-    availableCourses.forEach((c) => {
-      if (c.category) cats.add(c.category);
-    });
+    availableCourses.forEach((c) => { if (c.category) cats.add(c.category); });
     return Array.from(cats);
   }, [availableCourses]);
 
   const instructors = useMemo(() => {
     const insts = new Set<string>(['All']);
-    availableCourses.forEach((c) => {
-      if (c.instructor?.name) insts.add(c.instructor.name);
-    });
+    availableCourses.forEach((c) => { if (c.instructor?.name) insts.add(c.instructor.name); });
     return Array.from(insts);
   }, [availableCourses]);
 
   const filteredCourses = useMemo(() => {
+    const searchLower = searchQuery.toLowerCase().trim();
     return availableCourses.filter((c) => {
-      const searchLower = searchQuery.toLowerCase().trim();
       const matchesSearch =
         !searchLower ||
         c.title.toLowerCase().includes(searchLower) ||
         c.description?.toLowerCase().includes(searchLower) ||
         c.instructor?.name?.toLowerCase().includes(searchLower);
-
       const matchesCategory = selectedCategory === 'All' || c.category === selectedCategory;
       const matchesInstructor =
         selectedInstructor === 'All' || c.instructor?.name === selectedInstructor;
-
       return matchesSearch && matchesCategory && matchesInstructor;
     });
   }, [availableCourses, searchQuery, selectedCategory, selectedInstructor]);
@@ -85,57 +77,36 @@ export default function BrowseCoursesPage() {
     setSelectedInstructor('All');
   };
 
-  if (status === 'loading' || coursesLoading) {
-    return <PageSkeleton />;
-  }
+  if (status === 'loading' || coursesLoading) return <PageSkeleton />;
 
   return (
     <PageWrapper>
-      {/* Header Area */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="stack-page--compact"
-      >
-        <BackButton
-          href={ROUTES.student.courses}
-          label={t('courses.backToCourses')}
-          className="text-xs font-bold uppercase tracking-wider text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] mb-2 inline-block"
-        />
-
-        <PageHeader
-          title={
-            <div className="flex flex-col gap-1.5">
-              <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--student-primary)]">
-                <Compass className="w-3.5 h-3.5" />
-                <span>{t('courses.courseCatalog')}</span>
-              </div>
-              <span>{t('courses.browseCourses')}</span>
+      <StudentPageBanner
+        icon={Compass}
+        eyebrow={t('courses.courseCatalog')}
+        title={t('courses.browseCourses')}
+        description={t('courses.browseDesc')}
+        backHref={ROUTES.student.courses}
+        backLabel={t('courses.backToCourses')}
+        actions={
+          <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-[var(--surface-muted)] border border-[var(--border)]/80 w-full sm:w-auto justify-between sm:justify-start">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-muted-foreground)]">
+                {t('courses.availableCourses')}
+              </p>
+              <p className="text-xl font-extrabold leading-none mt-1 tabular-nums text-[var(--student-primary)]">
+                {availableCourses.length}
+              </p>
             </div>
-          }
-          description={t('courses.browseDesc')}
-          actions={
-            <div className="flex items-center gap-3 sm:gap-4 antigravity-glass border border-[var(--border)] rounded-2xl p-3 sm:p-4 shadow-sm w-full sm:w-auto">
-              <div className="text-right flex-1 sm:text-right text-left">
-                <p className="text-[10px] font-black uppercase tracking-widest text-[var(--color-muted-foreground)]">
-                  {t('courses.availableCourses')}
-                </p>
-                <p className="text-2xl font-black leading-none mt-1 tabular-nums text-[var(--student-primary)]">
-                  {availableCourses.length}
-                </p>
-              </div>
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--student-primary)] to-[var(--student-accent)] text-white flex items-center justify-center shadow-xs">
-                <Sparkles className="w-5 h-5" />
-              </div>
+            <div className="w-9 h-9 rounded-xl gradient-bg text-white flex items-center justify-center shrink-0">
+              <Sparkles className="w-4 h-4" />
             </div>
-          }
-        />
-      </motion.div>
+          </div>
+        }
+      />
 
-      {/* Join private course */}
       <LazyJoinCourseByCode />
 
-      {/* Filters Section */}
       <FilterPanel>
         <LazyCourseFilters
           searchQuery={searchQuery}
@@ -152,46 +123,29 @@ export default function BrowseCoursesPage() {
         />
       </FilterPanel>
 
-      {/* Grid Content */}
-      <div className="perspective-1000">
-        <ResponsiveGrid variant="cards">
-          {filteredCourses.length === 0 ? (
-            <div className="col-span-full text-center py-16 antigravity-glass border border-dashed border-[var(--border)] rounded-3xl p-8 shadow-sm">
-              <div className="w-16 h-16 rounded-2xl bg-[var(--student-primary)]/10 text-[var(--student-primary)] flex items-center justify-center mx-auto mb-4">
-                <BookOpen className="w-8 h-8" />
-              </div>
-              <h3 className="heading-md text-[var(--color-foreground)] mb-1 font-bold">
-                {t('courses.noAvailableCourses')}
-              </h3>
-              <p className="text-sm text-[var(--color-muted-foreground)] mb-6 max-w-sm mx-auto">
-                {t('courses.tryAdjustingFilters')}
-              </p>
-              <button
-                onClick={clearFilters}
-                className="btn-premium px-6 py-2.5 font-bold shadow-md shadow-[var(--student-primary)]/25"
-              >
-                {t('common.reset')}
-              </button>
-            </div>
-          ) : (
-            filteredCourses.map((course, idx) => (
-              <motion.div
-                key={course._id}
-                initial={{ opacity: 0, y: 16, rotateX: 4 }}
-                animate={{ opacity: 1, y: 0, rotateX: 0 }}
-                transition={{ duration: 0.35, delay: Math.min(idx * 0.05, 0.3) }}
-                className="transform-3d"
-              >
-                <LazyCourseCard
-                  course={course}
-                  type="available"
-                  onEnroll={handleEnroll}
-                />
-              </motion.div>
-            ))
-          )}
+      {filteredCourses.length === 0 ? (
+        <EmptyState
+          icon={BookOpen}
+          title={t('courses.noAvailableCourses')}
+          description={t('courses.tryAdjustingFilters')}
+          action={
+            <Button onClick={clearFilters} variant="primary" className="min-h-[44px] rounded-xl px-6">
+              {t('common.reset')}
+            </Button>
+          }
+        />
+      ) : (
+        <ResponsiveGrid variant="dense">
+          {filteredCourses.map((course) => (
+            <LazyCourseCard
+              key={course._id}
+              course={course}
+              type="available"
+              onEnroll={handleEnroll}
+            />
+          ))}
         </ResponsiveGrid>
-      </div>
+      )}
     </PageWrapper>
   );
 }

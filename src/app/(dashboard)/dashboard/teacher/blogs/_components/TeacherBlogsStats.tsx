@@ -3,7 +3,6 @@
 import React from 'react';
 import { BookOpen, CheckCircle, Clock } from 'lucide-react';
 import StatCard from '@/components/ui/StatCard';
-import { ResponsiveGrid } from '@/components/layout';
 import { useTranslation } from '@/hooks/useTranslation';
 
 interface TeacherBlogsStatsProps {
@@ -18,7 +17,7 @@ export default function TeacherBlogsStats({ stats }: TeacherBlogsStatsProps) {
   const { t } = useTranslation();
 
   return (
-    <ResponsiveGrid variant="cards">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
       <StatCard
         icon={BookOpen}
         value={stats.total}
@@ -40,6 +39,6 @@ export default function TeacherBlogsStats({ stats }: TeacherBlogsStatsProps) {
         color="warning"
         delay={0.15}
       />
-    </ResponsiveGrid>
+    </div>
   );
 }

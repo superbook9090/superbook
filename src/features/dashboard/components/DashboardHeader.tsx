@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Bell, ChevronRight } from 'lucide-react';
+import { Bell, ChevronRight, Home } from 'lucide-react';
 import { ROUTES } from '@/constants/routes';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useQuiz } from '@/contexts/QuizContext';
@@ -21,6 +21,15 @@ interface DashboardHeaderProps {
   isTeacherOrAdmin: boolean;
   showNotifications?: boolean;
   role?: string;
+}
+
+function getSubPageLabelKey(pathname: string, parentHref: string): string | null {
+  if (!pathname.startsWith(`${parentHref}/`)) return null;
+  const rest = pathname.slice(parentHref.length + 1);
+  if (rest === 'create' || rest.endsWith('/create')) return 'common.add';
+  if (rest === 'edit' || rest.endsWith('/edit') || rest.startsWith('edit/')) return 'common.edit';
+  if (rest.endsWith('/students')) return 'dashboard.students';
+  return null;
 }
 
 export default function DashboardHeader({
@@ -47,62 +56,86 @@ export default function DashboardHeader({
   const isHomeRoute = pathname === homePath;
   const activeItem = resolveActiveNavItem(pathname, role);
   const ActiveIcon = activeItem ? getNavIcon(activeItem.icon) : null;
+  const subPageKey = activeItem ? getSubPageLabelKey(pathname, activeItem.href) : null;
 
-  const getDashboardTitle = () => {
-    if (isSuperAdminUser) return t('topnav.superadminDashboard');
-    if (isAdminUser) return t('admin.adminDashboard');
-    if (role === 'teacher' || isTeacherOrAdmin) return t('dashboard.teacherDashboard');
-    return t('dashboard.studentDashboard');
-  };
+  const dashboardTitle = isSuperAdminUser
+    ? t('topnav.superadminDashboard')
+    : isAdminUser
+      ? t('admin.adminDashboard')
+      : role === 'teacher' || isTeacherOrAdmin
+        ? t('dashboard.teacherDashboard')
+        : t('dashboard.studentDashboard');
 
-  const getWorkspaceLabel = () => {
-    if (isSuperAdminUser) return t('common.administrator');
-    if (isAdminUser) return t('common.administrator');
-    if (role === 'teacher' || isTeacherOrAdmin) return t('common.teacher');
-    return t('common.student');
-  };
+  const workspaceLabel = isSuperAdminUser
+    ? t('common.administrator')
+    : isAdminUser
+      ? t('common.administrator')
+      : role === 'teacher' || isTeacherOrAdmin
+        ? t('common.teacher')
+        : t('common.student');
 
   const userName = session?.user?.name?.trim() || '';
-  const firstName = userName ? userName.split(/\s+/)[0] : '';
-  const displayFirstName = firstName
-    ? firstName.charAt(0).toUpperCase() + firstName.slice(1)
-    : '';
+  const displayName = userName
+    ? userName.charAt(0).toUpperCase() + userName.slice(1)
+    : workspaceLabel;
   const initial = userName.charAt(0).toUpperCase() || (isTeacherOrAdmin ? 'T' : 'S');
   const notificationsActive = isNavItemActive(pathname, ROUTES.student.notifications);
 
   return (
-    <header className="dashboard-topbar hidden md:block flex-shrink-0 z-20">
+    <header className="dashboard-topbar hidden md:block flex-shrink-0">
       <div className="max-w-[var(--page-max-width)] mx-auto px-[var(--gutter-x)] h-16 flex items-center justify-between gap-4">
-        {/* Left: Breadcrumb / Current Page Context */}
+        {/* Left: Crisp Breadcrumb Trail */}
         <div className="flex items-center gap-2.5 min-w-0">
           {isHomeRoute || !activeItem ? (
-            <h1 className="text-base font-bold font-[family-name:var(--font-display)] tracking-tight text-[var(--color-foreground)] truncate">
-              {getDashboardTitle()}
-            </h1>
+            <div className="flex items-center gap-2.5 min-w-0">
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-[10px] bg-[var(--primary-soft)] text-[var(--primary)] shrink-0">
+                <Home className="w-4 h-4" aria-hidden />
+              </span>
+              <h1 className="text-sm sm:text-base font-bold font-[family-name:var(--font-display)] tracking-tight text-[var(--color-foreground)] truncate">
+                {dashboardTitle}
+              </h1>
+            </div>
           ) : (
-            <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 min-w-0">
+            <nav aria-label="Breadcrumb" className="flex items-center gap-1 min-w-0">
               <Link
                 href={homePath}
-                className="text-xs font-semibold text-[var(--color-muted-foreground)] hover:text-[var(--primary)] transition-colors shrink-0 px-2 py-1 rounded-lg hover:bg-[var(--surface-muted)]"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--surface-muted)] px-2 py-1.5 rounded-[8px] transition-colors shrink-0"
               >
-                {getWorkspaceLabel()}
+                <Home className="w-3.5 h-3.5 shrink-0" aria-hidden />
+                <span>{workspaceLabel}</span>
               </Link>
-              <ChevronRight className="w-3.5 h-3.5 text-[var(--color-muted)] shrink-0" aria-hidden />
-              <div className="flex items-center gap-2 min-w-0">
-                {ActiveIcon && (
-                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--primary-soft)] text-[var(--primary)] shrink-0">
-                    <ActiveIcon className="w-4 h-4" aria-hidden />
+              <ChevronRight className="w-3.5 h-3.5 text-[var(--color-muted)]/70 shrink-0" aria-hidden />
+              {subPageKey ? (
+                <>
+                  <Link
+                    href={activeItem.href}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--surface-muted)] px-2 py-1.5 rounded-[8px] transition-colors shrink-0"
+                  >
+                    {ActiveIcon && <ActiveIcon className="w-3.5 h-3.5 shrink-0" aria-hidden />}
+                    <span>{t(activeItem.nameKey)}</span>
+                  </Link>
+                  <ChevronRight className="w-3.5 h-3.5 text-[var(--color-muted)]/70 shrink-0" aria-hidden />
+                  <span className="text-xs sm:text-sm font-bold text-[var(--color-foreground)] px-1.5 truncate">
+                    {t(subPageKey)}
                   </span>
-                )}
-                <h1 className="text-sm sm:text-base font-bold font-[family-name:var(--font-display)] tracking-tight text-[var(--color-foreground)] truncate">
-                  {t(activeItem.nameKey)}
-                </h1>
-              </div>
+                </>
+              ) : (
+                <div className="inline-flex items-center gap-2 px-1.5 min-w-0">
+                  {ActiveIcon && (
+                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-[8px] bg-[var(--primary-soft)] text-[var(--primary)] shrink-0">
+                      <ActiveIcon className="w-3.5 h-3.5" aria-hidden />
+                    </span>
+                  )}
+                  <h1 className="text-sm sm:text-[15px] font-bold font-[family-name:var(--font-display)] tracking-tight text-[var(--color-foreground)] truncate">
+                    {t(activeItem.nameKey)}
+                  </h1>
+                </div>
+              )}
             </nav>
           )}
 
           {session?.user?.organizationName && (
-            <div className="hidden lg:inline-flex shrink-0">
+            <div className="hidden xl:inline-flex shrink-0">
               <OrganizationBadge
                 name={session.user.organizationName}
                 logo={session.user.organizationLogo}
@@ -113,44 +146,47 @@ export default function DashboardHeader({
           )}
         </div>
 
-        {/* Right: Unified Utility Controls */}
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {showNotifications && (
-            <Tooltip label={t('common.notifications')} position="bottom">
-              <Link
-                href={ROUTES.student.notifications}
-                aria-label={t('common.notifications')}
-                aria-current={notificationsActive ? 'page' : undefined}
-                className={cn(
-                  'inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border transition-all active:scale-95 shadow-xs focus-ring',
-                  notificationsActive
-                    ? 'bg-[var(--primary-soft)] border-[var(--primary)]/35 text-[var(--primary)]'
-                    : 'border-[var(--border)]/85 bg-[var(--card-solid)] text-[var(--color-muted-foreground)] hover:text-[var(--primary)] hover:bg-[var(--primary-soft)]'
-                )}
-              >
-                <Bell className="w-4 h-4" />
-              </Link>
-            </Tooltip>
-          )}
+        {/* Right: Unified Utility Dock + Clean Profile Chip */}
+        <div className="flex items-center gap-2.5 flex-shrink-0">
+          <div className="topbar-dock">
+            {showNotifications && (
+              <Tooltip label={t('common.notifications')} position="bottom">
+                <Link
+                  href={ROUTES.student.notifications}
+                  aria-label={t('common.notifications')}
+                  aria-current={notificationsActive ? 'page' : undefined}
+                  className={cn(
+                    'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] transition-all active:scale-95 focus-ring',
+                    notificationsActive
+                      ? 'bg-[var(--card-solid)] text-[var(--primary)] shadow-xs'
+                      : 'text-[var(--color-muted-foreground)] hover:text-[var(--primary)] hover:bg-[var(--card-solid)]'
+                  )}
+                >
+                  <Bell className="w-4 h-4" />
+                </Link>
+              </Tooltip>
+            )}
 
-          <ThemeToggle />
-          <LanguageSwitcher compact />
-
-          <span className="h-5 w-px bg-[var(--border)]/80 mx-0.5" aria-hidden />
+            <ThemeToggle variant="ghost" />
+            <LanguageSwitcher variant="ghost" compact />
+          </div>
 
           <Tooltip label={t('sidebar.viewProfile')} position="bottom">
             <Link
               href={profileHref}
-              className="inline-flex h-9 items-center gap-2 pl-1 pr-1 lg:pr-2.5 rounded-xl border border-[var(--border)]/85 bg-[var(--card-solid)] hover:bg-[var(--surface-muted)] transition-all shadow-xs focus-ring group"
+              className="inline-flex h-10 items-center gap-2.5 pl-1.5 pr-1.5 lg:pr-3 rounded-[10px] hover:bg-[var(--surface-muted)]/90 border border-transparent hover:border-[var(--border)]/75 transition-all focus-ring group"
             >
-              <span className="w-7 h-7 rounded-lg gradient-bg flex items-center justify-center text-white text-xs font-bold shrink-0 group-hover:scale-105 transition-transform">
+              <span className="w-7 h-7 rounded-[8px] gradient-bg flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-xs">
                 {initial}
               </span>
-              {displayFirstName && (
-                <span className="hidden lg:inline text-xs font-semibold text-[var(--color-foreground)] max-w-[110px] truncate">
-                  {displayFirstName}
+              <span className="hidden lg:flex flex-col text-left leading-tight max-w-[120px]">
+                <span className="text-xs font-semibold text-[var(--color-foreground)] truncate group-hover:text-[var(--primary)] transition-colors">
+                  {displayName}
                 </span>
-              )}
+                <span className="text-[10px] font-medium text-[var(--color-muted-foreground)] truncate">
+                  {workspaceLabel}
+                </span>
+              </span>
             </Link>
           </Tooltip>
         </div>

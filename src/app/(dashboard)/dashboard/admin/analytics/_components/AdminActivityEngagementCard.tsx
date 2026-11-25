@@ -33,150 +33,149 @@ export function AdminActivityEngagementCard({
   const pctOlder = Math.max(0, 100 - pct24h - pct7d - pct30d);
 
   return (
-    <div className="card-panel flex flex-col justify-between w-full min-w-0 overflow-hidden">
-      <div className="card-panel-header flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="p-1.5 rounded-lg bg-[var(--student-soft)] text-[var(--student-primary)] shrink-0">
-              <Activity className="w-4 h-4" />
-            </span>
-            <h3 className="text-sm sm:text-base md:text-lg font-bold text-[var(--color-foreground)] truncate">
+    <div className="teacher-panel p-4 sm:p-5 h-full flex flex-col justify-between gap-4 overflow-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3.5 border-b border-[var(--border)]/70">
+        <div className="flex items-start gap-2.5 min-w-0">
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] bg-emerald-500/12 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
+            <Activity className="w-4 h-4" />
+          </span>
+          <div className="min-w-0">
+            <h3 className="text-sm sm:text-base font-extrabold font-[family-name:var(--font-display)] text-[var(--color-foreground)] truncate">
               {t('adminAnalytics.activityEngagementTitle')}
             </h3>
+            <p className="text-xs text-[var(--color-muted-foreground)] line-clamp-1">
+              {t('adminAnalytics.activityEngagementSubtitle')}
+            </p>
           </div>
-          <p className="text-[11px] sm:text-xs text-[var(--color-muted-foreground)] mt-0.5 sm:mt-1 line-clamp-1 sm:line-clamp-none">
-            {t('adminAnalytics.activityEngagementSubtitle')}
-          </p>
         </div>
 
-        {/* Stickiness Badge */}
-        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--success-light)] text-[var(--success)] text-xs font-bold shrink-0 self-start sm:self-auto">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/12 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25 text-xs font-bold shrink-0 self-start sm:self-auto tabular-nums">
           <Zap className="w-3.5 h-3.5" />
           <span>{stickiness}% {t('adminAnalytics.stickiness')}</span>
-        </div>
+        </span>
       </div>
 
-      <div className="card-panel-body space-y-4 sm:space-y-5">
-        {/* KPI Mini Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
-          {/* Active Today */}
-          <div className="p-3 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)] flex flex-col justify-between">
+      <div className="space-y-4 flex-1 flex flex-col justify-between">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          {/* DAU */}
+          <div className="p-3 rounded-xl bg-[var(--surface-muted)]/65 border border-[var(--border)]/70 flex flex-col justify-between gap-1">
             <div className="flex items-center justify-between text-[11px] font-semibold text-[var(--color-muted-foreground)]">
               <span className="truncate">{t('adminAnalytics.activeToday')}</span>
-              <span className="w-2 h-2 rounded-full bg-[var(--success)] shrink-0 animate-ping" />
+              <span className="relative flex h-2 w-2 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+              </span>
             </div>
-            <div className="text-lg sm:text-xl font-bold tabular-nums text-[var(--color-foreground)] mt-1">
-              {dau}
+            <div className="text-xl font-extrabold font-[family-name:var(--font-display)] tabular-nums text-[var(--color-foreground)]">
+              {dau.toLocaleString()}
             </div>
-            <span className="text-[10px] font-medium text-[var(--success)] mt-0.5">
+            <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
               {Math.round((dau / total) * 100)}% {t('adminAnalytics.ofTotal')}
             </span>
           </div>
 
-          {/* Active This Week */}
-          <div className="p-3 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)] flex flex-col justify-between">
+          {/* WAU */}
+          <div className="p-3 rounded-xl bg-[var(--surface-muted)]/65 border border-[var(--border)]/70 flex flex-col justify-between gap-1">
             <div className="flex items-center justify-between text-[11px] font-semibold text-[var(--color-muted-foreground)]">
               <span className="truncate">{t('adminAnalytics.activeThisWeek')}</span>
-              <Clock className="w-3.5 h-3.5 text-[var(--info)] shrink-0" />
+              <Clock className="w-3.5 h-3.5 text-sky-500 shrink-0" />
             </div>
-            <div className="text-lg sm:text-xl font-bold tabular-nums text-[var(--color-foreground)] mt-1">
-              {wau}
+            <div className="text-xl font-extrabold font-[family-name:var(--font-display)] tabular-nums text-[var(--color-foreground)]">
+              {wau.toLocaleString()}
             </div>
-            <span className="text-[10px] font-medium text-[var(--info)] mt-0.5">
+            <span className="text-[11px] font-semibold text-sky-600 dark:text-sky-400 tabular-nums">
               {Math.round((wau / total) * 100)}% {t('adminAnalytics.ofTotal')}
             </span>
           </div>
 
-          {/* Active This Month */}
-          <div className="p-3 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)] flex flex-col justify-between">
+          {/* MAU */}
+          <div className="p-3 rounded-xl bg-[var(--surface-muted)]/65 border border-[var(--border)]/70 flex flex-col justify-between gap-1">
             <div className="flex items-center justify-between text-[11px] font-semibold text-[var(--color-muted-foreground)]">
               <span className="truncate">{t('adminAnalytics.activeThisMonth')}</span>
-              <UserCheck className="w-3.5 h-3.5 text-[var(--primary)] shrink-0" />
+              <UserCheck className="w-3.5 h-3.5 text-[var(--teacher-primary)] shrink-0" />
             </div>
-            <div className="text-lg sm:text-xl font-bold tabular-nums text-[var(--color-foreground)] mt-1">
-              {mau}
+            <div className="text-xl font-extrabold font-[family-name:var(--font-display)] tabular-nums text-[var(--color-foreground)]">
+              {mau.toLocaleString()}
             </div>
-            <span className="text-[10px] font-medium text-[var(--primary)] mt-0.5">
+            <span className="text-[11px] font-semibold text-[var(--teacher-primary)] tabular-nums">
               {Math.round((mau / total) * 100)}% {t('adminAnalytics.ofTotal')}
             </span>
           </div>
 
           {/* Inactive */}
-          <div className="p-3 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)] flex flex-col justify-between">
+          <div className="p-3 rounded-xl bg-[var(--surface-muted)]/65 border border-[var(--border)]/70 flex flex-col justify-between gap-1">
             <div className="flex items-center justify-between text-[11px] font-semibold text-[var(--color-muted-foreground)]">
               <span className="truncate">{t('adminAnalytics.inactiveUsers')}</span>
-              <UserMinus className="w-3.5 h-3.5 text-[var(--color-muted)] shrink-0" />
+              <UserMinus className="w-3.5 h-3.5 text-[var(--color-muted-foreground)] shrink-0" />
             </div>
-            <div className="text-lg sm:text-xl font-bold tabular-nums text-[var(--color-muted-foreground)] mt-1">
-              {inactive}
+            <div className="text-xl font-extrabold font-[family-name:var(--font-display)] tabular-nums text-[var(--color-muted-foreground)]">
+              {inactive.toLocaleString()}
             </div>
-            <span className="text-[10px] font-medium text-[var(--color-muted)] mt-0.5">
+            <span className="text-[11px] font-medium text-[var(--color-muted-foreground)] tabular-nums">
               {Math.round((inactive / total) * 100)}% {t('adminAnalytics.ofTotal')}
             </span>
           </div>
         </div>
 
         {/* Recency Distribution Bar */}
-        <div>
-          <div className="flex justify-between items-center text-xs font-semibold text-[var(--color-foreground)] mb-1.5">
-            <span className="flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-[var(--color-muted)]" />
+        <div className="pt-3 border-t border-[var(--border)]/70 space-y-2.5">
+          <div className="flex justify-between items-center text-xs">
+            <span className="font-bold text-[var(--color-foreground)] inline-flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-[var(--color-muted-foreground)]" />
               <span>{t('adminAnalytics.recencyDistribution')}</span>
             </span>
-            <span className="text-[11px] text-[var(--color-muted-foreground)]">
-              {total} {t('adminAnalytics.totalTracked')}
+            <span className="text-[11px] font-semibold text-[var(--color-muted-foreground)] tabular-nums">
+              {totalUsers.toLocaleString()} {t('adminAnalytics.totalTracked')}
             </span>
           </div>
 
-          {/* Stacked Bar */}
-          <div className="w-full bg-[var(--color-surface-muted-strong)] rounded-full h-3 flex overflow-hidden">
+          <div className="w-full bg-[var(--surface-muted-strong)] rounded-full h-3 flex overflow-hidden">
             {pct24h > 0 && (
               <div
-                className="bg-[var(--success)] h-full transition-all"
+                className="bg-emerald-500 h-full transition-all"
                 style={{ width: `${pct24h}%` }}
                 title={`Last 24h: ${r24h} (${pct24h}%)`}
               />
             )}
             {pct7d > 0 && (
               <div
-                className="bg-[var(--info)] h-full transition-all"
+                className="bg-sky-500 h-full transition-all"
                 style={{ width: `${pct7d}%` }}
                 title={`1-7 Days: ${r7d} (${pct7d}%)`}
               />
             )}
             {pct30d > 0 && (
               <div
-                className="bg-[var(--warning)] h-full transition-all"
+                className="bg-amber-500 h-full transition-all"
                 style={{ width: `${pct30d}%` }}
                 title={`8-30 Days: ${r30d} (${pct30d}%)`}
               />
             )}
             {pctOlder > 0 && (
               <div
-                className="bg-[var(--color-muted)]/40 h-full transition-all"
+                className="bg-[var(--color-muted-foreground)]/30 h-full transition-all"
                 style={{ width: `${pctOlder}%` }}
                 title={`>30 Days / Never: ${rOlder} (${pctOlder}%)`}
               />
             )}
           </div>
 
-          {/* Legend */}
-          <div className="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] text-[var(--color-muted-foreground)]">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] text-[var(--color-muted-foreground)] tabular-nums">
             <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[var(--success)] shrink-0" />
-              <span>&lt;24h: <strong className="text-[var(--color-foreground)] font-mono">{r24h}</strong></span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+              <span>&lt;24h: <strong className="text-[var(--color-foreground)]">{r24h.toLocaleString()}</strong></span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[var(--info)] shrink-0" />
-              <span>1-7d: <strong className="text-[var(--color-foreground)] font-mono">{r7d}</strong></span>
+              <span className="w-2 h-2 rounded-full bg-sky-500 shrink-0" />
+              <span>1-7d: <strong className="text-[var(--color-foreground)]">{r7d.toLocaleString()}</strong></span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[var(--warning)] shrink-0" />
-              <span>8-30d: <strong className="text-[var(--color-foreground)] font-mono">{r30d}</strong></span>
+              <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
+              <span>8-30d: <strong className="text-[var(--color-foreground)]">{r30d.toLocaleString()}</strong></span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[var(--color-muted)]/40 shrink-0" />
-              <span>&gt;30d/Never: <strong className="text-[var(--color-foreground)] font-mono">{rOlder}</strong></span>
+              <span className="w-2 h-2 rounded-full bg-[var(--color-muted-foreground)]/40 shrink-0" />
+              <span>&gt;30d: <strong className="text-[var(--color-foreground)]">{rOlder.toLocaleString()}</strong></span>
             </div>
           </div>
         </div>

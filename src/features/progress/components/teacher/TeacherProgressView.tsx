@@ -1,11 +1,12 @@
 'use client';
 
 import React from 'react';
+import { RotateCw, TrendingUp } from 'lucide-react';
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { useTranslation } from '@/hooks/useTranslation';
+import { TeacherPageBanner } from '@/features/teacher/components/TeacherPageBanner';
 import { useTeacherProgress } from '../../hooks/useTeacherProgress';
-import { ProgressHeader } from '../ProgressHeader';
 import { TeacherCohortStats } from './TeacherCohortStats';
 import { TeacherCourseSelector } from './TeacherCourseSelector';
 import { TeacherStudentRosterTable } from './TeacherStudentRosterTable';
@@ -39,26 +40,34 @@ export function TeacherProgressView() {
   }
 
   return (
-    <PageWrapper className="space-y-6">
-      <ProgressHeader
+    <PageWrapper>
+      <TeacherPageBanner
+        icon={TrendingUp}
+        eyebrow={t('common.progress')}
         title={t('progress.teacherProgress')}
         description={t('progress.teacherProgressDesc')}
-        onRefresh={refetch}
-        isRefreshing={isLoading}
+        actions={
+          <button
+            type="button"
+            onClick={refetch}
+            disabled={isLoading}
+            className="teacher-pill-btn w-full sm:w-auto disabled:opacity-60"
+          >
+            <RotateCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            <span>{t('progress.refresh')}</span>
+          </button>
+        }
       />
 
-      {/* Cohort Stats Strip */}
       <TeacherCohortStats stats={overallStats} />
 
-      {/* Roster & Course Filter Section */}
-      <section className="space-y-4">
+      <section className="space-y-3.5">
         <div className="flex items-center justify-between">
-          <h2 className="text-base sm:text-lg font-bold text-[var(--color-foreground)]">
+          <h2 className="text-base sm:text-lg font-bold font-[family-name:var(--font-display)] text-[var(--color-foreground)]">
             {t('progress.studentRoster')} ({students.length})
           </h2>
         </div>
 
-        {/* Filter and selector toolbar */}
         <TeacherCourseSelector
           courses={courses}
           selectedCourseId={selectedCourseId}
@@ -69,14 +78,9 @@ export function TeacherProgressView() {
           onStatusFilterChange={setStatusFilter}
         />
 
-        {/* Roster Table / Mobile Cards */}
-        <TeacherStudentRosterTable
-          students={students}
-          onInspect={inspectStudent}
-        />
+        <TeacherStudentRosterTable students={students} onInspect={inspectStudent} />
       </section>
 
-      {/* Student Progress Drilldown Modal */}
       <TeacherStudentDetailModal
         isOpen={Boolean(drilldownStudent)}
         studentName={drilldownStudent?.name || ''}

@@ -2,13 +2,7 @@
 'use client';
 
 import React from 'react';
-import {
-  Building2,
-  Plus,
-  RefreshCw,
-  LayoutGrid,
-  List,
-} from 'lucide-react';
+import { Building2, Plus, RefreshCw, LayoutGrid, List } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { PageWrapper, EmptyState } from '@/components/layout';
 import { PageSkeleton } from '@/components/ui/Skeleton';
@@ -16,6 +10,7 @@ import Button from '@/components/ui/Button';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import Tooltip from '@/components/ui/Tooltip';
 import DashboardListFilters, { FilterPanel } from '@/components/filters/DashboardListFilters';
+import { AdminPageBanner } from '@/features/admin/components/AdminPageBanner';
 import { useAdminOrganizations } from './_hooks/useAdminOrganizations';
 import { useOrganizationsFilterChips } from './_hooks/useOrganizationsFilterChips';
 import { OrganizationsStats } from './_components/OrganizationsStats';
@@ -27,121 +22,75 @@ import { OrganizationDetailModal } from './_components/OrganizationDetailModal';
 
 export default function OrganizationsPage() {
   const { t } = useTranslation();
-  const {
-    status,
-    filteredOrganizations,
-    stats,
-    isLoading,
-    isSubmitting,
-    searchQuery,
-    setSearchQuery,
-    statusFilter,
-    setStatusFilter,
-    sortOption,
-    setSortOption,
-    viewMode,
-    setViewMode,
-    showCreateModal,
-    setShowCreateModal,
-    showEditModal,
-    setShowEditModal,
-    showDetailModal,
-    setShowDetailModal,
-    showDeleteDialog,
-    setShowDeleteDialog,
-    selectedOrg,
-    deleteTargetOrg,
-    copiedCode,
-    formData,
-    setFormData,
-    fetchOrganizations,
-    copyToClipboard,
-    openCreateModal,
-    openEditModal,
-    openDetailModal,
-    confirmDelete,
-    handleCreate,
-    handleUpdate,
-    handleToggleActive,
-    handleDelete,
-  } = useAdminOrganizations();
+  const o = useAdminOrganizations();
 
   const filterChips = useOrganizationsFilterChips({
-    statusFilter,
-    setStatusFilter,
-    sortOption,
-    setSortOption,
+    statusFilter: o.statusFilter,
+    setStatusFilter: o.setStatusFilter,
+    sortOption: o.sortOption,
+    setSortOption: o.setSortOption,
   });
 
-  if (status === 'loading' || (isLoading && stats.total === 0)) {
+  if (o.status === 'loading' || (o.isLoading && o.stats.total === 0)) {
     return <PageSkeleton />;
   }
 
   const handleResetFilters = () => {
-    setSearchQuery('');
-    setStatusFilter('all');
-    setSortOption('newest');
+    o.setSearchQuery('');
+    o.setStatusFilter('all');
+    o.setSortOption('newest');
   };
 
   return (
     <PageWrapper>
-      {/* Hero Banner Header */}
-      <div className="hero-banner flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 sm:p-6 md:p-8 rounded-3xl">
-        <div className="space-y-1.5 max-w-xl">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[var(--primary)]/15 text-[var(--primary)] border border-[var(--primary)]/25 shadow-xs">
-            <Building2 className="w-3.5 h-3.5" />
-            <span>{t('organizations.title')}</span>
-          </div>
-          <h1 className="heading-xl">{t('organizations.title')}</h1>
-          <p className="text-sm sm:text-base text-[var(--color-muted-foreground)]">
-            {t('organizations.description')}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2 self-start sm:self-auto">
-          <Tooltip label={t('analytics.refresh')}>
-            <Button
-              onClick={() => fetchOrganizations()}
-              variant="secondary"
-              size="sm"
-              className="flex items-center gap-2 min-h-[44px] px-3.5 shadow-xs"
-              aria-label="Refresh"
+      <AdminPageBanner
+        icon={Building2}
+        eyebrow={t('organizations.title')}
+        title={t('organizations.title')}
+        description={t('organizations.description')}
+        tier="superadmin"
+        actions={
+          <>
+            <Tooltip label={t('analytics.refresh')}>
+              <button
+                type="button"
+                onClick={() => o.fetchOrganizations()}
+                aria-label="Refresh"
+                className="teacher-pill-btn min-h-[44px] px-3.5 text-xs sm:text-sm font-semibold cursor-pointer"
+              >
+                <RefreshCw className={`w-4 h-4 ${o.isLoading ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">{t('analytics.refresh')}</span>
+              </button>
+            </Tooltip>
+            <button
+              type="button"
+              onClick={o.openCreateModal}
+              className="teacher-cta-btn min-h-[44px] px-4 text-xs sm:text-sm cursor-pointer"
             >
-              <RefreshCw className="w-4 h-4" />
-              <span className="hidden sm:inline">{t('analytics.refresh')}</span>
-            </Button>
-          </Tooltip>
-          <Button
-            onClick={openCreateModal}
-            variant="primary"
-            size="sm"
-            className="flex items-center gap-2 min-h-[44px] px-5 font-bold shadow-md"
-          >
-            <Plus className="w-4 h-4" />
-            <span>{t('organizations.createOrganization')}</span>
-          </Button>
-        </div>
-      </div>
+              <Plus className="w-4 h-4" />
+              <span>{t('organizations.createOrganization')}</span>
+            </button>
+          </>
+        }
+      />
 
-      {/* Top Executive Stats */}
-      <OrganizationsStats stats={stats} isLoading={isLoading} />
+      <OrganizationsStats stats={o.stats} isLoading={o.isLoading} />
 
-      {/* Filters & View Switcher */}
       <FilterPanel>
         <DashboardListFilters
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
+          searchQuery={o.searchQuery}
+          onSearchChange={o.setSearchQuery}
           onClear={handleResetFilters}
           searchPlaceholder={t('organizations.searchPlaceholder')}
           chipGroups={filterChips}
           headerAside={
-            <div className="hidden md:flex items-center gap-1 bg-[var(--surface-muted)] p-1 rounded-2xl border border-[var(--border)] shadow-xs">
+            <div className="hidden md:flex items-center gap-1 bg-[var(--surface-muted)] p-1 rounded-xl border border-[var(--border)]">
               <button
                 type="button"
-                onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-xl transition-colors cursor-pointer ${
-                  viewMode === 'grid'
-                    ? 'bg-[var(--primary)] text-white shadow-xs'
+                onClick={() => o.setViewMode('grid')}
+                className={`inline-flex h-8 w-8 items-center justify-center rounded-[8px] transition-colors cursor-pointer ${
+                  o.viewMode === 'grid'
+                    ? 'bg-[var(--card-solid)] text-[var(--teacher-primary)] shadow-xs'
                     : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]'
                 }`}
                 title={t('organizations.gridView')}
@@ -150,10 +99,10 @@ export default function OrganizationsPage() {
               </button>
               <button
                 type="button"
-                onClick={() => setViewMode('table')}
-                className={`p-2 rounded-xl transition-colors cursor-pointer ${
-                  viewMode === 'table'
-                    ? 'bg-[var(--primary)] text-white shadow-xs'
+                onClick={() => o.setViewMode('table')}
+                className={`inline-flex h-8 w-8 items-center justify-center rounded-[8px] transition-colors cursor-pointer ${
+                  o.viewMode === 'table'
+                    ? 'bg-[var(--card-solid)] text-[var(--teacher-primary)] shadow-xs'
                     : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]'
                 }`}
                 title={t('organizations.tableView')}
@@ -165,111 +114,109 @@ export default function OrganizationsPage() {
         />
       </FilterPanel>
 
-      {/* Organization List / Grid / Empty State */}
-      {filteredOrganizations.length === 0 ? (
+      {o.filteredOrganizations.length === 0 ? (
         <EmptyState
-          title={stats.total === 0 ? t('organizations.noOrganizations') : t('organizations.noFilteredResults')}
-          description={stats.total === 0 ? t('organizations.noOrganizationsDesc') : t('organizations.noFilteredResultsDesc')}
+          title={o.stats.total === 0 ? t('organizations.noOrganizations') : t('organizations.noFilteredResults')}
+          description={o.stats.total === 0 ? t('organizations.noOrganizationsDesc') : t('organizations.noFilteredResultsDesc')}
           action={
-            <Button onClick={stats.total === 0 ? openCreateModal : handleResetFilters} variant="secondary">
-              {stats.total === 0 ? t('organizations.createOrganization') : (t('common.reset'))}
+            <Button onClick={o.stats.total === 0 ? o.openCreateModal : handleResetFilters} variant="secondary">
+              {o.stats.total === 0 ? t('organizations.createOrganization') : t('common.reset')}
             </Button>
           }
         />
       ) : (
         <>
-          {viewMode === 'table' && (
+          {o.viewMode === 'table' && (
             <div className="hidden md:block">
               <OrganizationsTable
-                organizations={filteredOrganizations}
-                copiedCode={copiedCode}
-                onCopy={copyToClipboard}
-                onOpenDetail={openDetailModal}
-                onOpenEdit={openEditModal}
-                onToggleActive={handleToggleActive}
-                onDelete={confirmDelete}
+                organizations={o.filteredOrganizations}
+                copiedCode={o.copiedCode}
+                onCopy={o.copyToClipboard}
+                onOpenDetail={o.openDetailModal}
+                onOpenEdit={o.openEditModal}
+                onToggleActive={o.handleToggleActive}
+                onDelete={o.confirmDelete}
               />
             </div>
           )}
 
-          {viewMode === 'grid' && (
+          {o.viewMode === 'grid' && (
             <div className="hidden md:grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-              {filteredOrganizations.map((org, index) => (
+              {o.filteredOrganizations.map((org, index) => (
                 <OrganizationCard
                   key={org._id}
                   organization={org}
                   index={index}
-                  copiedCode={copiedCode}
-                  onCopy={copyToClipboard}
-                  onOpenDetail={openDetailModal}
-                  onOpenEdit={openEditModal}
-                  onToggleActive={handleToggleActive}
-                  onDelete={confirmDelete}
+                  copiedCode={o.copiedCode}
+                  onCopy={o.copyToClipboard}
+                  onOpenDetail={o.openDetailModal}
+                  onOpenEdit={o.openEditModal}
+                  onToggleActive={o.handleToggleActive}
+                  onDelete={o.confirmDelete}
                 />
               ))}
             </div>
           )}
 
           <OrganizationsMobileList
-            organizations={filteredOrganizations}
-            copiedCode={copiedCode}
-            onCopy={copyToClipboard}
-            onOpenDetail={openDetailModal}
-            onOpenEdit={openEditModal}
-            onToggleActive={handleToggleActive}
-            onDelete={confirmDelete}
+            organizations={o.filteredOrganizations}
+            copiedCode={o.copiedCode}
+            onCopy={o.copyToClipboard}
+            onOpenDetail={o.openDetailModal}
+            onOpenEdit={o.openEditModal}
+            onToggleActive={o.handleToggleActive}
+            onDelete={o.confirmDelete}
           />
         </>
       )}
 
-      {/* Modals */}
       <OrganizationFormModal
-        isOpen={showCreateModal}
+        isOpen={o.showCreateModal}
         isEdit={false}
         selectedOrg={null}
-        formData={formData}
-        setFormData={setFormData}
-        isSubmitting={isSubmitting}
-        copiedCode={copiedCode}
-        onCopy={copyToClipboard}
-        onSubmit={handleCreate}
-        onClose={() => setShowCreateModal(false)}
+        formData={o.formData}
+        setFormData={o.setFormData}
+        isSubmitting={o.isSubmitting}
+        copiedCode={o.copiedCode}
+        onCopy={o.copyToClipboard}
+        onSubmit={o.handleCreate}
+        onClose={() => o.setShowCreateModal(false)}
       />
 
       <OrganizationFormModal
-        isOpen={showEditModal}
+        isOpen={o.showEditModal}
         isEdit={true}
-        selectedOrg={selectedOrg}
-        formData={formData}
-        setFormData={setFormData}
-        isSubmitting={isSubmitting}
-        copiedCode={copiedCode}
-        onCopy={copyToClipboard}
-        onSubmit={handleUpdate}
-        onClose={() => setShowEditModal(false)}
+        selectedOrg={o.selectedOrg}
+        formData={o.formData}
+        setFormData={o.setFormData}
+        isSubmitting={o.isSubmitting}
+        copiedCode={o.copiedCode}
+        onCopy={o.copyToClipboard}
+        onSubmit={o.handleUpdate}
+        onClose={() => o.setShowEditModal(false)}
       />
 
       <OrganizationDetailModal
-        isOpen={showDetailModal}
-        organization={selectedOrg}
-        copiedCode={copiedCode}
-        onCopy={copyToClipboard}
-        onOpenEdit={openEditModal}
-        onToggleActive={handleToggleActive}
-        onDelete={confirmDelete}
-        onClose={() => setShowDetailModal(false)}
+        isOpen={o.showDetailModal}
+        organization={o.selectedOrg}
+        copiedCode={o.copiedCode}
+        onCopy={o.copyToClipboard}
+        onOpenEdit={o.openEditModal}
+        onToggleActive={o.handleToggleActive}
+        onDelete={o.confirmDelete}
+        onClose={() => o.setShowDetailModal(false)}
       />
 
       <ConfirmModal
-        isOpen={showDeleteDialog}
+        isOpen={o.showDeleteDialog}
         title={t('organizations.deleteOrgTitle')}
-        message={deleteTargetOrg ? t('organizations.deleteOrgConfirm') : t('organizations.deleteConfirm')}
+        message={o.deleteTargetOrg ? t('organizations.deleteOrgConfirm') : t('organizations.deleteConfirm')}
         confirmText={t('admin.delete')}
         cancelText={t('common.cancel')}
-        onConfirm={handleDelete}
-        onCancel={() => setShowDeleteDialog(false)}
+        onConfirm={o.handleDelete}
+        onCancel={() => o.setShowDeleteDialog(false)}
         type="danger"
-        isLoading={isSubmitting}
+        isLoading={o.isSubmitting}
       />
     </PageWrapper>
   );

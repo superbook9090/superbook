@@ -66,13 +66,9 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
   const isNotStarted = enrollment?.progress === 0;
 
   return (
-    <motion.div
-      whileHover={{ y: -6, rotateX: 1, rotateY: -1 }}
-      transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-      className="group h-full flex flex-col overflow-hidden rounded-2xl border border-[var(--border)] antigravity-glass antigravity-card hover:border-[var(--student-primary)]/50 hover:shadow-xl transition-all duration-300 transform-3d"
-    >
+    <div className="group h-full flex flex-col overflow-hidden student-card">
       {/* Thumbnail Container */}
-      <div className="relative h-40 sm:h-44 w-full overflow-hidden bg-[var(--color-surface-muted)]">
+      <div className="relative h-44 w-full overflow-hidden bg-[var(--color-surface-muted)] shrink-0">
         {courseData.thumbnail || courseData.thumbnailUrl ? (
           <>
             <Image
@@ -144,7 +140,7 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
             {courseData.title}
           </h3>
 
-          <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] line-clamp-2 mb-4 leading-relaxed">
+          <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] line-clamp-2 min-h-[2.5rem] mb-4 leading-relaxed">
             {courseData.description || t('courses.noDescription')}
           </p>
         </div>
@@ -161,7 +157,7 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${enrollment.progress}%` }}
-                  className="h-full rounded-full bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)] shadow-[0_0_8px_var(--student-primary)]"
+                  className="h-full rounded-full bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)]"
                 />
               </div>
             </div>
@@ -171,9 +167,10 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
             {type === 'available' ? (
               <>
                 <button
+                  type="button"
                   onClick={handleEnroll}
                   disabled={isLoading}
-                  className="btn-premium flex-1 group/btn min-h-[42px] text-xs sm:text-sm"
+                  className="student-cta-btn flex-1 group/btn text-xs sm:text-sm"
                 >
                   {isLoading ? (
                     <Loader size="sm" />
@@ -189,8 +186,9 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
             ) : (
               <>
                 <button
+                  type="button"
                   onClick={handleContinue}
-                  className="btn-premium flex-1 group/btn min-h-[42px] text-xs sm:text-sm"
+                  className="student-cta-btn flex-1 group/btn text-xs sm:text-sm"
                 >
                   {isNotStarted ? (
                     <><Play className="w-3.5 h-3.5 fill-current" /> {t('courses.start')}</>
@@ -203,9 +201,10 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
                 <CourseShareButton course={courseData} />
                 <Tooltip label={t('courses.dropCourse')}>
                   <button
+                    type="button"
                     onClick={handleDrop}
                     disabled={isLoading}
-                    className="p-2.5 min-h-[42px] min-w-[42px] flex items-center justify-center border border-[var(--color-error)]/25 text-[var(--color-error)] rounded-xl hover:bg-[var(--color-error-light)] transition-all disabled:opacity-50"
+                    className="p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center border border-[var(--color-error)]/25 text-[var(--color-error)] rounded-xl hover:bg-[var(--color-error-light)] transition-all disabled:opacity-50"
                     aria-label={t('courses.dropCourse')}
                   >
                     {isLoading ? <Loader size="sm" /> : <Trash2 className="w-4 h-4" />}
@@ -216,7 +215,7 @@ function CourseCard({ course, type, onEnroll, onDrop }: CourseCardProps) {
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 

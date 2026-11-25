@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
 import {
   Users,
   BookOpen,
@@ -46,43 +45,42 @@ export function OrganizationsTable({
   const { t } = useTranslation();
 
   return (
-    <div className="antigravity-glass border border-[var(--border)] rounded-3xl overflow-hidden shadow-lg">
+    <div className="teacher-panel overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm border-collapse">
           <thead>
-            <tr className="border-b border-[var(--border)] bg-[var(--surface-muted)]/70 text-[11px] font-bold uppercase tracking-wider text-[var(--color-muted-foreground)]">
-              <th className="py-3.5 px-4 font-bold">{t('organizations.organizationName')}</th>
-              <th className="py-3.5 px-4 font-bold">{t('organizations.status')}</th>
-              <th className="py-3.5 px-4 font-bold">{t('organizations.code')}</th>
-              <th className="py-3.5 px-4 font-bold">{t('organizations.inviteCode')}</th>
-              <th className="py-3.5 px-4 font-bold text-center">{t('organizations.users')}</th>
-              <th className="py-3.5 px-4 font-bold text-center">{t('organizations.totalContent')}</th>
-              <th className="py-3.5 px-4 font-bold text-right">{t('organizations.actions')}</th>
+            <tr className="border-b border-[var(--border)] bg-[var(--surface-muted)]/75 text-[11px] font-bold uppercase tracking-wider text-[var(--color-muted-foreground)]">
+              <th className="py-3.5 px-4">{t('organizations.organizationName')}</th>
+              <th className="py-3.5 px-4">{t('organizations.status')}</th>
+              <th className="py-3.5 px-4">{t('organizations.code')}</th>
+              <th className="py-3.5 px-4">{t('organizations.inviteCode')}</th>
+              <th className="py-3.5 px-4 text-center">{t('organizations.users')}</th>
+              <th className="py-3.5 px-4 text-center">{t('organizations.totalContent')}</th>
+              <th className="py-3.5 px-4 text-right">{t('organizations.actions')}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[var(--border)]">
-            {organizations.map((org, index) => {
+          <tbody className="divide-y divide-[var(--border)]/70">
+            {organizations.map((org) => {
               const totalContent = (org.courseCount || 0) + (org.quizCount || 0) + (org.blogCount || 0);
 
               return (
-                <motion.tr
+                <tr
                   key={org._id}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.02, duration: 0.2 }}
-                  className="hover:bg-[var(--color-surface-muted)]/40 transition-colors group"
+                  className="hover:bg-[var(--surface-muted)]/45 transition-colors"
                 >
-                  {/* Organization Name & Initials */}
                   <td className="py-3.5 px-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[var(--primary)] to-[var(--accent)] text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs">
+                      <div
+                        className="w-9 h-9 rounded-[10px] text-white font-bold text-xs flex items-center justify-center shrink-0"
+                        style={{ background: 'var(--teacher-gradient)' }}
+                      >
                         {getOrgInitials(org.name)}
                       </div>
                       <div className="min-w-0 max-w-xs">
                         <button
                           type="button"
                           onClick={() => onOpenDetail(org)}
-                          className="font-bold text-sm text-[var(--color-foreground)] hover:text-[var(--primary)] truncate block text-left transition-colors"
+                          className="font-bold text-sm text-[var(--color-foreground)] hover:text-[var(--teacher-primary)] truncate block text-left transition-colors cursor-pointer"
                         >
                           {org.name}
                         </button>
@@ -95,34 +93,32 @@ export function OrganizationsTable({
                     </div>
                   </td>
 
-                  {/* Status */}
                   <td className="py-3.5 px-4">
                     <span
                       className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 text-xs font-semibold rounded-full ${
                         org.isActive
                           ? 'bg-[var(--success-light)] text-[var(--success)]'
-                          : 'bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)]'
+                          : 'bg-[var(--surface-muted)] text-[var(--color-muted-foreground)]'
                       }`}
                     >
                       <span
                         className={`w-1.5 h-1.5 rounded-full ${
-                          org.isActive ? 'bg-[var(--success)] animate-pulse' : 'bg-[var(--color-muted-foreground)]'
+                          org.isActive ? 'bg-[var(--success)]' : 'bg-[var(--color-muted-foreground)]'
                         }`}
                       />
                       {org.isActive ? t('organizations.statusActive') : t('organizations.statusInactive')}
                     </span>
                   </td>
 
-                  {/* Org Code */}
                   <td className="py-3.5 px-4">
-                    <div className="inline-flex items-center gap-1.5 bg-[var(--color-surface-muted)] px-2.5 py-1 rounded-md text-xs font-mono">
+                    <div className="inline-flex items-center gap-1.5 bg-[var(--surface-muted)] border border-[var(--border)] px-2.5 py-1 rounded-[8px] text-xs font-mono">
                       <span className="font-semibold text-[var(--color-foreground)]">{org.code}</span>
                       <Tooltip label={copiedCode === `code-${org.code}` ? t('organizations.codeCopied') : t('organizations.copyCode')}>
                         <button
                           type="button"
                           onClick={() => onCopy(org.code, 'code')}
                           aria-label={t('organizations.copyCode')}
-                          className="text-[var(--color-muted-foreground)] hover:text-[var(--primary)] transition-colors"
+                          className="text-[var(--color-muted-foreground)] hover:text-[var(--teacher-primary)] transition-colors cursor-pointer"
                         >
                           {copiedCode === `code-${org.code}` ? (
                             <Check className="w-3.5 h-3.5 text-[var(--success)]" />
@@ -134,16 +130,15 @@ export function OrganizationsTable({
                     </div>
                   </td>
 
-                  {/* Invite Code */}
                   <td className="py-3.5 px-4">
-                    <div className="inline-flex items-center gap-1.5 bg-[var(--info-light)]/60 border border-[var(--info)]/20 px-2.5 py-1 rounded-md text-xs font-mono">
+                    <div className="inline-flex items-center gap-1.5 bg-[var(--info-light)]/70 border border-[var(--info)]/20 px-2.5 py-1 rounded-[8px] text-xs font-mono">
                       <span className="font-bold text-[var(--info)]">{org.inviteCode}</span>
                       <Tooltip label={copiedCode === `inviteCode-${org.inviteCode}` ? t('organizations.codeCopied') : t('organizations.copyCode')}>
                         <button
                           type="button"
                           onClick={() => onCopy(org.inviteCode, 'inviteCode')}
                           aria-label={t('organizations.copyCode')}
-                          className="text-[var(--info)] hover:text-[var(--info)]/80 transition-colors"
+                          className="text-[var(--info)] hover:opacity-80 transition-opacity cursor-pointer"
                         >
                           {copiedCode === `inviteCode-${org.inviteCode}` ? (
                             <Check className="w-3.5 h-3.5 text-[var(--success)]" />
@@ -155,23 +150,20 @@ export function OrganizationsTable({
                     </div>
                   </td>
 
-                  {/* Users */}
                   <td className="py-3.5 px-4 text-center">
-                    <span className="inline-flex items-center gap-1 text-xs font-bold text-[var(--student-primary)] bg-[var(--student-soft)] px-2.5 py-1 rounded-lg tabular-nums">
+                    <span className="inline-flex items-center gap-1 text-xs font-bold text-[var(--student-primary)] bg-[var(--student-soft)] px-2.5 py-1 rounded-[8px] tabular-nums">
                       <Users className="w-3.5 h-3.5" />
                       {org.userCount || 0}
                     </span>
                   </td>
 
-                  {/* Content */}
                   <td className="py-3.5 px-4 text-center">
-                    <span className="inline-flex items-center gap-1 text-xs font-bold text-[var(--teacher-primary)] bg-[var(--teacher-soft)] px-2.5 py-1 rounded-lg tabular-nums">
+                    <span className="inline-flex items-center gap-1 text-xs font-bold text-[var(--teacher-primary)] bg-[var(--teacher-soft)] px-2.5 py-1 rounded-[8px] tabular-nums">
                       <BookOpen className="w-3.5 h-3.5" />
                       {totalContent}
                     </span>
                   </td>
 
-                  {/* Actions */}
                   <td className="py-3.5 px-4 text-right">
                     <div className="flex items-center justify-end gap-1">
                       <Tooltip label={t('organizations.viewDetails')}>
@@ -179,7 +171,7 @@ export function OrganizationsTable({
                           type="button"
                           onClick={() => onOpenDetail(org)}
                           aria-label={t('organizations.viewDetails')}
-                          className="p-1.5 rounded-lg border border-[var(--border)] hover:bg-[var(--color-surface-muted)] text-[var(--color-foreground)] transition-colors"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--border)] bg-[var(--card-solid)] text-[var(--color-foreground)] hover:bg-[var(--surface-muted)] transition-colors cursor-pointer"
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
                         </button>
@@ -190,10 +182,10 @@ export function OrganizationsTable({
                           type="button"
                           onClick={() => onToggleActive(org)}
                           aria-label={t('organizations.toggleStatus')}
-                          className={`p-1.5 rounded-lg border border-[var(--border)] transition-colors ${
+                          className={`inline-flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--border)] bg-[var(--card-solid)] transition-colors cursor-pointer ${
                             org.isActive
                               ? 'text-[var(--success)] hover:bg-[var(--success-light)]'
-                              : 'text-[var(--color-muted-foreground)] hover:bg-[var(--color-surface-muted)]'
+                              : 'text-[var(--color-muted-foreground)] hover:bg-[var(--surface-muted)]'
                           }`}
                         >
                           <Power className="w-3.5 h-3.5" />
@@ -205,7 +197,7 @@ export function OrganizationsTable({
                           type="button"
                           onClick={() => onOpenEdit(org)}
                           aria-label={t('common.edit')}
-                          className="p-1.5 rounded-lg border border-[var(--border)] hover:bg-[var(--color-surface-muted)] text-[var(--color-foreground)] transition-colors"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--border)] bg-[var(--card-solid)] text-[var(--color-foreground)] hover:bg-[var(--teacher-soft)] hover:text-[var(--teacher-primary)] transition-colors cursor-pointer"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
@@ -216,14 +208,14 @@ export function OrganizationsTable({
                           type="button"
                           onClick={() => onDelete(org)}
                           aria-label={t('common.delete')}
-                          className="p-1.5 rounded-lg border border-[var(--border)] hover:bg-[var(--error-light)] text-[var(--error)] transition-colors"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--border)] bg-[var(--card-solid)] text-[var(--color-muted-foreground)] hover:bg-[var(--error-light)] hover:text-[var(--error)] transition-colors cursor-pointer"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </Tooltip>
                     </div>
                   </td>
-                </motion.tr>
+                </tr>
               );
             })}
           </tbody>

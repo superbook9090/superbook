@@ -11,6 +11,7 @@ import { PageSkeleton } from '@/components/ui/Skeleton';
 import { getCertificate } from '@/lib/api/certificates';
 import { Award, Printer } from 'lucide-react';
 import BackButton from '@/components/ui/BackButton';
+import { PageWrapper } from '@/components/layout';
 
 export default function CertificateDetailPage({
   params,
@@ -63,7 +64,7 @@ export default function CertificateDetailPage({
   });
 
   return (
-    <div>
+    <PageWrapper>
       {/* Print rules: show only the certificate itself when printing. */}
       <style>{`
         @media print {
@@ -78,24 +79,25 @@ export default function CertificateDetailPage({
         }
       `}</style>
 
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 print:hidden">
+      <div className="student-panel p-3.5 sm:p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 print:hidden">
         <BackButton
           href={ROUTES.student.certificates}
           label={t('certificates.backToCertificates')}
-          className="text-sm font-medium text-[var(--student-primary)] hover:text-[var(--student-primary)]/80"
+          className="text-sm font-semibold text-[var(--color-foreground)] hover:text-[var(--student-primary)]"
         />
         <button
+          type="button"
           onClick={() => window.print()}
-          className="btn-premium inline-flex items-center gap-2 min-h-[44px] px-6 py-2.5 text-sm font-bold shadow-lg shadow-[var(--student-primary)]/25"
+          className="student-cta-btn w-full sm:w-auto"
         >
           <Printer className="w-4 h-4" />
-          {t('certificates.printDownload')}
+          <span>{t('certificates.printDownload')}</span>
         </button>
       </div>
 
       <div
         id="certificate-sheet"
-        className="mt-6 mx-auto max-w-3xl bg-white text-gray-900 rounded-3xl shadow-2xl overflow-hidden border border-amber-500/20 ring-8 ring-amber-500/10"
+        className="mx-auto w-full max-w-3xl bg-white text-gray-900 rounded-3xl shadow-2xl overflow-hidden border border-amber-500/25 ring-4 sm:ring-8 ring-amber-500/10"
       >
         <div className="border-[12px] border-double border-amber-600/70 m-3 sm:m-4 px-6 py-10 sm:px-12 sm:py-14 text-center">
           <div className="flex justify-center mb-4">
@@ -138,6 +140,6 @@ export default function CertificateDetailPage({
           </p>
         </div>
       </div>
-    </div>
+    </PageWrapper>
   );
 }

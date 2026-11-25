@@ -22,49 +22,51 @@ export function CourseDetailNavTabs({
   t,
 }: Props) {
   const tabs = [
-    { id: 'curriculum', label: t('courses.courseContent'), icon: <BookOpen className="w-4 h-4" /> },
-    { id: 'overview', label: t('common.overview'), icon: <Info className="w-4 h-4" /> },
-    {
-      id: 'quizzes',
-      label: t('nav.quizzes'),
-      icon: <Target className="w-4 h-4" />,
-      count: courseQuizzesCount,
-    },
-    { id: 'leaderboard', label: t('courses.leaderboard'), icon: <Trophy className="w-4 h-4" /> },
+    { id: 'curriculum' as TabType, label: t('courses.courseContent'), icon: BookOpen },
+    { id: 'overview' as TabType, label: t('common.overview'), icon: Info },
+    { id: 'quizzes' as TabType, label: t('nav.quizzes'), icon: Target, count: courseQuizzesCount },
+    { id: 'leaderboard' as TabType, label: t('courses.leaderboard'), icon: Trophy },
     ...(doubtsEnabled
-      ? [{ id: 'doubts', label: t('courseDoubts.tabDoubts'), icon: <MessageCircle className="w-4 h-4" /> }]
+      ? [{ id: 'doubts' as TabType, label: t('courseDoubts.tabDoubts'), icon: MessageCircle }]
       : []),
   ];
 
   return (
-    <div className="flex items-center gap-1.5 sm:gap-2 p-2 sm:p-2.5 bg-[var(--color-surface-muted)]/60 border-b border-[var(--border)] sticky top-0 z-20 backdrop-blur-xl overflow-x-auto no-scrollbar">
+    <div
+      role="tablist"
+      className="flex items-center gap-1 p-1.5 sm:p-2 bg-[var(--surface-muted)]/80 border-b border-[var(--border)]/80 sticky top-0 z-20 backdrop-blur-xl overflow-x-auto scrollbar-none"
+    >
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id;
+        const Icon = tab.icon;
         return (
           <button
             key={tab.id}
-            onClick={() => onTabChange(tab.id as TabType)}
+            type="button"
+            role="tab"
+            aria-selected={isActive}
+            onClick={() => onTabChange(tab.id)}
             className={cn(
-              'flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap cursor-pointer',
+              'flex-1 md:flex-none inline-flex items-center justify-center gap-2 min-h-[40px] px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold border transition-all whitespace-nowrap cursor-pointer focus-ring',
               isActive
-                ? 'bg-gradient-to-r from-[var(--student-primary)] to-[var(--student-accent)] text-white shadow-md shadow-[var(--student-primary)]/30 scale-[1.02]'
-                : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--surface-muted)]/80'
+                ? 'bg-[var(--card-solid)] text-[var(--student-primary)] border-[var(--student-primary)]/30 shadow-xs'
+                : 'border-transparent text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--card-solid)]/60'
             )}
           >
-            <span className={cn('transition-transform', isActive && 'scale-110')}>{tab.icon}</span>
+            <Icon className="w-4 h-4 shrink-0" aria-hidden />
             <span>{tab.label}</span>
-            {tab.count !== undefined && tab.count > 0 ? (
+            {tab.count !== undefined && tab.count > 0 && (
               <span
                 className={cn(
-                  'px-2 py-0.5 rounded-full text-[10px] font-black',
+                  'px-1.5 py-0.5 rounded-full text-[10px] font-bold tabular-nums leading-none',
                   isActive
-                    ? 'bg-white/25 text-white'
-                    : 'bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)]'
+                    ? 'bg-[var(--student-soft)] text-[var(--student-primary)]'
+                    : 'bg-[var(--card-solid)] text-[var(--color-muted-foreground)]'
                 )}
               >
                 {tab.count}
               </span>
-            ) : null}
+            )}
           </button>
         );
       })}

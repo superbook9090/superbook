@@ -2,14 +2,14 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, RotateCw, TrendingUp } from 'lucide-react';
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { EmptyState } from '@/components/layout/EmptyState';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { useTranslation } from '@/hooks/useTranslation';
 import { ROUTES } from '@/constants/routes';
+import { StudentPageBanner } from '@/features/student/components/StudentPageBanner';
 import { useStudentProgress } from '../../hooks/useStudentProgress';
-import { ProgressHeader } from '../ProgressHeader';
 import { ProgressOverviewStats, type StatItem } from '../ProgressOverviewStats';
 import { StudentProgressFilters } from './StudentProgressFilters';
 import { StudentCourseProgressCard } from './StudentCourseProgressCard';
@@ -54,18 +54,27 @@ export function StudentProgressView() {
     : [];
 
   return (
-    <PageWrapper className="space-y-6">
-      <ProgressHeader
+    <PageWrapper>
+      <StudentPageBanner
+        icon={TrendingUp}
+        eyebrow={t('common.progress')}
         title={t('progress.myProgress')}
         description={t('progress.progressDesc')}
-        onRefresh={refetch}
-        isRefreshing={isLoading}
+        actions={
+          <button
+            type="button"
+            onClick={refetch}
+            disabled={isLoading}
+            className="student-pill-btn w-full sm:w-auto disabled:opacity-60"
+          >
+            <RotateCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            <span>{t('progress.refresh')}</span>
+          </button>
+        }
       />
 
-      {/* Metric Tiles */}
       {statItems.length > 0 && <ProgressOverviewStats stats={statItems} />}
 
-      {/* Analytics Insights Charts */}
       {progressData.length > 0 && (
         <StudentInsightsCharts
           scoreTrendData={scoreTrendData}
@@ -75,15 +84,13 @@ export function StudentProgressView() {
         />
       )}
 
-      {/* Course Progress Section */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-base sm:text-lg font-bold text-[var(--color-foreground)]">
+          <h2 className="text-base sm:text-lg font-bold font-[family-name:var(--font-display)] text-[var(--color-foreground)]">
             {t('progress.courseProgress')} ({filteredCourses.length})
           </h2>
         </div>
 
-        {/* Filters and search toolbar */}
         {progressData.length > 0 && (
           <StudentProgressFilters
             searchQuery={searchQuery}
@@ -95,23 +102,19 @@ export function StudentProgressView() {
           />
         )}
 
-        {/* Course Cards Grid or Empty */}
         {progressData.length === 0 ? (
           <EmptyState
             icon={BookOpen}
             title={t('progress.noProgressData')}
             description={t('dashboard.enrollToTrackProgress')}
             action={
-              <Link
-                href={ROUTES.student.browse}
-                className="inline-flex items-center px-4 py-2 text-sm font-semibold rounded-xl bg-[var(--student-primary)] text-white hover:bg-[var(--student-hover)] transition-colors"
-              >
+              <Link href={ROUTES.student.browse} className="student-cta-btn">
                 {t('progress.browseCourses')}
               </Link>
             }
           />
         ) : filteredCourses.length === 0 ? (
-          <div className="card-surface p-8 rounded-2xl text-center border border-[var(--border)]">
+          <div className="student-panel p-8 text-center">
             <p className="text-sm text-[var(--color-muted-foreground)] mb-3">
               {t('progress.noStudentsFound')}
             </p>
@@ -127,20 +130,18 @@ export function StudentProgressView() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 perspective-1000">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {filteredCourses.map((item) => (
-              <div key={item.enrollment._id} className="transform-3d">
-                <StudentCourseProgressCard
-                  item={item}
-                  onViewQuizHistory={(selected) => setSelectedCourseForModal(selected)}
-                />
-              </div>
+              <StudentCourseProgressCard
+                key={item.enrollment._id}
+                item={item}
+                onViewQuizHistory={(selected) => setSelectedCourseForModal(selected)}
+              />
             ))}
           </div>
         )}
       </section>
 
-      {/* Quiz Attempt History Modal */}
       <StudentQuizAttemptsModal
         isOpen={Boolean(selectedCourseForModal)}
         courseTitle={selectedCourseForModal?.course.title || ''}

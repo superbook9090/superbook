@@ -5,32 +5,26 @@ import Link from 'next/link';
 import { Newspaper, Plus } from 'lucide-react';
 import { ROUTES } from '@/constants/routes';
 import { useTranslation } from '@/hooks/useTranslation';
+import { AdminPageBanner } from '@/features/admin/components/AdminPageBanner';
 
 export function AdminBlogsHero() {
   const { t } = useTranslation();
 
   return (
-    <div className="hero-banner flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 sm:p-6 md:p-8 rounded-3xl">
-      <div className="space-y-1.5 max-w-xl">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[var(--teacher-soft)] text-[var(--teacher-primary)] border border-[var(--teacher-border)] shadow-xs">
-          <Newspaper className="w-3.5 h-3.5" />
-          <span>{t('admin.manageBlogs')}</span>
-        </div>
-        <h1 className="heading-xl">{t('admin.manageBlogs')}</h1>
-        <p className="text-sm sm:text-base text-[var(--color-muted-foreground)]">
-          {t('admin.manageBlogsDesc')}
-        </p>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-3 self-start sm:self-auto">
+    <AdminPageBanner
+      icon={Newspaper}
+      eyebrow={t('admin.manageBlogs')}
+      title={t('admin.manageBlogs')}
+      description={t('admin.manageBlogsDesc')}
+      actions={
         <Link
           href={ROUTES.teacher.blogCreate}
-          className="btn-premium inline-flex items-center justify-center gap-2 min-h-[44px] px-6 py-2.5 text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition-all"
+          className="teacher-cta-btn min-h-[44px] px-4 text-xs sm:text-sm"
         >
           <Plus className="w-4 h-4" />
           <span>{t('blog.createBlog')}</span>
         </Link>
-      </div>
-    </div>
+      }
+    />
   );
 }

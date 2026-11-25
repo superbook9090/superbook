@@ -1,22 +1,31 @@
 // src/app/(dashboard)/dashboard/teacher/blogs/page.tsx
 'use client';
 
-import { ROUTES } from '@/constants/routes';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Plus, BookOpen, Newspaper } from 'lucide-react';
+import { ROUTES } from '@/constants/routes';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { useAlert } from '@/components/ui/AlertContainer';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
-import BlogFilters, { type BlogLanguageFilter, type BlogStatusFilter } from '@/features/blogs/components/BlogFilters';
+import BlogFilters, {
+  type BlogLanguageFilter,
+  type BlogStatusFilter,
+} from '@/features/blogs/components/BlogFilters';
 import { FilterPanel } from '@/components/filters/DashboardListFilters';
-import { useDeleteBlog, useUpdateBlog, usePaginatedBlogs, type Blog } from '@/lib/react-query/useBlogQueries';
+import {
+  useDeleteBlog,
+  useUpdateBlog,
+  usePaginatedBlogs,
+  type Blog,
+} from '@/lib/react-query/useBlogQueries';
 import BlogListPagination from '@/features/blogs/components/BlogListPagination';
-import { PageWrapper } from '@/components/layout';
+import { PageWrapper, EmptyState } from '@/components/layout';
+import { TeacherPageBanner } from '@/features/teacher/components/TeacherPageBanner';
 import TeacherBlogsStats from './_components/TeacherBlogsStats';
 import TeacherBlogCard from './_components/TeacherBlogCard';
 
@@ -104,29 +113,21 @@ export default function TeacherBlogsPage() {
 
   return (
     <PageWrapper>
-      {/* Hero Header Banner */}
-      <div className="hero-banner flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 sm:p-6 md:p-8 rounded-3xl">
-        <div className="space-y-1 max-w-xl">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[var(--teacher-soft)] text-[var(--teacher-primary)] border border-[var(--teacher-border)]">
-            <Newspaper className="w-3.5 h-3.5" />
-            <span>{t('blog.myBlogs')}</span>
-          </div>
-          <h1 className="heading-xl">{t('blog.myBlogs')}</h1>
-          <p className="text-sm sm:text-base text-[var(--color-muted-foreground)]">{t('blog.manageBlogsDesc')}</p>
-        </div>
-        <Link
-          href={ROUTES.teacher.blogCreate}
-          className="btn-premium inline-flex items-center justify-center gap-2 min-h-[44px] px-6 py-2.5 text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition-all self-start sm:self-auto"
-        >
-          <Plus className="w-4 h-4" />
-          <span>{t('blog.createBlog')}</span>
-        </Link>
-      </div>
+      <TeacherPageBanner
+        icon={Newspaper}
+        eyebrow={t('common.blogs')}
+        title={t('blog.myBlogs')}
+        description={t('blog.manageBlogsDesc')}
+        actions={
+          <Link href={ROUTES.teacher.blogCreate} className="teacher-cta-btn w-full sm:w-auto">
+            <Plus className="w-4 h-4" />
+            <span>{t('blog.createBlog')}</span>
+          </Link>
+        }
+      />
 
-      {/* KPI Stats Strip */}
       <TeacherBlogsStats stats={stats} />
 
-      {/* Filters Toolbar */}
       <FilterPanel>
         <BlogFilters
           searchQuery={searchInput}
@@ -140,24 +141,21 @@ export default function TeacherBlogsPage() {
         />
       </FilterPanel>
 
-      {/* Blogs Grid or Empty State */}
-      <div className={`space-y-6 ${isFetching ? 'opacity-60 pointer-events-none' : ''}`}>
+      <div className={`space-y-4 transition-opacity ${isFetching ? 'opacity-60 pointer-events-none' : ''}`}>
         {blogs.length === 0 ? (
-          <div className="text-center py-16 px-4 bg-[var(--card-solid)] antigravity-glass rounded-3xl border border-dashed border-[var(--border)]">
-            <BookOpen className="w-14 h-14 text-[var(--color-muted-foreground)] mx-auto mb-3 opacity-30" />
-            <h3 className="text-lg font-bold text-[var(--color-foreground)] mb-1">
-              {searchTerm ? t('blog.noBlogsFound') : t('blog.noBlogsYetMsg')}
-            </h3>
-            <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] mb-5">
-              {searchTerm ? t('blog.tryAdjusting') : t('blog.createFirstBlog')}
-            </p>
-            {!searchTerm && (
-              <Link href={ROUTES.teacher.blogCreate} className="btn-premium inline-flex items-center gap-2 min-h-[44px]">
-                <Plus className="w-4 h-4" />
-                <span>{t('blog.createBlog')}</span>
-              </Link>
-            )}
-          </div>
+          <EmptyState
+            icon={BookOpen}
+            title={searchTerm ? t('blog.noBlogsFound') : t('blog.noBlogsYetMsg')}
+            description={searchTerm ? t('blog.tryAdjusting') : t('blog.createFirstBlog')}
+            action={
+              !searchTerm ? (
+                <Link href={ROUTES.teacher.blogCreate} className="teacher-cta-btn">
+                  <Plus className="w-4 h-4" />
+                  <span>{t('blog.createBlog')}</span>
+                </Link>
+              ) : undefined
+            }
+          />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {blogs.map((blog: Blog, idx: number) => (
@@ -177,7 +175,6 @@ export default function TeacherBlogsPage() {
         )}
       </div>
 
-      {/* Delete Confirmation Modal */}
       <ConfirmModal
         isOpen={showDeleteModal}
         title={t('blog.deleteConfirmTitle')}

@@ -1,10 +1,9 @@
 'use client';
-import { ROUTES } from '@/constants/routes';
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { motion } from 'framer-motion';
-import BackButton from '@/components/ui/BackButton';
+import { PenTool } from 'lucide-react';
+import { ROUTES } from '@/constants/routes';
 import { useAlert } from '@/components/ui/AlertContainer';
 import { useSessionStore } from '@/store/useSessionStore';
 import { getBlogById, updateBlog, type BlogDocument } from '@/lib/api/blogs';
@@ -14,6 +13,8 @@ import { isBlogContentEmpty, type BlogFormData } from '@/features/blogs/componen
 import { LazyBlogEditorForm } from '@/lib/lazy';
 import { isAdmin } from '@/lib/roles';
 import { PageWrapper } from '@/components/layout';
+import { PageSkeleton } from '@/components/ui/Skeleton';
+import { TeacherPageBanner } from '@/features/teacher/components/TeacherPageBanner';
 
 export default function EditBlogPage() {
   const { session, status } = useSessionStore();
@@ -43,7 +44,6 @@ export default function EditBlogPage() {
       router.push(ROUTES.login);
       return;
     }
-
     if (status === 'authenticated' && blogId) {
       fetchBlog();
     }
@@ -78,7 +78,6 @@ export default function EditBlogPage() {
 
   const submit = async (saveAsDraft: boolean) => {
     setIsSaving(true);
-
     if (!formData.title.trim() || !formData.topic || isBlogContentEmpty(formData.content)) {
       addAlert({ type: 'error', message: t('blog.fillAllFields') });
       setIsSaving(false);
@@ -107,38 +106,29 @@ export default function EditBlogPage() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="w-10 h-10 border-4 border-[var(--color-surface-muted)] border-t-[var(--teacher-primary)] rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (isLoading) return <PageSkeleton />;
 
   return (
-    <PageWrapper className="max-w-4xl">
-      <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}>
-        <BackButton
-          href={blogsHome}
-          label={t('blog.backToBlogs')}
-          className="text-[var(--teacher-primary)] hover:text-[var(--teacher-primary)]/80 mb-3"
-        />
-        <h1 className="heading-xl text-[var(--color-foreground)]">{t('editBlogPage.title')}</h1>
-        <p className="text-sm text-[var(--color-muted-foreground)] mt-0.5">{t('editBlogPage.description')}</p>
-      </motion.div>
+    <PageWrapper className="max-w-4xl mx-auto w-full">
+      <TeacherPageBanner
+        icon={PenTool}
+        eyebrow={t('common.blogs')}
+        title={t('editBlogPage.title')}
+        description={t('editBlogPage.description')}
+        backHref={blogsHome}
+        backLabel={t('blog.backToBlogs')}
+      />
 
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
-        <LazyBlogEditorForm
-          formData={formData}
-          onChange={setFormData}
-          isSaving={isSaving}
-          onPublish={() => submit(false)}
-          onSaveDraft={() => submit(true)}
-          publishLabel={
-            isPublished ? t('editBlogPage.updateAndPublish') : t('editBlogPage.publish')
-          }
-        />
-      </motion.div>
+      <LazyBlogEditorForm
+        formData={formData}
+        onChange={setFormData}
+        isSaving={isSaving}
+        onPublish={() => submit(false)}
+        onSaveDraft={() => submit(true)}
+        publishLabel={
+          isPublished ? t('editBlogPage.updateAndPublish') : t('editBlogPage.publish')
+        }
+      />
     </PageWrapper>
   );
 }

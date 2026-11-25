@@ -1,11 +1,9 @@
 'use client';
-import { ROUTES } from '@/constants/routes';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { BookOpen } from 'lucide-react';
-import BackButton from '@/components/ui/BackButton';
+import { BookOpen, PenTool } from 'lucide-react';
+import { ROUTES } from '@/constants/routes';
 import { useAlert } from '@/components/ui/AlertContainer';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useCreateBlog } from '@/lib/react-query/useBlogQueries';
@@ -15,6 +13,7 @@ import { isBlogContentEmpty, type BlogFormData } from '@/features/blogs/componen
 import { LazyBlogEditorForm } from '@/lib/lazy';
 import { isAdmin, isStaffRole } from '@/lib/roles';
 import { PageWrapper } from '@/components/layout';
+import { TeacherPageBanner } from '@/features/teacher/components/TeacherPageBanner';
 
 export default function CreateBlogPage() {
   const { session, status } = useSessionStore();
@@ -67,46 +66,38 @@ export default function CreateBlogPage() {
   };
 
   return (
-    <PageWrapper className="max-w-4xl">
-      <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}>
-        <BackButton
-          href={blogsHome}
-          label={t('blog.backToBlogs')}
-          className="text-[var(--teacher-primary)] hover:text-[var(--teacher-primary)]/80 mb-3"
-        />
-        <h1 className="heading-xl text-[var(--color-foreground)]">{t('createBlogPage.title')}</h1>
-        <p className="text-sm text-[var(--color-muted-foreground)] mt-0.5">{t('createBlogPage.description')}</p>
-      </motion.div>
+    <PageWrapper className="max-w-4xl mx-auto w-full">
+      <TeacherPageBanner
+        icon={PenTool}
+        eyebrow={t('common.blogs')}
+        title={t('createBlogPage.title')}
+        description={t('createBlogPage.description')}
+        backHref={blogsHome}
+        backLabel={t('blog.backToBlogs')}
+      />
 
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
-        <LazyBlogEditorForm
-          formData={formData}
-          onChange={setFormData}
-          isSaving={createBlogMutation.isPending}
-          onPublish={() => submit(false)}
-          onSaveDraft={() => submit(true)}
-          publishLabel={t('createBlogPage.publish')}
-        />
-      </motion.div>
+      <LazyBlogEditorForm
+        formData={formData}
+        onChange={setFormData}
+        isSaving={createBlogMutation.isPending}
+        onPublish={() => submit(false)}
+        onSaveDraft={() => submit(true)}
+        publishLabel={t('createBlogPage.publish')}
+      />
 
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="card-surface antigravity-glass rounded-2xl p-4 border border-[var(--teacher-border)] bg-[var(--teacher-soft)]/30"
-      >
-        <h4 className="text-sm font-bold text-[var(--teacher-primary)] mb-2 flex items-center">
-          <BookOpen className="w-4 h-4 mr-2" />
-          {t('createBlogPage.tipsTitle')}
+      <div className="teacher-panel p-4 sm:p-5 border-[var(--teacher-border)] bg-[var(--teacher-soft)]/35">
+        <h4 className="text-sm font-bold text-[var(--teacher-primary)] mb-2 flex items-center gap-2">
+          <BookOpen className="w-4 h-4 shrink-0" />
+          <span>{t('createBlogPage.tipsTitle')}</span>
         </h4>
-        <ul className="text-xs text-[var(--color-muted-foreground)] space-y-1 pl-6 list-disc">
+        <ul className="text-xs text-[var(--color-muted-foreground)] space-y-1 pl-5 list-disc leading-relaxed">
           <li>{t('createBlogPage.tipTitle')}</li>
           <li>{t('createBlogPage.tipSections')}</li>
           <li>{t('createBlogPage.tipLists')}</li>
           <li>{t('createBlogPage.tipLinks')}</li>
           <li>{t('createBlogPage.tipProofread')}</li>
         </ul>
-      </motion.div>
+      </div>
     </PageWrapper>
   );
 }

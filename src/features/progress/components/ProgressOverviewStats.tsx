@@ -20,10 +20,10 @@ export function ProgressOverviewStats({ stats }: ProgressOverviewStatsProps) {
       {stats.map((stat, idx) => (
         <div
           key={idx}
-          className="stat-tile hover:scale-[1.01] transition-transform flex flex-col justify-center items-center p-3 sm:p-4 rounded-xl border border-[var(--border)] bg-[var(--card-solid)]"
+          className="student-card flex flex-col justify-center items-center p-3.5 sm:p-4 text-center"
         >
           <p
-            className={`text-xl sm:text-2xl font-black ${
+            className={`text-xl sm:text-2xl font-extrabold tabular-nums font-[family-name:var(--font-display)] ${
               stat.colorClass || 'text-[var(--color-foreground)]'
             }`}
           >

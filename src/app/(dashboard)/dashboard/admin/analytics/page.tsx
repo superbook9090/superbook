@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/constants/routes';
+import { isSuperAdmin } from '@/lib/roles';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { PageWrapper, EmptyState } from '@/components/layout';
 import Button from '@/components/ui/Button';
@@ -28,6 +29,8 @@ export default function AdminAnalyticsPage() {
     setActiveTab,
     lastUpdated,
     handleRefresh,
+    dateRange,
+    setDateRange,
   } = useAdminAnalytics();
 
   useEffect(() => {
@@ -41,6 +44,8 @@ export default function AdminAnalyticsPage() {
     return <PageSkeleton />;
   }
 
+  const isSuper = isSuperAdmin(session?.user?.role);
+
   return (
     <PageWrapper className="overflow-x-hidden">
       <AdminAnalyticsHero
@@ -49,6 +54,10 @@ export default function AdminAnalyticsPage() {
         onRefresh={handleRefresh}
         isRefreshing={isRefreshing}
         lastUpdated={lastUpdated}
+        dateRange={dateRange}
+        onDateRangeChange={setDateRange}
+        isSuperAdmin={isSuper}
+        activityCount={stats?.recentActivity?.length}
       />
 
       {!stats ? (
@@ -62,7 +71,7 @@ export default function AdminAnalyticsPage() {
           }
         />
       ) : (
-        <>
+        <div className={`transition-opacity duration-150 ${isRefreshing ? 'opacity-70' : 'opacity-100'}`}>
           {activeTab === 'overview' && <AdminOverviewTab stats={stats} />}
           {activeTab === 'users' && <AdminUsersTab stats={stats} />}
           {activeTab === 'courses' && <AdminContentTab stats={stats} />}
@@ -70,7 +79,7 @@ export default function AdminAnalyticsPage() {
           {activeTab === 'activity' && (
             <AdminActivityTab activity={stats.recentActivity || []} />
           )}
-        </>
+        </div>
       )}
     </PageWrapper>
   );

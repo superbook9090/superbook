@@ -1,11 +1,13 @@
 // src/app/(dashboard)/dashboard/admin/page.tsx
 'use client';
 
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/constants/routes';
 import { useSessionStore } from '@/store/useSessionStore';
 import { isSuperAdmin as checkIsSuperAdmin } from '@/lib/roles';
 import { PageWrapper } from '@/components/layout';
+import { PageSkeleton } from '@/components/ui/Skeleton';
 import { useAdminAnalytics } from './analytics/_hooks/useAdminAnalytics';
 import AdminHero from './_components/AdminHero';
 import SuperadminExecutiveSuite from './_components/SuperadminExecutiveSuite';
@@ -19,16 +21,17 @@ export default function AdminDashboardPage() {
   const router = useRouter();
   const { stats, isLoading, isRefreshing, handleRefresh, dateRange, setDateRange } = useAdminAnalytics();
 
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push(ROUTES.login);
+    }
+  }, [status, router]);
+
   if (status === 'loading') {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-12 h-12 border-4 border-[var(--teacher-border)] border-t-[var(--teacher-primary)] rounded-full animate-spin" />
-      </div>
-    );
+    return <PageSkeleton />;
   }
 
   if (!session) {
-    router.push(ROUTES.login);
     return null;
   }
 
@@ -47,10 +50,7 @@ export default function AdminDashboardPage() {
 
       {isSuperAdmin && <SuperadminExecutiveSuite stats={stats} />}
 
-      <AdminStatsGrid
-        stats={stats}
-        isLoading={isLoading}
-      />
+      <AdminStatsGrid stats={stats} isLoading={isLoading} />
 
       <AdminQuickActions isSuperAdmin={isSuperAdmin} />
 

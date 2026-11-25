@@ -59,18 +59,20 @@ export default function TeacherAnalyticsPage() {
 
   if (!stats) {
     return (
-      <PageWrapper className="py-12">
-        <div className="card-surface antigravity-glass text-center p-8 sm:p-12 rounded-3xl border border-[var(--border)] max-w-lg mx-auto">
+      <PageWrapper>
+        <div className="teacher-panel text-center p-8 sm:p-12 max-w-lg mx-auto">
           {error && (
-            <div className="p-4 rounded-2xl bg-[var(--color-error)]/10 text-[var(--color-error)] border border-[var(--color-error)]/20 mb-4 inline-block">
+            <div className="p-3.5 rounded-xl bg-[var(--error-light)] text-[var(--error)] border border-[var(--error)]/25 mb-4 text-sm font-medium">
               {error}
             </div>
           )}
-          <h3 className="heading-md mb-2">{t('teacherAnalytics.errorLoading')}</h3>
-          <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] mb-6">
+          <h3 className="text-base sm:text-lg font-bold text-[var(--color-foreground)] mb-1.5">
+            {t('teacherAnalytics.errorLoading')}
+          </h3>
+          <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] mb-5">
             {t('errors.tryAgain')}
           </p>
-          <Button onClick={fetchStats} className="btn-premium min-h-[44px]">
+          <Button onClick={fetchStats} variant="primary" className="min-h-[44px] rounded-xl px-6">
             {t('teacherAnalytics.retry')}
           </Button>
         </div>

@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { User, Course, Quiz, Enrollment, QuizAttempt, Blog } from '@/models';
 import { parseDateRange } from '@/lib/dateUtils';
 import { buildAdminTrendTimeline, formatRecentActivity } from './adminTrends';
+import { getAdminBreakdowns } from './adminBreakdowns';
 
 export async function getAdminStats(
   organizationId?: string | null,
@@ -201,6 +202,17 @@ export async function getAdminStats(
     recentQuizAttempts as unknown as Parameters<typeof formatRecentActivity>[1]
   );
 
+  const breakdowns = await getAdminBreakdowns({
+    orgFilter,
+    userIds: userIds as mongoose.Types.ObjectId[],
+    quizIds: quizIds as mongoose.Types.ObjectId[],
+    trendStart,
+    rangeEnd,
+    totalUsers,
+    mauCount,
+    completedEnrollments,
+  });
+
   const inactiveCount = Math.max(0, totalUsers - mauCount);
   const stickinessRatio = mauCount > 0 ? Math.round((dauCount / mauCount) * 100) : 0;
   const appPct = totalUsers > 0 ? Math.round((appUsersCount / totalUsers) * 100) : 0;
@@ -266,5 +278,10 @@ export async function getAdminStats(
       studentsCount: c.studentsCount || 0,
     })),
     recentActivity,
+    scoreDistribution: breakdowns.scoreDistribution,
+    scoreTiers: breakdowns.scoreTiers,
+    dailyQuizScores: breakdowns.dailyQuizScores,
+    categoryBreakdown: breakdowns.categoryBreakdown,
+    funnel: breakdowns.funnel,
   };
 }

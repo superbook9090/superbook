@@ -104,31 +104,33 @@ function MobileNavComponent({ user, navigation, adminNavigation = [], isSuperAdm
             )}
           </div>
 
-          {/* Right: Quick Controls + Drawer Trigger */}
+          {/* Right: Recessed Utility Dock + Drawer Trigger */}
           <div className="flex items-center gap-1.5 shrink-0">
-            {!isStaff && (
-              <Link
-                href={ROUTES.student.notifications}
-                aria-label={t('common.notifications')}
-                aria-current={notificationsActive ? 'page' : undefined}
-                className={cn(
-                  'inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border transition-all active:scale-95 shadow-xs focus-ring',
-                  notificationsActive
-                    ? 'bg-[var(--primary-soft)] border-[var(--primary)]/35 text-[var(--primary)]'
-                    : 'border-[var(--border)]/85 bg-[var(--card-solid)] text-[var(--color-muted-foreground)] hover:text-[var(--primary)] hover:bg-[var(--primary-soft)]'
-                )}
-              >
-                <Bell className="w-4 h-4" />
-              </Link>
-            )}
+            <div className="topbar-dock">
+              {!isStaff && (
+                <Link
+                  href={ROUTES.student.notifications}
+                  aria-label={t('common.notifications')}
+                  aria-current={notificationsActive ? 'page' : undefined}
+                  className={cn(
+                    'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] transition-all active:scale-95 focus-ring',
+                    notificationsActive
+                      ? 'bg-[var(--card-solid)] text-[var(--primary)] shadow-xs'
+                      : 'text-[var(--color-muted-foreground)] hover:text-[var(--primary)] hover:bg-[var(--card-solid)]'
+                  )}
+                >
+                  <Bell className="w-4 h-4" />
+                </Link>
+              )}
 
-            <ThemeToggle />
+              <ThemeToggle variant="ghost" />
+            </div>
 
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
                 <button
                   type="button"
-                  className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--border)]/85 bg-[var(--card-solid)] text-[var(--color-foreground)] hover:bg-[var(--surface-muted)] transition-all active:scale-95 shadow-xs focus-ring"
+                  className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] border border-[var(--border)]/80 bg-[var(--card-solid)] text-[var(--color-foreground)] hover:bg-[var(--surface-muted)] transition-all active:scale-95 shadow-xs focus-ring"
                   aria-label={t('common.toggleMenu')}
                 >
                   <Menu className="w-5 h-5" />

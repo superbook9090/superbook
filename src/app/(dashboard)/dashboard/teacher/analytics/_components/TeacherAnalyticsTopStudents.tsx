@@ -23,12 +23,12 @@ export default function TeacherAnalyticsTopStudents({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.3 }}
-      className="card-surface antigravity-glass rounded-3xl border border-[var(--border)] shadow-xs overflow-hidden"
+      transition={{ delay: 0.15 }}
+      className="teacher-panel overflow-hidden"
     >
-      <div className="p-5 sm:p-6 border-b border-[var(--border)] flex items-center justify-between">
+      <div className="p-4 sm:p-5 border-b border-[var(--border)]/80 flex items-center justify-between">
         <div>
           <h2 className="text-base sm:text-lg font-bold text-[var(--color-foreground)]">
             {t('teacherAnalytics.studentsTitle')}

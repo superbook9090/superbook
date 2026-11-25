@@ -46,6 +46,41 @@ export interface PlatformStats {
   webPercentage: number;
 }
 
+export interface ScoreBandItem {
+  band: string;
+  label: string;
+  count: number;
+  percentage: number;
+}
+
+export interface ScoreTierCounts {
+  high: number;
+  average: number;
+  low: number;
+  passRate: number;
+}
+
+export interface DailyQuizScorePoint {
+  date: string;
+  attempts: number;
+  avgScore: number;
+}
+
+export interface CategoryBreakdownItem {
+  category: string;
+  courses: number;
+  published: number;
+  enrollments: number;
+}
+
+export interface LearnerFunnelData {
+  registered: number;
+  active30d: number;
+  enrolledLearners: number;
+  quizParticipants: number;
+  completedEnrollments: number;
+}
+
 export interface AdminStats {
   users: {
     total: number;
@@ -79,6 +114,11 @@ export interface AdminStats {
   trends?: DailyTrendPoint[];
   topCourses?: TopCourseItem[];
   recentActivity?: ActivityItem[];
+  scoreDistribution?: ScoreBandItem[];
+  scoreTiers?: ScoreTierCounts;
+  dailyQuizScores?: DailyQuizScorePoint[];
+  categoryBreakdown?: CategoryBreakdownItem[];
+  funnel?: LearnerFunnelData;
 }
 
 export type AnalyticsTabKey = 'overview' | 'users' | 'courses' | 'quizzes' | 'activity';

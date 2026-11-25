@@ -1,31 +1,25 @@
 'use client';
 
 import React from 'react';
-import { useTranslation } from '@/hooks/useTranslation';
-import { PageWrapper, PageHeader } from '@/components/layout';
-import { TeacherContestForm } from '@/features/contests/components/TeacherContestForm';
-import BackButton from '@/components/ui/BackButton';
-
+import { Trophy } from 'lucide-react';
 import { ROUTES } from '@/constants/routes';
+import { useTranslation } from '@/hooks/useTranslation';
+import { PageWrapper } from '@/components/layout';
+import { TeacherPageBanner } from '@/features/teacher/components/TeacherPageBanner';
+import { TeacherContestForm } from '@/features/contests/components/TeacherContestForm';
 
 export default function CreateTeacherContestPage() {
   const { t } = useTranslation();
 
   return (
     <PageWrapper>
-      <div className="flex items-center justify-between">
-        <BackButton
-          href={ROUTES.teacher.contests}
-          label={t('contest.backToContests')}
-          className="text-xs font-bold min-h-[44px]"
-        />
-      </div>
-
-      <PageHeader
+      <TeacherPageBanner
+        icon={Trophy}
+        eyebrow={t('common.contests')}
         title={t('contest.createContestTitle')}
-        description={
-          t('contest.createContestDesc')
-        }
+        description={t('contest.createContestDesc')}
+        backHref={ROUTES.teacher.contests}
+        backLabel={t('contest.backToContests')}
       />
 
       <TeacherContestForm />

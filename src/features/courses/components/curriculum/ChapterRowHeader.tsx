@@ -85,12 +85,12 @@ export function ChapterRowHeader({
               e.stopPropagation();
               onOpenAiModal('add-lesson', chapter);
             }}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-purple-500/10 hover:bg-purple-500/25 text-purple-300 border border-purple-500/30 transition-colors shadow-sm"
-            title="add lesson using AI"
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-[var(--teacher-soft)] hover:bg-[var(--teacher-primary)]/15 text-[var(--teacher-primary)] border border-[var(--teacher-border)] transition-colors cursor-pointer"
+            title="Add lesson using AI"
           >
-            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-            <span className="hidden xl:inline">add lesson using AI</span>
-            <span className="xl:hidden">+Lesson AI</span>
+            <Sparkles className="w-3.5 h-3.5 shrink-0" />
+            <span className="hidden xl:inline">AI Lesson</span>
+            <span className="xl:hidden">+Lesson</span>
           </button>
           <button
             type="button"
@@ -98,12 +98,12 @@ export function ChapterRowHeader({
               e.stopPropagation();
               onOpenAiModal('add-chapter', chapter);
             }}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-purple-500/10 hover:bg-purple-500/25 text-purple-300 border border-purple-500/30 transition-colors shadow-sm"
-            title="add chapter using AI"
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-[var(--teacher-soft)] hover:bg-[var(--teacher-primary)]/15 text-[var(--teacher-primary)] border border-[var(--teacher-border)] transition-colors cursor-pointer"
+            title="Add chapter using AI"
           >
-            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-            <span className="hidden xl:inline">add chapter using AI</span>
-            <span className="xl:hidden">+Chapter AI</span>
+            <Sparkles className="w-3.5 h-3.5 shrink-0" />
+            <span className="hidden xl:inline">AI Chapter</span>
+            <span className="xl:hidden">+Chapter</span>
           </button>
           <button
             type="button"
@@ -111,12 +111,12 @@ export function ChapterRowHeader({
               e.stopPropagation();
               onOpenAiModal('add-quiz', chapter);
             }}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-purple-500/10 hover:bg-purple-500/25 text-purple-300 border border-purple-500/30 transition-colors shadow-sm"
-            title="add quiz using AI"
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-[var(--teacher-soft)] hover:bg-[var(--teacher-primary)]/15 text-[var(--teacher-primary)] border border-[var(--teacher-border)] transition-colors cursor-pointer"
+            title="Add quiz using AI"
           >
-            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-            <span className="hidden xl:inline">add quiz using AI</span>
-            <span className="xl:hidden">+Quiz AI</span>
+            <Sparkles className="w-3.5 h-3.5 shrink-0" />
+            <span className="hidden xl:inline">AI Quiz</span>
+            <span className="xl:hidden">+Quiz</span>
           </button>
         </div>
       )}

@@ -8,10 +8,10 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
-import { PageWrapper, PageHeader } from '@/components/layout';
+import { PageWrapper } from '@/components/layout';
 import { PageSkeleton } from '@/components/ui/Skeleton';
-import Button from '@/components/ui/Button';
 import Tooltip from '@/components/ui/Tooltip';
+import { AdminPageBanner } from '@/features/admin/components/AdminPageBanner';
 import { useAdminFiles } from './_hooks/useAdminFiles';
 import { FilesStats } from './_components/FilesStats';
 import { FilesBreadcrumbs } from './_components/FilesBreadcrumbs';
@@ -98,65 +98,51 @@ export default function AdminFilesPage() {
 
   return (
     <PageWrapper>
-      {/* Header */}
-      <PageHeader
-        title={
-          <span className="flex items-center gap-3">
-            <span className="p-2.5 bg-[var(--primary)]/10 text-[var(--primary)] rounded-xl shrink-0 inline-flex shadow-xs">
-              <FolderOpen className="w-6 h-6" />
-            </span>
-            <span>{t('files.title')}</span>
-          </span>
-        }
-        description={
-          isStudent
-            ? t('files.studentDescription')
-            : t('files.description')
-        }
+      <AdminPageBanner
+        icon={FolderOpen}
+        eyebrow={t('files.title')}
+        title={t('files.title')}
+        description={isStudent ? t('files.studentDescription') : t('files.description')}
+        tier={isStudent ? 'admin' : 'superadmin'}
         actions={
-          <div className="flex items-center gap-2">
+          <>
             <Tooltip label={t('analytics.refresh')}>
-              <Button
+              <button
+                type="button"
                 onClick={() => loadContents(parentId)}
-                variant="secondary"
-                size="sm"
-                className="flex items-center gap-2"
                 aria-label="Refresh"
+                className="teacher-pill-btn min-h-[44px] px-3.5 text-xs sm:text-sm font-semibold cursor-pointer"
               >
                 <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
                 <span className="hidden sm:inline">{t('analytics.refresh')}</span>
-              </Button>
+              </button>
             </Tooltip>
             {canMutate && (
               <>
-                <Button
+                <button
+                  type="button"
                   onClick={() => setShowCreateFolderModal(true)}
-                  variant="secondary"
-                  size="sm"
-                  className="flex items-center gap-2"
+                  className="teacher-pill-btn min-h-[44px] px-3.5 text-xs sm:text-sm font-semibold cursor-pointer"
                 >
-                  <FolderPlus className="w-4 h-4 text-[var(--color-warning)]" />
+                  <FolderPlus className="w-4 h-4 text-[var(--warning)]" />
                   <span className="hidden min-[450px]:inline">{t('files.createFolder')}</span>
-                </Button>
-                <Button
+                </button>
+                <button
+                  type="button"
                   onClick={() => setShowUploadModal(true)}
-                  variant="primary"
-                  size="sm"
-                  className="flex items-center gap-2"
+                  className="teacher-cta-btn min-h-[44px] px-4 text-xs sm:text-sm cursor-pointer"
                 >
                   <UploadCloud className="w-4 h-4" />
                   <span>{t('files.uploadPdf')}</span>
-                </Button>
+                </button>
               </>
             )}
-          </div>
+          </>
         }
       />
 
-      {/* Executive Summary Stats (Admins / Staff only) */}
       {!isStudent && <FilesStats stats={stats} isLoading={isLoading} />}
 
-      {/* Breadcrumb Navigation */}
       <FilesBreadcrumbs
         breadcrumbs={breadcrumbs}
         totalItems={totalItemsCount}
@@ -164,14 +150,12 @@ export default function AdminFilesPage() {
         onGoToParent={goToParent}
       />
 
-      {/* Drag & Drop Quick Dropzone */}
       <FileDropzone
         onUploadFile={handleUploadFile}
         canMutate={canMutate}
         isMutating={isMutating}
       />
 
-      {/* Filter Bar with Search, Type Chips & View Mode Switcher */}
       <FilesFilterBar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -184,7 +168,6 @@ export default function AdminFilesPage() {
         onReset={handleResetFilters}
       />
 
-      {/* Content Rendering / Empty State */}
       {totalItemsCount === 0 ? (
         <FilesEmptyState
           isFolderEmpty={stats.totalFiles === 0 && stats.totalFolders === 0}
@@ -210,7 +193,6 @@ export default function AdminFilesPage() {
         />
       )}
 
-      {/* Modals & Dialogs */}
       <FilesModals
         canMutate={canMutate}
         isMutating={isMutating}

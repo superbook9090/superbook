@@ -70,16 +70,16 @@ export function FilesFilterBar({
         searchPlaceholder={t('files.searchPlaceholder')}
         chipGroups={filterChips}
         headerAside={
-          <div className="hidden md:flex items-center gap-1 bg-[var(--color-surface-muted)] p-1 rounded-xl border border-[var(--border)]">
+          <div className="hidden md:flex items-center gap-1 bg-[var(--surface-muted)] p-1 rounded-xl border border-[var(--border)]">
             <Tooltip label={t('files.grid')}>
               <button
                 type="button"
                 onClick={() => onViewModeChange('grid')}
                 aria-pressed={viewMode === 'grid'}
                 aria-label={t('files.grid')}
-                className={`p-2 rounded-lg transition-colors ${
+                className={`inline-flex h-8 w-8 items-center justify-center rounded-[8px] transition-colors cursor-pointer ${
                   viewMode === 'grid'
-                    ? 'bg-[var(--card-solid)] text-[var(--primary)] shadow-xs'
+                    ? 'bg-[var(--card-solid)] text-[var(--teacher-primary)] shadow-xs'
                     : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]'
                 }`}
               >
@@ -92,9 +92,9 @@ export function FilesFilterBar({
                 onClick={() => onViewModeChange('table')}
                 aria-pressed={viewMode === 'table'}
                 aria-label={t('files.list')}
-                className={`p-2 rounded-lg transition-colors ${
+                className={`inline-flex h-8 w-8 items-center justify-center rounded-[8px] transition-colors cursor-pointer ${
                   viewMode === 'table'
-                    ? 'bg-[var(--card-solid)] text-[var(--primary)] shadow-xs'
+                    ? 'bg-[var(--card-solid)] text-[var(--teacher-primary)] shadow-xs'
                     : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]'
                 }`}
               >

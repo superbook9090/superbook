@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { User } from './types';
 import { UsersTableRow } from './UsersTableRow';
@@ -22,35 +21,30 @@ export function UsersTable({
   const { t } = useTranslation();
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.15 }}
-      className="antigravity-glass rounded-3xl border border-[var(--border)] shadow-lg overflow-hidden hidden sm:block"
-    >
+    <div className="teacher-panel overflow-hidden hidden sm:block">
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-[var(--border)]">
-          <thead className="bg-[var(--surface-muted)]/70">
+          <thead className="bg-[var(--surface-muted)]/75">
             <tr>
-              <th className="px-5 py-4 text-left text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider">
+              <th className="px-5 py-3.5 text-left text-[11px] font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider">
                 {t('admin.user')}
               </th>
-              <th className="px-5 py-4 text-left text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider">
+              <th className="px-5 py-3.5 text-left text-[11px] font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider">
                 {t('admin.role')}
               </th>
-              <th className="px-5 py-4 text-left text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider">
+              <th className="px-5 py-3.5 text-left text-[11px] font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider">
                 {t('adminAnalytics.platform')}
               </th>
-              <th className="px-5 py-4 text-left text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider">
+              <th className="px-5 py-3.5 text-left text-[11px] font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider">
                 {t('adminUsers.lastOpened')}
               </th>
-              <th className="px-5 py-4 text-left text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider">
+              <th className="px-5 py-3.5 text-left text-[11px] font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider">
                 {t('adminUsers.organization')}
               </th>
-              <th className="px-5 py-4 text-left text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider">
+              <th className="px-5 py-3.5 text-left text-[11px] font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider">
                 {t('adminUsers.capabilitiesAndLimits')}
               </th>
-              <th className="px-5 py-4 text-right text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider">
+              <th className="px-5 py-3.5 text-right text-[11px] font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider">
                 {t('admin.actions')}
               </th>
             </tr>
@@ -69,6 +63,6 @@ export function UsersTable({
           </tbody>
         </table>
       </div>
-    </motion.div>
+    </div>
   );
 }

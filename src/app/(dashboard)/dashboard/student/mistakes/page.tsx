@@ -1,13 +1,17 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useUrlTab } from '@/hooks/useUrlTab';
-import { PageWrapper, PageHeader } from '@/components/layout';
-import { MistakeCard, type MistakeItem } from './_components/MistakeCard';
-import { PageSkeleton } from '@/components/ui/Skeleton';
 import { BookMarked, CheckCircle2, RotateCcw, Sparkles } from 'lucide-react';
+import { useUrlTab } from '@/hooks/useUrlTab';
+import { useTranslation } from '@/hooks/useTranslation';
+import { PageWrapper, EmptyState } from '@/components/layout';
+import { PageSkeleton } from '@/components/ui/Skeleton';
+import { StudentPageBanner } from '@/features/student/components/StudentPageBanner';
+import { StudentTabs } from '@/features/student/components/StudentTabs';
+import { MistakeCard, type MistakeItem } from './_components/MistakeCard';
 
 export default function StudentMistakesPage() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useUrlTab<'pending' | 'mastered'>(
     ['pending', 'mastered'],
     'pending'
@@ -45,7 +49,6 @@ export default function StudentMistakesPage() {
         body: JSON.stringify({ mastered: nextStatus }),
       });
       if (res.ok) {
-        // Refresh local list
         setMistakes((prev) => prev.filter((item) => item._id !== id));
         setUnmasteredCount((prev) => (nextStatus ? Math.max(0, prev - 1) : prev + 1));
       }
@@ -56,77 +59,60 @@ export default function StudentMistakesPage() {
 
   return (
     <PageWrapper>
-      <PageHeader
-        title={
-          <span className="flex items-center gap-2">
-            <BookMarked className="w-6 h-6 text-[var(--student-primary)]" />
-            <span>Mistakes Notebook</span>
-          </span>
+      <StudentPageBanner
+        icon={BookMarked}
+        eyebrow={t('common.mistakes')}
+        title={t('common.mistakes')}
+        description={t('studentUi.mistakesDesc')}
+        actions={
+          <div className="px-3.5 py-2 rounded-xl bg-[var(--surface-muted)] border border-[var(--border)]/80 text-xs font-semibold text-[var(--color-muted-foreground)]">
+            {unmasteredCount === 0
+              ? t('studentUi.allCaughtUp')
+              : t('studentUi.trickyToRevise').replace('{count}', String(unmasteredCount))}
+          </div>
         }
-        description="Every question you missed across live contests and practice quizzes is saved here for revision until fully mastered."
       />
 
-      {/* Tabs & Stats Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b border-[var(--border)] pb-3">
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setActiveTab('pending')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
-              activeTab === 'pending'
-                ? 'bg-[var(--student-primary)] text-white shadow-xs'
-                : 'bg-[var(--card-solid)] text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] border border-[var(--border)]'
-            }`}
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Needs Practice</span>
-            {unmasteredCount > 0 && (
-              <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-red-500 text-white font-black">
-                {unmasteredCount}
-              </span>
-            )}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('mastered')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
-              activeTab === 'mastered'
-                ? 'bg-emerald-600 text-white shadow-xs'
-                : 'bg-[var(--card-solid)] text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] border border-[var(--border)]'
-            }`}
-          >
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>Mastered Questions</span>
-          </button>
-        </div>
-
-        <div className="text-xs text-[var(--color-muted-foreground)] font-medium self-end sm:self-center">
-          {unmasteredCount === 0 ? '🎉 All caught up!' : `${unmasteredCount} tricky questions to revise`}
-        </div>
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <StudentTabs
+          activeTab={activeTab}
+          onChange={setActiveTab}
+          tabs={[
+            {
+              id: 'pending',
+              label: t('studentUi.needsPractice'),
+              icon: <RotateCcw className="w-4 h-4" />,
+              count: unmasteredCount > 0 ? unmasteredCount : undefined,
+              tone: 'danger',
+            },
+            {
+              id: 'mastered',
+              label: t('studentUi.masteredQuestions'),
+              icon: <CheckCircle2 className="w-4 h-4" />,
+              tone: 'success',
+            },
+          ]}
+        />
       </div>
 
-      {/* Content Area */}
       {loading ? (
         <PageSkeleton />
       ) : mistakes.length === 0 ? (
-        <div className="p-8 sm:p-14 text-center rounded-2xl border border-[var(--border)] bg-[var(--card-solid)] space-y-3">
-          <div className="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center mx-auto">
-            <Sparkles className="w-6 h-6" />
-          </div>
-          <h3 className="font-bold text-base text-[var(--color-foreground)]">
-            {activeTab === 'pending'
-              ? 'No pending mistakes found!'
-              : 'No mastered questions yet.'}
-          </h3>
-          <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] max-w-sm mx-auto">
-            {activeTab === 'pending'
-              ? 'Great job! Any questions you answer incorrectly during live contests or quizzes will automatically appear here for revision.'
-              : 'Mark questions as mastered once you have revised their explanations.'}
-          </p>
-        </div>
+        <EmptyState
+          icon={Sparkles}
+          title={
+            activeTab === 'pending'
+              ? t('studentUi.noPendingMistakes')
+              : t('studentUi.noMasteredMistakes')
+          }
+          description={
+            activeTab === 'pending'
+              ? t('studentUi.noPendingMistakesDesc')
+              : t('studentUi.noMasteredMistakesDesc')
+          }
+        />
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {mistakes.map((item, idx) => (
             <MistakeCard
               key={item._id}

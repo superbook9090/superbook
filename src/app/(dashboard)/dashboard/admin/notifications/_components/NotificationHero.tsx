@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import {
   BellRing,
   RefreshCw,
@@ -15,7 +14,8 @@ import { useSessionStore } from '@/store/useSessionStore';
 import { useAlert } from '@/components/ui/AlertContainer';
 import { registerDeviceToken } from '@/lib/notifications/push/registerDevice';
 import { apiJsonData, ApiClientError } from '@/lib/api/http';
-import Button from '@/components/ui/Button';
+import { AdminPageBanner } from '@/features/admin/components/AdminPageBanner';
+import { AdminTabs, type AdminTabOption } from '@/features/admin/components/AdminTabs';
 import type { NotificationTabKey } from './types';
 
 interface NotificationHeroProps {
@@ -79,10 +79,10 @@ export function NotificationHero({
     }
   };
 
-  const tabs: { key: NotificationTabKey; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-    { key: 'compose', label: t('admin.notifications.tabCompose'), icon: Send },
-    { key: 'templates', label: t('admin.notifications.tabTemplates'), icon: Sparkles },
-    { key: 'history', label: t('admin.notifications.tabHistory'), icon: History },
+  const tabs: AdminTabOption<NotificationTabKey>[] = [
+    { id: 'compose', label: t('admin.notifications.tabCompose'), icon: <Send className="w-4 h-4 shrink-0" />, tone: 'amber' },
+    { id: 'templates', label: t('admin.notifications.tabTemplates'), icon: <Sparkles className="w-4 h-4 shrink-0" />, tone: 'amber' },
+    { id: 'history', label: t('admin.notifications.tabHistory'), icon: <History className="w-4 h-4 shrink-0" />, tone: 'amber' },
   ];
 
   const formattedTime = lastUpdated
@@ -90,77 +90,48 @@ export function NotificationHero({
     : '';
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="space-y-4 w-full min-w-0"
-    >
-      {/* Top Hero Banner */}
-      <div className="hero-banner w-full min-w-0">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
-          <div className="flex items-start gap-3 min-w-0">
-            <div className="p-2.5 sm:p-3 bg-[var(--primary-soft)] text-[var(--primary)] rounded-xl sm:rounded-2xl shrink-0 shadow-xs">
-              <BellRing className="w-5 h-5 sm:w-7 sm:h-7" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h1 className="heading-lg sm:heading-xl truncate">{t('admin.notifications.title')}</h1>
-              <p className="text-[var(--color-muted-foreground)] text-xs sm:text-sm mt-0.5 sm:mt-1 line-clamp-2 max-w-2xl">
-                {t('admin.notifications.description')}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2.5 self-start md:self-auto shrink-0 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 border-[var(--color-border)] pt-2.5 sm:pt-0">
+    <div className="space-y-4 w-full min-w-0">
+      <AdminPageBanner
+        icon={BellRing}
+        eyebrow={t('admin.notifications.title')}
+        title={t('admin.notifications.title')}
+        description={t('admin.notifications.description')}
+        tier="superadmin"
+        actions={
+          <div className="flex items-center gap-2 flex-wrap">
             {formattedTime && (
-              <span className="text-[11px] sm:text-xs text-[var(--color-muted)] font-medium">
+              <span className="text-xs text-[var(--color-muted-foreground)] font-medium tabular-nums mr-1">
                 {t('adminAnalytics.lastUpdated', { time: formattedTime })}
               </span>
             )}
-            <Button
+            <button
               type="button"
-              variant="secondary"
               onClick={handleTestBrowserPush}
               disabled={testingPush}
-              className="flex items-center gap-1.5 text-xs font-semibold shadow-xs py-1.5 px-3 touch-target"
+              className="teacher-pill-btn min-h-[44px] px-3.5 text-xs sm:text-sm font-semibold cursor-pointer"
             >
-              <Bell className={`w-3.5 h-3.5 ${testingPush ? 'animate-pulse' : ''}`} />
+              <Bell className={`w-4 h-4 text-amber-500 ${testingPush ? 'animate-pulse' : ''}`} />
               <span>{testingPush ? t('notifications.inbox.enabling') : t('notifications.push.testBrowser')}</span>
-            </Button>
-            <Button
+            </button>
+            <button
               type="button"
-              variant="secondary"
               onClick={onRefresh}
               disabled={isRefreshing}
-              className="flex items-center gap-1.5 text-xs font-semibold shadow-xs py-1.5 px-3 touch-target"
+              className="teacher-pill-btn min-h-[44px] px-3.5 text-xs sm:text-sm font-semibold cursor-pointer"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
               <span>{isRefreshing ? t('adminAnalytics.refreshing') : t('adminAnalytics.refresh')}</span>
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Segmented Tab Navigation */}
-      <div className="flex items-center gap-1 sm:gap-1.5 p-1.5 antigravity-glass rounded-2xl border border-[var(--border)] overflow-x-auto scrollbar-none w-full min-w-0 shadow-xs">
-        {tabs.map(({ key, label, icon: Icon }) => {
-          const isActive = activeTab === key;
-          return (
-            <button
-              key={key}
-              type="button"
-              onClick={() => onTabChange(key)}
-              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all duration-200 cursor-pointer whitespace-nowrap shrink-0 md:flex-1 justify-center min-h-[40px] ${
-                isActive
-                  ? 'bg-[var(--primary)] text-white shadow-md'
-                  : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--surface-muted)]'
-              }`}
-            >
-              <Icon className="w-4 h-4 shrink-0" />
-              <span>{label}</span>
             </button>
-          );
-        })}
-      </div>
-    </motion.div>
+          </div>
+        }
+      />
+
+      <AdminTabs
+        tabs={tabs}
+        activeTab={activeTab}
+        onChange={onTabChange}
+        fullWidth
+      />
+    </div>
   );
 }

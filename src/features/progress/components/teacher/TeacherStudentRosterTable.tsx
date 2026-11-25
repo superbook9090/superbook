@@ -19,7 +19,7 @@ export function TeacherStudentRosterTable({
 
   if (students.length === 0) {
     return (
-      <div className="card-surface p-8 rounded-2xl text-center border border-[var(--border)]">
+      <div className="teacher-panel p-8 text-center">
         <p className="text-sm text-[var(--color-muted-foreground)]">
           {t('progress.noStudentsFound')}
         </p>
@@ -30,7 +30,7 @@ export function TeacherStudentRosterTable({
   return (
     <div className="space-y-3">
       {/* Desktop / Tablet Table */}
-      <div className="hidden md:block card-surface rounded-2xl border border-[var(--border)] overflow-hidden shadow-sm">
+      <div className="hidden md:block teacher-panel overflow-hidden">
         <table className="w-full text-left text-xs sm:text-sm">
           <thead className="bg-[var(--color-surface-muted)] text-[var(--color-muted-foreground)] text-[11px] font-bold uppercase tracking-wider border-b border-[var(--border)]">
             <tr>
@@ -129,7 +129,7 @@ export function TeacherStudentRosterTable({
       {/* Mobile Cards */}
       <div className="md:hidden space-y-2.5">
         {students.map((row) => (
-          <div key={row.enrollmentId} className="card-surface p-3.5 rounded-xl border border-[var(--border)] space-y-2.5">
+          <div key={row.enrollmentId} className="teacher-card p-4 space-y-2.5">
             <div className="flex items-start justify-between gap-2">
               <div>
                 <p className="font-bold text-sm text-[var(--color-foreground)]">{row.student.name}</p>

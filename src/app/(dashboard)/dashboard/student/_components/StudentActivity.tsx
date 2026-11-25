@@ -1,8 +1,7 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { useTranslation } from '@/hooks/useTranslation';
 import { Activity, BookOpen, CheckCircle2, Clock } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 import ActivityCard from '@/components/ui/ActivityCard';
 import type { ActivityItem, Enrollment, Attempt } from './types';
 
@@ -14,7 +13,6 @@ interface StudentActivityProps {
 export default function StudentActivity({ enrollments, attempts }: StudentActivityProps) {
   const { t } = useTranslation();
 
-  // Combine and sort recent activity
   const activities: ActivityItem[] = [
     ...enrollments.map((e) => ({ ...e, type: 'enrollment' as const })),
     ...attempts
@@ -41,14 +39,11 @@ export default function StudentActivity({ enrollments, attempts }: StudentActivi
 
     if (isToday) {
       return date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-    } else if (isYesterday) {
+    }
+    if (isYesterday) {
       return `Yesterday, ${date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}`;
     }
-    return (
-      date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) +
-      ', ' +
-      date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
-    );
+    return `${date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}, ${date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}`;
   };
 
   const recentActivity = activities
@@ -56,39 +51,37 @@ export default function StudentActivity({ enrollments, attempts }: StudentActivi
     .slice(0, 5);
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.4 }}
+    <section
       aria-labelledby="recent-activity-heading"
-      className="relative rounded-[2rem] bg-[var(--card-solid)]/40 backdrop-blur-xl border border-[var(--border)]/50 overflow-hidden shadow-xl"
+      className="student-panel overflow-hidden"
     >
-      <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--student-primary)]/5 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="relative z-10 flex items-center justify-between p-5 sm:p-6 border-b border-[var(--border)]/50">
-        <div>
-          <h2 id="recent-activity-heading" className="text-lg sm:text-xl font-extrabold tracking-tight text-[var(--color-foreground)]">
+      <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-4 border-b border-[var(--border)]/70">
+        <div className="min-w-0">
+          <h2
+            id="recent-activity-heading"
+            className="text-base sm:text-lg font-bold font-[family-name:var(--font-display)] tracking-tight text-[var(--color-foreground)]"
+          >
             {t('dashboard.recentActivity')}
           </h2>
-          <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] mt-1 font-medium">
+          <p className="text-xs text-[var(--color-muted-foreground)] mt-0.5">
             {t('dashboard.recentActivityDesc')}
           </p>
         </div>
-        <div className="p-3 rounded-2xl bg-[var(--student-soft)] text-[var(--student-primary)] shadow-sm">
-          <Activity className="w-5 h-5 sm:w-6 sm:h-6" />
+        <div className="w-10 h-10 rounded-xl bg-[var(--student-soft)] text-[var(--student-primary)] flex items-center justify-center shrink-0">
+          <Activity className="w-5 h-5" />
         </div>
       </div>
 
-      <div className="relative z-10 divide-y divide-[var(--border)]/50">
+      <div className="divide-y divide-[var(--border)]/60">
         {recentActivity.length === 0 ? (
-          <div className="text-center py-12 px-6">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[var(--student-soft)] flex items-center justify-center text-[var(--student-primary)] shadow-sm">
-              <Clock className="w-6 h-6 sm:w-8 sm:h-8" />
+          <div className="text-center py-10 px-6">
+            <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-[var(--student-soft)] flex items-center justify-center text-[var(--student-primary)]">
+              <Clock className="w-6 h-6" />
             </div>
-            <h3 className="text-sm sm:text-base font-bold text-[var(--color-foreground)] mb-1">
+            <h3 className="text-sm font-bold text-[var(--color-foreground)] mb-1">
               {t('dashboard.noRecentActivity')}
             </h3>
-            <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] font-medium">
+            <p className="text-xs text-[var(--color-muted-foreground)]">
               {t('dashboard.startEnrolling')}
             </p>
           </div>
@@ -113,11 +106,11 @@ export default function StudentActivity({ enrollments, attempts }: StudentActivi
                   : formatDate(item.submittedAt || item.startedAt)
               }
               color={item.type === 'enrollment' ? 'student' : 'success'}
-              delay={0.45 + index * 0.04}
+              delay={0.05 * index}
             />
           ))
         )}
       </div>
-    </motion.section>
+    </section>
   );
 }

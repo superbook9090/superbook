@@ -1,12 +1,27 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { BookOpen, Radio, Users, CheckCircle2, ArrowUpRight, BookMarked, FileText } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import {
+  BookOpen,
+  Radio,
+  Users,
+  CheckCircle2,
+  ArrowUpRight,
+  BookMarked,
+  FileText,
+  Award,
+} from 'lucide-react';
 import { ROUTES } from '@/constants/routes';
 import { useTranslation } from '@/hooks/useTranslation';
 import StatCard from '@/components/ui/StatCard';
+import { EmptyState } from '@/components/layout';
 import type { AdminStats } from './types';
+
+const AdminCategoryBreakdownChart = dynamic(
+  () => import('./AdminCategoryBreakdownChart').then((m) => m.AdminCategoryBreakdownChart),
+  { ssr: false, loading: () => <div className="h-[340px] teacher-panel animate-pulse" /> }
+);
 
 interface AdminContentTabProps {
   stats: AdminStats;
@@ -16,77 +31,82 @@ export function AdminContentTab({ stats }: AdminContentTabProps) {
   const { t } = useTranslation();
 
   const topCourses = stats.topCourses || [];
+  const maxStudents = Math.max(...topCourses.map((c) => c.studentsCount || 1), 1);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25 }}
-      className="space-y-4 sm:space-y-6 w-full min-w-0"
-    >
-      {/* Content Stat Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-4 w-full min-w-0">
+    <div className="space-y-4 sm:space-y-5 w-full min-w-0">
+      {/* Content KPI Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 w-full min-w-0">
         <StatCard
           icon={BookOpen}
           value={stats.courses.total}
           label={t('adminAnalytics.totalCourses')}
-          color="info"
-          delay={0.05}
+          color="teacher"
+          delay={0.04}
         />
         <StatCard
           icon={Radio}
           value={stats.courses.published}
           label={t('adminAnalytics.liveCourses')}
           color="success"
-          delay={0.1}
+          delay={0.08}
         />
         <StatCard
           icon={Users}
           value={stats.enrollments.total}
           label={t('adminAnalytics.totalEnrollments')}
-          color="student"
-          delay={0.15}
+          color="info"
+          delay={0.12}
         />
         <StatCard
           icon={BookMarked}
           value={stats.enrollments.active}
           label={t('adminAnalytics.activeEnrollments')}
           color="warning"
-          delay={0.2}
+          delay={0.16}
         />
         <StatCard
           icon={CheckCircle2}
           value={stats.enrollments.completed}
           label={t('adminAnalytics.completedEnrollments')}
           color="success"
-          delay={0.25}
+          delay={0.2}
         />
         {stats.blogs !== undefined && (
           <StatCard
             icon={FileText}
             value={stats.blogs.total}
             label={t('adminAnalytics.totalBlogs')}
-            color="info"
-            delay={0.3}
+            color="student"
+            delay={0.24}
             description={`${stats.blogs.published} ${t('adminAnalytics.published')}`}
           />
         )}
       </div>
 
-      {/* Top Enrolled Courses Table */}
-      <div className="card-panel w-full min-w-0 overflow-hidden">
-        <div className="card-panel-header flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
-          <div className="min-w-0">
-            <h3 className="text-sm sm:text-base md:text-lg font-bold text-[var(--color-foreground)] truncate">
-              {t('adminAnalytics.topCoursesTitle')}
-            </h3>
-            <p className="text-[11px] sm:text-xs text-[var(--color-muted-foreground)] mt-0.5 sm:mt-1 line-clamp-1 sm:line-clamp-none">
-              {t('adminAnalytics.topCoursesSubtitle')}
-            </p>
+      {/* Category Demand Breakdown Chart */}
+      <AdminCategoryBreakdownChart data={stats.categoryBreakdown} />
+
+      {/* Top Enrolled Courses Leaderboard */}
+      <div className="teacher-panel overflow-hidden w-full min-w-0">
+        <div className="p-4 sm:p-5 border-b border-[var(--border)]/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-start gap-2.5 min-w-0">
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] bg-[var(--teacher-soft)] text-[var(--teacher-primary)] border border-[var(--teacher-border)] shrink-0">
+              <Award className="w-4 h-4" />
+            </span>
+            <div className="min-w-0">
+              <h3 className="text-sm sm:text-base font-extrabold font-[family-name:var(--font-display)] text-[var(--color-foreground)] truncate">
+                {t('adminAnalytics.topCoursesTitle')}
+              </h3>
+              <p className="text-xs text-[var(--color-muted-foreground)] mt-0.5 line-clamp-1">
+                {t('adminAnalytics.topCoursesSubtitle')}
+              </p>
+            </div>
           </div>
+
           <Link
             href={ROUTES.admin.courses}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--primary)] text-white text-xs font-semibold hover:opacity-90 transition-opacity self-start sm:self-auto shrink-0"
+            className="teacher-cta-btn min-h-[40px] px-3.5 text-xs shrink-0 self-start sm:self-auto"
           >
             <span>{t('adminAnalytics.manageCourses')}</span>
             <ArrowUpRight className="w-3.5 h-3.5" />
@@ -94,66 +114,96 @@ export function AdminContentTab({ stats }: AdminContentTabProps) {
         </div>
 
         {topCourses.length === 0 ? (
-          <div className="card-panel-body text-center py-10">
-            <BookOpen className="w-8 h-8 text-[var(--color-muted)] mx-auto mb-2" />
-            <p className="text-[var(--color-muted-foreground)] text-xs sm:text-sm">{t('adminAnalytics.noTopCourses')}</p>
+          <div className="p-6">
+            <EmptyState
+              icon={BookOpen}
+              title={t('adminAnalytics.noTopCourses')}
+              description={t('adminAnalytics.topCoursesSubtitle')}
+            />
           </div>
         ) : (
           <div className="overflow-x-auto w-full min-w-0">
-            <table className="min-w-full divide-y divide-[var(--color-border)]">
-              <thead className="bg-[var(--color-surface-muted)]">
+            <table className="min-w-full divide-y divide-[var(--border)]/70">
+              <thead className="bg-[var(--surface-muted)]/75">
                 <tr>
-                  <th className="px-3.5 sm:px-6 py-2.5 sm:py-3 text-left text-xs font-semibold text-[var(--color-muted-foreground)] uppercase tracking-wider">
+                  <th className="px-4 sm:px-5 py-3 text-left text-[11px] font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider">
                     {t('adminAnalytics.courseTitle')}
                   </th>
-                  <th className="px-3.5 sm:px-6 py-2.5 sm:py-3 text-left text-xs font-semibold text-[var(--color-muted-foreground)] uppercase tracking-wider hidden sm:table-cell">
+                  <th className="px-4 sm:px-5 py-3 text-left text-[11px] font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider hidden sm:table-cell">
                     {t('adminAnalytics.category')}
                   </th>
-                  <th className="px-3.5 sm:px-6 py-2.5 sm:py-3 text-center text-xs font-semibold text-[var(--color-muted-foreground)] uppercase tracking-wider">
+                  <th className="px-4 sm:px-5 py-3 text-center text-[11px] font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider">
                     {t('adminAnalytics.status')}
                   </th>
-                  <th className="px-3.5 sm:px-6 py-2.5 sm:py-3 text-right text-xs font-semibold text-[var(--color-muted-foreground)] uppercase tracking-wider">
+                  <th className="px-4 sm:px-5 py-3 text-right text-[11px] font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider w-44">
                     {t('adminAnalytics.enrolledStudents')}
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--color-border)]">
-                {topCourses.map((course, idx) => (
-                  <tr key={course._id} className="hover:bg-[var(--color-surface-muted)] transition-colors">
-                    <td className="px-3.5 sm:px-6 py-3 sm:py-3.5 max-w-[180px] sm:max-w-none">
-                      <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-                        <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[var(--primary-soft)] text-[var(--primary)] font-bold text-[11px] sm:text-xs flex items-center justify-center shrink-0">
-                          {idx + 1}
+              <tbody className="divide-y divide-[var(--border)]/70">
+                {topCourses.map((course, idx) => {
+                  const pct = Math.round(((course.studentsCount || 0) / maxStudents) * 100);
+                  const rankTone =
+                    idx === 0
+                      ? 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/35'
+                      : idx === 1
+                      ? 'bg-[var(--surface-muted-strong)] text-[var(--color-foreground)] border-[var(--border)]'
+                      : idx === 2
+                      ? 'bg-orange-500/12 text-orange-700 dark:text-orange-400 border-orange-500/30'
+                      : 'bg-[var(--surface-muted)] text-[var(--color-muted-foreground)] border-transparent';
+
+                  return (
+                    <tr
+                      key={course._id}
+                      className="hover:bg-[var(--surface-muted)]/45 transition-colors"
+                    >
+                      <td className="px-4 sm:px-5 py-3.5 max-w-[220px] sm:max-w-none">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <span
+                            className={`w-7 h-7 rounded-[8px] border font-bold text-xs flex items-center justify-center shrink-0 tabular-nums ${rankTone}`}
+                          >
+                            {idx + 1}
+                          </span>
+                          <span className="text-xs sm:text-sm font-bold text-[var(--color-foreground)] truncate">
+                            {course.title}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-4 sm:px-5 py-3.5 text-xs font-medium text-[var(--color-muted-foreground)] hidden sm:table-cell">
+                        {course.category || '—'}
+                      </td>
+                      <td className="px-4 sm:px-5 py-3.5 text-center">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                            course.isPublished
+                              ? 'bg-emerald-500/12 text-emerald-700 dark:text-emerald-400'
+                              : 'bg-[var(--surface-muted)] text-[var(--color-muted-foreground)]'
+                          }`}
+                        >
+                          {course.isPublished ? t('adminAnalytics.published') : t('adminAnalytics.draft')}
                         </span>
-                        <span className="text-xs sm:text-sm font-semibold text-[var(--color-foreground)] truncate">
-                          {course.title}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-3.5 sm:px-6 py-3 sm:py-3.5 text-xs text-[var(--color-muted-foreground)] hidden sm:table-cell">
-                      {course.category}
-                    </td>
-                    <td className="px-3.5 sm:px-6 py-3 sm:py-3.5 text-center">
-                      <span
-                        className={`inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold ${
-                          course.isPublished
-                            ? 'bg-[var(--success-light)] text-[var(--success)]'
-                            : 'bg-[var(--color-surface-muted-strong)] text-[var(--color-muted-foreground)]'
-                        }`}
-                      >
-                        {course.isPublished ? t('adminAnalytics.published') : t('adminAnalytics.draft')}
-                      </span>
-                    </td>
-                    <td className="px-3.5 sm:px-6 py-3 sm:py-3.5 text-right font-bold tabular-nums text-xs sm:text-sm text-[var(--color-foreground)]">
-                      {course.studentsCount}
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="px-4 sm:px-5 py-3.5 text-right">
+                        <div className="flex flex-col items-end gap-1.5">
+                          <span className="font-extrabold tabular-nums text-xs sm:text-sm text-[var(--color-foreground)]">
+                            {course.studentsCount.toLocaleString()}
+                          </span>
+                          <div className="w-24 sm:w-28 bg-[var(--surface-muted-strong)] h-1.5 rounded-full overflow-hidden">
+                            <div
+                              className="h-full rounded-full"
+                              style={{ width: `${pct}%`, background: 'var(--teacher-gradient)' }}
+                            />
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }

@@ -63,22 +63,22 @@ function SortableLessonRow({
           <button
             type="button"
             onClick={() => onOpenAiModal('add-quiz', { _id: chapterId, title: '' }, lesson)}
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-purple-500/10 hover:bg-purple-500/25 text-purple-300 border border-purple-500/30 transition-colors shadow-sm"
-            title="add quiz using AI"
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-[var(--teacher-soft)] hover:bg-[var(--teacher-primary)]/15 text-[var(--teacher-primary)] border border-[var(--teacher-border)] transition-colors cursor-pointer"
+            title="Add quiz using AI"
           >
-            <Sparkles className="w-3 h-3 text-purple-400" />
-            <span className="hidden sm:inline">add quiz using AI</span>
-            <span className="sm:hidden">+Quiz AI</span>
+            <Sparkles className="w-3 h-3 shrink-0" />
+            <span className="hidden sm:inline">AI Quiz</span>
+            <span className="sm:hidden">+Quiz</span>
           </button>
           <button
             type="button"
             onClick={() => onOpenAiModal('add-lesson', { _id: chapterId, title: '' }, lesson)}
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-purple-500/10 hover:bg-purple-500/25 text-purple-300 border border-purple-500/30 transition-colors shadow-sm"
-            title="add lesson using AI"
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-[var(--teacher-soft)] hover:bg-[var(--teacher-primary)]/15 text-[var(--teacher-primary)] border border-[var(--teacher-border)] transition-colors cursor-pointer"
+            title="Add lesson using AI"
           >
-            <Sparkles className="w-3 h-3 text-purple-400" />
-            <span className="hidden sm:inline">add lesson using AI</span>
-            <span className="sm:hidden">+Lesson AI</span>
+            <Sparkles className="w-3 h-3 shrink-0" />
+            <span className="hidden sm:inline">AI Lesson</span>
+            <span className="sm:hidden">+Lesson</span>
           </button>
         </div>
       )}
@@ -151,10 +151,10 @@ export function LessonList({
             <button
               type="button"
               onClick={() => onOpenAiModal('add-lesson', { _id: chapterId, title: '' })}
-              className="flex items-center justify-center gap-2 px-4 py-3 min-h-[44px] border-2 border-dashed border-purple-500/40 bg-purple-500/5 rounded-xl text-purple-300 hover:text-purple-200 hover:border-purple-500 hover:bg-purple-500/15 transition-all font-semibold text-sm"
+              className="flex items-center justify-center gap-2 px-4 py-3 min-h-[44px] border-2 border-dashed border-[var(--teacher-border)] bg-[var(--teacher-soft)]/50 rounded-xl text-[var(--teacher-primary)] hover:border-[var(--teacher-primary)] hover:bg-[var(--teacher-soft)] transition-all font-semibold text-sm cursor-pointer"
             >
-              <Sparkles className="w-4 h-4 text-purple-400" />
-              add lesson using AI
+              <Sparkles className="w-4 h-4 shrink-0" />
+              <span>AI Lesson</span>
             </button>
           )}
         </div>

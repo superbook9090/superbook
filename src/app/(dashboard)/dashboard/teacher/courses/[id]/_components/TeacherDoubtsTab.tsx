@@ -1,9 +1,12 @@
+'use client';
+
 import React, { useState } from 'react';
+import { MessageCircle, CheckCircle2, Clock, Send } from 'lucide-react';
 import { useCourseDoubts, useReplyCourseDoubt } from '@/lib/react-query/hooks';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useTranslation } from '@/hooks/useTranslation';
 import Button from '@/components/ui/Button';
-import { MessageCircle, CheckCircle2, Clock, Send } from 'lucide-react';
+import { EmptyState } from '@/components/layout';
 import { cn } from '@/lib/utils';
 
 interface TeacherDoubtsTabProps {
@@ -31,34 +34,26 @@ export function TeacherDoubtsTab({ courseId }: TeacherDoubtsTabProps) {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center p-8">
-        <div className="w-8 h-8 border-4 border-[var(--primary)] border-t-transparent rounded-full animate-spin"></div>
+      <div className="flex justify-center py-12">
+        <div className="w-8 h-8 border-4 border-[var(--teacher-primary)] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-4">
+    <div className="max-w-4xl mx-auto space-y-3.5">
       {doubts.length === 0 ? (
-        <div className="text-center py-12 px-4 border border-[var(--border)] border-dashed rounded-2xl bg-[var(--color-surface-muted)]/30">
-          <div className="w-16 h-16 bg-[var(--primary-soft)] text-[var(--primary)] rounded-full flex items-center justify-center mx-auto mb-4">
-            <MessageCircle className="w-8 h-8" />
-          </div>
-          <p className="text-[var(--color-muted-foreground)] font-medium">
-            {t('courseDoubts.noDoubtsTeacher')}
-          </p>
-        </div>
+        <EmptyState icon={MessageCircle} title={t('courseDoubts.noDoubtsTeacher')} />
       ) : (
         doubts.map((doubt) => (
-          <div key={doubt._id} className="bg-[var(--card-solid)] antigravity-glass border border-[var(--border)] rounded-3xl p-5 sm:p-6 shadow-sm hover:shadow-md hover:border-[var(--teacher-primary)]/40 transition-all duration-300 flex flex-col gap-4">
-            {/* Header */}
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[var(--student-soft)] text-[var(--student-primary)] font-bold flex items-center justify-center flex-shrink-0">
+          <article key={doubt._id} className="teacher-card p-4 sm:p-5 flex flex-col gap-3.5">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-[var(--teacher-soft)] text-[var(--teacher-primary)] font-bold text-xs flex items-center justify-center shrink-0">
                   {doubt.studentId.name?.[0]?.toUpperCase() || 'S'}
                 </div>
-                <div>
-                  <h4 className="font-semibold text-sm text-[var(--color-foreground)]">
+                <div className="min-w-0">
+                  <h4 className="font-semibold text-sm text-[var(--color-foreground)] truncate">
                     {doubt.studentId.name}
                   </h4>
                   <span className="text-xs text-[var(--color-muted-foreground)]">
@@ -66,59 +61,60 @@ export function TeacherDoubtsTab({ courseId }: TeacherDoubtsTabProps) {
                   </span>
                 </div>
               </div>
-              <div className={cn(
-                "px-2.5 py-1 text-[10px] font-bold rounded-full uppercase tracking-wider flex items-center gap-1.5",
-                doubt.status === 'answered' 
-                  ? "bg-[var(--success-light)] text-[var(--success)]"
-                  : "bg-[var(--warning-light)] text-[var(--warning)]"
-              )}>
+              <span
+                className={cn(
+                  'px-2.5 py-1 text-[10px] font-bold rounded-full uppercase tracking-wider inline-flex items-center gap-1 shrink-0',
+                  doubt.status === 'answered'
+                    ? 'bg-[var(--success-light)] text-[var(--success)]'
+                    : 'bg-[var(--warning-light)] text-amber-800 dark:text-amber-300'
+                )}
+              >
                 {doubt.status === 'answered' ? <CheckCircle2 className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
                 {doubt.status === 'answered' ? t('courseDoubts.answered') : t('courseDoubts.pending')}
-              </div>
+              </span>
             </div>
 
-            {/* Question */}
-            <div className="pl-[3.25rem]">
-              <p className="text-sm text-[var(--color-foreground)] leading-relaxed font-medium">
-                {doubt.question}
-              </p>
-            </div>
+            <p className="text-sm text-[var(--color-foreground)] leading-relaxed font-medium sm:pl-12">
+              {doubt.question}
+            </p>
 
-            {/* Answer / Reply Box */}
-            <div className="pl-[3.25rem]">
+            <div className="sm:pl-12">
               {doubt.status === 'answered' && doubt.answer ? (
-                <div className="bg-[var(--primary-soft)] border border-[var(--primary)]/20 rounded-xl p-4 relative before:absolute before:left-[-6px] before:top-6 before:w-3 before:h-3 before:bg-[var(--primary-soft)] before:border-l before:border-b before:border-[var(--primary)]/20 before:rotate-45 mt-2">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-6 h-6 rounded-full bg-white text-[var(--primary)] flex items-center justify-center font-bold text-[10px]">
+                <div className="bg-[var(--teacher-soft)]/70 border border-[var(--teacher-border)] rounded-xl p-3.5 space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg gradient-bg text-white flex items-center justify-center font-bold text-[10px] shrink-0">
                       {doubt.teacherId?.name?.[0]?.toUpperCase() || 'T'}
                     </div>
                     <span className="font-semibold text-xs text-[var(--color-foreground)]">
-                      {doubt.teacherId?._id === session?.user?.id ? t('courseDoubts.you') : doubt.teacherId?.name || t('courseDoubts.teacher')}
+                      {doubt.teacherId?._id === session?.user?.id
+                        ? t('courseDoubts.you')
+                        : doubt.teacherId?.name || t('courseDoubts.teacher')}
                     </span>
-                    <span className="text-[10px] text-[var(--color-muted-foreground)] ml-auto">
+                    <span className="text-[11px] text-[var(--color-muted-foreground)] ml-auto">
                       {new Date(doubt.updatedAt).toLocaleDateString()}
                     </span>
                   </div>
-                  <p className="text-sm text-[var(--color-foreground)]/90 leading-relaxed pl-8">
+                  <p className="text-sm text-[var(--color-foreground)] leading-relaxed pl-8">
                     {doubt.answer}
                   </p>
                 </div>
               ) : activeReplyId === doubt._id ? (
-                <div className="mt-4 relative border border-[var(--border)] rounded-xl overflow-hidden shadow-inner">
+                <div className="space-y-2.5">
                   <textarea
                     value={replyText}
                     onChange={(e) => setReplyText(e.target.value)}
                     placeholder={t('courseDoubts.replyPlaceholder')}
-                    className="w-full min-h-[100px] p-4 pb-14 bg-[var(--color-surface-muted)] focus:bg-[var(--card-solid)] focus:ring-0 focus:outline-none resize-y text-sm text-[var(--color-foreground)] transition-colors"
+                    className="w-full min-h-[100px] p-3.5 rounded-xl bg-[var(--surface-muted)] focus:bg-[var(--card-solid)] border border-[var(--border)] focus:border-[var(--teacher-primary)] focus:ring-2 focus:ring-[var(--teacher-primary)]/20 focus:outline-none resize-y text-sm text-[var(--color-foreground)] transition-all"
                     disabled={replyDoubtMutation.isPending}
                   />
-                  <div className="absolute bottom-2 right-2 flex gap-2">
+                  <div className="flex justify-end gap-2">
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
                       onClick={() => setActiveReplyId(null)}
                       disabled={replyDoubtMutation.isPending}
+                      className="min-h-[40px] rounded-xl"
                     >
                       {t('common.cancel')}
                     </Button>
@@ -128,10 +124,13 @@ export function TeacherDoubtsTab({ courseId }: TeacherDoubtsTabProps) {
                       size="sm"
                       onClick={() => handleReplySubmit(doubt._id)}
                       disabled={!replyText.trim() || replyDoubtMutation.isPending}
+                      className="min-h-[40px] rounded-xl"
                     >
-                      {replyDoubtMutation.isPending ? t('courseDoubts.submitting') : (
+                      {replyDoubtMutation.isPending ? (
+                        t('courseDoubts.submitting')
+                      ) : (
                         <>
-                          <Send className="w-4 h-4 mr-2" />
+                          <Send className="w-3.5 h-3.5 mr-1.5" />
                           {t('courseDoubts.submitReply')}
                         </>
                       )}
@@ -140,20 +139,21 @@ export function TeacherDoubtsTab({ courseId }: TeacherDoubtsTabProps) {
                 </div>
               ) : (
                 <Button
+                  type="button"
                   onClick={() => {
                     setActiveReplyId(doubt._id);
                     setReplyText('');
                   }}
                   variant="outline"
                   size="sm"
-                  className="mt-2"
+                  className="min-h-[40px] rounded-xl"
                 >
-                  <MessageCircle className="w-4 h-4 mr-2" />
+                  <MessageCircle className="w-4 h-4 mr-1.5" />
                   {t('courseDoubts.reply')}
                 </Button>
               )}
             </div>
-          </div>
+          </article>
         ))
       )}
     </div>

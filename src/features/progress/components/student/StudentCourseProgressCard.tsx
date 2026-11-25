@@ -23,7 +23,7 @@ export function StudentCourseProgressCard({
   const isCompleted = item.enrollment.status === 'completed' || item.enrollment.progress >= 100;
 
   return (
-    <div className="antigravity-glass antigravity-card rounded-2xl border border-[var(--border)] overflow-hidden flex flex-col justify-between hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+    <div className="student-card overflow-hidden flex flex-col justify-between">
       <div className="p-4 sm:p-5">
         {/* Top Header: Thumbnail + Title + Status */}
         <div className="flex items-start gap-3.5">

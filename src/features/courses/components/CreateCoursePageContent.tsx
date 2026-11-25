@@ -1,27 +1,29 @@
 'use client';
 
+import { BookOpen } from 'lucide-react';
+import { ROUTES } from '@/constants/routes';
 import { LazyCreateCourseForm } from '@/lib/lazy';
 import { useTranslation } from '@/hooks/useTranslation';
+import { PageWrapper } from '@/components/layout';
+import { TeacherPageBanner } from '@/features/teacher/components/TeacherPageBanner';
 
 export default function CreateCoursePageContent() {
   const { t } = useTranslation();
 
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">
-          {t('createCoursePage.title')}
-        </h1>
-        <p className="mt-2 text-sm sm:text-base text-[var(--color-muted-foreground)]">
-          {t('createCoursePage.description')}
-        </p>
-      </div>
+    <PageWrapper>
+      <TeacherPageBanner
+        icon={BookOpen}
+        eyebrow={t('common.myCourses')}
+        title={t('createCoursePage.title')}
+        description={t('createCoursePage.description')}
+        backHref={ROUTES.teacher.courses}
+        backLabel={t('courses.backToCourses')}
+      />
 
-      <div className="bg-[var(--card-solid)] shadow rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <LazyCreateCourseForm />
-        </div>
+      <div className="teacher-panel p-4 sm:p-6 md:p-7">
+        <LazyCreateCourseForm />
       </div>
-    </div>
+    </PageWrapper>
   );
 }

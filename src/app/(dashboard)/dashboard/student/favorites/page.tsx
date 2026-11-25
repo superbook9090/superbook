@@ -1,12 +1,13 @@
 'use client';
-import { ROUTES } from '@/constants/routes';
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { ROUTES } from '@/constants/routes';
 import { useSessionStore } from '@/store/useSessionStore';
-import FavoritesList from './FavoritesList';
 import { useFeature } from '@/contexts/AppSettingsContext';
 import { useFavorites } from '@/lib/react-query/hooks';
+import { PageSkeleton } from '@/components/ui/Skeleton';
+import FavoritesList from './FavoritesList';
 
 export default function FavoritesPage() {
   const { status } = useSessionStore();
@@ -21,18 +22,13 @@ export default function FavoritesPage() {
       router.push(ROUTES.login);
       return;
     }
-
     if (status === 'authenticated' && !featureEnabled) {
       router.push(ROUTES.student.root);
     }
   }, [status, router, featureEnabled]);
 
   if (status === 'loading' || isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--student-primary)]"></div>
-      </div>
-    );
+    return <PageSkeleton />;
   }
 
   return <FavoritesList initialFavorites={favorites} totalCount={totalFavorites} />;

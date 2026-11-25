@@ -1,74 +1,76 @@
 'use client';
 
+import { Edit2, Trophy, HelpCircle } from 'lucide-react';
+import { ROUTES } from '@/constants/routes';
 import CreateQuizForm from '@/features/quizzes/components/CreateQuizForm';
 import { LazyQuizLeaderboard } from '@/lib/lazy';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useUrlTab } from '@/hooks/useUrlTab';
-import { Edit2, Trophy } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { useSessionStore } from '@/store/useSessionStore';
+import { isAdmin } from '@/lib/roles';
+import { PageWrapper } from '@/components/layout';
+import { TeacherPageBanner } from '@/features/teacher/components/TeacherPageBanner';
+import { TeacherTabs } from '@/features/teacher/components/TeacherTabs';
 
 export default function CreateQuizPageContent({ quizId }: { quizId?: string }) {
   const { t } = useTranslation();
+  const session = useSessionStore((s) => s.session);
+  const isAdminUser = isAdmin(session?.user?.role);
   const isEdit = Boolean(quizId);
   const [activeTab, setActiveTab] = useUrlTab<'edit' | 'leaderboard'>(
     ['edit', 'leaderboard'],
     'edit'
   );
 
-  return (
-    <div>
-      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--color-foreground)]">
-            {isEdit
-              ? activeTab === 'leaderboard'
-                ? t('quiz.leaderboard.title')
-                : t('createQuizPage.editTitle')
-              : t('createQuizPage.title')}
-          </h1>
-          <p className="mt-2 text-sm sm:text-base text-[var(--color-muted-foreground)]">
-            {isEdit
-              ? activeTab === 'leaderboard'
-                ? t('quiz.firstAttemptResults')
-                : t('createQuizPage.editDescription')
-              : t('createQuizPage.description')}
-          </p>
-        </div>
+  const backHref = isAdminUser ? ROUTES.admin.quizzes : ROUTES.teacher.quizzes;
 
-        {isEdit && (
-          <div className="flex gap-1 bg-[var(--color-surface-muted)] p-1 rounded-2xl w-fit border border-[var(--color-border)] shrink-0 self-start sm:self-auto">
-            <button
-              type="button"
-              onClick={() => setActiveTab('edit')}
-              className={cn(
-                'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer',
-                activeTab === 'edit'
-                  ? 'bg-[var(--card-solid)] text-[var(--color-foreground)] shadow-xs'
-                  : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]'
-              )}
-            >
-              <Edit2 className="w-4 h-4" />
-              <span>{t('createQuizPage.editTitle')}</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('leaderboard')}
-              className={cn(
-                'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer',
-                activeTab === 'leaderboard'
-                  ? 'bg-[var(--card-solid)] text-[var(--student-primary)] shadow-xs'
-                  : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]'
-              )}
-            >
-              <Trophy className="w-4 h-4 text-[var(--warning)]" />
-              <span>{t('quiz.leaderboard.title')}</span>
-            </button>
-          </div>
-        )}
-      </div>
+  return (
+    <PageWrapper>
+      <TeacherPageBanner
+        icon={HelpCircle}
+        eyebrow={t('common.quizzes')}
+        title={
+          isEdit
+            ? activeTab === 'leaderboard'
+              ? t('quiz.leaderboard.title')
+              : t('createQuizPage.editTitle')
+            : t('createQuizPage.title')
+        }
+        description={
+          isEdit
+            ? activeTab === 'leaderboard'
+              ? t('quiz.firstAttemptResults')
+              : t('createQuizPage.editDescription')
+            : t('createQuizPage.description')
+        }
+        backHref={backHref}
+        backLabel={t('common.back')}
+      />
+
+      {isEdit && (
+        <div className="flex items-center justify-between">
+          <TeacherTabs
+            activeTab={activeTab}
+            onChange={setActiveTab}
+            tabs={[
+              {
+                id: 'edit',
+                label: t('createQuizPage.editTitle'),
+                icon: <Edit2 className="w-4 h-4" />,
+              },
+              {
+                id: 'leaderboard',
+                label: t('quiz.leaderboard.title'),
+                icon: <Trophy className="w-4 h-4" />,
+                tone: 'warning',
+              },
+            ]}
+          />
+        </div>
+      )}
 
       {isEdit && activeTab === 'leaderboard' ? (
-        <div className="bg-[var(--card-solid)] shadow-xl rounded-[2rem] p-5 sm:p-7 border border-[var(--border)]">
+        <div className="teacher-panel p-4 sm:p-6 md:p-7">
           <LazyQuizLeaderboard quizId={quizId!} />
         </div>
       ) : (
@@ -77,6 +79,6 @@ export default function CreateQuizPageContent({ quizId }: { quizId?: string }) {
           onViewLeaderboard={isEdit ? () => setActiveTab('leaderboard') : undefined}
         />
       )}
-    </div>
+    </PageWrapper>
   );
 }

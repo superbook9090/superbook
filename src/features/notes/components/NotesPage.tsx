@@ -99,7 +99,7 @@ export function NotesPage() {
   };
 
   return (
-    <PageWrapper className="space-y-6">
+    <PageWrapper>
       {/* Header */}
       <NotesHeader
         isLimitReached={isLimitReached}

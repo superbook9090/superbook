@@ -34,39 +34,40 @@ export function AdminQuizTableView({
   const { t } = useTranslation();
   const router = useRouter();
 
-  const getCourseTitle = (courseId?: string) => {
-    if (!courseId) return '—';
-    const found = courses.find((c) => c._id === courseId);
+  const getCourseTitle = (quiz: Quiz) => {
+    const cid = quiz.course?._id ?? quiz.courseId;
+    if (quiz.course?.title) return quiz.course.title;
+    if (!cid) return '—';
+    const found = courses.find((c) => c._id === cid);
     return found ? found.title : '—';
   };
 
   return (
-    <div className="antigravity-glass border border-[var(--border)] rounded-3xl shadow-lg overflow-hidden">
+    <div className="teacher-panel overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs sm:text-sm border-collapse">
           <thead>
-            <tr className="border-b border-[var(--border)] bg-[var(--surface-muted)]/70 text-[var(--color-muted-foreground)] font-bold uppercase text-[11px] tracking-wider">
-              <th className="py-4 px-5">{t('teacherQuizzes.tableQuiz')}</th>
-              <th className="py-4 px-5">{t('teacherQuizzes.tableCourse')}</th>
-              <th className="py-4 px-5 text-center">{t('common.questions')}</th>
-              <th className="py-4 px-5">{t('admin.status')}</th>
-              <th className="py-4 px-5 text-center">{t('teacherQuizzes.passing')}</th>
-              <th className="py-4 px-5">{t('admin.created')}</th>
-              <th className="py-4 px-5 text-right">{t('admin.actions')}</th>
+            <tr className="border-b border-[var(--border)] bg-[var(--surface-muted)]/75 text-[var(--color-muted-foreground)] font-bold uppercase text-[11px] tracking-wider">
+              <th className="py-3.5 px-4">{t('teacherQuizzes.tableQuiz')}</th>
+              <th className="py-3.5 px-4">{t('teacherQuizzes.tableCourse')}</th>
+              <th className="py-3.5 px-4 text-center">{t('common.questions')}</th>
+              <th className="py-3.5 px-4">{t('admin.status')}</th>
+              <th className="py-3.5 px-4 text-center">{t('teacherQuizzes.passing')}</th>
+              <th className="py-3.5 px-4">{t('admin.created')}</th>
+              <th className="py-3.5 px-4 text-right">{t('admin.actions')}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[var(--border)]/60">
+          <tbody className="divide-y divide-[var(--border)]/70">
             {quizzes.map((quiz) => (
               <tr
                 key={quiz._id}
-                className="hover:bg-[var(--surface-muted)]/60 transition-colors"
+                className="hover:bg-[var(--surface-muted)]/45 transition-colors"
               >
-                {/* Title */}
-                <td className="py-3.5 px-5">
+                <td className="py-3.5 px-4">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-[var(--student-soft)] text-[var(--student-primary)] shrink-0">
+                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-[8px] bg-[var(--teacher-soft)] text-[var(--teacher-primary)] shrink-0">
                       <HelpCircle className="w-4 h-4" />
-                    </div>
+                    </span>
                     <div className="min-w-0">
                       <p className="font-bold text-[var(--color-foreground)] line-clamp-1 max-w-xs">
                         {quiz.title}
@@ -80,50 +81,44 @@ export function AdminQuizTableView({
                   </div>
                 </td>
 
-                {/* Course */}
-                <td className="py-3.5 px-5">
+                <td className="py-3.5 px-4">
                   <div className="flex items-center gap-1.5 font-medium text-[var(--color-foreground)] max-w-xs truncate">
-                    <BookOpen className="w-3.5 h-3.5 text-[var(--primary)] shrink-0" />
-                    <span className="truncate">{getCourseTitle(quiz.courseId)}</span>
+                    <BookOpen className="w-3.5 h-3.5 text-[var(--teacher-primary)] shrink-0" />
+                    <span className="truncate">{getCourseTitle(quiz)}</span>
                   </div>
                 </td>
 
-                {/* Question count */}
-                <td className="py-3.5 px-5 text-center font-bold tabular-nums text-[var(--color-foreground)]">
+                <td className="py-3.5 px-4 text-center font-bold tabular-nums text-[var(--color-foreground)]">
                   {quiz.questionCount ?? quiz.questions?.length ?? 0}
                 </td>
 
-                {/* Status */}
-                <td className="py-3.5 px-5">
+                <td className="py-3.5 px-4">
                   <Badge variant={quiz.isPublished ? 'primary' : 'default'} size="sm">
                     {quiz.isPublished ? t('common.published') : t('common.draft')}
                   </Badge>
                 </td>
 
-                {/* Passing Score */}
-                <td className="py-3.5 px-5 text-center font-semibold tabular-nums text-[var(--color-foreground)]">
+                <td className="py-3.5 px-4 text-center font-semibold tabular-nums text-[var(--color-foreground)]">
                   {quiz.passingScore !== undefined ? `${quiz.passingScore}%` : '—'}
                 </td>
 
-                {/* Created */}
-                <td className="py-3.5 px-5 text-xs text-[var(--color-muted-foreground)]">
+                <td className="py-3.5 px-4 text-xs text-[var(--color-muted-foreground)]">
                   {quiz.createdAt ? formatDate(quiz.createdAt) : '—'}
                 </td>
 
-                {/* Actions */}
-                <td className="py-3.5 px-5 text-right">
-                  <div className="flex items-center justify-end gap-1.5">
+                <td className="py-3.5 px-4 text-right">
+                  <div className="inline-flex items-center justify-end gap-1">
                     <Tooltip label={quiz.isPublished ? 'Unpublish' : 'Publish'}>
                       <button
                         type="button"
                         onClick={() => onTogglePublish(quiz._id, quiz.isPublished)}
-                        className={`p-2 rounded-xl transition-colors cursor-pointer ${
+                        className={`inline-flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--border)] bg-[var(--card-solid)] transition-colors cursor-pointer ${
                           quiz.isPublished
                             ? 'text-[var(--success)] hover:bg-[var(--success-light)]'
                             : 'text-[var(--color-muted-foreground)] hover:bg-[var(--surface-muted)]'
                         }`}
                       >
-                        {quiz.isPublished ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                        {quiz.isPublished ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                       </button>
                     </Tooltip>
 
@@ -131,9 +126,9 @@ export function AdminQuizTableView({
                       <button
                         type="button"
                         onClick={() => router.push(`${ROUTES.admin.quizEdit(quiz._id)}?tab=leaderboard`)}
-                        className="p-2 rounded-xl text-[var(--color-muted-foreground)] hover:text-[var(--warning)] hover:bg-[var(--warning-light)] transition-colors cursor-pointer"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--border)] bg-[var(--card-solid)] text-[var(--color-muted-foreground)] hover:text-[var(--warning)] hover:bg-[var(--warning-light)] transition-colors cursor-pointer"
                       >
-                        <Trophy className="w-4 h-4" />
+                        <Trophy className="w-3.5 h-3.5" />
                       </button>
                     </Tooltip>
 
@@ -141,9 +136,9 @@ export function AdminQuizTableView({
                       <button
                         type="button"
                         onClick={() => router.push(ROUTES.admin.quizEdit(quiz._id))}
-                        className="p-2 rounded-xl text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--surface-muted)] transition-colors cursor-pointer"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--border)] bg-[var(--card-solid)] text-[var(--color-muted-foreground)] hover:text-[var(--teacher-primary)] hover:bg-[var(--teacher-soft)] transition-colors cursor-pointer"
                       >
-                        <Edit2 className="w-4 h-4" />
+                        <Edit2 className="w-3.5 h-3.5" />
                       </button>
                     </Tooltip>
 
@@ -151,9 +146,9 @@ export function AdminQuizTableView({
                       <button
                         type="button"
                         onClick={() => onDelete(quiz._id)}
-                        className="p-2 rounded-xl text-[var(--color-muted-foreground)] hover:text-[var(--error)] hover:bg-[var(--error-light)] transition-colors cursor-pointer"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--border)] bg-[var(--card-solid)] text-[var(--color-muted-foreground)] hover:text-[var(--error)] hover:bg-[var(--error-light)] transition-colors cursor-pointer"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </Tooltip>
                   </div>

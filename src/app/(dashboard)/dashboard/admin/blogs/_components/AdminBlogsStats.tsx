@@ -3,7 +3,6 @@
 import React from 'react';
 import { Newspaper, CheckCircle, Clock } from 'lucide-react';
 import StatCard from '@/components/ui/StatCard';
-import { ResponsiveGrid } from '@/components/layout';
 import { useTranslation } from '@/hooks/useTranslation';
 
 interface AdminBlogsStatsProps {
@@ -18,7 +17,7 @@ export function AdminBlogsStats({ stats }: AdminBlogsStatsProps) {
   const { t } = useTranslation();
 
   return (
-    <ResponsiveGrid variant="cards">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
       <StatCard
         icon={Newspaper}
         value={stats.total}
@@ -42,6 +41,6 @@ export function AdminBlogsStats({ stats }: AdminBlogsStatsProps) {
         delay={0.15}
         description="Unpublished works"
       />
-    </ResponsiveGrid>
+    </div>
   );
 }

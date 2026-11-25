@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
 import {
   Mail,
   Phone,
@@ -30,8 +29,8 @@ type Props = {
 
 const roleBadgeConfig: Record<string, { bg: string; text: string }> = {
   superadmin: {
-    bg: 'bg-purple-500/15',
-    text: 'text-purple-600 dark:text-purple-400',
+    bg: 'bg-amber-500/15',
+    text: 'text-amber-700 dark:text-amber-400',
   },
   admin: {
     bg: 'bg-indigo-500/15',
@@ -61,29 +60,33 @@ export function UsersMobileList({ users, organizations, handleOpenUserDetail }: 
       : 'U';
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.15 }}
-      className="sm:hidden flex flex-col gap-3"
-    >
-      {users.map((user, index) => {
+    <div className="sm:hidden flex flex-col gap-3">
+      {users.map((user) => {
         const roleBadge = roleBadgeConfig[user.role] || roleBadgeConfig.student;
         const orgName = organizations.find((org) => org._id === user.organizationId)?.name;
 
+        const hasCustomLimits =
+          user.role === 'teacher' &&
+          Boolean(
+            (user.limits?.courses !== undefined && user.limits?.courses !== null) ||
+              (user.limits?.quizzes !== undefined && user.limits?.quizzes !== null) ||
+              (user.limits?.blogs !== undefined && user.limits?.blogs !== null) ||
+              (user.limits?.aiQuizGenerations !== undefined && user.limits?.aiQuizGenerations !== null) ||
+              (user.limits?.aiQuizMaxQuestions !== undefined && user.limits?.aiQuizMaxQuestions !== null)
+          );
+
         return (
-          <motion.div
+          <div
             key={user._id}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 + index * 0.04 }}
-            className="antigravity-glass rounded-2xl p-4 sm:p-5 border border-[var(--border)] shadow-md hover:border-[var(--primary)]/40 active:scale-[0.99] transition-all duration-200 cursor-pointer flex flex-col gap-3"
             onClick={() => handleOpenUserDetail(user)}
+            className="teacher-card p-4 active:scale-[0.99] cursor-pointer flex flex-col gap-3"
           >
-            {/* Header: Avatar, Name, Email, Role */}
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[var(--primary)] to-[var(--student-accent)] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">
+                <div
+                  className="w-10 h-10 rounded-[10px] text-white flex items-center justify-center font-bold text-sm shrink-0"
+                  style={{ background: 'var(--teacher-gradient)' }}
+                >
                   {getInitials(user.name)}
                 </div>
                 <div className="min-w-0">
@@ -100,7 +103,7 @@ export function UsersMobileList({ users, organizations, handleOpenUserDetail }: 
                     <span className="truncate">{user.email}</span>
                   </p>
                   {user.phone && (
-                    <p className="text-[11px] text-[var(--color-muted)] flex items-center gap-1 truncate mt-0.5">
+                    <p className="text-[11px] text-[var(--color-muted-foreground)] flex items-center gap-1 truncate mt-0.5">
                       <Phone className="w-3 h-3 shrink-0 text-[var(--success)]" />
                       <span className="truncate">{user.phone}</span>
                     </p>
@@ -109,27 +112,20 @@ export function UsersMobileList({ users, organizations, handleOpenUserDetail }: 
               </div>
 
               <span
-                className={`inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold rounded-lg capitalize shrink-0 ${roleBadge.bg} ${roleBadge.text}`}
+                className={`inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold rounded-[8px] capitalize shrink-0 ${roleBadge.bg} ${roleBadge.text}`}
               >
                 <Shield className="w-3 h-3" />
                 {user.role}
               </span>
             </div>
 
-            {/* Info Grid */}
-            <div className="flex flex-col gap-2 pt-2.5 border-t border-[var(--border)] text-xs">
-              {/* Platform & Last Opened */}
+            <div className="flex flex-col gap-2 pt-2.5 border-t border-[var(--border)]/70 text-xs">
               <div className="flex items-center justify-between">
                 <span className="text-[var(--color-muted-foreground)]">{t('adminAnalytics.platform')}</span>
-                {user.lastPlatform === 'android' ? (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--primary-soft)] text-[var(--primary)] text-[11px] font-semibold">
+                {user.lastPlatform === 'android' || user.lastPlatform === 'ios' ? (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--teacher-soft)] text-[var(--teacher-primary)] text-[11px] font-semibold">
                     <Smartphone className="w-3 h-3" />
-                    Android App
-                  </span>
-                ) : user.lastPlatform === 'ios' ? (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--primary-soft)] text-[var(--primary)] text-[11px] font-semibold">
-                    <Smartphone className="w-3 h-3" />
-                    iOS App
+                    {user.lastPlatform === 'android' ? 'Android App' : 'iOS App'}
                   </span>
                 ) : user.lastPlatform === 'web' ? (
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--info-light)] text-[var(--info)] text-[11px] font-semibold">
@@ -137,107 +133,92 @@ export function UsersMobileList({ users, organizations, handleOpenUserDetail }: 
                     Website
                   </span>
                 ) : (
-                  <span className="text-[var(--color-muted)] italic">N/A</span>
+                  <span className="text-[var(--color-muted-foreground)] italic">N/A</span>
                 )}
               </div>
 
-              {/* Last Opened */}
               <div className="flex items-center justify-between">
                 <span className="text-[var(--color-muted-foreground)]">{t('adminUsers.lastOpened')}</span>
                 {user.lastActiveAt ? (
-                  <span className="font-semibold text-[var(--color-foreground)] flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-[var(--primary)]" />
+                  <span className="font-semibold text-[var(--color-foreground)] inline-flex items-center gap-1">
+                    <Clock className="w-3 h-3 text-[var(--teacher-primary)]" />
                     {getRelativeTime(user.lastActiveAt)}
                   </span>
                 ) : (
-                  <span className="text-[var(--color-muted)] italic">{t('common.never')}</span>
+                  <span className="text-[var(--color-muted-foreground)] italic">{t('common.never')}</span>
                 )}
               </div>
 
-              {/* Organization */}
               <div className="flex items-center justify-between">
                 <span className="text-[var(--color-muted-foreground)]">{t('adminUsers.organization')}</span>
                 {orgName ? (
-                  <span className="font-semibold text-[var(--color-foreground)] flex items-center gap-1">
+                  <span className="font-semibold text-[var(--color-foreground)] inline-flex items-center gap-1">
                     <Building2 className="w-3 h-3 text-[var(--info)]" />
                     {orgName}
                   </span>
                 ) : (
-                  <span className="text-[var(--color-muted)] italic">{t('common.none')}</span>
+                  <span className="text-[var(--color-muted-foreground)] italic">{t('common.none')}</span>
                 )}
               </div>
 
-              {/* Teacher limits if teacher */}
-              {user.role === 'teacher' && (() => {
-                const hasCustomLimits = Boolean(
-                  (user.limits?.courses !== undefined && user.limits?.courses !== null) ||
-                  (user.limits?.quizzes !== undefined && user.limits?.quizzes !== null) ||
-                  (user.limits?.blogs !== undefined && user.limits?.blogs !== null) ||
-                  (user.limits?.aiQuizGenerations !== undefined && user.limits?.aiQuizGenerations !== null) ||
-                  (user.limits?.aiQuizMaxQuestions !== undefined && user.limits?.aiQuizMaxQuestions !== null)
-                );
-
-                return (
-                  <div className="flex flex-col gap-1.5 py-1">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[var(--color-muted-foreground)]">
-                        {t('adminUsers.capabilitiesAndLimits')}
+              {user.role === 'teacher' && (
+                <div className="flex flex-col gap-1.5 py-0.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[var(--color-muted-foreground)]">
+                      {t('adminUsers.capabilitiesAndLimits')}
+                    </span>
+                    {hasCustomLimits ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-amber-500/12 text-amber-700 dark:text-amber-400 border border-amber-500/20">
+                        <Sliders className="w-3 h-3" />
+                        <span>{t('adminUsers.customLimits')}</span>
                       </span>
-                      {hasCustomLimits ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                          <Sliders className="w-3 h-3" />
-                          <span>{t('adminUsers.customLimits')}</span>
-                        </span>
-                      ) : (
-                        <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-[var(--color-surface-muted-strong)] text-[var(--color-muted-foreground)]">
-                          {t('adminUsers.standardLimits')}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center justify-end gap-1.5 pt-0.5">
-                      {user.canUploadVideos && (
-                        <span className="p-1 rounded bg-violet-500/10 text-violet-600 dark:text-violet-400" title="Video Uploads">
-                          <Video className="w-3 h-3" />
-                        </span>
-                      )}
-                      {user.canCreatePublicCourses && (
-                        <span className="p-1 rounded bg-sky-500/10 text-sky-600 dark:text-sky-400" title="Public Courses">
-                          <Globe className="w-3 h-3" />
-                        </span>
-                      )}
-                      {user.canCreateContests && (
-                        <span className="p-1 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400" title="Contest Creator">
-                          <Trophy className="w-3 h-3" />
-                        </span>
-                      )}
-                      {user.canGenerateAiQuizzes && (
-                        <span className="p-1 rounded bg-[var(--primary-soft)] text-[var(--color-primary)]" title="AI Quiz Generator">
-                          <Sparkles className="w-3 h-3" />
-                        </span>
-                      )}
-                    </div>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-[var(--surface-muted)] text-[var(--color-muted-foreground)]">
+                        {t('adminUsers.standardLimits')}
+                      </span>
+                    )}
                   </div>
-                );
-              })()}
+                  <div className="flex items-center justify-end gap-1.5">
+                    {user.canUploadVideos && (
+                      <span className="p-1 rounded bg-violet-500/10 text-violet-600 dark:text-violet-400" title="Video Uploads">
+                        <Video className="w-3 h-3" />
+                      </span>
+                    )}
+                    {user.canCreatePublicCourses && (
+                      <span className="p-1 rounded bg-sky-500/10 text-sky-600 dark:text-sky-400" title="Public Courses">
+                        <Globe className="w-3 h-3" />
+                      </span>
+                    )}
+                    {user.canCreateContests && (
+                      <span className="p-1 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400" title="Contest Creator">
+                        <Trophy className="w-3 h-3" />
+                      </span>
+                    )}
+                    {user.canGenerateAiQuizzes && (
+                      <span className="p-1 rounded bg-[var(--teacher-soft)] text-[var(--teacher-primary)]" title="AI Quiz Generator">
+                        <Sparkles className="w-3 h-3" />
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
 
-              {/* Joined */}
               <div className="flex items-center justify-between">
                 <span className="text-[var(--color-muted-foreground)]">{t('admin.joined')}</span>
-                <span className="text-[var(--color-muted)] flex items-center gap-1">
+                <span className="text-[var(--color-muted-foreground)] inline-flex items-center gap-1">
                   <Calendar className="w-3 h-3" />
                   {formatDate(user.createdAt)}
                 </span>
               </div>
             </div>
 
-            {/* Tap Action Bar (min 44px touch target) */}
-            <div className="pt-2 border-t border-[var(--border)] flex items-center justify-between text-xs font-bold text-[var(--primary)] min-h-[44px]">
+            <div className="pt-2 border-t border-[var(--border)]/70 flex items-center justify-between text-xs font-bold text-[var(--teacher-primary)] min-h-[40px]">
               <span>{t('adminUsers.manageUser')}</span>
               <ChevronRight className="w-4 h-4" />
             </div>
-          </motion.div>
+          </div>
         );
       })}
-    </motion.div>
+    </div>
   );
 }

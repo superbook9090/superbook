@@ -12,12 +12,15 @@ interface LanguageSwitcherProps {
   compact?: boolean;
   /** Show full language name on all screen sizes (desktop-style) */
   alwaysShowLabel?: boolean;
+  /** Ghost style for recessed topbar utility docks */
+  variant?: 'default' | 'ghost';
   className?: string;
 }
 
 export default function LanguageSwitcher({
   compact = false,
   alwaysShowLabel = false,
+  variant = 'default',
   className,
 }: LanguageSwitcherProps = {}) {
   const { lang, setLang, t } = useTranslation();
@@ -39,8 +42,13 @@ export default function LanguageSwitcher({
         aria-expanded={isOpen}
         aria-label={t('language.selectLanguage')}
         className={cn(
-          'inline-flex items-center gap-1.5 bg-[var(--card-solid)] border border-[var(--border)]/85 rounded-xl font-medium text-[var(--color-foreground)] hover:bg-[var(--surface-muted)] transition-all focus-ring shadow-xs shrink-0',
-          compact ? 'h-9 px-2.5 text-xs' : 'h-9 px-3 text-xs sm:text-sm',
+          'inline-flex items-center gap-1.5 font-medium text-[var(--color-foreground)] transition-all focus-ring shrink-0 cursor-pointer',
+          variant === 'ghost'
+            ? 'h-8 px-2.5 text-xs rounded-[8px] hover:bg-[var(--card-solid)]'
+            : cn(
+                'bg-[var(--card-solid)] border border-[var(--border)]/85 rounded-[10px] hover:bg-[var(--surface-muted)] shadow-xs',
+                compact ? 'h-9 px-2.5 text-xs' : 'h-9 px-3 text-xs sm:text-sm'
+              ),
           className
         )}
       >

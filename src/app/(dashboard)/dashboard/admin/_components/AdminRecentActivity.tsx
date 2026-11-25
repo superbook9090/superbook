@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import { useTranslation } from '@/hooks/useTranslation';
 import { ROUTES } from '@/constants/routes';
 import {
@@ -31,85 +30,80 @@ export default function AdminRecentActivity({ stats }: AdminRecentActivityProps)
   const maxStudents = Math.max(...topCourses.map((c) => c.studentsCount || 1), 1);
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.35, duration: 0.5, ease: 'easeOut' }}
+    <section
       aria-labelledby="platform-radar-heading"
-      className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6"
+      className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5"
     >
       {/* Top Courses Leaderboard */}
       {topCourses.length > 0 && (
-        <div className="relative overflow-hidden rounded-[2rem] border border-[var(--border)]/50 bg-[var(--card-solid)]/40 backdrop-blur-2xl p-6 flex flex-col justify-between shadow-xl group/card">
-          <div className="absolute -top-24 -left-24 w-48 h-48 bg-purple-500/10 rounded-full blur-[40px] pointer-events-none group-hover/card:bg-purple-500/20 transition-colors duration-700" />
-          
-          <div className="relative z-10">
-            <div className="flex items-center justify-between pb-4 mb-5 border-b border-[var(--border)]/50">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-2xl bg-purple-500/20 text-purple-500 border border-purple-500/30 shadow-sm">
-                  <Award className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 id="platform-radar-heading" className="font-extrabold text-lg text-[var(--color-foreground)] tracking-tight">
-                    {t('admin.topCurriculumLeaders')}
-                  </h3>
-                </div>
+        <div className="teacher-panel p-4 sm:p-6 flex flex-col justify-between gap-4">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between gap-2 pb-3.5 border-b border-[var(--border)]/70">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] bg-[var(--teacher-soft)] text-[var(--teacher-primary)] border border-[var(--teacher-border)] shrink-0">
+                  <Award className="w-4 h-4" />
+                </span>
+                <h3
+                  id="platform-radar-heading"
+                  className="font-extrabold font-[family-name:var(--font-display)] text-base sm:text-lg text-[var(--color-foreground)] truncate"
+                >
+                  {t('admin.topCurriculumLeaders')}
+                </h3>
               </div>
               <Link
                 href={ROUTES.admin.courses}
-                className="text-xs font-bold text-[var(--primary)] hover:text-purple-400 flex items-center gap-1.5 min-h-[36px] group/link transition-colors"
+                className="text-xs font-bold text-[var(--teacher-primary)] hover:underline inline-flex items-center gap-1 min-h-[36px] shrink-0"
               >
                 <span>{t('dashboard.viewAll')}</span>
-                <ArrowRight className="w-3.5 h-3.5 group-hover/link:translate-x-0.5 transition-transform" />
+                <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {topCourses.slice(0, 4).map((course, idx) => {
                 const percent = Math.round(((course.studentsCount || 0) / maxStudents) * 100);
-                const rankColor =
+                const rankTone =
                   idx === 0
-                    ? 'bg-amber-500/20 text-amber-500 border-amber-500/40 shadow-[0_0_15px_rgba(245,158,11,0.2)]'
+                    ? 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/35'
                     : idx === 1
-                    ? 'bg-slate-400/20 text-slate-300 border-slate-400/40'
+                    ? 'bg-[var(--surface-muted-strong)] text-[var(--color-foreground)] border-[var(--border)]'
                     : idx === 2
-                    ? 'bg-amber-700/20 text-amber-600 border-amber-700/40'
+                    ? 'bg-orange-500/12 text-orange-700 dark:text-orange-400 border-orange-500/30'
                     : 'bg-[var(--surface-muted)] text-[var(--color-muted-foreground)] border-transparent';
 
                 return (
                   <div
                     key={course._id || idx}
-                    className="relative p-4 rounded-2xl bg-[var(--card-solid)]/60 backdrop-blur-md border border-[var(--border)]/50 hover:border-purple-500/50 hover:shadow-lg transition-all duration-300 space-y-3 group overflow-hidden"
+                    className="p-3.5 rounded-xl bg-[var(--surface-muted)]/60 border border-[var(--border)]/70 hover:border-[var(--teacher-primary)]/40 transition-colors space-y-2.5"
                   >
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-purple-500 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3 min-w-0">
-                        <span className={`w-8 h-8 rounded-[10px] text-xs font-black flex items-center justify-center shrink-0 border ${rankColor}`}>
+                        <span
+                          className={`w-7 h-7 rounded-[8px] text-xs font-bold flex items-center justify-center shrink-0 border tabular-nums ${rankTone}`}
+                        >
                           {idx + 1}
                         </span>
                         <div className="min-w-0">
-                          <span className="text-sm font-extrabold text-[var(--color-foreground)] group-hover:text-purple-400 transition-colors truncate block">
+                          <span className="text-sm font-bold text-[var(--color-foreground)] truncate block">
                             {course.title}
                           </span>
                           {course.category && (
-                            <span className="text-[10px] font-black text-[var(--color-muted-foreground)] uppercase tracking-widest mt-0.5 block">
+                            <span className="text-[10px] font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider block">
                               {course.category}
                             </span>
                           )}
                         </div>
                       </div>
-                      <span className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-foreground)] shrink-0 bg-[var(--surface-muted-strong)] px-3 py-1.5 rounded-xl border border-[var(--border)]/50">
-                        <Users className="w-4 h-4 text-purple-500" />
+                      <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-foreground)] shrink-0 bg-[var(--card-solid)] px-2.5 py-1 rounded-[8px] border border-[var(--border)] tabular-nums">
+                        <Users className="w-3.5 h-3.5 text-[var(--teacher-primary)]" />
                         {course.studentsCount}
                       </span>
                     </div>
 
-                    <div className="w-full bg-[var(--surface-muted-strong)] h-1.5 rounded-full overflow-hidden shadow-inner">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${percent}%` }}
-                        transition={{ duration: 1, delay: 0.5 + idx * 0.1, ease: 'easeOut' }}
-                        className="bg-gradient-to-r from-purple-500 to-indigo-500 h-full rounded-full"
+                    <div className="w-full bg-[var(--surface-muted-strong)] h-1.5 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{ width: `${percent}%`, background: 'var(--teacher-gradient)' }}
                       />
                     </div>
                   </div>
@@ -122,75 +116,78 @@ export default function AdminRecentActivity({ stats }: AdminRecentActivityProps)
 
       {/* Live Platform Activity Radar */}
       {recentActivity.length > 0 && (
-        <div className="relative overflow-hidden rounded-[2rem] border border-[var(--border)]/50 bg-[var(--card-solid)]/40 backdrop-blur-2xl p-6 flex flex-col justify-between shadow-xl group/card">
-          <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-sky-500/10 rounded-full blur-[40px] pointer-events-none group-hover/card:bg-sky-500/20 transition-colors duration-700" />
-          
-          <div className="relative z-10">
-            <div className="flex items-center justify-between pb-4 mb-5 border-b border-[var(--border)]/50">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-2xl bg-sky-500/20 text-sky-500 border border-sky-500/30 shadow-sm">
-                  <Activity className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-extrabold text-lg text-[var(--color-foreground)] tracking-tight">
-                    {t('admin.recentPlatformAudits')}
-                  </h3>
-                </div>
+        <div className="teacher-panel p-4 sm:p-6 flex flex-col justify-between gap-4">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between gap-2 pb-3.5 border-b border-[var(--border)]/70">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] bg-sky-500/12 text-sky-600 dark:text-sky-400 border border-sky-500/20 shrink-0">
+                  <Activity className="w-4 h-4" />
+                </span>
+                <h3 className="font-extrabold font-[family-name:var(--font-display)] text-base sm:text-lg text-[var(--color-foreground)] truncate">
+                  {t('admin.recentPlatformAudits')}
+                </h3>
               </div>
               <Link
                 href={ROUTES.admin.analytics}
-                className="text-xs font-bold text-sky-500 hover:text-sky-400 flex items-center gap-1.5 min-h-[36px] group/link transition-colors"
+                className="text-xs font-bold text-sky-600 dark:text-sky-400 hover:underline inline-flex items-center gap-1 min-h-[36px] shrink-0"
               >
                 <span>{t('admin.viewFullRadar')}</span>
-                <ArrowRight className="w-3.5 h-3.5 group-hover/link:translate-x-0.5 transition-transform" />
+                <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {recentActivity.slice(0, 4).map((item, idx) => {
                 const isEnrollment = item.type === 'enrollment';
 
                 return (
                   <div
                     key={idx}
-                    className="relative flex items-center justify-between p-4 rounded-2xl bg-[var(--card-solid)]/60 backdrop-blur-md border border-[var(--border)]/50 hover:border-sky-500/50 hover:shadow-lg transition-all duration-300 group overflow-hidden"
+                    className="flex items-center justify-between gap-3 p-3.5 rounded-xl bg-[var(--surface-muted)]/60 border border-[var(--border)]/70 hover:border-sky-500/35 transition-colors"
                   >
-                    <div className={`absolute left-0 top-0 bottom-0 w-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${isEnrollment ? 'bg-emerald-500' : 'bg-amber-500'}`} />
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className={`p-2.5 rounded-2xl shrink-0 border ${
-                        isEnrollment 
-                          ? 'bg-emerald-500/20 text-emerald-500 border-emerald-500/30' 
-                          : 'bg-amber-500/20 text-amber-500 border-amber-500/30'
-                      }`}>
+                      <span
+                        className={`inline-flex h-9 w-9 items-center justify-center rounded-[10px] shrink-0 border ${
+                          isEnrollment
+                            ? 'bg-emerald-500/12 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                            : 'bg-amber-500/12 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                        }`}
+                      >
                         {isEnrollment ? <CheckCircle className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
-                      </div>
+                      </span>
                       <div className="min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <p className="text-sm font-extrabold text-[var(--color-foreground)] truncate group-hover:text-[var(--primary)] transition-colors">
+                        <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                          <p className="text-sm font-bold text-[var(--color-foreground)] truncate">
                             {item.user}
                           </p>
-                          <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg border ${
-                            isEnrollment 
-                              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' 
-                              : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
-                          }`}>
+                          <span
+                            className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md border ${
+                              isEnrollment
+                                ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20'
+                                : 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20'
+                            }`}
+                          >
                             {isEnrollment ? 'Enrollment' : 'Quiz'}
                           </span>
                         </div>
-                        <p className="text-[11px] font-medium text-[var(--color-muted-foreground)] truncate">
+                        <p className="text-xs text-[var(--color-muted-foreground)] truncate">
                           {item.item}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex flex-col items-end shrink-0 ml-3">
+                    <div className="flex flex-col items-end shrink-0 tabular-nums">
                       {typeof item.score === 'number' && (
-                        <span className="text-xs font-black text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
+                        <span className="text-xs font-bold text-amber-700 dark:text-amber-400 bg-amber-500/12 px-2 py-0.5 rounded-md border border-amber-500/20">
                           {item.score}%
                         </span>
                       )}
                       {item.date && (
-                        <span className={`text-[10px] font-bold text-[var(--color-muted-foreground)] flex items-center gap-1 ${typeof item.score === 'number' ? 'mt-1' : ''}`}>
+                        <span
+                          className={`text-[11px] font-medium text-[var(--color-muted-foreground)] inline-flex items-center gap-1 ${
+                            typeof item.score === 'number' ? 'mt-1' : ''
+                          }`}
+                        >
                           <Clock className="w-3 h-3" />
                           {new Date(item.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                         </span>
@@ -203,6 +200,6 @@ export default function AdminRecentActivity({ stats }: AdminRecentActivityProps)
           </div>
         </div>
       )}
-    </motion.section>
+    </section>
   );
 }

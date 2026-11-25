@@ -24,10 +24,10 @@ export default function TeacherQuizTableView({
   const { t } = useTranslation();
 
   return (
-    <div className="bg-[var(--card-solid)] antigravity-glass shadow-sm rounded-3xl border border-[var(--border)] overflow-hidden">
+    <div className="teacher-panel overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-[var(--border)] text-left">
-          <thead className="bg-[var(--color-surface-muted)]/70">
+        <table className="min-w-full divide-y divide-[var(--border)]/80 text-left">
+          <thead className="bg-[var(--surface-muted)]/80">
             <tr>
               <th className="px-6 py-3.5 text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider">
                 {t('teacherQuizzes.tableQuiz')}

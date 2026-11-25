@@ -1,10 +1,16 @@
 'use client';
 
 import { useTranslation } from '@/hooks/useTranslation';
-import { motion } from 'framer-motion';
 import {
-  Users, BookOpen, GraduationCap, HelpCircle,
-  TrendingUp, Smartphone, Globe, Award, CheckCircle2,
+  Users,
+  BookOpen,
+  GraduationCap,
+  HelpCircle,
+  TrendingUp,
+  Smartphone,
+  Globe,
+  Award,
+  CheckCircle2,
 } from 'lucide-react';
 import type { AdminStats } from './types';
 
@@ -18,22 +24,21 @@ export default function AdminStatsGrid({ stats, isLoading }: AdminStatsGridProps
 
   if (isLoading || !stats) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5">
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
-            className="rounded-xl antigravity-glass border border-[var(--border)] p-3.5 h-28 animate-pulse flex flex-col justify-between shadow-xs"
+            className="teacher-card p-4 h-32 animate-pulse flex flex-col justify-between"
           >
-            <div className="h-3.5 bg-[var(--surface-muted-strong)] rounded-lg w-1/3 mb-2" />
-            <div className="h-7 bg-[var(--surface-muted-strong)] rounded-lg w-1/2 mb-1.5" />
-            <div className="h-2.5 bg-[var(--surface-muted-strong)] rounded-lg w-2/3" />
+            <div className="h-3.5 bg-[var(--surface-muted-strong)] rounded-md w-1/3" />
+            <div className="h-7 bg-[var(--surface-muted-strong)] rounded-md w-1/2" />
+            <div className="h-3 bg-[var(--surface-muted-strong)] rounded-md w-2/3" />
           </div>
         ))}
       </div>
     );
   }
 
-  // Calculated Telemetry
   const usersTotal = stats.users?.total || 0;
   const newUsers = stats.users?.newThisMonth || 0;
   const studentsCount = stats.users?.students || 0;
@@ -56,31 +61,25 @@ export default function AdminStatsGrid({ stats, isLoading }: AdminStatsGridProps
   const webPct = stats.platformStats?.webPercentage || 100;
 
   return (
-    <div className="space-y-2.5">
-      {/* 4 Main Executive KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2.5">
+    <div className="space-y-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5">
         {/* KPI 1: User Base */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1, duration: 0.25 }}
-          className="antigravity-glass antigravity-card relative overflow-hidden rounded-xl p-3 sm:p-3.5 border border-[var(--border)] hover:border-sky-500/40 transition-all duration-300 shadow-xs flex flex-col justify-between"
-        >
+        <div className="teacher-card p-4 sm:p-5 flex flex-col justify-between gap-3">
           <div>
-            <div className="flex items-center justify-between gap-2 mb-2">
+            <div className="flex items-center justify-between gap-2 mb-2.5">
               <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-muted-foreground)]">
                 {t('dashboard.totalPlatformUsers')}
               </span>
-              <div className="p-1.5 rounded-lg bg-sky-500/15 text-sky-500 border border-sky-500/25 shadow-xs">
-                <Users className="w-3.5 h-3.5" />
-              </div>
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-[10px] bg-sky-500/12 text-sky-600 dark:text-sky-400 border border-sky-500/20">
+                <Users className="w-4 h-4" />
+              </span>
             </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-xl sm:text-2xl font-black tracking-tight text-[var(--color-foreground)]">
+            <div className="flex items-baseline gap-2 flex-wrap">
+              <span className="text-2xl font-extrabold font-[family-name:var(--font-display)] tracking-tight text-[var(--color-foreground)] tabular-nums">
                 {usersTotal.toLocaleString()}
               </span>
               {newUsers > 0 && (
-                <span className="inline-flex items-center gap-0.5 text-[10px] font-extrabold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.2 rounded-full border border-emerald-500/20">
+                <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-500/12 px-2 py-0.5 rounded-full border border-emerald-500/20">
                   <TrendingUp className="w-2.5 h-2.5" />
                   +{newUsers}
                 </span>
@@ -88,153 +87,133 @@ export default function AdminStatsGrid({ stats, isLoading }: AdminStatsGridProps
             </div>
           </div>
 
-          <div className="pt-2 mt-2 border-t border-[var(--border)]/60 flex items-center justify-between text-[11px] font-semibold text-[var(--color-muted-foreground)]">
-            <span>{studentsCount} {t('admin.studentsCount')}</span>
-            <span>•</span>
-            <span>{teachersCount} {t('admin.teachersCount')}</span>
+          <div className="pt-2.5 border-t border-[var(--border)]/70 flex items-center justify-between text-xs font-medium text-[var(--color-muted-foreground)] tabular-nums">
+            <span>{studentsCount.toLocaleString()} {t('admin.studentsCount')}</span>
+            <span className="opacity-40">•</span>
+            <span>{teachersCount.toLocaleString()} {t('admin.teachersCount')}</span>
           </div>
-        </motion.div>
+        </div>
 
         {/* KPI 2: Curriculum Catalog */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15, duration: 0.25 }}
-          className="antigravity-glass antigravity-card relative overflow-hidden rounded-xl p-3 sm:p-3.5 border border-[var(--border)] hover:border-purple-500/40 transition-all duration-300 shadow-xs flex flex-col justify-between"
-        >
+        <div className="teacher-card p-4 sm:p-5 flex flex-col justify-between gap-3">
           <div>
-            <div className="flex items-center justify-between gap-2 mb-2">
+            <div className="flex items-center justify-between gap-2 mb-2.5">
               <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-muted-foreground)]">
                 {t('admin.totalCourses')}
               </span>
-              <div className="p-1.5 rounded-lg bg-purple-500/15 text-purple-500 border border-purple-500/25 shadow-xs">
-                <BookOpen className="w-3.5 h-3.5" />
-              </div>
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-[10px] bg-[var(--teacher-soft)] text-[var(--teacher-primary)] border border-[var(--teacher-border)]">
+                <BookOpen className="w-4 h-4" />
+              </span>
             </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-xl sm:text-2xl font-black tracking-tight text-[var(--color-foreground)]">
+            <div className="flex items-baseline gap-2 flex-wrap">
+              <span className="text-2xl font-extrabold font-[family-name:var(--font-display)] tracking-tight text-[var(--color-foreground)] tabular-nums">
                 {coursesTotal.toLocaleString()}
               </span>
-              <span className="text-[10px] font-bold text-purple-500 bg-purple-500/10 px-1.5 py-0.2 rounded-full border border-purple-500/20">
+              <span className="text-[10px] font-bold text-[var(--teacher-primary)] bg-[var(--teacher-soft)] px-2 py-0.5 rounded-full border border-[var(--teacher-border)]">
                 {coursePubPercent}% {t('dashboard.published')}
               </span>
             </div>
           </div>
 
-          <div className="pt-2 mt-2 border-t border-[var(--border)]/60">
+          <div className="pt-2.5 border-t border-[var(--border)]/70 space-y-1.5">
             <div className="w-full bg-[var(--surface-muted-strong)] h-1.5 rounded-full overflow-hidden">
               <div
-                className="bg-gradient-to-r from-purple-500 to-indigo-500 h-full rounded-full transition-all duration-500"
-                style={{ width: `${coursePubPercent}%` }}
+                className="h-full rounded-full transition-all duration-500"
+                style={{ width: `${coursePubPercent}%`, background: 'var(--teacher-gradient)' }}
               />
             </div>
           </div>
-        </motion.div>
+        </div>
 
-        {/* KPI 3: Learning Velocity / Enrollments */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.25 }}
-          className="antigravity-glass antigravity-card relative overflow-hidden rounded-xl p-3 sm:p-3.5 border border-[var(--border)] hover:border-emerald-500/40 transition-all duration-300 shadow-xs flex flex-col justify-between"
-        >
+        {/* KPI 3: Enrollments */}
+        <div className="teacher-card p-4 sm:p-5 flex flex-col justify-between gap-3">
           <div>
-            <div className="flex items-center justify-between gap-2 mb-2">
+            <div className="flex items-center justify-between gap-2 mb-2.5">
               <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-muted-foreground)]">
                 {t('dashboard.activeEnrollments')}
               </span>
-              <div className="p-1.5 rounded-lg bg-emerald-500/15 text-emerald-500 border border-emerald-500/25 shadow-xs">
-                <GraduationCap className="w-3.5 h-3.5" />
-              </div>
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-[10px] bg-emerald-500/12 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                <GraduationCap className="w-4 h-4" />
+              </span>
             </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-xl sm:text-2xl font-black tracking-tight text-[var(--color-foreground)]">
+            <div className="flex items-baseline gap-2 flex-wrap">
+              <span className="text-2xl font-extrabold font-[family-name:var(--font-display)] tracking-tight text-[var(--color-foreground)] tabular-nums">
                 {enrollmentsTotal.toLocaleString()}
               </span>
-              <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.2 rounded-full border border-emerald-500/20">
-                {activeEnrollments} {t('common.active')}
+              <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-500/12 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                {activeEnrollments.toLocaleString()} {t('common.active')}
               </span>
             </div>
           </div>
 
-          <div className="pt-2 mt-2 border-t border-[var(--border)]/60 flex items-center justify-between text-[11px] font-semibold text-[var(--color-muted-foreground)]">
+          <div className="pt-2.5 border-t border-[var(--border)]/70 flex items-center justify-between text-xs font-medium text-[var(--color-muted-foreground)] tabular-nums">
             <span>{t('admin.completionRate')}: {completionRate}%</span>
-            <span className="inline-flex items-center gap-1 text-emerald-500">
-              <CheckCircle2 className="w-3 h-3" />
-              {completedEnrollments}
+            <span className="inline-flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              {completedEnrollments.toLocaleString()}
             </span>
           </div>
-        </motion.div>
+        </div>
 
-        {/* KPI 4: Assessments & Performance */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25, duration: 0.25 }}
-          className="antigravity-glass antigravity-card relative overflow-hidden rounded-xl p-3 sm:p-3.5 border border-[var(--border)] hover:border-amber-500/40 transition-all duration-300 shadow-xs flex flex-col justify-between"
-        >
+        {/* KPI 4: Assessments */}
+        <div className="teacher-card p-4 sm:p-5 flex flex-col justify-between gap-3">
           <div>
-            <div className="flex items-center justify-between gap-2 mb-2">
+            <div className="flex items-center justify-between gap-2 mb-2.5">
               <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-muted-foreground)]">
                 {t('dashboard.totalAttempts')}
               </span>
-              <div className="p-1.5 rounded-lg bg-amber-500/15 text-amber-500 border border-amber-500/25 shadow-xs">
-                <HelpCircle className="w-3.5 h-3.5" />
-              </div>
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-[10px] bg-amber-500/12 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                <HelpCircle className="w-4 h-4" />
+              </span>
             </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-xl sm:text-2xl font-black tracking-tight text-[var(--color-foreground)]">
+            <div className="flex items-baseline gap-2 flex-wrap">
+              <span className="text-2xl font-extrabold font-[family-name:var(--font-display)] tracking-tight text-[var(--color-foreground)] tabular-nums">
                 {quizAttempts.toLocaleString()}
               </span>
               {avgScore > 0 && (
-                <span className="text-[10px] font-bold text-amber-500 bg-amber-500/10 px-1.5 py-0.2 rounded-full border border-amber-500/20">
+                <span className="text-[10px] font-bold text-amber-700 dark:text-amber-400 bg-amber-500/12 px-2 py-0.5 rounded-full border border-amber-500/20">
                   {avgScore}% {t('admin.passRate')}
                 </span>
               )}
             </div>
           </div>
 
-          <div className="pt-2 mt-2 border-t border-[var(--border)]/60 flex items-center justify-between text-[11px] font-semibold text-[var(--color-muted-foreground)]">
+          <div className="pt-2.5 border-t border-[var(--border)]/70 flex items-center justify-between text-xs font-medium text-[var(--color-muted-foreground)] tabular-nums">
             <span>{t('dashboard.averageScore')}: {avgScore}%</span>
             {stats.quizzes?.highestScore ? (
-              <span className="inline-flex items-center gap-1 text-amber-500">
-                <Award className="w-3 h-3" />
+              <span className="inline-flex items-center gap-1 font-semibold text-amber-600 dark:text-amber-400">
+                <Award className="w-3.5 h-3.5" />
                 {stats.quizzes.highestScore}%
               </span>
             ) : null}
           </div>
-        </motion.div>
+        </div>
       </div>
 
-      {/* Secondary Telemetry Strip: Stickiness & App Traffic */}
+      {/* Telemetry Strip */}
       {(stickiness > 0 || appPct > 0) && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.3 }}
-          className="antigravity-glass p-2.5 sm:p-3 rounded-xl border border-[var(--border)] flex flex-col sm:flex-row items-center justify-between gap-2.5 text-xs shadow-xs"
-        >
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <span className="font-bold text-[var(--color-foreground)] flex items-center gap-1.5">
+        <div className="teacher-panel px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
+          <div className="flex items-center gap-2.5">
+            <span className="font-semibold text-[var(--color-foreground)] flex items-center gap-1.5">
               <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
               {t('admin.platformStickiness')}:
             </span>
-            <span className="font-extrabold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-md">
+            <span className="font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-500/12 px-2 py-0.5 rounded-md tabular-nums">
               {stickiness}%
             </span>
           </div>
 
-          <div className="flex items-center gap-4 w-full sm:w-auto justify-end">
-            <div className="flex items-center gap-1 text-[var(--color-muted-foreground)]">
+          <div className="flex items-center gap-4 tabular-nums">
+            <div className="flex items-center gap-1.5 text-[var(--color-muted-foreground)]">
               <Globe className="w-3.5 h-3.5 text-sky-500" />
               <span>Web: <strong className="text-[var(--color-foreground)]">{webPct}%</strong></span>
             </div>
-            <div className="flex items-center gap-1 text-[var(--color-muted-foreground)]">
-              <Smartphone className="w-3.5 h-3.5 text-purple-500" />
+            <div className="flex items-center gap-1.5 text-[var(--color-muted-foreground)]">
+              <Smartphone className="w-3.5 h-3.5 text-[var(--teacher-primary)]" />
               <span>App: <strong className="text-[var(--color-foreground)]">{appPct}%</strong></span>
             </div>
           </div>
-        </motion.div>
+        </div>
       )}
     </div>
   );

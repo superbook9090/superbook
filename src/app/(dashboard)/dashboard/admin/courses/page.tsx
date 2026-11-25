@@ -18,6 +18,7 @@ import { buildPublishStatusOptions, type PublishStatusFilter } from '@/component
 import { isSuperAdmin } from '@/lib/roles';
 import { PageWrapper, ResponsiveGrid, EmptyState } from '@/components/layout';
 import { Pagination } from '@/components/ui/Pagination';
+import { AdminPageBanner } from '@/features/admin/components/AdminPageBanner';
 import AdminCoursesStats from './_components/AdminCoursesStats';
 import AdminCourseCard from './_components/AdminCourseCard';
 import AdminCoursesTable from './_components/AdminCoursesTable';
@@ -79,7 +80,6 @@ export default function AdminCoursesPage() {
     });
   }, [courses, searchQuery, filter]);
 
-  // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, filter]);
@@ -102,64 +102,59 @@ export default function AdminCoursesPage() {
 
   return (
     <PageWrapper>
-      {/* Hero Banner */}
-      <div className="hero-banner flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 sm:p-6 md:p-8 rounded-3xl">
-        <div className="space-y-1.5 max-w-xl">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[var(--teacher-soft)] text-[var(--teacher-primary)] border border-[var(--teacher-border)] shadow-xs">
-            <BookOpen className="w-3.5 h-3.5" />
-            <span>{t('admin.allCourses')}</span>
-          </div>
-          <h1 className="heading-xl">{t('admin.allCourses')}</h1>
-          <p className="text-sm sm:text-base text-[var(--color-muted-foreground)]">{t('admin.manageCoursesDesc')}</p>
-        </div>
+      <AdminPageBanner
+        icon={BookOpen}
+        eyebrow={t('admin.allCourses')}
+        title={t('admin.allCourses')}
+        description={t('admin.manageCoursesDesc')}
+        tier={isSuperAdminUser ? 'superadmin' : 'admin'}
+        actions={
+          <>
+            {isSuperAdminUser && (
+              <button
+                type="button"
+                onClick={() => setShowCleanupModal(true)}
+                className="inline-flex items-center gap-1.5 min-h-[44px] px-3.5 rounded-xl border border-red-500/35 bg-red-500/8 text-red-600 dark:text-red-400 hover:bg-red-500/15 font-bold text-xs transition-colors cursor-pointer"
+              >
+                <Trash2 className="w-4 h-4 shrink-0" />
+                <span>Clean Up Inactive Courses</span>
+              </button>
+            )}
 
-        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
-          {isSuperAdminUser && (
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={() => setShowCleanupModal(true)}
-              className="flex items-center gap-1.5 min-h-[42px] px-3.5 border-red-500/40 text-red-500 hover:bg-red-500/10 font-bold text-xs shadow-sm"
-            >
-              <Trash2 className="w-4 h-4" />
-              <span>Clean Up Inactive Courses</span>
-            </Button>
-          )}
+            <div className="inline-flex items-center gap-1 p-1 rounded-xl bg-[var(--surface-muted)] border border-[var(--border)]">
+              <button
+                type="button"
+                onClick={() => setViewMode('grid')}
+                className={`inline-flex items-center gap-1.5 px-3 min-h-[36px] rounded-[8px] text-xs font-bold transition-colors cursor-pointer ${
+                  viewMode === 'grid'
+                    ? 'bg-[var(--card-solid)] text-[var(--teacher-primary)] shadow-xs'
+                    : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]'
+                }`}
+                title={t('admin.viewGrid')}
+              >
+                <LayoutGrid className="w-4 h-4" />
+                <span className="hidden sm:inline">{t('admin.viewGrid')}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('table')}
+                className={`inline-flex items-center gap-1.5 px-3 min-h-[36px] rounded-[8px] text-xs font-bold transition-colors cursor-pointer ${
+                  viewMode === 'table'
+                    ? 'bg-[var(--card-solid)] text-[var(--teacher-primary)] shadow-xs'
+                    : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]'
+                }`}
+                title={t('admin.viewTable')}
+              >
+                <TableIcon className="w-4 h-4" />
+                <span className="hidden sm:inline">{t('admin.viewTable')}</span>
+              </button>
+            </div>
+          </>
+        }
+      />
 
-          <div className="flex items-center gap-1.5 p-1.5 rounded-2xl antigravity-glass border border-[var(--border)] shadow-sm">
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all min-h-[40px] cursor-pointer ${
-                viewMode === 'grid'
-                  ? 'bg-[var(--primary)] text-white shadow-md'
-                  : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--surface-muted)]'
-              }`}
-              title={t('admin.viewGrid')}
-            >
-              <LayoutGrid className="w-4 h-4" />
-              <span className="hidden sm:inline">{t('admin.viewGrid')}</span>
-            </button>
-            <button
-              onClick={() => setViewMode('table')}
-              className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all min-h-[40px] cursor-pointer ${
-                viewMode === 'table'
-                  ? 'bg-[var(--primary)] text-white shadow-md'
-                  : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--surface-muted)]'
-              }`}
-              title={t('admin.viewTable')}
-            >
-              <TableIcon className="w-4 h-4" />
-              <span className="hidden sm:inline">{t('admin.viewTable')}</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* KPI Stats */}
       <AdminCoursesStats courses={courses} />
 
-      {/* Filters */}
       <FilterPanel>
         <DashboardListFilters
           searchQuery={searchQuery}
@@ -179,61 +174,54 @@ export default function AdminCoursesPage() {
         />
       </FilterPanel>
 
-      {/* Course List: Grid or Table view */}
-      <div>
-        {courses.length === 0 ? (
-          <EmptyState
-            icon={BookOpen}
-            title={t('admin.noCoursesFound')}
-            description={t('admin.adjustSearch')}
-          />
-        ) : filteredCourses.length === 0 ? (
-          <div className="text-center py-20 bg-[var(--card-solid)] border border-dashed border-[var(--border)] rounded-2xl p-8">
-            <BookOpen className="w-12 h-12 text-[var(--muted)] mx-auto mb-4 opacity-30" />
-            <h3 className="heading-md text-[var(--color-foreground)] mb-1">
-              {t('admin.noCoursesFound')}
-            </h3>
-            <p className="text-sm text-[var(--color-muted-foreground)] mb-6">
-              {t('admin.adjustSearch')}
-            </p>
-            <button
-              onClick={clearFilters}
-              className="px-6 py-2.5 bg-[var(--info)] text-white rounded-xl text-xs sm:text-sm font-bold hover:opacity-90 transition-opacity shadow-sm"
-            >
+      {courses.length === 0 ? (
+        <EmptyState
+          icon={BookOpen}
+          title={t('admin.noCoursesFound')}
+          description={t('admin.adjustSearch')}
+        />
+      ) : filteredCourses.length === 0 ? (
+        <EmptyState
+          icon={BookOpen}
+          title={t('admin.noCoursesFound')}
+          description={t('admin.adjustSearch')}
+          action={
+            <Button onClick={clearFilters} variant="secondary">
               {t('common.reset')}
-            </button>
-          </div>
-        ) : viewMode === 'grid' ? (
-          <>
-            <ResponsiveGrid variant="cards">
-              {paginatedCourses.map((course) => (
-                <AdminCourseCard
-                  key={course._id}
-                  course={course}
-                  isSuperAdmin={isSuperAdminUser}
-                />
-              ))}
-            </ResponsiveGrid>
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-            />
-          </>
-        ) : (
-          <>
-            <AdminCoursesTable
-              courses={paginatedCourses}
-              isSuperAdmin={isSuperAdminUser}
-            />
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-            />
-          </>
-        )}
-      </div>
+            </Button>
+          }
+        />
+      ) : viewMode === 'grid' ? (
+        <>
+          <ResponsiveGrid variant="dense">
+            {paginatedCourses.map((course) => (
+              <AdminCourseCard
+                key={course._id}
+                course={course}
+                isSuperAdmin={isSuperAdminUser}
+              />
+            ))}
+          </ResponsiveGrid>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </>
+      ) : (
+        <>
+          <AdminCoursesTable
+            courses={paginatedCourses}
+            isSuperAdmin={isSuperAdminUser}
+          />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </>
+      )}
+
       {isSuperAdminUser && (
         <InactiveCoursesCleanupModal
           isOpen={showCleanupModal}

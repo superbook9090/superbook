@@ -3,7 +3,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
 import { ROUTES } from '@/constants/routes';
 import { BookOpen, ChevronLeft, ChevronRight } from 'lucide-react';
 import { PageSkeleton } from '@/components/ui/Skeleton';
@@ -18,7 +17,6 @@ import { useTranslation } from '@/hooks/useTranslation';
 import DashboardListFilters, { FilterPanel } from '@/components/filters/DashboardListFilters';
 import { buildPublishStatusOptions, type PublishStatusFilter } from '@/components/filters/publishStatusOptions';
 import { PageWrapper, ResponsiveGrid, EmptyState } from '@/components/layout';
-
 import { useAdminQuizzesState } from './_hooks/useAdminQuizzesState';
 import { AdminQuizzesHero } from './_components/AdminQuizzesHero';
 import { AdminQuizzesStats } from './_components/AdminQuizzesStats';
@@ -74,7 +72,6 @@ export default function AdminQuizzesPage() {
 
   return (
     <PageWrapper>
-      {/* Hero Banner Header */}
       <AdminQuizzesHero
         viewMode={viewMode}
         onViewModeChange={setViewMode}
@@ -82,14 +79,12 @@ export default function AdminQuizzesPage() {
         onOpenCleanupModal={() => setShowCleanupModal(true)}
       />
 
-      {/* KPI Stats Overview */}
       <AdminQuizzesStats
         quizzes={quizzes}
         totalQuizzes={pagination?.total}
         totalCourses={courses.length}
       />
 
-      {/* Filter Panel */}
       <FilterPanel>
         <DashboardListFilters
           searchQuery={searchQuery}
@@ -127,7 +122,6 @@ export default function AdminQuizzesPage() {
         />
       </FilterPanel>
 
-      {/* Quizzes List (Grid or Table) */}
       {quizzes.length === 0 ? (
         <EmptyState
           title={t('admin.noQuizzesFound')}
@@ -139,7 +133,7 @@ export default function AdminQuizzesPage() {
           }
         />
       ) : viewMode === 'grid' ? (
-        <ResponsiveGrid variant="cards">
+        <ResponsiveGrid variant="dense">
           {quizzes.map((quiz, index) => (
             <AdminQuizCard
               key={quiz._id}
@@ -160,49 +154,45 @@ export default function AdminQuizzesPage() {
         />
       )}
 
-      {/* Pagination Bar */}
       {pagination && pagination.totalPages > 1 && (
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-2 antigravity-glass border border-[var(--border)] rounded-2xl px-5 py-3 shadow-md"
-        >
-          <p className="text-xs sm:text-sm font-medium text-[var(--color-muted-foreground)]">
-            {t('admin.showing').replace('{current}', String(quizzes.length)).replace('{total}', String(pagination.total))}
+        <div className="teacher-panel flex flex-col sm:flex-row justify-between items-center gap-3 px-4 py-3">
+          <p className="text-xs sm:text-sm font-medium text-[var(--color-muted-foreground)] tabular-nums">
+            {t('admin.showing')
+              .replace('{current}', String(quizzes.length))
+              .replace('{total}', String(pagination.total))}
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <Tooltip label={t('common.previous')}>
-              <Button
+              <button
+                type="button"
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
                 aria-label={t('common.previous')}
-                variant="secondary"
-                size="sm"
-                className="p-2 rounded-xl"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-[var(--border)] bg-[var(--card-solid)] text-[var(--color-foreground)] hover:bg-[var(--surface-muted)] disabled:opacity-40 disabled:pointer-events-none transition-colors cursor-pointer"
               >
                 <ChevronLeft className="w-4 h-4" />
-              </Button>
+              </button>
             </Tooltip>
-            <span className="px-3 text-xs sm:text-sm font-bold text-[var(--color-foreground)]">
-              {t('admin.page').replace('{current}', String(page)).replace('{total}', String(pagination.totalPages))}
+            <span className="px-3 text-xs sm:text-sm font-bold text-[var(--color-foreground)] tabular-nums">
+              {t('admin.page')
+                .replace('{current}', String(page))
+                .replace('{total}', String(pagination.totalPages))}
             </span>
             <Tooltip label={t('common.next')}>
-              <Button
+              <button
+                type="button"
                 onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
                 disabled={page === pagination.totalPages}
                 aria-label={t('common.next')}
-                variant="secondary"
-                size="sm"
-                className="p-2 rounded-xl"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-[var(--border)] bg-[var(--card-solid)] text-[var(--color-foreground)] hover:bg-[var(--surface-muted)] disabled:opacity-40 disabled:pointer-events-none transition-colors cursor-pointer"
               >
                 <ChevronRight className="w-4 h-4" />
-              </Button>
+              </button>
             </Tooltip>
           </div>
-        </motion.div>
+        </div>
       )}
 
-      {/* Delete Confirmation Modal */}
       <ConfirmModal
         isOpen={Boolean(deleteId)}
         title={t('admin.deleteQuiz')}

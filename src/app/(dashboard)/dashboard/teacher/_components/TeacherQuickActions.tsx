@@ -1,8 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { useTranslation } from '@/hooks/useTranslation';
-import { ROUTES } from '@/constants/routes';
 import {
   BookOpen,
   HelpCircle,
@@ -10,7 +7,11 @@ import {
   Plus,
   PenTool,
   Notebook,
+  Trophy,
+  TrendingUp,
 } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
+import { ROUTES } from '@/constants/routes';
 import { useFeature } from '@/contexts/AppSettingsContext';
 import { ResponsiveGrid } from '@/components/layout';
 import QuickActionCard from '@/components/ui/QuickActionCard';
@@ -30,21 +31,19 @@ export default function TeacherQuickActions({
   const enableAnalytics = useFeature('enableAnalytics');
   const enableBlogs = useFeature('enableBlogs');
   const enableNotes = useFeature('enableNotes');
+  const enableContests = useFeature('enableContests');
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.4 }}
-      aria-labelledby="teacher-quick-actions-heading"
-      className="space-y-3 sm:space-y-4"
-    >
+    <section aria-labelledby="teacher-quick-actions-heading" className="space-y-3 sm:space-y-4">
       <div>
-        <h2 id="teacher-quick-actions-heading" className="text-lg sm:text-xl font-bold text-[var(--color-foreground)]">
+        <h2
+          id="teacher-quick-actions-heading"
+          className="text-base sm:text-lg font-bold font-[family-name:var(--font-display)] tracking-tight text-[var(--color-foreground)]"
+        >
           {t('dashboard.quickActions')}
         </h2>
-        <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)]">
-          {t('dashboard.learningHubDesc')}
+        <p className="text-xs sm:text-sm text-[var(--color-muted-foreground)] mt-0.5">
+          {t('dashboard.manageContent')}
         </p>
       </div>
 
@@ -56,7 +55,7 @@ export default function TeacherQuickActions({
             description={t('dashboard.viewAndEdit')}
             href={ROUTES.teacher.courses}
             color="teacher"
-            delay={0.1}
+            delay={0.04}
           />
         )}
 
@@ -66,8 +65,19 @@ export default function TeacherQuickActions({
             title={t('dashboard.manageQuizzes')}
             description={t('dashboard.createAndReview')}
             href={ROUTES.teacher.quizzes}
-            color="student"
-            delay={0.15}
+            color="success"
+            delay={0.08}
+          />
+        )}
+
+        {enableContests && (
+          <QuickActionCard
+            icon={Trophy}
+            title={t('common.contests')}
+            description={t('contest.teacherContestsDesc')}
+            href={ROUTES.teacher.contests}
+            color="error"
+            delay={0.12}
           />
         )}
 
@@ -78,9 +88,18 @@ export default function TeacherQuickActions({
             description={t('dashboard.viewInsights')}
             href={ROUTES.teacher.analytics}
             color="info"
-            delay={0.2}
+            delay={0.16}
           />
         )}
+
+        <QuickActionCard
+          icon={TrendingUp}
+          title={t('common.progress')}
+          description={t('progress.teacherProgressDesc')}
+          href={ROUTES.teacher.progress}
+          color="teacher"
+          delay={0.2}
+        />
 
         {enableCourses && (
           <QuickActionCard
@@ -90,7 +109,7 @@ export default function TeacherQuickActions({
             href={ROUTES.teacher.courseCreate}
             color="warning"
             disabled={isAtCourseLimit}
-            delay={0.25}
+            delay={0.24}
           />
         )}
 
@@ -102,7 +121,7 @@ export default function TeacherQuickActions({
             href={ROUTES.teacher.blogCreate}
             color="admin"
             disabled={isAtBlogLimit}
-            delay={0.3}
+            delay={0.28}
           />
         )}
 
@@ -113,10 +132,10 @@ export default function TeacherQuickActions({
             description={t('dashboard.notesDesc')}
             href={ROUTES.teacher.notes}
             color="teacher"
-            delay={0.35}
+            delay={0.32}
           />
         )}
       </ResponsiveGrid>
-    </motion.section>
+    </section>
   );
 }

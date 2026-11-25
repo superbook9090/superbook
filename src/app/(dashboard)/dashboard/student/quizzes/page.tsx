@@ -1,22 +1,31 @@
 // src/app/(dashboard)/dashboard/student/quizzes/page.tsx
 'use client';
 
-import { ROUTES } from '@/constants/routes';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { BookOpen, Trophy, HelpCircle, CheckCircle2, Sparkles } from 'lucide-react';
+import { ROUTES } from '@/constants/routes';
 import { useUrlTab, useUrlParam } from '@/hooks/useUrlTab';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useAlert } from '@/components/ui/AlertContainer';
 import { LazyQuizCard } from '@/lib/lazy';
 import { useSessionStore } from '@/store/useSessionStore';
 import { PageSkeleton } from '@/components/ui/Skeleton';
-import { useStartQuizAttempt, useEnrollments, useQuizAttempts, useQuizzes, type QuizAttempt, type Quiz } from '@/lib/react-query/hooks';
-import { BookOpen, Trophy } from 'lucide-react';
+import {
+  useStartQuizAttempt,
+  useEnrollments,
+  useQuizAttempts,
+  useQuizzes,
+  type QuizAttempt,
+  type Quiz,
+} from '@/lib/react-query/hooks';
 import { ApiClientError } from '@/lib/api/http';
 import { Dropdown } from '@/components/ui/Dropdown';
-import { PageWrapper, PageHeader, ResponsiveGrid } from '@/components/layout';
+import { PageWrapper, ResponsiveGrid, EmptyState } from '@/components/layout';
 import { useFeature } from '@/contexts/AppSettingsContext';
+import { StudentPageBanner } from '@/features/student/components/StudentPageBanner';
+import { StudentTabs } from '@/features/student/components/StudentTabs';
 
 export default function StudentQuizzesPage() {
   const session = useSessionStore((s) => s.session);
@@ -32,17 +41,16 @@ export default function StudentQuizzesPage() {
   );
   const [selectedCourseParam, setSelectedCourse] = useUrlParam('course', '');
   const selectedCourse = selectedCourseParam || 'all';
-  const [courseFilterInitialized, setCourseFilterInitialized] = useState(() => Boolean(searchParams.get('course')));
+  const [courseFilterInitialized, setCourseFilterInitialized] = useState(() =>
+    Boolean(searchParams.get('course'))
+  );
 
   const orgId = (session?.user as { organizationId?: string })?.organizationId || 'public';
   const { data: enrollments = [] } = useEnrollments();
   const { data: attempts = [] } = useQuizAttempts();
-  const { data: allQuizzes = [], isLoading: quizzesLoading } = useQuizzes(orgId);
-  const isLoading = quizzesLoading;
-
+  const { data: allQuizzes = [], isLoading } = useQuizzes(orgId);
   const startQuiz = useStartQuizAttempt();
 
-  // Default to the most recently enrolled course once enrollments load
   useEffect(() => {
     if (courseFilterInitialized || enrollments.length === 0) return;
     const latest = [...enrollments].sort(
@@ -57,50 +65,43 @@ export default function StudentQuizzesPage() {
 
   useEffect(() => {
     if (status === 'loading') return;
-    if (!session) {
-      router.push(ROUTES.login);
-    }
+    if (!session) router.push(ROUTES.login);
   }, [status, session, router]);
 
-  // Derive available quizzes from enrollments using useMemo
   const availableQuizzes = useMemo(() => {
-    if (enrollments.length === 0) {
-      return [];
-    }
+    if (enrollments.length === 0) return [];
+    const enrolledCourseIds = enrollments
+      .map((e: { course: { _id: string } | string }) =>
+        typeof e.course === 'object' && e.course !== null ? e.course._id?.toString() : e.course?.toString()
+      )
+      .filter(Boolean);
 
-    const enrolledCourseIds = enrollments.map(
-      (e: { course: { _id: string } | string }) => {
-        if (typeof e.course === 'object' && e.course !== null) {
-          return e.course._id?.toString();
-        }
-        return e.course?.toString();
-      }
-    ).filter(Boolean);
-
-    const courseMatches = (courseId: string | undefined) =>
-      selectedCourse === 'all' || courseId === selectedCourse;
-
-    // Filter for published quizzes from enrolled courses that haven't been completed
-    const relevantQuizzes = allQuizzes.filter((q: Quiz) => {
-      const quizCourseId = q.course?._id?.toString();
-      const isEnrolled = quizCourseId && enrolledCourseIds.includes(quizCourseId);
-      const matchesCourse = courseMatches(quizCourseId);
-
-      // Check if quiz has been completed
-      const isCompleted = attempts.some(
-        (a) => a.quiz?._id === q._id && a.status === 'completed'
-      );
-
-      return q.isPublished && isEnrolled && matchesCourse && !isCompleted;
-    });
-
-    // Sort by creation date (first created first)
-    return relevantQuizzes.sort((a: Quiz, b: Quiz) => {
-      const dateA = new Date(a.createdAt).getTime();
-      const dateB = new Date(b.createdAt).getTime();
-      return dateA - dateB;
-    });
+    return allQuizzes
+      .filter((q: Quiz) => {
+        const quizCourseId = q.course?._id?.toString();
+        const isEnrolled = quizCourseId && enrolledCourseIds.includes(quizCourseId);
+        const matchesCourse = selectedCourse === 'all' || quizCourseId === selectedCourse;
+        const isCompleted = attempts.some((a) => a.quiz?._id === q._id && a.status === 'completed');
+        return q.isPublished && isEnrolled && matchesCourse && !isCompleted;
+      })
+      .sort((a: Quiz, b: Quiz) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
   }, [enrollments, attempts, allQuizzes, selectedCourse]);
+
+  const completedAttempts = useMemo(() => {
+    return attempts
+      .filter((a) => {
+        const raw = a.quiz?.course;
+        const quizCourseId =
+          raw && typeof raw === 'object' ? raw._id?.toString() : raw ? String(raw) : undefined;
+        const matchesCourse = selectedCourse === 'all' || quizCourseId === selectedCourse;
+        return a.status === 'completed' && matchesCourse;
+      })
+      .sort(
+        (a, b) =>
+          new Date(b.submittedAt || b.startedAt).getTime() -
+          new Date(a.submittedAt || a.startedAt).getTime()
+      );
+  }, [attempts, selectedCourse]);
 
   const handleStartQuiz = useCallback(
     async (quizId: string) => {
@@ -108,77 +109,52 @@ export default function StudentQuizzesPage() {
         const data = await startQuiz.mutateAsync(quizId);
         router.push(ROUTES.student.quizTake(data.attempt._id));
       } catch (e) {
-        const message =
-          e instanceof ApiClientError ? e.message : t('errors.errorStartingQuiz');
+        const message = e instanceof ApiClientError ? e.message : t('errors.errorStartingQuiz');
         addAlert({ type: 'error', message: message || t('errors.failedStartQuiz'), duration: 5000 });
       }
     },
     [startQuiz, router, t, addAlert]
   );
 
-  const completedAttempts = useMemo(() => {
-    const filtered = attempts.filter((a) => {
-      let quizCourseId: string | undefined;
-      if (a.quiz?.course) {
-        if (typeof a.quiz.course === 'object' && a.quiz.course !== null) {
-          quizCourseId = a.quiz.course._id?.toString();
-        } else {
-          quizCourseId = String(a.quiz.course);
-        }
-      }
-      const matchesCourse = selectedCourse === 'all' || quizCourseId === selectedCourse;
-      return a.status === 'completed' && matchesCourse;
-    });
-
-    // Sort by latest attempted first (most recent first)
-    return filtered.sort((a, b) => {
-      const dateA = new Date(a.submittedAt || a.startedAt).getTime();
-      const dateB = new Date(b.submittedAt || b.startedAt).getTime();
-      return dateB - dateA;
-    });
-  }, [attempts, selectedCourse]);
-
-  if (status === 'loading' || isLoading) {
-    return <PageSkeleton />;
-  }
+  if (status === 'loading' || isLoading) return <PageSkeleton />;
 
   return (
     <PageWrapper>
-      <PageHeader
+      <StudentPageBanner
+        icon={HelpCircle}
+        eyebrow={t('common.quizzes')}
         title={t('quiz.myQuizzes')}
         description={t('quiz.quizzesDesc')}
         actions={
           enableContests ? (
-            <Link href={ROUTES.student.contests} className="btn-primary inline-flex items-center gap-2 px-4 py-2 bg-[var(--student-primary)] text-white rounded-lg hover:bg-[var(--student-primary)]/90 transition-colors">
+            <Link href={ROUTES.student.contests} className="student-cta-btn w-full sm:w-auto">
               <Trophy className="w-4 h-4" />
-              <span className="font-semibold text-sm">{t('common.contests')}</span>
+              <span>{t('common.contests')}</span>
             </Link>
           ) : null
         }
       />
 
-      {/* Tabs and Course Filter */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pb-2 sm:pb-0">
-        <div className="antigravity-tab-group overflow-x-auto no-scrollbar">
-          <button
-            onClick={() => handleTabChange('available')}
-            className={`antigravity-tab-btn ${activeTab === 'available' ? 'antigravity-tab-btn--active' : ''}`}
-          >
-            <span>{t('quiz.available')}</span>
-            <span className="px-1.5 py-0.2 rounded-full text-[11px] font-bold bg-[var(--student-primary)]/15 text-[var(--student-primary)]">
-              {availableQuizzes.length}
-            </span>
-          </button>
-          <button
-            onClick={() => handleTabChange('completed')}
-            className={`antigravity-tab-btn ${activeTab === 'completed' ? 'antigravity-tab-btn--active' : ''}`}
-          >
-            <span>{t('quiz.completed')}</span>
-            <span className="px-1.5 py-0.2 rounded-full text-[11px] font-bold bg-[var(--student-primary)]/15 text-[var(--student-primary)]">
-              {completedAttempts.length}
-            </span>
-          </button>
-        </div>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <StudentTabs
+          activeTab={activeTab}
+          onChange={handleTabChange}
+          tabs={[
+            {
+              id: 'available',
+              label: t('quiz.available'),
+              icon: <Sparkles className="w-4 h-4" />,
+              count: availableQuizzes.length,
+            },
+            {
+              id: 'completed',
+              label: t('quiz.completed'),
+              icon: <CheckCircle2 className="w-4 h-4" />,
+              count: completedAttempts.length,
+              tone: 'success',
+            },
+          ]}
+        />
 
         {enrollments.length > 0 && (
           <div className="w-full sm:w-64">
@@ -195,8 +171,7 @@ export default function StudentQuizzesPage() {
                       typeof enrollment.course === 'object' && enrollment.course !== null
                         ? enrollment.course
                         : null;
-                    if (!course) return null;
-                    return { value: course._id.toString(), label: course.title };
+                    return course ? { value: course._id.toString(), label: course.title } : null;
                   })
                   .filter((item): item is { value: string; label: string } => item !== null),
               ]}
@@ -206,46 +181,43 @@ export default function StudentQuizzesPage() {
         )}
       </div>
 
-      <div className="perspective-1000">
-        {activeTab === 'available' ? (
-          availableQuizzes.length === 0 ? (
-            <div className="antigravity-glass rounded-3xl p-8 sm:p-12 text-center border border-dashed border-[var(--border)]">
-              <div className="w-16 h-16 rounded-2xl bg-[var(--student-primary)]/10 text-[var(--student-primary)] flex items-center justify-center mx-auto mb-4">
-                <BookOpen className="w-8 h-8" />
-              </div>
-              <p className="text-base font-semibold text-[var(--color-foreground)] mb-1">
-                {t('quiz.enrollCourse')}
-              </p>
-              <p className="text-xs text-[var(--color-muted-foreground)] mb-6 max-w-sm mx-auto">
-                Join a course to unlock curated quizzes and skill assessments.
-              </p>
-              <Link href={ROUTES.student.browse} className="btn-premium inline-flex items-center min-h-[44px]">
+      {activeTab === 'available' ? (
+        availableQuizzes.length === 0 ? (
+          <EmptyState
+            icon={BookOpen}
+            title={t('quiz.enrollCourse')}
+            description={t('studentUi.enrollUnlockQuizzes')}
+            action={
+              <Link href={ROUTES.student.browse} className="student-cta-btn">
                 {t('courses.browseMore')}
               </Link>
-            </div>
-          ) : (
-            <ResponsiveGrid variant="dense">
-              {availableQuizzes.map((quiz: Quiz) => (
-                <div key={quiz._id} className="min-w-0 transform-3d">
-                  <LazyQuizCard quiz={quiz} type="available" onStart={handleStartQuiz} />
-                </div>
-              ))}
-            </ResponsiveGrid>
-          )
-        ) : completedAttempts.length === 0 ? (
-          <div className="antigravity-glass rounded-3xl p-8 sm:p-12 text-center border border-dashed border-[var(--border)]">
-            <p className="text-[var(--color-muted-foreground)]">{t('quiz.noCompleted')}</p>
-          </div>
+            }
+          />
         ) : (
           <ResponsiveGrid variant="dense">
-            {completedAttempts.map((attempt: QuizAttempt) => (
-              <div key={attempt._id} className="h-full min-w-0 transform-3d">
-                <LazyQuizCard quiz={attempt.quiz} attempt={attempt} type="attempted" onStart={handleStartQuiz} />
+            {availableQuizzes.map((quiz: Quiz) => (
+              <div key={quiz._id} className="min-w-0">
+                <LazyQuizCard quiz={quiz} type="available" onStart={handleStartQuiz} />
               </div>
             ))}
           </ResponsiveGrid>
-        )}
-      </div>
+        )
+      ) : completedAttempts.length === 0 ? (
+        <EmptyState icon={CheckCircle2} title={t('quiz.noCompleted')} />
+      ) : (
+        <ResponsiveGrid variant="dense">
+          {completedAttempts.map((attempt: QuizAttempt) => (
+            <div key={attempt._id} className="h-full min-w-0">
+              <LazyQuizCard
+                quiz={attempt.quiz}
+                attempt={attempt}
+                type="attempted"
+                onStart={handleStartQuiz}
+              />
+            </div>
+          ))}
+        </ResponsiveGrid>
+      )}
     </PageWrapper>
   );
 }

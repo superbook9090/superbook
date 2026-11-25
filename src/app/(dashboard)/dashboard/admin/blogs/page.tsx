@@ -128,7 +128,7 @@ export default function AdminBlogsPage() {
           }
         />
       ) : (
-        <ResponsiveGrid variant="cards">
+        <ResponsiveGrid variant="dense">
           {blogs.map((blog, index) => (
             <AdminBlogCard
               key={blog._id}

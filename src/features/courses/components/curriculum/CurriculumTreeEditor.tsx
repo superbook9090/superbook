@@ -171,39 +171,41 @@ export default function CurriculumTreeEditor({
   if (isLoading) return <div className="p-8 text-center">{t('common.loading')}</div>;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
-        <h2 className="text-xl font-bold text-[var(--color-foreground)]">{t('curriculum.title')}</h2>
+    <div className="space-y-5">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 pb-4 border-b border-[var(--border)]/70">
+        <h2 className="text-lg sm:text-xl font-bold font-[family-name:var(--font-display)] tracking-tight text-[var(--color-foreground)]">
+          {t('curriculum.title')}
+        </h2>
         <div className="flex flex-wrap gap-2">
           {onOpenAiModal && (
             <>
               <button
                 type="button"
                 onClick={() => onOpenAiModal('add-chapter')}
-                className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3.5 py-2 rounded-xl text-sm font-semibold bg-gradient-to-r from-purple-600/20 to-indigo-600/20 hover:from-purple-600/30 hover:to-indigo-600/30 text-purple-300 border border-purple-500/40 shadow-sm transition-all"
+                className="inline-flex items-center justify-center gap-1.5 min-h-[42px] px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-[var(--teacher-soft)] hover:bg-[var(--teacher-primary)]/15 text-[var(--teacher-primary)] border border-[var(--teacher-border)] transition-colors cursor-pointer"
               >
-                <Sparkles className="w-4 h-4 text-purple-400" />
-                add chapter using AI
+                <Sparkles className="w-4 h-4 shrink-0" />
+                <span>AI Chapter</span>
               </button>
               <button
                 type="button"
                 onClick={() => onOpenAiModal('add-quiz')}
-                className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3.5 py-2 rounded-xl text-sm font-semibold bg-gradient-to-r from-purple-600/20 to-indigo-600/20 hover:from-purple-600/30 hover:to-indigo-600/30 text-purple-300 border border-purple-500/40 shadow-sm transition-all"
+                className="inline-flex items-center justify-center gap-1.5 min-h-[42px] px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-[var(--teacher-soft)] hover:bg-[var(--teacher-primary)]/15 text-[var(--teacher-primary)] border border-[var(--teacher-border)] transition-colors cursor-pointer"
               >
-                <Sparkles className="w-4 h-4 text-purple-400" />
-                add quiz using AI
+                <Sparkles className="w-4 h-4 shrink-0" />
+                <span>AI Quiz</span>
               </button>
             </>
           )}
           <Link
             href={buildTeacherCreateQuizUrl({ courseId, placement: 'course' })}
-            className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2 rounded-xl text-sm font-semibold border border-[var(--primary-border)] text-[var(--primary)] hover:bg-[var(--primary-soft)] transition-colors"
+            className="teacher-pill-btn text-xs sm:text-sm min-h-[42px]"
           >
-            <Target className="w-4 h-4" />
-            {t('curriculum.addQuiz')}
+            <Target className="w-4 h-4 text-[var(--teacher-primary)]" />
+            <span>{t('curriculum.addQuiz')}</span>
           </Link>
-          <Button onClick={handleAddTopic} disabled={addChapter.isPending} size="sm" className="min-h-[44px]">
-            <Plus className="w-4 h-4 mr-2" />
+          <Button onClick={handleAddTopic} disabled={addChapter.isPending} size="sm" className="min-h-[42px] rounded-xl px-4">
+            <Plus className="w-4 h-4 mr-1.5" />
             {t('curriculum.addTopic')}
           </Button>
         </div>

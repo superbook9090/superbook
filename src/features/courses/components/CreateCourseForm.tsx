@@ -4,7 +4,6 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/constants/routes';
 import { useTranslation } from '@/hooks/useTranslation';
-import { useRoleTheme } from '@/contexts/RoleThemeContext';
 import { supportedLanguages } from '@/i18n/config';
 import { ImageUpload } from '@/components/ui/ImageUpload';
 import { TextField } from '@/components/ui/TextField';
@@ -20,7 +19,6 @@ type Props = {
 export default function CreateCourseForm({ courseId }: Props) {
   const { t } = useTranslation();
   const router = useRouter();
-  const { theme } = useRoleTheme();
 
   const {
     isLoading,
@@ -137,32 +135,35 @@ export default function CreateCourseForm({ courseId }: Props) {
         }
       />
 
-      <div className="flex items-center py-2">
+      <label
+        htmlFor="isPublished"
+        className="flex items-center gap-3 p-3.5 rounded-xl bg-[var(--surface-muted)]/70 border border-[var(--border)]/80 cursor-pointer hover:border-[var(--teacher-primary)]/40 transition-colors"
+      >
         <input
           type="checkbox"
           name="isPublished"
           id="isPublished"
           checked={formData.isPublished}
           onChange={handleChange}
-          className="h-5 w-5 text-[var(--color-primary)] focus:ring-[var(--color-primary)] border-[var(--color-border)] rounded cursor-pointer"
+          className="h-5 w-5 accent-[var(--teacher-primary)] rounded cursor-pointer shrink-0"
         />
-        <label htmlFor="isPublished" className="ml-3 block text-base sm:text-sm text-[var(--color-foreground)] cursor-pointer">
+        <span className="text-sm font-medium text-[var(--color-foreground)]">
           {t('createCourseForm.publishImmediately')}
-        </label>
-      </div>
+        </span>
+      </label>
 
-      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t border-[var(--color-border)]">
+      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 pt-4 border-t border-[var(--border)]/70">
         <button
           type="button"
           onClick={() => router.push(ROUTES.teacher.courses)}
-          className="px-4 py-3 sm:py-2 border border-[var(--color-border)] rounded-lg shadow-sm text-sm font-medium text-[var(--color-foreground)] bg-[var(--card-solid)] hover:bg-[var(--color-background)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)] touch-manipulation"
+          className="teacher-pill-btn w-full sm:w-auto"
         >
           {t('createCourseForm.cancel')}
         </button>
         <button
           type="submit"
           disabled={isLoading}
-          className={`px-4 py-3 sm:py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r ${theme.gradient} hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)] disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation`}
+          className="teacher-cta-btn w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading
             ? courseId

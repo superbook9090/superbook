@@ -35,12 +35,12 @@ export function CourseHeader({
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className="relative rounded-2xl overflow-hidden p-3.5 sm:p-4.5 border border-[var(--border)] antigravity-glass shadow-md"
+      transition={{ duration: 0.25 }}
+      className="student-panel overflow-hidden p-4 sm:p-5"
     >
       {/* Top luminous accent keyline */}
       <div
-        className="absolute top-0 left-0 right-0 h-[3px] shadow-[0_0_10px_var(--student-primary)]"
+        className="absolute top-0 left-0 right-0 h-[3px]"
         style={{ background: 'var(--student-gradient)' }}
         aria-hidden
       />

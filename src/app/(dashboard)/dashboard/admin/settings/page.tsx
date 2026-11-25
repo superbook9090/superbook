@@ -1,12 +1,12 @@
 'use client';
 
-import { Settings, RefreshCw, Save } from 'lucide-react';
+import { Settings, RefreshCw, Save, Loader2 } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { PageWrapper } from '@/components/layout';
 import { PageSkeleton } from '@/components/ui/Skeleton';
-import Button from '@/components/ui/Button';
 import Tooltip from '@/components/ui/Tooltip';
 import ConfirmModal from '@/components/ui/ConfirmModal';
+import { AdminPageBanner } from '@/features/admin/components/AdminPageBanner';
 
 import { useAdminSettings } from './_hooks/useAdminSettings';
 import { SettingsOverviewStats } from './_components/SettingsOverviewStats';
@@ -59,50 +59,40 @@ export default function AdminSettingsPage() {
 
   return (
     <PageWrapper className="max-w-6xl">
-      {/* Hero Banner */}
-      <div className="hero-banner flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 sm:p-6 md:p-8 rounded-3xl">
-        <div className="space-y-1.5 max-w-xl">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[var(--primary)]/15 text-[var(--primary)] border border-[var(--primary)]/25 shadow-xs">
-            <Settings className="w-3.5 h-3.5" />
-            <span>{t('adminSettings.title')}</span>
-          </div>
-          <h1 className="heading-xl">{t('adminSettings.title')}</h1>
-          <p className="text-sm sm:text-base text-[var(--color-muted-foreground)]">
-            {t('adminSettings.description')}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2 self-start sm:self-auto">
-          <Tooltip label={t('analytics.refresh')}>
-            <Button
-              onClick={fetchSettings}
-              variant="secondary"
-              size="sm"
-              className="flex items-center gap-2 min-h-[44px] px-3.5 shadow-xs"
-              aria-label="Refresh"
+      <AdminPageBanner
+        icon={Settings}
+        eyebrow={t('adminSettings.title')}
+        title={t('adminSettings.title')}
+        description={t('adminSettings.description')}
+        tier="superadmin"
+        actions={
+          <>
+            <Tooltip label={t('analytics.refresh')}>
+              <button
+                type="button"
+                onClick={fetchSettings}
+                aria-label="Refresh"
+                className="teacher-pill-btn min-h-[44px] px-3.5 text-xs sm:text-sm font-semibold cursor-pointer"
+              >
+                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">{t('analytics.refresh')}</span>
+              </button>
+            </Tooltip>
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={isSaving || !isDirty}
+              className="teacher-cta-btn min-h-[44px] px-4 text-xs sm:text-sm cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
             >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">{t('analytics.refresh')}</span>
-            </Button>
-          </Tooltip>
-          <Button
-            onClick={handleSave}
-            variant="primary"
-            size="sm"
-            isLoading={isSaving}
-            disabled={isSaving || !isDirty}
-            className="flex items-center gap-2 min-h-[44px] px-5 font-bold shadow-md"
-          >
-            {!isSaving && <Save className="w-4 h-4" />}
-            <span>{isSaving ? t('adminSettings.saving') : t('adminSettings.saveSettings')}</span>
-          </Button>
-        </div>
-      </div>
+              {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              <span>{isSaving ? t('adminSettings.saving') : t('adminSettings.saveSettings')}</span>
+            </button>
+          </>
+        }
+      />
 
-      {/* System Status Overview */}
       <SettingsOverviewStats stats={stats} />
 
-      {/* Tab Navigation & Search */}
       <SettingsTabsNav
         activeTab={activeTab}
         onTabChange={setActiveTab}
@@ -110,7 +100,6 @@ export default function AdminSettingsPage() {
         onSearchChange={setSearchQuery}
       />
 
-      {/* Sections */}
       <div className="space-y-6">
         {showFeatures && (
           <FeatureTogglesSection
@@ -145,7 +134,7 @@ export default function AdminSettingsPage() {
           />
         )}
 
-        { showPlatform && (
+        {showPlatform && (
           <PlatformConfigSection
             settings={settings}
             setSettings={setSettings}
@@ -153,12 +142,10 @@ export default function AdminSettingsPage() {
             searchQuery={searchQuery}
           />
         )}
-        { showJobs && (
-          <CronJobsSection />
-        )}
+
+        {showJobs && <CronJobsSection />}
       </div>
 
-      {/* Sticky Floating Action Bar for Unsaved Changes */}
       <SettingsActionBar
         isDirty={isDirty}
         isSaving={isSaving}
@@ -167,7 +154,6 @@ export default function AdminSettingsPage() {
         onRequestDiscard={() => setShowDiscardModal(true)}
       />
 
-      {/* Maintenance Confirmation Modal */}
       <ConfirmModal
         isOpen={showMaintenanceModal}
         type="danger"
@@ -179,7 +165,6 @@ export default function AdminSettingsPage() {
         onCancel={() => setShowMaintenanceModal(false)}
       />
 
-      {/* Discard Changes Confirmation Modal */}
       <ConfirmModal
         isOpen={showDiscardModal}
         type="warning"

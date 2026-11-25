@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { useMemo } from 'react';
 import {
   BarChart3,
   RefreshCw,
@@ -9,9 +9,15 @@ import {
   BookOpen,
   Award,
   Activity,
+  CalendarIcon,
+  X,
 } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 import { useTranslation } from '@/hooks/useTranslation';
-import Button from '@/components/ui/Button';
+import { AdminPageBanner } from '@/features/admin/components/AdminPageBanner';
+import { AdminTabs, type AdminTabOption } from '@/features/admin/components/AdminTabs';
 import type { AnalyticsTabKey } from './types';
 
 interface AdminAnalyticsHeroProps {
@@ -20,6 +26,10 @@ interface AdminAnalyticsHeroProps {
   onRefresh: () => void;
   isRefreshing: boolean;
   lastUpdated: Date | null;
+  dateRange: { startDate: string; endDate: string };
+  onDateRangeChange: (range: { startDate: string; endDate: string }) => void;
+  isSuperAdmin?: boolean;
+  activityCount?: number;
 }
 
 export function AdminAnalyticsHero({
@@ -28,83 +38,159 @@ export function AdminAnalyticsHero({
   onRefresh,
   isRefreshing,
   lastUpdated,
+  dateRange,
+  onDateRangeChange,
+  isSuperAdmin = false,
+  activityCount,
 }: AdminAnalyticsHeroProps) {
   const { t } = useTranslation();
 
-  const tabs: { key: AnalyticsTabKey; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-    { key: 'overview', label: t('adminAnalytics.tabOverview'), icon: LayoutDashboard },
-    { key: 'users', label: t('adminAnalytics.tabUsers'), icon: Users },
-    { key: 'courses', label: t('adminAnalytics.tabCourses'), icon: BookOpen },
-    { key: 'quizzes', label: t('adminAnalytics.tabQuizzes'), icon: Award },
-    { key: 'activity', label: t('adminAnalytics.tabActivity'), icon: Activity },
+  const tabs: AdminTabOption<AnalyticsTabKey>[] = [
+    { id: 'overview', label: t('adminAnalytics.tabOverview'), icon: <LayoutDashboard className="w-4 h-4 shrink-0" />, tone: isSuperAdmin ? 'amber' : 'primary' },
+    { id: 'users', label: t('adminAnalytics.tabUsers'), icon: <Users className="w-4 h-4 shrink-0" />, tone: isSuperAdmin ? 'amber' : 'primary' },
+    { id: 'courses', label: t('adminAnalytics.tabCourses'), icon: <BookOpen className="w-4 h-4 shrink-0" />, tone: isSuperAdmin ? 'amber' : 'primary' },
+    { id: 'quizzes', label: t('adminAnalytics.tabQuizzes'), icon: <Award className="w-4 h-4 shrink-0" />, tone: isSuperAdmin ? 'amber' : 'primary' },
+    {
+      id: 'activity',
+      label: t('adminAnalytics.tabActivity'),
+      icon: <Activity className="w-4 h-4 shrink-0" />,
+      count: activityCount && activityCount > 0 ? activityCount : undefined,
+      tone: isSuperAdmin ? 'amber' : 'primary',
+    },
   ];
 
+  const parsedStart = useMemo(
+    () => (dateRange.startDate ? parseISO(dateRange.startDate) : undefined),
+    [dateRange.startDate]
+  );
+  const parsedEnd = useMemo(
+    () => (dateRange.endDate ? parseISO(dateRange.endDate) : undefined),
+    [dateRange.endDate]
+  );
+
+  const hasRange = Boolean(dateRange.startDate || dateRange.endDate);
+
+  const setPreset = (days: number | null) => {
+    if (days === null) {
+      onDateRangeChange({ startDate: '', endDate: '' });
+      return;
+    }
+    const end = new Date();
+    const start = new Date();
+    start.setDate(end.getDate() - days + 1);
+    onDateRangeChange({
+      startDate: format(start, 'yyyy-MM-dd'),
+      endDate: format(end, 'yyyy-MM-dd'),
+    });
+  };
+
   const formattedTime = lastUpdated
-    ? lastUpdated.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    ? lastUpdated.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
     : '';
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="space-y-4 w-full min-w-0"
-    >
-      {/* Top Banner */}
-      <div className="hero-banner w-full min-w-0">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
-          <div className="flex items-start gap-3 min-w-0">
-            <div className="p-2.5 sm:p-3 bg-[var(--primary-soft)] text-[var(--primary)] rounded-xl sm:rounded-2xl shrink-0 shadow-xs">
-              <BarChart3 className="w-5 h-5 sm:w-7 sm:h-7" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h1 className="heading-lg sm:heading-xl truncate">{t('adminAnalytics.title')}</h1>
-              <p className="text-[var(--color-muted-foreground)] text-xs sm:text-sm mt-0.5 sm:mt-1 line-clamp-2 max-w-2xl">
-                {t('adminAnalytics.description')}
-              </p>
-            </div>
-          </div>
+    <div className="space-y-4 w-full min-w-0">
+      <AdminPageBanner
+        icon={BarChart3}
+        eyebrow={t('adminAnalytics.title')}
+        title={t('adminAnalytics.title')}
+        description={t('adminAnalytics.description')}
+        tier={isSuperAdmin ? 'superadmin' : 'admin'}
+        badges={
+          formattedTime ? (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--surface-muted)] text-[var(--color-muted-foreground)] border border-[var(--border)] tabular-nums">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              {t('adminAnalytics.lastUpdated', { time: formattedTime })}
+            </span>
+          ) : undefined
+        }
+        actions={
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+            <div className="inline-flex flex-wrap items-center gap-1 p-1 rounded-xl bg-[var(--surface-muted)] border border-[var(--border)]">
+              {[
+                { days: null, label: t('common.all') },
+                { days: 1, label: t('admin.presetToday') },
+                { days: 7, label: t('admin.preset7D') },
+                { days: 30, label: t('admin.preset30D') },
+              ].map((preset) => {
+                const isAllActive = preset.days === null && !hasRange;
+                return (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    onClick={() => setPreset(preset.days)}
+                    className={`px-2.5 min-h-[34px] text-xs font-bold rounded-[8px] transition-colors cursor-pointer ${
+                      isAllActive
+                        ? 'bg-[var(--card-solid)] text-[var(--teacher-primary)] shadow-xs'
+                        : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--card-solid)]/60'
+                    }`}
+                  >
+                    {preset.label}
+                  </button>
+                );
+              })}
 
-          <div className="flex items-center gap-2.5 self-start md:self-auto shrink-0 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 border-[var(--color-border)] pt-2.5 sm:pt-0">
-            {formattedTime && (
-              <span className="text-[11px] sm:text-xs text-[var(--color-muted)] font-medium">
-                {t('adminAnalytics.lastUpdated', { time: formattedTime })}
-              </span>
-            )}
-            <Button
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className={`inline-flex items-center gap-1.5 px-2.5 min-h-[34px] text-xs font-bold rounded-[8px] transition-colors cursor-pointer tabular-nums ${
+                      hasRange
+                        ? 'bg-[var(--card-solid)] text-[var(--teacher-primary)] shadow-xs'
+                        : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--card-solid)]/60'
+                    }`}
+                  >
+                    <CalendarIcon className="w-3.5 h-3.5 shrink-0" />
+                    <span>
+                      {parsedStart
+                        ? `${format(parsedStart, 'dd MMM')}${parsedEnd ? ` – ${format(parsedEnd, 'dd MMM')}` : ''}`
+                        : 'Range'}
+                    </span>
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <Calendar
+                    autoFocus
+                    mode="range"
+                    defaultMonth={parsedStart}
+                    selected={{ from: parsedStart, to: parsedEnd }}
+                    onSelect={(range) => {
+                      onDateRangeChange({
+                        startDate: range?.from ? format(range.from, 'yyyy-MM-dd') : '',
+                        endDate: range?.to ? format(range.to, 'yyyy-MM-dd') : '',
+                      });
+                    }}
+                    numberOfMonths={2}
+                  />
+                </PopoverContent>
+              </Popover>
+
+              {hasRange && (
+                <button
+                  type="button"
+                  onClick={() => setPreset(null)}
+                  aria-label={t('common.reset')}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-[8px] text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--card-solid)] transition-colors cursor-pointer"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            <button
               type="button"
-              variant="secondary"
               onClick={onRefresh}
               disabled={isRefreshing}
-              className="flex items-center gap-1.5 text-xs font-semibold shadow-xs py-1.5 px-3"
+              className="teacher-pill-btn min-h-[44px] px-3.5 text-xs sm:text-sm font-semibold cursor-pointer"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
               <span>{isRefreshing ? t('adminAnalytics.refreshing') : t('adminAnalytics.refresh')}</span>
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Segmented Tab Navigation */}
-      <div className="flex items-center gap-1 sm:gap-1.5 p-1.5 antigravity-glass rounded-2xl border border-[var(--border)] overflow-x-auto scrollbar-none w-full min-w-0 shadow-xs">
-        {tabs.map(({ key, label, icon: Icon }) => {
-          const isActive = activeTab === key;
-          return (
-            <button
-              key={key}
-              type="button"
-              onClick={() => onTabChange(key)}
-              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all duration-200 cursor-pointer whitespace-nowrap shrink-0 md:flex-1 justify-center min-h-[40px] ${
-                isActive
-                  ? 'bg-[var(--primary)] text-white shadow-md'
-                  : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--surface-muted)]'
-              }`}
-            >
-              <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 ${isActive ? 'text-white' : 'text-[var(--color-muted-foreground)]'}`} />
-              <span>{label}</span>
             </button>
-          );
-        })}
-      </div>
-    </motion.div>
+          </div>
+        }
+      />
+
+      <AdminTabs tabs={tabs} activeTab={activeTab} onChange={onTabChange} fullWidth />
+    </div>
   );
 }
