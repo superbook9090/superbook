@@ -102,13 +102,3 @@ export function listBlogsPaginated(params: ListBlogsParams = {}): Promise<BlogsL
 
   return apiJson<BlogsListPayload>(`${BASE}?${searchParams.toString()}`, { method: 'GET' });
 }
-
-/** @deprecated Use listBlogsPaginated */
-export function listBlogs(orgId: string, includeDrafts: boolean): Promise<BlogsListPayload> {
-  return listBlogsPaginated({
-    orgId,
-    includeDrafts,
-    limit: 200,
-    page: 1,
-  });
-}

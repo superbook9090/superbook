@@ -13,8 +13,3 @@ export function getSeoToolContent(slug: string, lang: Language): SeoToolData | n
 
   return english;
 }
-
-export function getSeoToolLabel(slug: string, lang: Language): string {
-  const tool = getSeoToolContent(slug, lang);
-  return tool?.h1 ?? slug;
-}

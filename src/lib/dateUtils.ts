@@ -39,17 +39,6 @@ export function formatDateTime(date: string | Date | null | undefined): string {
   });
 }
 
-/** Short numeric date per locale */
-export function formatShortDate(date: string | Date | null | undefined): string {
-  const d = parseValidDate(date);
-  if (!d) return 'N/A';
-  return d.toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  });
-}
-
 /** Time only (e.g. "2:30 PM") */
 export function formatTime(date: string | Date | null | undefined): string {
   const d = parseValidDate(date);
@@ -85,20 +74,6 @@ export function getRelativeTime(date: string | Date | null | undefined): string 
   if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
 
   return formatDate(d);
-}
-
-/** Returns a date set to the start of the day (00:00:00.000) */
-export function startOfDay(date: string | Date = new Date()): Date {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
-/** Returns a date set to the end of the day (23:59:59.999) */
-export function endOfDay(date: string | Date = new Date()): Date {
-  const d = new Date(date);
-  d.setHours(23, 59, 59, 999);
-  return d;
 }
 
 /** Returns a date N days in the past at the start of that day */

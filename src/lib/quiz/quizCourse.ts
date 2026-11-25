@@ -22,13 +22,6 @@ export type QuizWithCourse = {
   lesson?: QuizCourseRef;
 };
 
-export function filterQuizzesByCourse<T extends QuizWithCourse>(
-  quizzes: T[],
-  courseId: string
-): T[] {
-  return quizzes.filter((q) => getQuizCourseId(q.course) === courseId);
-}
-
 export function splitQuizzesByScope<T extends QuizWithCourse>(quizzes: T[]) {
   return {
     courseLevel: quizzes.filter((q) => isCourseLevelQuiz(q.chapter, q.lesson)),

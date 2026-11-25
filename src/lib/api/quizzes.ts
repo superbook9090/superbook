@@ -27,11 +27,6 @@ export function listQuizzesByCourse(courseId: string): Promise<QuizzesListPayloa
   return apiJson(`${BASE}?${params.toString()}`, { method: 'GET' });
 }
 
-/** GET `/api/quizzes` without org filter (admin all quizzes, teacher client-side filter). */
-export function listQuizzesAll(): Promise<QuizzesListPayload> {
-  return apiJson(BASE, { method: 'GET' });
-}
-
 /** Map UI sort values to `/api/quizzes` query param values. */
 function mapQuizSortParam(sort?: string): string | undefined {
   switch (sort) {

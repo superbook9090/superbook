@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import { Enrollment } from '@/models';
 
 /** Course is private when it has a non-empty course code. */
@@ -75,17 +74,4 @@ export function resolveCourseCodeForSave(
   if (courseCode === undefined) return existingCode ?? undefined;
   const normalized = normalizeCourseCode(courseCode);
   return normalized.length > 0 ? normalized : undefined;
-}
-
-export async function generateUniqueCourseCode(
-  CourseModel: mongoose.Model<{ courseCode?: string | null }>,
-  length = 8
-): Promise<string> {
-  const { generateInviteCode } = await import('@/lib/inviteCode');
-  for (let attempt = 0; attempt < 20; attempt++) {
-    const code = generateInviteCode(length);
-    const exists = await CourseModel.exists({ courseCode: code });
-    if (!exists) return code;
-  }
-  throw new Error('Unable to generate unique course code');
 }

@@ -72,6 +72,71 @@ export function updateOrganization(
   return apiJson(`/api/organizations/${encodeURIComponent(id)}`, { method: 'PATCH', body });
 }
 
+export interface OrganizationDetailUser {
+  _id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  role: string;
+  isSuspended: boolean;
+  lastPlatform?: string;
+  lastActiveAt?: string;
+  createdAt: string;
+}
+
+export interface OrganizationDetailCourse {
+  _id: string;
+  title: string;
+  category: string;
+  isPublished: boolean;
+  enrolledCount: number;
+  lessonCount: number;
+  instructorName: string;
+  createdAt: string;
+}
+
+export interface OrganizationDetailQuiz {
+  _id: string;
+  title: string;
+  isPublished: boolean;
+  questionCount: number;
+  timeLimit: number;
+  courseTitle: string;
+  instructorName: string;
+  createdAt: string;
+}
+
+export interface OrganizationDetailBlog {
+  _id: string;
+  title: string;
+  slug: string;
+  category: string;
+  isPublished: boolean;
+  views: number;
+  authorName: string;
+  createdAt: string;
+}
+
+export interface OrganizationFullDetails extends OrganizationItem {
+  details: {
+    roleBreakdown: {
+      students: number;
+      teachers: number;
+      admins: number;
+    };
+    users: OrganizationDetailUser[];
+    courses: OrganizationDetailCourse[];
+    quizzes: OrganizationDetailQuiz[];
+    blogs: OrganizationDetailBlog[];
+  };
+}
+
+export function getOrganizationDetails(id: string): Promise<OrganizationFullDetails> {
+  return apiJson(`/api/organizations/${encodeURIComponent(id)}?includeDetails=true`, {
+    method: 'GET',
+  });
+}
+
 export function deleteOrganization(id: string): Promise<{ message: string }> {
   return apiJson(`/api/organizations/${encodeURIComponent(id)}`, { method: 'DELETE' });
 }

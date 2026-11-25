@@ -109,10 +109,6 @@ export const LazyCourseLeaderboard = loadableClient(
 export const LazyCreateQuizPageContent = loadable(
   () => import('@/features/quizzes/components/CreateQuizPageContent')
 );
-export const LazyCreateQuizForm = loadableClient(
-  () => import('@/features/quizzes/components/CreateQuizForm'),
-  'embed'
-);
 export const LazyQuizCard = loadable(
   () => import('@/features/quizzes/components/QuizCard'),
   { skeleton: 'none' }
@@ -155,10 +151,6 @@ export const LazyBlogEditorForm = loadableClient(
   () => import('@/features/blogs/components/BlogEditorForm'),
   'embed'
 );
-export const LazyBlogFilters = loadable(
-  () => import('@/features/blogs/components/BlogFilters'),
-  { skeleton: 'none' }
-);
 
 // ——— Files & media ———
 export const LazyFileExplorer = loadableClient(
@@ -167,10 +159,6 @@ export const LazyFileExplorer = loadableClient(
 );
 export const LazySecurePlayer = loadableClient(
   () => import('@/components/video/SecurePlayer'),
-  'embed'
-);
-export const LazyRichTextEditor = loadableClient(
-  () => import('@/components/ui/RichTextEditor'),
   'embed'
 );
 

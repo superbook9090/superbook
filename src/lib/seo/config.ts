@@ -1,7 +1,6 @@
 /** Site-wide SEO configuration and education-domain keywords. */
 
 export const SITE_NAME = 'Quiz Do';
-export const SITE_NAME_FULL = 'Quiz Do — Free Online Quizzes & Learning Management System';
 
 /** Primary education / EdTech keywords for meta tags and structured data. */
 export const EDUCATION_KEYWORDS = [

@@ -135,6 +135,7 @@ async function getStudentDashboardData(userId: string): Promise<StudentDashboard
       .sort({ enrolledAt: -1 })
       .lean(),
     QuizAttempt.find({ student: userId })
+      .select('-answers')
       .populate('quiz', 'title description timeLimit questionCount')
       .populate('course', 'title description')
       .sort({ startedAt: -1 })
@@ -209,7 +210,7 @@ async function getTeacherDashboardData(
     blogQuery.organizationId = organizationId;
   }
 
-  const [courses, blogs, settings] = await Promise.all([
+  const [courses, blogs, settings, teacherUser] = await Promise.all([
     Course.find(courseQuery, {
       title: 1,
       description: 1,
@@ -240,29 +241,30 @@ async function getTeacherDashboardData(
       .sort({ createdAt: -1 })
       .lean(),
     getSettingsWithDefaults(),
+    User.findById(userId).select('limits').lean<TeacherUserLimits>(),
   ]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const courseIds: string[] = courses.map((c: any) => c._id?.toString()).filter(Boolean);
-  const [quizzes, teacherUser] = await Promise.all([
-    Quiz.find(
-      { course: { $in: courseIds } },
-      {
-        title: 1,
-        description: 1,
-        timeLimit: 1,
-        isPublished: 1,
-        course: 1,
-        createdAt: 1,
-        questionCount: 1,
-        version: 1,
-      }
-    )
-      .populate('course', 'title description')
-      .sort({ createdAt: -1 })
-      .lean(),
-    User.findById(userId).select('limits').lean<TeacherUserLimits>(),
-  ]);
+  const quizzes =
+    courseIds.length > 0
+      ? await Quiz.find(
+          { course: { $in: courseIds } },
+          {
+            title: 1,
+            description: 1,
+            timeLimit: 1,
+            isPublished: 1,
+            course: 1,
+            createdAt: 1,
+            questionCount: 1,
+            version: 1,
+          }
+        )
+          .populate('course', 'title description')
+          .sort({ createdAt: -1 })
+          .lean()
+      : [];
 
   const teacherLimits = settings.teacherLimits ?? { courses: 5, quizzes: 10, blogs: 10 };
 

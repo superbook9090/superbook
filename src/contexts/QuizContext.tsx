@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useMemo, useState, ReactNode } from 'react';
 
 interface QuizContextType {
   isQuizActive: boolean;
@@ -12,8 +12,13 @@ const QuizContext = createContext<QuizContextType | undefined>(undefined);
 export function QuizProvider({ children }: { children: ReactNode }) {
   const [isQuizActive, setQuizActive] = useState(false);
 
+  const value = useMemo(
+    () => ({ isQuizActive, setQuizActive }),
+    [isQuizActive]
+  );
+
   return (
-    <QuizContext.Provider value={{ isQuizActive, setQuizActive }}>
+    <QuizContext.Provider value={value}>
       {children}
     </QuizContext.Provider>
   );

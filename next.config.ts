@@ -2,6 +2,7 @@
 const nextConfig = {
   reactStrictMode: false, // Disabled to prevent double renders during debugging
   images: {
+    formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       {
         protocol: 'https',
@@ -18,6 +19,7 @@ const nextConfig = {
     ],
   },
   experimental: {
+    optimizePackageImports: ['lucide-react', 'recharts', 'framer-motion', 'date-fns', 'radix-ui'],
     serverActions: {
       bodySizeLimit: '2000mb',
     },

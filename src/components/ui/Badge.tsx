@@ -4,30 +4,30 @@ import { cn } from "@/lib/utils"
 import { Slot } from "radix-ui"
 
 const badgeVariants = cva(
-  "inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border border-transparent px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none [&>svg]:size-3",
+  "inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border border-transparent px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:ring-[var(--primary)]/35 [&>svg]:pointer-events-none [&>svg]:size-3",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground [a&]:hover:bg-primary/90",
-        primary: "bg-primary text-primary-foreground [a&]:hover:bg-primary/90",
+        default: "bg-[var(--primary)] text-white [a&]:hover:bg-[var(--primary-hover)]",
+        primary: "bg-[var(--primary)] text-white [a&]:hover:bg-[var(--primary-hover)]",
         secondary:
-          "bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90",
+          "bg-[var(--surface-muted)] text-[var(--color-foreground)] border-[var(--border)] [a&]:hover:bg-[var(--surface-muted-strong)]",
         destructive:
-          "bg-destructive text-white focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40 [a&]:hover:bg-destructive/90",
+          "bg-[var(--error)] text-white [a&]:hover:bg-[var(--error)]/90",
         error:
-          "bg-destructive text-white focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40 [a&]:hover:bg-destructive/90",
+          "bg-[var(--error)] text-white [a&]:hover:bg-[var(--error)]/90",
         danger:
-          "bg-destructive text-white focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40 [a&]:hover:bg-destructive/90",
+          "bg-[var(--error)] text-white [a&]:hover:bg-[var(--error)]/90",
         success:
           "bg-[var(--color-success)] text-white [a&]:hover:bg-[var(--color-success)]/90",
         warning:
-          "bg-[var(--color-warning)] text-white [a&]:hover:bg-[var(--color-warning)]/90",
+          "bg-[var(--color-warning)] text-slate-950 [a&]:hover:bg-[var(--color-warning)]/90",
         info:
           "bg-[var(--color-info)] text-white [a&]:hover:bg-[var(--color-info)]/90",
         outline:
-          "border-border text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
-        ghost: "[a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 [a&]:hover:underline",
+          "border-[var(--border)] text-[var(--color-foreground)] [a&]:hover:bg-[var(--surface-muted)]",
+        ghost: "text-[var(--color-foreground)] [a&]:hover:bg-[var(--surface-muted)]",
+        link: "text-[var(--primary)] underline-offset-4 [a&]:hover:underline",
       },
       size: {
         default: "",

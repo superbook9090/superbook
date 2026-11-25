@@ -78,19 +78,6 @@ export async function registerDeviceToken(input: RegisterDeviceInput): Promise<{
   return data;
 }
 
-export async function unregisterDeviceToken(deviceToken: string): Promise<{ success: boolean }> {
-  const { data } = await apiJsonData<{ success: boolean }>(DEVICE, {
-    method: 'DELETE',
-    body: { deviceToken },
-  });
-  return data;
-}
-
-export async function getNotificationPreferences(): Promise<NotificationPreferences> {
-  const { data } = await apiJsonData<NotificationPreferences>(PREFERENCES, { method: 'GET' });
-  return data;
-}
-
 export async function updateNotificationPreferences(
   updates: Partial<Pick<NotificationPreferences, 'muteAll' | 'disablePush' | 'categories'>>
 ): Promise<NotificationPreferences> {

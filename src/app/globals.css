@@ -6,6 +6,26 @@
 @source "../features/**/*.{js,ts,jsx,tsx}";
 @source "../constants/**/*.{js,ts,jsx,tsx}";
 
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card-solid);
+  --color-card-foreground: var(--foreground);
+  --color-popover: var(--card-solid);
+  --color-popover-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: #ffffff;
+  --color-secondary-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted);
+  --color-accent: var(--primary-soft);
+  --color-accent-foreground: var(--foreground);
+  --color-destructive: var(--error);
+  --color-destructive-foreground: #ffffff;
+  --color-border: var(--border);
+  --color-input: var(--border);
+  --color-ring: var(--primary);
+}
+
 /* =========================
    DESIGN TOKENS (centralized)
 ========================= */
@@ -85,6 +105,7 @@
   --primary-soft: var(--student-soft);
   --primary-border: var(--student-border);
   --primary-accent: var(--student-accent);
+  --accent: var(--student-accent);
   --primary-gradient: var(--student-gradient);
   --primary-shadow: var(--student-shadow);
   --primary-dark: var(--student-primary-dark);
@@ -229,6 +250,7 @@
   --primary-soft: var(--student-soft);
   --primary-border: var(--student-border);
   --primary-accent: var(--student-accent);
+  --accent: var(--student-accent);
   --primary-gradient: var(--student-gradient);
   --primary-shadow: var(--student-shadow);
   --primary-dark: var(--student-primary-dark);

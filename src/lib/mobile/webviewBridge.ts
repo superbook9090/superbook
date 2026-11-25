@@ -110,8 +110,6 @@ export const openLinkViaNativeApp = (url: string, target: NativeOpenLinkTarget =
 
 export const openExternalLinkViaNativeApp = (url: string) => openLinkViaNativeApp(url, 'external');
 
-export const openInternalLinkViaNativeApp = (url: string) => openLinkViaNativeApp(url, 'internal');
-
 export const requestGoogleSignOutViaNativeApp = () => {
   if (typeof window === 'undefined') {
     return false;

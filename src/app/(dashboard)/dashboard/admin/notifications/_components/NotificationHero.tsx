@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   BellRing,
@@ -7,8 +8,13 @@ import {
   Send,
   Sparkles,
   History,
+  Bell,
 } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useSessionStore } from '@/store/useSessionStore';
+import { useAlert } from '@/components/ui/AlertContainer';
+import { registerDeviceToken } from '@/lib/notifications/push/registerDevice';
+import { apiJsonData, ApiClientError } from '@/lib/api/http';
 import Button from '@/components/ui/Button';
 import type { NotificationTabKey } from './types';
 
@@ -28,6 +34,50 @@ export function NotificationHero({
   lastUpdated,
 }: NotificationHeroProps) {
   const { t } = useTranslation();
+  const { session } = useSessionStore();
+  const { addAlert } = useAlert();
+  const [testingPush, setTestingPush] = useState(false);
+
+  const handleTestBrowserPush = async () => {
+    const userId = session?.user?.id;
+    if (!userId || testingPush) return;
+    setTestingPush(true);
+    try {
+      const registered = await registerDeviceToken(userId, 'web', true);
+      if (!registered) {
+        const blocked =
+          typeof window !== 'undefined' &&
+          'Notification' in window &&
+          Notification.permission === 'denied';
+        addAlert({
+          type: 'error',
+          message: blocked
+            ? t('notifications.inbox.pushBlocked')
+            : t('notifications.push.enableFailed'),
+          duration: 6000,
+        });
+        return;
+      }
+      window.dispatchEvent(new Event('quizdo:push-enabled'));
+      const { data } = await apiJsonData<{ message?: string }>('/api/notifications/test', {
+        method: 'POST',
+      });
+      addAlert({
+        type: 'success',
+        message: data?.message || t('notifications.push.testSent'),
+        duration: 5000,
+      });
+      onRefresh();
+    } catch (err) {
+      addAlert({
+        type: 'error',
+        message: err instanceof ApiClientError ? err.message : t('notifications.push.enableFailed'),
+        duration: 6000,
+      });
+    } finally {
+      setTestingPush(false);
+    }
+  };
 
   const tabs: { key: NotificationTabKey; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { key: 'compose', label: t('admin.notifications.tabCompose'), icon: Send },
@@ -66,6 +116,16 @@ export function NotificationHero({
                 {t('adminAnalytics.lastUpdated', { time: formattedTime })}
               </span>
             )}
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleTestBrowserPush}
+              disabled={testingPush}
+              className="flex items-center gap-1.5 text-xs font-semibold shadow-xs py-1.5 px-3 touch-target"
+            >
+              <Bell className={`w-3.5 h-3.5 ${testingPush ? 'animate-pulse' : ''}`} />
+              <span>{testingPush ? t('notifications.inbox.enabling') : t('notifications.push.testBrowser')}</span>
+            </Button>
             <Button
               type="button"
               variant="secondary"

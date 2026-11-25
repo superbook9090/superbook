@@ -60,9 +60,3 @@ export const initMobileNotifications = async (userId: string): Promise<boolean> 
 
   return inFlightRegistration;
 };
-
-export const syncBadgeCount = (count: number) => {
-  if (isAndroidWebView() || isIOSWebView()) {
-    sendToWebView({ action: 'SET_BADGE_COUNT', payload: { count } });
-  }
-};

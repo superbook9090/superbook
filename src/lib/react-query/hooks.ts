@@ -21,7 +21,6 @@ import {
 } from '@/lib/api/courses';
 import { listQuizzesByOrg, listQuizzesByCourse, listQuizzesPaginated, deleteQuiz } from '@/lib/api/quizzes';
 import { toIdString } from '@/lib/id';
-import { listTeacherCoursesSelf } from '@/lib/api/courses';
 import { listEnrollments, enrollInCourse, joinCourseByCode, dropEnrollment } from '@/lib/api/enrollments';
 import { listCertificates } from '@/lib/api/certificates';
 import { listQuizAttempts, startQuizAttempt, submitQuizAttempt, type SubmitQuizAttemptInput } from '@/lib/api/quizAttempts';
@@ -216,33 +215,6 @@ export function useQuizzes(orgId?: string) {
 }
 
 /** Quizzes for one course, optionally published-only (student views). */
-/** Teacher quiz management list (all quizzes filtered to instructor's courses). */
-export function useTeacherQuizzesList(enabled = true) {
-  return useQuery({
-    queryKey: ['quizzes', 'teacher-list'],
-    queryFn: async () => {
-      const coursesData = await listTeacherCoursesSelf();
-      const courses = (coursesData.courses || []) as Course[];
-      if (courses.length === 0) {
-        return { courses, quizzes: [] as Quiz[] };
-      }
-      const courseIds = new Set(courses.map((c) => c._id));
-      const data = await listQuizzesPaginated({ limit: 200, instructor: 'self' });
-      const all = (data.quizzes || []) as Quiz[];
-      const quizzes = all.filter((q) => {
-        const id =
-          typeof q.course === 'object' && q.course !== null && '_id' in q.course
-            ? q.course._id
-            : String(q.course);
-        return id && courseIds.has(id);
-      });
-      return { courses, quizzes };
-    },
-    enabled,
-    refetchOnMount: 'always',
-  });
-}
-
 export function useCourseQuizzes(
   courseId: string,
   options?: { orgId?: string; publishedOnly?: boolean }
@@ -565,16 +537,6 @@ export function useCourseCurriculum(courseId: string) {
     queryKey: ['courses', courseId, 'curriculum'],
     queryFn: () => getCourseCurriculum(courseId) as Promise<Chapter[]>,
     enabled: !!courseId,
-  });
-}
-
-
-
-export function useLessonDetails(lessonId: string) {
-  return useQuery({
-    queryKey: ['lessons', lessonId],
-    queryFn: () => getLesson(lessonId) as Promise<Lesson>,
-    enabled: !!lessonId,
   });
 }
 

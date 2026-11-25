@@ -17,11 +17,6 @@ export function stopSpeaking(): void {
   }
 }
 
-export function isSpeaking(): boolean {
-  if (!isSpeechSupported()) return false;
-  return window.speechSynthesis.speaking;
-}
-
 export function speakText(
   text: string,
   options?: {

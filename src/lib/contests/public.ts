@@ -2,7 +2,6 @@ import 'server-only';
 import mongoose from 'mongoose';
 import dbConnect from '@/lib/db';
 import Contest from '@/models/Contest';
-import { getSiteUrl } from '@/lib/seo/config';
 
 export type PublicContestSummary = {
   _id: string;
@@ -203,8 +202,4 @@ export async function listPublicContestSitemapEntries(limit = 200): Promise<Publ
 
 export function buildPublicContestPath(slug: string) {
   return `/contests/${slug}`;
-}
-
-export function buildPublicContestCanonical(slug: string) {
-  return `${getSiteUrl()}${buildPublicContestPath(slug)}`;
 }

@@ -48,23 +48,52 @@ export async function GET(req: NextRequest) {
       .sort({ createdAt: -1 })
       .lean();
 
-    // Get user count for each organization
-    const orgsWithCounts = await Promise.all(
-      organizations.map(async (org) => {
-        const userCount = await User.countDocuments({ organizationId: org._id });
-        const courseCount = await Course.countDocuments({ organizationId: org._id });
-        const blogCount = await Blog.countDocuments({ organizationId: org._id });
-        const quizCount = await Quiz.countDocuments({ organizationId: org._id });
+    // Aggregate counts across all organizations in 4 constant-time queries (avoids 4*N N+1 queries)
+    const orgIds = organizations.map((org) => org._id);
+    const [userAgg, courseAgg, blogAgg, quizAgg] = orgIds.length
+      ? await Promise.all([
+          User.aggregate<{ _id: unknown; count: number }>([
+            { $match: { organizationId: { $in: orgIds } } },
+            { $group: { _id: '$organizationId', count: { $sum: 1 } } },
+          ]),
+          Course.aggregate<{ _id: unknown; count: number }>([
+            { $match: { organizationId: { $in: orgIds } } },
+            { $group: { _id: '$organizationId', count: { $sum: 1 } } },
+          ]),
+          Blog.aggregate<{ _id: unknown; count: number }>([
+            { $match: { organizationId: { $in: orgIds } } },
+            { $group: { _id: '$organizationId', count: { $sum: 1 } } },
+          ]),
+          Quiz.aggregate<{ _id: unknown; count: number }>([
+            { $match: { organizationId: { $in: orgIds } } },
+            { $group: { _id: '$organizationId', count: { $sum: 1 } } },
+          ]),
+        ])
+      : [[], [], [], []];
 
-        return {
-          ...org,
-          userCount,
-          courseCount,
-          blogCount,
-          quizCount,
-        };
-      })
-    );
+    const toCountMap = (rows: Array<{ _id: unknown; count: number }>) => {
+      const map = new Map<string, number>();
+      for (const row of rows) {
+        if (row._id) map.set(String(row._id), row.count);
+      }
+      return map;
+    };
+
+    const userCountMap = toCountMap(userAgg);
+    const courseCountMap = toCountMap(courseAgg);
+    const blogCountMap = toCountMap(blogAgg);
+    const quizCountMap = toCountMap(quizAgg);
+
+    const orgsWithCounts = organizations.map((org) => {
+      const idStr = String(org._id);
+      return {
+        ...org,
+        userCount: userCountMap.get(idStr) ?? 0,
+        courseCount: courseCountMap.get(idStr) ?? 0,
+        blogCount: blogCountMap.get(idStr) ?? 0,
+        quizCount: quizCountMap.get(idStr) ?? 0,
+      };
+    });
 
     const serializedOrgs = serialize(orgsWithCounts);
 
@@ -122,16 +151,20 @@ export async function POST(req: NextRequest) {
     let inviteCode = generateInviteCode();
 
     // Ensure codes are unique
-    let codeExists = await Organization.findOne({ code });
-    let inviteExists = await Organization.findOne({ inviteCode });
+    let [codeExists, inviteExists] = await Promise.all([
+      Organization.exists({ code }),
+      Organization.exists({ inviteCode }),
+    ]);
 
     // Retry if collision
     let attempts = 0;
     while ((codeExists || inviteExists) && attempts < 10) {
       code = generateOrgCode();
       inviteCode = generateInviteCode();
-      codeExists = await Organization.findOne({ code });
-      inviteExists = await Organization.findOne({ inviteCode });
+      [codeExists, inviteExists] = await Promise.all([
+        Organization.exists({ code }),
+        Organization.exists({ inviteCode }),
+      ]);
       attempts++;
     }
 

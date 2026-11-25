@@ -46,12 +46,50 @@ export async function initFirebaseMessaging(): Promise<Messaging | null> {
   }
 }
 
+async function waitForActiveServiceWorker(
+  registration: ServiceWorkerRegistration
+): Promise<ServiceWorkerRegistration> {
+  if (registration.active) {
+    return registration;
+  }
+
+  const worker = registration.installing || registration.waiting;
+  if (worker) {
+    await new Promise<void>((resolve) => {
+      const timeout = setTimeout(resolve, 5000);
+      const onStateChange = () => {
+        if (worker.state === 'activated' || worker.state === 'redundant') {
+          clearTimeout(timeout);
+          worker.removeEventListener('statechange', onStateChange);
+          resolve();
+        }
+      };
+      worker.addEventListener('statechange', onStateChange);
+    });
+  }
+
+  if (registration.active) {
+    return registration;
+  }
+
+  return navigator.serviceWorker.ready;
+}
+
 export async function requestNotificationPermission(): Promise<string | null> {
   if (typeof window === 'undefined' || !('Notification' in window) || !('serviceWorker' in navigator)) {
     return null;
   }
 
-  const permission = await Notification.requestPermission();
+  const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;
+  if (!vapidKey) {
+    console.warn('[Push] NEXT_PUBLIC_FIREBASE_VAPID_KEY is missing.');
+    return null;
+  }
+
+  const permission =
+    Notification.permission === 'granted'
+      ? 'granted'
+      : await Notification.requestPermission();
   if (permission !== 'granted') {
     return null;
   }
@@ -60,12 +98,16 @@ export async function requestNotificationPermission(): Promise<string | null> {
   if (!msg) return null;
 
   try {
-    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-    await navigator.serviceWorker.ready;
+    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
+      scope: '/',
+    });
+    // Prompt browser to fetch latest SW immediately if a stale copy is cached
+    void registration.update().catch(() => {});
+    const activeRegistration = await waitForActiveServiceWorker(registration);
 
     return await getToken(msg, {
-      vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
-      serviceWorkerRegistration: registration,
+      vapidKey,
+      serviceWorkerRegistration: activeRegistration,
     });
   } catch (error) {
     console.error('An error occurred while retrieving token.', error);
@@ -82,12 +124,3 @@ export async function subscribeToForegroundMessages(
 
   return onMessage(msg, handler);
 }
-
-/** @deprecated Use subscribeToForegroundMessages */
-export const onMessageListener = () =>
-  new Promise<MessagePayload>((resolve) => {
-    if (!messagingInstance) return;
-    onMessage(messagingInstance, (payload) => {
-      resolve(payload);
-    });
-  });

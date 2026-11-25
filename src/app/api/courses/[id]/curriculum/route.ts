@@ -13,25 +13,26 @@ import { serialize } from '@/lib/serialize';
 import { requireFeature } from '@/lib/settingsHelpers';
 
 async function fetchCurriculumTree(courseId: string, publishedQuizzesOnly: boolean) {
-  const chapters = await Chapter.find({ course: courseId }).sort({ order: 1 }).lean();
-  const lessons = await Lesson.find({ course: courseId })
-    .sort({ order: 1 })
-    .select('-content')
-    .lean();
-
-  const tree = buildCurriculumTree(
-    chapters as unknown as Parameters<typeof buildCurriculumTree>[0],
-    lessons as unknown as Parameters<typeof buildCurriculumTree>[1]
-  );
-
   const quizFilter: { course: string; isPublished?: boolean } = { course: courseId };
   if (publishedQuizzesOnly) {
     quizFilter.isPublished = true;
   }
 
-  const quizzes = await Quiz.find(quizFilter)
-    .select('title description timeLimit questionCount isPublished course chapter lesson')
-    .lean();
+  const [chapters, lessons, quizzes] = await Promise.all([
+    Chapter.find({ course: courseId }).sort({ order: 1 }).lean(),
+    Lesson.find({ course: courseId })
+      .sort({ order: 1 })
+      .select('-content')
+      .lean(),
+    Quiz.find(quizFilter)
+      .select('title description timeLimit questionCount isPublished course chapter lesson')
+      .lean(),
+  ]);
+
+  const tree = buildCurriculumTree(
+    chapters as unknown as Parameters<typeof buildCurriculumTree>[0],
+    lessons as unknown as Parameters<typeof buildCurriculumTree>[1]
+  );
 
   return attachQuizzesToCurriculumTree(
     tree,
@@ -45,7 +46,9 @@ async function validateParentChapter(
 ): Promise<{ ok: true } | { ok: false; message: string }> {
   if (!parentChapterId) return { ok: true };
 
-  const parent = await Chapter.findById(parentChapterId);
+  const parent = await Chapter.findById(parentChapterId)
+    .select('course parentChapter')
+    .lean<{ course: { toString(): string }; parentChapter?: unknown }>();
   if (!parent || parent.course.toString() !== courseId) {
     return { ok: false, message: 'Parent topic not found' };
   }
@@ -65,10 +68,11 @@ export async function GET(
     const featureCheck = await requireFeature('enableCourses');
     if (featureCheck) return featureCheck;
 
-    await dbConnect();
-    await ensureChapterIndexes();
-    const { id } = await params;
-    const session = await getServerSession(authOptions);
+    const [{ id }, session] = await Promise.all([
+      params,
+      getServerSession(authOptions),
+      dbConnect().then(() => ensureChapterIndexes()),
+    ]);
     const publishedQuizzesOnly =
       !session?.user?.role || session.user.role === 'student';
 

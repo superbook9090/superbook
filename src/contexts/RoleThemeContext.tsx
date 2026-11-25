@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, useMemo, ReactNode } from 'react';
 import { UserRole, RoleTheme, getRoleTheme } from '@/lib/roleTheme';
 
 interface RoleThemeContextType {
@@ -17,10 +17,13 @@ interface RoleThemeProviderProps {
 
 export function RoleThemeProvider({ role, children }: RoleThemeProviderProps) {
   const normalizedRole = (role?.toLowerCase() || 'student') as UserRole;
-  const theme = getRoleTheme(normalizedRole);
+  const value = useMemo(
+    () => ({ role: normalizedRole, theme: getRoleTheme(normalizedRole) }),
+    [normalizedRole]
+  );
 
   return (
-    <RoleThemeContext.Provider value={{ role: normalizedRole, theme }}>
+    <RoleThemeContext.Provider value={value}>
       {children}
     </RoleThemeContext.Provider>
   );

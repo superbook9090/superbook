@@ -27,17 +27,6 @@ export function isSoundMuted(): boolean {
   return localStorage.getItem(STORAGE_KEY) === 'true';
 }
 
-export function setSoundMuted(muted: boolean): void {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(STORAGE_KEY, muted ? 'true' : 'false');
-}
-
-export function toggleSound(): boolean {
-  const current = isSoundMuted();
-  setSoundMuted(!current);
-  return !current;
-}
-
 /** Soft pleasant pop when selecting a multiple-choice option */
 export function playOptionSelectSound(): void {
   if (isSoundMuted()) return;

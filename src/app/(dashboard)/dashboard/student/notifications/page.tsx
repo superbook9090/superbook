@@ -112,14 +112,17 @@ export default function StudentNotificationsPage() {
     setRequestingPush(true);
     try {
       const { registerDeviceToken } = await import('@/lib/notifications/push/registerDevice');
-      const success = await registerDeviceToken(session.user.id, 'web');
+      const success = await registerDeviceToken(session.user.id, 'web', true);
       if (typeof window !== 'undefined' && 'Notification' in window) {
         setPermissionState(Notification.permission);
       }
       if (success) {
+        window.dispatchEvent(new Event('quizdo:push-enabled'));
         addAlert({ type: 'success', message: t('notifications.inbox.pushEnabled'), duration: 4000 });
       } else if (Notification.permission === 'denied') {
         addAlert({ type: 'error', message: t('notifications.inbox.pushBlocked'), duration: 6000 });
+      } else {
+        addAlert({ type: 'error', message: t('notifications.push.enableFailed'), duration: 5000 });
       }
     } catch {
       addAlert({ type: 'error', message: t('notifications.inbox.loadFailed'), duration: 4000 });

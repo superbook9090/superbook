@@ -23,13 +23,15 @@ export async function GET(
   };
 
   try {
-    const featureCheck = await requireFeature('enableCourses');
+    const [featureCheck, enrollmentFeatureCheck, session, { id }] = await Promise.all([
+      requireFeature('enableCourses'),
+      requireFeature('enableEnrollmentManagement'),
+      getServerSession(authOptions),
+      params,
+    ]);
     if (featureCheck) return featureCheck;
-
-    const enrollmentFeatureCheck = await requireFeature('enableEnrollmentManagement');
     if (enrollmentFeatureCheck) return enrollmentFeatureCheck;
 
-    const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
@@ -37,9 +39,10 @@ export async function GET(
     logContext.userId = session.user.id;
 
     await dbConnect();
-    const { id } = await params;
 
-    const course = await Course.findById(id);
+    const course = await Course.findById(id)
+      .select('instructor organizationId')
+      .lean<{ instructor: { toString(): string }; organizationId?: mongoose.Types.ObjectId | null }>();
     if (!course) {
       return NextResponse.json({ message: 'Course not found' }, { status: 404 });
     }

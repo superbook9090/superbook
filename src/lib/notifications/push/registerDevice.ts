@@ -8,9 +8,10 @@ import {
 export async function registerDeviceTokenIfNeeded(
   userId: string,
   platform: 'android' | 'ios' | 'web',
-  token: string
+  token: string,
+  force = false
 ): Promise<boolean> {
-  if (isDeviceRegistered(userId, token, platform)) {
+  if (!force && isDeviceRegistered(userId, token, platform)) {
     return true;
   }
 
@@ -19,14 +20,18 @@ export async function registerDeviceTokenIfNeeded(
   return true;
 }
 
-export async function registerDeviceToken(userId: string, platform: 'android' | 'ios' | 'web') {
+export async function registerDeviceToken(
+  userId: string,
+  platform: 'android' | 'ios' | 'web',
+  force = false
+) {
   try {
     const token = await requestNotificationPermission();
     if (!token) {
       return false;
     }
 
-    return registerDeviceTokenIfNeeded(userId, platform, token);
+    return registerDeviceTokenIfNeeded(userId, platform, token, force);
   } catch (error) {
     console.error('Error during token registration:', error);
     return false;

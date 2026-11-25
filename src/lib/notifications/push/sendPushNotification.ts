@@ -5,15 +5,61 @@ import dbConnect from '@/lib/db';
 import { PushNotificationPayload } from './notificationPayload';
 import mongoose from 'mongoose';
 
+export interface PushDeliverySummary {
+  sent: number;
+  failed: number;
+  tokenCount: number;
+}
+
+function resolveWebPathFromRawUrl(rawUrl?: string): string {
+  if (!rawUrl) return '/dashboard/student/notifications';
+  if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://') || rawUrl.startsWith('/')) {
+    return rawUrl;
+  }
+  if (rawUrl.startsWith('quizdo://')) {
+    const segments = rawUrl.replace('quizdo://', '').split('/').filter(Boolean);
+    const [head, id, sub, subId] = segments;
+    switch (head) {
+      case 'course':
+        if (!id) return '/dashboard/student/courses';
+        if (sub === 'lesson' && subId) return `/dashboard/student/courses/${id}/lessons/${subId}`;
+        return `/dashboard/student/courses/${id}`;
+      case 'quiz':
+        return id ? `/dashboard/student/quizzes/${id}` : '/dashboard/student/quizzes';
+      case 'contest':
+        if (!id) return '/dashboard/student/contests';
+        if (sub === 'result') return `/dashboard/student/contests/${id}/result`;
+        return `/dashboard/student/contests/${id}/take`;
+      case 'certificate':
+        return id ? `/dashboard/student/certificates/${id}` : '/dashboard/student/certificates';
+      default:
+        return '/dashboard/student/notifications';
+    }
+  }
+  return '/dashboard/student/notifications';
+}
+
+function resolveHttpsClickLink(webPath: string): string | undefined {
+  if (webPath.startsWith('https://')) return webPath;
+  if (!webPath.startsWith('/')) return undefined;
+  const siteOrigin = (
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXTAUTH_URL ||
+    ''
+  ).replace(/\/+$/, '');
+  if (!siteOrigin.startsWith('https://')) return undefined;
+  return `${siteOrigin}${webPath}`;
+}
+
 export const sendPushNotification = async (
   userIds: string[], 
   payload: PushNotificationPayload,
   language: 'en' | 'hi' = 'en'
-) => {
+): Promise<PushDeliverySummary> => {
   const adminMessaging = getAdminMessaging();
   if (!adminMessaging) {
     console.warn('[sendPushNotification] FCM Admin not initialized. Skipping push notification.');
-    return;
+    return { sent: 0, failed: 0, tokenCount: 0 };
   }
 
   await dbConnect();
@@ -40,7 +86,7 @@ export const sendPushNotification = async (
 
   if (eligibleUserIds.length === 0) {
     console.log('[sendPushNotification] All target users disabled push or muted this category.');
-    return;
+    return { sent: 0, failed: 0, tokenCount: 0 };
   }
 
   // 2. Get active tokens for eligible users
@@ -58,7 +104,7 @@ export const sendPushNotification = async (
 
   if (tokens.length === 0) {
     console.log('[sendPushNotification] No active device tokens found. Skipping FCM send.');
-    return;
+    return { sent: 0, failed: 0, tokenCount: 0 };
   }
 
   // 3. Prepare the FCM Message
@@ -73,7 +119,18 @@ export const sendPushNotification = async (
     }
   }
 
-  const clickUrl = safeData.webUrl || safeData.url || '/dashboard/student/notifications';
+  const webPath = resolveWebPathFromRawUrl(safeData.webUrl || safeData.actionUrl || safeData.url);
+  safeData.webUrl = webPath;
+  safeData.title = title;
+  safeData.body = body;
+
+  const httpsLink = resolveHttpsClickLink(webPath);
+  const siteOrigin = (
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXTAUTH_URL ||
+    ''
+  ).replace(/\/+$/, '');
+  const webIcon = siteOrigin.startsWith('https://') ? `${siteOrigin}/favicon.png` : '/favicon.png';
 
   const messageBase = {
     notification: {
@@ -82,12 +139,12 @@ export const sendPushNotification = async (
     },
     webpush: {
       notification: {
-        icon: '/notification-icon.svg',
-        badge: '/notification-icon.svg',
+        title,
+        body,
+        icon: webIcon,
+        badge: webIcon,
       },
-      fcmOptions: {
-        link: clickUrl,
-      },
+      ...(httpsLink ? { fcmOptions: { link: httpsLink } } : {}),
     },
     android: {
       priority: 'high' as const,
@@ -118,9 +175,11 @@ export const sendPushNotification = async (
 
       if (response.failureCount > 0) {
         const invalidTokens: string[] = [];
+        const errorCounts: Record<string, number> = {};
         response.responses.forEach((resp, idx) => {
           if (!resp.success) {
-            const errCode = resp.error?.code;
+            const errCode = resp.error?.code || 'unknown';
+            errorCounts[errCode] = (errorCounts[errCode] || 0) + 1;
             if (
               errCode === 'messaging/invalid-registration-token' ||
               errCode === 'messaging/registration-token-not-registered'
@@ -129,6 +188,7 @@ export const sendPushNotification = async (
             }
           }
         });
+        console.warn('[sendPushNotification] Token delivery failures:', errorCounts);
 
         if (invalidTokens.length > 0) {
           await NotificationToken.updateMany(
@@ -138,9 +198,11 @@ export const sendPushNotification = async (
         }
       }
     } catch (batchError) {
+      totalFailure += chunkTokens.length;
       console.error('[sendPushNotification] Batch send error:', batchError);
     }
   }
 
   console.log(`[sendPushNotification] Multicast complete: ${totalSuccess} successful, ${totalFailure} failed.`);
+  return { sent: totalSuccess, failed: totalFailure, tokenCount: tokens.length };
 };
