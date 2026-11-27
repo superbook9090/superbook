@@ -11,6 +11,7 @@ import NavigationTracker from '@/components/providers/NavigationTracker';
 import ClarityInit from '@/components/providers/ClarityInit';
 import AdsenseInit from '@/components/providers/AdsenseInit';
 import ChatWidgetInit from '@/components/providers/ChatWidgetInit';
+import ThemeSync from '@/components/providers/ThemeSync';
 import { createRootMetadata } from '@/lib/seo/metadata';
 import { fontVariables } from '@/lib/fonts';
 import PullToRefresh from '@/components/PullToRefresh';
@@ -46,7 +47,7 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t)}}catch(e){}",
+              "try{var t=localStorage.getItem('theme');var d=t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',d?'dark':'light')}catch(e){}",
           }}
         />
         <AlertProvider>
@@ -63,6 +64,7 @@ export default function RootLayout({
             </AppSettingsProvider>
           </LanguageProvider>
         </AlertProvider>
+        <ThemeSync />
         <AnimatedCursor />
         <Suspense fallback={null}>
           <NavigationTracker />

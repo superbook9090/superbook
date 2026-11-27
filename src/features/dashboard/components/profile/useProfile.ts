@@ -10,7 +10,7 @@ export function useProfile(session: Session | null): ProfileHookState {
   const [accountInfo, setAccountInfo] = useState<AccountInfo | null>(null);
   const [isLoadingAccount, setIsLoadingAccount] = useState(true);
   const [activeTab, setActiveTab] = useUrlTab<ProfileTabKey>(
-    ['account', 'security'],
+    ['account', 'security', 'appearance'],
     'account'
   );
 

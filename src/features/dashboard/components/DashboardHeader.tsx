@@ -13,7 +13,6 @@ import { getNavIcon } from '@/lib/navigation/icons';
 import { cn } from '@/lib/utils';
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher';
 import Tooltip from '@/components/ui/Tooltip';
-import ThemeToggle from '@/components/ui/ThemeToggle';
 import { OrganizationBadge } from '@/components/organization/OrganizationBadge';
 import { isNavItemActive, resolveActiveNavItem } from './sidebar/sidebarGroups';
 
@@ -167,7 +166,6 @@ export default function DashboardHeader({
               </Tooltip>
             )}
 
-            <ThemeToggle variant="ghost" />
             <LanguageSwitcher variant="ghost" compact />
           </div>
 

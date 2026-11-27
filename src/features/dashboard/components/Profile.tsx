@@ -13,6 +13,7 @@ import { ProfileHero } from './profile/ProfileHero';
 import { ProfileTabsNav } from './profile/ProfileTabsNav';
 import { ProfilePersonalInfoTab } from './profile/ProfilePersonalInfoTab';
 import { ProfileSecurityTab } from './profile/ProfileSecurityTab';
+import { ProfileAppearanceTab } from './profile/ProfileAppearanceTab';
 
 interface ProfileProps {
   session: NextAuthSession | Session;
@@ -83,6 +84,7 @@ export default function Profile({ session, descriptionKey }: ProfileProps) {
             accountInfo={accountInfo}
           />
         )}
+        {activeTab === 'appearance' && <ProfileAppearanceTab />}
       </div>
     </PageWrapper>
   );

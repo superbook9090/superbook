@@ -1,7 +1,7 @@
 import type { Session } from '@/types';
 import type { AccountInfo } from '@/lib/api/auth';
 
-export type ProfileTabKey = 'account' | 'security';
+export type ProfileTabKey = 'account' | 'security' | 'appearance';
 
 export interface ProfileHookState {
   session: Session | null;

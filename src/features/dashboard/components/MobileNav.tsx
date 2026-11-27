@@ -13,7 +13,6 @@ import { useSessionStore } from '@/store/useSessionStore';
 import { cn } from '@/lib/utils';
 import BrandLogo from '@/components/ui/BrandLogo';
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher';
-import ThemeToggle from '@/components/ui/ThemeToggle';
 import LogoutButton from '@/components/ui/LogoutButton';
 import DownloadAppSidebarCard from '@/components/ui/DownloadAppSidebarCard';
 import { OrganizationBadge } from '@/components/organization/OrganizationBadge';
@@ -122,8 +121,6 @@ function MobileNavComponent({ user, navigation, adminNavigation = [], isSuperAdm
                   <Bell className="w-4 h-4" />
                 </Link>
               )}
-
-              <ThemeToggle variant="ghost" />
             </div>
 
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -162,7 +159,6 @@ function MobileNavComponent({ user, navigation, adminNavigation = [], isSuperAdm
                       {t('common.settings')}
                     </span>
                     <div className="flex items-center gap-1.5">
-                      <ThemeToggle />
                       <LanguageSwitcher compact alwaysShowLabel />
                     </div>
                   </div>

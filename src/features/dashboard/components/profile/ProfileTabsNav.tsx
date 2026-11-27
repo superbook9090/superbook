@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { User, Lock } from 'lucide-react';
+import { User, Lock, Palette } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { ProfileTabKey } from './types';
 
@@ -23,6 +23,11 @@ export function ProfileTabsNav({ activeTab, onTabChange }: ProfileTabsNavProps) 
       id: 'security',
       label: t('profile.tabSecurity'),
       icon: Lock,
+    },
+    {
+      id: 'appearance',
+      label: t('profile.tabAppearance'),
+      icon: Palette,
     },
   ];
 
