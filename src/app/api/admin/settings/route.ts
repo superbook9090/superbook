@@ -91,7 +91,14 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    const { teacherLimits, notesLimits, featureToggles, platformConfig, appVersionConfig } = validationResult.data;
+    const {
+      teacherLimits,
+      notesLimits,
+      featureToggles,
+      challengeConfig,
+      platformConfig,
+      appVersionConfig,
+    } = validationResult.data;
     const isSuper = isSuperAdmin(session.user.role);
 
     await dbConnect();
@@ -248,14 +255,19 @@ export async function PATCH(req: NextRequest) {
     }
 
     // Update challenge config if provided (superadmin only)
-    if (body.challengeConfig && isSuper) {
+    if (challengeConfig && isSuper) {
       const existingConfig = settings.challengeConfig || {
         allowGuestChallenges: true,
         challengeExpiryDays: 7,
       };
       settings.challengeConfig = {
-        allowGuestChallenges: body.challengeConfig.allowGuestChallenges ?? existingConfig.allowGuestChallenges ?? true,
-        challengeExpiryDays: body.challengeConfig.challengeExpiryDays ?? existingConfig.challengeExpiryDays ?? 7,
+        allowGuestChallenges: challengeConfig.allowGuestChallenges ?? existingConfig.allowGuestChallenges ?? true,
+        ...(challengeConfig.guestQuestionLimit !== undefined
+          ? { guestQuestionLimit: challengeConfig.guestQuestionLimit }
+          : existingConfig.guestQuestionLimit !== undefined
+            ? { guestQuestionLimit: existingConfig.guestQuestionLimit }
+            : {}),
+        challengeExpiryDays: challengeConfig.challengeExpiryDays ?? existingConfig.challengeExpiryDays ?? 7,
       };
     }
 

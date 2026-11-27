@@ -9,9 +9,23 @@ import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
 import { getCachedData, setCachedData } from '@/lib/redis';
 import { getContestComputedState } from '@/lib/contest/contestHelpers';
+import { requireFeature } from '@/lib/settingsHelpers';
+import { canManageOrgContent, type AccessUser } from '@/lib/accessControl';
 import mongoose from 'mongoose';
 
 export const dynamic = 'force-dynamic';
+
+interface CachedLeaderboardPayload {
+  leaderboard: Array<Record<string, unknown> & { userId?: string; rank: number }>;
+  prizes: unknown[];
+  totalParticipants: number;
+  contest: {
+    _id: string;
+    title: string;
+    status: string;
+    totalPoints: number;
+  };
+}
 
 // GET /api/contests/[id]/leaderboard
 export async function GET(
@@ -22,6 +36,9 @@ export async function GET(
   const logContext: LogContext = { method: 'GET', path: `/api/contests/${id}/leaderboard` };
 
   try {
+    const featureCheck = await requireFeature('enableContests');
+    if (featureCheck) return featureCheck;
+
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json({ message: 'Invalid contest ID' }, { status: 400 });
     }
@@ -41,11 +58,38 @@ export async function GET(
     const now = new Date();
     const computedState = getContestComputedState(contest, now);
 
-    const isInstructor =
-      session?.user?.id &&
-      (contest.instructor.toString() === session.user.id ||
-        session.user.role === 'superadmin' ||
-        session.user.role === 'admin');
+    const authUser: AccessUser | null = session?.user?.id
+      ? {
+          _id: new mongoose.Types.ObjectId(session.user.id),
+          organizationId: session.user.organizationId
+            ? new mongoose.Types.ObjectId(session.user.organizationId)
+            : null,
+          role: session.user.role as AccessUser['role'],
+        }
+      : null;
+
+    const isInstructor = authUser
+      ? canManageOrgContent(contest.organizationId, contest.instructor, authUser)
+      : false;
+
+    if ((contest.status === 'draft' || contest.status === 'cancelled') && !isInstructor) {
+      return NextResponse.json({ message: 'Contest not found' }, { status: 404 });
+    }
+
+    if (contest.organizationId && contest.visibility === 'organization' && !isInstructor) {
+      if (!authUser) {
+        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+      }
+      if (
+        !authUser.organizationId ||
+        authUser.organizationId.toString() !== contest.organizationId.toString()
+      ) {
+        return NextResponse.json(
+          { message: 'This contest is restricted to members of the organization' },
+          { status: 403 }
+        );
+      }
+    }
 
     // Check visibility setting
     if (!isInstructor) {
@@ -70,9 +114,18 @@ export async function GET(
 
     const cacheKey = `contest-leaderboard:${id}`;
     if (computedState === 'completed') {
-      const cached = await getCachedData(cacheKey);
+      const cached = await getCachedData<CachedLeaderboardPayload>(cacheKey);
       if (cached) {
-        return NextResponse.json(cached);
+        const userEntry = session?.user?.id
+          ? cached.leaderboard.find((entry) => String(entry.userId) === session.user.id)
+          : undefined;
+        return NextResponse.json(
+          {
+            ...cached,
+            userRank: userEntry ? userEntry.rank : null,
+          },
+          { status: 200 }
+        );
       }
     }
 
@@ -129,12 +182,8 @@ export async function GET(
       prizeMap.set(String(p.rank), p);
     });
 
-    let currentStudentRank: number | null = null;
     const leaderboard = rankedAttempts.map((entry, index) => {
       const rank = index + 1;
-      if (session?.user?.id && entry.userId.toString() === session.user.id) {
-        currentStudentRank = rank;
-      }
       const prize = prizeMap.get(String(rank)) || null;
       return {
         ...entry,
@@ -143,11 +192,14 @@ export async function GET(
       };
     });
 
-    const responseData = {
-      leaderboard: serialize(leaderboard),
+    const serializedLeaderboard = serialize(leaderboard) as Array<
+      Record<string, unknown> & { userId?: string; rank: number }
+    >;
+
+    const baseResponseData: CachedLeaderboardPayload = {
+      leaderboard: serializedLeaderboard,
       prizes: contest.prizes || [],
       totalParticipants: rankedAttempts.length,
-      userRank: currentStudentRank,
       contest: {
         _id: contest._id.toString(),
         title: contest.title,
@@ -157,10 +209,20 @@ export async function GET(
     };
 
     if (computedState === 'completed') {
-      await setCachedData(cacheKey, responseData, 300);
+      await setCachedData(cacheKey, baseResponseData, 300);
     }
 
-    return NextResponse.json(responseData, { status: 200 });
+    const userEntry = session?.user?.id
+      ? serializedLeaderboard.find((entry) => String(entry.userId) === session.user.id)
+      : undefined;
+
+    return NextResponse.json(
+      {
+        ...baseResponseData,
+        userRank: userEntry ? userEntry.rank : null,
+      },
+      { status: 200 }
+    );
   } catch (error) {
     logApiError(error as Error, 'GET', `/api/contests/${id}/leaderboard`, logContext);
     return NextResponse.json(

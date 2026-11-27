@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { uploadVideoToYouTube, validateVideoContentType, MAX_VIDEO_SIZE_BYTES } from '@/lib/youtube';
 import User from '@/models/User';
+import Organization from '@/models/Organization';
 import dbConnect from '@/lib/db';
 import { logApiError } from '@/lib/logger';
 import fs from 'fs';
@@ -42,7 +43,13 @@ export async function POST(request: NextRequest) {
     }
 
     await dbConnect();
-    const user = await User.findById(session.user.id).lean() as { role: string; canUploadVideos?: boolean } | null;
+    const user = await User.findById(session.user.id)
+      .select('role canUploadVideos organizationId')
+      .lean() as {
+      role: string;
+      canUploadVideos?: boolean;
+      organizationId?: string | { toString(): string } | null;
+    } | null;
     if (!user) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
@@ -51,8 +58,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
     }
 
-    // Teachers must have upload permission explicitly granted
-    if (user.role === 'teacher' && !user.canUploadVideos) {
+    // Any non-superadmin user in an organization requires the org to be active with canUploadVideos enabled
+    if (user.role !== 'superadmin' && user.organizationId) {
+      const org = await Organization.findById(user.organizationId)
+        .select('isActive permissions')
+        .lean() as {
+        isActive?: boolean;
+        permissions?: { canUploadVideos?: boolean };
+      } | null;
+
+      if (!org || org.isActive === false || org.permissions?.canUploadVideos !== true) {
+        return NextResponse.json(
+          { message: 'Forbidden: Video upload is not enabled for your organization.' },
+          { status: 403 }
+        );
+      }
+    }
+
+    // Teachers must also have upload permission explicitly granted on their account
+    if (user.role === 'teacher' && user.canUploadVideos !== true) {
       return NextResponse.json(
         { message: 'Forbidden: You do not have permission to upload videos.' },
         { status: 403 }

@@ -31,7 +31,33 @@ export async function aggregateTeacherProgress(
   }
 
   const courseIds = courses.map((c) => c._id);
-  const targetCourseIds = opts.courseId ? [new mongoose.Types.ObjectId(opts.courseId)] : courseIds;
+  const ownedCourseIdSet = new Set(courseIds.map((id) => id.toString()));
+
+  let targetCourseIds = courseIds;
+  if (opts.courseId) {
+    if (!mongoose.Types.ObjectId.isValid(opts.courseId) || !ownedCourseIdSet.has(opts.courseId)) {
+      return {
+        courses: courses.map((c) => ({
+          _id: String(c._id),
+          title: c.title,
+          thumbnail: c.thumbnail,
+          category: c.category,
+        })),
+        students: [],
+        overall: {
+          totalCourses: courses.length,
+          totalStudents: 0,
+          totalEnrollments: 0,
+          completedEnrollments: 0,
+          averageProgress: 0,
+          strugglingCount: 0,
+          averageScore: 0,
+        },
+        total: 0,
+      };
+    }
+    targetCourseIds = [new mongoose.Types.ObjectId(opts.courseId)];
+  }
 
   const enrollMatch: Record<string, unknown> = { course: { $in: targetCourseIds } };
 

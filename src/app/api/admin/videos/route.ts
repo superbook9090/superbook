@@ -6,6 +6,7 @@ import Course from '@/models/Course';
 import dbConnect from '@/lib/db';
 import { logApiError } from '@/lib/logger';
 import { isAdmin, isSuperAdmin } from '@/lib/roles';
+import { escapeRegex, validateObjectId } from '@/lib/sanitize';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,17 +17,21 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
+    const userRole = session.user.role;
+    const organizationId = session.user.organizationId;
+
+    if (!isSuperAdmin(userRole) && (!organizationId || !validateObjectId(String(organizationId)))) {
+      return NextResponse.json({ message: 'Forbidden: Admin must belong to a valid organization' }, { status: 403 });
+    }
+
     await dbConnect();
 
     const { searchParams } = new URL(request.url);
     const search = searchParams.get('search')?.toLowerCase().trim() || '';
-    const page = parseInt(searchParams.get('page') || '1', 10);
-    const limit = parseInt(searchParams.get('limit') || '10', 10);
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '10', 10) || 10));
     const skip = (page - 1) * limit;
 
-    const userRole = session.user.role;
-    const organizationId = session.user.organizationId;
-    
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let courseIds: any[] = [];
     if (!isSuperAdmin(userRole) && organizationId) {
@@ -67,7 +72,7 @@ export async function GET(request: NextRequest) {
     ];
 
     if (search) {
-      const searchRegex = new RegExp(search, 'i');
+      const searchRegex = new RegExp(escapeRegex(search), 'i');
       pipeline.push({
         $match: {
           $or: [

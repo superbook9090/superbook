@@ -5,6 +5,9 @@ import mongoose from 'mongoose';
 import dbConnect from '@/lib/db';
 import Quiz from '@/models/Quiz';
 import QuizAttempt from '@/models/QuizAttempt';
+import Course from '@/models/Course';
+import Enrollment from '@/models/Enrollment';
+import { validateContentAccess, canManageOrgContent, type AccessUser } from '@/lib/accessControl';
 
 export async function GET(
   request: NextRequest,
@@ -12,7 +15,7 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -24,9 +27,75 @@ export async function GET(
     await dbConnect();
 
     // Verify the quiz exists
-    const quiz = (await Quiz.findById(quizId).select('title').lean()) as { title?: string } | null;
+    const quiz = (await Quiz.findById(quizId)
+      .select('title isPublished instructor organizationId course')
+      .lean()) as {
+      title?: string;
+      isPublished?: boolean;
+      instructor?: mongoose.Types.ObjectId;
+      organizationId?: mongoose.Types.ObjectId | null;
+      course?: mongoose.Types.ObjectId | null;
+    } | null;
     if (!quiz) {
       return NextResponse.json({ error: 'Quiz not found' }, { status: 404 });
+    }
+
+    const authUser: AccessUser = {
+      _id: new mongoose.Types.ObjectId(session.user.id),
+      organizationId: session.user.organizationId
+        ? new mongoose.Types.ObjectId(session.user.organizationId)
+        : null,
+      role: session.user.role as AccessUser['role'],
+    };
+
+    try {
+      validateContentAccess(quiz.organizationId, authUser, 'quiz');
+    } catch {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    }
+
+    const canManage = canManageOrgContent(quiz.organizationId, quiz.instructor, authUser);
+
+    if (!canManage) {
+      if (!quiz.isPublished) {
+        return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+      }
+
+      if (quiz.course && mongoose.Types.ObjectId.isValid(String(quiz.course))) {
+        const course = await Course.findById(quiz.course)
+          .select('isPublished courseCode organizationId')
+          .lean<{
+            isPublished?: boolean;
+            courseCode?: string | null;
+            organizationId?: mongoose.Types.ObjectId | null;
+          }>();
+
+        if (course) {
+          try {
+            validateContentAccess(course.organizationId, authUser, 'course');
+          } catch {
+            return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+          }
+
+          if (!course.isPublished) {
+            return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+          }
+
+          if (course.courseCode) {
+            const enrollment = await Enrollment.findOne({
+              student: new mongoose.Types.ObjectId(session.user.id),
+              course: quiz.course,
+            }).lean();
+
+            if (!enrollment) {
+              return NextResponse.json(
+                { error: 'You must be enrolled in this private course to view this leaderboard' },
+                { status: 403 }
+              );
+            }
+          }
+        }
+      }
     }
 
     const quizObjectId = new mongoose.Types.ObjectId(quizId);

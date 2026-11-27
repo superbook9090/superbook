@@ -38,7 +38,9 @@ export interface LearnerFunnelData {
 
 interface BreakdownParams {
   orgFilter: Record<string, unknown>;
+  isSuperAdmin?: boolean;
   userIds: mongoose.Types.ObjectId[];
+  courseIds?: mongoose.Types.ObjectId[];
   quizIds: mongoose.Types.ObjectId[];
   trendStart: Date;
   rangeEnd: Date;
@@ -57,7 +59,9 @@ const SCORE_BAND_ORDER = [
 
 export async function getAdminBreakdowns({
   orgFilter,
+  isSuperAdmin = false,
   userIds,
+  courseIds = [],
   quizIds,
   trendStart,
   rangeEnd,
@@ -65,6 +69,22 @@ export async function getAdminBreakdowns({
   mauCount,
   completedEnrollments,
 }: BreakdownParams) {
+  if (!isSuperAdmin && !orgFilter.organizationId) {
+    throw new Error('Organization filter is required for non-superadmin breakdowns');
+  }
+
+  const hasAttemptScope = quizIds.length > 0 && (isSuperAdmin || userIds.length > 0);
+  const attemptMatch = isSuperAdmin
+    ? { quiz: { $in: quizIds }, status: 'completed' }
+    : { quiz: { $in: quizIds }, student: { $in: userIds }, status: 'completed' };
+
+  const hasEnrollmentScope = isSuperAdmin
+    ? userIds.length > 0
+    : userIds.length > 0 && courseIds.length > 0;
+  const enrollmentMatch = isSuperAdmin
+    ? { student: { $in: userIds } }
+    : { student: { $in: userIds }, course: { $in: courseIds } };
+
   const [
     scoreBandsRaw,
     tierRaw,
@@ -73,9 +93,9 @@ export async function getAdminBreakdowns({
     enrolledStudentsRaw,
     quizParticipantsRaw,
   ] = await Promise.all([
-    quizIds.length
+    hasAttemptScope
       ? QuizAttempt.aggregate([
-          { $match: { quiz: { $in: quizIds }, status: 'completed' } },
+          { $match: attemptMatch },
           {
             $project: {
               band: {
@@ -95,9 +115,9 @@ export async function getAdminBreakdowns({
         ])
       : Promise.resolve([]),
 
-    quizIds.length
+    hasAttemptScope
       ? QuizAttempt.aggregate([
-          { $match: { quiz: { $in: quizIds }, status: 'completed' } },
+          { $match: attemptMatch },
           {
             $group: {
               _id: null,
@@ -110,12 +130,11 @@ export async function getAdminBreakdowns({
         ])
       : Promise.resolve([]),
 
-    quizIds.length
+    hasAttemptScope
       ? QuizAttempt.aggregate([
           {
             $match: {
-              quiz: { $in: quizIds },
-              status: 'completed',
+              ...attemptMatch,
               createdAt: { $gte: trendStart, $lte: rangeEnd },
             },
           },
@@ -134,8 +153,15 @@ export async function getAdminBreakdowns({
       {
         $lookup: {
           from: 'enrollments',
-          localField: '_id',
-          foreignField: 'course',
+          let: { courseId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$course', '$$courseId'] },
+                ...(isSuperAdmin ? {} : { student: { $in: userIds } }),
+              },
+            },
+          ],
           as: 'enrollments',
         },
       },
@@ -157,12 +183,12 @@ export async function getAdminBreakdowns({
       { $limit: 8 },
     ]),
 
-    userIds.length
-      ? Enrollment.distinct('student', { student: { $in: userIds } })
+    hasEnrollmentScope
+      ? Enrollment.distinct('student', enrollmentMatch)
       : Promise.resolve([]),
 
-    quizIds.length
-      ? QuizAttempt.distinct('student', { quiz: { $in: quizIds }, status: 'completed' })
+    hasAttemptScope
+      ? QuizAttempt.distinct('student', attemptMatch)
       : Promise.resolve([]),
   ]);
 

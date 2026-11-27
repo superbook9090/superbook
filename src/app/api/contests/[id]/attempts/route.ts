@@ -12,6 +12,8 @@ import {
   handleStartAttempt,
   handleSubmitAttempt,
 } from '@/lib/contest/contestAttemptService';
+import { requireFeature } from '@/lib/settingsHelpers';
+import { canManageOrgContent, type AccessUser } from '@/lib/accessControl';
 import mongoose from 'mongoose';
 
 export const dynamic = 'force-dynamic';
@@ -25,6 +27,9 @@ export async function GET(
   const logContext: LogContext = { method: 'GET', path: `/api/contests/${id}/attempts` };
 
   try {
+    const featureCheck = await requireFeature('enableContests');
+    if (featureCheck) return featureCheck;
+
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json({ message: 'Invalid contest ID' }, { status: 400 });
     }
@@ -42,12 +47,15 @@ export async function GET(
       return NextResponse.json({ message: 'Contest not found' }, { status: 404 });
     }
 
-    const isInstructor =
-      contest.instructor.toString() === session.user.id ||
-      session.user.role === 'superadmin' ||
-      session.user.role === 'admin';
+    const authUser: AccessUser = {
+      _id: new mongoose.Types.ObjectId(session.user.id),
+      organizationId: session.user.organizationId
+        ? new mongoose.Types.ObjectId(session.user.organizationId)
+        : null,
+      role: session.user.role as AccessUser['role'],
+    };
 
-    if (!isInstructor) {
+    if (!canManageOrgContent(contest.organizationId, contest.instructor, authUser)) {
       return NextResponse.json(
         { message: 'Only instructors and admins can view all contest attempts' },
         { status: 403 }
@@ -86,6 +94,9 @@ export async function POST(
   const logContext: LogContext = { method: 'POST', path: `/api/contests/${id}/attempts` };
 
   try {
+    const featureCheck = await requireFeature('enableContests');
+    if (featureCheck) return featureCheck;
+
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json({ message: 'Invalid contest ID' }, { status: 400 });
     }
@@ -131,7 +142,13 @@ export async function POST(
       validationResult.data;
 
     if (action === 'start') {
-      const res = await handleStartAttempt(contest, session.user.id, session.user.organizationId, now);
+      const res = await handleStartAttempt(
+        contest,
+        session.user.id,
+        session.user.organizationId,
+        now,
+        session.user.role as AccessUser['role']
+      );
       if (res.status !== 200 && res.status !== 201) {
         return NextResponse.json({ message: res.message }, { status: res.status });
       }
@@ -155,7 +172,9 @@ export async function POST(
         contest,
         session.user.id,
         { submittedAnswers, timeTaken, violationCount },
-        now
+        now,
+        session.user.organizationId,
+        session.user.role as AccessUser['role']
       );
       if (res.status !== 200) {
         return NextResponse.json({ message: res.message }, { status: res.status });

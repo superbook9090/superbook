@@ -1,7 +1,64 @@
+function decodeHtmlEntities(value: string): string {
+  return value
+    .replace(/&#x([0-9a-f]+);?/gi, (_, hex: string) => {
+      const code = parseInt(hex, 16);
+      return Number.isFinite(code) && code >= 0 && code <= 0x10ffff
+        ? String.fromCodePoint(code)
+        : '';
+    })
+    .replace(/&#([0-9]+);?/g, (_, dec: string) => {
+      const code = parseInt(dec, 10);
+      return Number.isFinite(code) && code >= 0 && code <= 0x10ffff
+        ? String.fromCodePoint(code)
+        : '';
+    })
+    .replace(/&colon;?/gi, ':')
+    .replace(/&tab;?/gi, '\t')
+    .replace(/&newline;?/gi, '\n')
+    .replace(/&amp;?/gi, '&');
+}
+
+function isDangerousUrl(rawValue: string): boolean {
+  let decoded = rawValue;
+  for (let pass = 0; pass < 3; pass++) {
+    const next = decodeHtmlEntities(decoded);
+    if (next === decoded) break;
+    decoded = next;
+  }
+  const normalized = decoded.replace(/[\u0000-\u0020\u007f]+/g, '').toLowerCase();
+  return (
+    normalized.startsWith('javascript:') ||
+    normalized.startsWith('vbscript:') ||
+    normalized.startsWith('data:')
+  );
+}
+
+function escapeAttrValue(value: string): string {
+  return value
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function findTagEnd(html: string, startIndex: number): number {
+  let quote: '"' | "'" | null = null;
+  for (let idx = startIndex + 1; idx < html.length; idx++) {
+    const ch = html[idx];
+    if (quote) {
+      if (ch === quote) quote = null;
+    } else if (ch === '"' || ch === "'") {
+      quote = ch;
+    } else if (ch === '>') {
+      return idx;
+    }
+  }
+  return -1;
+}
+
 // Lightweight HTML sanitization for server-side use
 // Avoids jsdom dependency which causes ESM errors in Next.js 15 + Turbopack
 export function sanitizeHtml(html: string): string {
-  // Allow only safe tags and attributes
+  // Allow only safe tags and attributes (strip style to prevent CSS injection)
   const allowedTags = new Set([
     'p', 'br', 'strong', 'em', 'u', 'i', 'b', 'a', 'ul', 'ol', 'li',
     'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'code', 'pre',
@@ -9,7 +66,7 @@ export function sanitizeHtml(html: string): string {
   ]);
 
   const allowedAttrs = new Set([
-    'href', 'target', 'rel', 'src', 'alt', 'class', 'id', 'style'
+    'href', 'target', 'rel', 'src', 'alt', 'class', 'id'
   ]);
 
   let result = '';
@@ -41,8 +98,8 @@ export function sanitizeHtml(html: string): string {
         continue;
       }
 
-      // Check for opening tag
-      const tagEnd = html.indexOf('>', i);
+      // Check for opening tag (quote-aware so `>` inside attribute values cannot break tag parsing)
+      const tagEnd = findTagEnd(html, i);
       if (tagEnd === -1) {
         result += html[i];
         i++;
@@ -50,27 +107,30 @@ export function sanitizeHtml(html: string): string {
       }
 
       const tagContent = html.slice(i + 1, tagEnd);
-      const spaceIndex = tagContent.indexOf(' ');
-      const tagName = (spaceIndex === -1 ? tagContent : tagContent.slice(0, spaceIndex)).toLowerCase().trim();
+      const separatorIndex = tagContent.search(/[\s/]/);
+      const tagName = (
+        separatorIndex === -1 ? tagContent : tagContent.slice(0, separatorIndex)
+      )
+        .toLowerCase()
+        .trim();
 
       if (allowedTags.has(tagName)) {
         // Sanitize attributes
         let sanitizedAttrs = '';
-        if (spaceIndex !== -1) {
-          const attrs = tagContent.slice(spaceIndex + 1);
-          const attrRegex = /([a-zA-Z-]+)=["']([^"']*)["']/g;
+        if (separatorIndex !== -1) {
+          const attrs = tagContent.slice(separatorIndex + 1);
+          const attrRegex = /([a-zA-Z][a-zA-Z0-9-]*)\s*=\s*(?:"([^"]*)"|'([^']*)')/g;
           let match;
           while ((match = attrRegex.exec(attrs)) !== null) {
             const attrName = match[1].toLowerCase();
+            const rawVal = match[2] ?? match[3] ?? '';
             if (allowedAttrs.has(attrName)) {
-              // Additional security for href
-              if (attrName === 'href') {
-                const hrefValue = match[2].toLowerCase();
-                if (hrefValue.startsWith('javascript:') || hrefValue.startsWith('data:')) {
-                  continue; // Skip dangerous hrefs
+              if (attrName === 'href' || attrName === 'src') {
+                if (isDangerousUrl(rawVal)) {
+                  continue; // Skip dangerous URLs
                 }
               }
-              sanitizedAttrs += ` ${attrName}="${match[2]}"`;
+              sanitizedAttrs += ` ${attrName}="${escapeAttrValue(rawVal)}"`;
             }
           }
         }

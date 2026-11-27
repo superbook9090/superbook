@@ -12,21 +12,27 @@ export async function middleware(request: NextRequest) {
 
   // =========================
   // ✅ 0. AUTH ROUTES HANDLING
-  // Rate limit credential sign-in attempts while allowing lightweight session polling
+  // Rate limit credential sign-in, registration, and phone/password endpoints while allowing session polling
   // =========================
   if (pathname.startsWith('/api/auth')) {
-    const isSignInAttempt =
+    const isRateLimitedAuthPost =
       request.method === 'POST' &&
-      (pathname.includes('/callback/credentials') || pathname.includes('/signin'));
+      (pathname.includes('/callback/credentials') ||
+        pathname.includes('/signin') ||
+        pathname === '/api/auth/register' ||
+        pathname === '/api/auth/check-phone' ||
+        pathname === '/api/auth/add-phone' ||
+        pathname === '/api/auth/forgot-password' ||
+        pathname === '/api/auth/reset-password');
 
-    if (isSignInAttempt) {
+    if (isRateLimitedAuthPost) {
       const ip =
         request.headers.get('x-forwarded-for') ||
         request.headers.get('x-real-ip') || 'unknown';
       const result = authRateLimiter.check(ip);
       if (!result.allowed) {
         return NextResponse.json(
-          { message: 'Too many login attempts. Please try again later.' },
+          { message: 'Too many authentication attempts. Please try again later.' },
           { status: 429 }
         );
       }
@@ -137,7 +143,19 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/forgot-password') ||
     pathname.startsWith('/reset-password')
   ) {
-    if (token?.id) {
+    if (token?.id && !token?.suspended) {
+      if (pathname.startsWith('/register')) {
+        const inviteCode =
+          request.nextUrl.searchParams.get('inviteCode') ||
+          request.nextUrl.searchParams.get('code') ||
+          request.nextUrl.searchParams.get('orgCode') ||
+          request.nextUrl.searchParams.get('org');
+        if (inviteCode) {
+          const joinUrl = new URL('/dashboard/join-org', request.url);
+          joinUrl.searchParams.set('inviteCode', inviteCode);
+          return NextResponse.redirect(joinUrl);
+        }
+      }
       return NextResponse.redirect(new URL(ROUTES.dashboard, request.url));
     }
     return NextResponse.next();
@@ -147,7 +165,7 @@ export async function middleware(request: NextRequest) {
   // ✅ 3. PROTECT ADMIN ROUTES
   // =========================
   if (pathname.startsWith('/dashboard/admin')) {
-    if (!token) {
+    if (!token?.id || token?.suspended) {
       const loginUrl = new URL(ROUTES.login, request.url);
       loginUrl.searchParams.set('callbackUrl', request.nextUrl.pathname + request.nextUrl.search);
       return NextResponse.redirect(loginUrl);
@@ -158,10 +176,13 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL(ROUTES.dashboard, request.url));
     }
 
-    // Settings and Notifications are strictly for superadmin only
+    // Platform-level admin routes are strictly for superadmin only
     if (
       pathname.startsWith('/dashboard/admin/settings') ||
-      pathname.startsWith('/dashboard/admin/notifications')
+      pathname.startsWith('/dashboard/admin/notifications') ||
+      pathname.startsWith('/dashboard/admin/organizations') ||
+      pathname.startsWith('/dashboard/admin/challenges') ||
+      pathname.startsWith('/dashboard/admin/videos')
     ) {
       if (token.role !== 'superadmin') {
         return NextResponse.redirect(new URL('/dashboard/admin', request.url));
@@ -175,7 +196,7 @@ export async function middleware(request: NextRequest) {
   // ✅ 4. PROTECT DASHBOARD
   // =========================
   if (pathname.startsWith('/dashboard')) {
-    if (!token) {
+    if (!token?.id || token?.suspended) {
       const loginUrl = new URL(ROUTES.login, request.url);
       loginUrl.searchParams.set('callbackUrl', request.nextUrl.pathname + request.nextUrl.search);
       return NextResponse.redirect(loginUrl);

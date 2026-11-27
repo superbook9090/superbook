@@ -3,8 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import User from '@/models/User';
-import Organization from '@/models/Organization';
 import { logApiError, type LogContext } from '@/lib/logger';
+import { resolveOrganizationInvite } from '@/lib/organizations/resolveInvite';
 
 export async function POST(request: Request) {
   const logContext: LogContext = { method: 'POST', path: '/api/auth/add-organization' };
@@ -22,25 +22,13 @@ export async function POST(request: Request) {
 
     await dbConnect();
 
-    // Check if the organization exists
-    const cleanCode = inviteCode.trim();
-    const escaped = cleanCode.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp(`^${escaped}$`, 'i');
-    const organization = await Organization.findOne({
-      $or: [{ inviteCode: regex }, { code: regex }],
-      isActive: true,
-    });
-    if (!organization) {
-      return NextResponse.json(
-        { message: 'Invalid or inactive invite code' },
-        { status: 400 }
-      );
-    }
-
-    // Check if the user already has an organization
     const currentUser = await User.findById(session.user.id);
     if (!currentUser) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
+    }
+
+    if (currentUser.isSuspended) {
+      return NextResponse.json({ message: 'Account suspended' }, { status: 403 });
     }
 
     if (currentUser.organizationId) {
@@ -50,14 +38,19 @@ export async function POST(request: Request) {
       );
     }
 
-    // Update user's organizationId
-    currentUser.organizationId = organization._id;
+    const joinRole = currentUser.role === 'teacher' ? 'teacher' : 'student';
+    const resolved = await resolveOrganizationInvite(inviteCode, joinRole);
+    if (!resolved.ok) {
+      return NextResponse.json({ message: resolved.message }, { status: resolved.status });
+    }
+
+    currentUser.organizationId = resolved.data.organization._id;
     await currentUser.save();
 
     return NextResponse.json({
       message: 'Successfully joined the organization',
-      organizationId: organization._id.toString(),
-      organizationName: organization.name,
+      organizationId: resolved.data.organization._id.toString(),
+      organizationName: resolved.data.organization.name,
     });
   } catch (error) {
     logApiError(error as Error, 'POST', '/api/auth/add-organization', logContext);

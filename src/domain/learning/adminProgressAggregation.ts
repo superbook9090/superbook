@@ -148,16 +148,19 @@ export async function aggregateAdminProgress(opts: {
 
   if (opts.search) {
     const q = opts.search.trim();
-    const searchRegex = new RegExp(q, 'i');
-    rosterPipeline.push({
-      $match: {
-        $or: [
-          { 'student.name': searchRegex },
-          { 'student.email': searchRegex },
-          { 'course.title': searchRegex },
-        ],
-      },
-    });
+    if (q) {
+      const escapedQ = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const searchRegex = new RegExp(escapedQ, 'i');
+      rosterPipeline.push({
+        $match: {
+          $or: [
+            { 'student.name': searchRegex },
+            { 'student.email': searchRegex },
+            { 'course.title': searchRegex },
+          ],
+        },
+      });
+    }
   }
 
   rosterPipeline.push({

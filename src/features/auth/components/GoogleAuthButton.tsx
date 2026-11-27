@@ -12,10 +12,16 @@ import { isMobileApp, persistIsMobileApp } from '@/lib/mobile/mobileDetection';
 interface GoogleAuthButtonProps {
   callbackUrl: string;
   role?: string;
+  inviteCode?: string;
   isRegistration?: boolean;
 }
 
-export default function GoogleAuthButton({ callbackUrl, role, isRegistration }: GoogleAuthButtonProps) {
+export default function GoogleAuthButton({
+  callbackUrl,
+  role,
+  inviteCode,
+  isRegistration,
+}: GoogleAuthButtonProps) {
   const { t } = useTranslation();
   const enableGoogleAuthApp = useSettingsStore(
     (s) => s.settings.featureToggles.enableGoogleAuthApp ?? true
@@ -33,11 +39,20 @@ export default function GoogleAuthButton({ callbackUrl, role, isRegistration }: 
 
   const handleGoogleSignIn = () => {
     sendGAEvent({ event: isRegistration ? 'sign_up' : 'login', method: 'google' });
-    
+
     if (role) {
-      document.cookie = `google-auth-role=${role}; path=/; max-age=300`; // expires in 5 minutes
+      document.cookie = `google-auth-role=${encodeURIComponent(role)}; path=/; max-age=300; SameSite=Lax`;
+    } else {
+      document.cookie = 'google-auth-role=; path=/; max-age=0; SameSite=Lax';
     }
-    
+
+    const cleanInvite = inviteCode?.trim();
+    if (cleanInvite) {
+      document.cookie = `google-auth-invite-code=${encodeURIComponent(cleanInvite)}; path=/; max-age=300; SameSite=Lax`;
+    } else {
+      document.cookie = 'google-auth-invite-code=; path=/; max-age=0; SameSite=Lax';
+    }
+
     if (typeof window !== 'undefined' && (window.ReactNativeWebView || isMobileApp())) {
       persistIsMobileApp();
       sessionStorage.setItem('quizdo_just_logged_in', 'true');
@@ -46,7 +61,7 @@ export default function GoogleAuthButton({ callbackUrl, role, isRegistration }: 
         window.ReactNativeWebView.postMessage(
           JSON.stringify({
             action: 'REQUEST_GOOGLE_SIGN_IN',
-            payload: { selectAccount: true },
+            payload: { selectAccount: true, role: role || 'student', inviteCode: cleanInvite || '' },
           })
         );
         return;

@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X,
@@ -23,7 +24,8 @@ import {
 import { useTranslation } from '@/hooks/useTranslation';
 import Button from '@/components/ui/Button';
 import Tooltip from '@/components/ui/Tooltip';
-import { getOrganizationDetails, type OrganizationFullDetails } from '@/lib/api/organizations';
+import { getOrganizationDetails } from '@/lib/api/organizations';
+import { queryKeys } from '@/lib/react-query/query-keys';
 import { OrganizationAllDetailsPanel, type OrgDetailTab } from './OrganizationAllDetailsPanel';
 import { OrganizationPolicySummary } from './OrganizationPolicySummary';
 import { buildOrganizationRegistrationUrl } from '../_utils/formatOrgShareInfo';
@@ -63,37 +65,31 @@ export function OrganizationDetailModal({
   const { t } = useTranslation();
   const [showAllDetails, setShowAllDetails] = useState(false);
   const [activeTab, setActiveTab] = useState<OrgDetailTab>('users');
-  const [detailsData, setDetailsData] = useState<OrganizationFullDetails | null>(null);
-  const [isLoadingDetails, setIsLoadingDetails] = useState(false);
-  const [detailsError, setDetailsError] = useState<string | null>(null);
 
-  const loadFullDetails = useCallback(async (orgId: string) => {
-    setIsLoadingDetails(true);
-    setDetailsError(null);
-    try {
-      const data = await getOrganizationDetails(orgId);
-      setDetailsData(data);
-    } catch (err) {
-      setDetailsError(err instanceof Error ? err.message : 'Failed to load organization details');
-    } finally {
-      setIsLoadingDetails(false);
-    }
-  }, []);
+  const detailsQuery = useQuery({
+    queryKey: queryKeys.organizations.detail(org?._id || ''),
+    queryFn: () => getOrganizationDetails(org!._id),
+    enabled: Boolean(isOpen && showAllDetails && org?._id),
+    staleTime: 2 * 60 * 1000,
+  });
 
-  // Reset detail panel when modal closes or selected org changes
+  const detailsData = detailsQuery.data ?? null;
+  const isLoadingDetails = detailsQuery.isPending || detailsQuery.isFetching;
+  const detailsError = detailsQuery.error
+    ? detailsQuery.error instanceof Error
+      ? detailsQuery.error.message
+      : 'Failed to load organization details'
+    : null;
+
+  // Reset detail panel view when modal closes or selected org changes
   useEffect(() => {
     setShowAllDetails(false);
-    setDetailsData(null);
-    setDetailsError(null);
     setActiveTab('users');
   }, [org?._id, isOpen]);
 
   const handleOpenAllDetails = (initialTab: OrgDetailTab = 'users') => {
     setActiveTab(initialTab);
     setShowAllDetails(true);
-    if (org && (!detailsData || detailsData._id !== org._id)) {
-      void loadFullDetails(org._id);
-    }
   };
 
   // Escape key handler
@@ -115,7 +111,7 @@ export function OrganizationDetailModal({
 
   const teacherRegisterUrl = useMemo(() => {
     if (!org) return '';
-    return buildOrganizationRegistrationUrl(org.inviteCode, 'teacher');
+    return buildOrganizationRegistrationUrl(org.teacherInviteCode || org.inviteCode, 'teacher');
   }, [org]);
 
   if (!isOpen || !org) return null;
@@ -218,7 +214,7 @@ export function OrganizationDetailModal({
               error={detailsError}
               activeTab={activeTab}
               onTabChange={setActiveTab}
-              onRetry={() => void loadFullDetails(org._id)}
+              onRetry={() => void detailsQuery.refetch()}
             />
           ) : (
             <>

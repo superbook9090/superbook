@@ -19,6 +19,7 @@ interface OrganizationInviteShareModalProps {
   onClose: () => void;
   organizationName: string;
   inviteCode: string;
+  teacherInviteCode?: string;
   logo?: string | null;
 }
 
@@ -27,17 +28,20 @@ export function OrganizationInviteShareModal({
   onClose,
   organizationName,
   inviteCode,
+  teacherInviteCode,
   logo,
 }: OrganizationInviteShareModalProps) {
   const { t } = useTranslation();
   const [selectedRole, setSelectedRole] = useState<'student' | 'teacher'>('student');
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
+  const activeCode = selectedRole === 'teacher' ? (teacherInviteCode || inviteCode) : inviteCode;
+
   const inviteUrl = useMemo(() => {
-    if (!inviteCode) return '';
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://quiz-do.com';
-    return `${origin}/register?inviteCode=${encodeURIComponent(inviteCode)}&role=${selectedRole}`;
-  }, [inviteCode, selectedRole]);
+    if (!activeCode) return '';
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.quizdo.in';
+    return `${origin}/register?inviteCode=${encodeURIComponent(activeCode)}&role=${selectedRole}`;
+  }, [activeCode, selectedRole]);
 
   const handleCopy = (text: string, key: string) => {
     if (typeof navigator !== 'undefined') {
@@ -203,13 +207,13 @@ export function OrganizationInviteShareModal({
                 {t('organizations.inviteCode')}
               </span>
               <span className="font-mono font-extrabold text-sm text-[var(--color-foreground)]">
-                {inviteCode}
+                {activeCode}
               </span>
             </div>
             <Button
               size="sm"
               variant="secondary"
-              onClick={() => handleCopy(inviteCode, 'code')}
+              onClick={() => handleCopy(activeCode, 'code')}
               className="flex items-center gap-1.5 text-xs"
             >
               {copiedKey === 'code' ? (

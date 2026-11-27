@@ -25,3 +25,10 @@ export function generateOrgCode(length: number = 6): string {
   }
   return result;
 }
+
+/**
+ * Generate a unique teacher-only invite code prefixed with TCH-
+ */
+export function generateTeacherInviteCode(length: number = 8): string {
+  return `TCH-${generateInviteCode(length)}`;
+}

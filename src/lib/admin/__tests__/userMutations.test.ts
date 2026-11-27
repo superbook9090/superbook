@@ -144,7 +144,7 @@ describe('userMutations permission & access controls', () => {
       expect(selfSuspend.status).toBe(400);
     });
 
-    it('prevents org admin from promoting to superadmin or suspending another admin', () => {
+    it('prevents org admin from promoting to superadmin or modifying any admin/superadmin account', () => {
       const promoteSuper = validateUserUpdate(
         teacherInOrg,
         { role: 'superadmin' },
@@ -162,6 +162,89 @@ describe('userMutations permission & access controls', () => {
         orgPolicyWithVideoAndCourseCap
       );
       expect(suspendAdmin.status).toBe(403);
+
+      const demoteAdmin = validateUserUpdate(
+        adminInOrg,
+        { role: 'student' },
+        'admin-1',
+        orgAdminAuth,
+        orgPolicyWithVideoAndCourseCap
+      );
+      expect(demoteAdmin.status).toBe(403);
+
+      const modifySuper = validateUserUpdate(
+        { ...superAdminTarget, organizationId: orgId },
+        { canUploadVideos: false },
+        'admin-1',
+        orgAdminAuth,
+        orgPolicyWithVideoAndCourseCap
+      );
+      expect(modifySuper.status).toBe(403);
+    });
+
+    it('rejects mass assignment of disallowed fields and operator/dot keys with 400', () => {
+      expect(
+        validateUserUpdate(
+          teacherInOrg,
+          { password: 'hacked', email: 'evil@example.com' },
+          'super-1',
+          superAdminAuth,
+          null
+        ).status
+      ).toBe(400);
+
+      expect(
+        validateUserUpdate(
+          teacherInOrg,
+          { '$set': { role: 'superadmin' } },
+          'admin-1',
+          orgAdminAuth,
+          orgPolicyWithVideoAndCourseCap
+        ).status
+      ).toBe(400);
+
+      expect(
+        validateUserUpdate(
+          teacherInOrg,
+          { 'limits.courses': 999 },
+          'admin-1',
+          orgAdminAuth,
+          orgPolicyWithVideoAndCourseCap
+        ).status
+      ).toBe(400);
+
+      expect(
+        validateUserUpdate(
+          teacherInOrg,
+          { organizationId: otherOrgId },
+          'admin-1',
+          orgAdminAuth,
+          orgPolicyWithVideoAndCourseCap
+        ).status
+      ).toBe(400);
+
+      expect(
+        validateUserUpdate(
+          teacherInOrg,
+          { name: 'Renamed By Org Admin' },
+          'admin-1',
+          orgAdminAuth,
+          orgPolicyWithVideoAndCourseCap
+        ).status
+      ).toBe(400);
+
+      const superUpdate = validateUserUpdate(
+        teacherInOrg,
+        { name: 'Valid Name', organizationId: otherOrgId },
+        'super-1',
+        superAdminAuth,
+        null
+      );
+      expect(superUpdate.error).toBeUndefined();
+      expect(superUpdate.sanitizedUpdates).toEqual({
+        name: 'Valid Name',
+        organizationId: otherOrgId,
+      });
     });
 
     it('allows superadmin to suspend another admin', () => {

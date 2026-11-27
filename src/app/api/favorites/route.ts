@@ -14,6 +14,7 @@ import {
   listFavoritesPage,
 } from '@/lib/server/services/favorites-service';
 import { getCachedData, setCachedData } from '@/lib/redis';
+import { requireFeature } from '@/lib/settingsHelpers';
 
 const privateCache = {
   'Cache-Control': 'private, s-maxage=60, stale-while-revalidate=120',
@@ -24,11 +25,20 @@ export async function GET(req: NextRequest) {
   const logContext: LogContext = { method: 'GET', path: '/api/favorites' };
 
   try {
+    const featureCheck = await requireFeature('enableBlogs');
+    if (featureCheck) return featureCheck;
+
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return jsonApiError('UNAUTHORIZED', 'Unauthorized', 401, { headers: privateCache });
     }
     logContext.userId = session.user.id;
+
+    const accessUser = {
+      id: session.user.id,
+      role: session.user.role,
+      organizationId: session.user.organizationId ?? null,
+    };
 
     const { searchParams } = new URL(req.url);
 
@@ -47,7 +57,7 @@ export async function GET(req: NextRequest) {
     const { page, limit, skip } = parseOffsetPagination(searchParams);
     const includeContent = searchParams.get('includeContent') === 'true';
 
-    const { items, total } = await listFavoritesPage(session.user.id, {
+    const { items, total } = await listFavoritesPage(accessUser, {
       page,
       limit,
       skip,
@@ -74,6 +84,9 @@ export async function POST(req: NextRequest) {
   const logContext: LogContext = { method: 'POST', path: '/api/favorites' };
 
   try {
+    const featureCheck = await requireFeature('enableBlogs');
+    if (featureCheck) return featureCheck;
+
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return jsonApiError('UNAUTHORIZED', 'Unauthorized', 401);
@@ -87,7 +100,14 @@ export async function POST(req: NextRequest) {
     }
 
     const { blogId } = validationResult.data;
-    const result = await addFavoriteForUser(session.user.id, blogId);
+    const result = await addFavoriteForUser(
+      {
+        id: session.user.id,
+        role: session.user.role,
+        organizationId: session.user.organizationId ?? null,
+      },
+      blogId
+    );
 
     if (!result.ok) {
       if (result.reason === 'not_found') {

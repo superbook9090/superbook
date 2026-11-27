@@ -12,7 +12,7 @@ import mongoose from 'mongoose';
 import { requireFeature } from '@/lib/settingsHelpers';
 import { isAdmin } from '@/lib/roles';
 import { createUserNotifications } from '@/lib/server/services/notifications-service';
-import { validateContentAccess } from '@/lib/accessControl';
+import { canManageOrgContent, type AccessUser } from '@/lib/accessControl';
 
 // PATCH /api/enrollments/[id] - Update enrollment progress
 export async function PATCH(
@@ -40,7 +40,34 @@ export async function PATCH(
 
     await dbConnect();
 
-    const { progress, status, lessonCompletedCount } = await request.json();
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { message: 'Enrollment not found' },
+        { status: 404 }
+      );
+    }
+
+    const body = await request.json();
+
+    // Prevent students from forging progress, completion status, or completed lesson counts
+    if (
+      body?.progress !== undefined ||
+      body?.lessonCompletedCount !== undefined ||
+      body?.completedAt !== undefined ||
+      (body?.status !== undefined && body.status !== 'dropped')
+    ) {
+      return NextResponse.json(
+        { message: 'Course progress and completion are tracked automatically and cannot be modified directly' },
+        { status: 403 }
+      );
+    }
+
+    if (body?.status !== 'dropped') {
+      return NextResponse.json(
+        { message: 'No valid updatable fields provided' },
+        { status: 400 }
+      );
+    }
 
     const enrollment = await Enrollment.findOne({
       _id: id,
@@ -54,17 +81,7 @@ export async function PATCH(
       );
     }
 
-    // Update fields
-    if (progress !== undefined) enrollment.progress = Math.min(100, Math.max(0, progress));
-    if (status) enrollment.status = status;
-    if (lessonCompletedCount !== undefined) enrollment.lessonCompletedCount = lessonCompletedCount;
-
-    // If progress is 100%, mark as completed
-    if (enrollment.progress >= 100 && enrollment.status !== 'completed') {
-      enrollment.status = 'completed';
-      enrollment.completedAt = new Date();
-    }
-
+    enrollment.status = 'dropped';
     await enrollment.save();
 
     // Invalidate Redis cache for enrollments
@@ -112,6 +129,13 @@ export async function DELETE(
 
     await dbConnect();
 
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { message: 'Enrollment not found' },
+        { status: 404 }
+      );
+    }
+
     const enrollment = await Enrollment.findById(id).populate('course', 'instructor organizationId title');
 
     if (!enrollment) {
@@ -125,37 +149,32 @@ export async function DELETE(
     const isUserAdmin = isAdmin(session.user.role);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const course = enrollment.course as any;
-    const isOwnerTeacher = course?.instructor?.toString() === session.user.id;
 
-    if (!isSelf && !isUserAdmin && !isOwnerTeacher) {
-      return NextResponse.json(
-        { message: 'You do not have permission to remove this enrollment' },
-        { status: 403 }
-      );
-    }
-
-    // Removing another student's enrollment is a teacher/admin management action, gated separately
     if (!isSelf) {
-      const enrollmentFeatureCheck = await requireFeature('enableEnrollmentManagement');
-      if (enrollmentFeatureCheck) return enrollmentFeatureCheck;
-    }
-
-    if (isUserAdmin && !isSelf && !isOwnerTeacher) {
+      // Removing another student's enrollment requires course management permission
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const requester = session.user as any;
-      try {
-        validateContentAccess(
-          course?.organizationId,
-          {
-            _id: new mongoose.Types.ObjectId(requester.id),
-            organizationId: requester.organizationId ? new mongoose.Types.ObjectId(requester.organizationId) : null,
-            role: requester.role as 'student' | 'teacher' | 'admin',
-          },
-          'course'
+      const authUser: AccessUser = {
+        _id: new mongoose.Types.ObjectId(requester.id),
+        organizationId: requester.organizationId
+          ? new mongoose.Types.ObjectId(requester.organizationId)
+          : null,
+        role: (requester.role || 'student') as AccessUser['role'],
+      };
+
+      const canManage =
+        Boolean(course) &&
+        canManageOrgContent(course.organizationId, course.instructor, authUser);
+
+      if (!canManage) {
+        return NextResponse.json(
+          { message: 'You do not have permission to remove this enrollment' },
+          { status: 403 }
         );
-      } catch {
-        return NextResponse.json({ message: 'Enrollment not found' }, { status: 404 });
       }
+
+      const enrollmentFeatureCheck = await requireFeature('enableEnrollmentManagement');
+      if (enrollmentFeatureCheck) return enrollmentFeatureCheck;
     }
 
     // Update course enrolledCount for performance

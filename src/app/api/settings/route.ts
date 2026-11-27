@@ -61,11 +61,9 @@ export async function GET() {
         enableGoogleAdsense: true,
         enableCourseDoubts: true,
         enableContests: false,
+        enableContestMarketingPopup: false,
         enableDownloadAppPopup: true,
         enableQuizChallenges: true,
-        enableAutoDailyAiContestCreation: true,
-        enableAutoDeclareResults: true,
-        enableBankPoCourseCron: true,
         enableChatWidget: true,
       },
       challengeConfig: {
@@ -102,32 +100,77 @@ export async function GET() {
       });
     }
 
+    const ft = settings.featureToggles;
+    const tl = settings.teacherLimits;
+    const nl = settings.notesLimits;
+    const cc = settings.challengeConfig;
+    const av = settings.appVersionConfig;
+    const pc = settings.platformConfig as IAppSettings['platformConfig'] & {
+      siteName?: string;
+      siteDescription?: string;
+    };
+
     const mergedSettings = {
-      ...defaultSettings,
-      ...settings,
       teacherLimits: {
-        ...defaultSettings.teacherLimits,
-        ...(settings.teacherLimits || {}),
+        courses: tl?.courses ?? defaultSettings.teacherLimits.courses,
+        quizzes: tl?.quizzes ?? defaultSettings.teacherLimits.quizzes,
+        blogs: tl?.blogs ?? defaultSettings.teacherLimits.blogs,
+        aiQuizGenerations: tl?.aiQuizGenerations ?? defaultSettings.teacherLimits.aiQuizGenerations,
+        aiQuizMaxQuestions: tl?.aiQuizMaxQuestions ?? defaultSettings.teacherLimits.aiQuizMaxQuestions,
       },
       notesLimits: {
-        ...defaultSettings.notesLimits,
-        ...(settings.notesLimits || {}),
+        maxPagesPerUser: nl?.maxPagesPerUser ?? defaultSettings.notesLimits.maxPagesPerUser,
+        maxWordsPerPage: nl?.maxWordsPerPage ?? defaultSettings.notesLimits.maxWordsPerPage,
       },
       featureToggles: {
-        ...defaultSettings.featureToggles,
-        ...(settings.featureToggles || {}),
+        enableBlogs: ft?.enableBlogs ?? defaultSettings.featureToggles.enableBlogs,
+        enableQuizzes: ft?.enableQuizzes ?? defaultSettings.featureToggles.enableQuizzes,
+        enableCourses: ft?.enableCourses ?? defaultSettings.featureToggles.enableCourses,
+        enableAnalytics: ft?.enableAnalytics ?? defaultSettings.featureToggles.enableAnalytics,
+        enableClarity: ft?.enableClarity ?? defaultSettings.featureToggles.enableClarity,
+        enableQuizSolutionAnalysis:
+          ft?.enableQuizSolutionAnalysis ?? defaultSettings.featureToggles.enableQuizSolutionAnalysis,
+        restrictPublicCourseCreation:
+          ft?.restrictPublicCourseCreation ?? defaultSettings.featureToggles.restrictPublicCourseCreation,
+        enableEnrollmentManagement:
+          ft?.enableEnrollmentManagement ?? defaultSettings.featureToggles.enableEnrollmentManagement,
+        enablePhoneAuth: ft?.enablePhoneAuth ?? defaultSettings.featureToggles.enablePhoneAuth,
+        enablePullToRefresh: ft?.enablePullToRefresh ?? defaultSettings.featureToggles.enablePullToRefresh,
+        enableGoogleAuthApp: ft?.enableGoogleAuthApp ?? defaultSettings.featureToggles.enableGoogleAuthApp,
+        enableGoogleAuthWeb: ft?.enableGoogleAuthWeb ?? defaultSettings.featureToggles.enableGoogleAuthWeb,
+        enableNotes: ft?.enableNotes ?? defaultSettings.featureToggles.enableNotes,
+        enableAiQuizGen: ft?.enableAiQuizGen ?? defaultSettings.featureToggles.enableAiQuizGen,
+        enableGoogleAdsense: ft?.enableGoogleAdsense ?? defaultSettings.featureToggles.enableGoogleAdsense,
+        enableCourseDoubts: ft?.enableCourseDoubts ?? defaultSettings.featureToggles.enableCourseDoubts,
+        enableContests: ft?.enableContests ?? defaultSettings.featureToggles.enableContests,
+        enableContestMarketingPopup:
+          ft?.enableContestMarketingPopup ?? defaultSettings.featureToggles.enableContestMarketingPopup,
+        enableDownloadAppPopup:
+          ft?.enableDownloadAppPopup ?? defaultSettings.featureToggles.enableDownloadAppPopup,
+        enableQuizChallenges: ft?.enableQuizChallenges ?? defaultSettings.featureToggles.enableQuizChallenges,
+        enableChatWidget: ft?.enableChatWidget ?? defaultSettings.featureToggles.enableChatWidget,
       },
       challengeConfig: {
-        ...defaultSettings.challengeConfig,
-        ...(settings.challengeConfig || {}),
+        allowGuestChallenges: cc?.allowGuestChallenges ?? defaultSettings.challengeConfig.allowGuestChallenges,
+        ...(cc?.guestQuestionLimit !== undefined ? { guestQuestionLimit: cc.guestQuestionLimit } : {}),
+        challengeExpiryDays: cc?.challengeExpiryDays ?? defaultSettings.challengeConfig.challengeExpiryDays,
       },
       appVersionConfig: {
-        ...defaultSettings.appVersionConfig,
-        ...(settings.appVersionConfig || {}),
+        latestVersion: av?.latestVersion ?? defaultSettings.appVersionConfig.latestVersion,
+        minRequiredVersion: av?.minRequiredVersion ?? defaultSettings.appVersionConfig.minRequiredVersion,
+        forceUpdate: av?.forceUpdate ?? defaultSettings.appVersionConfig.forceUpdate,
+        updateUrl: av?.updateUrl ?? defaultSettings.appVersionConfig.updateUrl,
+        releaseNotes: av?.releaseNotes ?? defaultSettings.appVersionConfig.releaseNotes,
+        enabled: av?.enabled ?? defaultSettings.appVersionConfig.enabled,
       },
       platformConfig: {
-        ...defaultSettings.platformConfig,
-        ...(settings.platformConfig || {}),
+        siteName: pc?.siteName ?? defaultSettings.platformConfig.siteName,
+        siteDescription: pc?.siteDescription ?? defaultSettings.platformConfig.siteDescription,
+        maintenanceMode: pc?.maintenanceMode ?? defaultSettings.platformConfig.maintenanceMode,
+        allowRegistration: pc?.allowRegistration ?? defaultSettings.platformConfig.allowRegistration,
+        allowTeacherRegistration:
+          pc?.allowTeacherRegistration ?? defaultSettings.platformConfig.allowTeacherRegistration,
+        defaultLanguage: pc?.defaultLanguage ?? defaultSettings.platformConfig.defaultLanguage,
       },
     };
 

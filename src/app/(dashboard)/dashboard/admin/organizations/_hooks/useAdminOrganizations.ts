@@ -2,12 +2,14 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ROUTES } from '@/constants/routes';
 import { useSessionStore } from '@/store/useSessionStore';
 import { isSuperAdmin } from '@/lib/roles';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useAlert } from '@/components/ui/AlertContainer';
 import { ApiClientError } from '@/lib/api/http';
+import { queryKeys } from '@/lib/react-query/query-keys';
 import {
   listOrganizations,
   createOrganization,
@@ -76,11 +78,10 @@ function toPolicyPayload(formData: OrganizationFormData) {
 export function useAdminOrganizations() {
   const { t } = useTranslation();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { session, status } = useSessionStore();
   const { addAlert } = useAlert();
 
-  const [organizations, setOrganizations] = useState<OrganizationItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Filters & View State
@@ -112,24 +113,34 @@ export function useAdminOrganizations() {
     }
   }, [session, status, router]);
 
-  // Fetch Organizations
-  const fetchOrganizations = useCallback(async () => {
-    try {
-      setIsLoading(true);
+  const isSuper = isSuperAdmin(session?.user?.role);
+
+  // Cached Organizations Query (shared with Admin Users superadmin filter)
+  const orgsQuery = useQuery({
+    queryKey: queryKeys.organizations.list(true),
+    queryFn: async () => {
       const data = await listOrganizations({ includeInactive: true });
-      setOrganizations(data.organizations || []);
-    } catch (err) {
+      return data.organizations || [];
+    },
+    enabled: status === 'authenticated' && isSuper,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  useEffect(() => {
+    if (orgsQuery.error) {
+      const err = orgsQuery.error;
       const message =
         err instanceof ApiClientError ? err.message : t('organizations.failedFetchOrganizations');
       addAlert({ type: 'error', message });
-    } finally {
-      setIsLoading(false);
     }
-  }, [t, addAlert]);
+  }, [orgsQuery.error, addAlert, t]);
 
-  useEffect(() => {
-    fetchOrganizations();
-  }, [fetchOrganizations]);
+  const organizations = useMemo(() => orgsQuery.data ?? [], [orgsQuery.data]);
+  const isLoading = orgsQuery.isPending || orgsQuery.isFetching;
+
+  const fetchOrganizations = useCallback(async () => {
+    await orgsQuery.refetch();
+  }, [orgsQuery]);
 
   // Compute Stats
   const stats: OrganizationsStatsData = useMemo(() => {
@@ -265,7 +276,7 @@ export function useAdminOrganizations() {
       addAlert({ type: 'success', message: t('organizations.create') + ' ' + t('common.success') });
       setShowCreateModal(false);
       setFormData(DEFAULT_FORM_DATA);
-      fetchOrganizations();
+      void queryClient.invalidateQueries({ queryKey: queryKeys.organizations.all });
     } catch (err) {
       const message =
         err instanceof ApiClientError ? err.message : t('organizations.failedCreateOrganization');
@@ -291,7 +302,7 @@ export function useAdminOrganizations() {
       } else {
         setSelectedOrg(null);
       }
-      fetchOrganizations();
+      void queryClient.invalidateQueries({ queryKey: queryKeys.organizations.all });
     } catch (err) {
       const message =
         err instanceof ApiClientError ? err.message : t('organizations.failedUpdateOrganization');
@@ -307,12 +318,14 @@ export function useAdminOrganizations() {
       const newStatus = !org.isActive;
       await updateOrganization(org._id, { isActive: newStatus });
       addAlert({ type: 'success', message: t('organizations.statusUpdated') });
-      setOrganizations((prev) =>
-        prev.map((o) => (o._id === org._id ? { ...o, isActive: newStatus } : o))
+      queryClient.setQueryData<OrganizationItem[]>(
+        queryKeys.organizations.list(true),
+        (prev) => prev?.map((o) => (o._id === org._id ? { ...o, isActive: newStatus } : o))
       );
       if (selectedOrg?._id === org._id) {
         setSelectedOrg((prev) => (prev ? { ...prev, isActive: newStatus } : null));
       }
+      void queryClient.invalidateQueries({ queryKey: queryKeys.organizations.detail(org._id) });
     } catch (err) {
       const message =
         err instanceof ApiClientError ? err.message : t('organizations.failedUpdateOrganization');
@@ -344,7 +357,7 @@ export function useAdminOrganizations() {
       setShowDeleteDialog(false);
       setShowDetailModal(false);
       setDeleteTargetOrg(null);
-      fetchOrganizations();
+      void queryClient.invalidateQueries({ queryKey: queryKeys.organizations.all });
     } catch (err) {
       const message =
         err instanceof ApiClientError ? err.message : t('organizations.failedDeleteOrganization');

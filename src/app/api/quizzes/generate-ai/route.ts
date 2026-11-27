@@ -147,6 +147,9 @@ export async function POST(req: NextRequest) {
 export async function GET() {
   const logContext = { path: '/api/quizzes/generate-ai', method: 'GET' };
   try {
+    const featureCheck = await requireFeature('enableAiQuizGen');
+    if (featureCheck) return featureCheck;
+
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });

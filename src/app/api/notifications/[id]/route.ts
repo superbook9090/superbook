@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import mongoose from 'mongoose';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { logApiError, type LogContext } from '@/lib/logger';
@@ -19,6 +20,10 @@ export async function PATCH(_req: NextRequest, context: RouteContext) {
     }
 
     logContext.userId = session.user.id;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return jsonApiError('VALIDATION', 'Invalid notification ID', 400);
+    }
 
     const updated = await markUserNotificationRead(session.user.id, id);
     if (!updated) {

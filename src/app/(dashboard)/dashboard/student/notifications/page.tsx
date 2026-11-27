@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Bell,
   BookOpen,
@@ -28,6 +29,7 @@ import { handleDeepLink } from '@/lib/mobile/deepLink';
 import type { NotificationCategory } from '@/lib/notifications/push/notificationPayload';
 import { StudentPageBanner } from '@/features/student/components/StudentPageBanner';
 import { StudentTabs } from '@/features/student/components/StudentTabs';
+import { queryKeys } from '@/lib/react-query/query-keys';
 import { cn } from '@/lib/utils';
 
 function localizedText(value: { en: string; hi?: string }, lang: string): string {
@@ -61,32 +63,40 @@ function getCategoryIcon(category: NotificationCategory | string) {
 export default function StudentNotificationsPage() {
   const { session, status } = useSessionStore();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { t, lang } = useTranslation();
   const { addAlert } = useAlert();
 
-  const [notifications, setNotifications] = useState<UserNotificationItem[]>([]);
-  const [loading, setLoading] = useState(true);
   const [filterTab, setFilterTab] = useState<'all' | 'unread'>('all');
   const [permissionState, setPermissionState] = useState<NotificationPermission | 'unsupported'>('default');
   const [requestingPush, setRequestingPush] = useState(false);
 
-  const loadNotifications = useCallback(async () => {
-    try {
+  const inboxKey = queryKeys.notifications.inbox(session?.user?.id);
+
+  const notificationsQuery = useQuery({
+    queryKey: inboxKey,
+    queryFn: async () => {
       const { notifications: items } = await fetchUserNotifications();
-      setNotifications(items);
-    } catch {
+      return items;
+    },
+    enabled: status === 'authenticated' && session?.user?.role === 'student',
+    staleTime: 60 * 1000,
+  });
+
+  useEffect(() => {
+    if (notificationsQuery.error) {
       addAlert({ type: 'error', message: t('notifications.inbox.loadFailed'), duration: 5000 });
-    } finally {
-      setLoading(false);
     }
-  }, [t, addAlert]);
+  }, [notificationsQuery.error, addAlert, t]);
 
   useEffect(() => {
     if (status === 'loading') return;
     if (!session) { router.push(ROUTES.login); return; }
-    if (session.user?.role !== 'student') { router.push(ROUTES.dashboard); return; }
-    void loadNotifications();
-  }, [status, session, router, loadNotifications]);
+    if (session.user?.role !== 'student') { router.push(ROUTES.dashboard); }
+  }, [status, session, router]);
+
+  const notifications = useMemo(() => notificationsQuery.data ?? [], [notificationsQuery.data]);
+  const loading = notificationsQuery.isPending;
 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'Notification' in window) {
@@ -100,7 +110,9 @@ export default function StudentNotificationsPage() {
     if (!item.read) {
       try {
         await markNotificationRead(item._id);
-        setNotifications((prev) => prev.map((n) => (n._id === item._id ? { ...n, read: true } : n)));
+        queryClient.setQueryData<UserNotificationItem[]>(inboxKey, (prev) =>
+          (prev ?? []).map((n) => (n._id === item._id ? { ...n, read: true } : n))
+        );
       } catch {
         addAlert({ type: 'error', message: t('notifications.inbox.markReadFailed'), duration: 5000 });
       }

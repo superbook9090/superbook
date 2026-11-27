@@ -175,6 +175,7 @@ export default function ProfileOrganizationSection({ session }: ProfileOrganizat
           onClose={() => setShowInviteModal(false)}
           organizationName={organizationName || orgData.name}
           inviteCode={orgData.inviteCode}
+          teacherInviteCode={(orgData as typeof orgData & { teacherInviteCode?: string }).teacherInviteCode}
           logo={orgData.logo}
         />
       )}

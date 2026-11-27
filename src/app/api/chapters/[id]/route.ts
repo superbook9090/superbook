@@ -48,6 +48,9 @@ export async function PATCH(
     if (featureCheck) return featureCheck;
 
     const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
     await dbConnect();
     const { id } = await params;
 
@@ -100,6 +103,9 @@ export async function DELETE(
     if (featureCheck) return featureCheck;
 
     const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
     await dbConnect();
     const { id } = await params;
 

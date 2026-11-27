@@ -32,20 +32,19 @@ export async function POST(req: NextRequest) {
 
     await dbConnect();
 
-    const resetRecord = await PasswordResetToken.findOne({ tokenHash });
-    if (!resetRecord || resetRecord.expiresAt < new Date()) {
-      if (resetRecord) {
-        await PasswordResetToken.deleteOne({ _id: resetRecord._id });
-      }
+    const resetRecord = await PasswordResetToken.findOneAndDelete({
+      tokenHash,
+      expiresAt: { $gt: new Date() },
+    });
+    if (!resetRecord) {
       return NextResponse.json(
         { message: 'This reset link is invalid or has expired. Please request a new one.' },
         { status: 400 }
       );
     }
 
-    const user = await User.findById(resetRecord.userId).select('+password isSuspended');
+    const user = await User.findById(resetRecord.userId).select('+password isSuspended provider');
     if (!user || user.isSuspended) {
-      await PasswordResetToken.deleteOne({ _id: resetRecord._id });
       return NextResponse.json(
         { message: 'This reset link is invalid or has expired. Please request a new one.' },
         { status: 400 }

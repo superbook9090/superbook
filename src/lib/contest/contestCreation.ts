@@ -3,6 +3,7 @@ import Quiz from '@/models/Quiz';
 import User from '@/models/User';
 import { setQuizQuestions } from '@/domain/learning/quizContent';
 import { sendAdminBroadcast } from '@/lib/server/services/notifications-service';
+import { canManageOrgContent, type AccessUser } from '@/lib/accessControl';
 
 export interface RawContestQuestion {
   question: string;
@@ -26,6 +27,7 @@ export interface BuildQuizRefsParams {
   enableNegativeMarking?: boolean;
   negativeMarks?: number;
   userId: string;
+  userRole: AccessUser['role'];
   organizationId?: string | null;
   rawQuestions?: RawContestQuestion[];
   rawQuizzes?: RawContestQuizInput[];
@@ -42,6 +44,8 @@ export async function buildContestQuizRefs(params: BuildQuizRefsParams): Promise
   contestQuizRefs: ContestQuizRef[];
   totalQuestions: number;
   totalPoints: number;
+  error?: string;
+  status?: number;
 }> {
   const {
     title,
@@ -50,10 +54,73 @@ export async function buildContestQuizRefs(params: BuildQuizRefsParams): Promise
     enableNegativeMarking,
     negativeMarks,
     userId,
+    userRole,
     organizationId,
     rawQuestions = [],
     rawQuizzes = [],
   } = params;
+
+  const authUser: AccessUser = {
+    _id: new mongoose.Types.ObjectId(userId),
+    organizationId: organizationId ? new mongoose.Types.ObjectId(organizationId) : null,
+    role: userRole,
+  };
+
+  // Pre-validate all referenced quizIds before creating any standalone quiz documents
+  const validatedQuizMap = new Map<
+    string,
+    {
+      _id: mongoose.Types.ObjectId;
+      title: string;
+      questionCount?: number;
+      instructor?: mongoose.Types.ObjectId;
+      organizationId?: mongoose.Types.ObjectId | null;
+    }
+  >();
+
+  if (rawQuizzes && rawQuizzes.length > 0) {
+    for (const item of rawQuizzes) {
+      if (item.quizId) {
+        if (!mongoose.Types.ObjectId.isValid(item.quizId)) {
+          return {
+            contestQuizRefs: [],
+            totalQuestions: 0,
+            totalPoints: 0,
+            error: 'Invalid referenced quiz ID',
+            status: 400,
+          };
+        }
+        const existingQuiz = await Quiz.findById(item.quizId)
+          .select('_id title questionCount instructor organizationId')
+          .lean<{
+            _id: mongoose.Types.ObjectId;
+            title: string;
+            questionCount?: number;
+            instructor?: mongoose.Types.ObjectId;
+            organizationId?: mongoose.Types.ObjectId | null;
+          }>();
+        if (!existingQuiz) {
+          return {
+            contestQuizRefs: [],
+            totalQuestions: 0,
+            totalPoints: 0,
+            error: 'Referenced quiz not found',
+            status: 404,
+          };
+        }
+        if (!canManageOrgContent(existingQuiz.organizationId, existingQuiz.instructor, authUser)) {
+          return {
+            contestQuizRefs: [],
+            totalQuestions: 0,
+            totalPoints: 0,
+            error: 'You are not authorized to attach one or more referenced quizzes',
+            status: 403,
+          };
+        }
+        validatedQuizMap.set(item.quizId, existingQuiz);
+      }
+    }
+  }
 
   const contestQuizRefs: ContestQuizRef[] = [];
   let totalQuestions = 0;
@@ -104,11 +171,7 @@ export async function buildContestQuizRefs(params: BuildQuizRefsParams): Promise
     for (let i = 0; i < rawQuizzes.length; i++) {
       const item = rawQuizzes[i];
       if (item.quizId) {
-        const existingQuiz = await Quiz.findById(item.quizId).lean<{
-          _id: mongoose.Types.ObjectId;
-          title: string;
-          questionCount?: number;
-        }>();
+        const existingQuiz = validatedQuizMap.get(item.quizId);
         if (existingQuiz) {
           contestQuizRefs.push({
             quiz: existingQuiz._id,
@@ -163,12 +226,30 @@ export async function buildContestQuizRefs(params: BuildQuizRefsParams): Promise
   return { contestQuizRefs, totalQuestions, totalPoints };
 }
 
-export async function broadcastNewContest(contestId: string | mongoose.Types.ObjectId, title: string) {
+export async function broadcastNewContest(
+  contestId: string | mongoose.Types.ObjectId,
+  title: string,
+  options?: {
+    organizationId?: string | mongoose.Types.ObjectId | null;
+    creatorRole?: string;
+  }
+) {
   try {
-    const students = await User.find({
+    const recipientFilter: Record<string, unknown> = {
       $or: [{ role: 'student' }, { role: { $exists: false } }, { role: null }],
       isSuspended: { $ne: true },
-    }).select('_id').lean();
+    };
+
+    if (options?.organizationId) {
+      recipientFilter.organizationId = options.organizationId;
+    } else if (options?.creatorRole !== 'superadmin') {
+      console.warn(
+        '[broadcastNewContest] Blocked platform-wide contest broadcast by non-superadmin user.'
+      );
+      return { delivered: 0, pushSent: 0, pushFailed: 0, activeTokens: 0 };
+    }
+
+    const students = await User.find(recipientFilter).select('_id').lean();
 
     const studentIds = students.map((s) => String(s._id));
 

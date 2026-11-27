@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ROUTES } from '@/constants/routes';
 import { useAlert } from '@/components/ui/AlertContainer';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -9,6 +10,7 @@ import { useSessionStore } from '@/store/useSessionStore';
 import { listFolderContents } from '@/lib/api/files';
 import { ApiClientError } from '@/lib/api/http';
 import { normalizeRole, isAdmin } from '@/lib/roles';
+import { queryKeys } from '@/lib/react-query/query-keys';
 import type {
   BreadcrumbItem,
   FileNodeItem,
@@ -25,6 +27,7 @@ import { useFileMutations } from './useFileMutations';
 export function useAdminFiles() {
   const { t } = useTranslation();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { session, status } = useSessionStore();
   const { addAlert } = useAlert();
 
@@ -43,35 +46,50 @@ export function useAdminFiles() {
   const [typeFilter, setTypeFilter] = useState<FileTypeFilter>('all');
   const [sortOption, setSortOption] = useState<FileSortOption>('newest');
 
-  const [contents, setContents] = useState<FolderContentsResponse>({ folders: [], files: [] });
-  const [isLoading, setIsLoading] = useState(true);
-
   // Preview state
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [previewTarget, setPreviewTarget] = useState<FileNodeItem | null>(null);
 
   const canMutate = session?.user?.role === 'superadmin';
+  const orgScope = `${rawRole || 'guest'}:${session?.user?.organizationId || 'public'}`;
+
+  const folderQuery = useQuery<FolderContentsResponse>({
+    queryKey: queryKeys.files.folder(orgScope, parentId),
+    queryFn: async () => {
+      const data = await listFolderContents<FolderNode, FileNodeItem>(parentId);
+      return {
+        folders: data.folders || [],
+        files: data.files || [],
+        pagination: data.pagination,
+      };
+    },
+    enabled: status === 'authenticated' && Boolean(session?.user?.id),
+    staleTime: 2 * 60 * 1000,
+  });
+
+  useEffect(() => {
+    if (folderQuery.error) {
+      const err = folderQuery.error;
+      addAlert({
+        type: 'error',
+        message: err instanceof ApiClientError ? err.message : t('common.error'),
+      });
+    }
+  }, [folderQuery.error, t, addAlert]);
+
+  const contents = useMemo<FolderContentsResponse>(
+    () => folderQuery.data ?? { folders: [], files: [] },
+    [folderQuery.data]
+  );
+  const isLoading = folderQuery.isPending;
 
   const loadContents = useCallback(
     async (pid: string | null) => {
-      setIsLoading(true);
-      try {
-        const data = await listFolderContents<FolderNode, FileNodeItem>(pid);
-        setContents({
-          folders: data.folders || [],
-          files: data.files || [],
-          pagination: data.pagination,
-        });
-      } catch (err) {
-        addAlert({
-          type: 'error',
-          message: err instanceof ApiClientError ? err.message : t('common.error'),
-        });
-      } finally {
-        setIsLoading(false);
-      }
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.files.folder(orgScope, pid),
+      });
     },
-    [t, addAlert]
+    [queryClient, orgScope]
   );
 
   const mutations = useFileMutations({
@@ -83,10 +101,8 @@ export function useAdminFiles() {
     if (status === 'loading') return;
     if (!session) {
       router.push(ROUTES.login);
-      return;
     }
-    loadContents(parentId);
-  }, [status, session, router, parentId, loadContents]);
+  }, [status, session, router]);
 
   useEffect(() => {
     setBreadcrumbs((prev) => {

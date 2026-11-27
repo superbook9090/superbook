@@ -4,7 +4,8 @@ import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import { Organization, User, Course, Blog, Quiz } from '@/models';
 import { logApiError, type LogContext } from '@/lib/logger';
-import { generateInviteCode, generateOrgCode } from '@/lib/inviteCode';
+import { generateInviteCode, generateOrgCode, generateTeacherInviteCode } from '@/lib/inviteCode';
+import { ensureTeacherInviteCode } from '@/lib/organizations/resolveInvite';
 import { serialize } from '@/lib/serialize';
 import {
   sanitizeOrganizationPermissions,
@@ -88,16 +89,21 @@ export async function GET(req: NextRequest) {
     const blogCountMap = toCountMap(blogAgg);
     const quizCountMap = toCountMap(quizAgg);
 
-    const orgsWithCounts = organizations.map((org) => {
-      const idStr = String(org._id);
-      return {
-        ...org,
-        userCount: userCountMap.get(idStr) ?? 0,
-        courseCount: courseCountMap.get(idStr) ?? 0,
-        blogCount: blogCountMap.get(idStr) ?? 0,
-        quizCount: quizCountMap.get(idStr) ?? 0,
-      };
-    });
+    const orgsWithCounts = await Promise.all(
+      organizations.map(async (org) => {
+        const idStr = String(org._id);
+        const teacherInviteCode =
+          org.teacherInviteCode || (await ensureTeacherInviteCode(idStr));
+        return {
+          ...org,
+          teacherInviteCode,
+          userCount: userCountMap.get(idStr) ?? 0,
+          courseCount: courseCountMap.get(idStr) ?? 0,
+          blogCount: blogCountMap.get(idStr) ?? 0,
+          quizCount: quizCountMap.get(idStr) ?? 0,
+        };
+      })
+    );
 
     const serializedOrgs = serialize(orgsWithCounts);
 
@@ -162,26 +168,30 @@ export async function POST(req: NextRequest) {
     // Generate unique codes
     let code = generateOrgCode();
     let inviteCode = generateInviteCode();
+    let teacherInviteCode = generateTeacherInviteCode();
 
     // Ensure codes are unique
-    let [codeExists, inviteExists] = await Promise.all([
+    let [codeExists, inviteExists, teacherInviteExists] = await Promise.all([
       Organization.exists({ code }),
       Organization.exists({ inviteCode }),
+      Organization.exists({ teacherInviteCode }),
     ]);
 
     // Retry if collision
     let attempts = 0;
-    while ((codeExists || inviteExists) && attempts < 10) {
-      code = generateOrgCode();
-      inviteCode = generateInviteCode();
-      [codeExists, inviteExists] = await Promise.all([
+    while ((codeExists || inviteExists || teacherInviteExists) && attempts < 10) {
+      if (codeExists) code = generateOrgCode();
+      if (inviteExists) inviteCode = generateInviteCode();
+      if (teacherInviteExists) teacherInviteCode = generateTeacherInviteCode();
+      [codeExists, inviteExists, teacherInviteExists] = await Promise.all([
         Organization.exists({ code }),
         Organization.exists({ inviteCode }),
+        Organization.exists({ teacherInviteCode }),
       ]);
       attempts++;
     }
 
-    if (codeExists || inviteExists) {
+    if (codeExists || inviteExists || teacherInviteExists) {
       return NextResponse.json(
         { message: 'Failed to generate unique codes' },
         { status: 500 }
@@ -192,6 +202,7 @@ export async function POST(req: NextRequest) {
       name,
       code,
       inviteCode,
+      teacherInviteCode,
       description,
       logo: logo || null,
       primaryColor: primaryColor || null,

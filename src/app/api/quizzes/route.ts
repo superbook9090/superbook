@@ -10,11 +10,34 @@ import { createQuizSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
 import mongoose from 'mongoose';
-import { getAccessFilter } from '@/lib/accessControl';
+import { getAccessFilter, canManageOrgContent } from '@/lib/accessControl';
 import { getCachedData, setCachedData, invalidatePattern } from '@/lib/redis';
 import { setQuizQuestions } from '@/domain/learning/quizContent';
 import { resolveQuizPlacement } from '@/lib/quiz/quizPlacement';
-import { isStaffRole, isAdmin } from '@/lib/roles';
+import { isStaffRole } from '@/lib/roles';
+
+const ALLOWED_QUIZ_FIELDS = new Set([
+  '_id',
+  'title',
+  'description',
+  'course',
+  'chapter',
+  'lesson',
+  'instructor',
+  'organizationId',
+  'questionCount',
+  'version',
+  'timeLimit',
+  'isPublished',
+  'enableNegativeMarking',
+  'negativeMarks',
+  'createdAt',
+  'updatedAt',
+]);
+
+function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
 // GET /api/quizzes - Get all quizzes (with optional filtering)
 export async function GET(request: NextRequest) {
@@ -51,17 +74,47 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status');
     const sortParam = searchParams.get('sort');
 
-    // Build cache key (only for published quizzes)
-    const orgId = session.user?.organizationId || 'public';
-    const cacheKey = `quizzes:${orgId}:${course || 'all'}:${instructor || 'all'}:${page}:${limit}:${search || ''}:${status || ''}:${sortParam || ''}`;
+    // Validate ObjectId query params
+    if (course && !mongoose.Types.ObjectId.isValid(course)) {
+      return NextResponse.json({ message: 'Invalid course ID' }, { status: 400 });
+    }
+    if (chapter && chapter !== 'none' && chapter !== 'null' && !mongoose.Types.ObjectId.isValid(chapter)) {
+      return NextResponse.json({ message: 'Invalid chapter ID' }, { status: 400 });
+    }
+    if (
+      lesson &&
+      lesson !== 'none' &&
+      lesson !== 'null' &&
+      lesson !== 'all' &&
+      !mongoose.Types.ObjectId.isValid(lesson)
+    ) {
+      return NextResponse.json({ message: 'Invalid lesson ID' }, { status: 400 });
+    }
+    if (instructor && instructor !== 'self' && !mongoose.Types.ObjectId.isValid(instructor)) {
+      return NextResponse.json({ message: 'Invalid instructor ID' }, { status: 400 });
+    }
+
+    const userRole = session.user?.role;
+    const userId = session.user?.id || 'anon';
+    const mustBePublished = !session?.user || userRole === 'student';
+
+    // Build cache key scoped by org/superadmin, role, user, placement, and fields
+    const orgPrefix =
+      userRole === 'superadmin' ? 'superadmin' : session.user?.organizationId || 'public';
+    const effectiveStatus = mustBePublished ? 'published' : status || '';
+    const cacheKey = `quizzes:${orgPrefix}:${userRole || 'anon'}:${userId}:${course || 'all'}:${chapter || 'all'}:${lesson || 'all'}:${instructor || 'all'}:${fields || 'default'}:${page}:${limit}:${search || ''}:${effectiveStatus}:${sortParam || ''}`;
 
     // Try cache for published quizzes
-    const isPublished = searchParams.get('isPublished') === 'true';
-    // If it's a student fetching published, or explicit isPublished flag
+    const isPublished = searchParams.get('isPublished') === 'true' || mustBePublished;
     if (isPublished) {
       const cached = await getCachedData(cacheKey);
       if (cached) {
-        return NextResponse.json(cached);
+        return NextResponse.json(cached, {
+          status: 200,
+          headers: {
+            'Cache-Control': 'private, no-store',
+          },
+        });
       }
     }
 
@@ -105,16 +158,17 @@ export async function GET(request: NextRequest) {
       andFilters.push({ lesson });
     }
 
-    if (search) {
+    if (search && search.trim()) {
+      const escapedSearch = escapeRegex(search.trim());
       andFilters.push({
         $or: [
-          { title: { $regex: search, $options: 'i' } },
-          { description: { $regex: search, $options: 'i' } },
+          { title: { $regex: escapedSearch, $options: 'i' } },
+          { description: { $regex: escapedSearch, $options: 'i' } },
         ],
       });
     }
 
-    if (status === 'published' || isPublished) {
+    if (mustBePublished || status === 'published' || isPublished) {
       andFilters.push({ isPublished: true });
     } else if (status === 'draft') {
       andFilters.push({ isPublished: false });
@@ -126,25 +180,34 @@ export async function GET(request: NextRequest) {
       query.$and = andFilters;
     }
 
-    // Build select object for field selection
+    // Build select object for field selection (allowlisted)
+    const defaultSelectFields: Record<string, number> = {
+      title: 1,
+      description: 1,
+      timeLimit: 1,
+      isPublished: 1,
+      createdAt: 1,
+      questionCount: 1,
+      version: 1,
+      chapter: 1,
+      lesson: 1,
+      course: 1,
+    };
     let selectFields: Record<string, number> = {};
     if (fields) {
-      const fieldList = fields.split(',');
-      fieldList.forEach(f => selectFields[f] = 1);
+      const fieldList = fields
+        .split(',')
+        .map((f) => f.trim())
+        .filter((f) => ALLOWED_QUIZ_FIELDS.has(f));
+      if (fieldList.length > 0) {
+        fieldList.forEach((f) => {
+          selectFields[f] = 1;
+        });
+      } else {
+        selectFields = defaultSelectFields;
+      }
     } else {
-      // Default fields to avoid over-fetching
-      selectFields = {
-        title: 1,
-        description: 1,
-        timeLimit: 1,
-        isPublished: 1,
-        createdAt: 1,
-        questionCount: 1,
-        version: 1,
-        chapter: 1,
-        lesson: 1,
-        course: 1,
-      };
+      selectFields = defaultSelectFields;
     }
 
     let sortQuery: Record<string, 1 | -1> = { createdAt: -1 };
@@ -186,14 +249,10 @@ export async function GET(request: NextRequest) {
       await setCachedData(cacheKey, responseData, 300); // 5 minutes
     }
 
-    const cacheControl = isPublished
-      ? 'public, s-maxage=300, stale-while-revalidate=600'
-      : 'private, no-cache, no-store, must-revalidate';
-
     return NextResponse.json(responseData, {
       status: 200,
       headers: {
-        'Cache-Control': cacheControl,
+        'Cache-Control': 'private, no-store',
       },
     });
   } catch (error) {
@@ -271,18 +330,34 @@ export async function POST(request: NextRequest) {
       if (limitCheck) return limitCheck;
     }
 
-    // Verify course exists and belongs to this instructor (or bypass if admin)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const courseQuery: any = { _id: course };
-    if (!isAdmin(session.user?.role)) {
-      courseQuery.instructor = session.user.id;
+    // Verify course exists and caller is authorized to manage content on it
+    if (!mongoose.Types.ObjectId.isValid(course)) {
+      return NextResponse.json({ message: 'Invalid course ID' }, { status: 400 });
     }
-    const courseDoc = await Course.findOne(courseQuery).lean();
+
+    const courseDoc = await Course.findById(course)
+      .select('_id instructor organizationId')
+      .lean<{
+        _id: mongoose.Types.ObjectId;
+        instructor: mongoose.Types.ObjectId;
+        organizationId?: mongoose.Types.ObjectId | null;
+      }>();
 
     if (!courseDoc) {
+      return NextResponse.json({ message: 'Course not found' }, { status: 404 });
+    }
+
+    const user = session.user as { id: string; organizationId?: string | null; role: string };
+    const authUser = {
+      _id: new mongoose.Types.ObjectId(user.id),
+      organizationId: user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null,
+      role: user.role as 'student' | 'teacher' | 'admin' | 'superadmin',
+    };
+
+    if (!canManageOrgContent(courseDoc.organizationId, courseDoc.instructor, authUser)) {
       return NextResponse.json(
-        { message: 'Course not found or you are not the instructor' },
-        { status: 404 }
+        { message: 'Not authorized to create quizzes for this course' },
+        { status: 403 }
       );
     }
 
@@ -308,10 +383,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Get organizationId from session
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const user = session.user as any;
-    const organizationId = user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null;
+    const organizationId =
+      courseDoc.organizationId ??
+      (user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null);
     const orgId = organizationId?.toString() || 'public';
 
     const quiz = new Quiz({
@@ -345,8 +419,9 @@ export async function POST(request: NextRequest) {
 
     const fresh = await Quiz.findById(quiz._id).lean();
 
-    // Invalidate cache for this organization
+    // Invalidate cache for this organization and superadmin
     await invalidatePattern(`quizzes:${orgId}:*`);
+    await invalidatePattern('quizzes:superadmin:*');
 
     return NextResponse.json(
       { message: 'Quiz created successfully', quiz: fresh },

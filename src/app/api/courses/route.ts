@@ -9,7 +9,7 @@ import { requireFeature, checkTeacherLimit, checkPublicCoursePermission } from '
 import { createCourseSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
-import { getAccessFilter } from '@/lib/accessControl';
+import { canManageOrgContent, getAccessFilter, type AccessUser } from '@/lib/accessControl';
 import { getCachedData, setCachedData, invalidatePattern } from '@/lib/redis';
 import { revalidateTag } from 'next/cache';
 import {
@@ -22,6 +22,27 @@ import { isStaffRole } from '@/lib/roles';
 // Configure Next.js caching for this route
 export const dynamic = 'force-dynamic';
 
+const ALLOWED_COURSE_FIELDS = new Set([
+  '_id',
+  'title',
+  'description',
+  'price',
+  'category',
+  'thumbnail',
+  'instructor',
+  'organizationId',
+  'isPublished',
+  'isCompleted',
+  'locale',
+  'createdAt',
+  'updatedAt',
+  'enrolledCount',
+  'chapterCount',
+  'lessonCount',
+  'courseCode',
+  'slug',
+]);
+
 // GET /api/courses - Get all courses (with optional filtering)
 export async function GET(request: NextRequest) {
   const logContext: LogContext = {
@@ -31,13 +52,11 @@ export async function GET(request: NextRequest) {
 
   try {
     const session = await getServerSession(authOptions);
-    if (!session) {
+    if (!session?.user) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    if (session.user) {
-      logContext.userId = session.user.id;
-    }
+    logContext.userId = session.user.id;
 
     // Check if courses feature is enabled
     const featureCheck = await requireFeature('enableCourses');
@@ -47,14 +66,42 @@ export async function GET(request: NextRequest) {
     const instructor = searchParams.get('instructor');
     const isPublished = searchParams.get('isPublished');
     const available = searchParams.get('available'); // For students to browse
-    const page = parseInt(searchParams.get('page') || '1', 10);
-    const limit = parseInt(searchParams.get('limit') || '10', 10);
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10) || 1);
+    const limit = Math.min(1000, Math.max(1, parseInt(searchParams.get('limit') || '10', 10) || 10));
     const skip = (page - 1) * limit;
     const fields = searchParams.get('fields'); // Comma-separated fields to select
 
-    // Build cache key (only for public/available courses)
-    const orgId = session.user?.organizationId || 'public';
-    const cacheKey = `courses:${orgId}:${instructor || 'all'}:${isPublished || 'all'}:${available || 'false'}:${page}:${limit}`;
+    // Allowlist requested projection fields
+    const requestedFields = fields
+      ? Array.from(
+          new Set(
+            fields
+              .split(',')
+              .map((f) => f.trim())
+              .filter((f) => ALLOWED_COURSE_FIELDS.has(f))
+          )
+        ).sort()
+      : [];
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const user = session.user as any;
+    const userRole = (user.role || 'student') as AccessUser['role'];
+    const authUser: AccessUser = {
+      _id: new mongoose.Types.ObjectId(user.id),
+      organizationId: user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null,
+      role: userRole,
+    };
+
+    // Build cache key scoped by tenant/superadmin, role, userId (when needed), and allowlisted fields
+    const orgCachePrefix =
+      userRole === 'superadmin'
+        ? 'superadmin'
+        : user.organizationId
+        ? String(user.organizationId)
+        : 'public';
+    const userScope = available === 'true' || userRole !== 'student' ? String(user.id) : 'shared';
+    const fieldsKey = requestedFields.length > 0 ? requestedFields.join(',') : 'default';
+    const cacheKey = `courses:${orgCachePrefix}:${userRole}:${userScope}:${instructor || 'all'}:${isPublished || 'all'}:${available || 'false'}:${fieldsKey}:${page}:${limit}`;
 
     // Try cache for available/public courses
     if (available === 'true' || isPublished === 'true') {
@@ -72,32 +119,48 @@ export async function GET(request: NextRequest) {
     const andConditions: Record<string, any>[] = [];
 
     // Apply organization-based access control
-    if (session.user) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const user = session.user as any;
-      const accessFilter = getAccessFilter({
-        _id: new mongoose.Types.ObjectId(user.id),
-        organizationId: user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null,
-        role: user.role as 'student' | 'teacher' | 'admin',
-      });
-      if (Object.keys(accessFilter).length > 0) {
-        andConditions.push(accessFilter);
-      }
+    const accessFilter = getAccessFilter(authUser);
+    if (Object.keys(accessFilter).length > 0) {
+      andConditions.push(accessFilter);
     }
 
-    // If 'available' is set, return published public courses student can enroll in
-    if (available === 'true' && session.user?.role === 'student') {
+    if (userRole === 'student') {
+      // Students can only browse published, public courses via GET /api/courses
       query.isPublished = true;
       andConditions.push(publicCourseFilter());
-      // Exclude courses student is already enrolled in
-      const Enrollment = (await import('@/models/Enrollment')).default;
-      const enrollments = await Enrollment.find({ student: session.user.id }).select('course').lean();
-      const enrolledCourseIds = enrollments.map(e => e.course.toString());
-      if (enrolledCourseIds.length > 0) {
-        query._id = { $nin: enrolledCourseIds };
+
+      if (available === 'true') {
+        // Exclude courses student is already enrolled in
+        const Enrollment = (await import('@/models/Enrollment')).default;
+        const enrollments = await Enrollment.find({ student: session.user.id }).select('course').lean();
+        const enrolledCourseIds = enrollments.map((e) => e.course.toString());
+        if (enrolledCourseIds.length > 0) {
+          query._id = { $nin: enrolledCourseIds };
+        }
+      } else if (instructor && instructor !== 'self') {
+        query.instructor = instructor;
+      }
+    } else if (userRole === 'teacher') {
+      if (instructor === 'self' || instructor === session.user.id) {
+        query.instructor = session.user.id;
+        if (isPublished !== null) query.isPublished = isPublished === 'true';
+      } else if (instructor) {
+        // Non-owner teacher browsing another instructor's courses: published & public only
+        query.instructor = instructor;
+        query.isPublished = true;
+        andConditions.push(publicCourseFilter());
+      } else {
+        // Own courses (any state) OR other teachers' published public courses only
+        andConditions.push({
+          $or: [
+            { instructor: session.user.id },
+            { isPublished: true, ...publicCourseFilter() },
+          ],
+        });
+        if (isPublished !== null) query.isPublished = isPublished === 'true';
       }
     } else {
-      // Handle 'self' keyword for getting own courses
+      // Admin / Superadmin (org admin already scoped by getAccessFilter)
       if (instructor === 'self') {
         query.instructor = session.user.id;
       } else if (instructor) {
@@ -112,12 +175,29 @@ export async function GET(request: NextRequest) {
 
     // Build select object for field selection
     let selectFields: Record<string, number> = {};
-    if (fields) {
-      const fieldList = fields.split(',');
-      fieldList.forEach(f => selectFields[f] = 1);
+    if (requestedFields.length > 0) {
+      requestedFields.forEach((f) => {
+        selectFields[f] = 1;
+      });
     } else {
       // Default fields to avoid over-fetching
-      selectFields = { title: 1, description: 1, price: 1, category: 1, thumbnail: 1, instructor: 1, isPublished: 1, locale: 1, createdAt: 1, enrolledCount: 1, chapterCount: 1, lessonCount: 1, courseCode: 1, slug: 1 };
+      selectFields = {
+        title: 1,
+        description: 1,
+        price: 1,
+        category: 1,
+        thumbnail: 1,
+        instructor: 1,
+        organizationId: 1,
+        isPublished: 1,
+        locale: 1,
+        createdAt: 1,
+        enrolledCount: 1,
+        chapterCount: 1,
+        lessonCount: 1,
+        courseCode: 1,
+        slug: 1,
+      };
     }
 
     const courses = await Course.find(query, selectFields)
@@ -133,12 +213,12 @@ export async function GET(request: NextRequest) {
         typeof course.instructor === 'object' && course.instructor !== null
           ? (course.instructor as { _id?: string })._id?.toString()
           : course.instructor?.toString();
-      const isOwner = instructorId === session.user?.id;
-      const includeCourseCode =
-        session.user?.role === 'admin' ||
-        session.user?.role === 'superadmin' ||
-        (instructor === 'self' && isOwner);
-      return sanitizeCourseResponse(course, { includeCourseCode });
+      const canManage = canManageOrgContent(
+        course.organizationId as string | null | undefined,
+        instructorId,
+        authUser
+      );
+      return sanitizeCourseResponse(course, { includeCourseCode: canManage });
     });
 
     const total = await Course.countDocuments(query);
@@ -265,8 +345,9 @@ export async function POST(request: NextRequest) {
 
     await course.save();
 
-    // Invalidate cache for this organization
+    // Invalidate cache for this organization and superadmin views
     await invalidatePattern(`courses:${orgId}:*`);
+    await invalidatePattern(`courses:superadmin:*`);
     
     // Revalidate Next.js cache tag
     revalidateTag(`courses:${orgId}`);

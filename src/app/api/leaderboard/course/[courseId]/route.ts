@@ -5,6 +5,8 @@ import mongoose from 'mongoose';
 import dbConnect from '@/lib/db';
 import QuizAttempt from '@/models/QuizAttempt';
 import Course, { ICourse } from '@/models/Course';
+import Enrollment from '@/models/Enrollment';
+import { validateContentAccess, canManageOrgContent, type AccessUser } from '@/lib/accessControl';
 
 export async function GET(
   request: NextRequest,
@@ -12,29 +14,57 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { courseId } = await params;
+    if (!courseId || !mongoose.Types.ObjectId.isValid(courseId)) {
+      return NextResponse.json({ error: 'Invalid course ID' }, { status: 400 });
+    }
+
     await dbConnect();
 
     // Check if user has access to this course
-    const course = await Course.findById(courseId).lean() as ICourse | null;
+    const course = (await Course.findById(courseId).lean()) as ICourse | null;
     if (!course) {
       return NextResponse.json({ error: 'Course not found' }, { status: 404 });
     }
 
-    // Check if user is enrolled in this course (or if course is public)
-    const userEnrollment = await QuizAttempt.findOne({ 
-      student: new mongoose.Types.ObjectId(session.user.id), 
-      course: new mongoose.Types.ObjectId(courseId),
-      status: 'completed' 
-    }).lean();
+    const authUser: AccessUser = {
+      _id: new mongoose.Types.ObjectId(session.user.id),
+      organizationId: session.user.organizationId
+        ? new mongoose.Types.ObjectId(session.user.organizationId)
+        : null,
+      role: session.user.role as AccessUser['role'],
+    };
 
-    const canAccess = course.isPublished || userEnrollment || session.user.role === 'admin' || session.user.role === 'superadmin';
-    if (!canAccess) {
+    try {
+      validateContentAccess(course.organizationId, authUser, 'course');
+    } catch {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    }
+
+    const canManage = canManageOrgContent(course.organizationId, course.instructor, authUser);
+
+    if (!canManage) {
+      if (!course.isPublished) {
+        return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+      }
+
+      if (course.courseCode) {
+        const enrollment = await Enrollment.findOne({
+          student: new mongoose.Types.ObjectId(session.user.id),
+          course: new mongoose.Types.ObjectId(courseId),
+        }).lean();
+
+        if (!enrollment) {
+          return NextResponse.json(
+            { error: 'You must be enrolled in this private course to view its leaderboard' },
+            { status: 403 }
+          );
+        }
+      }
     }
 
     const courseOid = new mongoose.Types.ObjectId(courseId);

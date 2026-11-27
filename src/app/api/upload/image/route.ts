@@ -7,12 +7,62 @@ import { MAX_IMAGE_SIZE_BYTES } from '@/lib/constants';
 
 export const dynamic = 'force-dynamic';
 
+const ALLOWED_RASTER_MIME_TYPES = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+]);
+
+function hasValidRasterImageSignature(buffer: Buffer): boolean {
+  // JPEG: FF D8 FF
+  if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
+    return true;
+  }
+  // PNG: 89 50 4E 47 0D 0A 1A 0A
+  if (
+    buffer.length >= 8 &&
+    buffer[0] === 0x89 &&
+    buffer[1] === 0x50 &&
+    buffer[2] === 0x4e &&
+    buffer[3] === 0x47 &&
+    buffer[4] === 0x0d &&
+    buffer[5] === 0x0a &&
+    buffer[6] === 0x1a &&
+    buffer[7] === 0x0a
+  ) {
+    return true;
+  }
+  // GIF: 47 49 46 38 (GIF87a / GIF89a)
+  if (
+    buffer.length >= 6 &&
+    buffer[0] === 0x47 &&
+    buffer[1] === 0x49 &&
+    buffer[2] === 0x46 &&
+    buffer[3] === 0x38 &&
+    (buffer[4] === 0x37 || buffer[4] === 0x39) &&
+    buffer[5] === 0x61
+  ) {
+    return true;
+  }
+  // WebP: RIFF....WEBP
+  if (
+    buffer.length >= 12 &&
+    buffer.subarray(0, 4).toString('ascii') === 'RIFF' &&
+    buffer.subarray(8, 12).toString('ascii') === 'WEBP'
+  ) {
+    return true;
+  }
+  return false;
+}
+
 async function uploadToCloudinary(buffer: Buffer, folder: string) {
   return new Promise<{ secure_url: string; public_id: string }>((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       {
         folder,
         resource_type: 'image',
+        allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'gif'],
       },
       (error, result) => {
         if (error || !result) return reject(error);
@@ -62,12 +112,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const isImage = file.type.startsWith('image/');
-    if (!isImage) {
-      return NextResponse.json({ message: 'Only image files are allowed' }, { status: 400 });
+    const normalizedType = file.type.toLowerCase();
+    if (!ALLOWED_RASTER_MIME_TYPES.has(normalizedType)) {
+      return NextResponse.json(
+        { message: 'Only JPEG, PNG, WebP, and GIF images are allowed' },
+        { status: 400 }
+      );
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
+    if (!hasValidRasterImageSignature(buffer)) {
+      return NextResponse.json(
+        { message: 'Invalid image file signature' },
+        { status: 400 }
+      );
+    }
     const folder = `course-thumbnails/${session.user.id}`;
     
     const uploaded = await uploadToCloudinary(buffer, folder);

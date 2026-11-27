@@ -57,7 +57,7 @@ describe('formatOrgShareInfo', () => {
     expect(text).toContain('Description: K-12 science and mathematics institution');
     expect(text).toContain('Website: https://springdale.edu');
     expect(text).toContain('- Org Code: SPRINGDALE');
-    expect(text).toContain('- Invite Code: SPR-8492');
+    expect(text).toContain('- Student Invite Code: SPR-8492');
     expect(text).toContain(
       '- Student Registration Link: https://www.quizdo.in/register?inviteCode=SPR-8492&role=student'
     );

@@ -28,6 +28,7 @@ interface PhoneRegisterFormProps {
   allowTeacherRegistration: boolean;
   initialInviteCode?: string;
   initialRole?: 'student' | 'teacher';
+  lockedRole?: 'student' | 'teacher';
 }
 
 export default function PhoneRegisterForm({
@@ -37,6 +38,7 @@ export default function PhoneRegisterForm({
   allowTeacherRegistration,
   initialInviteCode,
   initialRole,
+  lockedRole,
 }: PhoneRegisterFormProps) {
   const { t } = useTranslation();
   const router = useRouter();
@@ -56,8 +58,9 @@ export default function PhoneRegisterForm({
   }, [initialInviteCode]);
 
   useEffect(() => {
-    if (initialRole) setRole(initialRole);
-  }, [initialRole]);
+    if (lockedRole) setRole(lockedRole);
+    else if (initialRole) setRole(initialRole);
+  }, [initialRole, lockedRole]);
 
   const setupRecaptcha = () => {
     try {
@@ -131,7 +134,10 @@ export default function PhoneRegisterForm({
         if (res.ok) {
           const data = await res.json();
           if (data.exists) {
-            router.push(`/login?phone=${encodeURIComponent(formattedPhone)}&error=exists`);
+            const joinCallback = inviteCode.trim()
+              ? `&callbackUrl=${encodeURIComponent(`/dashboard/join-org?inviteCode=${encodeURIComponent(inviteCode.trim())}`)}`
+              : '';
+            router.push(`/login?phone=${encodeURIComponent(formattedPhone)}&error=exists${joinCallback}`);
             return;
           }
         }
@@ -223,6 +229,7 @@ export default function PhoneRegisterForm({
         role={role}
         onChange={setRole}
         allowTeacherRegistration={allowTeacherRegistration}
+        lockedRole={lockedRole}
       />
 
       {!isOtpSent ? (

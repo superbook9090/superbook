@@ -14,11 +14,12 @@ export async function getAdminStats(
     organizationId && mongoose.Types.ObjectId.isValid(organizationId)
       ? new mongoose.Types.ObjectId(organizationId)
       : null;
-  const orgFilter = isSuperAdmin
-    ? {}
-    : orgObjectId
-      ? { organizationId: orgObjectId }
-      : { organizationId: null };
+
+  if (!isSuperAdmin && !orgObjectId) {
+    throw new Error('Organization ID is required for non-superadmin analytics');
+  }
+
+  const orgFilter = isSuperAdmin ? {} : { organizationId: orgObjectId! };
 
   const nowTime = Date.now();
   const { rangeStart, rangeEnd, trendStart } = parseDateRange(startDateStr, endDateStr, 13);
@@ -51,9 +52,9 @@ export async function getAdminStats(
     totalBlogs,
     publishedBlogs,
     orgUserIds,
+    orgCourseIds,
     orgQuizIds,
     userDailyTrends,
-    topEnrolledCourses,
   ] = await Promise.all([
     User.countDocuments(orgFilter),
     User.countDocuments({ ...orgFilter, role: 'student' }),
@@ -87,6 +88,7 @@ export async function getAdminStats(
     Blog.countDocuments(orgFilter),
     Blog.countDocuments({ ...orgFilter, isPublished: true }),
     User.find(orgFilter).select('_id').lean(),
+    Course.find(orgFilter).select('_id').lean(),
     Quiz.find(orgFilter).select('_id').lean(),
     User.aggregate([
       { $match: { ...orgFilter, createdAt: { $gte: trendStart, $lte: rangeEnd } } },
@@ -97,13 +99,48 @@ export async function getAdminStats(
         },
       },
     ]),
+  ]);
+
+  const userIds = orgUserIds.map((u) => u._id as mongoose.Types.ObjectId);
+  const courseIds = orgCourseIds.map((c) => c._id as mongoose.Types.ObjectId);
+  const quizIds = orgQuizIds.map((q) => q._id as mongoose.Types.ObjectId);
+
+  const hasEnrollmentScope = isSuperAdmin || (userIds.length > 0 && courseIds.length > 0);
+  const enrollmentScope = isSuperAdmin
+    ? {}
+    : { student: { $in: userIds }, course: { $in: courseIds } };
+
+  const hasAttemptScope = quizIds.length > 0 && (isSuperAdmin || userIds.length > 0);
+  const attemptScope = isSuperAdmin
+    ? { quiz: { $in: quizIds }, status: 'completed' }
+    : { quiz: { $in: quizIds }, student: { $in: userIds }, status: 'completed' };
+
+  const [
+    topEnrolledCourses,
+    totalEnrollments,
+    activeEnrollments,
+    completedEnrollments,
+    totalAttempts,
+    scoreStats,
+    enrollmentDailyTrends,
+    quizAttemptDailyTrends,
+    recentEnrollments,
+    recentQuizAttempts,
+  ] = await Promise.all([
     Course.aggregate([
       { $match: orgFilter },
       {
         $lookup: {
           from: 'enrollments',
-          localField: '_id',
-          foreignField: 'course',
+          let: { courseId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$course', '$$courseId'] },
+                ...(isSuperAdmin ? {} : { student: { $in: userIds } }),
+              },
+            },
+          ],
           as: 'enrollments',
         },
       },
@@ -119,31 +156,17 @@ export async function getAdminStats(
       { $sort: { studentsCount: -1 } },
       { $limit: 5 },
     ]),
-  ]);
-
-  const userIds = orgUserIds.map((u) => u._id);
-  const quizIds = orgQuizIds.map((q) => q._id);
-
-  const [
-    totalEnrollments,
-    activeEnrollments,
-    completedEnrollments,
-    totalAttempts,
-    scoreStats,
-    enrollmentDailyTrends,
-    quizAttemptDailyTrends,
-    recentEnrollments,
-    recentQuizAttempts,
-  ] = await Promise.all([
-    Enrollment.countDocuments({ student: { $in: userIds } }),
-    Enrollment.countDocuments({ student: { $in: userIds }, status: 'active' }),
-    Enrollment.countDocuments({ student: { $in: userIds }, status: 'completed' }),
-    quizIds.length
-      ? QuizAttempt.countDocuments({ quiz: { $in: quizIds }, status: 'completed' })
+    hasEnrollmentScope ? Enrollment.countDocuments(enrollmentScope) : Promise.resolve(0),
+    hasEnrollmentScope
+      ? Enrollment.countDocuments({ ...enrollmentScope, status: 'active' })
       : Promise.resolve(0),
-    quizIds.length
+    hasEnrollmentScope
+      ? Enrollment.countDocuments({ ...enrollmentScope, status: 'completed' })
+      : Promise.resolve(0),
+    hasAttemptScope ? QuizAttempt.countDocuments(attemptScope) : Promise.resolve(0),
+    hasAttemptScope
       ? QuizAttempt.aggregate([
-          { $match: { quiz: { $in: quizIds }, status: 'completed' } },
+          { $match: attemptScope },
           {
             $group: {
               _id: null,
@@ -153,18 +176,9 @@ export async function getAdminStats(
           },
         ])
       : Promise.resolve([]),
-    Enrollment.aggregate([
-      { $match: { student: { $in: userIds }, createdAt: { $gte: trendStart, $lte: rangeEnd } } },
-      {
-        $group: {
-          _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
-          count: { $sum: 1 },
-        },
-      },
-    ]),
-    quizIds.length
-      ? QuizAttempt.aggregate([
-          { $match: { quiz: { $in: quizIds }, status: 'completed', createdAt: { $gte: trendStart, $lte: rangeEnd } } },
+    hasEnrollmentScope
+      ? Enrollment.aggregate([
+          { $match: { ...enrollmentScope, createdAt: { $gte: trendStart, $lte: rangeEnd } } },
           {
             $group: {
               _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
@@ -173,14 +187,27 @@ export async function getAdminStats(
           },
         ])
       : Promise.resolve([]),
-    Enrollment.find({ student: { $in: userIds } })
-      .sort({ createdAt: -1 })
-      .limit(6)
-      .populate('student', 'name email')
-      .populate('course', 'title')
-      .lean(),
-    quizIds.length
-      ? QuizAttempt.find({ quiz: { $in: quizIds }, status: 'completed' })
+    hasAttemptScope
+      ? QuizAttempt.aggregate([
+          { $match: { ...attemptScope, createdAt: { $gte: trendStart, $lte: rangeEnd } } },
+          {
+            $group: {
+              _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+              count: { $sum: 1 },
+            },
+          },
+        ])
+      : Promise.resolve([]),
+    hasEnrollmentScope
+      ? Enrollment.find(enrollmentScope)
+          .sort({ createdAt: -1 })
+          .limit(6)
+          .populate('student', 'name email')
+          .populate('course', 'title')
+          .lean()
+      : Promise.resolve([]),
+    hasAttemptScope
+      ? QuizAttempt.find(attemptScope)
           .sort({ createdAt: -1 })
           .limit(6)
           .populate('student', 'name email')
@@ -204,8 +231,10 @@ export async function getAdminStats(
 
   const breakdowns = await getAdminBreakdowns({
     orgFilter,
-    userIds: userIds as mongoose.Types.ObjectId[],
-    quizIds: quizIds as mongoose.Types.ObjectId[],
+    isSuperAdmin,
+    userIds,
+    courseIds,
+    quizIds,
     trendStart,
     rangeEnd,
     totalUsers,

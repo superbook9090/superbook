@@ -14,9 +14,23 @@ import { listQuestionsForQuiz, setQuizQuestions } from '@/domain/learning/quizCo
 import {
   getContestComputedState,
 } from '@/lib/contest/contestHelpers';
+import { requireFeature } from '@/lib/settingsHelpers';
+import { canManageOrgContent, type AccessUser } from '@/lib/accessControl';
+import { deleteQuizzesAndQuestions } from '@/lib/cascade/deleteRelated';
 import mongoose from 'mongoose';
 
 export const dynamic = 'force-dynamic';
+
+function buildAuthUser(
+  user?: { id?: string; organizationId?: string | null; role?: string } | null
+): AccessUser | null {
+  if (!user?.id || !user.role) return null;
+  return {
+    _id: new mongoose.Types.ObjectId(user.id),
+    organizationId: user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null,
+    role: user.role as AccessUser['role'],
+  };
+}
 
 // GET /api/contests/[id]
 export async function GET(
@@ -27,6 +41,9 @@ export async function GET(
   const logContext: LogContext = { method: 'GET', path: `/api/contests/${id}` };
 
   try {
+    const featureCheck = await requireFeature('enableContests');
+    if (featureCheck) return featureCheck;
+
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json({ message: 'Invalid contest ID' }, { status: 400 });
     }
@@ -39,7 +56,7 @@ export async function GET(
     await dbConnect();
 
     const contest = await Contest.findById(id)
-      .populate('instructor', 'name email avatar')
+      .populate('instructor', 'name avatar')
       .populate('quizzes.quiz', 'title questionCount timeLimit version')
       .lean<IContest>();
 
@@ -50,10 +67,32 @@ export async function GET(
     const now = new Date();
     const computedState = getContestComputedState(contest, now);
 
-    const isInstructor =
-      session?.user?.id &&
-      (contest.instructor?._id?.toString() === session.user.id ||
-        session.user.role === 'superadmin');
+    const authUser = buildAuthUser(session?.user);
+    const instructorId =
+      (contest.instructor as unknown as { _id?: mongoose.Types.ObjectId })?._id ||
+      contest.instructor;
+    const isInstructor = authUser
+      ? canManageOrgContent(contest.organizationId, instructorId, authUser)
+      : false;
+
+    if ((contest.status === 'draft' || contest.status === 'cancelled') && !isInstructor) {
+      return NextResponse.json({ message: 'Contest not found' }, { status: 404 });
+    }
+
+    if (contest.organizationId && contest.visibility === 'organization' && !isInstructor) {
+      if (!authUser) {
+        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+      }
+      if (
+        !authUser.organizationId ||
+        authUser.organizationId.toString() !== contest.organizationId.toString()
+      ) {
+        return NextResponse.json(
+          { message: 'This contest is restricted to members of the organization' },
+          { status: 403 }
+        );
+      }
+    }
 
     // If teacher/admin requests details for editing or managing, load full question list
     const questionsForEditor: Array<{
@@ -123,6 +162,9 @@ export async function PATCH(
   const logContext: LogContext = { method: 'PATCH', path: `/api/contests/${id}` };
 
   try {
+    const featureCheck = await requireFeature('enableContests');
+    if (featureCheck) return featureCheck;
+
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json({ message: 'Invalid contest ID' }, { status: 400 });
     }
@@ -140,10 +182,8 @@ export async function PATCH(
       return NextResponse.json({ message: 'Contest not found' }, { status: 404 });
     }
 
-    const isOwner = contest.instructor.toString() === session.user.id;
-    const isSuperAdmin = session.user.role === 'superadmin';
-
-    if (!isOwner && !isSuperAdmin) {
+    const authUser = buildAuthUser(session.user);
+    if (!authUser || !canManageOrgContent(contest.organizationId, contest.instructor, authUser)) {
       return NextResponse.json(
         { message: 'You are not authorized to update this contest' },
         { status: 403 }
@@ -162,6 +202,17 @@ export async function PATCH(
     const updates = validationResult.data;
     const now = new Date();
     const currentState = getContestComputedState(contest, now);
+
+    if (updates.startTime || updates.endTime) {
+      const nextStart = updates.startTime ? new Date(updates.startTime) : new Date(contest.startTime);
+      const nextEnd = updates.endTime ? new Date(updates.endTime) : new Date(contest.endTime);
+      if (Number.isNaN(nextStart.getTime()) || Number.isNaN(nextEnd.getTime())) {
+        return NextResponse.json({ message: 'Invalid start or end date' }, { status: 400 });
+      }
+      if (nextEnd <= nextStart) {
+        return NextResponse.json({ message: 'End time must be after start time' }, { status: 400 });
+      }
+    }
 
     // If contest is already live or completed, restrict changing structural questions/duration
     if (currentState === 'live' || currentState === 'completed') {
@@ -251,7 +302,7 @@ export async function PATCH(
     await invalidatePattern('contests:*');
 
     const fresh = await Contest.findById(id)
-      .populate('instructor', 'name email avatar')
+      .populate('instructor', 'name avatar')
       .populate('quizzes.quiz', 'title questionCount timeLimit')
       .lean();
 
@@ -277,6 +328,9 @@ export async function DELETE(
   const logContext: LogContext = { method: 'DELETE', path: `/api/contests/${id}` };
 
   try {
+    const featureCheck = await requireFeature('enableContests');
+    if (featureCheck) return featureCheck;
+
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json({ message: 'Invalid contest ID' }, { status: 400 });
     }
@@ -293,10 +347,8 @@ export async function DELETE(
       return NextResponse.json({ message: 'Contest not found' }, { status: 404 });
     }
 
-    const isOwner = contest.instructor.toString() === session.user.id;
-    const isSuperAdmin = session.user.role === 'superadmin';
-
-    if (!isOwner && !isSuperAdmin) {
+    const authUser = buildAuthUser(session.user);
+    if (!authUser || !canManageOrgContent(contest.organizationId, contest.instructor, authUser)) {
       return NextResponse.json(
         { message: 'You are not authorized to delete this contest' },
         { status: 403 }
@@ -306,10 +358,10 @@ export async function DELETE(
     // Hard-delete all associated student attempts
     await ContestAttempt.deleteMany({ contest: id });
 
-    // Delete standalone quizzes created for this contest
+    // Delete standalone quizzes and their associated QuizQuestion documents
     if (contest.quizzes && contest.quizzes.length > 0) {
       const quizIds = contest.quizzes.map((q) => q.quiz);
-      await Quiz.deleteMany({ _id: { $in: quizIds } });
+      await deleteQuizzesAndQuestions(quizIds);
     }
 
     // Delete the contest itself

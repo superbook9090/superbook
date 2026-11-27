@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
-import { Challenge, Quiz, QuizAttempt, Enrollment } from '@/models';
+import { Challenge, Course, Quiz, QuizAttempt, Enrollment } from '@/models';
 import { requireFeature } from '@/lib/settingsHelpers';
+import { isSuperAdmin } from '@/lib/roles';
 
 export async function POST(
   _req: NextRequest,
@@ -39,8 +40,53 @@ export async function POST(
       return NextResponse.json({ message: 'Quiz not found' }, { status: 404 });
     }
 
-    // Auto-enroll user in course if needed so the quiz take page and attempts are authorized
+    if (quiz.isPublished !== true) {
+      return NextResponse.json({ message: 'Quiz is not published' }, { status: 403 });
+    }
+
+    const isSuper = isSuperAdmin(session.user.role);
+    const userOrgId = session.user.organizationId?.toString() || null;
+
+    if (quiz.organizationId && !isSuper && quiz.organizationId.toString() !== userOrgId) {
+      return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
+    }
+
+    // Auto-enroll user in course if needed ONLY for published, free, non-code-gated, org-allowed courses
     if (quiz.course) {
+      const course = (await Course.findById(quiz.course)
+        .select('isPublished price courseCode organizationId')
+        .lean()) as {
+        isPublished?: boolean;
+        price?: number;
+        courseCode?: string | null;
+        organizationId?: { toString(): string } | null;
+      } | null;
+
+      if (!course || course.isPublished !== true) {
+        return NextResponse.json(
+          { message: 'Course is not available for challenge enrollment' },
+          { status: 403 }
+        );
+      }
+
+      if (course.price && course.price > 0) {
+        return NextResponse.json(
+          { message: 'Cannot auto-enroll in a paid course via challenge' },
+          { status: 403 }
+        );
+      }
+
+      if (course.courseCode) {
+        return NextResponse.json(
+          { message: 'Cannot auto-enroll in a private code-gated course via challenge' },
+          { status: 403 }
+        );
+      }
+
+      if (course.organizationId && !isSuper && course.organizationId.toString() !== userOrgId) {
+        return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
+      }
+
       const enrollment = await Enrollment.findOne({
         student: session.user.id,
         course: quiz.course,

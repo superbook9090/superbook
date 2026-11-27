@@ -65,15 +65,44 @@ export async function POST(
 
     const { guestName, guestSessionId, timeTaken, answers } = validation.data;
 
-    // Fetch questions to evaluate answers securely on the server
-    const questionIds = answers.map((a) => a.questionId);
+    const selectedQuestionIds: string[] = (challenge.selectedQuestions || []).map(
+      (id: { toString(): string }) => id.toString()
+    );
+    if (selectedQuestionIds.length === 0) {
+      return NextResponse.json({ message: 'Challenge has no questions' }, { status: 400 });
+    }
+
+    const allowedQuestionSet = new Set(selectedQuestionIds);
+    const seenQuestionIds = new Set<string>();
+    const validatedAnswers: typeof answers = [];
+
+    for (const ans of answers) {
+      if (!allowedQuestionSet.has(ans.questionId)) {
+        return NextResponse.json(
+          { message: 'Invalid question ID in submission' },
+          { status: 400 }
+        );
+      }
+      if (seenQuestionIds.has(ans.questionId)) {
+        return NextResponse.json(
+          { message: 'Duplicate question ID in submission' },
+          { status: 400 }
+        );
+      }
+      seenQuestionIds.add(ans.questionId);
+      validatedAnswers.push(ans);
+    }
+
+    const clampedTimeTaken = Math.max(1, Math.floor(Number(timeTaken) || 1));
+
+    // Fetch ONLY challenge.selectedQuestions to evaluate answers securely on the server
     interface GradedQuestionDoc {
       _id: { toString(): string };
       correctOption: number;
     }
 
     const questions = (await QuizQuestion.find({
-      _id: { $in: questionIds },
+      _id: { $in: challenge.selectedQuestions },
     })
       .select('_id correctOption')
       .lean()) as unknown as GradedQuestionDoc[];
@@ -83,7 +112,7 @@ export async function POST(
     );
 
     let correctCount = 0;
-    const gradedAnswers = answers.map((ans, idx) => {
+    const gradedAnswers = validatedAnswers.map((ans, idx) => {
       const q = questionMap.get(ans.questionId);
       const isCorrect = q ? q.correctOption === ans.selectedOption : false;
       if (isCorrect) correctCount += 1;
@@ -97,7 +126,7 @@ export async function POST(
       };
     });
 
-    const totalQuestions = answers.length;
+    const totalQuestions = selectedQuestionIds.length;
     const score = Math.round((correctCount / Math.max(1, totalQuestions)) * 100);
 
     // Determine win/loss logic
@@ -106,9 +135,9 @@ export async function POST(
     if (score > challenge.targetScore) {
       isWon = true;
     } else if (score === challenge.targetScore) {
-      if (timeTaken > 0 && challenge.timeTaken > 0 && timeTaken < challenge.timeTaken) {
+      if (clampedTimeTaken > 0 && challenge.timeTaken > 0 && clampedTimeTaken < challenge.timeTaken) {
         isWon = true;
-      } else if (score > 0 && timeTaken === challenge.timeTaken) {
+      } else if (score > 0 && clampedTimeTaken === challenge.timeTaken) {
         isDraw = true;
       }
     }
@@ -129,7 +158,7 @@ export async function POST(
       score,
       correctCount,
       totalQuestions,
-      timeTaken,
+      timeTaken: clampedTimeTaken,
       isWon,
       claimToken,
       converted,
@@ -156,7 +185,7 @@ export async function POST(
         score,
         correctCount,
         totalQuestions,
-        timeTaken,
+        timeTaken: clampedTimeTaken,
         targetScore: challenge.targetScore,
         challengerCorrectCount: challenge.correctCount,
         challengerTimeTaken: challenge.timeTaken,

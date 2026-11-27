@@ -31,8 +31,10 @@ interface EmailRegisterFormProps {
   allowTeacherRegistration: boolean;
   initialInviteCode?: string;
   initialRole?: UserRole;
+  lockedRole?: UserRole;
   orgBranding?: {
     name: string;
+    inviteCode?: string;
     logo?: string | null;
     tagline?: string | null;
   } | null;
@@ -45,6 +47,7 @@ export default function EmailRegisterForm({
   allowTeacherRegistration,
   initialInviteCode,
   initialRole,
+  lockedRole,
   orgBranding,
 }: EmailRegisterFormProps) {
   const { t } = useTranslation();
@@ -68,10 +71,12 @@ export default function EmailRegisterForm({
   }, [initialInviteCode]);
 
   useEffect(() => {
-    if (initialRole) {
+    if (lockedRole) {
+      setFormData((prev) => ({ ...prev, role: lockedRole }));
+    } else if (initialRole) {
       setFormData((prev) => ({ ...prev, role: initialRole }));
     }
-  }, [initialRole]);
+  }, [initialRole, lockedRole]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -86,7 +91,7 @@ export default function EmailRegisterForm({
       return;
     }
 
-    if (formData.role === 'teacher' && !allowTeacherRegistration) {
+    if (formData.role === 'teacher' && !allowTeacherRegistration && lockedRole !== 'teacher') {
       addAlert({ type: 'error', message: t('register.teacherRegistrationDisabled') });
       return;
     }
@@ -142,6 +147,7 @@ export default function EmailRegisterForm({
         role={formData.role}
         onChange={(role) => setFormData((prev) => ({ ...prev, role }))}
         allowTeacherRegistration={allowTeacherRegistration}
+        lockedRole={lockedRole}
       />
 
       {/* Row 1: Name & Email */}
@@ -218,12 +224,15 @@ export default function EmailRegisterForm({
           startIcon={<Building2 className="w-4 h-4 text-[var(--color-muted)]" />}
           fullWidth
         />
-        {orgBranding && (
-          <p className="mt-1 flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>{t('organizations.verifiedInvite')}: {orgBranding.name}</span>
-          </p>
-        )}
+        {orgBranding &&
+          formData.inviteCode.trim() &&
+          (!orgBranding.inviteCode ||
+            formData.inviteCode.trim().toLowerCase() === orgBranding.inviteCode.toLowerCase()) && (
+            <p className="mt-1 flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>{t('organizations.verifiedInvite')}: {orgBranding.name}</span>
+            </p>
+          )}
       </motion.div>
 
       {/* Submit Button */}
@@ -249,7 +258,12 @@ export default function EmailRegisterForm({
       <AuthDivider />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
-        <GoogleAuthButton callbackUrl={callbackUrl} role={formData.role} isRegistration={true} />
+        <GoogleAuthButton
+          callbackUrl={callbackUrl}
+          role={formData.role}
+          inviteCode={formData.inviteCode}
+          isRegistration={true}
+        />
         <PhoneAuthButton onClick={onSelectPhoneFlow} />
       </div>
     </form>

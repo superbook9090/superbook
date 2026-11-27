@@ -4,6 +4,7 @@ import dbConnect from '@/lib/db';
 import '@/models';
 import Blog from '@/models/Blog';
 import { getSiteUrl } from '@/lib/seo/config';
+import { escapeRegex } from '@/lib/sanitize';
 
 export type PublicBlogSummary = {
   _id: string;
@@ -172,18 +173,21 @@ export async function listPublicBlogs(params: {
   const query: Record<string, unknown> = { ...publicVisibilityFilter() };
 
   if (params.topic && params.topic !== 'all') {
-    query.topic = { $regex: new RegExp(`^${params.topic.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') };
+    const safeTopic = escapeRegex(params.topic.trim().slice(0, 100));
+    query.topic = { $regex: new RegExp(`^${safeTopic}$`, 'i') };
   }
 
-  if (params.search?.trim()) {
+  const trimmedSearch = params.search?.trim().slice(0, 100);
+  if (trimmedSearch) {
+    const safeSearch = escapeRegex(trimmedSearch);
     query.$and = [
       ...(Array.isArray(query.$and) ? query.$and : []),
       {
         $or: [
-          { title: { $regex: params.search.trim(), $options: 'i' } },
-          { topic: { $regex: params.search.trim(), $options: 'i' } },
-          { excerpt: { $regex: params.search.trim(), $options: 'i' } },
-          { metaDescription: { $regex: params.search.trim(), $options: 'i' } },
+          { title: { $regex: safeSearch, $options: 'i' } },
+          { topic: { $regex: safeSearch, $options: 'i' } },
+          { excerpt: { $regex: safeSearch, $options: 'i' } },
+          { metaDescription: { $regex: safeSearch, $options: 'i' } },
         ],
       },
     ];
@@ -223,12 +227,14 @@ export async function listPublicBlogs(params: {
 export async function getPublicBlogBySlug(slug: string): Promise<PublicBlogDetail | null> {
   await dbConnect();
 
+  const normalizedSlug = slug.toLowerCase();
   const isObjectId = mongoose.Types.ObjectId.isValid(slug);
+  const identifierFilter = isObjectId
+    ? { $or: [{ slug: normalizedSlug }, { _id: new mongoose.Types.ObjectId(slug) }] }
+    : { slug: normalizedSlug };
+
   const row = await Blog.findOne({
-    ...publicVisibilityFilter(),
-    ...(isObjectId
-      ? { $or: [{ slug: slug.toLowerCase() }, { _id: new mongoose.Types.ObjectId(slug) }] }
-      : { slug: slug.toLowerCase() }),
+    $and: [publicVisibilityFilter(), identifierFilter],
   })
     .select('title slug topic language excerpt metaTitle metaDescription content createdAt updatedAt isFeatured viewCount author')
     .populate('author', 'name')

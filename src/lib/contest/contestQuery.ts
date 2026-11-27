@@ -10,59 +10,109 @@ export interface ContestFilterParams {
   search?: string | null;
 }
 
+function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function combineAndFilters(filters: Record<string, unknown>[]): Record<string, unknown> {
+  if (filters.length === 0) return {};
+  if (filters.length === 1) return filters[0];
+  return { $and: filters };
+}
+
+function buildBaseContestScopeFilters(
+  session: Session | null,
+  isTeacherSelf: boolean,
+  isAdminAll: boolean
+): Record<string, unknown>[] {
+  const filters: Record<string, unknown>[] = [];
+
+  if (isAdminAll) {
+    if (session?.user?.role === 'superadmin') {
+      // Superadmin sees all contests
+      return filters;
+    }
+    // Org admin sees only contests belonging to their organization
+    if (session?.user?.organizationId) {
+      filters.push({ organizationId: session.user.organizationId });
+    } else {
+      // Admin without organizationId gets empty result
+      filters.push({ _id: null });
+    }
+    return filters;
+  }
+
+  if (isTeacherSelf && session?.user?.id) {
+    filters.push({ instructor: session.user.id });
+    return filters;
+  }
+
+  filters.push({ status: { $in: ['published', 'completed'] } });
+
+  if (session?.user?.organizationId) {
+    filters.push({
+      $or: [
+        { organizationId: session.user.organizationId, visibility: { $ne: 'unlisted' } },
+        { organizationId: null, visibility: 'public' },
+        { organizationId: { $exists: false }, visibility: 'public' },
+      ],
+    });
+  } else {
+    filters.push({
+      visibility: 'public',
+      $or: [{ organizationId: null }, { organizationId: { $exists: false } }],
+    });
+  }
+
+  return filters;
+}
+
 export function buildContestListQuery(
   session: Session | null,
   params: ContestFilterParams,
   now: Date = new Date()
 ) {
   const { tab, scheduleType, instructor, search } = params;
-  const isTeacherSelf = instructor === 'self' && session?.user?.id;
-  const isAdminAll =
+  const isTeacherSelf = Boolean(instructor === 'self' && session?.user?.id);
+  const isAdminAll = Boolean(
     instructor === 'all' &&
-    (session?.user?.role === 'superadmin' || session?.user?.role === 'admin');
+      (session?.user?.role === 'superadmin' || session?.user?.role === 'admin')
+  );
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const query: Record<string, any> = {};
-
-  if (isAdminAll) {
-    // Admin sees all
-  } else if (isTeacherSelf) {
-    query.instructor = session.user.id;
-  } else {
-    query.status = { $in: ['published', 'completed'] };
-
-    if (session?.user?.organizationId) {
-      query.$or = [
-        { organizationId: null },
-        { organizationId: session.user.organizationId },
-      ];
-    } else {
-      query.visibility = { $in: ['public', 'unlisted'] };
-      query.organizationId = null;
-    }
-  }
+  const andFilters = buildBaseContestScopeFilters(session, isTeacherSelf, isAdminAll);
 
   if (scheduleType && ['one_time', 'daily', 'weekly'].includes(scheduleType)) {
-    query.scheduleType = scheduleType;
+    andFilters.push({ scheduleType });
   }
 
   if (search && search.trim()) {
-    query.$or = [
-      { title: { $regex: search.trim(), $options: 'i' } },
-      { description: { $regex: search.trim(), $options: 'i' } },
-    ];
+    const escapedSearch = escapeRegex(search.trim());
+    andFilters.push({
+      $or: [
+        { title: { $regex: escapedSearch, $options: 'i' } },
+        { description: { $regex: escapedSearch, $options: 'i' } },
+      ],
+    });
   }
 
   if (tab === 'live') {
-    query.startTime = { $lte: now };
-    query.endTime = { $gte: now };
-    if (!isTeacherSelf && !isAdminAll) query.status = 'published';
+    andFilters.push({
+      startTime: { $lte: now },
+      endTime: { $gte: now },
+      ...(!isTeacherSelf && !isAdminAll ? { status: 'published' } : {}),
+    });
   } else if (tab === 'upcoming') {
-    query.startTime = { $gt: now };
-    if (!isTeacherSelf && !isAdminAll) query.status = 'published';
+    andFilters.push({
+      startTime: { $gt: now },
+      ...(!isTeacherSelf && !isAdminAll ? { status: 'published' } : {}),
+    });
   } else if (tab === 'completed') {
-    query.$or = [{ endTime: { $lt: now } }, { status: 'completed' }];
+    andFilters.push({
+      $or: [{ endTime: { $lt: now } }, { status: 'completed' }],
+    });
   }
+
+  const query = combineAndFilters(andFilters);
 
   return { query, isTeacherSelf, isAdminAll };
 }
@@ -102,38 +152,36 @@ export async function getContestTabCounts(
   isAdminAll: boolean,
   now: Date = new Date()
 ) {
-  const baseCountQuery = isAdminAll
-    ? {}
-    : isTeacherSelf && session?.user?.id
-    ? { instructor: session.user.id }
-    : {
-        status: { $in: ['published', 'completed'] },
-        ...(session?.user?.organizationId
-          ? {
-              $or: [
-                { organizationId: null },
-                { organizationId: session.user.organizationId },
-              ],
-            }
-          : { visibility: { $in: ['public', 'unlisted'] }, organizationId: null }),
-      };
+  const baseFilters = buildBaseContestScopeFilters(session, isTeacherSelf, isAdminAll);
 
   const [liveCount, upcomingCount, completedCount] = await Promise.all([
-    Contest.countDocuments({
-      ...baseCountQuery,
-      startTime: { $lte: now },
-      endTime: { $gte: now },
-      status: 'published',
-    }),
-    Contest.countDocuments({
-      ...baseCountQuery,
-      startTime: { $gt: now },
-      status: 'published',
-    }),
-    Contest.countDocuments({
-      ...baseCountQuery,
-      $or: [{ endTime: { $lt: now } }, { status: 'completed' }],
-    }),
+    Contest.countDocuments(
+      combineAndFilters([
+        ...baseFilters,
+        {
+          startTime: { $lte: now },
+          endTime: { $gte: now },
+          status: 'published',
+        },
+      ])
+    ),
+    Contest.countDocuments(
+      combineAndFilters([
+        ...baseFilters,
+        {
+          startTime: { $gt: now },
+          status: 'published',
+        },
+      ])
+    ),
+    Contest.countDocuments(
+      combineAndFilters([
+        ...baseFilters,
+        {
+          $or: [{ endTime: { $lt: now } }, { status: 'completed' }],
+        },
+      ])
+    ),
   ]);
 
   return { liveCount, upcomingCount, completedCount };

@@ -11,37 +11,75 @@ export interface PushDeliverySummary {
   tokenCount: number;
 }
 
-function resolveWebPathFromRawUrl(rawUrl?: string): string {
-  if (!rawUrl) return '/dashboard/student/notifications';
-  if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://') || rawUrl.startsWith('/')) {
-    return rawUrl;
+const DEFAULT_NOTIFICATION_PATH = '/dashboard/student/notifications';
+const SAFE_SEGMENT_RE = /^[a-zA-Z0-9_-]+$/;
+
+function getConfiguredSiteOrigin(): string | null {
+  const raw = (process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXTAUTH_URL || '').trim();
+  if (!raw) return null;
+  try {
+    return new URL(raw).origin;
+  } catch {
+    return null;
   }
-  if (rawUrl.startsWith('quizdo://')) {
-    const segments = rawUrl.replace('quizdo://', '').split('/').filter(Boolean);
-    const [head, id, sub, subId] = segments;
-    switch (head) {
-      case 'course':
-        if (!id) return '/dashboard/student/courses';
-        if (sub === 'lesson' && subId) return `/dashboard/student/courses/${id}/lessons/${subId}`;
-        return `/dashboard/student/courses/${id}`;
-      case 'quiz':
-        return id ? `/dashboard/student/quizzes/${id}` : '/dashboard/student/quizzes';
-      case 'contest':
-        if (!id) return '/dashboard/student/contests';
-        if (sub === 'result') return `/dashboard/student/contests/${id}/result`;
-        return `/dashboard/student/contests/${id}/take`;
-      case 'certificate':
-        return id ? `/dashboard/student/certificates/${id}` : '/dashboard/student/certificates';
-      default:
-        return '/dashboard/student/notifications';
+}
+
+function isSafeRelativePath(value: string): boolean {
+  return value.startsWith('/') && !value.startsWith('//') && !value.includes('\\') && !/[\r\n]/.test(value);
+}
+
+function resolveWebPathFromRawUrl(rawUrl?: string): string {
+  if (!rawUrl || typeof rawUrl !== 'string') return DEFAULT_NOTIFICATION_PATH;
+  const trimmed = rawUrl.trim();
+  if (!trimmed) return DEFAULT_NOTIFICATION_PATH;
+
+  if (isSafeRelativePath(trimmed)) {
+    return trimmed;
+  }
+
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    const allowedOrigin = getConfiguredSiteOrigin();
+    if (!allowedOrigin) return DEFAULT_NOTIFICATION_PATH;
+    try {
+      const parsed = new URL(trimmed);
+      if (parsed.origin !== allowedOrigin) {
+        return DEFAULT_NOTIFICATION_PATH;
+      }
+      const relative = `${parsed.pathname}${parsed.search}${parsed.hash}`;
+      return isSafeRelativePath(relative) ? relative : DEFAULT_NOTIFICATION_PATH;
+    } catch {
+      return DEFAULT_NOTIFICATION_PATH;
     }
   }
-  return '/dashboard/student/notifications';
+
+  if (trimmed.startsWith('quizdo://')) {
+    const segments = trimmed.replace('quizdo://', '').split('/').filter(Boolean);
+    const [head, id, sub, subId] = segments;
+    const safeId = id && SAFE_SEGMENT_RE.test(id) ? id : undefined;
+    const safeSubId = subId && SAFE_SEGMENT_RE.test(subId) ? subId : undefined;
+    switch (head) {
+      case 'course':
+        if (!safeId) return '/dashboard/student/courses';
+        if (sub === 'lesson' && safeSubId) return `/dashboard/student/courses/${safeId}/lessons/${safeSubId}`;
+        return `/dashboard/student/courses/${safeId}`;
+      case 'quiz':
+        return safeId ? `/dashboard/student/quizzes/${safeId}` : '/dashboard/student/quizzes';
+      case 'contest':
+        if (!safeId) return '/dashboard/student/contests';
+        if (sub === 'result') return `/dashboard/student/contests/${safeId}/result`;
+        return `/dashboard/student/contests/${safeId}/take`;
+      case 'certificate':
+        return safeId ? `/dashboard/student/certificates/${safeId}` : '/dashboard/student/certificates';
+      default:
+        return DEFAULT_NOTIFICATION_PATH;
+    }
+  }
+
+  return DEFAULT_NOTIFICATION_PATH;
 }
 
 function resolveHttpsClickLink(webPath: string): string | undefined {
-  if (webPath.startsWith('https://')) return webPath;
-  if (!webPath.startsWith('/')) return undefined;
+  if (!isSafeRelativePath(webPath)) return undefined;
   const siteOrigin = (
     process.env.NEXT_PUBLIC_SITE_URL ||
     process.env.NEXTAUTH_URL ||
@@ -121,6 +159,12 @@ export const sendPushNotification = async (
 
   const webPath = resolveWebPathFromRawUrl(safeData.webUrl || safeData.actionUrl || safeData.url);
   safeData.webUrl = webPath;
+  if (safeData.url && !safeData.url.startsWith('quizdo://')) {
+    safeData.url = resolveWebPathFromRawUrl(safeData.url);
+  }
+  if (safeData.actionUrl) {
+    safeData.actionUrl = resolveWebPathFromRawUrl(safeData.actionUrl);
+  }
   safeData.title = title;
   safeData.body = body;
 

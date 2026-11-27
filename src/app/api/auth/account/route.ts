@@ -4,8 +4,11 @@ import type { Types } from 'mongoose';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import User from '@/models/User';
+import { findUserByEmail } from '@/lib/user/findByEmail';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { canUserCreatePublicCourses } from '@/lib/settingsHelpers';
+import { isAdmin } from '@/lib/roles';
+import { ensureTeacherInviteCode } from '@/lib/organizations/resolveInvite';
 
 /** Returns account flags for profile and course-form UI (password change, public course permission). */
 export async function GET() {
@@ -18,55 +21,87 @@ export async function GET() {
     }
 
     await dbConnect();
-    const user = await User.findById(session.user.id).select('password provider organizationId canCreateContests').lean<{
-      password?: string;
-      provider?: string;
-      organizationId?: Types.ObjectId;
-      canCreateContests?: boolean;
-    }>();
+    const user = await User.findById(session.user.id)
+      .select('password provider organizationId canCreateContests isSuspended role')
+      .lean<{
+        password?: string;
+        provider?: string;
+        organizationId?: Types.ObjectId;
+        canCreateContests?: boolean;
+        isSuspended?: boolean;
+        role?: string;
+      }>();
 
     if (!user) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
 
+    if (user.isSuspended) {
+      return NextResponse.json({ message: 'Account suspended' }, { status: 403 });
+    }
+
+    const canSeeOrgInviteCodes = isAdmin(user.role || session.user.role);
     let organizationName = null;
     let organization = null;
+    let orgAllowsContests = false;
+
     if (user.organizationId) {
       const Organization = (await import('@/models/Organization')).default;
       const org = await Organization.findById(user.organizationId)
-        .select('name logo primaryColor website tagline inviteCode code')
+        .select('name logo primaryColor website tagline inviteCode teacherInviteCode code isActive permissions')
         .lean<{
+          _id: Types.ObjectId;
           name?: string;
           logo?: string;
           primaryColor?: string;
           website?: string;
           tagline?: string;
           inviteCode?: string;
+          teacherInviteCode?: string;
           code?: string;
+          isActive?: boolean;
+          permissions?: { canCreateContests?: boolean };
         }>();
       if (org) {
+        if (org.isActive === false) {
+          return NextResponse.json({ message: 'Organization is inactive' }, { status: 403 });
+        }
         organizationName = org.name;
+        orgAllowsContests = Boolean(org.permissions?.canCreateContests);
+        let teacherInviteCode = org.teacherInviteCode || '';
+        if (canSeeOrgInviteCodes && !teacherInviteCode) {
+          teacherInviteCode = await ensureTeacherInviteCode(org._id);
+        }
         organization = {
           name: org.name,
           logo: org.logo || null,
           primaryColor: org.primaryColor || null,
           website: org.website || null,
           tagline: org.tagline || null,
-          inviteCode: org.inviteCode || '',
-          code: org.code || '',
+          ...(canSeeOrgInviteCodes
+            ? {
+                inviteCode: org.inviteCode || '',
+                teacherInviteCode,
+                code: org.code || '',
+              }
+            : {}),
         };
       }
     }
+
+    const effectiveRole = user.role || session.user.role;
+    const canCreateContests =
+      effectiveRole === 'superadmin' ||
+      (user.organizationId
+        ? orgAllowsContests && (effectiveRole === 'admin' || Boolean(user.canCreateContests))
+        : Boolean(user.canCreateContests));
 
     return NextResponse.json({
       provider: user.provider ?? 'credentials',
       hasPassword: Boolean(user.password),
       canChangePassword: user.provider !== 'google' || Boolean(user.password),
-      canCreatePublicCourses: await canUserCreatePublicCourses(
-        session.user.id,
-        session.user.role
-      ),
-      canCreateContests: Boolean(user.canCreateContests || user.organizationId || session.user.role === 'superadmin'),
+      canCreatePublicCourses: await canUserCreatePublicCourses(session.user.id, effectiveRole),
+      canCreateContests,
       organizationName,
       organization,
     });
@@ -93,11 +128,15 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
 
+    if (user.isSuspended) {
+      return NextResponse.json({ message: 'Account suspended' }, { status: 403 });
+    }
+
     const updateData: Record<string, string> = {};
 
     if (name !== undefined) {
-      if (!name || typeof name !== 'string' || !name.trim()) {
-        return NextResponse.json({ message: 'Name is required' }, { status: 400 });
+      if (!name || typeof name !== 'string' || !name.trim() || name.trim().length > 100) {
+        return NextResponse.json({ message: 'Name must be between 1 and 100 characters' }, { status: 400 });
       }
       updateData.name = name.trim();
     }
@@ -115,12 +154,15 @@ export async function PATCH(request: Request) {
       // Check if user has a mock phone registration email
       const isMockEmail = user.email?.endsWith('@phone.quizdo.com');
       if (!isMockEmail) {
-        return NextResponse.json({
-          message: 'Email can only be added for phone accounts without a linked email.'
-        }, { status: 403 });
+        return NextResponse.json(
+          {
+            message: 'Email can only be added for phone accounts without a linked email.',
+          },
+          { status: 403 }
+        );
       }
 
-      const existingUser = await User.findOne({ email: trimmedEmail });
+      const existingUser = await findUserByEmail(trimmedEmail);
       if (existingUser) {
         return NextResponse.json({ message: 'Email already in use' }, { status: 400 });
       }
@@ -131,11 +173,7 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ message: 'No fields to update' }, { status: 400 });
     }
 
-    const updatedUser = await User.findByIdAndUpdate(
-      session.user.id,
-      updateData,
-      { new: true }
-    );
+    const updatedUser = await User.findByIdAndUpdate(session.user.id, updateData, { new: true });
 
     if (!updatedUser) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });

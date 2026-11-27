@@ -49,7 +49,7 @@ export async function PATCH(
     node.name = name;
     await node.save();
 
-    const orgKey = session!.user!.organizationId || 'public';
+    const orgKey = node.organizationId?.toString() || 'public';
     await invalidatePattern(`files:${orgKey}:*`);
 
     return NextResponse.json({ node }, { status: 200 });
@@ -90,7 +90,14 @@ export async function DELETE(
       return NextResponse.json({ message: 'Invalid id' }, { status: 400 });
     }
 
-    const node = await FileNode.findById(id).select('_id type parentId').lean();
+    const node = await FileNode.findById(id)
+      .select('_id type parentId organizationId')
+      .lean<{
+        _id: mongoose.Types.ObjectId;
+        type: 'folder' | 'file';
+        parentId?: mongoose.Types.ObjectId | null;
+        organizationId?: mongoose.Types.ObjectId | null;
+      } | null>();
     if (!node) {
       return NextResponse.json({ message: 'Not found' }, { status: 404 });
     }
@@ -109,7 +116,7 @@ export async function DELETE(
 
     await FileNode.deleteMany({ _id: { $in: ids } });
 
-    const orgKey = session!.user!.organizationId || 'public';
+    const orgKey = node.organizationId?.toString() || 'public';
     await invalidatePattern(`files:${orgKey}:*`);
 
     return NextResponse.json({ message: 'Deleted successfully' }, { status: 200 });

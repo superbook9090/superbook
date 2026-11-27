@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+import mongoose from 'mongoose';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import { Course, Chapter, Lesson } from '@/models';
 import { createLessonSchema } from '@/lib/validation';
+import { canManageOrgContent, type AccessUser } from '@/lib/accessControl';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
 import { requireFeature } from '@/lib/settingsHelpers';
@@ -23,17 +25,27 @@ export async function POST(
 
     await dbConnect();
     const { id } = await params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json({ message: 'Chapter not found' }, { status: 404 });
+    }
+
     const chapter = await Chapter.findById(id);
     if (!chapter) return NextResponse.json({ message: 'Chapter not found' }, { status: 404 });
 
     const course = await Course.findById(chapter.course);
     if (!course) return NextResponse.json({ message: 'Course not found' }, { status: 404 });
 
-    if (
-      course.instructor.toString() !== session.user.id &&
-      session.user.role !== 'admin' &&
-      session.user.role !== 'superadmin'
-    ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const user = session.user as any;
+    const authUser: AccessUser = {
+      _id: new mongoose.Types.ObjectId(user.id),
+      organizationId: user.organizationId
+        ? new mongoose.Types.ObjectId(user.organizationId)
+        : null,
+      role: (user.role || 'student') as AccessUser['role'],
+    };
+
+    if (!canManageOrgContent(course.organizationId, course.instructor, authUser)) {
       return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
     }
 

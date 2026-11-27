@@ -68,12 +68,13 @@ describe('adminAuth & admin user query scoping', () => {
       });
     });
 
-    it('locks org admin with missing or invalid organizationId to organizationId=null (ignores param)', () => {
+    it('throws when org admin has missing or invalid organizationId (never falls back to null)', () => {
       const auth = checkAdmin(makeSession({ role: 'admin', organizationId: null }));
-      const { orgFilter } = buildAdminUsersQuery(auth, {
-        organizationIdParam: otherOrgId,
-      });
-      expect(orgFilter).toEqual({ organizationId: null });
+      expect(() =>
+        buildAdminUsersQuery(auth, {
+          organizationIdParam: otherOrgId,
+        })
+      ).toThrow(/valid organization/i);
     });
 
     it('allows superadmin to view all organizations by default', () => {

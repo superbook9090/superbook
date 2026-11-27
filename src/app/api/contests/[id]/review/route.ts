@@ -9,6 +9,8 @@ import QuizQuestion from '@/models/QuizQuestion';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
 import { areContestSolutionsReleased } from '@/lib/contest/contestHelpers';
+import { requireFeature } from '@/lib/settingsHelpers';
+import { canManageOrgContent, type AccessUser } from '@/lib/accessControl';
 import mongoose from 'mongoose';
 
 export const dynamic = 'force-dynamic';
@@ -22,6 +24,9 @@ export async function GET(
   const logContext: LogContext = { method: 'GET', path: `/api/contests/${id}/review` };
 
   try {
+    const featureCheck = await requireFeature('enableContests');
+    if (featureCheck) return featureCheck;
+
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json({ message: 'Invalid contest ID' }, { status: 400 });
     }
@@ -39,10 +44,27 @@ export async function GET(
       return NextResponse.json({ message: 'Contest not found' }, { status: 404 });
     }
 
-    const isInstructor =
-      contest.instructor.toString() === session.user.id ||
-      session.user.role === 'superadmin' ||
-      session.user.role === 'admin';
+    const authUser: AccessUser = {
+      _id: new mongoose.Types.ObjectId(session.user.id),
+      organizationId: session.user.organizationId
+        ? new mongoose.Types.ObjectId(session.user.organizationId)
+        : null,
+      role: session.user.role as AccessUser['role'],
+    };
+
+    const isInstructor = canManageOrgContent(contest.organizationId, contest.instructor, authUser);
+
+    if (!isInstructor && contest.organizationId && contest.visibility === 'organization') {
+      if (
+        !authUser.organizationId ||
+        authUser.organizationId.toString() !== contest.organizationId.toString()
+      ) {
+        return NextResponse.json(
+          { message: 'This contest is restricted to members of the organization' },
+          { status: 403 }
+        );
+      }
+    }
 
     const now = new Date();
     const solutionsReleased = areContestSolutionsReleased(contest, now);
@@ -61,6 +83,9 @@ export async function GET(
 
     const { searchParams } = new URL(request.url);
     const studentIdParam = searchParams.get('studentId');
+    if (isInstructor && studentIdParam && !mongoose.Types.ObjectId.isValid(studentIdParam)) {
+      return NextResponse.json({ message: 'Invalid student ID' }, { status: 400 });
+    }
     const targetStudentId = isInstructor && studentIdParam ? studentIdParam : session.user.id;
 
     const attempt = await ContestAttempt.findOne({

@@ -10,6 +10,7 @@ import mongoose from 'mongoose';
 import { serialize } from '@/lib/serialize';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { requireFeature } from '@/lib/settingsHelpers';
+import { isSuperAdmin, normalizeRole } from '@/lib/roles';
 
 // GET /api/certificates/[id] - Single certificate.
 // Accepts either the Mongo _id or the public certificateId serial, so the
@@ -43,14 +44,20 @@ export async function GET(
     }
 
     const isOwner = String(certificate.student) === session.user.id;
-    const isAdmin = session.user.role === 'admin' || session.user.role === 'superadmin';
+    const isSuper = isSuperAdmin(session.user.role);
+    const normalizedRole = normalizeRole(session.user.role);
+    const isSameOrgAdmin =
+      normalizedRole === 'admin' &&
+      Boolean(session.user.organizationId) &&
+      Boolean(certificate.organizationId) &&
+      String(session.user.organizationId) === String(certificate.organizationId);
     let isInstructor = false;
-    if (!isOwner && !isAdmin && session.user.role === 'teacher') {
+    if (!isOwner && !isSuper && !isSameOrgAdmin && normalizedRole === 'teacher') {
       const course = await Course.findById(certificate.course).select('instructor').lean();
       isInstructor = String(course?.instructor) === session.user.id;
     }
 
-    if (!isOwner && !isAdmin && !isInstructor) {
+    if (!isOwner && !isSuper && !isSameOrgAdmin && !isInstructor) {
       return NextResponse.json({ message: 'Certificate not found' }, { status: 404 });
     }
 

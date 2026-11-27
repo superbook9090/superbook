@@ -52,9 +52,24 @@ function generateTicketId(): string {
   return ticket;
 }
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 // 4. HTML Template for Admin Alert Email (Support Ticket Style)
 function getAdminHtmlTemplate(params: ContactEmailParams, ticketId: string): string {
-  const { name, email, subject, message, ipAddress, timestamp } = params;
+  const name = escapeHtml(params.name);
+  const email = escapeHtml(params.email);
+  const subject = escapeHtml(params.subject);
+  const message = escapeHtml(params.message);
+  const ipAddress = escapeHtml(params.ipAddress);
+  const timestamp = escapeHtml(params.timestamp);
+  const safeTicketId = escapeHtml(ticketId);
 
   return `
   <!DOCTYPE html>
@@ -206,7 +221,7 @@ function getAdminHtmlTemplate(params: ContactEmailParams, ticketId: string): str
         </div>
         <div class="content">
           <div class="badge-row">
-            <span class="badge">Ticket ID: ${ticketId}</span>
+            <span class="badge">Ticket ID: ${safeTicketId}</span>
           </div>
 
           <div class="section-title">Submitter Information</div>
@@ -257,7 +272,10 @@ function getAdminHtmlTemplate(params: ContactEmailParams, ticketId: string): str
 
 // 5. HTML Template for User Auto-Reply Receipt Confirmation
 function getUserHtmlTemplate(params: ContactEmailParams, ticketId: string): string {
-  const { name, subject, message } = params;
+  const name = escapeHtml(params.name);
+  const subject = escapeHtml(params.subject);
+  const message = escapeHtml(params.message);
+  const safeTicketId = escapeHtml(ticketId);
 
   return `
   <!DOCTYPE html>
@@ -401,7 +419,7 @@ function getUserHtmlTemplate(params: ContactEmailParams, ticketId: string): stri
           </p>
 
           <div class="ticket-box">
-            Your Support Ticket ID: ${ticketId}
+            Your Support Ticket ID: ${safeTicketId}
           </div>
 
           <div class="section-title">Your Submission Details</div>
@@ -474,7 +492,8 @@ export async function sendUserAutoReply(params: ContactEmailParams, ticketId: st
 }
 
 function passwordResetHtml(name: string, resetUrl: string): string {
-  const safeName = name.replace(/[<>]/g, '');
+  const safeName = escapeHtml(name);
+  const safeUrl = escapeHtml(resetUrl);
   return `
   <!DOCTYPE html>
   <html>
@@ -491,12 +510,12 @@ function passwordResetHtml(name: string, resetUrl: string): string {
           We received a request to reset your password. Click the button below to choose a new password.
           This link expires in 1 hour.
         </p>
-        <a href="${resetUrl}" style="display:inline-block;background:#4f46e5;color:#fff;text-decoration:none;font-weight:600;padding:12px 24px;border-radius:10px;font-size:14px;">
+        <a href="${safeUrl}" style="display:inline-block;background:#4f46e5;color:#fff;text-decoration:none;font-weight:600;padding:12px 24px;border-radius:10px;font-size:14px;">
           Reset Password
         </a>
         <p style="margin:20px 0 0;color:#64748b;font-size:12px;line-height:1.6;word-break:break-all;">
           Or copy this link into your browser:<br>
-          <a href="${resetUrl}" style="color:#4f46e5;">${resetUrl}</a>
+          <a href="${safeUrl}" style="color:#4f46e5;">${safeUrl}</a>
         </p>
         <p style="margin:24px 0 0;color:#94a3b8;font-size:12px;line-height:1.5;">
           If you did not request this, you can safely ignore this email.
@@ -536,6 +555,10 @@ function courseDeletionHtml(params: {
   reason: string;
   deletedBy?: string;
 }): string {
+  const safeTeacherName = escapeHtml(params.teacherName);
+  const safeCourseTitle = escapeHtml(params.courseTitle);
+  const safeReason = escapeHtml(params.reason);
+  const safeDeletedBy = params.deletedBy ? escapeHtml(params.deletedBy) : '';
   return `
   <!DOCTYPE html>
   <html>
@@ -552,13 +575,13 @@ function courseDeletionHtml(params: {
           <div style="font-size:14px;font-weight:600;color:#fee2e2;text-transform:uppercase;letter-spacing:2px;margin:0;">Course Removal Notice</div>
         </div>
         <div style="padding:32px 24px;">
-          <h3 style="font-size:18px;font-weight:700;color:#0f172a;margin:0 0 16px 0;">Hello ${params.teacherName},</h3>
+          <h3 style="font-size:18px;font-weight:700;color:#0f172a;margin:0 0 16px 0;">Hello ${safeTeacherName},</h3>
           <p style="font-size:14px;line-height:1.6;color:#475569;margin:0 0 20px 0;">
-            This email is to notify you that your course <strong>"${params.courseTitle}"</strong> has been deleted from the platform by an administrator${params.deletedBy ? ` (${params.deletedBy})` : ''}.
+            This email is to notify you that your course <strong>"${safeCourseTitle}"</strong> has been deleted from the platform by an administrator${safeDeletedBy ? ` (${safeDeletedBy})` : ''}.
           </p>
           <div style="background-color:#fef2f2;border-left:4px solid #ef4444;border-radius:8px;padding:20px;margin-bottom:24px;border-top:1px solid #fee2e2;border-right:1px solid #fee2e2;border-bottom:1px solid #fee2e2;">
             <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#991b1b;margin-bottom:8px;">Reason for Deletion:</div>
-            <p style="margin:0;font-size:14px;line-height:1.6;color:#7f1d1d;white-space:pre-wrap;">${params.reason}</p>
+            <p style="margin:0;font-size:14px;line-height:1.6;color:#7f1d1d;white-space:pre-wrap;">${safeReason}</p>
           </div>
           <p style="font-size:14px;line-height:1.6;color:#475569;margin:0;">
             If you have any questions regarding this action, please contact the platform administration or support team.
@@ -613,9 +636,10 @@ function directUserEmailHtml(params: {
   message: string;
   senderName?: string;
 }): string {
-  const safeName = params.recipientName.replace(/[<>]/g, '');
-  const safeSubject = params.subject.replace(/[<>]/g, '');
-  const safeMessage = params.message.replace(/[<>]/g, '');
+  const safeName = escapeHtml(params.recipientName);
+  const safeSubject = escapeHtml(params.subject);
+  const safeMessage = escapeHtml(params.message);
+  const safeSenderName = params.senderName ? escapeHtml(params.senderName) : 'The Quiz Do Administration Team';
 
   return `
   <!DOCTYPE html>
@@ -640,7 +664,7 @@ function directUserEmailHtml(params: {
           </div>
           <p style="font-size:14px;line-height:1.6;color:#475569;margin:0 0 8px 0;">
             Best regards,<br>
-            <strong>${params.senderName ? params.senderName : 'The Quiz Do Administration Team'}</strong>
+            <strong>${safeSenderName}</strong>
           </p>
         </div>
         <div style="background-color:#f1f5f9;padding:20px 24px;text-align:center;border-top:1px solid #e2e8f0;">

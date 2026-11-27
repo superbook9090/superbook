@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { isFeatureEnabled, getChallengeSettings } from '@/lib/settingsHelpers';
-import { Challenge, QuizQuestion, Quiz, User } from '@/models';
+import { isSuperAdmin } from '@/lib/roles';
+import { Challenge, Course, QuizQuestion, Quiz, User } from '@/models';
 
 export async function GET(
   _req: NextRequest,
@@ -38,10 +41,39 @@ export async function GET(
     // Find challenge
     const challenge = await Challenge.findOne({ slug })
       .populate({ path: 'creator', model: User, select: 'name image' })
-      .populate({ path: 'quiz', model: Quiz, select: 'title description' });
+      .populate({ path: 'quiz', model: Quiz, select: 'title description organizationId course isPublished' });
 
     if (!challenge) {
       return NextResponse.json({ message: 'Challenge not found' }, { status: 404 });
+    }
+
+    const session = await getServerSession(authOptions);
+    const courseId = challenge.quiz?.course || challenge.course || null;
+    const course = courseId
+      ? ((await Course.findById(courseId)
+          .select('organizationId isPublished')
+          .lean()) as {
+          organizationId?: { toString(): string } | null;
+          isPublished?: boolean;
+        } | null)
+      : null;
+
+    const quizOrgId = challenge.quiz?.organizationId?.toString() || null;
+    const courseOrgId = course?.organizationId?.toString() || null;
+
+    if (quizOrgId || courseOrgId) {
+      if (!session?.user) {
+        return NextResponse.json({ message: 'Challenge not found' }, { status: 404 });
+      }
+      const userOrgId = session.user.organizationId?.toString() || null;
+      const isAllowed =
+        isSuperAdmin(session.user.role) ||
+        (Boolean(userOrgId) &&
+          (!quizOrgId || quizOrgId === userOrgId) &&
+          (!courseOrgId || courseOrgId === userOrgId));
+      if (!isAllowed) {
+        return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
+      }
     }
 
     if (challenge.status === 'disabled') {
@@ -115,7 +147,7 @@ export async function GET(
         id: challenge._id.toString(),
         slug: challenge.slug,
         challenger: {
-          id: challenge.creator?._id?.toString(),
+          ...(session?.user ? { id: challenge.creator?._id?.toString() } : {}),
           name: challenge.creator?.name || 'A Quizdo Student',
           image: challenge.creator?.image || null,
         },

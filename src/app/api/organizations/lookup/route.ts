@@ -13,21 +13,20 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const code = searchParams.get('code')?.trim();
 
-    if (!code) {
+    if (!code || code.length > 64) {
       return NextResponse.json({ found: false, message: 'Code is required' }, { status: 400 });
     }
 
     await dbConnect();
 
-    // Check code in case-insensitive manner for both inviteCode and code
     const escapedCode = code.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(`^${escapedCode}$`, 'i');
 
     const org = await Organization.findOne({
-      $or: [{ inviteCode: regex }, { code: regex }],
+      $or: [{ inviteCode: regex }, { teacherInviteCode: regex }, { code: regex }],
       isActive: true,
     })
-      .select('_id name logo primaryColor website tagline inviteCode description')
+      .select('_id name logo primaryColor website tagline inviteCode teacherInviteCode description')
       .lean<{
         _id: unknown;
         name: string;
@@ -36,12 +35,17 @@ export async function GET(req: NextRequest) {
         website?: string;
         tagline?: string;
         inviteCode: string;
+        teacherInviteCode?: string;
         description?: string;
       }>();
 
     if (!org) {
       return NextResponse.json({ found: false }, { status: 200 });
     }
+
+    const isTeacherCode =
+      Boolean(org.teacherInviteCode) &&
+      org.teacherInviteCode!.toLowerCase() === code.toLowerCase();
 
     return NextResponse.json(
       {
@@ -53,7 +57,8 @@ export async function GET(req: NextRequest) {
           primaryColor: org.primaryColor || null,
           website: org.website || null,
           tagline: org.tagline || null,
-          inviteCode: org.inviteCode,
+          inviteCode: isTeacherCode ? org.teacherInviteCode : org.inviteCode,
+          inviteRole: isTeacherCode ? 'teacher' : 'student',
           description: org.description || null,
         },
       },

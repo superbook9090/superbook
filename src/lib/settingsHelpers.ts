@@ -1,4 +1,5 @@
 import User from '@/models/User';
+import Organization from '@/models/Organization';
 import { NextResponse } from 'next/server';
 import { redirect } from 'next/navigation';
 import { ROUTES } from '@/constants/routes';
@@ -104,14 +105,31 @@ export async function requireFeature(feature: keyof FeatureToggles): Promise<Nex
  * Shared by the API guard and the teacher UI so both apply the same rule.
  */
 export async function canUserCreatePublicCourses(userId: string, role: string): Promise<boolean> {
-  if (role === 'admin' || role === 'superadmin') {
+  if (role === 'superadmin') {
     return true;
   }
 
-  const user = await User.findById(userId).select('canCreatePublicCourses organizationId').lean();
+  const user = await User.findById(userId)
+    .select('canCreatePublicCourses organizationId role')
+    .lean<{ canCreatePublicCourses?: boolean; organizationId?: unknown; role?: string }>();
+
   if (user?.organizationId) {
-    return true;
+    const org = await Organization.findById(user.organizationId)
+      .select('isActive permissions')
+      .lean<{ isActive?: boolean; permissions?: { canCreatePublicCourses?: boolean } }>();
+    if (!org || org.isActive === false || !org.permissions?.canCreatePublicCourses) {
+      return false;
+    }
+    if (role === 'admin' || user.role === 'admin') {
+      return true;
+    }
+    return Boolean(user.canCreatePublicCourses);
   }
+
+  if (role === 'admin') {
+    return false;
+  }
+
   return Boolean(user?.canCreatePublicCourses);
 }
 
@@ -157,15 +175,47 @@ export async function isTeacherRegistrationAllowed(): Promise<boolean> {
  * Teacher content limit (per-user override from User.limits, else global settings)
  */
 export async function getTeacherLimit(type: keyof TeacherLimits, userId?: string): Promise<number> {
-  if (userId) {
-    const user = await User.findById(userId);
-    if (user?.limits?.[type] !== undefined && user.limits[type] !== null) {
-      return user.limits[type]!;
-    }
-  }
   const settings = await getSettingsWithDefaults();
-  const defaultVal = type === 'aiQuizGenerations' ? 5 : 10;
-  return settings?.teacherLimits?.[type] ?? defaultVal;
+  const defaultVal =
+    type === 'aiQuizGenerations' ? 5 : type === 'aiQuizMaxQuestions' ? 20 : 10;
+  const globalLimit = settings?.teacherLimits?.[type] ?? defaultVal;
+
+  if (!userId) {
+    return globalLimit;
+  }
+
+  const user = await User.findById(userId)
+    .select('limits organizationId role')
+    .lean<{
+      limits?: Partial<Record<keyof TeacherLimits, number>>;
+      organizationId?: unknown;
+      role?: string;
+    }>();
+
+  if (user?.role === 'superadmin') {
+    return Number.MAX_SAFE_INTEGER;
+  }
+
+  const userLimit = user?.limits?.[type];
+  const hasUserLimit = typeof userLimit === 'number' && Number.isFinite(userLimit) && userLimit >= 1;
+
+  if (user?.organizationId) {
+    const org = await Organization.findById(user.organizationId)
+      .select('teacherLimits')
+      .lean<{ teacherLimits?: Partial<Record<keyof TeacherLimits, number>> }>();
+    const orgCeiling = org?.teacherLimits?.[type];
+    const hasOrgCeiling =
+      typeof orgCeiling === 'number' && Number.isFinite(orgCeiling) && orgCeiling >= 1;
+
+    if (hasOrgCeiling) {
+      return hasUserLimit ? Math.min(userLimit!, orgCeiling!) : Math.min(globalLimit, orgCeiling!);
+    }
+
+    // No custom quota ceiling granted to the organization: cannot exceed platform global default
+    return hasUserLimit ? Math.min(userLimit!, globalLimit) : globalLimit;
+  }
+
+  return hasUserLimit ? userLimit! : globalLimit;
 }
 
 /**

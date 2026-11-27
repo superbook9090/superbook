@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import { logApiError, type LogContext } from '@/lib/logger';
-import { isAdmin } from '@/lib/roles';
+import { isSuperAdmin } from '@/lib/roles';
 import { Challenge, User, Quiz } from '@/models';
 
 interface ChallengePopulatedDoc {
@@ -36,27 +36,16 @@ export async function GET() {
     }
     logContext.userId = session.user.id;
 
-    if (!isAdmin(session.user.role)) {
+    if (!isSuperAdmin(session.user.role)) {
       return NextResponse.json(
-        { message: 'Forbidden: Admin access required' },
+        { message: 'Forbidden: Super admin access required' },
         { status: 403 }
       );
     }
 
     await dbConnect();
 
-    const userRole = session.user.role;
-    const organizationId = session.user.organizationId;
-    const isSuper = userRole === 'superadmin';
-
-    // Build course filter if organizational admin
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let matchStage: any = {};
-    if (!isSuper && organizationId) {
-      const courses = await dbConnect().then(() => mongoose.model('Course').find({ organizationId }).select('_id').lean());
-      const courseIds = courses.map((c) => c._id);
-      matchStage = { course: { $in: courseIds } };
-    }
+    const matchStage: Record<string, unknown> = {};
 
     // Aggregate overall metrics
     const [totals] = await Challenge.aggregate([
@@ -144,9 +133,9 @@ export async function PATCH(req: NextRequest) {
     }
     logContext.userId = session.user.id;
 
-    if (!isAdmin(session.user.role)) {
+    if (!isSuperAdmin(session.user.role)) {
       return NextResponse.json(
-        { message: 'Forbidden: Admin access required' },
+        { message: 'Forbidden: Super admin access required' },
         { status: 403 }
       );
     }
@@ -154,7 +143,12 @@ export async function PATCH(req: NextRequest) {
     const body = await req.json();
     const { challengeId, status } = body;
 
-    if (!challengeId || !['active', 'disabled'].includes(status)) {
+    if (
+      !challengeId ||
+      typeof challengeId !== 'string' ||
+      !mongoose.Types.ObjectId.isValid(challengeId) ||
+      !['active', 'disabled'].includes(status)
+    ) {
       return NextResponse.json(
         { message: 'Invalid challengeId or status' },
         { status: 400 }
@@ -162,28 +156,6 @@ export async function PATCH(req: NextRequest) {
     }
 
     await dbConnect();
-
-    const targetChallenge = await Challenge.findById(challengeId).lean();
-    if (!targetChallenge) {
-      return NextResponse.json({ message: 'Challenge not found' }, { status: 404 });
-    }
-
-    const userRole = session.user.role;
-    const organizationId = session.user.organizationId;
-    const isSuper = userRole === 'superadmin';
-
-    // Verify organization ownership
-    if (!isSuper && organizationId) {
-      const challengeCourse = (targetChallenge as { course?: string | mongoose.Types.ObjectId }).course;
-      if (!challengeCourse) {
-        // If a challenge somehow has no course, a normal admin shouldn't mutate it
-        return NextResponse.json({ message: 'Forbidden: Cannot modify global challenges' }, { status: 403 });
-      }
-      const course = await mongoose.model('Course').findById(challengeCourse).select('organizationId').lean();
-      if (!course || String((course as { organizationId?: mongoose.Types.ObjectId | string }).organizationId) !== String(organizationId)) {
-        return NextResponse.json({ message: 'Forbidden: Challenge belongs to another organization' }, { status: 403 });
-      }
-    }
 
     const updated = await Challenge.findByIdAndUpdate(
       challengeId,

@@ -9,7 +9,22 @@ import { requireFeature } from '@/lib/settingsHelpers';
 import { createUserNotifications } from '@/lib/server/services/notifications-service';
 import { sendPushNotification } from '@/lib/notifications/push/sendPushNotification';
 import mongoose from 'mongoose';
-import { isStudentEnrolled } from '@/lib/courseAccess';
+import { isPrivateCourse, isStudentEnrolled } from '@/lib/courseAccess';
+import { canManageOrgContent, validateContentAccess, type AccessUser } from '@/lib/accessControl';
+
+const MAX_DOUBT_LENGTH = 2000;
+
+function buildAccessUser(sessionUser: unknown): AccessUser {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const user = sessionUser as any;
+  return {
+    _id: new mongoose.Types.ObjectId(user.id),
+    organizationId: user.organizationId
+      ? new mongoose.Types.ObjectId(user.organizationId)
+      : null,
+    role: (user.role || 'student') as AccessUser['role'],
+  };
+}
 
 // GET /api/courses/[id]/doubts - Get all doubts for a course
 export async function GET(
@@ -29,10 +44,45 @@ export async function GET(
 
     await dbConnect();
     const { id } = await params;
-    const course = await Course.findById(id).select('instructor').lean();
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json({ message: 'Course not found' }, { status: 404 });
+    }
+
+    const course = await Course.findById(id)
+      .select('instructor organizationId isPublished courseCode')
+      .lean<{
+        instructor?: mongoose.Types.ObjectId | string;
+        organizationId?: mongoose.Types.ObjectId | null;
+        isPublished?: boolean;
+        courseCode?: string | null;
+      }>();
 
     if (!course) {
       return NextResponse.json({ message: 'Course not found' }, { status: 404 });
+    }
+
+    const authUser = buildAccessUser(session.user);
+    try {
+      validateContentAccess(course.organizationId, authUser, 'course');
+    } catch {
+      return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
+    }
+
+    const canManage = canManageOrgContent(course.organizationId, course.instructor, authUser);
+
+    if (!canManage) {
+      if (!course.isPublished) {
+        return NextResponse.json({ message: 'Course not found' }, { status: 404 });
+      }
+      if (isPrivateCourse(course)) {
+        const enrolled = await isStudentEnrolled(session.user.id, id);
+        if (!enrolled) {
+          return NextResponse.json(
+            { message: 'You must be enrolled in this course to view doubts' },
+            { status: 403 }
+          );
+        }
+      }
     }
 
     const courseDoubt = await CourseDoubt.findOne({ courseId: id })
@@ -46,11 +96,15 @@ export async function GET(
 
     let doubts = courseDoubt.doubts || [];
 
-    // Filter doubts for students
-    if (session.user.role === 'student') {
-      doubts = doubts.filter(
-        (doubt) => doubt.status === 'answered' || doubt.studentId._id.toString() === session.user.id
-      );
+    // Only course managers see all pending doubts; non-managers only see answered doubts (plus their own)
+    if (!canManage) {
+      doubts = doubts.filter((doubt) => {
+        const doubtStudentId =
+          typeof doubt.studentId === 'object' && doubt.studentId !== null && '_id' in doubt.studentId
+            ? String((doubt.studentId as { _id: unknown })._id)
+            : String(doubt.studentId || '');
+        return doubt.status === 'answered' || doubtStudentId === session.user.id;
+      });
     }
 
     // Sort descending by created at
@@ -84,22 +138,46 @@ export async function POST(
 
     await dbConnect();
     const { id } = await params;
-    
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json({ message: 'Course not found' }, { status: 404 });
+    }
+
+    const course = await Course.findById(id)
+      .select('title instructor organizationId isPublished')
+      .lean<{
+        title: string;
+        instructor: mongoose.Types.ObjectId | string;
+        organizationId?: mongoose.Types.ObjectId | null;
+        isPublished?: boolean;
+      }>();
+    if (!course || !course.isPublished) {
+      return NextResponse.json({ message: 'Course not found' }, { status: 404 });
+    }
+
+    const authUser = buildAccessUser(session.user);
+    try {
+      validateContentAccess(course.organizationId, authUser, 'course');
+    } catch {
+      return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
+    }
+
     // Check if enrolled
     const enrolled = await isStudentEnrolled(session.user.id, id);
     if (!enrolled) {
       return NextResponse.json({ message: 'You must be enrolled to ask a doubt' }, { status: 403 });
     }
 
-    const course = await Course.findById(id).select('title instructor').lean();
-    if (!course) {
-      return NextResponse.json({ message: 'Course not found' }, { status: 404 });
-    }
-
     const { question } = await req.json();
 
-    if (!question || question.trim().length === 0) {
+    if (typeof question !== 'string' || question.trim().length === 0) {
       return NextResponse.json({ message: 'Question cannot be empty' }, { status: 400 });
+    }
+
+    if (question.trim().length > MAX_DOUBT_LENGTH) {
+      return NextResponse.json(
+        { message: `Question must be at most ${MAX_DOUBT_LENGTH} characters` },
+        { status: 400 }
+      );
     }
 
     const newDoubt = {

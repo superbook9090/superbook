@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Swords,
   Eye,
@@ -17,7 +18,8 @@ import { PageSkeleton } from '@/components/ui/Skeleton';
 import { AdminPageBanner } from '@/features/admin/components/AdminPageBanner';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useTranslation } from '@/hooks/useTranslation';
-import { isAdmin } from '@/lib/roles';
+import { isSuperAdmin } from '@/lib/roles';
+import { queryKeys } from '@/lib/react-query/query-keys';
 import { ROUTES } from '@/constants/routes';
 import { ChallengesTable, type ChallengeAdminItem } from './_components/ChallengesTable';
 
@@ -30,43 +32,48 @@ interface ChallengeMetrics {
   conversionRate: string;
 }
 
+interface AdminChallengesResponse {
+  metrics: ChallengeMetrics | null;
+  challenges: ChallengeAdminItem[];
+}
+
 export default function AdminChallengesPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { t } = useTranslation();
   const session = useSessionStore((s) => s.session);
   const status = useSessionStore((s) => s.status);
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [metrics, setMetrics] = useState<ChallengeMetrics | null>(null);
-  const [challenges, setChallenges] = useState<ChallengeAdminItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
-  const fetchAdminChallenges = async () => {
-    try {
+  const isSuper = isSuperAdmin(session?.user?.role);
+
+  const challengesQuery = useQuery<AdminChallengesResponse>({
+    queryKey: queryKeys.adminChallenges.all,
+    queryFn: async () => {
       const res = await fetch('/api/admin/challenges');
       const data = await res.json();
-      if (data.success) {
-        setMetrics(data.metrics);
-        setChallenges(data.challenges || []);
+      if (!res.ok || !data.success) {
+        return { metrics: null, challenges: [] };
       }
-    } catch {
-      // Handled silently
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
-    }
-  };
+      return { metrics: data.metrics ?? null, challenges: data.challenges || [] };
+    },
+    enabled: status === 'authenticated' && isSuper,
+    staleTime: 2 * 60 * 1000,
+  });
 
   useEffect(() => {
     if (status === 'loading') return;
-    if (!session || !isAdmin(session.user?.role)) {
+    if (!session || !isSuper) {
       router.push(ROUTES.login);
-      return;
     }
-    fetchAdminChallenges();
-  }, [session, status, router]);
+  }, [session, status, router, isSuper]);
+
+  const metrics = challengesQuery.data?.metrics ?? null;
+  const challenges = useMemo(() => challengesQuery.data?.challenges ?? [], [challengesQuery.data]);
+  const isLoading = challengesQuery.isPending;
+  const isRefreshing = challengesQuery.isFetching && !challengesQuery.isPending;
 
   const handleToggleStatus = async (challengeId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'active' ? 'disabled' : 'active';
@@ -79,10 +86,15 @@ export default function AdminChallengesPage() {
       });
       const data = await res.json();
       if (data.success) {
-        setChallenges((prev) =>
-          prev.map((c) =>
-            c.id === challengeId ? { ...c, status: newStatus as 'active' | 'disabled' } : c
-          )
+        queryClient.setQueryData<AdminChallengesResponse>(queryKeys.adminChallenges.all, (prev) =>
+          prev
+            ? {
+                ...prev,
+                challenges: prev.challenges.map((c) =>
+                  c.id === challengeId ? { ...c, status: newStatus as 'active' | 'disabled' } : c
+                ),
+              }
+            : prev
         );
       }
     } catch {
@@ -124,10 +136,7 @@ export default function AdminChallengesPage() {
           <>
             <button
               type="button"
-              onClick={() => {
-                setIsRefreshing(true);
-                fetchAdminChallenges();
-              }}
+              onClick={() => void challengesQuery.refetch()}
               disabled={isRefreshing}
               className="teacher-pill-btn min-h-[44px] px-4 text-xs sm:text-sm font-semibold cursor-pointer"
             >

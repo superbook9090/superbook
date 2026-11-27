@@ -1,12 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+import mongoose from 'mongoose';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import { Course, Lesson, Chapter } from '@/models';
 import { updateLessonSchema } from '@/lib/validation';
 import { deleteLessonRelatedData } from '@/lib/cascade/deleteRelated';
+import { canManageOrgContent, validateContentAccess, type AccessUser } from '@/lib/accessControl';
+import { isPrivateCourse, isStudentEnrolled } from '@/lib/courseAccess';
+import { requireFeature } from '@/lib/settingsHelpers';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
+
+function buildAccessUser(sessionUser: unknown): AccessUser {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const user = sessionUser as any;
+  return {
+    _id: new mongoose.Types.ObjectId(user.id),
+    organizationId: user.organizationId
+      ? new mongoose.Types.ObjectId(user.organizationId)
+      : null,
+    role: (user.role || 'student') as AccessUser['role'],
+  };
+}
 
 // GET /api/lessons/[id] - Get lesson details
 export async function GET(
@@ -15,10 +31,77 @@ export async function GET(
 ) {
   const logContext: LogContext = { method: 'GET', path: '/api/lessons/[id]' };
   try {
+    const featureCheck = await requireFeature('enableCourses');
+    if (featureCheck) return featureCheck;
+
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
     await dbConnect();
     const { id } = await params;
-    const lesson = await Lesson.findById(id).lean();
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json({ message: 'Lesson not found' }, { status: 404 });
+    }
+
+    const lesson = await Lesson.findById(id).lean<{
+      _id: mongoose.Types.ObjectId;
+      course?: mongoose.Types.ObjectId;
+      chapter?: mongoose.Types.ObjectId;
+      isPublished?: boolean;
+    }>();
     if (!lesson) return NextResponse.json({ message: 'Lesson not found' }, { status: 404 });
+
+    let courseId = lesson.course?.toString();
+    if (!courseId && lesson.chapter) {
+      const chapter = await Chapter.findById(lesson.chapter)
+        .select('course')
+        .lean<{ course?: mongoose.Types.ObjectId }>();
+      courseId = chapter?.course?.toString();
+    }
+
+    if (!courseId) {
+      return NextResponse.json({ message: 'Course not found' }, { status: 404 });
+    }
+
+    const course = await Course.findById(courseId)
+      .select('organizationId isPublished courseCode instructor')
+      .lean<{
+        _id: mongoose.Types.ObjectId;
+        organizationId?: mongoose.Types.ObjectId | null;
+        isPublished?: boolean;
+        courseCode?: string | null;
+        instructor?: mongoose.Types.ObjectId | string;
+      }>();
+    if (!course) {
+      return NextResponse.json({ message: 'Course not found' }, { status: 404 });
+    }
+
+    const authUser = buildAccessUser(session.user);
+    try {
+      validateContentAccess(course.organizationId, authUser, 'course');
+    } catch {
+      return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
+    }
+
+    const canManage = canManageOrgContent(course.organizationId, course.instructor, authUser);
+
+    if (!canManage) {
+      if (!course.isPublished || !lesson.isPublished) {
+        return NextResponse.json({ message: 'Lesson not found' }, { status: 404 });
+      }
+
+      if (isPrivateCourse(course) || Boolean(course.organizationId)) {
+        const enrolled = await isStudentEnrolled(session.user.id, String(course._id));
+        if (!enrolled) {
+          return NextResponse.json(
+            { message: 'You must be enrolled in this course to access this lesson' },
+            { status: 403 }
+          );
+        }
+      }
+    }
 
     return NextResponse.json(serialize(lesson));
   } catch (error) {
@@ -34,20 +117,26 @@ export async function PATCH(
 ) {
   const logContext: LogContext = { method: 'PATCH', path: '/api/lessons/[id]' };
   try {
+    const featureCheck = await requireFeature('enableCourses');
+    if (featureCheck) return featureCheck;
+
     const session = await getServerSession(authOptions);
     if (!session?.user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 
     await dbConnect();
     const { id } = await params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json({ message: 'Lesson not found' }, { status: 404 });
+    }
+
     const lesson = await Lesson.findById(id);
     if (!lesson) return NextResponse.json({ message: 'Lesson not found' }, { status: 404 });
 
     const course = await Course.findById(lesson.course);
     if (!course) return NextResponse.json({ message: 'Course not found' }, { status: 404 });
 
-    const isOwner = course.instructor.toString() === session.user.id;
-    const isStaff = ['admin', 'superadmin'].includes(session.user.role || '');
-    if (!isOwner && !isStaff) {
+    const authUser = buildAccessUser(session.user);
+    if (!canManageOrgContent(course.organizationId, course.instructor, authUser)) {
       return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
     }
 
@@ -96,20 +185,26 @@ export async function DELETE(
 ) {
   const logContext: LogContext = { method: 'DELETE', path: '/api/lessons/[id]' };
   try {
+    const featureCheck = await requireFeature('enableCourses');
+    if (featureCheck) return featureCheck;
+
     const session = await getServerSession(authOptions);
     if (!session?.user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 
     await dbConnect();
     const { id } = await params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json({ message: 'Lesson not found' }, { status: 404 });
+    }
+
     const lesson = await Lesson.findById(id);
     if (!lesson) return NextResponse.json({ message: 'Lesson not found' }, { status: 404 });
 
     const course = await Course.findById(lesson.course);
     if (!course) return NextResponse.json({ message: 'Course not found' }, { status: 404 });
 
-    const isOwner = course.instructor.toString() === session.user.id;
-    const isStaff = ['admin', 'superadmin'].includes(session.user.role || '');
-    if (!isOwner && !isStaff) {
+    const authUser = buildAccessUser(session.user);
+    if (!canManageOrgContent(course.organizationId, course.instructor, authUser)) {
       return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
     }
 

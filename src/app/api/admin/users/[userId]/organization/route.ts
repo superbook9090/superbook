@@ -5,6 +5,7 @@ import dbConnect from '@/lib/db';
 import User from '@/models/User';
 import Organization from '@/models/Organization';
 import { logApiError, type LogContext } from '@/lib/logger';
+import { isAdmin, isSuperAdmin } from '@/lib/roles';
 import mongoose from 'mongoose';
 
 // PATCH /api/admin/users/[userId]/organization - Assign/remove user from organization (admin only)
@@ -28,7 +29,7 @@ export async function PATCH(
     }
 
     // Only admins and superadmins can assign users to organizations
-    if (session.user.role !== 'admin' && session.user.role !== 'superadmin') {
+    if (!isAdmin(session.user.role)) {
       return NextResponse.json(
         { message: 'Forbidden: Admin access required' },
         { status: 403 }
@@ -36,9 +37,24 @@ export async function PATCH(
     }
 
     logContext.userId = session.user.id;
+    const callerIsSuper = isSuperAdmin(session.user.role);
+
+    if (!callerIsSuper && (!session.user.organizationId || !mongoose.Types.ObjectId.isValid(String(session.user.organizationId)))) {
+      return NextResponse.json(
+        { message: 'Admin must belong to an organization' },
+        { status: 403 }
+      );
+    }
 
     await dbConnect();
     const { userId } = await params;
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return NextResponse.json(
+        { message: 'Invalid user ID' },
+        { status: 400 }
+      );
+    }
 
     const user = await User.findById(userId);
 
@@ -49,16 +65,39 @@ export async function PATCH(
       );
     }
 
+    if (!callerIsSuper && (user.role === 'admin' || user.role === 'superadmin')) {
+      return NextResponse.json(
+        { message: 'Only super admins can modify organization assignment for admin accounts' },
+        { status: 403 }
+      );
+    }
+
     const body = await req.json();
     const { organizationId } = body;
 
     // If organizationId is provided, validate it exists and is active
     if (organizationId) {
-      if (!mongoose.Types.ObjectId.isValid(organizationId)) {
+      if (typeof organizationId !== 'string' || !mongoose.Types.ObjectId.isValid(organizationId)) {
         return NextResponse.json(
           { message: 'Invalid organization ID' },
           { status: 400 }
         );
+      }
+
+      if (!callerIsSuper) {
+        const adminOrgId = session.user.organizationId!.toString();
+        if (adminOrgId !== organizationId) {
+          return NextResponse.json(
+            { message: 'Admin can only assign users to their own organization' },
+            { status: 403 }
+          );
+        }
+        if (user.organizationId && user.organizationId.toString() !== adminOrgId) {
+          return NextResponse.json(
+            { message: 'Cannot reassign a user who already belongs to another organization' },
+            { status: 403 }
+          );
+        }
       }
 
       const organization = await Organization.findOne({
@@ -73,32 +112,26 @@ export async function PATCH(
         );
       }
 
-      // Admin can only assign users to their own organization
-      if (session.user.role === 'admin') {
-        if (!session.user.organizationId) {
+      user.organizationId = new mongoose.Types.ObjectId(organizationId);
+    } else {
+      if (!callerIsSuper) {
+        const adminOrgId = session.user.organizationId!.toString();
+        if (!user.organizationId || user.organizationId.toString() !== adminOrgId) {
           return NextResponse.json(
-            { message: 'Admin must belong to an organization' },
-            { status: 403 }
-          );
-        }
-        if (session.user.organizationId.toString() !== organizationId) {
-          return NextResponse.json(
-            { message: 'Admin can only assign users to their own organization' },
+            { message: 'Admin can only remove users from their own organization' },
             { status: 403 }
           );
         }
       }
-
-      user.organizationId = organizationId;
-    } else {
       // Remove user from organization
       user.organizationId = null;
     }
 
     await user.save();
 
-    // Return updated user with organization populated
+    // Return updated user with organization populated (never expose password hash)
     const updatedUser = await User.findById(userId)
+      .select('-password')
       .populate('organizationId', 'name code inviteCode')
       .lean();
 

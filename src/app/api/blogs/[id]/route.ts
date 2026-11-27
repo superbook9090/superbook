@@ -13,6 +13,7 @@ import { canManageOrgContent, validateContentAccess } from '@/lib/accessControl'
 import { invalidatePattern } from '@/lib/redis';
 import { revalidateTag } from 'next/cache';
 import { slugifyBlogTitle } from '@/lib/blogs/public';
+import { isSuperAdmin } from '@/lib/roles';
 
 async function resolveSessionAccessUser(sessionUser: {
   id: string;
@@ -161,6 +162,17 @@ export async function PATCH(
   };
 
   try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user) {
+      return NextResponse.json(
+        { message: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    logContext.userId = session.user.id;
+
     await dbConnect();
 
     // Check if blogs feature is enabled
@@ -184,17 +196,6 @@ export async function PATCH(
         { status: 404 }
       );
     }
-
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { message: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    logContext.userId = session.user.id;
 
     // Check ownership or same-organization admin access
     const accessUser = await resolveSessionAccessUser(
@@ -238,8 +239,14 @@ export async function PATCH(
     if (visibility) {
       blog.visibility = visibility;
     }
-    if (typeof isFeatured === 'boolean') {
-      blog.isFeatured = blog.visibility === 'public' ? isFeatured : false;
+    if (blog.visibility !== 'public') {
+      blog.isFeatured = false;
+    } else if (typeof isFeatured === 'boolean') {
+      if (isSuperAdmin(session.user.role)) {
+        blog.isFeatured = isFeatured;
+      } else if (isFeatured === false) {
+        blog.isFeatured = false;
+      }
     }
     if (excerpt !== undefined) {
       blog.excerpt = excerpt?.trim() || deriveExcerpt(blog.content, null);
@@ -315,6 +322,17 @@ export async function DELETE(
   };
 
   try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user) {
+      return NextResponse.json(
+        { message: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    logContext.userId = session.user.id;
+
     await dbConnect();
 
     // Check if blogs feature is enabled
@@ -338,17 +356,6 @@ export async function DELETE(
         { status: 404 }
       );
     }
-
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { message: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    logContext.userId = session.user.id;
 
     // Check ownership or same-organization admin access
     const accessUser = await resolveSessionAccessUser(

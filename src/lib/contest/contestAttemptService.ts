@@ -11,6 +11,7 @@ import {
 import { invalidatePattern } from '@/lib/redis';
 import { recordUserActivity } from '@/lib/gamification/streakService';
 import { recordMistakes, type RecordMistakeItem } from '@/lib/learning/mistakesService';
+import { validateContentAccess, type AccessUser } from '@/lib/accessControl';
 
 export async function getContestAttemptsWithStats(contestId: string, page: number = 1, limit: number = 50) {
   const skip = (page - 1) * limit;
@@ -104,7 +105,8 @@ export async function handleStartAttempt(
   contest: IContest,
   userId: string,
   userOrgId?: string | null,
-  now: Date = new Date()
+  now: Date = new Date(),
+  userRole: AccessUser['role'] = 'student'
 ) {
   const computedState = getContestComputedState(contest, now);
   if (computedState === 'upcoming') {
@@ -114,8 +116,15 @@ export async function handleStartAttempt(
     return { status: 400, message: 'Contest has already ended' };
   }
 
-  if (contest.visibility === 'organization' && contest.organizationId) {
-    if (contest.organizationId.toString() !== userOrgId) {
+  if (contest.organizationId && contest.visibility === 'organization') {
+    const authUser: AccessUser = {
+      _id: new mongoose.Types.ObjectId(userId),
+      organizationId: userOrgId ? new mongoose.Types.ObjectId(userOrgId) : null,
+      role: userRole,
+    };
+    try {
+      validateContentAccess(contest.organizationId, authUser, 'contest');
+    } catch {
       return { status: 403, message: 'This contest is restricted to members of the organization' };
     }
   }
@@ -214,9 +223,24 @@ export async function handleSubmitAttempt(
   contest: IContest,
   userId: string,
   params: SubmitAttemptParams,
-  now: Date = new Date()
+  now: Date = new Date(),
+  userOrgId?: string | null,
+  userRole: AccessUser['role'] = 'student'
 ) {
-  const { submittedAnswers = [], timeTaken, violationCount = 0 } = params;
+  const { submittedAnswers = [], violationCount = 0 } = params;
+
+  if (contest.organizationId && contest.visibility === 'organization') {
+    const authUser: AccessUser = {
+      _id: new mongoose.Types.ObjectId(userId),
+      organizationId: userOrgId ? new mongoose.Types.ObjectId(userOrgId) : null,
+      role: userRole,
+    };
+    try {
+      validateContentAccess(contest.organizationId, authUser, 'contest');
+    } catch {
+      return { status: 403, message: 'This contest is restricted to members of the organization' };
+    }
+  }
 
   const attempt = await ContestAttempt.findOne({
     contest: contest._id,
@@ -252,6 +276,11 @@ export async function handleSubmitAttempt(
     return { status: 404, message: 'No active in-progress contest attempt found' };
   }
 
+  const contestEndMs = new Date(contest.endTime).getTime();
+  if (!Number.isNaN(contestEndMs) && now.getTime() > contestEndMs + 60_000) {
+    return { status: 400, message: 'Contest submission window has closed' };
+  }
+
   const elapsedSeconds = Math.max(1, Math.floor((now.getTime() - new Date(attempt.startedAt).getTime()) / 1000));
   const maxAllowedSeconds = contest.duration * 60 + 30;
   const finalTimeTaken = Math.min(elapsedSeconds, maxAllowedSeconds);
@@ -260,16 +289,8 @@ export async function handleSubmitAttempt(
     .map((qRef) => (typeof qRef.quiz === 'object' && qRef.quiz !== null ? qRef.quiz._id : qRef.quiz))
     .filter((q) => Boolean(q) && mongoose.Types.ObjectId.isValid(String(q)));
 
-  const submittedQuestionIds = submittedAnswers
-    .map((a) => a.questionId)
-    .filter((qId) => Boolean(qId) && mongoose.Types.ObjectId.isValid(String(qId)));
-
-  const rawQuestionDocs = await QuizQuestion.find({
-    $or: [
-      ...(quizIds.length > 0 ? [{ quiz: { $in: quizIds } }] : []),
-      ...(submittedQuestionIds.length > 0 ? [{ _id: { $in: submittedQuestionIds } }] : []),
-    ],
-  }).lean();
+  const rawQuestionDocs =
+    quizIds.length > 0 ? await QuizQuestion.find({ quiz: { $in: quizIds } }).lean() : [];
 
   type QuestionDocType = {
     _id: mongoose.Types.ObjectId;
@@ -284,6 +305,20 @@ export async function handleSubmitAttempt(
   const questionDocs = rawQuestionDocs as unknown as QuestionDocType[];
   const questionMap = new Map(questionDocs.map((q) => [q._id.toString(), q]));
 
+  // Deduplicate submitted answers by questionId and ignore any question not belonging to this contest
+  const seenQuestionIds = new Set<string>();
+  const validSubmittedAnswers: Array<{ questionId: string; selectedOption: number }> = [];
+  for (const ans of submittedAnswers) {
+    if (!ans.questionId || !questionMap.has(ans.questionId)) {
+      continue;
+    }
+    if (seenQuestionIds.has(ans.questionId)) {
+      continue;
+    }
+    seenQuestionIds.add(ans.questionId);
+    validSubmittedAnswers.push(ans);
+  }
+
   let totalPointsAwarded = 0;
   let correctCount = 0;
   let totalPossiblePoints = 0;
@@ -294,7 +329,7 @@ export async function handleSubmitAttempt(
 
   const gradedAnswers: IContestGradedAnswer[] = [];
 
-  submittedAnswers.forEach((ans) => {
+  validSubmittedAnswers.forEach((ans) => {
     const qDoc = questionMap.get(ans.questionId);
     if (qDoc) {
       const isAttempted = typeof ans.selectedOption === 'number' && ans.selectedOption !== -1;
@@ -328,17 +363,26 @@ export async function handleSubmitAttempt(
     }
   });
 
+  const maxScoreCap =
+    typeof contest.totalPoints === 'number' && contest.totalPoints > 0
+      ? contest.totalPoints
+      : totalPossiblePoints;
+  const finalScore = Math.max(
+    0,
+    Math.min(maxScoreCap, Math.round(totalPointsAwarded * 100) / 100)
+  );
+
   const percentage =
     totalPossiblePoints > 0
-      ? Math.max(0, Math.min(100, Math.round((totalPointsAwarded / totalPossiblePoints) * 1000) / 10))
+      ? Math.max(0, Math.min(100, Math.round((finalScore / totalPossiblePoints) * 1000) / 10))
       : 0;
 
   attempt.answers = gradedAnswers;
-  attempt.score = Math.max(0, Math.round(totalPointsAwarded * 100) / 100);
+  attempt.score = finalScore;
   attempt.percentage = percentage;
   attempt.correctCount = correctCount;
-  attempt.totalQuestions = questionDocs.length > 0 ? questionDocs.length : submittedAnswers.length || 1;
-  attempt.timeTaken = timeTaken !== undefined && timeTaken !== null ? timeTaken : finalTimeTaken;
+  attempt.totalQuestions = questionDocs.length > 0 ? questionDocs.length : validSubmittedAnswers.length || 1;
+  attempt.timeTaken = finalTimeTaken;
   attempt.status = 'completed';
   attempt.submittedAt = now;
   attempt.violationCount = violationCount;
@@ -354,7 +398,7 @@ export async function handleSubmitAttempt(
 
   // Mistakes Notebook: Log incorrectly answered questions
   const mistakeItems: RecordMistakeItem[] = [];
-  submittedAnswers.forEach((ans) => {
+  validSubmittedAnswers.forEach((ans) => {
     const qDoc = questionMap.get(ans.questionId);
     if (qDoc && ans.selectedOption !== -1 && ans.selectedOption !== qDoc.correctOption) {
       mistakeItems.push({
@@ -385,7 +429,7 @@ export async function handleSubmitAttempt(
     message: 'Contest attempt submitted successfully',
     result: {
       attemptId: attempt._id.toString(),
-      score: totalPointsAwarded,
+      score: finalScore,
       percentage,
       correctCount,
       totalQuestions: attempt.totalQuestions,

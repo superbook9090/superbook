@@ -171,13 +171,14 @@ export async function listPublicCourses(params: {
   }
 
   if (params.search?.trim()) {
+    const escapedSearch = params.search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     query.$and = [
       ...(Array.isArray(query.$and) ? query.$and : []),
       {
         $or: [
-          { title: { $regex: params.search.trim(), $options: 'i' } },
-          { description: { $regex: params.search.trim(), $options: 'i' } },
-          { category: { $regex: params.search.trim(), $options: 'i' } },
+          { title: { $regex: escapedSearch, $options: 'i' } },
+          { description: { $regex: escapedSearch, $options: 'i' } },
+          { category: { $regex: escapedSearch, $options: 'i' } },
         ],
       },
     ];

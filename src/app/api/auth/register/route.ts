@@ -2,10 +2,13 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import User from '@/models/User';
-import Organization from '@/models/Organization';
 import { isRegistrationAllowed, isTeacherRegistrationAllowed } from '@/lib/settingsHelpers';
 import { findUserByEmail } from '@/lib/user/findByEmail';
 import { logApiError, type LogContext } from '@/lib/logger';
+import {
+  resolveOrganizationInvite,
+  sanitizeRegistrationRole,
+} from '@/lib/organizations/resolveInvite';
 
 export async function POST(request: Request) {
   const logContext: LogContext = {
@@ -25,10 +28,57 @@ export async function POST(request: Request) {
       );
     }
 
-    const { name, email: rawEmail, password, role = 'student', inviteCode } = await request.json();
+    const body = await request.json();
+    const { name: rawName, email: rawEmail, password, role: rawRole, inviteCode } = body ?? {};
+
+    const name = typeof rawName === 'string' ? rawName.trim() : '';
     const email = typeof rawEmail === 'string' ? rawEmail.trim().toLowerCase() : '';
 
-    if (role === 'teacher') {
+    if (!name || name.length > 100) {
+      return NextResponse.json(
+        { message: 'Please provide a valid name (1-100 characters)' },
+        { status: 400 }
+      );
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email)) {
+      return NextResponse.json(
+        { message: 'Please provide a valid email address' },
+        { status: 400 }
+      );
+    }
+
+    if (typeof password !== 'string' || password.length < 6) {
+      return NextResponse.json(
+        { message: 'Password must be at least 6 characters long' },
+        { status: 400 }
+      );
+    }
+
+    // Strictly allowlist registrable roles — never allow admin or superadmin self-registration
+    const role = sanitizeRegistrationRole(rawRole);
+    if (!role) {
+      return NextResponse.json(
+        { message: 'Invalid role. Only student or teacher accounts can be registered.' },
+        { status: 400 }
+      );
+    }
+
+    // Handle organization joining via invite code
+    let organizationId = null;
+    const trimmedInviteCode = typeof inviteCode === 'string' ? inviteCode.trim() : '';
+    if (trimmedInviteCode) {
+      const resolved = await resolveOrganizationInvite(trimmedInviteCode, role);
+      if (!resolved.ok) {
+        return NextResponse.json(
+          { message: resolved.message },
+          { status: resolved.status }
+        );
+      }
+      organizationId = resolved.data.organization._id;
+    } else if (role === 'teacher') {
+      // Independent teacher registration respects the global teacher registration toggle
       const teacherRegistrationAllowed = await isTeacherRegistrationAllowed();
       if (!teacherRegistrationAllowed) {
         return NextResponse.json(
@@ -47,25 +97,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Handle organization joining via invite code
-    let organizationId = null;
-    if (inviteCode && typeof inviteCode === 'string') {
-      const trimmedCode = inviteCode.trim();
-      const escaped = trimmedCode.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const regex = new RegExp(`^${escaped}$`, 'i');
-      const organization = await Organization.findOne({
-        $or: [{ inviteCode: regex }, { code: regex }],
-        isActive: true,
-      });
-      if (!organization) {
-        return NextResponse.json(
-          { message: 'Invalid invite code' },
-          { status: 400 }
-        );
-      }
-      organizationId = organization._id;
-    }
-
     // Create user (password will be hashed by User model's pre-save hook)
     const user = new User({
       name,
@@ -78,7 +109,7 @@ export async function POST(request: Request) {
     await user.save();
 
     return NextResponse.json(
-      { 
+      {
         message: 'User created successfully',
         user: {
           id: user._id.toString(),
@@ -86,7 +117,7 @@ export async function POST(request: Request) {
           name: user.name,
           role: user.role,
           organizationId: user.organizationId?.toString() || null,
-        }
+        },
       },
       { status: 201 }
     );

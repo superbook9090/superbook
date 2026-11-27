@@ -1,8 +1,9 @@
 'use client';
 
 import { ROUTES } from '@/constants/routes';
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { BookOpen, LayoutGrid, Table as TableIcon, Trash2 } from 'lucide-react';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { useAlert } from '@/components/ui/AlertContainer';
@@ -13,6 +14,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import type { Course } from '@/types';
 import { listCoursesAdmin } from '@/lib/api/courses';
 import { ApiClientError } from '@/lib/api/http';
+import { queryKeys } from '@/lib/react-query/query-keys';
 import DashboardListFilters, { FilterPanel } from '@/components/filters/DashboardListFilters';
 import { buildPublishStatusOptions, type PublishStatusFilter } from '@/components/filters/publishStatusOptions';
 import { isSuperAdmin } from '@/lib/roles';
@@ -26,11 +28,10 @@ import AdminCoursesTable from './_components/AdminCoursesTable';
 export default function AdminCoursesPage() {
   const { session, status } = useSessionStore();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const isSuperAdminUser = isSuperAdmin(session?.user?.role);
   const { t } = useTranslation();
 
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<PublishStatusFilter>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
@@ -39,29 +40,35 @@ export default function AdminCoursesPage() {
   const ITEMS_PER_PAGE = 12;
   const { addAlert } = useAlert();
 
-  const fetchCourses = useCallback(async () => {
-    try {
+  const orgScope = `${session?.user?.role || 'guest'}:${session?.user?.organizationId || 'global'}`;
+
+  const coursesQuery = useQuery({
+    queryKey: queryKeys.adminCourses.list(orgScope),
+    queryFn: async () => {
       const data = await listCoursesAdmin();
-      setCourses((data.courses || []) as Course[]);
-    } catch (err) {
-      const text =
-        err instanceof ApiClientError ? err.message : t('admin.failedFetchCourses');
+      return (data.courses || []) as Course[];
+    },
+    enabled: status === 'authenticated' && Boolean(session?.user?.id),
+    staleTime: 2 * 60 * 1000,
+  });
+
+  useEffect(() => {
+    if (coursesQuery.error) {
+      const err = coursesQuery.error;
+      const text = err instanceof ApiClientError ? err.message : t('admin.failedFetchCourses');
       addAlert({ type: 'error', message: text });
-    } finally {
-      setIsLoading(false);
     }
-  }, [t, addAlert]);
+  }, [coursesQuery.error, t, addAlert]);
 
   useEffect(() => {
     if (status === 'loading') return;
     if (!session) {
       router.push(ROUTES.login);
-      return;
     }
-    if (status === 'authenticated') {
-      fetchCourses();
-    }
-  }, [status, session, router, fetchCourses]);
+  }, [status, session, router]);
+
+  const courses = useMemo(() => coursesQuery.data ?? [], [coursesQuery.data]);
+  const isLoading = coursesQuery.isPending;
 
   const filteredCourses = useMemo(() => {
     return courses.filter((course) => {
@@ -228,7 +235,7 @@ export default function AdminCoursesPage() {
           onClose={() => setShowCleanupModal(false)}
           onCompleted={(message) => {
             addAlert({ type: 'success', message });
-            void fetchCourses();
+            void queryClient.invalidateQueries({ queryKey: queryKeys.adminCourses.all });
           }}
         />
       )}

@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useUrlTab } from '@/hooks/useUrlTab';
 import { useAlert } from '@/components/ui/AlertContainer';
 import { fetchAnalytics } from '@/lib/api/analytics';
 import { getApiErrorMessage } from '@/lib/api/http';
+import { queryKeys } from '@/lib/react-query/query-keys';
 import { useSessionStore } from '@/store/useSessionStore';
 import type { AdminStats, AnalyticsTabKey } from '../_components/types';
 
@@ -14,65 +16,52 @@ export function useAdminAnalytics() {
   const { t } = useTranslation();
   const { addAlert } = useAlert();
 
-  const [stats, setStats] = useState<AdminStats | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useUrlTab<AnalyticsTabKey>(
     ['overview', 'users', 'courses', 'quizzes', 'activity'],
     'overview'
   );
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  
+
   // Date range state
   const [dateRange, setDateRange] = useState<{ startDate: string; endDate: string }>({
     startDate: '',
     endDate: '',
   });
 
-  const fetchStats = useCallback(
-    async (isManualRefresh = false) => {
-      if (isManualRefresh) {
-        setIsRefreshing(true);
-      }
-      try {
-        const data = (await fetchAnalytics('admin', dateRange)) as { stats?: AdminStats };
-        if (data.stats) {
-          setStats(data.stats);
-          setLastUpdated(new Date());
-        }
-      } catch (err) {
-        addAlert({
-          type: 'error',
-          message: getApiErrorMessage(err, t('errors.errorLoadingAnalytics')),
-        });
-      } finally {
-        setIsLoading(false);
-        setIsRefreshing(false);
-      }
+  const orgScope = `${session?.user?.role || 'guest'}:${session?.user?.organizationId || 'global'}`;
+
+  const query = useQuery({
+    queryKey: queryKeys.analytics.admin(orgScope, dateRange.startDate, dateRange.endDate),
+    queryFn: async () => {
+      const data = (await fetchAnalytics('admin', dateRange)) as { stats?: AdminStats };
+      return data.stats ?? null;
     },
-    [t, addAlert, dateRange]
-  );
+    enabled: status === 'authenticated' && Boolean(session?.user?.id),
+    staleTime: 2 * 60 * 1000, // 2 minutes frontend cache shared across Admin Dashboard & Analytics
+    placeholderData: keepPreviousData,
+  });
 
   useEffect(() => {
-    if (status === 'loading') return;
-    if (session) {
-      fetchStats();
+    if (query.error) {
+      addAlert({
+        type: 'error',
+        message: getApiErrorMessage(query.error, t('errors.errorLoadingAnalytics')),
+      });
     }
-  }, [session, status, fetchStats]);
+  }, [query.error, addAlert, t]);
 
-  const handleRefresh = () => {
-    fetchStats(true);
-  };
+  const handleRefresh = useCallback(() => {
+    void query.refetch();
+  }, [query]);
 
   return {
     session,
     status,
-    stats,
-    isLoading,
-    isRefreshing,
+    stats: query.data ?? null,
+    isLoading: query.isPending,
+    isRefreshing: query.isFetching && !query.isPending,
     activeTab,
     setActiveTab,
-    lastUpdated,
+    lastUpdated: query.dataUpdatedAt ? new Date(query.dataUpdatedAt) : null,
     handleRefresh,
     dateRange,
     setDateRange,

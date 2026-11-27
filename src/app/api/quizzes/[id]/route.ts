@@ -5,16 +5,26 @@ import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import Quiz from '@/models/Quiz';
 import { Course } from '@/models';
+import Contest from '@/models/Contest';
+import Enrollment from '@/models/Enrollment';
 import { updateQuizSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
 import mongoose from 'mongoose';
-import { validateContentAccess } from '@/lib/accessControl';
+import { validateContentAccess, canManageOrgContent, type AccessUser } from '@/lib/accessControl';
 import { listQuestionsForQuiz, setQuizQuestions } from '@/domain/learning/quizContent';
 import { deleteQuizzesAndQuestions } from '@/lib/cascade/deleteRelated';
 import { resolveQuizPlacement } from '@/lib/quiz/quizPlacement';
 import { invalidatePattern } from '@/lib/redis';
 import { requireFeature } from '@/lib/settingsHelpers';
-import { isStaffRole, isAdmin } from '@/lib/roles';
+import { isStaffRole } from '@/lib/roles';
+
+function toAccessUser(user: { id: string; organizationId?: string | null; role: string }): AccessUser {
+  return {
+    _id: new mongoose.Types.ObjectId(user.id),
+    organizationId: user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null,
+    role: user.role as AccessUser['role'],
+  };
+}
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const logContext: LogContext = { method: 'GET', path: '/api/quizzes/[id]' };
@@ -24,11 +34,15 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     if (featureCheck) return featureCheck;
 
     const { id } = await params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json({ message: 'Invalid quiz ID' }, { status: 400 });
+    }
+
     const session = await getServerSession(authOptions);
-    if (!session) {
+    if (!session?.user?.id) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
-    if (session.user) logContext.userId = session.user.id;
+    logContext.userId = session.user.id;
 
     await dbConnect();
 
@@ -39,23 +53,68 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       .lean()) as {
       _id: mongoose.Types.ObjectId;
       isPublished: boolean;
+      instructor?: mongoose.Types.ObjectId;
+      organizationId?: mongoose.Types.ObjectId | null;
+      course?: { _id: mongoose.Types.ObjectId } | mongoose.Types.ObjectId | null;
       [key: string]: unknown;
     } | null;
     if (!quiz) {
       return NextResponse.json({ message: 'Quiz not found' }, { status: 404 });
     }
 
-    if (!quiz.isPublished && session.user?.role === 'student') {
+    const authUser = toAccessUser(
+      session.user as { id: string; organizationId?: string | null; role: string }
+    );
+
+    try {
+      validateContentAccess(quiz.organizationId, authUser, 'quiz');
+    } catch {
+      return NextResponse.json(
+        { message: 'You do not have permission to access this quiz' },
+        { status: 403 }
+      );
+    }
+
+    const canManage = canManageOrgContent(quiz.organizationId, quiz.instructor, authUser);
+
+    if (!quiz.isPublished && !canManage) {
       return NextResponse.json({ message: 'Quiz not available' }, { status: 403 });
     }
 
-    if (session.user?.role === 'teacher') {
-      const course = await Course.findOne({
-        _id: quiz.course,
-        instructor: session.user.id,
-      }).lean();
-      if (!course) {
-        return NextResponse.json({ message: 'Not authorized to view this quiz' }, { status: 403 });
+    if (!canManage) {
+      const blockedContest = await Contest.findOne({
+        'quizzes.quiz': quiz._id,
+        $or: [{ startTime: { $gt: new Date() } }, { status: 'draft' }],
+      })
+        .select('_id')
+        .lean();
+      if (blockedContest) {
+        return NextResponse.json(
+          { message: 'Contest quiz is not available before the contest starts' },
+          { status: 403 }
+        );
+      }
+
+      if (authUser.role === 'student' && quiz.course) {
+        const courseId =
+          typeof quiz.course === 'object' && '_id' in quiz.course ? quiz.course._id : quiz.course;
+        if (courseId && mongoose.Types.ObjectId.isValid(String(courseId))) {
+          const courseDoc = await Course.findById(courseId)
+            .select('courseCode')
+            .lean<{ courseCode?: string | null }>();
+          if (courseDoc?.courseCode) {
+            const enrollment = await Enrollment.findOne({
+              student: session.user.id,
+              course: courseId,
+            }).lean();
+            if (!enrollment) {
+              return NextResponse.json(
+                { message: 'You must be enrolled in this private course to access this quiz' },
+                { status: 403 }
+              );
+            }
+          }
+        }
       }
     }
 
@@ -65,7 +124,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const payload: Record<string, unknown> = { quiz };
     if (include.includes('questions')) {
       const rows = await listQuestionsForQuiz(quiz._id);
-      const staff = ['teacher', 'admin', 'superadmin'].includes(session.user?.role || '');
       payload.questions = rows.map((q) => ({
         _id: q._id,
         order: q.order,
@@ -73,7 +131,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         options: q.options,
         points: (q as unknown as { points?: number }).points ?? 1,
         negativePoints: (q as unknown as { negativePoints?: number }).negativePoints ?? 0,
-        ...(include.includes('answers') && staff
+        ...(include.includes('answers') && canManage
           ? { correctAnswer: (q as unknown as { correctOption: number }).correctOption }
           : {}),
       }));
@@ -94,14 +152,18 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (featureCheck) return featureCheck;
 
     const { id } = await params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json({ message: 'Invalid quiz ID' }, { status: 400 });
+    }
+
     const session = await getServerSession(authOptions);
-    if (!session) {
+    if (!session?.user?.id) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
     if (!isStaffRole(session.user?.role)) {
       return NextResponse.json({ message: 'Only teachers and admins can update quizzes' }, { status: 403 });
     }
-    if (session.user) logContext.userId = session.user.id;
+    logContext.userId = session.user.id;
 
     await dbConnect();
 
@@ -128,22 +190,11 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       return NextResponse.json({ message: 'Quiz not found' }, { status: 404 });
     }
 
-    const user = session.user as { id: string; organizationId?: string | null; role: string };
-    validateContentAccess(
-      quiz.organizationId,
-      {
-        _id: new mongoose.Types.ObjectId(user.id),
-        organizationId: user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null,
-        role: user.role as 'student' | 'teacher' | 'admin',
-      },
-      'quiz'
+    const authUser = toAccessUser(
+      session.user as { id: string; organizationId?: string | null; role: string }
     );
 
-    const course = await Course.findOne({
-      _id: quiz.course,
-      instructor: session.user.id,
-    });
-    if (!course && !isAdmin(session.user?.role)) {
+    if (!canManageOrgContent(quiz.organizationId, quiz.instructor, authUser)) {
       return NextResponse.json({ message: 'Not authorized to update this quiz' }, { status: 403 });
     }
 
@@ -207,8 +258,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     await quiz.save();
 
-    const orgId = user.organizationId?.toString() || 'public';
+    const orgId = quiz.organizationId?.toString() || 'public';
     await invalidatePattern(`quizzes:${orgId}:*`);
+    await invalidatePattern('quizzes:superadmin:*');
 
     return NextResponse.json({ message: 'Quiz updated successfully', quiz }, { status: 200 });
   } catch (error) {
@@ -225,14 +277,18 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
     if (featureCheck) return featureCheck;
 
     const { id } = await params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json({ message: 'Invalid quiz ID' }, { status: 400 });
+    }
+
     const session = await getServerSession(authOptions);
-    if (!session) {
+    if (!session?.user?.id) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
     if (!isStaffRole(session.user?.role)) {
       return NextResponse.json({ message: 'Only teachers and admins can delete quizzes' }, { status: 403 });
     }
-    if (session.user) logContext.userId = session.user.id;
+    logContext.userId = session.user.id;
 
     await dbConnect();
 
@@ -241,29 +297,19 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
       return NextResponse.json({ message: 'Quiz not found' }, { status: 404 });
     }
 
-    const user = session.user as { id: string; organizationId?: string | null; role: string };
-    validateContentAccess(
-      quiz.organizationId,
-      {
-        _id: new mongoose.Types.ObjectId(user.id),
-        organizationId: user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null,
-        role: user.role as 'student' | 'teacher' | 'admin',
-      },
-      'quiz'
+    const authUser = toAccessUser(
+      session.user as { id: string; organizationId?: string | null; role: string }
     );
 
-    const course = await Course.findOne({
-      _id: quiz.course,
-      instructor: session.user.id,
-    });
-    if (!course && !isAdmin(session.user?.role)) {
+    if (!canManageOrgContent(quiz.organizationId, quiz.instructor, authUser)) {
       return NextResponse.json({ message: 'Not authorized to delete this quiz' }, { status: 403 });
     }
 
     await deleteQuizzesAndQuestions([quiz._id]);
 
-    const orgId = user.organizationId?.toString() || 'public';
+    const orgId = quiz.organizationId?.toString() || 'public';
     await invalidatePattern(`quizzes:${orgId}:*`);
+    await invalidatePattern('quizzes:superadmin:*');
 
     return NextResponse.json({ message: 'Quiz deleted successfully' }, { status: 200 });
   } catch (error) {

@@ -7,6 +7,52 @@ import { Course } from '@/models';
 import { isStaffRole, isSuperAdmin } from '@/lib/roles';
 import { logApiError, type LogContext } from '@/lib/logger';
 
+const STATIC_ALLOWED_THUMBNAIL_HOSTS = new Set([
+  'res.cloudinary.com',
+  'i.ytimg.com',
+  'img.youtube.com',
+  'lh3.googleusercontent.com',
+]);
+
+function isIpLiteralOrPrivateHost(hostname: string): boolean {
+  const lower = hostname.toLowerCase();
+  if (
+    !lower ||
+    lower === 'localhost' ||
+    lower.endsWith('.localhost') ||
+    lower.endsWith('.local') ||
+    lower.endsWith('.internal') ||
+    !lower.includes('.')
+  ) {
+    return true;
+  }
+  // Reject IPv6 literals
+  if (lower.startsWith('[') || lower.includes(':')) {
+    return true;
+  }
+  // Reject IPv4 literals (dotted quad, decimal, octal, hex)
+  if (/^(\d{1,3}\.){3}\d{1,3}$/.test(lower) || /^(0x[\da-f]+|\d+)$/i.test(lower)) {
+    return true;
+  }
+  return false;
+}
+
+function getAllowedThumbnailHosts(): Set<string> {
+  const allowed = new Set(STATIC_ALLOWED_THUMBNAIL_HOSTS);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (siteUrl) {
+    try {
+      const parsedSite = new URL(siteUrl);
+      if (parsedSite.protocol === 'https:' && !isIpLiteralOrPrivateHost(parsedSite.hostname)) {
+        allowed.add(parsedSite.hostname.toLowerCase());
+      }
+    } catch {
+      // Ignore malformed NEXT_PUBLIC_SITE_URL
+    }
+  }
+  return allowed;
+}
+
 function sanitizeSlug(title: string): string {
   const cleaned = title
     .toLowerCase()
@@ -96,11 +142,26 @@ export async function GET(
       return NextResponse.json({ message: 'Invalid image URL' }, { status: 400 });
     }
 
-    if (parsedUrl.protocol !== 'https:' && parsedUrl.protocol !== 'http:') {
-      return NextResponse.json({ message: 'Unsupported image protocol' }, { status: 400 });
+    // SSRF protection: HTTPS only, no credentials/custom ports, no IP/private hosts, allowlisted CDNs only
+    if (parsedUrl.protocol !== 'https:') {
+      return NextResponse.json({ message: 'Only HTTPS image URLs are allowed' }, { status: 400 });
     }
 
-    const upstream = await fetch(parsedUrl.toString());
+    if (parsedUrl.username || parsedUrl.password || (parsedUrl.port && parsedUrl.port !== '443')) {
+      return NextResponse.json({ message: 'Invalid image URL' }, { status: 400 });
+    }
+
+    const hostname = parsedUrl.hostname.toLowerCase();
+    if (isIpLiteralOrPrivateHost(hostname) || !getAllowedThumbnailHosts().has(hostname)) {
+      return NextResponse.json({ message: 'Image host is not allowed' }, { status: 400 });
+    }
+
+    let upstream: Response;
+    try {
+      upstream = await fetch(parsedUrl.toString(), { redirect: 'error' });
+    } catch {
+      return NextResponse.json({ message: 'Failed to fetch image' }, { status: 502 });
+    }
     if (!upstream.ok) {
       return NextResponse.json({ message: 'Failed to fetch image' }, { status: 502 });
     }

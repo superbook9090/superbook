@@ -26,7 +26,8 @@ import {
 } from '@/lib/quizzes/quizAttemptEvaluation';
 import { recordUserActivity } from '@/lib/gamification/streakService';
 import { recordMistakes } from '@/lib/learning/mistakesService';
-import type { Types } from 'mongoose';
+import { validateContentAccess, type AccessUser } from '@/lib/accessControl';
+import mongoose, { type Types } from 'mongoose';
 
 // GET /api/quiz-attempts
 export async function GET(request: NextRequest) {
@@ -51,6 +52,16 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = parseInt(searchParams.get('limit') || '10', 10);
     const skip = (page - 1) * limit;
+
+    if (quiz && !mongoose.Types.ObjectId.isValid(quiz)) {
+      return NextResponse.json({ message: 'Invalid quiz ID' }, { status: 400 });
+    }
+    if (course && !mongoose.Types.ObjectId.isValid(course)) {
+      return NextResponse.json({ message: 'Invalid course ID' }, { status: 400 });
+    }
+    if (attemptId && !mongoose.Types.ObjectId.isValid(attemptId)) {
+      return NextResponse.json({ message: 'Invalid attempt ID' }, { status: 400 });
+    }
 
     const cacheKey = `quiz-attempts:${session.user.id}:${quiz || 'all'}:${course || 'all'}:${attemptId || 'all'}:page${page}:limit${limit}`;
 
@@ -162,7 +173,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'Invalid input', errors: validationResult.error.issues }, { status: 400 });
     }
 
-    const { quizId, action, answers, timeTaken } = validationResult.data;
+    const { quizId, action, answers } = validationResult.data;
+
+    if (!mongoose.Types.ObjectId.isValid(quizId)) {
+      return NextResponse.json({ message: 'Invalid quiz ID' }, { status: 400 });
+    }
 
     if (session.user?.role !== 'student') {
       const challengeAttempt = await QuizAttempt.findOne({
@@ -181,6 +196,8 @@ export async function POST(request: NextRequest) {
       title?: string;
       isPublished: boolean;
       course: { _id: Types.ObjectId };
+      organizationId?: Types.ObjectId | null;
+      timeLimit?: number;
       version: number;
       enableNegativeMarking?: boolean;
       negativeMarks?: number;
@@ -190,6 +207,23 @@ export async function POST(request: NextRequest) {
     }
     if (!quiz.isPublished) {
       return NextResponse.json({ message: 'This quiz is not available' }, { status: 403 });
+    }
+
+    const authUser: AccessUser = {
+      _id: new mongoose.Types.ObjectId(session.user.id),
+      organizationId: session.user.organizationId
+        ? new mongoose.Types.ObjectId(session.user.organizationId)
+        : null,
+      role: session.user.role as AccessUser['role'],
+    };
+
+    try {
+      validateContentAccess(quiz.organizationId, authUser, 'quiz');
+    } catch {
+      return NextResponse.json(
+        { message: 'You do not have permission to access this quiz' },
+        { status: 403 }
+      );
     }
 
     const courseId = (quiz.course as { _id: Types.ObjectId })._id;
@@ -240,11 +274,30 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ message: 'Invalid number of answers' }, { status: 400 });
       }
 
+      const uniqueQuestionIds = new Set(answers.map((a) => a.questionId));
+      if (uniqueQuestionIds.size !== answers.length) {
+        return NextResponse.json({ message: 'Duplicate question IDs in answers' }, { status: 400 });
+      }
+
       const byId = new Map(questionList.map((q) => [q._id.toString(), q]));
       const valid = answers.every((a) => byId.has(a.questionId));
       if (!valid) {
         return NextResponse.json({ message: 'Unknown question id in answers' }, { status: 400 });
       }
+
+      const nowMs = Date.now();
+      const elapsedSeconds = Math.max(
+        1,
+        Math.floor((nowMs - new Date(attempt.startedAt).getTime()) / 1000)
+      );
+      const timeLimitSeconds =
+        typeof quiz.timeLimit === 'number' && quiz.timeLimit > 0 ? quiz.timeLimit * 60 : 0;
+      const graceSeconds = 60;
+      if (timeLimitSeconds > 0 && elapsedSeconds > timeLimitSeconds + graceSeconds) {
+        return NextResponse.json({ message: 'Quiz time limit has expired' }, { status: 400 });
+      }
+      const computedTimeTaken =
+        timeLimitSeconds > 0 ? Math.min(elapsedSeconds, timeLimitSeconds) : elapsedSeconds;
 
       const isForceSubmit = (body as { forceSubmit?: boolean }).forceSubmit === true;
       const { gradedAnswers, correctCount, score } = gradeQuizAnswers(
@@ -257,7 +310,7 @@ export async function POST(request: NextRequest) {
       attempt.answers = gradedAnswers;
       attempt.correctCount = correctCount;
       attempt.score = score;
-      attempt.timeTaken = timeTaken || Math.floor((Date.now() - attempt.startedAt.getTime()) / 1000);
+      attempt.timeTaken = computedTimeTaken;
       attempt.status = isForceSubmit ? 'force_submitted' : 'completed';
       if (isForceSubmit) attempt.violationCount = (attempt.violationCount || 0) + 1;
       attempt.submittedAt = new Date();

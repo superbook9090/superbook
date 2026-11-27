@@ -7,7 +7,8 @@ import type {
 export interface IOrganization extends Document {
   name: string;
   code: string; // Unique code for joining (deprecated, use inviteCode)
-  inviteCode: string; // Unique invite code for users to join
+  inviteCode: string; // Unique invite code for students to join
+  teacherInviteCode?: string; // Separate invite code required for teachers to join
   description?: string;
   logo?: string; // Logo image URL or base64 data
   primaryColor?: string; // Hex color code for branding (e.g. #4F46E5)
@@ -27,6 +28,7 @@ const organizationSchema = new Schema<IOrganization>(
     name: { type: String, required: true },
     code: { type: String, required: true, unique: true },
     inviteCode: { type: String, required: true, unique: true },
+    teacherInviteCode: { type: String, unique: true, sparse: true },
     description: String,
     logo: { type: String, default: null },
     primaryColor: { type: String, default: null },

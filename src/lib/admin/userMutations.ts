@@ -1,3 +1,4 @@
+import { validateObjectId } from '@/lib/sanitize';
 import { AdminAuthResult } from './adminAuth';
 import {
   ORG_LIMIT_KEYS,
@@ -11,6 +12,23 @@ interface UserTargetDoc {
   organizationId?: unknown;
   limits?: Partial<Record<(typeof ORG_LIMIT_KEYS)[number], number>>;
 }
+
+const ADMIN_ALLOWED_UPDATE_KEYS = new Set<string>([
+  'role',
+  'isSuspended',
+  'suspendedReason',
+  'canUploadVideos',
+  'canCreatePublicCourses',
+  'canCreateContests',
+  'canGenerateAiQuizzes',
+  'limits',
+]);
+
+const SUPERADMIN_ONLY_UPDATE_KEYS = new Set<string>(['organizationId', 'name']);
+
+const VALID_USER_ROLES = new Set(['student', 'teacher', 'admin', 'superadmin']);
+
+const ORG_LIMIT_KEY_SET = new Set<string>(ORG_LIMIT_KEYS);
 
 const PERMISSION_LABELS: Record<(typeof ORG_PERMISSION_KEYS)[number], string> = {
   canUploadVideos: 'video upload permission',
@@ -34,25 +52,46 @@ export function validateUserUpdate(
   sessionUserId: string,
   authResult: AdminAuthResult,
   orgPolicy?: OrganizationPolicy | null
-): { error?: string; status?: number } {
+): { error?: string; status?: number; sanitizedUpdates?: Record<string, unknown> } {
   const userId = String(targetUser._id);
 
-  // Cross-org check
+  if (!updates || typeof updates !== 'object' || Array.isArray(updates)) {
+    return { error: 'Updates must be an object', status: 400 };
+  }
+
+  // Require valid organizationId for non-superadmin callers (never fall back to null)
   if (!authResult.isSuperAdmin) {
+    if (!authResult.organizationId || !validateObjectId(String(authResult.organizationId))) {
+      return { error: 'Admin must belong to a valid organization', status: 403 };
+    }
     const targetOrgId = targetUser.organizationId?.toString();
-    if (!authResult.organizationId || targetOrgId !== authResult.organizationId.toString()) {
+    if (!targetOrgId || targetOrgId !== authResult.organizationId.toString()) {
       return { error: 'You can only update users from your organization', status: 403 };
     }
   }
 
-  // Prevent changing own role
-  if (userId === sessionUserId && updates.role && updates.role !== 'admin') {
-    return { error: 'Cannot change your own role', status: 400 };
+  // Strict allowlist & key safety check (prevent mass assignment & Mongo operator/dot injection)
+  const updateKeys = Object.keys(updates);
+  if (updateKeys.length === 0) {
+    return { error: 'No valid update fields provided', status: 400 };
   }
 
-  // Prevent non-superadmins from promoting anyone to superadmin
-  if (!authResult.isSuperAdmin && updates.role === 'superadmin') {
-    return { error: 'Only super admins can assign super admin role', status: 403 };
+  const allowedKeys = authResult.isSuperAdmin
+    ? new Set<string>([...ADMIN_ALLOWED_UPDATE_KEYS, ...SUPERADMIN_ONLY_UPDATE_KEYS])
+    : ADMIN_ALLOWED_UPDATE_KEYS;
+
+  for (const key of updateKeys) {
+    if (key.includes('.') || key.includes('$')) {
+      return { error: `Invalid update field: ${key}`, status: 400 };
+    }
+    if (!allowedKeys.has(key)) {
+      return { error: `Field "${key}" is not allowed`, status: 400 };
+    }
+  }
+
+  // Prevent changing own role
+  if (userId === sessionUserId && updates.role !== undefined && updates.role !== targetUser.role) {
+    return { error: 'Cannot change your own role', status: 400 };
   }
 
   // Prevent suspending self
@@ -60,9 +99,55 @@ export function validateUserUpdate(
     return { error: 'Cannot suspend your own account', status: 400 };
   }
 
-  // Prevent suspending other admins (only superadmin can do this)
-  if (targetUser.role === 'admin' && updates.isSuspended && authResult.role !== 'superadmin') {
-    return { error: 'Only super admins can suspend admin accounts', status: 403 };
+  // Block org admin from modifying ANY admin or superadmin account
+  if (!authResult.isSuperAdmin && (targetUser.role === 'admin' || targetUser.role === 'superadmin')) {
+    return { error: 'Only super admins can modify admin or super admin accounts', status: 403 };
+  }
+
+  const sanitizedUpdates: Record<string, unknown> = {};
+
+  if (updates.role !== undefined) {
+    if (typeof updates.role !== 'string' || !VALID_USER_ROLES.has(updates.role)) {
+      return { error: 'Invalid role value', status: 400 };
+    }
+    if (!authResult.isSuperAdmin && updates.role === 'superadmin') {
+      return { error: 'Only super admins can assign super admin role', status: 403 };
+    }
+    sanitizedUpdates.role = updates.role;
+  }
+
+  if (updates.isSuspended !== undefined) {
+    if (typeof updates.isSuspended !== 'boolean') {
+      return { error: 'isSuspended must be a boolean', status: 400 };
+    }
+    sanitizedUpdates.isSuspended = updates.isSuspended;
+  }
+
+  if (updates.suspendedReason !== undefined) {
+    if (updates.suspendedReason !== null && typeof updates.suspendedReason !== 'string') {
+      return { error: 'suspendedReason must be a string or null', status: 400 };
+    }
+    if (typeof updates.suspendedReason === 'string' && updates.suspendedReason.length > 500) {
+      return { error: 'suspendedReason cannot exceed 500 characters', status: 400 };
+    }
+    sanitizedUpdates.suspendedReason = updates.suspendedReason;
+  }
+
+  if (authResult.isSuperAdmin && updates.name !== undefined) {
+    if (typeof updates.name !== 'string' || !updates.name.trim() || updates.name.trim().length > 100) {
+      return { error: 'name must be between 1 and 100 characters', status: 400 };
+    }
+    sanitizedUpdates.name = updates.name.trim();
+  }
+
+  if (authResult.isSuperAdmin && updates.organizationId !== undefined) {
+    if (updates.organizationId === null || updates.organizationId === '') {
+      sanitizedUpdates.organizationId = null;
+    } else if (typeof updates.organizationId === 'string' && validateObjectId(updates.organizationId)) {
+      sanitizedUpdates.organizationId = updates.organizationId;
+    } else {
+      return { error: 'Invalid organizationId', status: 400 };
+    }
   }
 
   // Validate teacher feature permission toggles against superadmin-granted organization permissions
@@ -77,6 +162,7 @@ export function validateUserUpdate(
           status: 403,
         };
       }
+      sanitizedUpdates[key] = updates[key];
     }
   }
 
@@ -86,9 +172,22 @@ export function validateUserUpdate(
       return { error: 'limits must be an object', status: 400 };
     }
 
+    for (const limitKey of Object.keys(updates.limits)) {
+      if (limitKey.includes('.') || limitKey.includes('$') || !ORG_LIMIT_KEY_SET.has(limitKey)) {
+        return { error: `Invalid limit field: ${limitKey}`, status: 400 };
+      }
+    }
+
+    const sanitizedLimits: Partial<Record<(typeof ORG_LIMIT_KEYS)[number], number | null>> = {};
+
     for (const key of ORG_LIMIT_KEYS) {
+      if (!Object.prototype.hasOwnProperty.call(updates.limits, key)) continue;
       const val = updates.limits[key];
-      if (val === undefined || val === null) continue;
+      if (val === undefined) continue;
+      if (val === null) {
+        sanitizedLimits[key] = null;
+        continue;
+      }
 
       if (typeof val !== 'number' || !Number.isInteger(val) || val < 1) {
         return { error: `${LIMIT_LABELS[key]} limit must be a positive integer`, status: 400 };
@@ -114,10 +213,14 @@ export function validateUserUpdate(
           };
         }
       }
+
+      sanitizedLimits[key] = val;
     }
+
+    sanitizedUpdates.limits = sanitizedLimits;
   }
 
-  return {};
+  return { sanitizedUpdates };
 }
 
 export function validateUserDeletion(
@@ -132,10 +235,13 @@ export function validateUserDeletion(
     return { error: 'Cannot delete your own account', status: 400 };
   }
 
-  // Cross-org check
+  // Require valid organizationId & cross-org check for non-superadmin callers
   if (!authResult.isSuperAdmin) {
+    if (!authResult.organizationId || !validateObjectId(String(authResult.organizationId))) {
+      return { error: 'Admin must belong to a valid organization', status: 403 };
+    }
     const targetOrgId = targetUser.organizationId?.toString();
-    if (targetOrgId !== authResult.organizationId?.toString()) {
+    if (!targetOrgId || targetOrgId !== authResult.organizationId.toString()) {
       return { error: 'You can only delete users from your organization', status: 403 };
     }
   }

@@ -6,7 +6,8 @@ import crypto from 'crypto';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { requireFeature, getChallengeSettings } from '@/lib/settingsHelpers';
 import { createChallengeSchema } from '@/lib/validation';
-import { Challenge, QuizAttempt, QuizQuestion, Quiz } from '@/models';
+import { Challenge, Course, QuizAttempt, QuizQuestion, Quiz } from '@/models';
+import { isSuperAdmin } from '@/lib/roles';
 
 export async function POST(req: NextRequest) {
   const logContext: LogContext = {
@@ -41,10 +42,26 @@ export async function POST(req: NextRequest) {
       student: { toString(): string };
       quiz: { toString(): string };
       course?: { toString(): string } | null;
+      status?: string;
       correctCount: number;
       totalQuestions: number;
       timeTaken: number;
       answers?: Array<{ question: { toString(): string }; isCorrect: boolean }>;
+    }
+
+    interface QuizDoc {
+      _id: { toString(): string };
+      course?: { toString(): string } | null;
+      isPublished?: boolean;
+      organizationId?: { toString(): string } | null;
+    }
+
+    interface CourseDoc {
+      _id: { toString(): string };
+      isPublished?: boolean;
+      courseCode?: string | null;
+      price?: number;
+      organizationId?: { toString(): string } | null;
     }
 
     interface ExistingChallengeDoc {
@@ -67,10 +84,70 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
     }
 
-    // Verify Quiz exists
-    const quiz = await Quiz.findById(attempt.quiz).lean();
+    if (attempt.status !== 'submitted' && attempt.status !== 'completed') {
+      return NextResponse.json(
+        { message: 'Challenge can only be created from a completed quiz attempt' },
+        { status: 400 }
+      );
+    }
+
+    // Verify Quiz exists and is published
+    const quiz = (await Quiz.findById(attempt.quiz)
+      .select('course isPublished organizationId')
+      .lean()) as unknown as QuizDoc | null;
     if (!quiz) {
       return NextResponse.json({ message: 'Quiz not found' }, { status: 404 });
+    }
+
+    if (quiz.isPublished !== true) {
+      return NextResponse.json(
+        { message: 'Challenges can only be created for published quizzes' },
+        { status: 400 }
+      );
+    }
+
+    const courseId = quiz.course || attempt.course || null;
+    let course: CourseDoc | null = null;
+    if (courseId) {
+      course = (await Course.findById(courseId)
+        .select('isPublished courseCode price organizationId')
+        .lean()) as unknown as CourseDoc | null;
+
+      if (!course || course.isPublished !== true) {
+        return NextResponse.json(
+          { message: 'Challenges can only be created for published courses' },
+          { status: 400 }
+        );
+      }
+
+      if (course.courseCode) {
+        return NextResponse.json(
+          { message: 'Challenges cannot be created for private code-gated courses' },
+          { status: 403 }
+        );
+      }
+
+      if (course.price && course.price > 0) {
+        return NextResponse.json(
+          { message: 'Challenges can only be created for free courses' },
+          { status: 403 }
+        );
+      }
+    }
+
+    const userOrgId = session.user.organizationId?.toString() || null;
+    const isSuper = isSuperAdmin(session.user.role);
+    if (quiz.organizationId && !isSuper && quiz.organizationId.toString() !== userOrgId) {
+      return NextResponse.json(
+        { message: 'You do not have permission to create a challenge for this quiz' },
+        { status: 403 }
+      );
+    }
+    if (course?.organizationId && !isSuper && course.organizationId.toString() !== userOrgId) {
+      return NextResponse.json(
+        { message: 'You do not have permission to create a challenge for this course' },
+        { status: 403 }
+      );
     }
 
     const { challengeExpiryDays } = await getChallengeSettings();
@@ -135,7 +212,7 @@ export async function POST(req: NextRequest) {
     let slug = '';
     let isUnique = false;
     while (!isUnique) {
-      slug = `ch_${crypto.randomBytes(4).toString('hex')}`;
+      slug = `ch_${crypto.randomBytes(8).toString('hex')}`;
       const conflict = await Challenge.findOne({ slug }).select('_id').lean();
       if (!conflict) isUnique = true;
     }

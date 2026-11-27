@@ -8,6 +8,8 @@ import { createContestSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
 import { getCachedData, setCachedData, invalidatePattern } from '@/lib/redis';
+import { requireFeature } from '@/lib/settingsHelpers';
+import type { AccessUser } from '@/lib/accessControl';
 import {
   getContestComputedState,
   canTeacherManageContests,
@@ -30,6 +32,9 @@ export async function GET(request: NextRequest) {
   const logContext: LogContext = { method: 'GET', path: '/api/contests' };
 
   try {
+    const featureCheck = await requireFeature('enableContests');
+    if (featureCheck) return featureCheck;
+
     const session = await getServerSession(authOptions);
     if (session?.user) {
       logContext.userId = session.user.id;
@@ -45,7 +50,10 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10', 10);
     const skip = (page - 1) * limit;
 
-    const orgId = session?.user?.organizationId || 'public';
+    const orgId =
+      session?.user?.role === 'superadmin'
+        ? 'superadmin'
+        : session?.user?.organizationId || 'public';
     const now = new Date();
 
     const { query, isTeacherSelf, isAdminAll } = buildContestListQuery(
@@ -55,16 +63,37 @@ export async function GET(request: NextRequest) {
     );
 
     const cacheKey = `contests:${orgId}:${tab || 'all'}:${scheduleType || 'all'}:${instructor || 'all'}:${search || ''}:${page}:${limit}`;
-    if (!isTeacherSelf && !isAdminAll && !search) {
-      const cached = await getCachedData(cacheKey);
+    const canUseBaseCache = !isTeacherSelf && !isAdminAll && !search;
+
+    if (canUseBaseCache) {
+      const cached = await getCachedData<{
+        contests: Array<Record<string, unknown> & { _id: string }>;
+        pagination: { page: number; limit: number; total: number; totalPages: number };
+        stats: { liveCount: number; upcomingCount: number; completedCount: number };
+      }>(cacheKey);
+
       if (cached) {
-        return NextResponse.json(cached);
+        if (session?.user?.id && session.user.role === 'student' && cached.contests.length > 0) {
+          const contestIds = cached.contests.map((c) => c._id);
+          const studentAttemptMap = await getStudentAttemptMap(session.user.id, contestIds);
+          return NextResponse.json(
+            {
+              ...cached,
+              contests: cached.contests.map((c) => ({
+                ...c,
+                userAttempt: studentAttemptMap[c._id] || null,
+              })),
+            },
+            { status: 200 }
+          );
+        }
+        return NextResponse.json(cached, { status: 200 });
       }
     }
 
     const [contestsRaw, total] = await Promise.all([
       Contest.find(query)
-        .populate('instructor', 'name email avatar')
+        .populate('instructor', 'name avatar')
         .populate('quizzes.quiz', 'title questionCount timeLimit createdAt')
         .sort({ startTime: tab === 'completed' ? -1 : 1, createdAt: -1 })
         .skip(skip)
@@ -94,12 +123,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const studentAttemptMap =
-      session?.user?.id && session.user.role === 'student' && contestsRaw.length > 0
-        ? await getStudentAttemptMap(session.user.id, contestIds)
-        : {};
-
-    const contests = contestsRaw.map((c) => {
+    const baseContests = contestsRaw.map((c) => {
       const quizDates = (c.quizzes ?? []).map((q) => {
         const date = (q.quiz as { createdAt?: string | Date })?.createdAt;
         return date ? new Date(date).getTime() : 0;
@@ -109,14 +133,14 @@ export async function GET(request: NextRequest) {
       return {
         ...c,
         computedState: getContestComputedState(c, now),
-        userAttempt: studentAttemptMap[c._id.toString()] || null,
+        userAttempt: null,
         attemptCount: attemptCountMap[c._id.toString()] || 0,
         latestQuizTimestamp,
       };
     });
 
     // Sort descending by latest quiz date
-    contests.sort((a, b) => b.latestQuizTimestamp - a.latestQuizTimestamp);
+    baseContests.sort((a, b) => b.latestQuizTimestamp - a.latestQuizTimestamp);
 
     const { liveCount, upcomingCount, completedCount } = await getContestTabCounts(
       session,
@@ -125,8 +149,8 @@ export async function GET(request: NextRequest) {
       now
     );
 
-    const responseData = {
-      contests: serialize(contests),
+    const baseResponseData = {
+      contests: serialize(baseContests) as Array<Record<string, unknown> & { _id: string }>,
       pagination: {
         page,
         limit,
@@ -140,9 +164,25 @@ export async function GET(request: NextRequest) {
       },
     };
 
-    if (!isTeacherSelf && !isAdminAll && !search) {
-      await setCachedData(cacheKey, responseData, 60);
+    if (canUseBaseCache) {
+      await setCachedData(cacheKey, baseResponseData, 60);
     }
+
+    const studentAttemptMap =
+      session?.user?.id && session.user.role === 'student' && contestIds.length > 0
+        ? await getStudentAttemptMap(session.user.id, contestIds)
+        : {};
+
+    const responseData =
+      Object.keys(studentAttemptMap).length > 0
+        ? {
+            ...baseResponseData,
+            contests: baseResponseData.contests.map((c) => ({
+              ...c,
+              userAttempt: studentAttemptMap[c._id] || null,
+            })),
+          }
+        : baseResponseData;
 
     return NextResponse.json(responseData, { status: 200 });
   } catch (error) {
@@ -159,12 +199,16 @@ export async function POST(request: NextRequest) {
   const logContext: LogContext = { method: 'POST', path: '/api/contests' };
 
   try {
+    const featureCheck = await requireFeature('enableContests');
+    if (featureCheck) return featureCheck;
+
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
     logContext.userId = session.user.id;
 
+    await dbConnect();
     const isAuthorized = await canTeacherManageContests(session.user.id, session.user.role);
     if (!isAuthorized) {
       return NextResponse.json(
@@ -173,7 +217,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    await dbConnect();
     const body = await request.json();
 
     const validationResult = createContestSchema.safeParse(body);
@@ -196,7 +239,7 @@ export async function POST(request: NextRequest) {
       prizes = [],
       maxAttempts = 1,
       maxParticipants = null,
-      visibility = 'public',
+      visibility: requestedVisibility,
       leaderboardVisibility = 'live',
       enableNegativeMarking,
       negativeMarks,
@@ -207,6 +250,9 @@ export async function POST(request: NextRequest) {
       metaTitle,
       metaDescription,
     } = validationResult.data;
+
+    const visibility =
+      requestedVisibility ?? (session.user.organizationId ? 'organization' : 'public');
 
     const startDate = new Date(startTime);
     const endDate = new Date(endTime);
@@ -221,17 +267,27 @@ export async function POST(request: NextRequest) {
 
     const solutionDate = solutionsReleaseAt ? new Date(solutionsReleaseAt) : endDate;
 
-    const { contestQuizRefs, totalQuestions, totalPoints } = await buildContestQuizRefs({
+    const quizRefsResult = await buildContestQuizRefs({
       title,
       description,
       duration,
       enableNegativeMarking,
       negativeMarks,
       userId: session.user.id,
+      userRole: session.user.role as AccessUser['role'],
       organizationId: session.user.organizationId,
       rawQuestions,
       rawQuizzes,
     });
+
+    if (quizRefsResult.error) {
+      return NextResponse.json(
+        { message: quizRefsResult.error },
+        { status: quizRefsResult.status || 403 }
+      );
+    }
+
+    const { contestQuizRefs, totalQuestions, totalPoints } = quizRefsResult;
 
     if (contestQuizRefs.length === 0 || totalQuestions === 0) {
       return NextResponse.json(
@@ -272,11 +328,14 @@ export async function POST(request: NextRequest) {
 
     let notificationSummary = null;
     if (notifyAllStudents) {
-      notificationSummary = await broadcastNewContest(contest._id, title);
+      notificationSummary = await broadcastNewContest(contest._id, title, {
+        organizationId: contest.organizationId,
+        creatorRole: session.user.role,
+      });
     }
 
     const created = await Contest.findById(contest._id)
-      .populate('instructor', 'name email avatar')
+      .populate('instructor', 'name avatar')
       .populate('quizzes.quiz', 'title questionCount timeLimit')
       .lean();
 

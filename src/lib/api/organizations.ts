@@ -11,6 +11,7 @@ export interface OrganizationItem {
   name: string;
   code: string;
   inviteCode: string;
+  teacherInviteCode?: string;
   description?: string;
   logo?: string;
   primaryColor?: string;
@@ -37,6 +38,7 @@ export interface OrganizationLookupResult {
     website?: string;
     tagline?: string;
     inviteCode: string;
+    inviteRole?: 'student' | 'teacher';
     description?: string;
   };
 }

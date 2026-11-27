@@ -6,7 +6,7 @@ import dbConnect from '@/lib/db';
 import FileNode from '@/models/FileNode';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { invalidatePattern } from '@/lib/redis';
-import { assertParentIsFolder, normalizeParentId } from '@/lib/fileNodes';
+import { assertParentIsFolder } from '@/lib/fileNodes';
 import { cloudinary, isCloudinaryConfigured } from '@/lib/cloudinary';
 import { requireFilesSuperadmin } from '@/lib/filesAccess';
 
@@ -72,8 +72,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'Missing file' }, { status: 400 });
     }
 
-    const parentIdStr = typeof parentIdRaw === 'string' ? parentIdRaw : null;
-    const parentId = normalizeParentId(parentIdStr);
+    const parentIdStr = typeof parentIdRaw === 'string' ? parentIdRaw.trim() : '';
+    if (parentIdStr && !mongoose.Types.ObjectId.isValid(parentIdStr)) {
+      return NextResponse.json({ message: 'Invalid parentId' }, { status: 400 });
+    }
+    const parentId = parentIdStr ? new mongoose.Types.ObjectId(parentIdStr) : null;
     await assertParentIsFolder(parentId);
 
     if (file.size <= 0) {
@@ -87,7 +90,7 @@ export async function POST(request: NextRequest) {
     }
 
     const isPdf =
-      file.type === 'application/pdf' ||
+      file.type === 'application/pdf' &&
       file.name.toLowerCase().endsWith('.pdf');
 
     if (!isPdf) {
@@ -95,16 +98,29 @@ export async function POST(request: NextRequest) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
+    if (buffer.length < 5 || buffer.subarray(0, 5).toString('ascii') !== '%PDF-') {
+      return NextResponse.json(
+        { message: 'Invalid PDF file content' },
+        { status: 400 }
+      );
+    }
+
+    let organizationId: mongoose.Types.ObjectId | null = authUser.organizationId
+      ? new mongoose.Types.ObjectId(authUser.organizationId)
+      : null;
+
+    if (parentId) {
+      const parentFolder = await FileNode.findById(parentId)
+        .select('organizationId')
+        .lean<{ organizationId?: mongoose.Types.ObjectId | null } | null>();
+      organizationId = parentFolder?.organizationId ?? null;
+    }
 
     const folder = `file-manager/${parentId ? parentId.toString() : 'root'}`;
     const baseName = file.name.replace(/\.pdf$/i, '');
     const publicId = `${Date.now()}-${sanitizePublicIdPart(baseName)}`;
 
     const uploaded = await uploadRawToCloudinary(buffer, { folder, publicId });
-
-    const organizationId = authUser.organizationId
-      ? new mongoose.Types.ObjectId(authUser.organizationId)
-      : null;
 
     const node = await FileNode.create({
       name: file.name,
@@ -118,7 +134,7 @@ export async function POST(request: NextRequest) {
       organizationId,
     });
 
-    const orgKey = authUser.organizationId || 'public';
+    const orgKey = organizationId?.toString() || 'public';
     const parentKey = parentId ? parentId.toString() : 'root';
     await invalidatePattern(`files:${orgKey}:${parentKey}:*`);
 

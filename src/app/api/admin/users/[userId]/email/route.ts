@@ -66,10 +66,16 @@ export async function POST(
     // Organization-level authorization
     if (!isSuperAdmin(session.user.role)) {
       const adminOrgId = session.user.organizationId?.toString();
+      if (!adminOrgId) {
+        return NextResponse.json(
+          { message: 'Admin must belong to an organization' },
+          { status: 403 }
+        );
+      }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const userOrgId = (targetUser as any).organizationId?.toString();
 
-      if (adminOrgId !== userOrgId) {
+      if (!userOrgId || adminOrgId !== userOrgId) {
         return NextResponse.json(
           { message: 'You can only email users in your organization' },
           { status: 403 }
@@ -93,7 +99,7 @@ export async function POST(
   } catch (error) {
     logApiError(error as Error, 'POST', `/api/admin/users/${userId}/email`, logContext);
     return NextResponse.json(
-      { message: error instanceof Error ? error.message : 'Failed to send email. Please try again later.' },
+      { message: 'Failed to send email. Please try again later.' },
       { status: 500 }
     );
   }

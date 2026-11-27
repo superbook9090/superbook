@@ -26,6 +26,7 @@ vi.mock('@/lib/logger', () => ({ logApiError: vi.fn() }));
 vi.mock('@/lib/inviteCode', () => ({
   generateOrgCode: () => 'ORGCODE1',
   generateInviteCode: () => 'INVITE1',
+  generateTeacherInviteCode: () => 'TCH-INVITE1',
 }));
 vi.mock('@/models', () => {
   class MockOrganizationModel {

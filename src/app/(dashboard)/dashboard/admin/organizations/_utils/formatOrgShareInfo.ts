@@ -29,7 +29,8 @@ function formatIsoDate(value?: string): string | null {
 
 export function buildOrganizationShareText(org: OrganizationItem, origin?: string): string {
   const studentUrl = buildOrganizationRegistrationUrl(org.inviteCode, 'student', origin);
-  const teacherUrl = buildOrganizationRegistrationUrl(org.inviteCode, 'teacher', origin);
+  const teacherCode = org.teacherInviteCode || org.inviteCode;
+  const teacherUrl = buildOrganizationRegistrationUrl(teacherCode, 'teacher', origin);
 
   const lines: string[] = [];
 
@@ -48,7 +49,10 @@ export function buildOrganizationShareText(org: OrganizationItem, origin?: strin
   lines.push('');
   lines.push('Codes & Join Links:');
   lines.push(`- Org Code: ${org.code}`);
-  lines.push(`- Invite Code: ${org.inviteCode}`);
+  lines.push(`- Student Invite Code: ${org.inviteCode}`);
+  if (org.teacherInviteCode) {
+    lines.push(`- Teacher Invite Code: ${org.teacherInviteCode}`);
+  }
   lines.push(`- Student Registration Link: ${studentUrl}`);
   lines.push(`- Teacher Registration Link: ${teacherUrl}`);
 

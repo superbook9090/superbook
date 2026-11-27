@@ -47,17 +47,32 @@ function RegisterFormInner() {
     rawRole === 'teacher' ? 'teacher' : rawRole === 'student' ? 'student' : undefined;
 
   const [orgBranding, setOrgBranding] = useState<OrganizationLookupResult['organization'] | null>(null);
+  const [inviteInvalid, setInviteInvalid] = useState(false);
+
+  const lockedRole: 'student' | 'teacher' | undefined = orgBranding?.inviteRole
+    ? orgBranding.inviteRole
+    : queryInviteCode && queryRole === 'student'
+      ? 'student'
+      : undefined;
+
+  const effectiveRole: 'student' | 'teacher' = lockedRole || queryRole || 'student';
 
   useEffect(() => {
     if (!queryInviteCode) {
       setOrgBranding(null);
+      setInviteInvalid(false);
       return;
     }
     let cancelled = false;
     lookupOrganization(queryInviteCode)
       .then((res) => {
-        if (!cancelled && res.found && res.organization) {
+        if (cancelled) return;
+        if (res.found && res.organization) {
           setOrgBranding(res.organization);
+          setInviteInvalid(false);
+        } else {
+          setOrgBranding(null);
+          setInviteInvalid(true);
         }
       })
       .catch(() => {});
@@ -67,12 +82,16 @@ function RegisterFormInner() {
     };
   }, [queryInviteCode]);
 
-  // Client-side guard for UX improvement
+  // Client-side guard for UX improvement — preserve inviteCode if already signed in
   useEffect(() => {
     if (status === 'authenticated') {
-      router.replace(callbackUrl);
+      if (queryInviteCode) {
+        router.replace(`/dashboard/join-org?inviteCode=${encodeURIComponent(queryInviteCode)}`);
+      } else {
+        router.replace(callbackUrl);
+      }
     }
-  }, [status, router, callbackUrl]);
+  }, [status, router, callbackUrl, queryInviteCode]);
 
   // Listen for Native Google Sign-In tokens
   useEffect(() => {
@@ -84,6 +103,8 @@ function RegisterFormInner() {
             redirect: false,
             googleIdToken: data.token,
             platform: 'mobile',
+            role: effectiveRole,
+            inviteCode: queryInviteCode,
           });
 
           if (result?.error) {
@@ -107,7 +128,7 @@ function RegisterFormInner() {
     });
 
     return cleanup;
-  }, [router, fetchSession, t, callbackUrl, addAlert]);
+  }, [router, fetchSession, t, callbackUrl, addAlert, effectiveRole, queryInviteCode]);
 
   return (
     <div className="w-full flex-1 flex flex-col items-center justify-center p-3 sm:p-6 lg:p-8 my-auto">
@@ -184,24 +205,32 @@ function RegisterFormInner() {
               </motion.div>
             )}
 
+            {inviteInvalid && queryInviteCode && (
+              <div className="mb-3 p-3 rounded-xl border border-[var(--error)]/30 bg-[var(--error-light)] text-xs font-medium text-[var(--error)]">
+                Invalid or inactive organization invite code ({queryInviteCode}). Please check with your organization administrator.
+              </div>
+            )}
+
             {/* Conditionally Render Phone or Email Signup Flow */}
             {isPhoneFlow ? (
               <PhoneRegisterForm
                 theme={theme}
                 callbackUrl={callbackUrl}
                 onBackToEmail={() => setIsPhoneFlow(false)}
-                allowTeacherRegistration={allowTeacherRegistration}
+                allowTeacherRegistration={allowTeacherRegistration || lockedRole === 'teacher'}
                 initialInviteCode={queryInviteCode}
-                initialRole={queryRole}
+                initialRole={effectiveRole}
+                lockedRole={lockedRole}
               />
             ) : (
               <EmailRegisterForm
                 theme={theme}
                 callbackUrl={callbackUrl}
                 onSelectPhoneFlow={() => setIsPhoneFlow(true)}
-                allowTeacherRegistration={allowTeacherRegistration}
+                allowTeacherRegistration={allowTeacherRegistration || lockedRole === 'teacher'}
                 initialInviteCode={queryInviteCode}
-                initialRole={queryRole}
+                initialRole={effectiveRole}
+                lockedRole={lockedRole}
                 orgBranding={orgBranding}
               />
             )}
@@ -213,9 +242,13 @@ function RegisterFormInner() {
                   {t('register.alreadyHaveAccount')}{' '}
                   <Link
                     href={
-                      callbackUrl === ROUTES.dashboard
-                        ? ROUTES.login
-                        : `${ROUTES.login}?callbackUrl=${encodeURIComponent(callbackUrl)}`
+                      queryInviteCode
+                        ? `${ROUTES.login}?callbackUrl=${encodeURIComponent(
+                            `/dashboard/join-org?inviteCode=${encodeURIComponent(queryInviteCode)}`
+                          )}`
+                        : callbackUrl === ROUTES.dashboard
+                          ? ROUTES.login
+                          : `${ROUTES.login}?callbackUrl=${encodeURIComponent(callbackUrl)}`
                     }
                     className="font-bold text-[var(--primary)] hover:text-[var(--primary-hover)] hover:underline transition-colors ml-1"
                   >

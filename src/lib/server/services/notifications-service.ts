@@ -1,12 +1,14 @@
 import dbConnect from '@/lib/db';
 import '@/models';
 import User from '@/models/User';
+import Course from '@/models/Course';
 import Enrollment from '@/models/Enrollment';
 import NotificationToken from '@/models/NotificationToken';
 import NotificationPreference from '@/models/NotificationPreference';
 import UserNotification from '@/models/UserNotification';
 import { sendPushNotification } from '@/lib/notifications/push/sendPushNotification';
 import type { NotificationCategory, PushNotificationPayload } from '@/lib/notifications/push/notificationPayload';
+import { updateNotificationPreferencesSchema } from '@/lib/validation';
 import mongoose from 'mongoose';
 
 export type BroadcastTargetAudience = 'all' | 'students' | 'teachers' | 'course_enrolled';
@@ -78,6 +80,13 @@ export async function listUserNotifications(
 }
 
 export async function markUserNotificationRead(userId: string, notificationId: string): Promise<boolean> {
+  if (
+    !mongoose.Types.ObjectId.isValid(userId) ||
+    !mongoose.Types.ObjectId.isValid(notificationId)
+  ) {
+    return false;
+  }
+
   await dbConnect();
 
   const result = await UserNotification.findOneAndUpdate(
@@ -148,10 +157,39 @@ export async function getOrCreateNotificationPreferences(userId: string) {
 }
 
 export async function updateNotificationPreferences(userId: string, updates: Record<string, unknown>) {
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    throw new Error('Invalid userId');
+  }
+
+  const parsed = updateNotificationPreferencesSchema.parse(updates);
+  const safeSet: Record<string, unknown> = {};
+
+  if (parsed.muteAll !== undefined) {
+    safeSet.muteAll = parsed.muteAll;
+  }
+  if (parsed.disablePush !== undefined) {
+    safeSet.disablePush = parsed.disablePush;
+  }
+  if (parsed.mutedCourses !== undefined) {
+    safeSet.mutedCourses = parsed.mutedCourses.map((id) => new mongoose.Types.ObjectId(id));
+  }
+  if (parsed.categories !== undefined) {
+    for (const [key, val] of Object.entries(parsed.categories)) {
+      if (val !== undefined) {
+        safeSet[`categories.${key}`] = val;
+      }
+    }
+  }
+
   await dbConnect();
+
+  if (Object.keys(safeSet).length === 0) {
+    return getOrCreateNotificationPreferences(userId);
+  }
+
   return NotificationPreference.findOneAndUpdate(
-    { userId },
-    { $set: updates },
+    { userId: new mongoose.Types.ObjectId(userId) },
+    { $set: safeSet },
     { new: true, upsert: true }
   ).lean();
 }
@@ -166,10 +204,31 @@ export async function resolveBroadcastRecipientIds(
 ): Promise<string[]> {
   await dbConnect();
 
+  let scopedOrgObjectId: mongoose.Types.ObjectId | null = null;
+  if (senderRole === 'admin') {
+    if (!senderOrgId || !mongoose.Types.ObjectId.isValid(senderOrgId)) return [];
+    scopedOrgObjectId = new mongoose.Types.ObjectId(senderOrgId);
+  } else if (targetOrgId) {
+    if (!mongoose.Types.ObjectId.isValid(targetOrgId)) return [];
+    scopedOrgObjectId = new mongoose.Types.ObjectId(targetOrgId);
+  }
+
   // 1. If targeting students enrolled in a specific course
-  if (targetAudience === 'course_enrolled' && targetCourseId) {
+  if (targetAudience === 'course_enrolled') {
+    if (!targetCourseId || !mongoose.Types.ObjectId.isValid(targetCourseId)) return [];
+    const courseObjectId = new mongoose.Types.ObjectId(targetCourseId);
+
+    // For org admins, verify the target course belongs to their organization
+    if (senderRole === 'admin') {
+      const courseInOrg = await Course.exists({
+        _id: courseObjectId,
+        organizationId: scopedOrgObjectId,
+      });
+      if (!courseInOrg) return [];
+    }
+
     const enrollments = await Enrollment.find({
-      course: new mongoose.Types.ObjectId(targetCourseId),
+      course: courseObjectId,
       status: { $in: ['active', 'completed'] },
     })
       .select('student')
@@ -182,11 +241,8 @@ export async function resolveBroadcastRecipientIds(
       _id: { $in: studentIds },
     };
 
-    if (senderRole === 'admin') {
-      if (!senderOrgId) return [];
-      userQuery.organizationId = new mongoose.Types.ObjectId(senderOrgId);
-    } else if (targetOrgId) {
-      userQuery.organizationId = new mongoose.Types.ObjectId(targetOrgId);
+    if (scopedOrgObjectId) {
+      userQuery.organizationId = scopedOrgObjectId;
     }
 
     const users = await User.find(userQuery).select('_id').lean();
@@ -205,11 +261,8 @@ export async function resolveBroadcastRecipientIds(
     role: { $in: roleFilter },
   };
 
-  if (senderRole === 'admin') {
-    if (!senderOrgId) return [];
-    query.organizationId = new mongoose.Types.ObjectId(senderOrgId);
-  } else if (targetOrgId) {
-    query.organizationId = new mongoose.Types.ObjectId(targetOrgId);
+  if (scopedOrgObjectId) {
+    query.organizationId = scopedOrgObjectId;
   }
 
   const users = await User.find(query).select('_id').lean();

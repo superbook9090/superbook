@@ -40,6 +40,20 @@ export async function POST(request: Request) {
 
     await dbConnect();
 
+    const currentUser = await User.findById(session.user.id).select('isSuspended phone');
+    if (!currentUser) {
+      return NextResponse.json({ message: 'User not found' }, { status: 404 });
+    }
+    if (currentUser.isSuspended) {
+      return NextResponse.json({ message: 'Account suspended' }, { status: 403 });
+    }
+    if (currentUser.phone) {
+      return NextResponse.json(
+        { message: 'A phone number is already linked to this account' },
+        { status: 400 }
+      );
+    }
+
     // Check if another user has this phone number
     const duplicatePhoneUser = await User.findOne({
       phone: phoneNumber,

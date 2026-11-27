@@ -1,6 +1,7 @@
 // src/app/api/enrollments/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+import mongoose from 'mongoose';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import { Enrollment, Course } from '@/models';
@@ -9,6 +10,7 @@ import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
 import { getCachedData, setCachedData } from '@/lib/redis';
 import { isPrivateCourse } from '@/lib/courseAccess';
+import { validateContentAccess, type AccessUser } from '@/lib/accessControl';
 import { enrollStudentInCourse } from '@/lib/enrollmentService';
 import {
   courseCodeAttemptLimiter,
@@ -19,6 +21,19 @@ import { requireFeature } from '@/lib/settingsHelpers';
 
 // Configure Next.js caching for this route
 export const dynamic = 'force-dynamic';
+
+const ALLOWED_ENROLLMENT_FIELDS = new Set([
+  '_id',
+  'student',
+  'course',
+  'status',
+  'progress',
+  'enrolledAt',
+  'completedAt',
+  'lessonCompletedCount',
+  'createdAt',
+  'updatedAt',
+]);
 
 // GET /api/enrollments - Get user's enrollments
 export async function GET(request: NextRequest) {
@@ -44,13 +59,25 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const course = searchParams.get('course');
-    const page = parseInt(searchParams.get('page') || '1', 10);
-    const limit = parseInt(searchParams.get('limit') || '10', 10);
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '10', 10) || 10));
     const skip = (page - 1) * limit;
     const fields = searchParams.get('fields'); // Comma-separated fields to select
 
+    const requestedFields = fields
+      ? Array.from(
+          new Set(
+            fields
+              .split(',')
+              .map((f) => f.trim())
+              .filter((f) => ALLOWED_ENROLLMENT_FIELDS.has(f))
+          )
+        ).sort()
+      : [];
+    const fieldsKey = requestedFields.length > 0 ? requestedFields.join(',') : 'default';
+
     // Build cache key based on query params
-    const cacheKey = `enrollments:${session.user.id}:${course || 'all'}:page${page}:limit${limit}:fields${fields || 'default'}`;
+    const cacheKey = `enrollments:${session.user.id}:${course || 'all'}:page${page}:limit${limit}:fields${fieldsKey}`;
 
     // Try cache first
     const cached = await getCachedData(cacheKey);
@@ -67,11 +94,12 @@ export async function GET(request: NextRequest) {
     const query: Record<string, any> = { student: session.user.id };
     if (course) query.course = course;
 
-    // Build select object for field selection
+    // Build select object for field selection (allowlisted)
     let selectFields: Record<string, number> = {};
-    if (fields) {
-      const fieldList = fields.split(',');
-      fieldList.forEach(f => selectFields[f] = 1);
+    if (requestedFields.length > 0) {
+      requestedFields.forEach((f) => {
+        selectFields[f] = 1;
+      });
     } else {
       // Default fields to avoid over-fetching
       selectFields = { status: 1, progress: 1, enrolledAt: 1, completedAt: 1, lessonCompletedCount: 1 };
@@ -80,7 +108,7 @@ export async function GET(request: NextRequest) {
     const enrollments = await Enrollment.find(query, selectFields)
       .populate({
         path: 'course',
-        select: 'title description thumbnail category instructor price slug courseCode',
+        select: 'title description thumbnail category instructor price slug',
         populate: { path: 'instructor', select: 'name email' }
       })
       .populate('student', 'name email')
@@ -181,10 +209,36 @@ export async function POST(request: NextRequest) {
 
     const { courseId, courseCode } = validationResult.data;
 
+    if (!mongoose.Types.ObjectId.isValid(courseId)) {
+      return NextResponse.json(
+        { message: 'Course not found or not published' },
+        { status: 404 }
+      );
+    }
+
     const course = await Course.findOne({ _id: courseId, isPublished: true })
-      .select('courseCode')
-      .lean<{ courseCode?: string | null }>();
+      .select('courseCode organizationId')
+      .lean<{ courseCode?: string | null; organizationId?: mongoose.Types.ObjectId | null }>();
     if (!course) {
+      return NextResponse.json(
+        { message: 'Course not found or not published' },
+        { status: 404 }
+      );
+    }
+
+    // Validate organization access BEFORE checking whether courseCode is required
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const user = session.user as any;
+    const authUser: AccessUser = {
+      _id: new mongoose.Types.ObjectId(user.id),
+      organizationId: user.organizationId
+        ? new mongoose.Types.ObjectId(user.organizationId)
+        : null,
+      role: (user.role || 'student') as AccessUser['role'],
+    };
+    try {
+      validateContentAccess(course.organizationId, authUser, 'course');
+    } catch {
       return NextResponse.json(
         { message: 'Course not found or not published' },
         { status: 404 }
@@ -207,8 +261,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const user = session.user as any;
     const result = await enrollStudentInCourse({
       studentId: session.user.id,
       organizationId: user.organizationId ?? null,

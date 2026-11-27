@@ -1,4 +1,5 @@
 import User from '@/models/User';
+import Organization from '@/models/Organization';
 import mongoose from 'mongoose';
 
 export type ContestComputedState = 'upcoming' | 'live' | 'completed' | 'cancelled' | 'draft';
@@ -88,9 +89,28 @@ export async function canTeacherManageContests(
     return false;
   }
 
-  const user = await User.findById(userId).select('canCreateContests organizationId role').lean();
+  const user = await User.findById(userId)
+    .select('canCreateContests organizationId role')
+    .lean<{
+      canCreateContests?: boolean;
+      organizationId?: mongoose.Types.ObjectId | null;
+      role?: string;
+    }>();
   if (!user) return false;
   if (user.role === 'superadmin') return true;
-  if (user.organizationId) return true;
+
+  if (user.organizationId) {
+    const org = await Organization.findById(user.organizationId)
+      .select('isActive permissions')
+      .lean<{ isActive?: boolean; permissions?: { canCreateContests?: boolean } }>();
+    if (!org || org.isActive === false || !org.permissions?.canCreateContests) {
+      return false;
+    }
+    if (user.role === 'admin') {
+      return true;
+    }
+    return Boolean(user.canCreateContests);
+  }
+
   return Boolean(user.canCreateContests);
 }

@@ -18,9 +18,17 @@ import {
   Zap,
 } from 'lucide-react';
 import { useFeature } from '@/contexts/AppSettingsContext';
+import { useSessionStore } from '@/store/useSessionStore';
+import { isSuperAdmin as checkIsSuperAdmin } from '@/lib/roles';
 
-export default function AdminSystemOverview() {
+interface AdminSystemOverviewProps {
+  isSuperAdmin?: boolean;
+}
+
+export default function AdminSystemOverview({ isSuperAdmin }: AdminSystemOverviewProps = {}) {
   const { t } = useTranslation();
+  const { session } = useSessionStore();
+  const canAccessSettings = isSuperAdmin ?? checkIsSuperAdmin(session?.user?.role);
   const enableCourses = useFeature('enableCourses');
   const enableQuizzes = useFeature('enableQuizzes');
   const enableBlogs = useFeature('enableBlogs');
@@ -53,13 +61,15 @@ export default function AdminSystemOverview() {
           </h2>
         </div>
 
-        <Link
-          href={ROUTES.admin.settings}
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--teacher-primary)] hover:underline min-h-[36px]"
-        >
-          <span>{t('admin.configureInSettings')}</span>
-          <ArrowRight className="w-3.5 h-3.5" />
-        </Link>
+        {canAccessSettings && (
+          <Link
+            href={ROUTES.admin.settings}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--teacher-primary)] hover:underline min-h-[36px]"
+          >
+            <span>{t('admin.configureInSettings')}</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        )}
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">

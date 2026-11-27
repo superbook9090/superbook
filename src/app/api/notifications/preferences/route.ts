@@ -7,6 +7,7 @@ import {
   getOrCreateNotificationPreferences,
   updateNotificationPreferences,
 } from '@/lib/server/services/notifications-service';
+import { updateNotificationPreferencesSchema } from '@/lib/validation';
 import { serialize } from '@/lib/serialize';
 
 export async function GET() {
@@ -37,8 +38,13 @@ export async function PUT(req: NextRequest) {
     }
     logContext.userId = session.user.id;
 
-    const updates = await req.json();
-    const preferences = await updateNotificationPreferences(session.user.id, updates);
+    const rawBody = await req.json();
+    const parsed = updateNotificationPreferencesSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return jsonApiError('VALIDATION', 'Invalid notification preferences payload', 400);
+    }
+
+    const preferences = await updateNotificationPreferences(session.user.id, parsed.data);
     return jsonSuccess(serialize(preferences));
   } catch (error) {
     logApiError(error as Error, 'PUT', '/api/notifications/preferences', logContext);

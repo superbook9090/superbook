@@ -6,12 +6,14 @@ import '@/models';
 import Contest from '@/models/Contest';
 import { declareContestResults } from '@/lib/contests/declareResults';
 import { logApiError, type LogContext } from '@/lib/logger';
-import { isSuperAdmin } from '@/lib/roles';
+import { requireFeature } from '@/lib/settingsHelpers';
+import { canManageOrgContent, type AccessUser } from '@/lib/accessControl';
+import { getContestComputedState } from '@/lib/contest/contestHelpers';
 import mongoose from 'mongoose';
 
 export const dynamic = 'force-dynamic';
 
-// POST /api/contests/[id]/declare-results - Declare contest results and notify students (Superadmin / Teacher only)
+// POST /api/contests/[id]/declare-results - Declare contest results and notify students (Superadmin / Org Admin / Teacher only)
 export async function POST(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -20,6 +22,9 @@ export async function POST(
   const logContext: LogContext = { method: 'POST', path: `/api/contests/${id}/declare-results` };
 
   try {
+    const featureCheck = await requireFeature('enableContests');
+    if (featureCheck) return featureCheck;
+
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json({ message: 'Invalid contest ID' }, { status: 400 });
     }
@@ -37,16 +42,40 @@ export async function POST(
       return NextResponse.json({ message: 'Contest not found' }, { status: 404 });
     }
 
-    const isAuthorized =
-      isSuperAdmin(session.user.role) ||
-      session.user.role === 'superadmin' ||
-      contest.instructor?.toString() === session.user.id;
+    const authUser: AccessUser = {
+      _id: new mongoose.Types.ObjectId(session.user.id),
+      organizationId: session.user.organizationId
+        ? new mongoose.Types.ObjectId(session.user.organizationId)
+        : null,
+      role: session.user.role as AccessUser['role'],
+    };
 
-    if (!isAuthorized) {
+    if (!canManageOrgContent(contest.organizationId, contest.instructor, authUser)) {
       return NextResponse.json(
         { message: 'You are not authorized to declare results for this contest' },
         { status: 403 }
       );
+    }
+
+    const computedState = getContestComputedState(contest, new Date());
+    if (
+      contest.status === 'draft' ||
+      (contest.status as string) === 'upcoming' ||
+      contest.status === 'cancelled' ||
+      computedState === 'upcoming'
+    ) {
+      return NextResponse.json(
+        { message: 'Cannot declare results for a draft, cancelled, or upcoming contest' },
+        { status: 400 }
+      );
+    }
+
+    if (contest.resultsDeclared === true) {
+      return NextResponse.json({
+        success: true,
+        message: 'Results have already been declared for this contest.',
+        notificationsSent: 0,
+      });
     }
 
     const result = await declareContestResults(id, { ignoreAge: true });

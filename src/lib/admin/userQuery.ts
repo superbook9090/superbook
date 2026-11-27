@@ -25,10 +25,9 @@ export function buildAdminUsersQuery(
   let orgFilter: QueryFilter = {};
   if (!authResult.isSuperAdmin) {
     if (!authResult.organizationId || !validateObjectId(authResult.organizationId)) {
-      orgFilter = { organizationId: null };
-    } else {
-      orgFilter = { organizationId: new mongoose.Types.ObjectId(authResult.organizationId) };
+      throw new Error('Admin must belong to a valid organization');
     }
+    orgFilter = { organizationId: new mongoose.Types.ObjectId(authResult.organizationId) };
   } else if (organizationIdParam && organizationIdParam !== 'all') {
     if (organizationIdParam === 'null' || organizationIdParam === 'none') {
       orgFilter = { organizationId: null };

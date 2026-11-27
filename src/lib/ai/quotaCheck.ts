@@ -1,12 +1,90 @@
 import User from '@/models/User';
+import Organization from '@/models/Organization';
 import { getTeacherLimit } from '@/lib/settingsHelpers';
 import { getSettingsWithDefaults } from '@/lib/dataService';
+import type mongoose from 'mongoose';
 
 export interface QuotaValidationResult {
   error?: string;
   status?: number;
   currentCount?: number;
   effectiveLimit?: number;
+}
+
+interface AiUserLean {
+  limits?: {
+    aiQuizGenerations?: number;
+    aiQuizMaxQuestions?: number;
+  };
+  aiQuizGenerationsCount?: number;
+  canGenerateAiQuizzes?: boolean;
+  organizationId?: mongoose.Types.ObjectId | null;
+  role?: string;
+}
+
+async function resolveAiGenerationAccess(
+  user: AiUserLean,
+  userRole: string,
+  entityType: 'quiz' | 'contest' = 'quiz'
+): Promise<{ allowed: boolean; error?: string }> {
+  if (userRole === 'superadmin' || user.role === 'superadmin') {
+    return { allowed: true };
+  }
+
+  if (user.organizationId) {
+    const org = await Organization.findById(user.organizationId)
+      .select('isActive permissions teacherLimits')
+      .lean<{
+        isActive?: boolean;
+        permissions?: { canGenerateAiQuizzes?: boolean };
+        teacherLimits?: { aiQuizGenerations?: number; aiQuizMaxQuestions?: number };
+      }>();
+
+    if (!org || org.isActive === false) {
+      return {
+        allowed: false,
+        error: 'Your organization is currently inactive. Please contact an administrator.',
+      };
+    }
+
+    if (org.permissions?.canGenerateAiQuizzes !== true) {
+      return {
+        allowed: false,
+        error:
+          entityType === 'contest'
+            ? 'AI contest question generation is not enabled for your organization. Please contact an administrator.'
+            : 'AI quiz generation is not enabled for your organization. Please contact an administrator.',
+      };
+    }
+
+    if (userRole === 'admin' || user.role === 'admin') {
+      return { allowed: true };
+    }
+
+    if (!user.canGenerateAiQuizzes) {
+      return {
+        allowed: false,
+        error:
+          entityType === 'contest'
+            ? 'AI contest question generation is not enabled for your teacher account. Please contact an administrator to activate it.'
+            : 'AI quiz generation is not enabled for your teacher account. Please contact an administrator to activate it.',
+      };
+    }
+
+    return { allowed: true };
+  }
+
+  if (!user.canGenerateAiQuizzes) {
+    return {
+      allowed: false,
+      error:
+        entityType === 'contest'
+          ? 'AI contest question generation is not enabled for your teacher account. Please contact an administrator to activate it.'
+          : 'AI quiz generation is not enabled for your teacher account. Please contact an administrator to activate it.',
+    };
+  }
+
+  return { allowed: true };
 }
 
 export async function validateTeacherAiPermissionsAndQuota(
@@ -16,22 +94,19 @@ export async function validateTeacherAiPermissionsAndQuota(
   numQuestions: number
 ): Promise<QuotaValidationResult> {
   const user = await User.findById(userId)
-    .select('limits aiQuizGenerationsCount canGenerateAiQuizzes canCreateContests role')
-    .lean();
+    .select('limits aiQuizGenerationsCount canGenerateAiQuizzes organizationId role')
+    .lean<AiUserLean>();
 
   if (!user) {
     return { error: 'User not found', status: 404 };
   }
 
-  const isSuperOrAdmin = userRole === 'superadmin' || userRole === 'admin';
-  const hasContestPermission = entityType === 'contest' && Boolean(user.canCreateContests);
+  const isSuperAdmin = userRole === 'superadmin' || user.role === 'superadmin';
+  const access = await resolveAiGenerationAccess(user, userRole, entityType);
 
-  if (!isSuperOrAdmin && !user.canGenerateAiQuizzes && !hasContestPermission) {
+  if (!access.allowed) {
     return {
-      error:
-        entityType === 'contest'
-          ? 'AI contest question generation is not enabled for your teacher account. Please contact an administrator to activate it.'
-          : 'AI quiz generation is not enabled for your teacher account. Please contact an administrator to activate it.',
+      error: access.error,
       status: 403,
     };
   }
@@ -39,7 +114,7 @@ export async function validateTeacherAiPermissionsAndQuota(
   const effectiveLimit = await getTeacherLimit('aiQuizGenerations', userId);
   const currentCount = user.aiQuizGenerationsCount ?? 0;
 
-  if (!isSuperOrAdmin && currentCount >= effectiveLimit) {
+  if (!isSuperAdmin && currentCount >= effectiveLimit) {
     return {
       error: `You have reached your limit of ${effectiveLimit} AI generation(s). Please contact super admin to increase your quota.`,
       status: 403,
@@ -50,7 +125,7 @@ export async function validateTeacherAiPermissionsAndQuota(
 
   const maxAllowedQuestions =
     (await getTeacherLimit('aiQuizMaxQuestions', userId).catch(() => 10)) || 10;
-  if (!isSuperOrAdmin && numQuestions > maxAllowedQuestions) {
+  if (!isSuperAdmin && numQuestions > maxAllowedQuestions) {
     return {
       error: `Maximum ${maxAllowedQuestions} question(s) can be generated at a time. This limit is set by the administrator.`,
       status: 400,
@@ -62,17 +137,19 @@ export async function validateTeacherAiPermissionsAndQuota(
 
 export async function fetchTeacherAiQuotaStatus(userId: string, userRole: string) {
   const user = await User.findById(userId)
-    .select('limits aiQuizGenerationsCount canGenerateAiQuizzes canCreateContests role')
-    .lean();
+    .select('limits aiQuizGenerationsCount canGenerateAiQuizzes organizationId role')
+    .lean<AiUserLean>();
 
   if (!user) return null;
 
-  const isSuperOrAdmin = userRole === 'superadmin' || userRole === 'admin';
+  const isSuperAdmin = userRole === 'superadmin' || user.role === 'superadmin';
+  const access = await resolveAiGenerationAccess(user, userRole, 'quiz');
+
   const hasCustomMaxQuestions =
-    isSuperOrAdmin ||
+    isSuperAdmin ||
     (user.limits?.aiQuizMaxQuestions !== undefined && user.limits.aiQuizMaxQuestions !== null);
 
-  const effectiveMaxQuestions = isSuperOrAdmin
+  const effectiveMaxQuestions = isSuperAdmin
     ? 50
     : await getTeacherLimit('aiQuizMaxQuestions', userId).catch(() => 10);
 
@@ -86,15 +163,14 @@ export async function fetchTeacherAiQuotaStatus(userId: string, userRole: string
     maxQuestions: effectiveMaxQuestions,
     globalMaxQuestions,
     hasCustomMaxQuestions,
-    customMaxQuestions: hasCustomMaxQuestions ? user.limits?.aiQuizMaxQuestions : null,
-    usage: isSuperOrAdmin
+    customMaxQuestions: hasCustomMaxQuestions ? effectiveMaxQuestions : null,
+    usage: isSuperAdmin
       ? null
       : {
           used: currentCount,
           limit: effectiveGenerationsLimit,
           remaining: Math.max(0, effectiveGenerationsLimit - currentCount),
         },
-    canGenerate:
-      isSuperOrAdmin || Boolean(user.canGenerateAiQuizzes) || Boolean(user.canCreateContests),
+    canGenerate: access.allowed,
   };
 }

@@ -7,8 +7,7 @@ import { Course } from '@/models';
 import Enrollment from '@/models/Enrollment';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
-import { validateContentAccess } from '@/lib/accessControl';
-import { isAdmin } from '@/lib/roles';
+import { canManageOrgContent, type AccessUser } from '@/lib/accessControl';
 import { requireFeature } from '@/lib/settingsHelpers';
 import mongoose from 'mongoose';
 
@@ -40,37 +39,30 @@ export async function GET(
 
     await dbConnect();
 
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json({ message: 'Course not found' }, { status: 404 });
+    }
+
     const course = await Course.findById(id)
       .select('instructor organizationId')
-      .lean<{ instructor: { toString(): string }; organizationId?: mongoose.Types.ObjectId | null }>();
+      .lean<{ instructor: mongoose.Types.ObjectId | string; organizationId?: mongoose.Types.ObjectId | null }>();
     if (!course) {
       return NextResponse.json({ message: 'Course not found' }, { status: 404 });
     }
 
-    const isOwner = course.instructor.toString() === session.user.id;
-    const isUserAdmin = isAdmin(session.user.role);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const user = session.user as any;
+    const authUser: AccessUser = {
+      _id: new mongoose.Types.ObjectId(user.id),
+      organizationId: user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null,
+      role: (user.role || 'student') as AccessUser['role'],
+    };
 
-    if (!isOwner && !isUserAdmin) {
+    if (!canManageOrgContent(course.organizationId, course.instructor, authUser)) {
       return NextResponse.json(
         { message: 'You do not have permission to view this course\'s students' },
         { status: 403 }
       );
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const user = session.user as any;
-    try {
-      validateContentAccess(
-        course.organizationId,
-        {
-          _id: new mongoose.Types.ObjectId(user.id),
-          organizationId: user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null,
-          role: user.role as 'student' | 'teacher' | 'admin',
-        },
-        'course'
-      );
-    } catch {
-      return NextResponse.json({ message: 'Course not found' }, { status: 404 });
     }
 
     const enrollments = await Enrollment.find({ course: id })

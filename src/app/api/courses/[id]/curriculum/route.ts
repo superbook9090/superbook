@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+import mongoose from 'mongoose';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import { Course, Chapter, Lesson } from '@/models';
@@ -8,19 +9,23 @@ import { ensureChapterIndexes } from '@/models/Chapter';
 import { createChapterSchema } from '@/lib/validation';
 import { attachQuizzesToCurriculumTree, buildCurriculumTree } from '@/lib/curriculum/tree';
 import { authorizeCourseEditor } from '@/lib/curriculum/authorize';
+import { canManageOrgContent, validateContentAccess, type AccessUser } from '@/lib/accessControl';
+import { isPrivateCourse, isStudentEnrolled } from '@/lib/courseAccess';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
 import { requireFeature } from '@/lib/settingsHelpers';
 
-async function fetchCurriculumTree(courseId: string, publishedQuizzesOnly: boolean) {
+async function fetchCurriculumTree(courseId: string, publishedOnly: boolean) {
+  const lessonFilter: { course: string; isPublished?: boolean } = { course: courseId };
   const quizFilter: { course: string; isPublished?: boolean } = { course: courseId };
-  if (publishedQuizzesOnly) {
+  if (publishedOnly) {
+    lessonFilter.isPublished = true;
     quizFilter.isPublished = true;
   }
 
   const [chapters, lessons, quizzes] = await Promise.all([
     Chapter.find({ course: courseId }).sort({ order: 1 }).lean(),
-    Lesson.find({ course: courseId })
+    Lesson.find(lessonFilter)
       .sort({ order: 1 })
       .select('-content')
       .lean(),
@@ -73,10 +78,70 @@ export async function GET(
       getServerSession(authOptions),
       dbConnect().then(() => ensureChapterIndexes()),
     ]);
-    const publishedQuizzesOnly =
-      !session?.user?.role || session.user.role === 'student';
 
-    const tree = await fetchCurriculumTree(id, publishedQuizzesOnly);
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json({ message: 'Course not found' }, { status: 404 });
+    }
+
+    const course = await Course.findById(id)
+      .select('organizationId isPublished courseCode instructor')
+      .lean<{
+        organizationId?: mongoose.Types.ObjectId | null;
+        isPublished?: boolean;
+        courseCode?: string | null;
+        instructor?: mongoose.Types.ObjectId | string;
+      }>();
+
+    if (!course) {
+      return NextResponse.json({ message: 'Course not found' }, { status: 404 });
+    }
+
+    const requiresAuth =
+      Boolean(course.organizationId) || isPrivateCourse(course) || !course.isPublished;
+    if (requiresAuth && !session?.user) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    let authUser: AccessUser | null = null;
+    if (session?.user) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const user = session.user as any;
+      authUser = {
+        _id: new mongoose.Types.ObjectId(user.id),
+        organizationId: user.organizationId
+          ? new mongoose.Types.ObjectId(user.organizationId)
+          : null,
+        role: (user.role || 'student') as AccessUser['role'],
+      };
+
+      try {
+        validateContentAccess(course.organizationId, authUser, 'course');
+      } catch {
+        return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
+      }
+    }
+
+    const canManage = authUser
+      ? canManageOrgContent(course.organizationId, course.instructor, authUser)
+      : false;
+
+    if (!course.isPublished && !canManage) {
+      return NextResponse.json({ message: 'Course not found' }, { status: 404 });
+    }
+
+    if (isPrivateCourse(course) && !canManage) {
+      if (!session?.user) {
+        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+      }
+      const enrolled = await isStudentEnrolled(session.user.id, id);
+      if (!enrolled) {
+        return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
+      }
+    }
+
+    const publishedOnly = !canManage;
+
+    const tree = await fetchCurriculumTree(id, publishedOnly);
     return NextResponse.json(serialize(tree));
   } catch (error) {
     logApiError(error as Error, 'GET', '/api/courses/[id]/curriculum', logContext);

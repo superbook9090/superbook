@@ -1,7 +1,8 @@
 // src/app/(dashboard)/dashboard/admin/users/_hooks/useAdminUsers.ts
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useAlert } from '@/components/ui/AlertContainer';
 import { useSessionStore } from '@/store/useSessionStore';
@@ -14,19 +15,24 @@ import {
 import { listOrganizations } from '@/lib/api/organizations';
 import { fetchAccountInfo } from '@/lib/api/auth';
 import { ApiClientError } from '@/lib/api/http';
+import { isSuperAdmin } from '@/lib/roles';
+import { queryKeys } from '@/lib/react-query/query-keys';
 import type { OrganizationPolicy } from '@/lib/admin/orgPolicy';
 import type { User, UserStats } from '../_components/types';
+
+interface AdminUsersQueryData {
+  users: User[];
+  pagination: { total: number; totalPages: number };
+  stats: UserStats | null;
+  organizationPolicy: OrganizationPolicy | null;
+}
 
 export function useAdminUsers() {
   const { session, status } = useSessionStore();
   const { t } = useTranslation();
   const { addAlert } = useAlert();
+  const queryClient = useQueryClient();
 
-  const [users, setUsers] = useState<User[]>([]);
-  const [stats, setStats] = useState<UserStats | null>(null);
-  const [organizationPolicy, setOrganizationPolicy] = useState<OrganizationPolicy | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isFetching, setIsFetching] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
@@ -40,16 +46,7 @@ export function useAdminUsers() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showUserDetail, setShowUserDetail] = useState(false);
-  const [organizations, setOrganizations] = useState<Array<{ _id: string; name: string }>>([]);
-  const [adminOrg, setAdminOrg] = useState<{
-    name: string;
-    inviteCode: string;
-    logo?: string | null;
-  } | null>(null);
-  const [pagination, setPagination] = useState({ total: 0, totalPages: 1 });
 
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const requestIdRef = useRef(0);
   const isFirstSearchMountRef = useRef(true);
   const errorMessageRef = useRef(t('adminSettings.errorLoadingUsers'));
   errorMessageRef.current = t('adminSettings.errorLoadingUsers');
@@ -68,99 +65,121 @@ export function useAdminUsers() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  useEffect(() => {
-    let cancelled = false;
-    if (session?.user?.organizationId) {
-      fetchAccountInfo()
-        .then((info) => {
-          if (!cancelled && info.organization) {
-            setAdminOrg({
-              name: info.organization.name,
-              inviteCode: info.organization.inviteCode,
-              logo: info.organization.logo,
-            });
-          }
-        })
-        .catch(() => {});
-    }
-    return () => {
-      cancelled = true;
+  const sessionUserId = session?.user?.id;
+  const callerIsSuperAdmin = isSuperAdmin(session?.user?.role);
+  const orgScope = `${session?.user?.role || 'guest'}:${session?.user?.organizationId || 'global'}`;
+
+  // Cached account info (shared across admin users & profile views)
+  const accountQuery = useQuery({
+    queryKey: queryKeys.account.info(sessionUserId),
+    queryFn: () => fetchAccountInfo(),
+    enabled: status === 'authenticated' && Boolean(session?.user?.organizationId),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const adminOrg = useMemo(() => {
+    const org = accountQuery.data?.organization;
+    if (!org) return null;
+    const orgWithTeacherCode = org as typeof org & { teacherInviteCode?: string };
+    return {
+      name: org.name,
+      inviteCode: org.inviteCode,
+      teacherInviteCode: orgWithTeacherCode.teacherInviteCode,
+      logo: org.logo,
     };
-  }, [session?.user?.organizationId]);
+  }, [accountQuery.data]);
 
-  const fetchUsers = useCallback(async () => {
-    abortControllerRef.current?.abort();
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
-    const currentRequestId = ++requestIdRef.current;
+  // Cached organizations list (shared with /dashboard/admin/organizations)
+  const orgsQuery = useQuery({
+    queryKey: queryKeys.organizations.list(true),
+    queryFn: async () => {
+      const data = await listOrganizations({ includeInactive: true });
+      return data.organizations || [];
+    },
+    enabled: status === 'authenticated' && Boolean(sessionUserId) && callerIsSuperAdmin,
+    staleTime: 5 * 60 * 1000,
+  });
 
-    setIsFetching(true);
-    try {
-      const data = await listAdminUsers(
-        {
-          search: debouncedSearch || undefined,
-          role: roleFilter === 'all' ? undefined : roleFilter,
-          platform: platformFilter === 'all' ? undefined : platformFilter,
-          activity: activityFilter === 'all' ? undefined : activityFilter,
-          status: statusFilter === 'all' ? undefined : statusFilter,
-          organizationId: orgFilter === 'all' ? undefined : orgFilter,
-          page,
-          limit: pageSize,
-        },
-        { signal: controller.signal }
-      );
-      if (currentRequestId !== requestIdRef.current) return;
-      setUsers((data.users || []) as User[]);
-      setPagination(data.pagination || { total: 0, totalPages: 1 });
-      if (data.stats) setStats(data.stats);
-      if (data.organizationPolicy) setOrganizationPolicy(data.organizationPolicy);
-    } catch (err) {
-      if (err instanceof DOMException && err.name === 'AbortError') return;
-      if (currentRequestId !== requestIdRef.current) return;
+  const organizations = useMemo(
+    () => (orgsQuery.data || []) as Array<{ _id: string; name: string }>,
+    [orgsQuery.data]
+  );
+
+  const queryParams = useMemo(
+    () => ({
+      search: debouncedSearch || undefined,
+      role: roleFilter === 'all' ? undefined : roleFilter,
+      platform: platformFilter === 'all' ? undefined : platformFilter,
+      activity: activityFilter === 'all' ? undefined : activityFilter,
+      status: statusFilter === 'all' ? undefined : statusFilter,
+      organizationId: orgFilter === 'all' ? undefined : orgFilter,
+      page,
+      limit: pageSize,
+    }),
+    [debouncedSearch, roleFilter, platformFilter, activityFilter, statusFilter, orgFilter, page, pageSize]
+  );
+
+  const currentUsersQueryKey = useMemo(
+    () => queryKeys.adminUsers.list(orgScope, queryParams),
+    [orgScope, queryParams]
+  );
+
+  const usersQuery = useQuery<AdminUsersQueryData>({
+    queryKey: currentUsersQueryKey,
+    queryFn: async ({ signal }) => {
+      const data = await listAdminUsers(queryParams, { signal });
+      return {
+        users: (data.users || []) as User[],
+        pagination: data.pagination || { total: 0, totalPages: 1 },
+        stats: data.stats ?? null,
+        organizationPolicy: data.organizationPolicy ?? null,
+      };
+    },
+    enabled: status === 'authenticated' && Boolean(sessionUserId),
+    staleTime: 60 * 1000, // 1 minute cache per filter/page combo
+    placeholderData: keepPreviousData,
+  });
+
+  useEffect(() => {
+    if (usersQuery.error) {
+      const err = usersQuery.error;
       addAlert({
         type: 'error',
         message: err instanceof ApiClientError ? err.message : errorMessageRef.current,
       });
-    } finally {
-      if (currentRequestId === requestIdRef.current) {
-        setIsLoading(false);
-        setIsFetching(false);
-      }
     }
-  }, [debouncedSearch, roleFilter, platformFilter, activityFilter, statusFilter, orgFilter, page, pageSize, addAlert]);
+  }, [usersQuery.error, addAlert]);
 
-  const sessionUserId = session?.user?.id;
+  const users = useMemo(() => usersQuery.data?.users ?? [], [usersQuery.data]);
+  const pagination = usersQuery.data?.pagination ?? { total: 0, totalPages: 1 };
+  const stats = usersQuery.data?.stats ?? null;
+  const organizationPolicy = usersQuery.data?.organizationPolicy ?? null;
+  const isLoading = usersQuery.isPending;
+  const isFetching = usersQuery.isFetching;
 
-  // Fetch organizations only once per authenticated session
-  useEffect(() => {
-    if (status === 'loading' || !sessionUserId) return;
-    let cancelled = false;
-    listOrganizations()
-      .then((data) => {
-        if (!cancelled) {
-          setOrganizations((data.organizations || []) as Array<{ _id: string; name: string }>);
-        }
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [sessionUserId, status]);
+  const fetchUsers = useCallback(async () => {
+    await usersQuery.refetch();
+  }, [usersQuery]);
 
-  // Fetch users whenever query/filter/pagination changes, aborting stale requests
-  useEffect(() => {
-    if (status === 'loading' || !sessionUserId) return;
-    void fetchUsers();
-    return () => {
-      abortControllerRef.current?.abort();
-    };
-  }, [sessionUserId, status, fetchUsers]);
+  const patchCachedUser = useCallback(
+    (userId: string, patch: Partial<User>) => {
+      queryClient.setQueryData<AdminUsersQueryData>(currentUsersQueryKey, (prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          users: prev.users.map((u) => (u._id === userId ? { ...u, ...patch } : u)),
+        };
+      });
+      setSelectedUser((prev) => (prev && prev._id === userId ? { ...prev, ...patch } : prev));
+    },
+    [queryClient, currentUsersQueryKey]
+  );
 
   const handleRoleChange = async (userId: string, newRole: string) => {
     try {
       await patchAdminUser({ userId, updates: { role: newRole } });
-      setUsers((prev) => prev.map((u) => (u._id === userId ? { ...u, role: newRole } : u)));
-      if (selectedUser?._id === userId) setSelectedUser((prev) => (prev ? { ...prev, role: newRole } : null));
+      patchCachedUser(userId, { role: newRole });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.adminUsers.all });
       addAlert({ type: 'success', message: t('adminUsers.userRoleUpdatedSuccess') });
     } catch (err) {
       addAlert({
@@ -174,8 +193,7 @@ export function useAdminUsers() {
     try {
       const newVal = !currentVal;
       await patchAdminUser({ userId, updates: { canUploadVideos: newVal } });
-      setUsers((prev) => prev.map((u) => (u._id === userId ? { ...u, canUploadVideos: newVal } : u)));
-      if (selectedUser?._id === userId) setSelectedUser((prev) => (prev ? { ...prev, canUploadVideos: newVal } : null));
+      patchCachedUser(userId, { canUploadVideos: newVal });
       addAlert({ type: 'success', message: t('adminUsers.videoPermissionUpdated') });
     } catch (err) {
       addAlert({
@@ -189,8 +207,7 @@ export function useAdminUsers() {
     try {
       const newVal = !currentVal;
       await patchAdminUser({ userId, updates: { canCreatePublicCourses: newVal } });
-      setUsers((prev) => prev.map((u) => (u._id === userId ? { ...u, canCreatePublicCourses: newVal } : u)));
-      if (selectedUser?._id === userId) setSelectedUser((prev) => (prev ? { ...prev, canCreatePublicCourses: newVal } : null));
+      patchCachedUser(userId, { canCreatePublicCourses: newVal });
       addAlert({ type: 'success', message: t('adminUsers.publicCoursePermissionUpdated') });
     } catch (err) {
       addAlert({
@@ -204,8 +221,7 @@ export function useAdminUsers() {
     try {
       const newVal = !currentVal;
       await patchAdminUser({ userId, updates: { canCreateContests: newVal } });
-      setUsers((prev) => prev.map((u) => (u._id === userId ? { ...u, canCreateContests: newVal } : u)));
-      if (selectedUser?._id === userId) setSelectedUser((prev) => (prev ? { ...prev, canCreateContests: newVal } : null));
+      patchCachedUser(userId, { canCreateContests: newVal });
       addAlert({ type: 'success', message: t('adminUsers.contestPermissionUpdated') });
     } catch (err) {
       addAlert({
@@ -219,8 +235,7 @@ export function useAdminUsers() {
     try {
       const newVal = !currentVal;
       await patchAdminUser({ userId, updates: { canGenerateAiQuizzes: newVal } });
-      setUsers((prev) => prev.map((u) => (u._id === userId ? { ...u, canGenerateAiQuizzes: newVal } : u)));
-      if (selectedUser?._id === userId) setSelectedUser((prev) => (prev ? { ...prev, canGenerateAiQuizzes: newVal } : null));
+      patchCachedUser(userId, { canGenerateAiQuizzes: newVal });
       addAlert({ type: 'success', message: t('adminUsers.aiQuizPermissionUpdated') });
     } catch (err) {
       addAlert({
@@ -236,8 +251,7 @@ export function useAdminUsers() {
   ) => {
     try {
       await patchAdminUser({ userId, updates: { limits } });
-      setUsers((prev) => prev.map((u) => (u._id === userId ? { ...u, limits } : u)));
-      if (selectedUser?._id === userId) setSelectedUser((prev) => (prev ? { ...prev, limits } : null));
+      patchCachedUser(userId, { limits });
       addAlert({ type: 'success', message: t('adminUsers.userLimitsUpdated') });
     } catch (err) {
       addAlert({
@@ -250,8 +264,9 @@ export function useAdminUsers() {
   const handleSaveOrgAssign = async (userId: string, orgId: string | null) => {
     try {
       const data = (await patchAdminUserOrganization(userId, { organizationId: orgId })) as Partial<User>;
-      setUsers((prev) => prev.map((u) => (u._id === userId ? { ...u, ...data } : u)));
-      if (selectedUser?._id === userId) setSelectedUser((prev) => (prev ? { ...prev, ...data } : null));
+      patchCachedUser(userId, data);
+      void queryClient.invalidateQueries({ queryKey: queryKeys.adminUsers.all });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.organizations.all });
       addAlert({ type: 'success', message: t('adminUsers.orgAssignedSuccess') });
     } catch (err) {
       addAlert({
@@ -265,8 +280,8 @@ export function useAdminUsers() {
     try {
       const newVal = !currentVal;
       await patchAdminUser({ userId, updates: { isSuspended: newVal } });
-      setUsers((prev) => prev.map((u) => (u._id === userId ? { ...u, isSuspended: newVal } : u)));
-      if (selectedUser?._id === userId) setSelectedUser((prev) => (prev ? { ...prev, isSuspended: newVal } : null));
+      patchCachedUser(userId, { isSuspended: newVal });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.adminUsers.all });
       addAlert({
         type: 'success',
         message: newVal ? t('adminUsers.userSuspended') : t('adminUsers.userUnsuspended'),
@@ -287,7 +302,8 @@ export function useAdminUsers() {
       setShowDeleteDialog(false);
       setDeleteId(null);
       addAlert({ type: 'success', message: t('adminUsers.userDeletedSuccess') });
-      void fetchUsers();
+      void queryClient.invalidateQueries({ queryKey: queryKeys.adminUsers.all });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.organizations.all });
     } catch (err) {
       addAlert({
         type: 'error',

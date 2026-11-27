@@ -214,6 +214,7 @@ export default function AdminUsersPage() {
           onClose={() => setShowInviteModal(false)}
           organizationName={u.adminOrg.name}
           inviteCode={u.adminOrg.inviteCode}
+          teacherInviteCode={u.adminOrg.teacherInviteCode}
           logo={u.adminOrg.logo}
         />
       )}

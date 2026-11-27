@@ -16,6 +16,21 @@ function isPdfFile(name: string, fileType?: string | null) {
   return name.toLowerCase().endsWith('.pdf');
 }
 
+function isAllowedCloudinaryUrl(rawUrl: string | null | undefined): boolean {
+  if (!rawUrl) return false;
+  try {
+    const parsed = new URL(rawUrl);
+    return (
+      parsed.protocol === 'https:' &&
+      parsed.hostname === 'res.cloudinary.com' &&
+      !parsed.username &&
+      !parsed.password
+    );
+  } catch {
+    return false;
+  }
+}
+
 // GET /api/files/view/[id] - Authenticated users; stream PDF inline (same org/public rules as listing)
 export async function GET(
   _request: NextRequest,
@@ -62,8 +77,20 @@ export async function GET(
       return NextResponse.json({ message: 'Only PDF files can be viewed' }, { status: 415 });
     }
 
+    if (!isAllowedCloudinaryUrl(file.fileUrl)) {
+      return NextResponse.json({ message: 'Invalid file source' }, { status: 400 });
+    }
+
     try {
-      const response = await fetch(file.fileUrl, { redirect: 'follow' });
+      let response = await fetch(file.fileUrl, { redirect: 'manual' });
+      if (response.status >= 300 && response.status < 400) {
+        const location = response.headers.get('location');
+        const resolved = location ? new URL(location, file.fileUrl).toString() : null;
+        if (!isAllowedCloudinaryUrl(resolved)) {
+          throw new Error('Blocked redirect to disallowed host');
+        }
+        response = await fetch(resolved!, { redirect: 'error' });
+      }
       if (!response.ok) {
         throw new Error('Failed to fetch file');
       }

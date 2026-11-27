@@ -11,28 +11,38 @@ interface RoleSelectorProps {
   role: UserRole;
   onChange: (role: UserRole) => void;
   allowTeacherRegistration: boolean;
+  lockedRole?: UserRole;
 }
 
 export default function RoleSelector({
   role,
   onChange,
   allowTeacherRegistration,
+  lockedRole,
 }: RoleSelectorProps) {
   const { t } = useTranslation();
 
+  const showStudent = !lockedRole || lockedRole === 'student';
+  const showTeacher =
+    lockedRole === 'teacher' || (!lockedRole && allowTeacherRegistration);
+
   const roles = [
-    {
-      id: 'student' as const,
-      label: t('register.student'),
-      desc: t('register.studentDesc'),
-      icon: GraduationCap,
-      badge: 'Learner',
-      accentColor: 'var(--student-primary)',
-      activeBorder: 'border-[var(--student-primary)]',
-      activeBg: 'bg-[var(--student-soft)]',
-      activeText: 'text-[var(--student-primary)]',
-    },
-    ...(allowTeacherRegistration
+    ...(showStudent
+      ? [
+          {
+            id: 'student' as const,
+            label: t('register.student'),
+            desc: t('register.studentDesc'),
+            icon: GraduationCap,
+            badge: 'Learner',
+            accentColor: 'var(--student-primary)',
+            activeBorder: 'border-[var(--student-primary)]',
+            activeBg: 'bg-[var(--student-soft)]',
+            activeText: 'text-[var(--student-primary)]',
+          },
+        ]
+      : []),
+    ...(showTeacher
       ? [
           {
             id: 'teacher' as const,

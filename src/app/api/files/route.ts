@@ -27,7 +27,11 @@ export async function GET(request: NextRequest) {
     const isSuperadmin = authUser.role === 'superadmin';
 
     const { searchParams } = new URL(request.url);
-    const parentIdRaw = searchParams.get('parentId');
+    const parentIdRaw = searchParams.get('parentId')?.trim() || null;
+
+    if (parentIdRaw && !mongoose.Types.ObjectId.isValid(parentIdRaw)) {
+      return NextResponse.json({ message: 'Invalid parentId' }, { status: 400 });
+    }
 
     const paginationParsed = paginationSchema.safeParse({
       page: searchParams.get('page') || undefined,
@@ -41,7 +45,7 @@ export async function GET(request: NextRequest) {
     const orgId = authUser.organizationId || 'public';
     const parentKey = parentIdRaw || 'root';
     const cacheScope = isSuperadmin ? 'full' : 'ro';
-    const cacheKey = `files:${orgId}:${parentKey}:${page}:${limit}:${cacheScope}`;
+    const cacheKey = `files:${orgId}:${parentKey}:${authUser.role}:${page}:${limit}:${cacheScope}`;
 
     const cached = await getCachedData<unknown>(cacheKey);
     if (cached) {

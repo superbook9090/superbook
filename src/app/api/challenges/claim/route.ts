@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import { logApiError, type LogContext } from '@/lib/logger';
+import { requireFeature } from '@/lib/settingsHelpers';
 import { claimChallengeSchema } from '@/lib/validation';
 import { Challenge, ChallengeAttempt } from '@/models';
 
@@ -14,6 +15,9 @@ export async function POST(req: NextRequest) {
   };
 
   try {
+    const featureGuard = await requireFeature('enableQuizChallenges');
+    if (featureGuard) return featureGuard;
+
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
@@ -31,39 +35,52 @@ export async function POST(req: NextRequest) {
 
     await dbConnect();
     const { claimToken } = validation.data;
+    const userObjectId = new mongoose.Types.ObjectId(session.user.id);
 
-    const attempt = await ChallengeAttempt.findOne({ claimToken });
-    if (!attempt) {
-      return NextResponse.json({ message: 'Challenge attempt not found' }, { status: 404 });
-    }
+    // Atomically claim only if not already converted
+    const claimed = await ChallengeAttempt.findOneAndUpdate(
+      { claimToken, converted: false },
+      { $set: { opponentUser: userObjectId, converted: true } },
+      { new: true }
+    );
 
-    if (attempt.converted && attempt.opponentUser?.toString() === session.user.id) {
+    if (claimed) {
+      await Challenge.updateOne(
+        { _id: claimed.challenge },
+        { $inc: { conversionsCount: 1 } }
+      );
+
       return NextResponse.json({
         success: true,
-        message: 'Attempt already claimed by current user',
-        attemptId: attempt._id.toString(),
+        message: 'Challenge attempt successfully linked to your account!',
+        attemptId: claimed._id.toString(),
       });
     }
 
-    // Link user and mark converted
-    const wasAlreadyConverted = attempt.converted;
-    attempt.opponentUser = new mongoose.Types.ObjectId(session.user.id);
-    attempt.converted = true;
-    await attempt.save();
+    const existing = (await ChallengeAttempt.findOne({ claimToken })
+      .select('_id converted opponentUser')
+      .lean()) as {
+      _id: { toString(): string };
+      converted?: boolean;
+      opponentUser?: { toString(): string } | null;
+    } | null;
 
-    // Increment conversion count on parent challenge if not already counted
-    if (!wasAlreadyConverted) {
-      await Challenge.updateOne(
-        { _id: attempt.challenge },
-        { $inc: { conversionsCount: 1 } }
-      );
+    if (!existing) {
+      return NextResponse.json({ message: 'Challenge attempt not found' }, { status: 404 });
     }
 
-    return NextResponse.json({
-      success: true,
-      message: 'Challenge attempt successfully linked to your account!',
-      attemptId: attempt._id.toString(),
-    });
+    if (existing.converted && existing.opponentUser?.toString() === session.user.id) {
+      return NextResponse.json({
+        success: true,
+        message: 'Attempt already claimed by current user',
+        attemptId: existing._id.toString(),
+      });
+    }
+
+    return NextResponse.json(
+      { message: 'This challenge attempt has already been claimed by another user' },
+      { status: 409 }
+    );
   } catch (error) {
     logApiError(error as Error, 'POST', logContext.path || '/api/challenges/claim', logContext);
     return NextResponse.json(

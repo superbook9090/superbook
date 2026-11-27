@@ -18,13 +18,23 @@ export const metadata: Metadata = createPageMetadata({
 export default async function RegisterPage({
   searchParams,
 }: {
-  searchParams: Promise<{ callbackUrl?: string }>;
+  searchParams: Promise<{
+    callbackUrl?: string;
+    inviteCode?: string;
+    code?: string;
+    orgCode?: string;
+    org?: string;
+  }>;
 }) {
   const session = await getServerSession(authOptions);
 
-  if (session) {
-    const { callbackUrl } = await searchParams;
-    redirect(getSafeCallbackUrl(callbackUrl, ROUTES.dashboard));
+  if (session?.user?.id) {
+    const params = await searchParams;
+    const inviteCode = params.inviteCode || params.code || params.orgCode || params.org;
+    if (inviteCode) {
+      redirect(`/dashboard/join-org?inviteCode=${encodeURIComponent(inviteCode)}`);
+    }
+    redirect(getSafeCallbackUrl(params.callbackUrl, ROUTES.dashboard));
   }
 
   return <LazyRegisterForm />;

@@ -8,7 +8,7 @@ import { updateCourseSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { serialize } from '@/lib/serialize';
 import mongoose from 'mongoose';
-import { validateContentAccess } from '@/lib/accessControl';
+import { canManageOrgContent, validateContentAccess, type AccessUser } from '@/lib/accessControl';
 import { deleteCourseRelatedData } from '@/lib/cascade/deleteRelated';
 import { invalidatePattern } from '@/lib/redis';
 import { revalidateTag } from 'next/cache';
@@ -40,6 +40,13 @@ export async function GET(
     await dbConnect();
     const { id } = await params;
 
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { message: 'Course not found' },
+        { status: 404 }
+      );
+    }
+
     const course = await Course.findById(id)
       .populate('instructor', 'name email')
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -54,54 +61,65 @@ export async function GET(
 
     const session = await getServerSession(authOptions);
 
-    // Apply organization-based access control
+    // Require authentication for org-scoped, private, or unpublished courses
+    const requiresAuth =
+      Boolean(course.organizationId) || isPrivateCourse(course) || !course.isPublished;
+    if (requiresAuth && !session?.user) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    const instructorId =
+      typeof course.instructor === 'object' && course.instructor !== null
+        ? course.instructor._id?.toString()
+        : course.instructor?.toString();
+
+    let authUser: AccessUser | null = null;
     if (session?.user) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const user = session.user as any;
-      validateContentAccess(
-        course.organizationId,
-        {
-          _id: new mongoose.Types.ObjectId(user.id),
-          organizationId: user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null,
-          role: user.role as 'student' | 'teacher' | 'admin',
-        },
-        'course'
-      );
-    }
+      authUser = {
+        _id: new mongoose.Types.ObjectId(user.id),
+        organizationId: user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null,
+        role: (user.role || 'student') as AccessUser['role'],
+      };
 
-    // Only allow viewing unpublished courses for owner or admin
-    if (!course.isPublished) {
-      if (
-        !session ||
-        (course.instructor._id.toString() !== session.user.id &&
-          session.user.role !== 'admin' &&
-          session.user.role !== 'superadmin')
-      ) {
+      // Apply organization-based access control
+      try {
+        validateContentAccess(course.organizationId, authUser, 'course');
+      } catch {
         return NextResponse.json(
-          { message: 'Course not found' },
-          { status: 404 }
+          { message: 'You do not have permission to access this course' },
+          { status: 403 }
         );
       }
     }
 
-    const isOwner = session?.user?.id === course.instructor._id.toString();
-    const isAdmin = session?.user?.role === 'admin' || session?.user?.role === 'superadmin';
+    const canManage = authUser
+      ? canManageOrgContent(course.organizationId, instructorId, authUser)
+      : false;
 
-    if (
-      session?.user?.role === 'student' &&
-      isPrivateCourse(course) &&
-      !isOwner &&
-      !isAdmin
-    ) {
+    // Only allow viewing unpublished courses for authorized managers (owner, same-org admin, superadmin)
+    if (!course.isPublished && !canManage) {
+      return NextResponse.json(
+        { message: 'Course not found' },
+        { status: 404 }
+      );
+    }
+
+    // Restrict private (courseCode) courses for ALL non-managers unless enrolled
+    if (isPrivateCourse(course) && !canManage) {
+      if (!session?.user) {
+        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+      }
       const enrolled = await isStudentEnrolled(session.user.id, id);
       if (!enrolled) {
         return NextResponse.json({ message: 'Course not found' }, { status: 404 });
       }
     }
 
-    // Apply serialization to convert ObjectIds to strings
+    // Apply serialization to convert ObjectIds to strings; only expose courseCode to authorized managers
     const serializedCourse = sanitizeCourseResponse(serialize(course) as Record<string, unknown>, {
-      includeCourseCode: isOwner || isAdmin,
+      includeCourseCode: canManage,
     });
 
     return NextResponse.json(serializedCourse);
@@ -142,6 +160,13 @@ export async function PATCH(
     await dbConnect();
     const { id } = await params;
 
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { message: 'Course not found' },
+        { status: 404 }
+      );
+    }
+
     const course = await Course.findById(id);
 
     if (!course) {
@@ -151,12 +176,18 @@ export async function PATCH(
       );
     }
 
-    // Check ownership or admin
-    if (
-      course.instructor.toString() !== session.user.id &&
-      session.user.role !== 'admin' &&
-      session.user.role !== 'superadmin'
-    ) {
+    // Check organization-scoped management permission
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const patchUser = session.user as any;
+    const patchAuthUser: AccessUser = {
+      _id: new mongoose.Types.ObjectId(patchUser.id),
+      organizationId: patchUser.organizationId
+        ? new mongoose.Types.ObjectId(patchUser.organizationId)
+        : null,
+      role: (patchUser.role || 'student') as AccessUser['role'],
+    };
+
+    if (!canManageOrgContent(course.organizationId, course.instructor, patchAuthUser)) {
       return NextResponse.json(
         { message: 'You can only edit your own courses' },
         { status: 403 }
@@ -222,9 +253,10 @@ export async function PATCH(
 
     await course.populate('instructor', 'name email');
 
-    // Invalidate cache for this organization
+    // Invalidate cache for this organization and superadmin views
     const orgId = course.organizationId?.toString() || 'public';
     await invalidatePattern(`courses:${orgId}:*`);
+    await invalidatePattern(`courses:superadmin:*`);
     
     // Revalidate Next.js cache tag
     revalidateTag(`courses:${orgId}`);
@@ -284,6 +316,13 @@ export async function DELETE(
     await dbConnect();
     const { id } = await params;
 
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { message: 'Course not found' },
+        { status: 404 }
+      );
+    }
+
     const course = await Course.findById(id).populate('instructor', 'name email');
 
     if (!course) {
@@ -295,7 +334,7 @@ export async function DELETE(
 
     const isUserAdmin = isAdmin(session.user.role);
 
-    // Check ownership or admin
+    // Check organization-scoped management permission
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const instructorObj = course.instructor as any;
     const instructorId =
@@ -303,7 +342,17 @@ export async function DELETE(
         ? instructorObj._id?.toString()
         : String(instructorObj);
 
-    if (instructorId !== session.user.id && !isUserAdmin) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const deleteUser = session.user as any;
+    const deleteAuthUser: AccessUser = {
+      _id: new mongoose.Types.ObjectId(deleteUser.id),
+      organizationId: deleteUser.organizationId
+        ? new mongoose.Types.ObjectId(deleteUser.organizationId)
+        : null,
+      role: (deleteUser.role || 'student') as AccessUser['role'],
+    };
+
+    if (!canManageOrgContent(course.organizationId, instructorId, deleteAuthUser)) {
       return NextResponse.json(
         { message: 'You can only delete your own courses' },
         { status: 403 }
@@ -334,9 +383,10 @@ export async function DELETE(
     await deleteCourseRelatedData(id);
     await Course.findByIdAndDelete(id);
 
-    // Invalidate cache for this organization
+    // Invalidate cache for this organization and superadmin views
     const orgId = course.organizationId?.toString() || 'public';
     await invalidatePattern(`courses:${orgId}:*`);
+    await invalidatePattern(`courses:superadmin:*`);
     await invalidatePattern(`quizzes:${orgId}:*`);
     
     // Revalidate Next.js cache tag

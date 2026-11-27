@@ -7,7 +7,7 @@ import User from '@/models/User';
 import { createBlogSchema } from '@/lib/validation';
 import { logApiError, logFailedRequest, type LogContext } from '@/lib/logger';
 import { requireFeature, checkTeacherLimit } from '@/lib/settingsHelpers';
-import { sanitizeHtml } from '@/lib/sanitize';
+import { sanitizeHtml, escapeRegex } from '@/lib/sanitize';
 import mongoose from 'mongoose';
 import { getAccessFilter } from '@/lib/accessControl';
 import { getCachedData, setCachedData, invalidatePattern } from '@/lib/redis';
@@ -15,7 +15,7 @@ import { revalidateTag } from 'next/cache';
 import { parseOffsetPagination } from '@/lib/server/pagination';
 import { blogTopicValues, type BlogTopicKey } from '@/i18n/config';
 import { slugifyBlogTitle } from '@/lib/blogs/public';
-import { isStaffRole } from '@/lib/roles';
+import { isStaffRole, isSuperAdmin } from '@/lib/roles';
 
 export const dynamic = 'force-dynamic';
 
@@ -68,13 +68,9 @@ async function generateUniqueBlogSlug(title: string, existingId?: string) {
   }
 }
 
-function escapeRegex(value: string) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
 function buildTopicFilter(topic: string) {
   const mapped = blogTopicValues[topic as BlogTopicKey];
-  const value = mapped ?? topic;
+  const value = (mapped ?? topic).trim().slice(0, 100);
   return { topic: { $regex: new RegExp(`^${escapeRegex(value)}$`, 'i') } };
 }
 
@@ -110,7 +106,7 @@ export async function GET(req: NextRequest) {
     const { page, limit, skip } = parseOffsetPagination(searchParams, { defaultLimit: 10 });
     const topic = searchParams.get('topic');
     const language = searchParams.get('language');
-    const search = searchParams.get('search')?.trim() || '';
+    const search = (searchParams.get('search')?.trim() || '').slice(0, 100);
     const status = searchParams.get('status');
     const includeDrafts = searchParams.get('includeDrafts') === 'true';
     const author = searchParams.get('author');
@@ -158,12 +154,40 @@ export async function GET(req: NextRequest) {
 
     const andFilters: Record<string, unknown>[] = [];
 
-    if (status === 'published') {
+    if (!sessionUser || sessionUser.role === 'student') {
+      // Unauthenticated users and students may only ever see published blogs
       andFilters.push({ isPublished: true });
-    } else if (status === 'draft') {
-      andFilters.push({ isPublished: false });
-    } else if (!includeDrafts) {
-      andFilters.push({ isPublished: true });
+    } else if (sessionUser.role === 'teacher') {
+      const teacherId = new mongoose.Types.ObjectId(sessionUser.id);
+      if (status === 'draft') {
+        andFilters.push({ isPublished: false, author: teacherId });
+      } else if (status === 'published' || !includeDrafts) {
+        andFilters.push({ isPublished: true });
+      } else {
+        andFilters.push({
+          $or: [
+            { isPublished: true },
+            { isPublished: false, author: teacherId },
+          ],
+        });
+      }
+    } else if (sessionUser.role === 'admin') {
+      // accessFilter below already restricts org admins strictly to their own organization
+      // (or strictly to their own self-authored blogs when no organization is assigned).
+      if (status === 'draft') {
+        andFilters.push({ isPublished: false });
+      } else if (status === 'published' || !includeDrafts) {
+        andFilters.push({ isPublished: true });
+      }
+    } else {
+      // superadmin
+      if (status === 'published') {
+        andFilters.push({ isPublished: true });
+      } else if (status === 'draft') {
+        andFilters.push({ isPublished: false });
+      } else if (!includeDrafts) {
+        andFilters.push({ isPublished: true });
+      }
     }
 
     if (topic && topic !== 'all') {
@@ -202,12 +226,13 @@ export async function GET(req: NextRequest) {
     }
 
     if (search) {
+      const escapedSearch = escapeRegex(search);
       const searchOr: Record<string, unknown>[] = [
-        { title: { $regex: search, $options: 'i' } },
-        { topic: { $regex: search, $options: 'i' } },
+        { title: { $regex: escapedSearch, $options: 'i' } },
+        { topic: { $regex: escapedSearch, $options: 'i' } },
       ];
 
-      const matchingAuthors = await User.find({ name: { $regex: search, $options: 'i' } })
+      const matchingAuthors = await User.find({ name: { $regex: escapedSearch, $options: 'i' } })
         .select('_id')
         .lean();
       if (matchingAuthors.length > 0) {
@@ -227,10 +252,11 @@ export async function GET(req: NextRequest) {
     }
 
     const sortOrder = sortParam === 'oldest' ? 1 : -1;
+    const authorSelect = isAdminSession ? 'name email' : 'name';
 
     const [blogs, total] = await Promise.all([
       Blog.find(query)
-        .populate('author', 'name email')
+        .populate('author', authorSelect)
         .sort({ createdAt: sortOrder })
         .skip(skip)
         .limit(limit)
@@ -261,19 +287,38 @@ export async function GET(req: NextRequest) {
         statsAndFilters.push({ author: new mongoose.Types.ObjectId(sessionUser.id) });
       }
 
-      const statsQuery: Record<string, unknown> = {};
-      if (statsAndFilters.length === 1) {
-        Object.assign(statsQuery, statsAndFilters[0]);
-      } else if (statsAndFilters.length > 1) {
-        statsQuery.$and = statsAndFilters;
+      const publishedQuery: Record<string, unknown> = {
+        $and: [...statsAndFilters, { isPublished: true }],
+      };
+
+      const statsPublished = await Blog.countDocuments(publishedQuery);
+      let statsDraft = 0;
+
+      if (sessionUser.role === 'superadmin') {
+        statsDraft = await Blog.countDocuments({
+          $and: [...statsAndFilters, { isPublished: false }],
+        });
+      } else if (sessionUser.role === 'admin' && resolvedOrgId) {
+        statsDraft = await Blog.countDocuments({
+          $and: [
+            ...statsAndFilters,
+            { isPublished: false, organizationId: new mongoose.Types.ObjectId(resolvedOrgId) },
+          ],
+        });
+      } else if (sessionUser.role === 'teacher') {
+        statsDraft = await Blog.countDocuments({
+          $and: [
+            ...statsAndFilters,
+            { isPublished: false, author: new mongoose.Types.ObjectId(sessionUser.id) },
+          ],
+        });
       }
 
-      const [statsTotal, statsPublished, statsDraft] = await Promise.all([
-        Blog.countDocuments(statsQuery),
-        Blog.countDocuments({ ...statsQuery, isPublished: true }),
-        Blog.countDocuments({ ...statsQuery, isPublished: false }),
-      ]);
-      stats = { total: statsTotal, published: statsPublished, draft: statsDraft };
+      stats = {
+        total: statsPublished + statsDraft,
+        published: statsPublished,
+        draft: statsDraft,
+      };
     }
 
     const responseData = {
@@ -405,7 +450,10 @@ export async function POST(req: NextRequest) {
       metaTitle: metaTitle?.trim() || title,
       metaDescription: metaDescription?.trim() || deriveExcerpt(sanitizedContent, excerpt),
       visibility: normalizedVisibility,
-      isFeatured: normalizedVisibility === 'public' ? isFeatured : false,
+      isFeatured:
+        normalizedVisibility === 'public' && isSuperAdmin(session.user.role)
+          ? isFeatured
+          : false,
       ...(resolvedSlug ? { slug: resolvedSlug } : {}),
       author: session.user.id,
       organizationId,

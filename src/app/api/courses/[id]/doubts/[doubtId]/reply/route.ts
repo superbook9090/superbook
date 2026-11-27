@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+import mongoose from 'mongoose';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import { Course } from '@/models';
@@ -9,6 +10,7 @@ import { requireFeature } from '@/lib/settingsHelpers';
 import { createUserNotifications } from '@/lib/server/services/notifications-service';
 import { sendPushNotification } from '@/lib/notifications/push/sendPushNotification';
 import { isAdmin } from '@/lib/roles';
+import { canManageOrgContent, type AccessUser } from '@/lib/accessControl';
 
 // PATCH /api/courses/[id]/doubts/[doubtId]/reply - Teacher replies to a doubt
 export async function PATCH(
@@ -29,21 +31,41 @@ export async function PATCH(
     await dbConnect();
     const { id, doubtId } = await params;
 
-    const course = await Course.findById(id).select('title instructor').lean();
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json({ message: 'Course not found' }, { status: 404 });
+    }
+
+    const course = await Course.findById(id)
+      .select('title instructor organizationId')
+      .lean<{
+        title: string;
+        instructor: mongoose.Types.ObjectId | string;
+        organizationId?: mongoose.Types.ObjectId | null;
+      }>();
     if (!course) {
       return NextResponse.json({ message: 'Course not found' }, { status: 404 });
     }
 
-    // Check ownership
+    // Check organization-scoped management permission
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const instructorId = (course.instructor as any)._id?.toString() || course.instructor.toString();
-    if (instructorId !== session.user.id && !isAdmin(session.user.role)) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const user = session.user as any;
+    const authUser: AccessUser = {
+      _id: new mongoose.Types.ObjectId(user.id),
+      organizationId: user.organizationId
+        ? new mongoose.Types.ObjectId(user.organizationId)
+        : null,
+      role: (user.role || 'student') as AccessUser['role'],
+    };
+
+    if (!canManageOrgContent(course.organizationId, instructorId, authUser)) {
       return NextResponse.json({ message: 'Only the course instructor can reply' }, { status: 403 });
     }
 
     const { answer } = await req.json();
 
-    if (!answer || answer.trim().length === 0) {
+    if (typeof answer !== 'string' || answer.trim().length === 0) {
       return NextResponse.json({ message: 'Answer cannot be empty' }, { status: 400 });
     }
 

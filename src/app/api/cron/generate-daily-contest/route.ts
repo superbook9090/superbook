@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import dbConnect from '@/lib/db';
@@ -147,14 +148,22 @@ function processAndRandomizeContestQuestion(
   };
 }
 
+function isValidCronBearer(authHeader: string | null, expectedSecret: string | undefined): boolean {
+  if (!expectedSecret || !authHeader) return false;
+  const expected = `Bearer ${expectedSecret}`;
+  const a = Buffer.from(authHeader, 'utf8');
+  const b = Buffer.from(expected, 'utf8');
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(a, b);
+}
+
 export async function GET(req: NextRequest) {
   const logContext = { method: 'GET', path: '/api/cron/generate-daily-contest' };
 
   try {
-    // 1. Verify Vercel Cron Secret (if configured) or Superadmin session
+    // 1. Verify Vercel Cron Secret (Bearer only, fail closed) or Superadmin session
     const authHeader = req.headers.get('authorization');
-    const isCronAuthorized =
-      Boolean(process.env.CRON_SECRET) && authHeader === `Bearer ${process.env.CRON_SECRET}`;
+    const isCronAuthorized = isValidCronBearer(authHeader, process.env.CRON_SECRET);
 
     let isSuperAdmin = false;
     if (!isCronAuthorized) {
@@ -385,10 +394,7 @@ CRITICAL FACTUAL ACCURACY & FORMAT REQUIREMENTS:
   } catch (error) {
     logApiError(error as Error, 'GET', '/api/cron/generate-daily-contest', logContext);
     return NextResponse.json(
-      {
-        message: 'Internal Server Error',
-        error: error instanceof Error ? error.message : String(error),
-      },
+      { message: 'Internal Server Error' },
       { status: 500 }
     );
   }

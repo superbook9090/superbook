@@ -33,14 +33,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const parentId = normalizeParentId(parsed.data.parentId ?? null);
+    const parentIdRaw = typeof parsed.data.parentId === 'string' ? parsed.data.parentId.trim() : '';
+    if (parentIdRaw && !mongoose.Types.ObjectId.isValid(parentIdRaw)) {
+      return NextResponse.json({ message: 'Invalid parentId' }, { status: 400 });
+    }
+    const parentId = normalizeParentId(parentIdRaw || null);
     await assertParentIsFolder(parentId);
 
     const authUser = session!.user;
 
-    const organizationId = authUser.organizationId
+    let organizationId: mongoose.Types.ObjectId | null = authUser.organizationId
       ? new mongoose.Types.ObjectId(authUser.organizationId)
       : null;
+
+    if (parentId) {
+      const parentFolder = await FileNode.findById(parentId)
+        .select('organizationId')
+        .lean<{ organizationId?: mongoose.Types.ObjectId | null } | null>();
+      organizationId = parentFolder?.organizationId ?? null;
+    }
 
     const node = await FileNode.create({
       name: parsed.data.name,
@@ -50,7 +61,7 @@ export async function POST(request: NextRequest) {
       organizationId,
     });
 
-    const orgKey = authUser.organizationId || 'public';
+    const orgKey = organizationId?.toString() || 'public';
     const parentKey = parentId ? parentId.toString() : 'root';
     await invalidatePattern(`files:${orgKey}:${parentKey}:*`);
 

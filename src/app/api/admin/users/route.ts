@@ -41,6 +41,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
     }
 
+    if (!authResult.isSuperAdmin && (!authResult.organizationId || !validateObjectId(authResult.organizationId))) {
+      return NextResponse.json({ message: 'Admin must belong to a valid organization' }, { status: 403 });
+    }
+
     if (session?.user) {
       logContext.userId = session.user.id;
     }
@@ -108,6 +112,10 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ message: 'Admin access required' }, { status: 403 });
     }
 
+    if (!authResult.isSuperAdmin && (!authResult.organizationId || !validateObjectId(authResult.organizationId))) {
+      return NextResponse.json({ message: 'Admin must belong to a valid organization' }, { status: 403 });
+    }
+
     if (session?.user) {
       logContext.userId = session.user.id;
     }
@@ -151,18 +159,23 @@ export async function PATCH(request: NextRequest) {
       authResult,
       orgPolicy
     );
-    if (validation.error) {
-      return NextResponse.json({ message: validation.error }, { status: validation.status || 400 });
+    if (validation.error || !validation.sanitizedUpdates) {
+      return NextResponse.json(
+        { message: validation.error || 'Invalid updates' },
+        { status: validation.status || 400 }
+      );
     }
 
-    if (updates.role && updates.role !== targetUser.role) {
+    const sanitizedUpdates = validation.sanitizedUpdates;
+
+    if (sanitizedUpdates.role && sanitizedUpdates.role !== targetUser.role) {
       await deleteUserRelatedData(userId);
     }
 
     const user = await User.findByIdAndUpdate(
       userId,
-      { $set: updates },
-      { new: true }
+      { $set: sanitizedUpdates },
+      { new: true, runValidators: true }
     ).select('-password');
 
     if (!user) {
@@ -189,6 +202,10 @@ export async function DELETE(request: NextRequest) {
 
     if (!authResult.authorized) {
       return NextResponse.json({ message: 'Admin access required' }, { status: 403 });
+    }
+
+    if (!authResult.isSuperAdmin && (!authResult.organizationId || !validateObjectId(authResult.organizationId))) {
+      return NextResponse.json({ message: 'Admin must belong to a valid organization' }, { status: 403 });
     }
 
     if (session?.user) {

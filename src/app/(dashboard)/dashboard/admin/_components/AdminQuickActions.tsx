@@ -156,7 +156,7 @@ export default function AdminQuickActions({ isSuperAdmin }: AdminQuickActionsPro
           labelKey: 'admin.settings',
           titleKey: 'admin.manageSettings',
           iconTone: 'bg-[var(--surface-muted)] text-[var(--color-foreground)] border-[var(--border)]',
-          show: true,
+          show: isSuperAdmin,
         },
       ],
     },

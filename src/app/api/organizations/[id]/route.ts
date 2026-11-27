@@ -6,6 +6,7 @@ import dbConnect from '@/lib/db';
 import { Organization, User, Course, Blog, Quiz } from '@/models';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { isAdmin, isSuperAdmin } from '@/lib/roles';
+import { ensureTeacherInviteCode } from '@/lib/organizations/resolveInvite';
 import {
   sanitizeOrganizationPermissions,
   sanitizeOrganizationTeacherLimits,
@@ -48,8 +49,36 @@ export async function GET(
     }
 
     const orgObjectId = new mongoose.Types.ObjectId(id);
+    const isAdminOrSuper = isSuper || isAdmin(session.user.role);
     const includeDetails = req.nextUrl.searchParams.get('includeDetails') === 'true';
     const canViewDetails = includeDetails && (isSuper || (isOwnOrg && isAdmin(session.user.role)));
+
+    const orgRecord = organization as Record<string, unknown>;
+    let sanitizedOrganization: Record<string, unknown>;
+    if (!isAdminOrSuper) {
+      const {
+        inviteCode: _inviteCode,
+        teacherInviteCode: _teacherInviteCode,
+        code: _code,
+        permissions: _permissions,
+        teacherLimits: _teacherLimits,
+        ...publicFields
+      } = orgRecord;
+      void _inviteCode;
+      void _teacherInviteCode;
+      void _code;
+      void _permissions;
+      void _teacherLimits;
+      sanitizedOrganization = publicFields;
+    } else {
+      const teacherInviteCode =
+        (typeof orgRecord.teacherInviteCode === 'string' && orgRecord.teacherInviteCode) ||
+        (await ensureTeacherInviteCode(orgObjectId));
+      sanitizedOrganization = {
+        ...orgRecord,
+        teacherInviteCode,
+      };
+    }
 
     const [userCount, courseCount, blogCount, quizCount] = await Promise.all([
       User.countDocuments({ organizationId: orgObjectId }),
@@ -60,7 +89,7 @@ export async function GET(
 
     if (!canViewDetails) {
       return NextResponse.json({
-        ...organization,
+        ...sanitizedOrganization,
         userCount,
         courseCount,
         blogCount,
@@ -162,7 +191,7 @@ export async function GET(
     });
 
     return NextResponse.json({
-      ...organization,
+      ...sanitizedOrganization,
       userCount,
       courseCount,
       blogCount,
@@ -214,6 +243,13 @@ export async function PATCH(
     await dbConnect();
     const { id } = await params;
 
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { message: 'Invalid organization ID' },
+        { status: 400 }
+      );
+    }
+
     const organization = await Organization.findById(id);
 
     if (!organization) {
@@ -255,6 +291,13 @@ export async function PATCH(
     if ((permissions !== undefined || teacherLimits !== undefined) && !isSuperAdmin(session.user.role)) {
       return NextResponse.json(
         { message: 'Forbidden: Only super admins can configure organization permissions and quotas' },
+        { status: 403 }
+      );
+    }
+
+    if (isActive !== undefined && !isSuperAdmin(session.user.role)) {
+      return NextResponse.json(
+        { message: 'Forbidden: Only super admins can change organization active status' },
         { status: 403 }
       );
     }
@@ -322,10 +365,10 @@ export async function DELETE(
       );
     }
 
-    // Only admins and superadmins can delete organizations
-    if (session.user.role !== 'admin' && session.user.role !== 'superadmin') {
+    // Only superadmins can delete organizations
+    if (!isSuperAdmin(session.user.role)) {
       return NextResponse.json(
-        { message: 'Forbidden: Admin access required' },
+        { message: 'Forbidden: Super admin access required' },
         { status: 403 }
       );
     }
@@ -335,6 +378,13 @@ export async function DELETE(
     await dbConnect();
     const { id } = await params;
 
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { message: 'Invalid organization ID' },
+        { status: 400 }
+      );
+    }
+
     const organization = await Organization.findById(id);
 
     if (!organization) {
@@ -342,22 +392,6 @@ export async function DELETE(
         { message: 'Organization not found' },
         { status: 404 }
       );
-    }
-
-    // Admin can only delete their own organization
-    if (session.user.role === 'admin') {
-      if (!session.user.organizationId) {
-        return NextResponse.json(
-          { message: 'Admin must belong to an organization' },
-          { status: 403 }
-        );
-      }
-      if (session.user.organizationId.toString() !== id) {
-        return NextResponse.json(
-          { message: 'Admin can only delete their own organization' },
-          { status: 403 }
-        );
-      }
     }
 
     // Safety check: Count users assigned to this organization

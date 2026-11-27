@@ -1,8 +1,38 @@
+import mongoose, { type Types } from 'mongoose';
 import dbConnect from '@/lib/db';
 import Favorite from '@/models/Favorite';
 import Blog from '@/models/Blog';
 import { deleteCachedData } from '@/lib/redis';
-import type { Types } from 'mongoose';
+import { isSuperAdmin } from '@/lib/roles';
+
+export interface FavoriteAccessUser {
+  id: string;
+  role: string;
+  organizationId?: string | null;
+}
+
+function buildAccessibleBlogFilter(user: FavoriteAccessUser): Record<string, unknown> {
+  if (isSuperAdmin(user.role)) {
+    return { isPublished: true };
+  }
+
+  const visibilityClauses: Record<string, unknown>[] = [
+    { visibility: 'public' },
+    { organizationId: null },
+    { organizationId: { $exists: false } },
+  ];
+
+  if (user.organizationId && mongoose.Types.ObjectId.isValid(user.organizationId)) {
+    visibilityClauses.push({
+      organizationId: new mongoose.Types.ObjectId(user.organizationId),
+    });
+  }
+
+  return {
+    isPublished: true,
+    $or: visibilityClauses,
+  };
+}
 
 type FavoriteIdsLean = { blogs?: Types.ObjectId[] };
 
@@ -60,19 +90,22 @@ export async function invalidateFavoriteIdsCache(userId: string): Promise<void> 
 }
 
 export async function listFavoritesPage(
-  userId: string,
+  user: FavoriteAccessUser,
   options: { page: number; limit: number; skip: number; includeContent?: boolean }
 ): Promise<{ items: FavoriteListRow[]; total: number }> {
   await dbConnect();
 
-  const doc = (await Favorite.findOne({ user: userId }).select('blogs').lean()) as FavoriteIdsLean | null;
+  const doc = (await Favorite.findOne({ user: user.id }).select('blogs').lean()) as FavoriteIdsLean | null;
   if (!doc?.blogs?.length) {
     return { items: [], total: 0 };
   }
 
   const blogIds = doc.blogs;
 
-  const filter = { _id: { $in: blogIds }, isPublished: true };
+  const filter = {
+    _id: { $in: blogIds },
+    ...buildAccessibleBlogFilter(user),
+  };
 
   const [total, blogs] = await Promise.all([
     Blog.countDocuments(filter),
@@ -119,15 +152,25 @@ export type AddFavoriteResult =
   | { ok: true; favorite: FavoriteListRow }
   | { ok: false; reason: 'not_found' | 'duplicate' };
 
-export async function addFavoriteForUser(userId: string, blogId: string): Promise<AddFavoriteResult> {
+export async function addFavoriteForUser(
+  user: FavoriteAccessUser,
+  blogId: string
+): Promise<AddFavoriteResult> {
   await dbConnect();
 
-  const current = (await Favorite.findOne({ user: userId }).select('blogs').lean()) as FavoriteIdsLean | null;
+  if (!mongoose.Types.ObjectId.isValid(blogId)) {
+    return { ok: false, reason: 'not_found' };
+  }
+
+  const current = (await Favorite.findOne({ user: user.id }).select('blogs').lean()) as FavoriteIdsLean | null;
   if (current?.blogs?.some((id: Types.ObjectId) => id.toString() === blogId)) {
     return { ok: false, reason: 'duplicate' };
   }
 
-  const exists = (await Blog.findOne({ _id: blogId, isPublished: true })
+  const exists = (await Blog.findOne({
+    _id: blogId,
+    ...buildAccessibleBlogFilter(user),
+  })
     .select('title topic content language createdAt author')
     .populate('author', 'name')
     .lean()) as BlogListLean | null;
@@ -135,7 +178,7 @@ export async function addFavoriteForUser(userId: string, blogId: string): Promis
     return { ok: false, reason: 'not_found' };
   }
 
-  await Favorite.findOneAndUpdate({ user: userId }, { $addToSet: { blogs: blogId } }, { upsert: true, new: true });
+  await Favorite.findOneAndUpdate({ user: user.id }, { $addToSet: { blogs: blogId } }, { upsert: true, new: true });
 
   const id = exists._id.toString();
   const createdAt = exists.createdAt ? new Date(exists.createdAt).toISOString() : new Date().toISOString();

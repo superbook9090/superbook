@@ -6,11 +6,13 @@ import '@/models';
 import Contest from '@/models/Contest';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { declareContestResults } from '@/lib/contests/declareResults';
+import { requireFeature } from '@/lib/settingsHelpers';
+import { canManageOrgContent, type AccessUser } from '@/lib/accessControl';
 import mongoose from 'mongoose';
 
 export const dynamic = 'force-dynamic';
 
-// POST /api/contests/[id]/end - End contest early (Teacher/Superadmin only)
+// POST /api/contests/[id]/end - End contest early (Teacher/Admin/Superadmin only)
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -19,6 +21,9 @@ export async function POST(
   const logContext: LogContext = { method: 'POST', path: `/api/contests/${id}/end` };
 
   try {
+    const featureCheck = await requireFeature('enableContests');
+    if (featureCheck) return featureCheck;
+
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json({ message: 'Invalid contest ID' }, { status: 400 });
     }
@@ -36,14 +41,35 @@ export async function POST(
       return NextResponse.json({ message: 'Contest not found' }, { status: 404 });
     }
 
-    const isInstructor =
-      contest.instructor.toString() === session.user.id ||
-      session.user.role === 'superadmin';
+    const authUser: AccessUser = {
+      _id: new mongoose.Types.ObjectId(session.user.id),
+      organizationId: session.user.organizationId
+        ? new mongoose.Types.ObjectId(session.user.organizationId)
+        : null,
+      role: session.user.role as AccessUser['role'],
+    };
 
-    if (!isInstructor) {
+    if (!canManageOrgContent(contest.organizationId, contest.instructor, authUser)) {
       return NextResponse.json(
         { message: 'You are not authorized to end this contest' },
         { status: 403 }
+      );
+    }
+
+    if (contest.status === 'completed') {
+      return NextResponse.json(
+        {
+          message: 'Contest has already ended.',
+          notificationsSent: 0,
+        },
+        { status: 200 }
+      );
+    }
+
+    if (contest.status === 'draft' || contest.status === 'cancelled') {
+      return NextResponse.json(
+        { message: 'Cannot end a draft or cancelled contest' },
+        { status: 400 }
       );
     }
 
@@ -57,8 +83,10 @@ export async function POST(
 
     await contest.save();
 
-    // Automatically declare results and notify all participating students
-    const result = await declareContestResults(id, { ignoreAge: true });
+    // Automatically declare results and notify all participating students (only if not already declared)
+    const result = contest.resultsDeclared
+      ? { notificationsSent: 0 }
+      : await declareContestResults(id, { ignoreAge: true });
 
     return NextResponse.json(
       {

@@ -133,21 +133,48 @@ const notificationCategorySchema = z.enum([
 
 export const targetAudienceSchema = z.enum(['all', 'students', 'teachers', 'course_enrolled']);
 
-export const sendNotificationSchema = z.object({
-  title: z.object({
-    en: z.string().min(1, 'English title is required').max(200),
-    hi: z.string().max(200).optional(),
-  }),
-  body: z.object({
-    en: z.string().min(1, 'English message is required').max(1000),
-    hi: z.string().max(1000).optional(),
-  }),
-  data: z.record(z.string(), z.string()).optional(),
-  category: notificationCategorySchema,
-  organizationId: objectIdSchema.optional(),
-  targetAudience: targetAudienceSchema.optional().default('all'),
-  targetCourseId: objectIdSchema.optional(),
-});
+export const sendNotificationSchema = z
+  .object({
+    title: z.object({
+      en: z.string().min(1, 'English title is required').max(200),
+      hi: z.string().max(200).optional(),
+    }),
+    body: z.object({
+      en: z.string().min(1, 'English message is required').max(1000),
+      hi: z.string().max(1000).optional(),
+    }),
+    data: z.record(z.string(), z.string()).optional(),
+    category: notificationCategorySchema,
+    organizationId: objectIdSchema.optional(),
+    targetAudience: targetAudienceSchema.optional().default('all'),
+    targetCourseId: objectIdSchema.optional(),
+  })
+  .refine(
+    (data) => data.targetAudience !== 'course_enrolled' || Boolean(data.targetCourseId),
+    {
+      message: 'targetCourseId is required when targetAudience is course_enrolled',
+      path: ['targetCourseId'],
+    }
+  );
+
+export const updateNotificationPreferencesSchema = z
+  .object({
+    muteAll: z.boolean().optional(),
+    disablePush: z.boolean().optional(),
+    mutedCourses: z.array(objectIdSchema).max(200).optional(),
+    categories: z
+      .object({
+        lessons: z.boolean().optional(),
+        quizzes: z.boolean().optional(),
+        assignments: z.boolean().optional(),
+        liveClasses: z.boolean().optional(),
+        announcements: z.boolean().optional(),
+        system: z.boolean().optional(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
 
 export const registerDeviceSchema = z.object({
   deviceToken: z.string().min(1, 'Device token is required'),
