@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import User from '@/models/User';
+import Organization from '@/models/Organization';
 import dbConnect from '@/lib/db';
 import { validateObjectId } from '@/lib/sanitize';
 import { logApiError, type LogContext } from '@/lib/logger';
@@ -9,6 +10,24 @@ import { deleteUserRelatedData } from '@/lib/cascade/deleteRelated';
 import { checkAdmin } from '@/lib/admin/adminAuth';
 import { buildAdminUsersQuery, fetchAdminUsersWithStats } from '@/lib/admin/userQuery';
 import { validateUserUpdate, validateUserDeletion } from '@/lib/admin/userMutations';
+import {
+  normalizeOrganizationPolicy,
+  type OrganizationPermissions,
+  type OrganizationTeacherLimits,
+} from '@/lib/admin/orgPolicy';
+
+async function fetchOrgPolicy(organizationId?: string | null) {
+  if (!organizationId || !validateObjectId(organizationId)) {
+    return normalizeOrganizationPolicy(null);
+  }
+  const org = await Organization.findById(organizationId)
+    .select('permissions teacherLimits')
+    .lean<{
+      permissions?: OrganizationPermissions | null;
+      teacherLimits?: OrganizationTeacherLimits | null;
+    }>();
+  return normalizeOrganizationPolicy(org);
+}
 
 // GET /api/admin/users - Get all users (Admin only)
 export async function GET(request: NextRequest) {
@@ -49,7 +68,10 @@ export async function GET(request: NextRequest) {
       organizationIdParam,
     });
 
-    const { users, total, stats } = await fetchAdminUsersWithStats(query, orgFilter, page, limit);
+    const [{ users, total, stats }, organizationPolicy] = await Promise.all([
+      fetchAdminUsersWithStats(query, orgFilter, page, limit),
+      authResult.isSuperAdmin ? Promise.resolve(null) : fetchOrgPolicy(authResult.organizationId),
+    ]);
 
     return NextResponse.json(
       {
@@ -61,6 +83,7 @@ export async function GET(request: NextRequest) {
           totalPages: Math.ceil(total / limit),
         },
         stats,
+        ...(organizationPolicy ? { organizationPolicy } : {}),
       },
       { status: 200 }
     );
@@ -101,17 +124,33 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ message: 'Invalid User ID' }, { status: 400 });
     }
 
-    const targetUser = await User.findById(userId).select('-password').lean<{
-      _id: unknown;
-      role: string;
-      organizationId?: unknown;
-    }>();
+    const [targetUser, orgPolicy] = await Promise.all([
+      User.findById(userId).select('-password').lean<{
+        _id: unknown;
+        role: string;
+        organizationId?: unknown;
+        limits?: {
+          courses?: number;
+          quizzes?: number;
+          blogs?: number;
+          aiQuizGenerations?: number;
+          aiQuizMaxQuestions?: number;
+        };
+      }>(),
+      authResult.isSuperAdmin ? Promise.resolve(null) : fetchOrgPolicy(authResult.organizationId),
+    ]);
 
     if (!targetUser) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
 
-    const validation = validateUserUpdate(targetUser, updates, session?.user?.id || '', authResult);
+    const validation = validateUserUpdate(
+      targetUser,
+      updates,
+      session?.user?.id || '',
+      authResult,
+      orgPolicy
+    );
     if (validation.error) {
       return NextResponse.json({ message: validation.error }, { status: validation.status || 400 });
     }

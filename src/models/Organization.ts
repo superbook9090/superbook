@@ -1,4 +1,8 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import type {
+  OrganizationPermissions,
+  OrganizationTeacherLimits,
+} from '@/lib/admin/orgPolicy';
 
 export interface IOrganization extends Document {
   name: string;
@@ -10,6 +14,10 @@ export interface IOrganization extends Document {
   website?: string; // Organization website URL
   tagline?: string; // Short slogan or motto
   isActive: boolean;
+  /** Superadmin-granted feature toggles that org admins are allowed to enable for teachers */
+  permissions?: OrganizationPermissions;
+  /** Superadmin-granted per-teacher quota ceilings that org admins may assign within */
+  teacherLimits?: OrganizationTeacherLimits;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -25,6 +33,19 @@ const organizationSchema = new Schema<IOrganization>(
     website: { type: String, default: null },
     tagline: { type: String, default: null },
     isActive: { type: Boolean, default: true },
+    permissions: {
+      canUploadVideos: { type: Boolean, default: false },
+      canCreatePublicCourses: { type: Boolean, default: false },
+      canCreateContests: { type: Boolean, default: false },
+      canGenerateAiQuizzes: { type: Boolean, default: false },
+    },
+    teacherLimits: {
+      courses: { type: Number, default: undefined },
+      quizzes: { type: Number, default: undefined },
+      blogs: { type: Number, default: undefined },
+      aiQuizGenerations: { type: Number, default: undefined },
+      aiQuizMaxQuestions: { type: Number, default: undefined },
+    },
   },
   { timestamps: true }
 );

@@ -66,3 +66,34 @@ export function validateContentAccess(
     throw new Error(`You do not have permission to access this ${contentType}`);
   }
 }
+
+/**
+ * Checks whether a user is allowed to edit, publish/unpublish, delete, or view
+ * unpublished drafts of an organization-scoped content item (e.g., blog).
+ * - superadmin: all items
+ * - author: their own item
+ * - organization admin: only items explicitly belonging to their own organization
+ *   (never global/public items with organizationId=null authored by others)
+ */
+export function canManageOrgContent(
+  contentOrganizationId: mongoose.Types.ObjectId | string | null | undefined,
+  contentAuthorId: mongoose.Types.ObjectId | string | null | undefined,
+  user: AccessUser
+): boolean {
+  if (user.role === 'superadmin') {
+    return true;
+  }
+
+  if (contentAuthorId && contentAuthorId.toString() === user._id.toString()) {
+    return true;
+  }
+
+  if (user.role === 'admin') {
+    if (!user.organizationId || !contentOrganizationId) {
+      return false;
+    }
+    return user.organizationId.toString() === contentOrganizationId.toString();
+  }
+
+  return false;
+}

@@ -33,6 +33,9 @@ export function UsersTable({
                 {t('admin.role')}
               </th>
               <th className="px-5 py-3.5 text-left text-[11px] font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider">
+                {t('adminUsers.activity')}
+              </th>
+              <th className="px-5 py-3.5 text-left text-[11px] font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider">
                 {t('adminAnalytics.platform')}
               </th>
               <th className="px-5 py-3.5 text-left text-[11px] font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider">

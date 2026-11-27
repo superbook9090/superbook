@@ -13,12 +13,14 @@ import type { Blog } from '@/lib/react-query/useBlogQueries';
 interface AdminBlogCardProps {
   blog: Blog;
   index: number;
+  canManage: boolean;
   onTogglePublish: (id: string, currentStatus: boolean) => void;
   onDelete: (id: string) => void;
 }
 
 export function AdminBlogCard({
   blog,
+  canManage,
   onTogglePublish,
   onDelete,
 }: AdminBlogCardProps) {
@@ -74,28 +76,32 @@ export function AdminBlogCard({
 
       <div className="flex items-center justify-between pt-3 border-t border-[var(--border)]/70">
         <div className="flex items-center gap-1.5">
-          <Tooltip label={blog.isPublished ? t('common.unpublish') : t('common.publish')}>
-            <button
-              type="button"
-              onClick={() => onTogglePublish(blog._id, blog.isPublished)}
-              className={`inline-flex h-10 w-10 items-center justify-center rounded-[10px] border border-[var(--border)] transition-colors cursor-pointer ${
-                blog.isPublished
-                  ? 'text-[var(--success)] bg-[var(--success-light)] border-[var(--success)]/25'
-                  : 'text-[var(--color-muted-foreground)] bg-[var(--surface-muted)] hover:text-[var(--color-foreground)]'
-              }`}
-            >
-              {blog.isPublished ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-            </button>
-          </Tooltip>
+          {canManage && (
+            <>
+              <Tooltip label={blog.isPublished ? t('common.unpublish') : t('common.publish')}>
+                <button
+                  type="button"
+                  onClick={() => onTogglePublish(blog._id, blog.isPublished)}
+                  className={`inline-flex h-10 w-10 items-center justify-center rounded-[10px] border border-[var(--border)] transition-colors cursor-pointer ${
+                    blog.isPublished
+                      ? 'text-[var(--success)] bg-[var(--success-light)] border-[var(--success)]/25'
+                      : 'text-[var(--color-muted-foreground)] bg-[var(--surface-muted)] hover:text-[var(--color-foreground)]'
+                  }`}
+                >
+                  {blog.isPublished ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                </button>
+              </Tooltip>
 
-          <Tooltip label={t('common.edit')}>
-            <Link
-              href={ROUTES.teacher.blogEdit(blog._id)}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-[10px] border border-[var(--border)] bg-[var(--surface-muted)] text-[var(--color-foreground)] hover:bg-[var(--teacher-soft)] hover:text-[var(--teacher-primary)] transition-colors"
-            >
-              <Edit2 className="w-4 h-4" />
-            </Link>
-          </Tooltip>
+              <Tooltip label={t('common.edit')}>
+                <Link
+                  href={ROUTES.teacher.blogEdit(blog._id)}
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-[10px] border border-[var(--border)] bg-[var(--surface-muted)] text-[var(--color-foreground)] hover:bg-[var(--teacher-soft)] hover:text-[var(--teacher-primary)] transition-colors"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </Link>
+              </Tooltip>
+            </>
+          )}
 
           {blog.isPublished && (
             <Tooltip label={t('createBlogPage.viewPublicBlog')}>
@@ -112,15 +118,17 @@ export function AdminBlogCard({
           )}
         </div>
 
-        <Tooltip label={t('common.delete')}>
-          <button
-            type="button"
-            onClick={() => onDelete(blog._id)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-[10px] border border-[var(--border)] bg-[var(--surface-muted)] text-[var(--color-muted-foreground)] hover:text-[var(--error)] hover:bg-[var(--error-light)] transition-colors cursor-pointer"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        </Tooltip>
+        {canManage && (
+          <Tooltip label={t('common.delete')}>
+            <button
+              type="button"
+              onClick={() => onDelete(blog._id)}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-[10px] border border-[var(--border)] bg-[var(--surface-muted)] text-[var(--color-muted-foreground)] hover:text-[var(--error)] hover:bg-[var(--error-light)] transition-colors cursor-pointer"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </Tooltip>
+        )}
       </div>
     </div>
   );

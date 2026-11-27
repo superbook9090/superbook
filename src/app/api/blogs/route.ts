@@ -78,6 +78,23 @@ function buildTopicFilter(topic: string) {
   return { topic: { $regex: new RegExp(`^${escapeRegex(value)}$`, 'i') } };
 }
 
+async function resolveEffectiveOrganizationId(user: {
+  id: string;
+  role: string;
+  organizationId?: string | null;
+}): Promise<string | null> {
+  if (user.organizationId && mongoose.Types.ObjectId.isValid(user.organizationId)) {
+    return user.organizationId;
+  }
+  if (user.role === 'admin' && mongoose.Types.ObjectId.isValid(user.id)) {
+    const dbUser = await User.findById(user.id)
+      .select('organizationId')
+      .lean<{ organizationId?: mongoose.Types.ObjectId | null }>();
+    return dbUser?.organizationId ? dbUser.organizationId.toString() : null;
+  }
+  return null;
+}
+
 // GET /api/blogs - List blogs with server-side filters and pagination
 export async function GET(req: NextRequest) {
   const requestId = req.headers.get('X-Request-ID') || undefined;
@@ -97,19 +114,40 @@ export async function GET(req: NextRequest) {
     const status = searchParams.get('status');
     const includeDrafts = searchParams.get('includeDrafts') === 'true';
     const author = searchParams.get('author');
-    const orgId = searchParams.get('orgId');
     const includeStats = searchParams.get('includeStats') === 'true';
     const sortParam = searchParams.get('sort');
 
+    await dbConnect();
+
+    const featureCheck = await requireFeature('enableBlogs');
+    if (featureCheck) return featureCheck;
+
+    const sessionUser = session?.user as
+      | {
+          id: string;
+          organizationId?: string | null;
+          role: 'student' | 'teacher' | 'admin' | 'superadmin';
+        }
+      | undefined;
+
+    const resolvedOrgId = sessionUser ? await resolveEffectiveOrganizationId(sessionUser) : null;
+    const isAdminSession =
+      sessionUser?.role === 'admin' || sessionUser?.role === 'superadmin';
+
     const canUseCache =
+      !isAdminSession &&
       !includeDrafts &&
+      !includeStats &&
       !search &&
       !author &&
       status === 'all' &&
       !topic &&
       !language &&
       sortParam === 'newest';
-    const cacheKey = `blogs:${orgId}:${page}:${limit}`;
+    const cacheScope = sessionUser
+      ? `${sessionUser.role}:${resolvedOrgId || 'public'}`
+      : 'guest:public';
+    const cacheKey = `blogs:${cacheScope}:${page}:${limit}`;
 
     if (canUseCache) {
       const cached = await getCachedData(cacheKey);
@@ -117,11 +155,6 @@ export async function GET(req: NextRequest) {
         return NextResponse.json(cached);
       }
     }
-
-    await dbConnect();
-
-    const featureCheck = await requireFeature('enableBlogs');
-    if (featureCheck) return featureCheck;
 
     const andFilters: Record<string, unknown>[] = [];
 
@@ -141,19 +174,22 @@ export async function GET(req: NextRequest) {
       andFilters.push({ language });
     }
 
-    if (session?.user) {
-      const user = session.user as {
-        id: string;
-        organizationId?: string | null;
-        role: 'student' | 'teacher' | 'admin' | 'superadmin';
-      };
-      const accessFilter = getAccessFilter({
-        _id: new mongoose.Types.ObjectId(user.id),
-        organizationId: user.organizationId
-          ? new mongoose.Types.ObjectId(user.organizationId)
-          : null,
-        role: user.role,
-      });
+    let accessFilter: Record<string, unknown> = {};
+    if (sessionUser) {
+      if (sessionUser.role === 'admin') {
+        // Organization admins only ever see their own organization's blogs.
+        // If an admin account has no organization assigned, restrict strictly to self-authored blogs
+        // so they never see platform-wide public blogs.
+        accessFilter = resolvedOrgId
+          ? { organizationId: new mongoose.Types.ObjectId(resolvedOrgId) }
+          : { author: new mongoose.Types.ObjectId(sessionUser.id) };
+      } else {
+        accessFilter = getAccessFilter({
+          _id: new mongoose.Types.ObjectId(sessionUser.id),
+          organizationId: resolvedOrgId ? new mongoose.Types.ObjectId(resolvedOrgId) : null,
+          role: sessionUser.role,
+        });
+      }
       if (Object.keys(accessFilter).length > 0) {
         andFilters.push(accessFilter);
       }
@@ -161,8 +197,8 @@ export async function GET(req: NextRequest) {
       andFilters.push(publicBlogAccessFilter());
     }
 
-    if (author === 'self' && session?.user?.id) {
-      andFilters.push({ author: new mongoose.Types.ObjectId(session.user.id) });
+    if (author === 'self' && sessionUser?.id) {
+      andFilters.push({ author: new mongoose.Types.ObjectId(sessionUser.id) });
     }
 
     if (search) {
@@ -206,6 +242,7 @@ export async function GET(req: NextRequest) {
     const serializedBlogs = blogs.map((blog: any) => ({
       ...blog,
       _id: blog._id?.toString(),
+      organizationId: blog.organizationId ? blog.organizationId.toString() : null,
       author: blog.author
         ? {
             ...blog.author,
@@ -215,26 +252,13 @@ export async function GET(req: NextRequest) {
     }));
 
     let stats: { total: number; published: number; draft: number } | undefined;
-    if (includeStats && session?.user) {
+    if (includeStats && sessionUser) {
       const statsAndFilters: Record<string, unknown>[] = [];
-
-      const user = session.user as {
-        id: string;
-        organizationId?: string | null;
-        role: 'student' | 'teacher' | 'admin' | 'superadmin';
-      };
-      const accessFilter = getAccessFilter({
-        _id: new mongoose.Types.ObjectId(user.id),
-        organizationId: user.organizationId
-          ? new mongoose.Types.ObjectId(user.organizationId)
-          : null,
-        role: user.role,
-      });
       if (Object.keys(accessFilter).length > 0) {
         statsAndFilters.push(accessFilter);
       }
       if (author === 'self') {
-        statsAndFilters.push({ author: new mongoose.Types.ObjectId(user.id) });
+        statsAndFilters.push({ author: new mongoose.Types.ObjectId(sessionUser.id) });
       }
 
       const statsQuery: Record<string, unknown> = {};
@@ -331,6 +355,8 @@ export async function POST(req: NextRequest) {
     } = validationResult.data;
     const sanitizedContent = sanitizeHtml(content);
 
+    await dbConnect();
+
     if (session.user.role === 'teacher') {
       const blogCount = await Blog.countDocuments({
         author: session.user.id,
@@ -345,11 +371,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'Language must be either en or hi' }, { status: 400 });
     }
 
-    await dbConnect();
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const user = session.user as any;
-    const organizationId = user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null;
+    const resolvedOrgId = await resolveEffectiveOrganizationId({
+      id: user.id,
+      role: user.role,
+      organizationId: user.organizationId,
+    });
+    const organizationId = resolvedOrgId ? new mongoose.Types.ObjectId(resolvedOrgId) : null;
     const normalizedVisibility = visibility ?? (organizationId ? 'organization' : 'public');
     const userSlug = slug?.trim() ? slugifyBlogTitle(slug) : undefined;
     let resolvedSlug: string | undefined;
@@ -386,7 +415,7 @@ export async function POST(req: NextRequest) {
     await blog.populate('author', 'name');
 
     const orgKey = organizationId?.toString() || 'public';
-    await invalidatePattern(`blogs:${orgKey}:*`);
+    await invalidatePattern(`blogs:*:${orgKey}:*`);
     revalidateTag(`blogs:${orgKey}`);
 
     return NextResponse.json(blog, { status: 201 });

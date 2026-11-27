@@ -6,6 +6,7 @@ import { X, Building2, Copy, Check } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import Button from '@/components/ui/Button';
 import Tooltip from '@/components/ui/Tooltip';
+import { OrganizationPolicyFields } from './OrganizationPolicyFields';
 import type { OrganizationItem, OrganizationFormData } from './types';
 
 interface OrganizationFormModalProps {
@@ -65,7 +66,7 @@ export function OrganizationFormModal({
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
-          className="relative z-10 w-full max-w-lg bg-[var(--card-solid)] border border-[var(--border)] rounded-2xl shadow-2xl overflow-hidden p-6"
+          className="relative z-10 w-full max-w-2xl bg-[var(--card-solid)] border border-[var(--border)] rounded-2xl shadow-2xl overflow-y-auto max-h-[90vh] p-6"
         >
           {/* Header */}
           <div className="flex items-center justify-between pb-4 mb-4 border-b border-[var(--border)]">
@@ -237,6 +238,9 @@ export function OrganizationFormModal({
                 </div>
               </div>
             )}
+
+            {/* Organization Permissions & Quota Ceilings (Superadmin Only) */}
+            <OrganizationPolicyFields formData={formData} setFormData={setFormData} />
 
             {/* Active Toggle Switch */}
             <div className="flex items-center justify-between p-3.5 bg-[var(--color-surface-muted)]/60 rounded-xl border border-[var(--border)]">

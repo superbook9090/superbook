@@ -3,10 +3,12 @@
 import React from 'react';
 import { Video, Globe, Trophy, Sparkles, ShieldCheck } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
+import type { OrgPermissionKey } from '@/lib/admin/orgPolicy';
 import type { User } from './types';
 
 interface TeacherPermissionsTabProps {
   user: User;
+  allowedKeys?: OrgPermissionKey[];
   onToggleVideo: (currentVal: boolean) => void;
   onTogglePublicCourse: (currentVal: boolean) => void;
   onToggleContest?: (currentVal: boolean) => void;
@@ -15,6 +17,7 @@ interface TeacherPermissionsTabProps {
 
 export function TeacherPermissionsTab({
   user,
+  allowedKeys,
   onToggleVideo,
   onTogglePublicCourse,
   onToggleContest,
@@ -22,9 +25,20 @@ export function TeacherPermissionsTab({
 }: TeacherPermissionsTabProps) {
   const { t } = useTranslation();
 
-  const permissions = [
+  const allPermissions: Array<{
+    id: string;
+    key: OrgPermissionKey;
+    icon: React.ReactNode;
+    iconBg: string;
+    title: string;
+    desc: string;
+    checked: boolean;
+    onToggle: () => void;
+    activeClass: string;
+  }> = [
     {
       id: 'video',
+      key: 'canUploadVideos',
       icon: <Video className="w-4 h-4" />,
       iconBg: 'bg-violet-500/10 text-violet-600 dark:text-violet-400',
       title: t('adminUsers.videoUploadPermission'),
@@ -35,6 +49,7 @@ export function TeacherPermissionsTab({
     },
     {
       id: 'publicCourse',
+      key: 'canCreatePublicCourses',
       icon: <Globe className="w-4 h-4" />,
       iconBg: 'bg-sky-500/10 text-sky-600 dark:text-sky-400',
       title: t('adminUsers.canCreatePublicCourses'),
@@ -45,6 +60,7 @@ export function TeacherPermissionsTab({
     },
     {
       id: 'contests',
+      key: 'canCreateContests',
       icon: <Trophy className="w-4 h-4" />,
       iconBg: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
       title: t('adminUsers.canCreateContests'),
@@ -55,6 +71,7 @@ export function TeacherPermissionsTab({
     },
     {
       id: 'aiQuiz',
+      key: 'canGenerateAiQuizzes',
       icon: <Sparkles className="w-4 h-4" />,
       iconBg: 'bg-[var(--primary-soft)] text-[var(--color-primary)]',
       title: t('adminUsers.canGenerateAiQuizzes'),
@@ -64,6 +81,10 @@ export function TeacherPermissionsTab({
       activeClass: 'peer-checked:bg-[var(--color-primary)]',
     },
   ];
+
+  const permissions = allowedKeys
+    ? allPermissions.filter((p) => allowedKeys.includes(p.key))
+    : allPermissions;
 
   const enabledCount = permissions.filter((p) => p.checked).length;
 
@@ -76,7 +97,7 @@ export function TeacherPermissionsTab({
           <span>{t('adminUsers.featurePermissions')}</span>
         </span>
         <span className="font-semibold text-[var(--color-foreground)]">
-          {enabledCount} of {permissions.length} active
+          {enabledCount} / {permissions.length}
         </span>
       </div>
 

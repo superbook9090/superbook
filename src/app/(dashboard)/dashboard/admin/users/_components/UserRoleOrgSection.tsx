@@ -10,6 +10,7 @@ import type { User } from './types';
 interface UserRoleOrgSectionProps {
   user: User;
   currentUserId?: string | null;
+  isSuperAdmin?: boolean;
   organizations: Array<{ _id: string; name: string }>;
   selectedOrgId: string | null;
   onRoleChange: (newRole: string) => void;
@@ -21,6 +22,7 @@ interface UserRoleOrgSectionProps {
 export function UserRoleOrgSection({
   user,
   currentUserId,
+  isSuperAdmin = true,
   organizations,
   selectedOrgId,
   onRoleChange,
@@ -74,37 +76,39 @@ export function UserRoleOrgSection({
           )}
         </div>
 
-        {/* Organization Assignment */}
-        <div>
-          <div className="flex items-end gap-2">
-            <div className="flex-1 min-w-0">
-              <Dropdown
-                label={
-                  <span className="flex items-center gap-1.5">
-                    <Building2 className="w-3 h-3 text-[var(--info)]" />
-                    <span>{t('adminUsers.organization')}</span>
-                  </span>
-                }
-                value={selectedOrgId ?? user.organizationId ?? ''}
-                onChange={(val) => onOrgSelect(val || null)}
-                options={orgOptions}
-                placeholder=""
-              />
+        {/* Organization Assignment (Superadmin only) */}
+        {isSuperAdmin && (
+          <div>
+            <div className="flex items-end gap-2">
+              <div className="flex-1 min-w-0">
+                <Dropdown
+                  label={
+                    <span className="flex items-center gap-1.5">
+                      <Building2 className="w-3 h-3 text-[var(--info)]" />
+                      <span>{t('adminUsers.organization')}</span>
+                    </span>
+                  }
+                  value={selectedOrgId ?? user.organizationId ?? ''}
+                  onChange={(val) => onOrgSelect(val || null)}
+                  options={orgOptions}
+                  placeholder=""
+                />
+              </div>
+              {hasOrgChanged && (
+                <Button
+                  onClick={onSaveOrg}
+                  variant="primary"
+                  size="md"
+                  disabled={isSavingOrg}
+                  className="shrink-0 flex items-center gap-1.5"
+                >
+                  <Check className="w-4 h-4" />
+                  <span>{isSavingOrg ? t('admin.saving') : t('common.save')}</span>
+                </Button>
+              )}
             </div>
-            {hasOrgChanged && (
-              <Button
-                onClick={onSaveOrg}
-                variant="primary"
-                size="md"
-                disabled={isSavingOrg}
-                className="shrink-0 flex items-center gap-1.5"
-              >
-                <Check className="w-4 h-4" />
-                <span>{isSavingOrg ? t('admin.saving') : t('common.save')}</span>
-              </Button>
-            )}
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

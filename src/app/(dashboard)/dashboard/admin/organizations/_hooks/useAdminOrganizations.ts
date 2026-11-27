@@ -23,6 +23,55 @@ import type {
   OrganizationFormData,
 } from '../_components/types';
 
+const DEFAULT_FORM_DATA: OrganizationFormData = {
+  name: '',
+  description: '',
+  logo: '',
+  primaryColor: '',
+  website: '',
+  tagline: '',
+  isActive: true,
+  permissions: {
+    canUploadVideos: false,
+    canCreatePublicCourses: false,
+    canCreateContests: false,
+    canGenerateAiQuizzes: false,
+  },
+  teacherLimits: {
+    courses: '',
+    quizzes: '',
+    blogs: '',
+    aiQuizGenerations: '',
+    aiQuizMaxQuestions: '',
+  },
+};
+
+function toPolicyPayload(formData: OrganizationFormData) {
+  const parseLimit = (val: string) => {
+    const trimmed = val.trim();
+    if (!trimmed) return undefined;
+    const parsed = parseInt(trimmed, 10);
+    return Number.isFinite(parsed) && parsed >= 1 ? parsed : undefined;
+  };
+  return {
+    name: formData.name,
+    description: formData.description,
+    logo: formData.logo,
+    primaryColor: formData.primaryColor,
+    website: formData.website,
+    tagline: formData.tagline,
+    isActive: formData.isActive,
+    permissions: formData.permissions,
+    teacherLimits: {
+      courses: parseLimit(formData.teacherLimits.courses),
+      quizzes: parseLimit(formData.teacherLimits.quizzes),
+      blogs: parseLimit(formData.teacherLimits.blogs),
+      aiQuizGenerations: parseLimit(formData.teacherLimits.aiQuizGenerations),
+      aiQuizMaxQuestions: parseLimit(formData.teacherLimits.aiQuizMaxQuestions),
+    },
+  };
+}
+
 export function useAdminOrganizations() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -48,15 +97,7 @@ export function useAdminOrganizations() {
   const [deleteTargetOrg, setDeleteTargetOrg] = useState<OrganizationItem | null>(null);
 
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
-  const [formData, setFormData] = useState<OrganizationFormData>({
-    name: '',
-    description: '',
-    logo: '',
-    primaryColor: '',
-    website: '',
-    tagline: '',
-    isActive: true,
-  });
+  const [formData, setFormData] = useState<OrganizationFormData>(DEFAULT_FORM_DATA);
 
   // Role Guard
   useEffect(() => {
@@ -152,15 +193,7 @@ export function useAdminOrganizations() {
 
   // Modal Openers
   const openCreateModal = () => {
-    setFormData({
-      name: '',
-      description: '',
-      logo: '',
-      primaryColor: '',
-      website: '',
-      tagline: '',
-      isActive: true,
-    });
+    setFormData(DEFAULT_FORM_DATA);
     setShowCreateModal(true);
   };
 
@@ -174,6 +207,23 @@ export function useAdminOrganizations() {
       website: org.website || '',
       tagline: org.tagline || '',
       isActive: org.isActive,
+      permissions: {
+        canUploadVideos: Boolean(org.permissions?.canUploadVideos),
+        canCreatePublicCourses: Boolean(org.permissions?.canCreatePublicCourses),
+        canCreateContests: Boolean(org.permissions?.canCreateContests),
+        canGenerateAiQuizzes: Boolean(org.permissions?.canGenerateAiQuizzes),
+      },
+      teacherLimits: {
+        courses: org.teacherLimits?.courses ? String(org.teacherLimits.courses) : '',
+        quizzes: org.teacherLimits?.quizzes ? String(org.teacherLimits.quizzes) : '',
+        blogs: org.teacherLimits?.blogs ? String(org.teacherLimits.blogs) : '',
+        aiQuizGenerations: org.teacherLimits?.aiQuizGenerations
+          ? String(org.teacherLimits.aiQuizGenerations)
+          : '',
+        aiQuizMaxQuestions: org.teacherLimits?.aiQuizMaxQuestions
+          ? String(org.teacherLimits.aiQuizMaxQuestions)
+          : '',
+      },
     });
     setShowEditModal(true);
   };
@@ -195,10 +245,10 @@ export function useAdminOrganizations() {
 
     try {
       setIsSubmitting(true);
-      await createOrganization(formData);
+      await createOrganization(toPolicyPayload(formData));
       addAlert({ type: 'success', message: t('organizations.create') + ' ' + t('common.success') });
       setShowCreateModal(false);
-      setFormData({ name: '', description: '', isActive: true });
+      setFormData(DEFAULT_FORM_DATA);
       fetchOrganizations();
     } catch (err) {
       const message =
@@ -216,11 +266,12 @@ export function useAdminOrganizations() {
 
     try {
       setIsSubmitting(true);
-      await updateOrganization(selectedOrg._id, formData);
+      const payload = toPolicyPayload(formData);
+      await updateOrganization(selectedOrg._id, payload);
       addAlert({ type: 'success', message: t('organizations.statusUpdated') });
       setShowEditModal(false);
       if (showDetailModal) {
-        setSelectedOrg((prev) => (prev ? { ...prev, ...formData } : null));
+        setSelectedOrg((prev) => (prev ? { ...prev, ...payload } : null));
       } else {
         setSelectedOrg(null);
       }

@@ -343,6 +343,21 @@ export const authOptions: AuthOptions = {
         }
       }
 
+      // Lazy hydrate organizationId for org admins whose JWT predates org assignment
+      if (token.role === 'admin' && !token.organizationId && token.id) {
+        try {
+          await dbConnect();
+          const dbUser = await User.findById(token.id)
+            .select('organizationId')
+            .lean<{ organizationId?: { toString(): string } | null }>();
+          if (dbUser?.organizationId) {
+            token.organizationId = dbUser.organizationId.toString();
+          }
+        } catch {
+          // Ignore hydration errors
+        }
+      }
+
       // Lazy hydrate organization branding if organizationId exists but name is not yet in token
       if (token.organizationId && !token.organizationName) {
         try {

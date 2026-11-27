@@ -5,8 +5,11 @@ import { motion } from 'framer-motion';
 import { X, Copy, Check, CheckCircle2, Shield } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import Tooltip from '@/components/ui/Tooltip';
+import { isSuperAdmin } from '@/lib/roles';
+import type { OrganizationPolicy } from '@/lib/admin/orgPolicy';
 import type { User } from './types';
 import { UserProfileInfoSection } from './UserProfileInfoSection';
+import { UserActivitySection } from './UserActivitySection';
 import { UserRoleOrgSection } from './UserRoleOrgSection';
 import { UserTeacherPermissionsSection } from './UserTeacherPermissionsSection';
 import { UserModerationSection } from './UserModerationSection';
@@ -16,6 +19,7 @@ type Props = {
   selectedUser: User;
   session: { user?: { id?: string; role?: string } | null } | null;
   organizations: Array<{ _id: string; name: string }>;
+  organizationPolicy?: OrganizationPolicy | null;
   handleCloseUserDetail: () => void;
   handleRoleChange: (userId: string, newRole: string) => void;
   handleSaveOrgAssign: (userId: string, orgId: string | null) => Promise<void>;
@@ -29,12 +33,13 @@ type Props = {
 };
 
 export function UserDetailModal({
-  selectedUser, session, organizations, handleCloseUserDetail, handleRoleChange,
+  selectedUser, session, organizations, organizationPolicy, handleCloseUserDetail, handleRoleChange,
   handleSaveOrgAssign, handleToggleVideoUpload, handleTogglePublicCoursePermission,
   handleToggleContestPermission, handleToggleAiQuizGenPermission,
   handleSaveLimits, handleToggleSuspend, handleDeleteClick,
 }: Props) {
   const { t } = useTranslation();
+  const isSuper = isSuperAdmin(session?.user?.role);
   const [copiedId, setCopiedId] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [selectedOrgId, setSelectedOrgId] = useState<string | null>(selectedUser.organizationId ?? null);
@@ -196,10 +201,14 @@ export function UserDetailModal({
             onSendEmailClick={() => setShowEmailModal(true)}
           />
 
+          {/* Platform Activity & Created/Enrolled Counts */}
+          <UserActivitySection user={selectedUser} />
+
           {/* Role & Org Section */}
           <UserRoleOrgSection
             user={selectedUser}
             currentUserId={session?.user?.id}
+            isSuperAdmin={isSuper}
             organizations={organizations}
             selectedOrgId={selectedOrgId}
             onRoleChange={(newRole) => handleRoleChange(selectedUser._id, newRole)}
@@ -211,6 +220,8 @@ export function UserDetailModal({
           {/* Teacher Capabilities & Quotas */}
           <UserTeacherPermissionsSection
             user={selectedUser}
+            isSuperAdmin={isSuper}
+            organizationPolicy={organizationPolicy}
             onToggleVideo={(val) => handleToggleVideoUpload(selectedUser._id, val)}
             onTogglePublicCourse={(val) => handleTogglePublicCoursePermission(selectedUser._id, val)}
             onToggleContest={(val) => handleToggleContestPermission?.(selectedUser._id, val)}

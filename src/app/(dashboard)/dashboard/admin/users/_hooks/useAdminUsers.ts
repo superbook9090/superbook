@@ -14,6 +14,7 @@ import {
 import { listOrganizations } from '@/lib/api/organizations';
 import { fetchAccountInfo } from '@/lib/api/auth';
 import { ApiClientError } from '@/lib/api/http';
+import type { OrganizationPolicy } from '@/lib/admin/orgPolicy';
 import type { User, UserStats } from '../_components/types';
 
 export function useAdminUsers() {
@@ -23,6 +24,7 @@ export function useAdminUsers() {
 
   const [users, setUsers] = useState<User[]>([]);
   const [stats, setStats] = useState<UserStats | null>(null);
+  const [organizationPolicy, setOrganizationPolicy] = useState<OrganizationPolicy | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isFetching, setIsFetching] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -111,6 +113,7 @@ export function useAdminUsers() {
       setUsers((data.users || []) as User[]);
       setPagination(data.pagination || { total: 0, totalPages: 1 });
       if (data.stats) setStats(data.stats);
+      if (data.organizationPolicy) setOrganizationPolicy(data.organizationPolicy);
     } catch (err) {
       if (err instanceof DOMException && err.name === 'AbortError') return;
       if (currentRequestId !== requestIdRef.current) return;
@@ -338,6 +341,7 @@ export function useAdminUsers() {
     setShowUserDetail,
     organizations,
     adminOrg,
+    organizationPolicy,
     pagination,
     fetchUsers,
     handleRoleChange,

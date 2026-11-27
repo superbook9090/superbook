@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import User from '@/models/User';
 import { escapeRegex, sanitizeSearchQuery, validateObjectId } from '@/lib/sanitize';
 import { AdminAuthResult } from './adminAuth';
+import { attachUserActivityStats } from './userActivityCounts';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type QueryFilter = Record<string, any>;
@@ -194,8 +195,12 @@ export async function fetchAdminUsersWithStats(
     activeMonthly: agg?.activeMonthly ?? 0,
   };
 
+  const usersWithActivity = await attachUserActivityStats(
+    users as Array<{ _id: mongoose.Types.ObjectId; role?: string } & Record<string, unknown>>
+  );
+
   return {
-    users,
+    users: usersWithActivity,
     total,
     stats,
   };

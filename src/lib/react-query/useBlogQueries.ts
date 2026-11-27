@@ -20,6 +20,7 @@ export interface Blog {
   readTime?: number;
   slug?: string | null;
   visibility?: 'public' | 'organization';
+  organizationId?: string | null;
   isPublished: boolean;
   author: { _id: string; name: string; email?: string };
   createdAt: string;

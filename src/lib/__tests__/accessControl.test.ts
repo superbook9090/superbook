@@ -1,6 +1,12 @@
+// @vitest-environment node
 import { describe, it, expect } from 'vitest';
 import mongoose from 'mongoose';
-import { getAccessFilter, validateContentAccess, type AccessUser } from '../accessControl';
+import {
+  getAccessFilter,
+  validateContentAccess,
+  canManageOrgContent,
+  type AccessUser,
+} from '../accessControl';
 
 describe('accessControl', () => {
   const superadmin: AccessUser = {
@@ -87,6 +93,58 @@ describe('accessControl', () => {
 
     it('denies access to org content for public users', () => {
       expect(() => validateContentAccess(orgId, publicStudent)).toThrow(/permission to access/);
+    });
+  });
+
+  describe('canManageOrgContent', () => {
+    const orgId = orgAdmin.organizationId!;
+    const otherOrgId = new mongoose.Types.ObjectId();
+    const otherAuthorId = new mongoose.Types.ObjectId();
+
+    it('allows superadmin to manage any content', () => {
+      expect(canManageOrgContent(null, otherAuthorId, superadmin)).toBe(true);
+      expect(canManageOrgContent(orgId, otherAuthorId, superadmin)).toBe(true);
+      expect(canManageOrgContent(otherOrgId, otherAuthorId, superadmin)).toBe(true);
+    });
+
+    it('allows org admin to manage content belonging to their own organization', () => {
+      expect(canManageOrgContent(orgId, otherAuthorId, orgAdmin)).toBe(true);
+    });
+
+    it('denies org admin from managing public/platform content authored by others', () => {
+      expect(canManageOrgContent(null, otherAuthorId, orgAdmin)).toBe(false);
+    });
+
+    it('denies org admin from managing another organization content', () => {
+      expect(canManageOrgContent(otherOrgId, otherAuthorId, orgAdmin)).toBe(false);
+    });
+
+    it('denies admin without an organization from managing public content authored by others', () => {
+      expect(canManageOrgContent(null, otherAuthorId, sysAdmin)).toBe(false);
+    });
+
+    it('allows any user to manage content they authored themselves', () => {
+      expect(canManageOrgContent(null, orgAdmin._id, orgAdmin)).toBe(true);
+      expect(canManageOrgContent(null, publicStudent._id, publicStudent)).toBe(true);
+    });
+
+    it('denies teacher from managing same-org or public content authored by another user', () => {
+      const orgTeacher: AccessUser = {
+        _id: new mongoose.Types.ObjectId(),
+        role: 'teacher',
+        organizationId: orgId,
+      };
+      expect(canManageOrgContent(orgId, otherAuthorId, orgTeacher)).toBe(false);
+      expect(canManageOrgContent(null, otherAuthorId, orgTeacher)).toBe(false);
+      expect(canManageOrgContent(orgId, orgTeacher._id, orgTeacher)).toBe(true);
+    });
+
+    it('handles string IDs identically to ObjectIds', () => {
+      expect(canManageOrgContent(orgId.toString(), otherAuthorId.toString(), orgAdmin)).toBe(true);
+      expect(canManageOrgContent(otherOrgId.toString(), otherAuthorId.toString(), orgAdmin)).toBe(
+        false
+      );
+      expect(canManageOrgContent(null, orgAdmin._id.toString(), orgAdmin)).toBe(true);
     });
   });
 });

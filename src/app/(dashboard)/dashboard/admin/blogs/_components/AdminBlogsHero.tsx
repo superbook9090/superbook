@@ -7,7 +7,7 @@ import { ROUTES } from '@/constants/routes';
 import { useTranslation } from '@/hooks/useTranslation';
 import { AdminPageBanner } from '@/features/admin/components/AdminPageBanner';
 
-export function AdminBlogsHero() {
+export function AdminBlogsHero({ isSuperAdmin = false }: { isSuperAdmin?: boolean }) {
   const { t } = useTranslation();
 
   return (
@@ -16,6 +16,7 @@ export function AdminBlogsHero() {
       eyebrow={t('admin.manageBlogs')}
       title={t('admin.manageBlogs')}
       description={t('admin.manageBlogsDesc')}
+      tier={isSuperAdmin ? 'superadmin' : 'admin'}
       actions={
         <Link
           href={ROUTES.teacher.blogCreate}

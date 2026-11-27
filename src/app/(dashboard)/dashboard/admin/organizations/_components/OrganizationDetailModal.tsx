@@ -24,6 +24,7 @@ import Button from '@/components/ui/Button';
 import Tooltip from '@/components/ui/Tooltip';
 import { getOrganizationDetails, type OrganizationFullDetails } from '@/lib/api/organizations';
 import { OrganizationAllDetailsPanel, type OrgDetailTab } from './OrganizationAllDetailsPanel';
+import { OrganizationPolicySummary } from './OrganizationPolicySummary';
 import type { OrganizationItem } from './types';
 
 interface OrganizationDetailModalProps {
@@ -353,6 +354,9 @@ export function OrganizationDetailModal({
               </div>
             </div>
           </div>
+
+          {/* Granted Feature Access & Quota Ceilings */}
+          <OrganizationPolicySummary org={org} />
 
           {/* Content Breakdown Metrics */}
           <div>

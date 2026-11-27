@@ -6,6 +6,10 @@ import { Organization, User, Course, Blog, Quiz } from '@/models';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { generateInviteCode, generateOrgCode } from '@/lib/inviteCode';
 import { serialize } from '@/lib/serialize';
+import {
+  sanitizeOrganizationPermissions,
+  sanitizeOrganizationTeacherLimits,
+} from '@/lib/admin/orgPolicy';
 
 // GET /api/organizations - List all organizations (admin only)
 export async function GET(req: NextRequest) {
@@ -137,13 +141,22 @@ export async function POST(req: NextRequest) {
     await dbConnect();
 
     const body = await req.json();
-    const { name, description, logo, primaryColor, website, tagline } = body;
+    const { name, description, logo, primaryColor, website, tagline, permissions, teacherLimits } = body;
 
     if (!name) {
       return NextResponse.json(
         { message: 'Name is required' },
         { status: 400 }
       );
+    }
+
+    const permResult = sanitizeOrganizationPermissions(permissions);
+    if (permResult.error) {
+      return NextResponse.json({ message: permResult.error }, { status: 400 });
+    }
+    const limitsResult = sanitizeOrganizationTeacherLimits(teacherLimits);
+    if (limitsResult.error) {
+      return NextResponse.json({ message: limitsResult.error }, { status: 400 });
     }
 
     // Generate unique codes
@@ -185,6 +198,8 @@ export async function POST(req: NextRequest) {
       website: website || null,
       tagline: tagline || null,
       isActive: true,
+      ...(permResult.value ? { permissions: permResult.value } : {}),
+      ...(limitsResult.value ? { teacherLimits: limitsResult.value } : {}),
     });
 
     await organization.save();

@@ -6,6 +6,22 @@ export interface UserLimits {
   aiQuizMaxQuestions?: number;
 }
 
+export interface UserActivityStats {
+  coursesCount?: number;
+  publishedCoursesCount?: number;
+  quizzesCount?: number;
+  publishedQuizzesCount?: number;
+  blogsCount?: number;
+  contestsCount?: number;
+  courseEnrollmentsCount?: number;
+  enrolledCoursesCount?: number;
+  completedCoursesCount?: number;
+  quizAttemptsCount?: number;
+  completedQuizAttemptsCount?: number;
+  contestAttemptsCount?: number;
+  certificatesCount?: number;
+}
+
 export interface User {
   _id: string;
   name: string;
@@ -31,6 +47,7 @@ export interface User {
   canCreateContests?: boolean;
   canGenerateAiQuizzes?: boolean;
   aiQuizGenerationsCount?: number;
+  activityStats?: UserActivityStats;
   createdAt: string;
   updatedAt?: string;
 }

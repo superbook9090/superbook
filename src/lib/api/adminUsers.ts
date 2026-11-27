@@ -1,4 +1,5 @@
 import { apiJson } from '@/lib/api/http';
+import type { OrganizationPolicy } from '@/lib/admin/orgPolicy';
 
 export type AdminUsersStats = {
   total: number;
@@ -17,6 +18,7 @@ export type AdminUsersListResult = {
   users: unknown[];
   pagination?: { total: number; totalPages: number };
   stats?: AdminUsersStats;
+  organizationPolicy?: OrganizationPolicy;
 };
 
 export function listAdminUsers(

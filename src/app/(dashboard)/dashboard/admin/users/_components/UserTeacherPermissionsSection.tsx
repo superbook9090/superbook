@@ -1,10 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Sliders, ShieldCheck, Layers, Sparkles, Check, RotateCcw } from 'lucide-react';
+import { Sliders, ShieldCheck, Layers, Sparkles, Check, RotateCcw, Lock } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import Button from '@/components/ui/Button';
+import {
+  ORG_PERMISSION_KEYS,
+  type OrganizationPolicy,
+  type OrgPermissionKey,
+} from '@/lib/admin/orgPolicy';
 import type { User } from './types';
 import { TeacherPermissionsTab } from './TeacherPermissionsTab';
 import { TeacherQuotasTab } from './TeacherQuotasTab';
@@ -12,6 +17,8 @@ import { TeacherAiLimitsTab } from './TeacherAiLimitsTab';
 
 interface UserTeacherPermissionsSectionProps {
   user: User;
+  isSuperAdmin?: boolean;
+  organizationPolicy?: OrganizationPolicy | null;
   onToggleVideo: (currentVal: boolean) => void;
   onTogglePublicCourse: (currentVal: boolean) => void;
   onToggleContest?: (currentVal: boolean) => void;
@@ -36,6 +43,8 @@ type TabType = 'permissions' | 'quotas' | 'ai';
 
 export function UserTeacherPermissionsSection({
   user,
+  isSuperAdmin = true,
+  organizationPolicy,
   onToggleVideo,
   onTogglePublicCourse,
   onToggleContest,
@@ -59,6 +68,36 @@ export function UserTeacherPermissionsSection({
     return null;
   }
 
+  const allowedPermissionKeys: OrgPermissionKey[] = isSuperAdmin
+    ? [...ORG_PERMISSION_KEYS]
+    : ORG_PERMISSION_KEYS.filter((k) => Boolean(organizationPolicy?.permissions?.[k]));
+
+  const orgLimits = organizationPolicy?.teacherLimits;
+  const hasContentQuotas =
+    isSuperAdmin ||
+    Boolean(orgLimits?.courses || orgLimits?.quizzes || orgLimits?.blogs);
+  const hasAiQuotas =
+    isSuperAdmin ||
+    Boolean(orgLimits?.aiQuizGenerations || orgLimits?.aiQuizMaxQuestions);
+
+  if (!isSuperAdmin && allowedPermissionKeys.length === 0 && !hasContentQuotas && !hasAiQuotas) {
+    return (
+      <div className="flex items-start gap-3 p-4 rounded-2xl bg-[var(--color-surface-muted)]/45 border border-[var(--border)]">
+        <div className="p-2 rounded-xl bg-[var(--color-surface-muted-strong)] text-[var(--color-muted-foreground)] shrink-0">
+          <Lock className="w-4 h-4" />
+        </div>
+        <div className="min-w-0">
+          <h4 className="text-xs sm:text-sm font-bold text-[var(--color-foreground)]">
+            {t('adminUsers.orgPermissionsManagedBySuperAdminTitle')}
+          </h4>
+          <p className="text-xs text-[var(--color-muted-foreground)] mt-0.5 leading-relaxed">
+            {t('adminUsers.orgPermissionsManagedBySuperAdminDesc')}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   const hasLimitsChanged =
     limitsForm.courses !== String(user.limits?.courses ?? '') ||
     limitsForm.quizzes !== String(user.limits?.quizzes ?? '') ||
@@ -66,31 +105,13 @@ export function UserTeacherPermissionsSection({
     limitsForm.aiQuizGenerations !== String(user.limits?.aiQuizGenerations ?? '') ||
     limitsForm.aiQuizMaxQuestions !== String(user.limits?.aiQuizMaxQuestions ?? '');
 
-  const activeOverridesCount = [
-    Boolean(limitsForm.courses && limitsForm.courses.trim() !== ''),
-    Boolean(limitsForm.quizzes && limitsForm.quizzes.trim() !== ''),
-    Boolean(limitsForm.blogs && limitsForm.blogs.trim() !== ''),
-    Boolean(limitsForm.aiQuizGenerations && limitsForm.aiQuizGenerations.trim() !== ''),
-    Boolean(limitsForm.aiQuizMaxQuestions && limitsForm.aiQuizMaxQuestions.trim() !== ''),
-  ].filter(Boolean).length;
-
-  const permissionsActiveCount = [
-    Boolean(user.canUploadVideos),
-    Boolean(user.canCreatePublicCourses),
-    Boolean(user.canCreateContests),
-    Boolean(user.canGenerateAiQuizzes),
-  ].filter(Boolean).length;
-
-  const contentOverridesCount = [
-    Boolean(limitsForm.courses && limitsForm.courses.trim() !== ''),
-    Boolean(limitsForm.quizzes && limitsForm.quizzes.trim() !== ''),
-    Boolean(limitsForm.blogs && limitsForm.blogs.trim() !== ''),
-  ].filter(Boolean).length;
-
-  const aiOverridesCount = [
-    Boolean(limitsForm.aiQuizGenerations && limitsForm.aiQuizGenerations.trim() !== ''),
-    Boolean(limitsForm.aiQuizMaxQuestions && limitsForm.aiQuizMaxQuestions.trim() !== ''),
-  ].filter(Boolean).length;
+  const permissionsActiveCount = allowedPermissionKeys.filter((k) => Boolean(user[k])).length;
+  const contentOverridesCount = [limitsForm.courses, limitsForm.quizzes, limitsForm.blogs].filter(
+    (v) => Boolean(v?.trim())
+  ).length;
+  const aiOverridesCount = [limitsForm.aiQuizGenerations, limitsForm.aiQuizMaxQuestions].filter(
+    (v) => Boolean(v?.trim())
+  ).length;
 
   const tabs: Array<{
     id: TabType;
@@ -99,33 +120,46 @@ export function UserTeacherPermissionsSection({
     badge: string;
     hasOverride: boolean;
   }> = [
-    {
-      id: 'permissions',
-      label: t('adminUsers.tabFeatureAccess'),
-      icon: <ShieldCheck className="w-4 h-4" />,
-      badge: `${permissionsActiveCount}/4`,
-      hasOverride: false,
-    },
-    {
-      id: 'quotas',
-      label: t('adminUsers.tabContentQuotas'),
-      icon: <Layers className="w-4 h-4" />,
-      badge: contentOverridesCount > 0 ? `${contentOverridesCount} custom` : 'default',
-      hasOverride: contentOverridesCount > 0,
-    },
-    {
-      id: 'ai',
-      label: t('adminUsers.tabAiIntelligence'),
-      icon: <Sparkles className="w-4 h-4" />,
-      badge: aiOverridesCount > 0 ? `${aiOverridesCount} custom` : 'default',
-      hasOverride: aiOverridesCount > 0,
-    },
+    ...(allowedPermissionKeys.length > 0
+      ? [
+          {
+            id: 'permissions' as const,
+            label: t('adminUsers.tabFeatureAccess'),
+            icon: <ShieldCheck className="w-4 h-4" />,
+            badge: `${permissionsActiveCount}/${allowedPermissionKeys.length}`,
+            hasOverride: false,
+          },
+        ]
+      : []),
+    ...(hasContentQuotas
+      ? [
+          {
+            id: 'quotas' as const,
+            label: t('adminUsers.tabContentQuotas'),
+            icon: <Layers className="w-4 h-4" />,
+            badge: contentOverridesCount > 0 ? `${contentOverridesCount} custom` : 'default',
+            hasOverride: contentOverridesCount > 0,
+          },
+        ]
+      : []),
+    ...(hasAiQuotas
+      ? [
+          {
+            id: 'ai' as const,
+            label: t('adminUsers.tabAiIntelligence'),
+            icon: <Sparkles className="w-4 h-4" />,
+            badge: aiOverridesCount > 0 ? `${aiOverridesCount} custom` : 'default',
+            hasOverride: aiOverridesCount > 0,
+          },
+        ]
+      : []),
   ];
+
+  const effectiveTab = tabs.some((tab) => tab.id === activeTab) ? activeTab : tabs[0].id;
 
   return (
     <div className="flex flex-col gap-3.5 p-4 sm:p-5 rounded-2xl bg-[var(--color-surface-muted)]/45 border border-[var(--border)]">
-      {/* Section Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-1">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-xl bg-gradient-to-tr from-[var(--teacher-soft)] to-[var(--primary-soft)] text-[var(--teacher-primary)] shadow-sm shrink-0">
             <Sliders className="w-5 h-5" />
@@ -135,64 +169,53 @@ export function UserTeacherPermissionsSection({
               {t('adminUsers.teacherPrivilegesAndLimits')}
             </h4>
             <p className="text-xs text-[var(--color-muted-foreground)] mt-0.5">
-              {t('adminUsers.teacherPrivilegesDesc')}
+              {isSuperAdmin
+                ? t('adminUsers.teacherPrivilegesDesc')
+                : t('adminUsers.orgTeacherPrivilegesDesc')}
             </p>
           </div>
         </div>
-
-        {/* Global Overrides Status Badge */}
-        <div className="shrink-0 self-start sm:self-center">
-          {activeOverridesCount > 0 ? (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-              <span>{activeOverridesCount} {t('adminUsers.activeOverrides')}</span>
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--color-surface-muted-strong)] text-[var(--color-muted-foreground)]">
-              {t('adminUsers.allGlobalDefaults')}
-            </span>
-          )}
-        </div>
       </div>
 
-      {/* Segmented Tab Pill Navigation */}
-      <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[var(--color-surface)] border border-[var(--border)] overflow-x-auto no-scrollbar">
-        {tabs.map((tab) => {
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-3 sm:px-3.5 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
-                isActive
-                  ? 'bg-[var(--teacher-primary)] text-white shadow-xs'
-                  : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted)]'
-              }`}
-            >
-              {tab.icon}
-              <span>{tab.label}</span>
-              <span
-                className={`text-[10px] px-1.5 py-0.5 rounded-md font-medium ${
+      {tabs.length > 1 && (
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[var(--color-surface)] border border-[var(--border)] overflow-x-auto no-scrollbar">
+          {tabs.map((tab) => {
+            const isActive = effectiveTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-3 sm:px-3.5 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
                   isActive
-                    ? 'bg-white/20 text-white'
-                    : tab.hasOverride
-                    ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
-                    : 'bg-[var(--color-surface-muted-strong)] text-[var(--color-muted-foreground)]'
+                    ? 'bg-[var(--teacher-primary)] text-white shadow-xs'
+                    : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-surface-muted)]'
                 }`}
               >
-                {tab.badge}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+                {tab.icon}
+                <span>{tab.label}</span>
+                <span
+                  className={`text-[10px] px-1.5 py-0.5 rounded-md font-medium ${
+                    isActive
+                      ? 'bg-white/20 text-white'
+                      : tab.hasOverride
+                      ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
+                      : 'bg-[var(--color-surface-muted-strong)] text-[var(--color-muted-foreground)]'
+                  }`}
+                >
+                  {tab.badge}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
-      {/* Active Tab Panel */}
-      <div className="min-h-[160px]">
-        {activeTab === 'permissions' && (
+      <div className="min-h-[120px]">
+        {effectiveTab === 'permissions' && (
           <TeacherPermissionsTab
             user={user}
+            allowedKeys={isSuperAdmin ? undefined : allowedPermissionKeys}
             onToggleVideo={onToggleVideo}
             onTogglePublicCourse={onTogglePublicCourse}
             onToggleContest={onToggleContest}
@@ -200,13 +223,20 @@ export function UserTeacherPermissionsSection({
           />
         )}
 
-        {activeTab === 'quotas' && (
+        {effectiveTab === 'quotas' && (
           <TeacherQuotasTab
             limitsForm={{
               courses: limitsForm.courses,
               quizzes: limitsForm.quizzes,
               blogs: limitsForm.blogs,
             }}
+            usedCounts={{
+              courses: user.activityStats?.coursesCount,
+              quizzes: user.activityStats?.quizzesCount,
+              blogs: user.activityStats?.blogsCount,
+            }}
+            orgMaxLimits={isSuperAdmin ? undefined : orgLimits}
+            isSuperAdmin={isSuperAdmin}
             globalCoursesLimit={globalCoursesLimit}
             globalQuizzesLimit={globalQuizzesLimit}
             globalBlogsLimit={globalBlogsLimit}
@@ -214,12 +244,14 @@ export function UserTeacherPermissionsSection({
           />
         )}
 
-        {activeTab === 'ai' && (
+        {effectiveTab === 'ai' && (
           <TeacherAiLimitsTab
             limitsForm={{
               aiQuizGenerations: limitsForm.aiQuizGenerations,
               aiQuizMaxQuestions: limitsForm.aiQuizMaxQuestions,
             }}
+            orgMaxLimits={isSuperAdmin ? undefined : orgLimits}
+            isSuperAdmin={isSuperAdmin}
             globalGenerationsLimit={globalGenerationsLimit}
             globalMaxQuestions={globalMaxQuestions}
             usedGenerationsCount={user.aiQuizGenerationsCount}
@@ -228,8 +260,7 @@ export function UserTeacherPermissionsSection({
         )}
       </div>
 
-      {/* Unsaved Changes Docked Bar */}
-      {hasLimitsChanged && (
+      {hasLimitsChanged && (hasContentQuotas || hasAiQuotas) && (
         <div className="flex items-center justify-between gap-3 p-3 sm:p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/25 text-[var(--color-foreground)]">
           <div className="flex items-center gap-2 min-w-0">
             <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shrink-0" />
@@ -237,7 +268,6 @@ export function UserTeacherPermissionsSection({
               {t('adminUsers.unsavedChanges')}
             </p>
           </div>
-
           <div className="flex items-center gap-2 shrink-0">
             {onResetLimits && (
               <button
@@ -266,6 +296,3 @@ export function UserTeacherPermissionsSection({
     </div>
   );
 }
-
-
-

@@ -3,16 +3,40 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import Blog from '@/models/Blog';
+import User from '@/models/User';
 import { requireFeature } from '@/lib/settingsHelpers';
 import mongoose from 'mongoose';
 import { sanitizeHtml } from '@/lib/sanitize';
 import { updateBlogSchema } from '@/lib/validation';
 import { logApiError, type LogContext } from '@/lib/logger';
-import { validateContentAccess } from '@/lib/accessControl';
+import { canManageOrgContent, validateContentAccess } from '@/lib/accessControl';
 import { invalidatePattern } from '@/lib/redis';
 import { revalidateTag } from 'next/cache';
 import { slugifyBlogTitle } from '@/lib/blogs/public';
-import { isAdmin } from '@/lib/roles';
+
+async function resolveSessionAccessUser(sessionUser: {
+  id: string;
+  role: string;
+  organizationId?: string | null;
+}) {
+  let orgId =
+    sessionUser.organizationId && mongoose.Types.ObjectId.isValid(sessionUser.organizationId)
+      ? sessionUser.organizationId
+      : null;
+
+  if (sessionUser.role === 'admin' && !orgId && mongoose.Types.ObjectId.isValid(sessionUser.id)) {
+    const dbUser = await User.findById(sessionUser.id)
+      .select('organizationId')
+      .lean<{ organizationId?: mongoose.Types.ObjectId | null }>();
+    orgId = dbUser?.organizationId ? dbUser.organizationId.toString() : null;
+  }
+
+  return {
+    _id: new mongoose.Types.ObjectId(sessionUser.id),
+    organizationId: orgId ? new mongoose.Types.ObjectId(orgId) : null,
+    role: sessionUser.role as 'student' | 'teacher' | 'admin' | 'superadmin',
+  };
+}
 
 function publicBlogAccessAllowed(blog: {
   visibility?: 'public' | 'organization' | null;
@@ -83,18 +107,19 @@ export async function GET(
     const session = await getServerSession(authOptions);
 
     // Apply organization-based access control
+    let accessUser: Awaited<ReturnType<typeof resolveSessionAccessUser>> | null = null;
     if (session?.user) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const user = session.user as any;
-      validateContentAccess(
-        blog.organizationId,
-        {
-          _id: new mongoose.Types.ObjectId(user.id),
-          organizationId: user.organizationId ? new mongoose.Types.ObjectId(user.organizationId) : null,
-          role: user.role as 'student' | 'teacher' | 'admin',
-        },
-        'blog'
+      accessUser = await resolveSessionAccessUser(
+        session.user as { id: string; role: string; organizationId?: string | null }
       );
+      try {
+        validateContentAccess(blog.organizationId, accessUser, 'blog');
+      } catch {
+        return NextResponse.json(
+          { message: 'You do not have permission to access this blog' },
+          { status: 403 }
+        );
+      }
     } else if (!publicBlogAccessAllowed(blog)) {
       return NextResponse.json(
         { message: 'Blog not found' },
@@ -103,7 +128,11 @@ export async function GET(
     }
 
     if (!blog.isPublished) {
-      if (!session || (session.user.id !== blog.author._id.toString() && !isAdmin(session.user.role))) {
+      const authorId =
+        typeof blog.author === 'object' && blog.author?._id
+          ? blog.author._id.toString()
+          : blog.author?.toString();
+      if (!accessUser || !canManageOrgContent(blog.organizationId, authorId, accessUser)) {
         return NextResponse.json(
           { message: 'Blog not found' },
           { status: 404 }
@@ -167,10 +196,13 @@ export async function PATCH(
 
     logContext.userId = session.user.id;
 
-    // Check ownership
-    if (blog.author.toString() !== session.user.id && !isAdmin(session.user.role)) {
+    // Check ownership or same-organization admin access
+    const accessUser = await resolveSessionAccessUser(
+      session.user as { id: string; role: string; organizationId?: string | null }
+    );
+    if (!canManageOrgContent(blog.organizationId, blog.author, accessUser)) {
       return NextResponse.json(
-        { message: 'You can only edit your own blogs' },
+        { message: 'You do not have permission to edit this blog' },
         { status: 403 }
       );
     }
@@ -257,7 +289,7 @@ export async function PATCH(
 
     // Invalidate cache for this organization
     const orgId = blog.organizationId?.toString() || 'public';
-    await invalidatePattern(`blogs:${orgId}:*`);
+    await invalidatePattern(`blogs:*:${orgId}:*`);
     
     // Revalidate Next.js cache tag
     revalidateTag(`blogs:${orgId}`);
@@ -318,10 +350,13 @@ export async function DELETE(
 
     logContext.userId = session.user.id;
 
-    // Check ownership
-    if (blog.author.toString() !== session.user.id && !isAdmin(session.user.role)) {
+    // Check ownership or same-organization admin access
+    const accessUser = await resolveSessionAccessUser(
+      session.user as { id: string; role: string; organizationId?: string | null }
+    );
+    if (!canManageOrgContent(blog.organizationId, blog.author, accessUser)) {
       return NextResponse.json(
-        { message: 'You can only delete your own blogs' },
+        { message: 'You do not have permission to delete this blog' },
         { status: 403 }
       );
     }
@@ -330,7 +365,7 @@ export async function DELETE(
 
     // Invalidate cache for this organization
     const orgId = blog.organizationId?.toString() || 'public';
-    await invalidatePattern(`blogs:${orgId}:*`);
+    await invalidatePattern(`blogs:*:${orgId}:*`);
     
     // Revalidate Next.js cache tag
     revalidateTag(`blogs:${orgId}`);

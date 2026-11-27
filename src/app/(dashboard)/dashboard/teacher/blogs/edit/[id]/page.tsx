@@ -11,7 +11,7 @@ import { ApiClientError } from '@/lib/api/http';
 import { useTranslation } from '@/hooks/useTranslation';
 import { isBlogContentEmpty, type BlogFormData } from '@/features/blogs/components/BlogEditorForm';
 import { LazyBlogEditorForm } from '@/lib/lazy';
-import { isAdmin } from '@/lib/roles';
+import { isAdmin, isSuperAdmin } from '@/lib/roles';
 import { PageWrapper } from '@/components/layout';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { TeacherPageBanner } from '@/features/teacher/components/TeacherPageBanner';
@@ -53,6 +53,24 @@ export default function EditBlogPage() {
   const fetchBlog = async () => {
     try {
       const blog: BlogDocument = await getBlogById(blogId);
+      const role = session?.user?.role;
+      const userId = session?.user?.id;
+      const userOrgId = (session?.user as { organizationId?: string | null } | undefined)?.organizationId ?? null;
+      const blogAuthorId =
+        typeof blog.author === 'object' && blog.author !== null ? blog.author._id : undefined;
+      const blogOrgId = blog.organizationId ? String(blog.organizationId) : null;
+
+      const allowed =
+        isSuperAdmin(role) ||
+        Boolean(userId && blogAuthorId && blogAuthorId === userId) ||
+        (role === 'admin' && Boolean(userOrgId && blogOrgId && blogOrgId === userOrgId));
+
+      if (!allowed) {
+        addAlert({ type: 'error', message: t('blog.failedToLoadBlog') });
+        router.replace(blogsHome);
+        return;
+      }
+
       setFormData({
         title: blog.title,
         topic: blog.topic,

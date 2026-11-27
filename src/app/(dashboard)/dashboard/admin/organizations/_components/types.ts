@@ -1,4 +1,7 @@
-import type { OrganizationItem } from '@/lib/api/organizations';
+import type {
+  OrganizationItem,
+  OrganizationPermissions,
+} from '@/lib/api/organizations';
 
 export type { OrganizationItem };
 
@@ -14,6 +17,14 @@ export type OrgStatusFilter = 'all' | 'active' | 'inactive';
 export type OrgSortOption = 'newest' | 'name' | 'users' | 'courses';
 export type ViewMode = 'grid' | 'table';
 
+export interface OrganizationTeacherLimitsForm {
+  courses: string;
+  quizzes: string;
+  blogs: string;
+  aiQuizGenerations: string;
+  aiQuizMaxQuestions: string;
+}
+
 export interface OrganizationFormData {
   name: string;
   description: string;
@@ -22,4 +33,6 @@ export interface OrganizationFormData {
   website?: string;
   tagline?: string;
   isActive: boolean;
+  permissions: Required<OrganizationPermissions>;
+  teacherLimits: OrganizationTeacherLimitsForm;
 }

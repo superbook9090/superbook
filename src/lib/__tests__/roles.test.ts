@@ -1,20 +1,14 @@
-import { describe, it, expect, vi } from 'vitest';
+// @vitest-environment node
+import { describe, it, expect } from 'vitest';
 import {
   normalizeRole,
   isStaffRole,
   isAdmin,
+  isSuperAdmin,
   getDashboardHomePath,
   withDashboardHome
 } from '../roles';
-
-// Mock ROUTES constant
-vi.mock('@/constants/routes', () => ({
-  ROUTES: {
-    student: { root: '/dashboard/student' },
-    teacher: { root: '/dashboard/teacher' },
-    admin: { root: '/dashboard/admin' },
-  }
-}));
+import { ADMIN_NAV, filterAdminNav, filterNavByFeatures } from '@/constants/navigation';
 
 describe('roles', () => {
   describe('normalizeRole', () => {
@@ -87,6 +81,59 @@ describe('roles', () => {
       
       expect(result[0].href).toBe('/dashboard/teacher');
       expect(result[1].href).toBe('/other'); // unchanged
+    });
+  });
+
+  describe('isSuperAdmin', () => {
+    it('returns true only for superadmin role (case-insensitive)', () => {
+      expect(isSuperAdmin('superadmin')).toBe(true);
+      expect(isSuperAdmin('SuperAdmin')).toBe(true);
+    });
+
+    it('returns false for admin, teacher, student, null, and undefined', () => {
+      expect(isSuperAdmin('admin')).toBe(false);
+      expect(isSuperAdmin('teacher')).toBe(false);
+      expect(isSuperAdmin('student')).toBe(false);
+      expect(isSuperAdmin(null)).toBe(false);
+      expect(isSuperAdmin(undefined)).toBe(false);
+    });
+  });
+
+  describe('navigation role & feature gating', () => {
+    it('hides superadmin-only admin nav entries from organization admins', () => {
+      const orgAdminNav = filterAdminNav(ADMIN_NAV, false);
+      const superAdminNav = filterAdminNav(ADMIN_NAV, true);
+
+      const superOnlyKeys = [
+        'common.organizations',
+        'common.contests',
+        'admin.challenges',
+        'common.files',
+        'common.notifications',
+        'common.settings',
+      ];
+
+      for (const key of superOnlyKeys) {
+        expect(orgAdminNav.some((item) => item.nameKey === key)).toBe(false);
+        expect(superAdminNav.some((item) => item.nameKey === key)).toBe(true);
+      }
+    });
+
+    it('filters nav items by enabled feature toggles', () => {
+      const filtered = filterNavByFeatures(ADMIN_NAV, {
+        enableBlogs: false,
+        enableQuizzes: true,
+        enableCourses: true,
+        enableAnalytics: false,
+        enableNotes: false,
+        enableContests: false,
+        enableQuizChallenges: false,
+      });
+
+      expect(filtered.some((item) => item.nameKey === 'common.allBlogs')).toBe(false);
+      expect(filtered.some((item) => item.nameKey === 'common.analytics')).toBe(false);
+      expect(filtered.some((item) => item.nameKey === 'common.allCourses')).toBe(true);
+      expect(filtered.some((item) => item.nameKey === 'common.users')).toBe(true);
     });
   });
 });

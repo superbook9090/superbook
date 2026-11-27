@@ -1,4 +1,10 @@
 import { apiJson } from '@/lib/api/http';
+import type {
+  OrganizationPermissions,
+  OrganizationTeacherLimits,
+} from '@/lib/admin/orgPolicy';
+
+export type { OrganizationPermissions, OrganizationTeacherLimits };
 
 export interface OrganizationItem {
   _id: string;
@@ -11,6 +17,8 @@ export interface OrganizationItem {
   website?: string;
   tagline?: string;
   isActive: boolean;
+  permissions?: OrganizationPermissions;
+  teacherLimits?: OrganizationTeacherLimits;
   userCount: number;
   courseCount: number;
   blogCount: number;
@@ -53,6 +61,8 @@ export function createOrganization(body: {
   website?: string;
   tagline?: string;
   isActive?: boolean;
+  permissions?: OrganizationPermissions;
+  teacherLimits?: OrganizationTeacherLimits;
 }): Promise<OrganizationItem> {
   return apiJson('/api/organizations', { method: 'POST', body });
 }
@@ -67,6 +77,8 @@ export function updateOrganization(
     website?: string;
     tagline?: string;
     isActive?: boolean;
+    permissions?: OrganizationPermissions;
+    teacherLimits?: OrganizationTeacherLimits;
   }
 ): Promise<OrganizationItem> {
   return apiJson(`/api/organizations/${encodeURIComponent(id)}`, { method: 'PATCH', body });

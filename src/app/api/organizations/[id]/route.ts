@@ -6,6 +6,10 @@ import dbConnect from '@/lib/db';
 import { Organization, User, Course, Blog, Quiz } from '@/models';
 import { logApiError, type LogContext } from '@/lib/logger';
 import { isAdmin, isSuperAdmin } from '@/lib/roles';
+import {
+  sanitizeOrganizationPermissions,
+  sanitizeOrganizationTeacherLimits,
+} from '@/lib/admin/orgPolicy';
 
 // GET /api/organizations/[id] - Fetch organization details
 export async function GET(
@@ -236,7 +240,47 @@ export async function PATCH(
     }
 
     const body = await req.json();
-    const { name, description, isActive, logo, primaryColor, website, tagline } = body;
+    const {
+      name,
+      description,
+      isActive,
+      logo,
+      primaryColor,
+      website,
+      tagline,
+      permissions,
+      teacherLimits,
+    } = body;
+
+    if ((permissions !== undefined || teacherLimits !== undefined) && !isSuperAdmin(session.user.role)) {
+      return NextResponse.json(
+        { message: 'Forbidden: Only super admins can configure organization permissions and quotas' },
+        { status: 403 }
+      );
+    }
+
+    if (permissions !== undefined) {
+      const permResult = sanitizeOrganizationPermissions(permissions);
+      if (permResult.error) {
+        return NextResponse.json({ message: permResult.error }, { status: 400 });
+      }
+      if (permResult.value) {
+        organization.permissions = {
+          ...(organization.permissions || {}),
+          ...permResult.value,
+        };
+      }
+    }
+
+    if (teacherLimits !== undefined) {
+      const limitsResult = sanitizeOrganizationTeacherLimits(teacherLimits);
+      if (limitsResult.error) {
+        return NextResponse.json({ message: limitsResult.error }, { status: 400 });
+      }
+      if (limitsResult.value) {
+        organization.teacherLimits = limitsResult.value;
+      }
+    }
 
     if (name) organization.name = name;
     if (description !== undefined) organization.description = description;

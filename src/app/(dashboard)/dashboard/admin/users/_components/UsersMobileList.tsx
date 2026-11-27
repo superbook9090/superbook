@@ -20,6 +20,7 @@ import {
 import { useTranslation } from '@/hooks/useTranslation';
 import { formatDate, getRelativeTime } from '@/lib/dateUtils';
 import type { User } from './types';
+import { UserActivityBadges } from './UserActivityBadges';
 
 type Props = {
   users: User[];
@@ -120,6 +121,13 @@ export function UsersMobileList({ users, organizations, handleOpenUserDetail }: 
             </div>
 
             <div className="flex flex-col gap-2 pt-2.5 border-t border-[var(--border)]/70 text-xs">
+              <div className="flex items-start justify-between gap-2">
+                <span className="text-[var(--color-muted-foreground)] shrink-0 pt-0.5">
+                  {t('adminUsers.activity')}
+                </span>
+                <UserActivityBadges user={user} align="end" />
+              </div>
+
               <div className="flex items-center justify-between">
                 <span className="text-[var(--color-muted-foreground)]">{t('adminAnalytics.platform')}</span>
                 {user.lastPlatform === 'android' || user.lastPlatform === 'ios' ? (

@@ -174,6 +174,7 @@ export default function AdminUsersPage() {
           selectedUser={u.selectedUser}
           session={u.session}
           organizations={u.organizations}
+          organizationPolicy={u.organizationPolicy}
           handleCloseUserDetail={() => {
             u.setSelectedUser(null);
             u.setShowUserDetail(false);

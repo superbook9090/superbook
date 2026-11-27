@@ -9,6 +9,7 @@ import { useAlert } from '@/components/ui/AlertContainer';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import Button from '@/components/ui/Button';
 import { useSessionStore } from '@/store/useSessionStore';
+import { isAdmin, isSuperAdmin } from '@/lib/roles';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import BlogFilters, { type BlogLanguageFilter, type BlogStatusFilter } from '@/features/blogs/components/BlogFilters';
@@ -47,23 +48,42 @@ export default function AdminBlogsPage() {
     setPage(1);
   }, [searchTerm, filter, languageFilter]);
 
+  const isSuper = isSuperAdmin(session?.user?.role);
+  const isUserAdmin = isAdmin(session?.user?.role);
+  const userOrgId = (session?.user as { organizationId?: string | null } | undefined)?.organizationId ?? null;
+  const userId = session?.user?.id;
+
   useEffect(() => {
+    if (status === 'loading') return;
     if (status === 'unauthenticated') {
       router.push(ROUTES.login);
+      return;
     }
-  }, [status, router]);
+    if (!isUserAdmin) {
+      router.push(ROUTES.dashboard);
+    }
+  }, [status, isUserAdmin, router]);
 
-  const orgId = (session?.user as { organizationId?: string })?.organizationId || 'public';
-  const { data, isLoading } = usePaginatedBlogs({
-    orgId,
-    page,
-    limit: PAGE_SIZE,
-    search: searchTerm || undefined,
-    status: filter,
-    language: languageFilter !== 'all' ? languageFilter : undefined,
-    includeDrafts: true,
-    includeStats: true,
-  });
+  const orgId = userOrgId || (isSuper ? 'all' : 'self');
+  const { data, isLoading } = usePaginatedBlogs(
+    {
+      orgId,
+      page,
+      limit: PAGE_SIZE,
+      search: searchTerm || undefined,
+      status: filter,
+      language: languageFilter !== 'all' ? languageFilter : undefined,
+      includeDrafts: true,
+      includeStats: true,
+    },
+    status === 'authenticated' && isUserAdmin
+  );
+
+  const canManageBlog = (blog: { organizationId?: string | null; author?: { _id?: string } }) => {
+    if (isSuper) return true;
+    if (userId && blog.author?._id === userId) return true;
+    return Boolean(userOrgId && blog.organizationId && blog.organizationId === userOrgId);
+  };
 
   const blogs = data?.blogs ?? [];
   const pagination = data?.pagination;
@@ -98,7 +118,7 @@ export default function AdminBlogsPage() {
   return (
     <PageWrapper>
       {/* Hero Banner */}
-      <AdminBlogsHero />
+      <AdminBlogsHero isSuperAdmin={isSuper} />
 
       {/* KPI Stats Overview */}
       <AdminBlogsStats stats={stats} />
@@ -134,6 +154,7 @@ export default function AdminBlogsPage() {
               key={blog._id}
               blog={blog}
               index={index}
+              canManage={canManageBlog(blog)}
               onTogglePublish={handleTogglePublish}
               onDelete={(id) => setDeleteId(id)}
             />

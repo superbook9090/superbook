@@ -16,6 +16,7 @@ export type BlogDocument = {
   metaDescription?: string | null;
   visibility?: 'public' | 'organization';
   isFeatured?: boolean;
+  organizationId?: string | null;
   author?: { _id: string; name: string; email?: string };
   createdAt?: string;
   updatedAt?: string;
