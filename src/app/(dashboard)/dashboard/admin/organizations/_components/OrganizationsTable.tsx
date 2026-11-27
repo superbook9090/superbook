@@ -10,6 +10,7 @@ import {
   Trash2,
   ExternalLink,
   Power,
+  Share2,
 } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import Tooltip from '@/components/ui/Tooltip';
@@ -19,6 +20,7 @@ interface OrganizationsTableProps {
   organizations: OrganizationItem[];
   copiedCode: string | null;
   onCopy: (text: string, type: string) => void;
+  onCopyShareInfo: (org: OrganizationItem) => void;
   onOpenDetail: (org: OrganizationItem) => void;
   onOpenEdit: (org: OrganizationItem) => void;
   onToggleActive: (org: OrganizationItem) => void;
@@ -37,6 +39,7 @@ export function OrganizationsTable({
   organizations,
   copiedCode,
   onCopy,
+  onCopyShareInfo,
   onOpenDetail,
   onOpenEdit,
   onToggleActive,
@@ -166,6 +169,21 @@ export function OrganizationsTable({
 
                   <td className="py-3.5 px-4 text-right">
                     <div className="flex items-center justify-end gap-1">
+                      <Tooltip label={copiedCode === `shareInfo-${org._id}` ? t('organizations.codeCopied') : t('organizations.copyShareInfo')}>
+                        <button
+                          type="button"
+                          onClick={() => onCopyShareInfo(org)}
+                          aria-label={t('organizations.copyShareInfo')}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--border)] bg-[var(--card-solid)] text-[var(--primary)] hover:bg-[var(--primary-soft)] transition-colors cursor-pointer"
+                        >
+                          {copiedCode === `shareInfo-${org._id}` ? (
+                            <Check className="w-3.5 h-3.5 text-[var(--success)]" />
+                          ) : (
+                            <Share2 className="w-3.5 h-3.5" />
+                          )}
+                        </button>
+                      </Tooltip>
+
                       <Tooltip label={t('organizations.viewDetails')}>
                         <button
                           type="button"

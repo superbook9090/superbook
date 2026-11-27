@@ -22,6 +22,7 @@ import type {
   ViewMode,
   OrganizationFormData,
 } from '../_components/types';
+import { buildOrganizationShareText } from '../_utils/formatOrgShareInfo';
 
 const DEFAULT_FORM_DATA: OrganizationFormData = {
   name: '',
@@ -184,12 +185,27 @@ export function useAdminOrganizations() {
       });
   }, [organizations, searchQuery, statusFilter, sortOption]);
 
-  // Clipboard Helper
+  // Clipboard Helpers
   const copyToClipboard = useCallback((text: string, type: string) => {
     navigator.clipboard.writeText(text);
     setCopiedCode(`${type}-${text}`);
     setTimeout(() => setCopiedCode(null), 2000);
   }, []);
+
+  const copyOrgShareInfo = useCallback(
+    async (org: OrganizationItem) => {
+      try {
+        const text = buildOrganizationShareText(org);
+        await navigator.clipboard.writeText(text);
+        setCopiedCode(`shareInfo-${org._id}`);
+        addAlert({ type: 'success', message: t('organizations.shareInfoCopied') });
+        setTimeout(() => setCopiedCode(null), 2000);
+      } catch {
+        addAlert({ type: 'error', message: t('organizations.copyShareInfoFailed') });
+      }
+    },
+    [addAlert, t]
+  );
 
   // Modal Openers
   const openCreateModal = () => {
@@ -369,6 +385,7 @@ export function useAdminOrganizations() {
     setFormData,
     fetchOrganizations,
     copyToClipboard,
+    copyOrgShareInfo,
     openCreateModal,
     openEditModal,
     openDetailModal,

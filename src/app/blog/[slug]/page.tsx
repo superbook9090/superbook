@@ -81,6 +81,13 @@ export default async function PublicBlogDetailPage({
       ? blog.author.name
       : 'Quiz Do Editorial Team';
 
+  const wordCount = (blog.content || '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean).length;
+
   const articleJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -90,6 +97,7 @@ export default async function PublicBlogDetailPage({
     datePublished: blog.createdAt,
     dateModified: blog.updatedAt,
     inLanguage: blog.language || 'en',
+    wordCount,
     author: [
       {
         '@type': 'Person',

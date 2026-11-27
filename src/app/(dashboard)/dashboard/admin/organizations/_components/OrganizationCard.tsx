@@ -12,6 +12,7 @@ import {
   Trash2,
   ExternalLink,
   Power,
+  Share2,
 } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import Tooltip from '@/components/ui/Tooltip';
@@ -22,6 +23,7 @@ interface OrganizationCardProps {
   index: number;
   copiedCode: string | null;
   onCopy: (text: string, type: string) => void;
+  onCopyShareInfo: (org: OrganizationItem) => void;
   onOpenDetail: (org: OrganizationItem) => void;
   onOpenEdit: (org: OrganizationItem) => void;
   onToggleActive: (org: OrganizationItem) => void;
@@ -40,6 +42,7 @@ export function OrganizationCard({
   organization: org,
   copiedCode,
   onCopy,
+  onCopyShareInfo,
   onOpenDetail,
   onOpenEdit,
   onToggleActive,
@@ -47,6 +50,7 @@ export function OrganizationCard({
 }: OrganizationCardProps) {
   const { t } = useTranslation();
   const initials = getOrgInitials(org.name);
+  const isShareCopied = copiedCode === `shareInfo-${org._id}`;
 
   return (
     <div className="teacher-card p-5 flex flex-col justify-between gap-4 group">
@@ -170,6 +174,17 @@ export function OrganizationCard({
         </button>
 
         <div className="flex items-center gap-1.5">
+          <Tooltip label={isShareCopied ? t('organizations.codeCopied') : t('organizations.copyShareInfo')}>
+            <button
+              type="button"
+              onClick={() => onCopyShareInfo(org)}
+              aria-label={t('organizations.copyShareInfo')}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-[10px] border border-[var(--border)] bg-[var(--surface-muted)] text-[var(--primary)] hover:bg-[var(--primary-soft)] transition-colors cursor-pointer"
+            >
+              {isShareCopied ? <Check className="w-4 h-4 text-[var(--success)]" /> : <Share2 className="w-4 h-4" />}
+            </button>
+          </Tooltip>
+
           <Tooltip label={org.isActive ? t('organizations.deactivateOrg') : t('organizations.activateOrg')}>
             <button
               type="button"

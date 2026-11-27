@@ -5,6 +5,11 @@ import { Shield, HardDrive, Lock, EyeOff, Server, Mail } from 'lucide-react';
 export const metadata: Metadata = {
   title: 'Privacy Policy | Space Saver',
   description: 'Privacy Policy for the Space Saver application.',
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: { index: false, follow: false },
+  },
 };
 
 export default function SpaceSaverPrivacyPolicyPage() {

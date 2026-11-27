@@ -18,6 +18,7 @@ import {
   ArrowLeft,
   ChevronRight,
   Eye,
+  Share2,
 } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import Button from '@/components/ui/Button';
@@ -25,6 +26,7 @@ import Tooltip from '@/components/ui/Tooltip';
 import { getOrganizationDetails, type OrganizationFullDetails } from '@/lib/api/organizations';
 import { OrganizationAllDetailsPanel, type OrgDetailTab } from './OrganizationAllDetailsPanel';
 import { OrganizationPolicySummary } from './OrganizationPolicySummary';
+import { buildOrganizationRegistrationUrl } from '../_utils/formatOrgShareInfo';
 import type { OrganizationItem } from './types';
 
 interface OrganizationDetailModalProps {
@@ -32,6 +34,7 @@ interface OrganizationDetailModalProps {
   organization: OrganizationItem | null;
   copiedCode: string | null;
   onCopy: (text: string, type: string) => void;
+  onCopyShareInfo: (org: OrganizationItem) => void;
   onOpenEdit: (org: OrganizationItem) => void;
   onToggleActive: (org: OrganizationItem) => void;
   onDelete: (org: OrganizationItem) => void;
@@ -51,6 +54,7 @@ export function OrganizationDetailModal({
   organization: org,
   copiedCode,
   onCopy,
+  onCopyShareInfo,
   onOpenEdit,
   onToggleActive,
   onDelete,
@@ -106,14 +110,12 @@ export function OrganizationDetailModal({
   // Construct Direct Registration Links for Students & Teachers
   const studentRegisterUrl = useMemo(() => {
     if (!org) return '';
-    const base = typeof window !== 'undefined' ? window.location.origin : 'https://quiz-do.com';
-    return `${base}/register?inviteCode=${encodeURIComponent(org.inviteCode)}&role=student`;
+    return buildOrganizationRegistrationUrl(org.inviteCode, 'student');
   }, [org]);
 
   const teacherRegisterUrl = useMemo(() => {
     if (!org) return '';
-    const base = typeof window !== 'undefined' ? window.location.origin : 'https://quiz-do.com';
-    return `${base}/register?inviteCode=${encodeURIComponent(org.inviteCode)}&role=teacher`;
+    return buildOrganizationRegistrationUrl(org.inviteCode, 'teacher');
   }, [org]);
 
   if (!isOpen || !org) return null;
@@ -282,16 +284,37 @@ export function OrganizationDetailModal({
 
           {/* Direct Registration Link Share Box */}
           <div className="bg-[var(--card-solid)] border border-[var(--primary)]/30 rounded-xl p-3.5 shadow-xs space-y-3">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <LinkIcon className="w-4 h-4 text-[var(--primary)]" />
-                <span className="text-xs font-bold text-[var(--color-foreground)]">
-                  {t('organizations.registrationLink')}
-                </span>
+            <div className="flex items-start justify-between gap-2 flex-wrap">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <LinkIcon className="w-4 h-4 text-[var(--primary)]" />
+                  <span className="text-xs font-bold text-[var(--color-foreground)]">
+                    {t('organizations.registrationLink')}
+                  </span>
+                </div>
+                <p className="text-[11px] text-[var(--color-muted-foreground)]">
+                  {t('organizations.registrationLinkDesc')}
+                </p>
               </div>
-              <p className="text-[11px] text-[var(--color-muted-foreground)]">
-                {t('organizations.registrationLinkDesc')}
-              </p>
+              <Button
+                type="button"
+                onClick={() => onCopyShareInfo(org)}
+                variant="primary"
+                size="sm"
+                className="shrink-0 inline-flex items-center gap-1.5 text-xs min-h-[36px] px-3"
+              >
+                {copiedCode === `shareInfo-${org._id}` ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-white" />
+                    <span>{t('organizations.codeCopied')}</span>
+                  </>
+                ) : (
+                  <>
+                    <Share2 className="w-3.5 h-3.5" />
+                    <span>{t('organizations.copyShareInfo')}</span>
+                  </>
+                )}
+              </Button>
             </div>
 
             {/* Student Link */}

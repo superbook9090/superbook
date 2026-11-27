@@ -6,7 +6,7 @@ import { getAllSeoLandingPaths } from '@/lib/seo/landing-routes';
 import {
   buildPublicBlogPath,
   listPublicBlogSitemapEntries,
-  listPublicBlogTopics,
+  listPublicBlogTopicsWithMinCount,
   blogTopicSlug,
 } from '@/lib/blogs/public';
 import { buildPublicCoursePath, listPublicCourseSitemapEntries } from '@/lib/courses/public';
@@ -17,7 +17,6 @@ import { getCanonicalSeoPath } from '@/lib/seo/landing-routes';
 const PUBLIC_PATHS: { path: string; changeFrequency: MetadataRoute.Sitemap[number]['changeFrequency']; priority: number }[] = [
   { path: ROUTES.home, changeFrequency: 'weekly', priority: 1 },
   { path: ROUTES.howItWorks, changeFrequency: 'monthly', priority: 0.8 },
-  { path: ROUTES.register, changeFrequency: 'monthly', priority: 0.8 },
   { path: ROUTES.contact, changeFrequency: 'monthly', priority: 0.7 },
   { path: ROUTES.about, changeFrequency: 'monthly', priority: 0.8 },
   { path: ROUTES.privacy, changeFrequency: 'yearly', priority: 0.3 },
@@ -71,7 +70,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     }));
 
-    const topics = await listPublicBlogTopics();
+    const topics = await listPublicBlogTopicsWithMinCount(2);
     categoryPages = topics.map((topic) => ({
       url: `${baseUrl}/blogs/category/${blogTopicSlug(topic)}`,
       lastModified: STATIC_PAGES_LASTMOD,

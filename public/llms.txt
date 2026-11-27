@@ -1,0 +1,38 @@
+# Quiz Do (https://www.quizdo.in)
+
+> Quiz Do is a free online learning management system (LMS), interactive quiz maker, AI MCQ generator, and competitive exam preparation platform built for Indian students, teachers, and coaching institutes. Available in English and Hindi on Web and Android.
+
+## Core Platform Offerings
+
+- [Home](https://www.quizdo.in/): Free online quiz maker, gamified mock tests, live contests, structured courses, and verifiable completion certificates.
+- [Public Courses Catalog](https://www.quizdo.in/courses): Free chapter-wise online courses with embedded quizzes, progress tracking, and certificates.
+- [Educational Blogs & Study Guides](https://www.quizdo.in/blogs): In-depth exam preparation guides, study strategies, and subject explainers in English and Hindi.
+- [Live Quiz Contests](https://www.quizdo.in/contests): Scheduled live timed contests with real-time leaderboards and solution analysis.
+- [Free Educator & Exam Tools Directory](https://www.quizdo.in/tools): Interactive quiz creation, MCQ authoring, PDF-to-quiz, and exam practice tools.
+
+## Educator & Assessment Creation Tools
+
+- [Free Quiz Maker](https://www.quizdo.in/quiz-maker-free): Build timed MCQ quizzes with instant auto-grading and performance analytics.
+- [AI Quiz Generator](https://www.quizdo.in/ai-quiz-generator): Generate curriculum-aligned multiple-choice questions with distractors and explanations from text or topics.
+- [MCQ Generator](https://www.quizdo.in/mcq-generator): Create balanced four-option multiple choice question banks for school and competitive exams.
+- [Mock Test Maker](https://www.quizdo.in/mock-test-maker): Build full-length simulated competitive exams with optional negative marking and rank boards.
+- [Question Paper Maker](https://www.quizdo.in/question-paper-maker): Draft balanced section-wise question papers for schools and coaching batches.
+- [PDF to Quiz Generator](https://www.quizdo.in/quiz-generator-from-pdf): Turn study notes and PDF text into interactive practice quizzes.
+- [Free Course Maker](https://www.quizdo.in/course-maker-free): Organize chapters, lessons, video lectures, and milestone quizzes in one LMS.
+- [Free Test Series Maker](https://www.quizdo.in/test-series-maker-free): Package chapter-wise and full-length mock tests for student cohorts.
+
+## Competitive Exam Practice Hubs
+
+- [Online Quiz Practice](https://www.quizdo.in/quiz): Free timed practice quizzes with instant explanations across GK, Science, Math, and Reasoning.
+- [UPTET Practice Quiz](https://www.quizdo.in/uptet-quiz): Syllabus-aligned UPTET Paper 1 & Paper 2 practice questions (CDP, Hindi, EVS, Math) with exam pattern breakdown.
+- [CTET Practice Quiz](https://www.quizdo.in/ctet-quiz): CBSE CTET pedagogy and subject MCQs aligned with NCF 2005 and NEP 2020.
+- [PAT Exam 2026 Free Test Series](https://www.quizdo.in/free-test-series-for-pat-exam-2026): Pre-Agriculture Test (PAT) Physics, Chemistry, Biology, Math, and Agriculture practice sets.
+
+## Publisher & Trust Pages
+
+- [About Quiz Do](https://www.quizdo.in/about): Mission, educational vision, and platform architecture.
+- [Contact Support](https://www.quizdo.in/contact): Direct support channels for students, teachers, and organizations.
+- [Privacy Policy](https://www.quizdo.in/privacy): Data privacy practices and advertising disclosures.
+- [Terms of Service](https://www.quizdo.in/terms): Platform terms and acceptable use policy.
+- [XML Sitemap](https://www.quizdo.in/sitemap.xml): Canonical index of public articles, courses, contests, and tools.
+- [RSS Feed](https://www.quizdo.in/blogs/feed.xml): Latest published educational articles.

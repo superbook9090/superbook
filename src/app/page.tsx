@@ -8,6 +8,8 @@ import FeaturedBlogs from '@/components/home/FeaturedBlogs';
 import SeoResources from '@/components/home/SeoResources';
 import GamificationFeatures from '@/components/home/GamificationFeatures';
 import MobileWebviewGuard from '@/components/mobile/MobileWebviewGuard';
+import { PublicInteractiveQuiz } from '@/components/seo/PublicInteractiveQuiz';
+import { GENERAL_QUIZ_GUIDE } from '@/data/seo-guides/examGuides';
 import { createPageMetadata } from '@/lib/seo/metadata';
 
 export const dynamic = 'force-static';
@@ -53,6 +55,13 @@ export default function HomePage() {
       <JsonLd includeWebSite />
       <MarketingHeader />
       <HeroStatic />
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <PublicInteractiveQuiz
+          title={GENERAL_QUIZ_GUIDE.interactiveTitle}
+          subtitle={GENERAL_QUIZ_GUIDE.interactiveSubtitle}
+          questions={GENERAL_QUIZ_GUIDE.sampleQuestions}
+        />
+      </section>
       <GamificationFeatures />
       <HomeQuizMakerSeo />
       <SeoResources />

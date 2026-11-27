@@ -20,6 +20,7 @@ import MarketingHeader from '@/components/home/MarketingHeader';
 import Footer from '@/components/home/Footer';
 import { useFeature } from '@/contexts/AppSettingsContext';
 import { Accordion } from '@/components/ui/Accordion';
+import { SeoToolGuideSection } from '@/components/seo/SeoToolGuideSection';
 
 const IconMap: Record<string, React.ElementType> = {
   Zap,
@@ -89,6 +90,8 @@ export default function ToolClient({ toolSlug }: ToolClientProps) {
           </div>
 
           <div className="space-y-16">
+            <SeoToolGuideSection toolSlug={toolSlug} />
+
             <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {tool.features.map((feature, i) => {
                 const Icon = IconMap[feature.iconName] || CheckCircle;

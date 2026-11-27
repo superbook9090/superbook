@@ -144,6 +144,17 @@ export async function listPublicBlogTopics(): Promise<string[]> {
   return topics.filter(Boolean).sort((a, b) => a.localeCompare(b));
 }
 
+export async function listPublicBlogTopicsWithMinCount(minCount = 2): Promise<string[]> {
+  await dbConnect();
+  const rows = await Blog.aggregate<{ _id: string; count: number }>([
+    { $match: publicVisibilityFilter() },
+    { $group: { _id: '$topic', count: { $sum: 1 } } },
+    { $match: { _id: { $ne: null }, count: { $gte: minCount } } },
+    { $sort: { _id: 1 } },
+  ]);
+  return rows.map((r) => r._id).filter(Boolean);
+}
+
 export async function listPublicBlogs(params: {
   page?: number;
   limit?: number;

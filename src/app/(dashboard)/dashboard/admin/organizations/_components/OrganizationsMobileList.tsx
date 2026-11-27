@@ -10,6 +10,7 @@ import {
   Trash2,
   ChevronRight,
   Power,
+  Share2,
 } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { OrganizationItem } from './types';
@@ -18,6 +19,7 @@ interface OrganizationsMobileListProps {
   organizations: OrganizationItem[];
   copiedCode: string | null;
   onCopy: (text: string, type: string) => void;
+  onCopyShareInfo: (org: OrganizationItem) => void;
   onOpenDetail: (org: OrganizationItem) => void;
   onOpenEdit: (org: OrganizationItem) => void;
   onToggleActive: (org: OrganizationItem) => void;
@@ -36,6 +38,7 @@ export function OrganizationsMobileList({
   organizations,
   copiedCode,
   onCopy,
+  onCopyShareInfo,
   onOpenDetail,
   onOpenEdit,
   onToggleActive,
@@ -145,6 +148,19 @@ export function OrganizationsMobileList({
               </div>
 
               <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => onCopyShareInfo(org)}
+                  aria-label={t('organizations.copyShareInfo')}
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-[10px] border border-[var(--border)] bg-[var(--surface-muted)] text-[var(--primary)] cursor-pointer"
+                >
+                  {copiedCode === `shareInfo-${org._id}` ? (
+                    <Check className="w-4 h-4 text-[var(--success)]" />
+                  ) : (
+                    <Share2 className="w-4 h-4" />
+                  )}
+                </button>
+
                 <button
                   type="button"
                   onClick={() => onToggleActive(org)}

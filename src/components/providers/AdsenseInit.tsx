@@ -1,14 +1,33 @@
 "use client";
 
 import Script from 'next/script';
+import { usePathname } from 'next/navigation';
 import { useSettingsStore } from '@/store/useSettingsStore';
 
+const BLOCKED_ADSENSE_PREFIXES = [
+  '/dashboard',
+  '/login',
+  '/register',
+  '/forgot-password',
+  '/reset-password',
+  '/maintenance',
+  '/privacy-spacesaver',
+];
+
+function isAdsenseAllowedPath(pathname: string | null): boolean {
+  if (!pathname) return false;
+  return !BLOCKED_ADSENSE_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+  );
+}
+
 export default function AdsenseInit() {
+  const pathname = usePathname();
   const enableAdsense = useSettingsStore(
     (s) => s.settings?.featureToggles?.enableGoogleAdsense ?? true
   );
 
-  if (!enableAdsense) return null;
+  if (!enableAdsense || !isAdsenseAllowedPath(pathname)) return null;
 
   return (
     <Script

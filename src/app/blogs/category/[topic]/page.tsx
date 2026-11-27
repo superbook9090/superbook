@@ -43,12 +43,19 @@ export async function generateMetadata({
     return createPageMetadata({ title: 'Category Not Found', path: `/blogs/category/${topicSlug}`, index: false });
   }
 
-  return createPageMetadata({
-    title: `${topic} — Educational Articles`,
-    description: `Read ${topic} articles on Quiz Do. Study tips, exam preparation guides, and learning resources for students and teachers.`,
-    path: `/blogs/category/${topicSlug}`,
-    keywords: [topic, 'education blog', 'exam preparation', 'study tips'],
-  });
+  const countData = await listPublicBlogs({ page: 1, limit: 2, topic, sort: 'latest' });
+  const hasEnoughArticles = countData.pagination.total >= 2;
+
+  return {
+    ...createPageMetadata({
+      title: `${topic} — Educational Articles`,
+      description: `Read ${topic} articles on Quiz Do. Study tips, exam preparation guides, and learning resources for students and teachers.`,
+      path: `/blogs/category/${topicSlug}`,
+      keywords: [topic, 'education blog', 'exam preparation', 'study tips'],
+      index: hasEnoughArticles,
+    }),
+    robots: hasEnoughArticles ? { index: true, follow: true } : { index: false, follow: true },
+  };
 }
 
 export default async function BlogCategoryPage({

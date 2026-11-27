@@ -132,6 +132,7 @@ export default function OrganizationsPage() {
                 organizations={o.filteredOrganizations}
                 copiedCode={o.copiedCode}
                 onCopy={o.copyToClipboard}
+                onCopyShareInfo={o.copyOrgShareInfo}
                 onOpenDetail={o.openDetailModal}
                 onOpenEdit={o.openEditModal}
                 onToggleActive={o.handleToggleActive}
@@ -149,6 +150,7 @@ export default function OrganizationsPage() {
                   index={index}
                   copiedCode={o.copiedCode}
                   onCopy={o.copyToClipboard}
+                  onCopyShareInfo={o.copyOrgShareInfo}
                   onOpenDetail={o.openDetailModal}
                   onOpenEdit={o.openEditModal}
                   onToggleActive={o.handleToggleActive}
@@ -162,6 +164,7 @@ export default function OrganizationsPage() {
             organizations={o.filteredOrganizations}
             copiedCode={o.copiedCode}
             onCopy={o.copyToClipboard}
+            onCopyShareInfo={o.copyOrgShareInfo}
             onOpenDetail={o.openDetailModal}
             onOpenEdit={o.openEditModal}
             onToggleActive={o.handleToggleActive}
@@ -201,6 +204,7 @@ export default function OrganizationsPage() {
         organization={o.selectedOrg}
         copiedCode={o.copiedCode}
         onCopy={o.copyToClipboard}
+        onCopyShareInfo={o.copyOrgShareInfo}
         onOpenEdit={o.openEditModal}
         onToggleActive={o.handleToggleActive}
         onDelete={o.confirmDelete}
