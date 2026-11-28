@@ -3142,4 +3142,96 @@ export const en = {
     nextQuestion: 'Next Question',
     previousQuestion: 'Previous',
   },
+
+  // Public Organizations Landing & Request Page
+  orgLanding: {
+    navLabel: 'For Organizations',
+    backToHome: 'Back to Home',
+    badge: 'For Schools, Coaching Institutes & Colleges',
+    title: 'Launch Your Own Branded Organization on Quiz Do',
+    subtitle:
+      'Give your institution a dedicated, isolated LMS workspace with custom branding, separate student & teacher invite links, AI quiz generation, live contests, analytics, and mobile app access.',
+    primaryCta: 'Request Your Organization',
+    secondaryCta: 'Contact Support',
+    trustIsolated: 'Isolated Tenant Data',
+    trustInvites: 'Separate Student & Teacher Codes',
+    trustBranding: 'Custom Logo & Brand Color',
+    trustBilingual: 'Web + Android (EN / HI)',
+    featuresHeading: 'Everything Included for Your Organization',
+    featuresSubheading:
+      'Every institutional workspace comes packed with teaching, testing, engagement, and governance tools out of the box.',
+    f1Title: 'Dedicated Multi-Tenant Workspace',
+    f1Desc:
+      'Your courses, quizzes, blogs, study files, and student records stay strictly isolated to your organization.',
+    f2Title: 'Custom Branding & Identity',
+    f2Desc:
+      'Display your institution logo, brand color, tagline, and website across invite pages and member dashboards.',
+    f3Title: 'Separate Student & Teacher Invite Links',
+    f3Desc:
+      'Share auto-prefilled student join links and protected teacher-only invite codes via WhatsApp, email, or QR.',
+    f4Title: 'Role-Based Admin, Teacher & Student Panels',
+    f4Desc:
+      'Organization admins manage users, teacher permissions, and content quotas from a dedicated control center.',
+    f5Title: 'Courses, Video Lessons & Doubt Q&A',
+    f5Desc:
+      'Build structured chapters and lessons, host video classes, attach PDFs, gate private batches with course codes, and answer student doubts.',
+    f6Title: 'Timed Quizzes, AI Generator & Mistakes Notebook',
+    f6Desc:
+      'Create MCQs manually or with AI, auto-grade instantly, track attempts, and let students revise errors automatically.',
+    f7Title: 'Live Contests & Real-Time Leaderboards',
+    f7Desc:
+      'Host scheduled institutional tests and live contests with live rankings, result declarations, and solution reviews.',
+    f8Title: 'Study Blogs & Protected PDF Vault',
+    f8Desc:
+      'Publish org-private or public articles and organize study PDFs in folder hierarchies scoped to your students.',
+    f9Title: 'Analytics, Progress & Auto Certificates',
+    f9Desc:
+      'Monitor enrollments, active learners, quiz performance, and automatically issue verifiable course completion certificates.',
+    f10Title: 'Push Notifications & Mobile App Access',
+    f10Desc:
+      'Send targeted in-app and push announcements to students, teachers, or specific course batches on Web and Android.',
+    stepsHeading: 'How Organization Onboarding Works',
+    step1Title: 'Submit Your Details',
+    step1Desc: 'Fill out the quick request form below with your institute name, expected size, and needed features.',
+    step2Title: 'We Configure Your Workspace',
+    step2Desc: 'Our team creates your branded organization, sets your feature permissions & quotas, and activates your admin account.',
+    step3Title: 'Invite & Start Teaching',
+    step3Desc: 'Share your direct student & teacher invite links and launch your first courses, quizzes, and contests.',
+    formBadge: 'Get Started',
+    formHeading: 'Contact Us to Create Your Organization',
+    formSubheading:
+      'Tell us about your school, coaching institute, or college. Our team will set up your organization workspace and reply promptly.',
+    fieldName: 'Your Full Name',
+    fieldNamePlaceholder: 'e.g., Dr. Rajesh Sharma',
+    fieldEmail: 'Work Email',
+    fieldEmailPlaceholder: 'you@institute.edu',
+    fieldOrgName: 'Organization / Institute Name',
+    fieldOrgNamePlaceholder: 'e.g., Springdale Coaching Academy',
+    fieldOrgType: 'Organization Type',
+    typeSchool: 'School (K-12)',
+    typeCoaching: 'Coaching / Test Prep Institute',
+    typeCollege: 'College / University',
+    typeCorporate: 'Corporate / Training Team',
+    typeOther: 'Other',
+    fieldSize: 'Estimated Learners & Teachers',
+    sizeSmall: 'Up to 100 members',
+    sizeMedium: '100 – 500 members',
+    sizeLarge: '500 – 2,000 members',
+    sizeEnterprise: '2,000+ members',
+    fieldPhone: 'Phone / WhatsApp (Optional)',
+    fieldPhonePlaceholder: '+91 98765 43210',
+    fieldNotes: 'Requirements & Features Needed',
+    fieldNotesPlaceholder:
+      'Tell us about your courses, exams, teacher count, or any specific features you need (e.g., video uploads, AI quizzes, live contests)...',
+    submitBtn: 'Submit Organization Request',
+    submittingBtn: 'Submitting Request...',
+    preferDirectContact: 'Prefer our general support page?',
+    openContactPage: 'Go to Contact Us',
+    successTitle: 'Organization Request Received!',
+    successDesc:
+      'Thank you! Our onboarding team has received your inquiry and will reach out to your email shortly to set up your workspace.',
+    ticketLabel: 'Reference Ticket',
+    submitAnother: 'Submit Another Request',
+    errorGeneric: 'Could not submit your request. Please try again or use our Contact Us page.',
+  },
 };

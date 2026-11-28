@@ -74,6 +74,31 @@ type JsonInit = Omit<RequestInit, 'body'> & {
   acceptStatuses?: number[];
 };
 
+let unauthorizedCheckInFlight = false;
+
+/**
+ * If an API call returns 401 while the client believes it is signed in (e.g. the account was
+ * deleted/suspended server-side), re-validate the session and send the user to login.
+ */
+function handleUnauthorized(url: string, status: number): void {
+  if (status !== 401 || typeof window === 'undefined') return;
+  if (url.startsWith('/api/auth/') || unauthorizedCheckInFlight) return;
+  unauthorizedCheckInFlight = true;
+  void import('@/store/useSessionStore')
+    .then(async ({ useSessionStore }) => {
+      const store = useSessionStore.getState();
+      if (!store.session) return;
+      await store.fetchSession(true);
+      if (!useSessionStore.getState().session) {
+        window.location.href = '/login';
+      }
+    })
+    .catch(() => {})
+    .finally(() => {
+      unauthorizedCheckInFlight = false;
+    });
+}
+
 /**
  * JSON fetch helper: sets Content-Type when body is sent, parses JSON, throws {@link ApiClientError} on non-OK.
  */
@@ -99,6 +124,7 @@ export async function apiJson<T>(url: string, init: JsonInit = {}): Promise<T> {
   }
 
   if (!res.ok && !acceptStatuses.includes(res.status)) {
+    handleUnauthorized(url, res.status);
     const { message, code } = parseErrorMessage(data);
     throw new ApiClientError(message || res.statusText || 'Request failed', res.status, data, code);
   }
@@ -134,6 +160,7 @@ export async function apiJsonData<T>(
   }
 
   if (!res.ok && !acceptStatuses.includes(res.status)) {
+    handleUnauthorized(url, res.status);
     const { message, code } = parseErrorMessage(raw);
     throw new ApiClientError(message || res.statusText || 'Request failed', res.status, raw, code);
   }

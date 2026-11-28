@@ -99,3 +99,37 @@ export async function invalidatePattern(pattern: string): Promise<void> {
     logError('Redis invalidate pattern error', logContext, { error: (error as Error).message });
   }
 }
+
+/**
+ * Distributed fixed-window rate limiter using Upstash Redis INCR + EXPIRE.
+ * Returns null when Redis is not configured or unavailable so callers can
+ * cleanly fall back to the local in-memory RateLimiter.
+ */
+export async function checkRedisRateLimit(
+  key: string,
+  maxRequests: number,
+  windowSeconds: number
+): Promise<{ allowed: boolean; remaining: number; retryAfterSeconds: number } | null> {
+  try {
+    const client = getRedisClient();
+    if (!client) return null;
+
+    const count = await client.incr(key);
+    let ttl = await client.ttl(key);
+    if (count === 1 || ttl < 0) {
+      await client.expire(key, windowSeconds);
+      ttl = windowSeconds;
+    }
+
+    const allowed = count <= maxRequests;
+    return {
+      allowed,
+      remaining: Math.max(0, maxRequests - count),
+      retryAfterSeconds: Math.max(1, ttl),
+    };
+  } catch (error) {
+    const logContext: LogContext = { method: 'REDIS_RATE_LIMIT', path: 'redis' };
+    logError('Redis rate limit error', logContext, { error: (error as Error).message });
+    return null;
+  }
+}

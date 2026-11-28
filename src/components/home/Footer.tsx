@@ -15,6 +15,7 @@ const getFooterLinks = (t: (key: string) => string) => ({
     { label: t('home.features.title'), href: '#features' },
     { label: t('home.roles.title'), href: '#roles' },
     { label: t('home.about.title'), href: ROUTES.about },
+    { label: t('orgLanding.navLabel'), href: ROUTES.organizations },
     { label: t('contact.title'), href: ROUTES.contact },
   ],
   resources: [

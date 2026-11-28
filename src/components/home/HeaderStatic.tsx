@@ -11,6 +11,7 @@ import {
   Info,
   Mail,
   HelpCircle,
+  Building2,
   LayoutDashboard,
   ArrowRight,
 } from 'lucide-react';
@@ -73,6 +74,7 @@ export default function HeaderStatic({ forceScrolled = false }: { forceScrolled?
 
   const secondaryLinks = useMemo<PublicNavLink[]>(
     () => [
+      { href: ROUTES.organizations, labelKey: 'orgLanding.navLabel', icon: Building2 },
       { href: ROUTES.howItWorks, labelKey: 'home.footer.howItWorks', icon: HelpCircle },
       { href: ROUTES.about, labelKey: 'topnav.about', icon: Info },
       { href: ROUTES.contact, labelKey: 'contact.title', icon: Mail },

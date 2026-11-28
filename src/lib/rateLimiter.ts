@@ -64,7 +64,9 @@ class RateLimiter {
 export const authRateLimiter = new RateLimiter(60 * 1000, 5); // 5 requests per minute
 export const generalRateLimiter = new RateLimiter(60 * 1000, 60); // 60 requests per minute
 export const adminRateLimiter = new RateLimiter(60 * 1000, 120); // 120 requests per minute
-export const contactRateLimiter = new RateLimiter(60 * 1000, 3); // 3 requests per minute
+export const contactRateLimiter = new RateLimiter(10 * 60 * 1000, 3); // 3 requests per 10 minutes per IP
+export const contactHourlyIpLimiter = new RateLimiter(60 * 60 * 1000, 10); // 10 requests per hour per IP
+export const contactEmailLimiter = new RateLimiter(60 * 60 * 1000, 3); // 3 requests per hour per email
 export const publicBlogRateLimiter = new RateLimiter(60 * 1000, 120); // 120 requests per minute
 
 /** Forgot-password: 3 requests per 15 minutes per IP */
@@ -91,6 +93,8 @@ setInterval(() => {
   generalRateLimiter.cleanup();
   adminRateLimiter.cleanup();
   contactRateLimiter.cleanup();
+  contactHourlyIpLimiter.cleanup();
+  contactEmailLimiter.cleanup();
   publicBlogRateLimiter.cleanup();
   forgotPasswordIpLimiter.cleanup();
   forgotPasswordEmailLimiter.cleanup();
@@ -101,11 +105,19 @@ setInterval(() => {
 }, 60 * 1000);
 
 export function getRequestIp(req: Request): string {
+  const vercelForwarded = req.headers.get('x-vercel-forwarded-for');
+  if (vercelForwarded) {
+    return vercelForwarded.split(',')[0]?.trim() || 'unknown';
+  }
+  const cfIp = req.headers.get('cf-connecting-ip');
+  if (cfIp) {
+    return cfIp.trim();
+  }
   const forwarded = req.headers.get('x-forwarded-for');
   if (forwarded) {
     return forwarded.split(',')[0]?.trim() || 'unknown';
   }
-  return req.headers.get('x-real-ip') || 'unknown';
+  return req.headers.get('x-real-ip')?.trim() || 'unknown';
 }
 
 export function rateLimitExceededMessage(): string {

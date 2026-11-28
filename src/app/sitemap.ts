@@ -19,6 +19,7 @@ const PUBLIC_PATHS: { path: string; changeFrequency: MetadataRoute.Sitemap[numbe
   { path: ROUTES.howItWorks, changeFrequency: 'monthly', priority: 0.8 },
   { path: ROUTES.contact, changeFrequency: 'monthly', priority: 0.7 },
   { path: ROUTES.about, changeFrequency: 'monthly', priority: 0.8 },
+  { path: ROUTES.organizations, changeFrequency: 'weekly', priority: 0.9 },
   { path: ROUTES.privacy, changeFrequency: 'yearly', priority: 0.3 },
   { path: ROUTES.terms, changeFrequency: 'yearly', priority: 0.3 },
   { path: ROUTES.blogs, changeFrequency: 'daily', priority: 0.9 },

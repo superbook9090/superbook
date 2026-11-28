@@ -597,10 +597,9 @@ export const authOptions: AuthOptions = {
     async session({ session, token }) {
       if (session.user && token) {
         if (token.suspended || !token.id) {
-          session.user.id = '';
-          session.user.role = '';
-          session.user.organizationId = null;
-          return session;
+          // Deleted, suspended, or deactivated-org user: return a session with no user so every
+          // `session?.user` check (API routes, pages, client store) treats the caller as signed out.
+          return { expires: session.expires } as unknown as typeof session;
         }
         session.user.id = token.id;
         session.user.role = token.role;
